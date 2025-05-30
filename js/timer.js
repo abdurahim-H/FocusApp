@@ -1,0 +1,238 @@
+// Timer Module
+// Handles all timer-related functionality for pomodoro sessions
+
+import { state } from './state.js';
+import { triggerFocusIntensification } from './blackhole.js';
+import { triggerFocusZoom, triggerSessionCompleteZoom, approachBlackHole } from './camera-effects.js';
+import { triggerFocusIntensity, triggerSessionCompleteUI, triggerBlackHoleApproachUI } from './ui-effects.js';
+import { trackSetInterval } from './cleanup.js';
+
+export function updateTimerDisplay() {
+    const minutes = String(state.timer.minutes).padStart(2, '0');
+    const seconds = String(state.timer.seconds).padStart(2, '0');
+    const timerDisplay = document.getElementById('timerDisplay');
+    if (timerDisplay) {
+        timerDisplay.textContent = `${minutes}:${seconds}`;
+    }
+}
+
+export function startTimer() {
+    state.timer.isRunning = true;
+    state.timerState = 'running'; // Update for black hole effects
+    state.currentMode = state.timer.isBreak ? 'break' : 'focus'; // Update mode
+    
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    if (startBtn) startBtn.classList.add('hidden');
+    if (pauseBtn) pauseBtn.classList.remove('hidden');
+    
+    // Trigger black hole intensification when starting focus session
+    if (!state.timer.isBreak) {
+        triggerFocusIntensification();
+        triggerFocusZoom(); // Add cinematic zoom effect
+        triggerFocusIntensity(); // Add UI intensity effects
+    } else {
+        // Break mode - dramatic approach to black hole
+        approachBlackHole();
+        triggerBlackHoleApproachUI();
+    }
+    
+    const skipBtn = document.getElementById('skipBtn');
+    if (skipBtn) {
+        if (state.timer.isBreak) {
+            skipBtn.classList.remove('hidden');
+        } else {
+            skipBtn.classList.add('hidden');
+        }
+    }
+
+    state.timer.interval = trackSetInterval(() => {
+        if (state.timer.seconds === 0) {
+            if (state.timer.minutes === 0) {
+                completeSession();
+                return;
+            }
+            state.timer.minutes--;
+            state.timer.seconds = 59;
+        } else {
+            state.timer.seconds--;
+        }
+        updateTimerDisplay();
+    }, 1000);
+}
+
+export function pauseTimer() {
+    state.timer.isRunning = false;
+    state.timerState = 'paused'; // Update for black hole effects
+    clearInterval(state.timer.interval);
+    
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    if (startBtn) {
+        startBtn.classList.remove('hidden');
+        startBtn.textContent = 'Resume';
+    }
+    if (pauseBtn) {
+        pauseBtn.classList.add('hidden');
+    }
+}
+
+export function resetTimer() {
+    state.timer.isRunning = false;
+    state.timerState = 'stopped'; // Update for black hole effects
+    state.currentMode = 'home'; // Reset mode
+    clearInterval(state.timer.interval);
+    
+    if (state.timer.isBreak) {
+        state.timer.minutes = state.timer.settings.shortBreak;
+    } else {
+        state.timer.minutes = state.timer.settings.focusDuration;
+    }
+    
+    state.timer.seconds = 0;
+    updateTimerDisplay();
+    
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    
+    if (startBtn) {
+        startBtn.classList.remove('hidden');
+        startBtn.textContent = 'Start Focus';
+    }
+    if (pauseBtn) {
+        pauseBtn.classList.add('hidden');
+    }
+    if (skipBtn) {
+        skipBtn.classList.add('hidden');
+    }
+}
+
+export function skipBreak() {
+    if (state.timer.isBreak) {
+        completeSession();
+    }
+}
+
+export function completeSession() {
+    clearInterval(state.timer.interval);
+    state.timer.isRunning = false;
+    state.timerState = 'completed'; // Update state
+
+    if (state.timer.isBreak) {
+        // Break completed, start new focus session
+        state.timer.isBreak = false;
+        state.timer.minutes = state.timer.settings.focusDuration;
+        state.timer.seconds = 0;
+        state.currentMode = 'home'; // Reset mode
+        const sessionType = document.getElementById('sessionType');
+        if (sessionType) {
+            sessionType.textContent = 'Focus Time';
+        }
+        showAchievement('Break Complete!', 'Ready for another focus session');
+    } else {
+        // Focus session completed
+        state.timer.pomodoroCount++;
+        state.universe.focusMinutes += state.timer.settings.focusDuration;
+        state.universe.stars += 1;
+
+        // Trigger spectacular session completion effects
+        triggerSessionCompleteZoom();
+        triggerSessionCompleteUI();
+
+        if (state.timer.pomodoroCount % 4 === 0) {
+            // Long break after 4 pomodoros
+            state.timer.minutes = state.timer.settings.longBreak;
+            showAchievement('Pomodoro Cycle Complete!', 'Take a long break');
+        } else {
+            // Short break
+            state.timer.minutes = state.timer.settings.shortBreak;
+            showAchievement('Focus Complete!', 'Time for a short break');
+        }
+
+        state.timer.isBreak = true;
+        state.timer.seconds = 0;
+        state.currentMode = 'break'; // Update mode
+        const sessionType = document.getElementById('sessionType');
+        if (sessionType) {
+            sessionType.textContent = 'Break Time';
+        }
+    }
+
+    updateTimerDisplay();
+    updateUniverseStats();
+    
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    
+    if (startBtn) {
+        startBtn.classList.remove('hidden');
+        startBtn.textContent = state.timer.isBreak ? 'Start Break' : 'Start Focus';
+    }
+    if (pauseBtn) {
+        pauseBtn.classList.add('hidden');
+    }
+    if (skipBtn) {
+        if (state.timer.isBreak) {
+            skipBtn.classList.remove('hidden');
+        } else {
+            skipBtn.classList.add('hidden');
+        }
+    }
+}
+
+// Update universe stats
+export function updateUniverseStats() {
+    const starsCount = document.getElementById('starsCount');
+    const galaxyLevel = document.getElementById('galaxyLevel');
+    const focusTime = document.getElementById('focusTime');
+    const tasksComplete = document.getElementById('tasksComplete');
+    
+    if (starsCount) starsCount.textContent = state.universe.stars;
+    if (galaxyLevel) galaxyLevel.textContent = state.universe.level;
+    if (focusTime) focusTime.textContent = state.universe.focusMinutes;
+    if (tasksComplete) tasksComplete.textContent = state.universe.tasksCompleted;
+}
+
+// Show achievement
+export function showAchievement(title, desc) {
+    const achievement = document.getElementById('achievement');
+    document.getElementById('achievementTitle').textContent = title;
+    document.getElementById('achievementDesc').textContent = desc;
+    achievement.classList.add('show');
+    setTimeout(() => {
+        achievement.classList.remove('show');
+    }, 3000);
+}
+
+// Date and Time
+export function updateDateTime() {
+    const now = new Date();
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    document.getElementById('dateTime').textContent = now.toLocaleDateString('en-US', options);
+}
+
+// Breathing animation
+export function startBreathing() {
+    const guide = document.getElementById('breathingGuide');
+    let breathIn = true;
+    
+    setInterval(() => {
+        if (breathIn) {
+            guide.textContent = 'Breathe In...';
+            guide.style.transform = 'scale(1.2)';
+        } else {
+            guide.textContent = 'Breathe Out...';
+            guide.style.transform = 'scale(1)';
+        }
+        breathIn = !breathIn;
+    }, 4000);
+}

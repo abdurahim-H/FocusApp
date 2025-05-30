@@ -1,0 +1,778 @@
+/* Cosmic Settings - Spectacular "Whoa!" Factor Styles */
+/* Transforms settings into an immersive cosmic control panel */
+
+/* Particle Background Canvas */
+.settings-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.6;
+    z-index: -1;
+    border-radius: 20px;
+}
+
+/* Enhanced Modal with Cosmic Entrance */
+.settings-modal {
+    background: linear-gradient(135deg, 
+        rgba(20, 10, 40, 0.95) 0%,
+        rgba(40, 20, 80, 0.9) 50%,
+        rgba(20, 10, 40, 0.95) 100%);
+    backdrop-filter: blur(30px);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+    overflow: hidden;
+    transform: scale(0.8) rotateY(15deg);
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.settings-modal::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        #ff006e, #8338ec, #3a86ff, #06ffa5, #ffbe0b, #ff006e);
+    background-size: 600% 600%;
+    border-radius: 22px;
+    z-index: -1;
+    animation: cosmicBorderFlow 3s ease-in-out infinite;
+}
+
+.cosmic-entrance-active {
+    transform: scale(1) rotateY(0deg) !important;
+    opacity: 1 !important;
+}
+
+.cosmic-exit-active {
+    transform: scale(0.8) rotateY(-15deg) !important;
+    opacity: 0 !important;
+}
+
+@keyframes cosmicBorderFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Settings Sections with Staggered Entrance */
+.cosmic-section-entrance {
+    transform: translateX(-50px);
+    opacity: 0;
+    animation: sectionSlideIn 0.6s ease-out forwards;
+}
+
+@keyframes sectionSlideIn {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Cosmic Preview Section */
+.cosmic-preview-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, 
+        rgba(30, 15, 60, 0.8) 0%,
+        rgba(60, 30, 120, 0.6) 100%);
+    border-radius: 15px;
+    border: 1px solid rgba(150, 100, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.cosmic-preview-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.1), 
+        transparent);
+    animation: cosmicScan 3s ease-in-out infinite;
+}
+
+@keyframes cosmicScan {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
+
+.preview-title {
+    color: #8338ec;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(131, 56, 236, 0.5);
+}
+
+.cosmic-preview-container {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.mini-universe {
+    border: 2px solid rgba(131, 56, 236, 0.5);
+    border-radius: 10px;
+    background: radial-gradient(circle, rgba(20, 10, 40, 1) 0%, rgba(5, 5, 15, 1) 100%);
+    box-shadow: 
+        inset 0 0 20px rgba(131, 56, 236, 0.3),
+        0 0 30px rgba(131, 56, 236, 0.2);
+}
+
+.preview-stats {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-bar {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.stat-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease, background 0.3s ease;
+    position: relative;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.stat-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.4), 
+        transparent);
+    animation: statShimmer 2s ease-in-out infinite;
+}
+
+@keyframes statShimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Cosmic Theme Orbs */
+.cosmic-theme-orbs {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.cosmic-orb {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    position: relative;
+    cursor: pointer;
+    background: radial-gradient(circle, 
+        rgba(100, 50, 200, 0.8) 0%,
+        rgba(50, 25, 100, 0.9) 70%,
+        rgba(20, 10, 40, 1) 100%);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.cosmic-orb[data-cosmic-theme="light"] {
+    background: radial-gradient(circle, 
+        rgba(255, 220, 100, 0.8) 0%,
+        rgba(255, 180, 50, 0.9) 70%,
+        rgba(200, 140, 20, 1) 100%);
+    color: rgba(100, 50, 20, 0.9);
+}
+
+.cosmic-orb[data-cosmic-theme="dark"] {
+    background: radial-gradient(circle, 
+        rgba(50, 50, 150, 0.8) 0%,
+        rgba(25, 25, 75, 0.9) 70%,
+        rgba(10, 10, 30, 1) 100%);
+}
+
+.cosmic-orb[data-cosmic-theme="auto"] {
+    background: radial-gradient(circle, 
+        rgba(150, 100, 255, 0.8) 0%,
+        rgba(100, 50, 200, 0.9) 70%,
+        rgba(50, 25, 100, 1) 100%);
+}
+
+.orb-constellation {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.6;
+}
+
+.orb-constellation::before,
+.orb-constellation::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 0 5px currentColor;
+}
+
+.orb-constellation::before {
+    top: 20%;
+    left: 30%;
+    animation: twinkle 2s ease-in-out infinite;
+}
+
+.orb-constellation::after {
+    bottom: 25%;
+    right: 25%;
+    animation: twinkle 2s ease-in-out infinite 1s;
+}
+
+.orb-energy-rings {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.orb-energy-rings::before,
+.orb-energy-rings::after {
+    content: '';
+    position: absolute;
+    width: 130%;
+    height: 130%;
+    top: -15%;
+    left: -15%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.orb-energy-rings::after {
+    width: 150%;
+    height: 150%;
+    top: -25%;
+    left: -25%;
+    animation: energyRingPulse 2s ease-in-out infinite;
+}
+
+.cosmic-orb:hover .orb-energy-rings,
+.orb-activated .orb-energy-rings {
+    opacity: 1;
+}
+
+.orb-active {
+    transform: scale(1.1);
+    box-shadow: 
+        0 0 30px currentColor,
+        inset 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+@keyframes energyRingPulse {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.1; }
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Cosmic Ripple Effect */
+.cosmic-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%);
+    transform: translate(-50%, -50%);
+    animation: cosmicRipple 1s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes cosmicRipple {
+    to {
+        width: 200px;
+        height: 200px;
+    }
+}
+
+/* Stellar Control Containers */
+.stellar-control-container {
+    position: relative;
+    margin: 20px 0;
+    padding: 15px 0;
+}
+
+.stellar-track {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        rgba(131, 56, 236, 0.3) 0%,
+        rgba(131, 56, 236, 0.8) 50%,
+        rgba(131, 56, 236, 0.3) 100%);
+    transform: translateY(-50%);
+    border-radius: 1px;
+}
+
+.track-star {
+    position: absolute;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+    box-shadow: 0 0 8px currentColor;
+}
+
+.track-star.star-active {
+    background: #8338ec;
+    box-shadow: 
+        0 0 12px #8338ec,
+        0 0 24px #8338ec;
+    transform: translateY(-50%) scale(1.5);
+}
+
+.stellar-slider {
+    width: 100%;
+    height: 20px;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    position: relative;
+    z-index: 2;
+}
+
+.stellar-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(131, 56, 236, 1) 0%,
+        rgba(100, 40, 200, 1) 70%,
+        rgba(80, 30, 160, 1) 100%);
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 
+        0 0 15px rgba(131, 56, 236, 0.8),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.stellar-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 
+        0 0 25px rgba(131, 56, 236, 1),
+        inset 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.cosmic-thumb {
+    position: absolute;
+    top: 50%;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(131, 56, 236, 0.8) 0%,
+        rgba(131, 56, 236, 0.4) 70%,
+        transparent 100%);
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cosmic-pulse {
+    animation: cosmicThumbPulse 0.3s ease-out;
+}
+
+@keyframes cosmicThumbPulse {
+    0% { transform: translateY(-50%) scale(1); opacity: 0.8; }
+    50% { transform: translateY(-50%) scale(1.5); opacity: 1; }
+    100% { transform: translateY(-50%) scale(1); opacity: 0; }
+}
+
+/* Holographic Input */
+.holographic-input-container {
+    position: relative;
+    margin: 20px 0;
+}
+
+.holographic-border {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        transparent, 
+        rgba(131, 56, 236, 0.6), 
+        transparent, 
+        rgba(131, 56, 236, 0.6), 
+        transparent);
+    background-size: 20px 20px;
+    border-radius: 8px;
+    animation: holographicFlow 2s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.holographic-input:focus + .holographic-border {
+    opacity: 1;
+}
+
+@keyframes holographicFlow {
+    0% { background-position: 0 0; }
+    100% { background-position: 20px 20px; }
+}
+
+.holographic-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(20, 10, 40, 0.8);
+    border: 1px solid rgba(131, 56, 236, 0.3);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1em;
+    outline: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.holographic-input:focus {
+    border-color: rgba(131, 56, 236, 0.8);
+    box-shadow: 
+        0 0 20px rgba(131, 56, 236, 0.3),
+        inset 0 0 10px rgba(131, 56, 236, 0.1);
+}
+
+.floating-letters {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    height: 100%;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.floating-letter {
+    color: rgba(131, 56, 236, 0.8);
+    font-size: 1.2em;
+    animation: letterFloat 1s ease-out forwards;
+    opacity: 0;
+    transform: translateY(0);
+}
+
+@keyframes letterFloat {
+    0% { opacity: 0; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-10px); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* Cosmic Action Buttons */
+.cosmic-action-btn {
+    position: relative;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(135deg, 
+        rgba(131, 56, 236, 0.8) 0%,
+        rgba(100, 40, 200, 0.9) 50%,
+        rgba(80, 30, 160, 1) 100%);
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 600;
+    font-size: 1em;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 8px 25px rgba(131, 56, 236, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.cosmic-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 12px 35px rgba(131, 56, 236, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.cosmic-reset {
+    background: linear-gradient(135deg, 
+        rgba(255, 100, 100, 0.8) 0%,
+        rgba(200, 50, 50, 0.9) 50%,
+        rgba(150, 30, 30, 1) 100%);
+    box-shadow: 
+        0 8px 25px rgba(255, 100, 100, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.cosmic-reset:hover {
+    box-shadow: 
+        0 12px 35px rgba(255, 100, 100, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-text {
+    position: relative;
+    z-index: 2;
+    display: block;
+}
+
+.btn-energy-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.6) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.cosmic-action-btn:hover .btn-energy-core {
+    width: 100%;
+    height: 100%;
+}
+
+.btn-particle-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    opacity: 0;
+}
+
+.btn-particle-burst::before,
+.btn-particle-burst::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.burst-active {
+    animation: particleBurst 2s ease-out;
+}
+
+.cosmic-saving .btn-particle-burst {
+    opacity: 1;
+}
+
+@keyframes particleBurst {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.burst-active::before {
+    animation: particle1 2s ease-out;
+}
+
+.burst-active::after {
+    animation: particle2 2s ease-out;
+}
+
+@keyframes particle1 {
+    0% { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    100% { top: 20%; left: 80%; transform: translate(-50%, -50%) scale(0); }
+}
+
+@keyframes particle2 {
+    0% { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    100% { top: 80%; left: 20%; transform: translate(-50%, -50%) scale(0); }
+}
+
+/* Cosmic Success Message */
+.cosmic-success-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: linear-gradient(135deg, 
+        rgba(100, 255, 150, 0.95) 0%,
+        rgba(50, 200, 100, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(100, 255, 150, 0.8);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    z-index: 3000;
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 
+        0 20px 60px rgba(100, 255, 150, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.success-visible {
+    transform: translate(-50%, -50%) scale(1) !important;
+    opacity: 1 !important;
+}
+
+.success-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+    animation: successPulse 1s ease-in-out infinite alternate;
+}
+
+.success-text {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: rgba(20, 80, 40, 0.9);
+    margin-bottom: 8px;
+}
+
+.success-subtitle {
+    font-size: 1em;
+    color: rgba(20, 80, 40, 0.7);
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+}
+
+/* Responsive Design for Cosmic Settings */
+@media (max-width: 768px) {
+    .cosmic-preview-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .mini-universe {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .cosmic-theme-orbs {
+        gap: 15px;
+    }
+    
+    .cosmic-orb {
+        width: 60px;
+        height: 60px;
+        font-size: 0.8em;
+    }
+    
+    .cosmic-action-btn {
+        padding: 12px 24px;
+        font-size: 0.9em;
+    }
+}
+
+/* Settings Section Spacing */
+.settings-section {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: rgba(30, 15, 60, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(131, 56, 236, 0.2);
+    position: relative;
+}
+
+.settings-section:hover {
+    border-color: rgba(131, 56, 236, 0.4);
+    background: rgba(30, 15, 60, 0.5);
+}
+
+.settings-label {
+    display: block;
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9em;
+}
+
+/* Enhanced Modal Title */
+.settings-modal h2 {
+    text-align: center;
+    font-size: 2em;
+    background: linear-gradient(135deg, 
+        #8338ec 0%, 
+        #ff006e 50%, 
+        #3a86ff 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: titleGradientShift 3s ease-in-out infinite;
+    margin-bottom: 30px;
+    text-shadow: 0 0 30px rgba(131, 56, 236, 0.5);
+}
+
+@keyframes titleGradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
