@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Focus - 3D Productivity Universe</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <!-- Immediate theme setup script -->
+    <script>
+        // Set theme immediately to prevent flash
+        console.log('🎨 Initial theme setup starting...');
+        const savedTheme = localStorage.getItem('fu_theme') || 'auto';
+        console.log('🎨 Saved theme from localStorage:', savedTheme);
+        
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.body.setAttribute('data-theme', savedTheme);
+        
+        console.log('🎨 Theme attributes set:', {
+            documentElement: document.documentElement.getAttribute('data-theme'),
+            body: document.body.getAttribute('data-theme')
+        });
+        
+        // Check if CSS variables are available
+        setTimeout(() => {
+            const computedStyle = getComputedStyle(document.body);
+            console.log('🎨 CSS variables check:', {
+                'bg-dark': computedStyle.getPropertyValue('--bg-dark'),
+                'text-primary': computedStyle.getPropertyValue('--text-primary'),
+                backgroundColor: computedStyle.backgroundColor,
+                color: computedStyle.color
+            });
+        }, 100);
+    </script>
+</head>
+<body data-theme="auto">
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-text">Initializing Universe...</div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+    </div>
+
+    <!-- 3D Scene Container -->
+    <div id="scene-container"></div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <button class="nav-btn active" data-mode="home">Home</button>
+        <button class="nav-btn" data-mode="focus">Focus</button>
+        <button class="nav-btn" data-mode="ambient">Ambient</button>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Home Mode -->
+        <div class="mode active" id="home">
+            <div class="home-content">
+                <h1>Cosmic Focus</h1>
+                <div class="greeting" id="greeting">Welcome to Your Universe!</div>
+                <div class="date-time" id="dateTime"></div>
+            </div>
+        </div>
+
+        <!-- Focus Mode -->
+        <div class="mode" id="focus">
+            <div class="focus-content">
+                <div class="session-info">
+                    <h2 id="sessionType" class="session-type">Focus Time</h2>
+                    <div class="session-progress">
+                        Session <span id="pomodoroCount">1</span> of <span id="pomodoroTotal">4</span>
+                    </div>
+                </div>
+                <div class="timer-display" id="timerDisplay">25:00</div>
+                
+                <div class="timer-controls">
+                    <button class="btn btn-primary" id="startBtn">Start Focus</button>
+                    <button class="btn hidden" id="pauseBtn">Pause</button>
+                    <button class="btn" id="resetBtn">Reset</button>
+                    <button class="btn hidden" id="skipBtn">Skip Break</button>
+                </div>
+
+                <div class="task-section">
+                    <h3 class="tasks-title">Tasks for this session</h3>
+                    <div class="task-input-group">
+                        <input type="text" class="task-input" id="taskInput" placeholder="What are you working on?">
+                        <button class="btn" id="addTaskBtn">Add</button>
+                    </div>
+                    <ul class="task-list" id="taskList"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ambient Mode -->
+        <div class="mode" id="ambient">
+            <div class="ambient-content">
+                <div class="breathing-circle"></div>
+                <div id="breathingGuide" class="ambient-text">Breathe In...</div>
+                
+                <div class="ambient-section">
+                    <h3 class="ambient-title">Ambient Sounds</h3>
+                    <div class="ambient-controls">
+                        <button class="btn" id="rainBtn">🌧️ Rain</button>
+                        <button class="btn" id="oceanBtn">🌊 Ocean</button>
+                        <button class="btn" id="forestBtn">🌲 Forest</button>
+                        <button class="btn" id="spaceBtn">🌌 Space</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D Progress Indicator -->
+        <div class="progress-3d" id="progress3d" style="display: none;">
+            <span class="progress-label">Universe Energy:</span>
+            <span class="progress-value" id="progressValue">0%</span>
+        </div>
+
+        <!-- Achievement Popup -->
+        <div class="achievement" id="achievement">
+            <div class="achievement-title" id="achievementTitle">First Star!</div>
+            <div class="achievement-desc" id="achievementDesc">You've started your journey</div>
+        </div>
+
+        <!-- Settings Button -->
+        <button class="settings-btn" id="settingsBtn">⚙️</button>
+        
+        <!-- Theme Debug Button (temporary) -->
+        <button class="settings-btn" id="themeDebugBtn" style="right: 80px;">🎨</button>
+
+        <!-- Settings Modal -->
+        <div class="settings-modal-overlay" id="settingsModalOverlay">
+            <div class="settings-modal">
+                <button class="close-btn" id="closeSettingsBtn" title="Close">✕</button>
+                <h2>Settings</h2>
+                <div class="settings-content">
+                    
+                    <!-- Theme Selection -->
+                    <div class="settings-section">
+                        <h4>Theme</h4>
+                        <div class="theme-buttons">
+                            <button class="btn" id="themeLightBtn" data-theme="light">Light</button>
+                            <button class="btn" id="themeDarkBtn" data-theme="dark">Dark</button>
+                            <button class="btn btn-primary" id="themeAutoBtn" data-theme="auto">Auto</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Focus Session Length -->
+                    <div class="settings-section">
+                        <label for="focusLengthRange" class="settings-label">Focus Duration: <span id="focusLengthValue">25</span> min</label>
+                        <div class="range-container">
+                            <input type="range" min="1" max="60" value="25" id="focusLengthRange" class="range-input">
+                        </div>
+                    </div>
+                    
+                    <!-- Ambient Sound Volume -->
+                    <div class="settings-section">
+                        <label for="soundVolumeRange" class="settings-label">Ambient Sound Volume: <span id="soundVolumeValue">30</span>%</label>
+                        <div class="range-container">
+                            <input type="range" min="0" max="100" value="30" id="soundVolumeRange" class="range-input">
+                        </div>
+                    </div>
+                    
+                    <!-- Personalized Greeting -->
+                    <div class="settings-section">
+                        <label for="greetingInput" class="settings-label">Greeting Message</label>
+                        <input type="text" id="greetingInput" class="text-input" maxlength="40" placeholder="Welcome to Your Universe!">
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="settings-section">
+                        <div class="settings-buttons">
+                            <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+                            <button class="btn" id="resetSettingsBtn">Reset to Default</button>
+                        </div>
+                    </div>
+                    
+                    <div id="settingsSavedMsg" class="settings-saved-msg">Settings Saved!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
