@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkbox Investigation - Test Page</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .iframe-container {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .console-log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .highlight {
+            background: rgba(255, 255, 0, 0.2);
+            padding: 10px;
+            border-left: 4px solid #ffff00;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Cosmic Focus - Checkbox Investigation</h1>
+        
+        <div class="highlight">
+            <h3>📋 Investigation Instructions:</h3>
+            <ol>
+                <li><strong>Navigate to Focus Mode</strong> in the app below</li>
+                <li><strong>Add a new task</strong> using the input field</li>
+                <li><strong>Check the checkbox</strong> next to the task</li>
+                <li><strong>Observe all effects</strong> that occur (visual, console logs, animations)</li>
+                <li><strong>Check console below</strong> for detailed logging</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 Live Application</h2>
+            <div class="iframe-container">
+                <iframe src="http://localhost:8000" id="appFrame"></iframe>
+            </div>
+            <button onclick="reloadApp()">🔄 Reload App</button>
+            <button onclick="openConsole()">🖥️ Open Browser Console</button>
+            <button onclick="runInvestigation()">🔬 Run Automated Test</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Investigation Results</h2>
+            <div id="results">
+                <p>Results will appear here after testing...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Expected Effects When Checkbox is Checked:</h2>
+            <ul>
+                <li>✨ <strong>Black Hole Burst:</strong> 3D particle explosion effect</li>
+                <li>📸 <strong>Camera Shake:</strong> Screen shake for impact</li>
+                <li>🎨 <strong>UI Animation:</strong> Task celebration with expanding glow</li>
+                <li>🏆 <strong>Achievement Popup:</strong> "Task Complete!" notification</li>
+                <li>📈 <strong>Stats Update:</strong> Universe stats increment</li>
+                <li>⚡ <strong>Special Effects:</strong> Time dilation on every 3rd task</li>
+                <li>🔄 <strong>DOM Updates:</strong> Task styling changes, re-rendering</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Summary of Files Involved:</h2>
+            <ul>
+                <li><code>js/tasks.js</code> - Main toggle logic and event handling</li>
+                <li><code>js/blackhole.js</code> - 3D WebGL particle effects</li>
+                <li><code>js/camera-effects.js</code> - Camera shake and movements</li>
+                <li><code>js/ui-effects.js</code> - UI animations and celebrations</li>
+                <li><code>js/timer.js</code> - Achievement system and stats</li>
+                <li><code>css/style.css</code> - Animation definitions</li>
+                <li><code>css/components.css</code> - Task styling and layouts</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function reloadApp() {
+            document.getElementById('appFrame').src = document.getElementById('appFrame').src;
+        }
+
+        function openConsole() {
+            alert('Press F12 to open browser console and see detailed logs!');
+        }
+
+        function runInvestigation() {
+            const iframe = document.getElementById('appFrame');
+            const results = document.getElementById('results');
+            
+            results.innerHTML = `
+                <h3>🔬 Investigation Running...</h3>
+                <p>1. ✅ App loaded in iframe</p>
+                <p>2. 🎯 Ready for manual testing</p>
+                <p>3. 📋 Please follow the instructions above</p>
+                <p>4. 🖥️ Check browser console (F12) for detailed logs</p>
+                <br>
+                <p><strong>Next Steps:</strong></p>
+                <ul>
+                    <li>Click on "Focus" in the navigation</li>
+                    <li>Add a task in the input field</li>
+                    <li>Click the checkbox next to the task</li>
+                    <li>Watch for all the effects!</li>
+                </ul>
+            `;
+        }
+
+        // Auto-run investigation setup
+        setTimeout(runInvestigation, 1000);
+    </script>
+</body>
+</html>

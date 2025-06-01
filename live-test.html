@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Checkbox Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        body { background: #0f0f23; color: #ccc; font-family: Arial; padding: 20px; }
+        .test-results { background: #1a1a2e; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .issue { background: #2d1b1b; border-left: 3px solid #f44336; }
+        .success { background: #1b2d1b; border-left: 3px solid #4caf50; }
+        button { background: #4caf50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .container { border: 2px dashed #333; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Live Checkbox Layout Investigation</h1>
+    
+    <button onclick="runQuickTest()">🚀 Run Quick Test</button>
+    <button onclick="clearResults()">🗑️ Clear Results</button>
+    
+    <div id="results"></div>
+    
+    <div class="container" id="testContainer">
+        <h3>Test Area</h3>
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Test task" value="Checkbox Layout Test">
+            <button onclick="addTestTask()">Add Task</button>
+        </div>
+        <ul id="taskList" class="task-list"></ul>
+    </div>
+
+    <script type="module">
+        import { state } from './js/state.js';
+        import { addTask, toggleTask, renderTasks } from './js/tasks.js';
+        import { initUIEffects } from './js/ui-effects.js';
+        
+        window.addTask = addTask;
+        window.toggleTask = toggleTask;
+        window.state = state;
+        
+        let results = [];
+        
+        function addResult(message, isIssue = false) {
+            const timestamp = new Date().toLocaleTimeString();
+            results.push({ timestamp, message, isIssue });
+            updateResultsDisplay();
+            console.log(`${timestamp}: ${message}`);
+        }
+        
+        function updateResultsDisplay() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = results.map(r => 
+                `<div class="test-results ${r.isIssue ? 'issue' : 'success'}">
+                    <strong>${r.timestamp}:</strong> ${r.message}
+                </div>`
+            ).join('');
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        window.clearResults = function() {
+            results = [];
+            updateResultsDisplay();
+        }
+        
+        window.addTestTask = function() {
+            addTask();
+            addResult('✅ Task added successfully');
+        }
+        
+        window.runQuickTest = function() {
+            addResult('🚀 Starting quick checkbox test...');
+            
+            // Clear existing tasks
+            state.tasks = [];
+            renderTasks();
+            
+            // Add a test task
+            document.getElementById('taskInput').value = 'Test Task';
+            addTask();
+            addResult('➕ Test task added');
+            
+            if (state.tasks.length === 0) {
+                addResult('❌ Failed to add task - state.tasks is empty', true);
+                return;
+            }
+            
+            // Get container measurements before toggle
+            const container = document.querySelector('.container');
+            const beforeRect = container.getBoundingClientRect();
+            const beforeClasses = container.className;
+            
+            addResult(`📏 Before toggle - Container: ${Math.round(beforeRect.width)}x${Math.round(beforeRect.height)}, Classes: "${beforeClasses}"`);
+            
+            // Get the task ID
+            const taskId = state.tasks[0].id;
+            addResult(`🎯 Task ID: ${taskId}`);
+            
+            // Set up monitoring
+            let layoutChangeDetected = false;
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const element = mutation.target;
+                        const oldClasses = mutation.oldValue || '';
+                        const newClasses = element.className || '';
+                        
+                        if (oldClasses !== newClasses) {
+                            layoutChangeDetected = true;
+                            addResult(`🔄 Class change on ${element.tagName}.${element.className}: "${oldClasses}" → "${newClasses}"`, true);
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(document.body, {
+                attributes: true,
+                attributeOldValue: true,
+                subtree: true,
+                attributeFilter: ['class']
+            });
+            
+            // Toggle the checkbox
+            addResult('☑️ Toggling checkbox...');
+            toggleTask(taskId);
+            
+            // Check immediately after toggle
+            setTimeout(() => {
+                const afterRect = container.getBoundingClientRect();
+                const afterClasses = container.className;
+                
+                addResult(`📏 After toggle - Container: ${Math.round(afterRect.width)}x${Math.round(afterRect.height)}, Classes: "${afterClasses}"`);
+                
+                // Check for dimension changes
+                const widthChange = Math.abs(beforeRect.width - afterRect.width);
+                const heightChange = Math.abs(beforeRect.height - afterRect.height);
+                
+                if (widthChange > 1) {
+                    addResult(`🚨 Container width changed by ${widthChange.toFixed(1)}px`, true);
+                }
+                if (heightChange > 1) {
+                    addResult(`🚨 Container height changed by ${heightChange.toFixed(1)}px`, true);
+                }
+                if (beforeClasses !== afterClasses) {
+                    addResult(`🚨 Container classes changed: "${beforeClasses}" → "${afterClasses}"`, true);
+                }
+                
+                // Continue monitoring for animations
+                let monitorCount = 0;
+                const monitorInterval = setInterval(() => {
+                    monitorCount++;
+                    const currentRect = container.getBoundingClientRect();
+                    const currentClasses = container.className;
+                    
+                    const currentWidthChange = Math.abs(beforeRect.width - currentRect.width);
+                    const currentHeightChange = Math.abs(beforeRect.height - currentRect.height);
+                    
+                    if (currentWidthChange > 1 || currentHeightChange > 1 || beforeClasses !== currentClasses) {
+                        addResult(`🔄 Layout change at ${monitorCount * 100}ms: ${Math.round(currentRect.width)}x${Math.round(currentRect.height)}, Classes: "${currentClasses}"`, true);
+                    }
+                    
+                    if (monitorCount >= 20) { // Monitor for 2 seconds
+                        clearInterval(monitorInterval);
+                        observer.disconnect();
+                        
+                        if (!layoutChangeDetected) {
+                            addResult('✅ No layout issues detected during test');
+                        } else {
+                            addResult('🏁 Test complete - Layout issues detected above', true);
+                        }
+                    }
+                }, 100);
+                
+            }, 50);
+        }
+        
+        // Initialize
+        initUIEffects();
+        renderTasks();
+        addResult('🔧 Page initialized and ready for testing');
+    </script>
+</body>
+</html>

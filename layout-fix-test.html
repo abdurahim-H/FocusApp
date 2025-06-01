@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Issue Reproduction & Fix Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        body {
+            background: #0f0f23;
+            color: #ccc;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            /* Add debug indicators */
+            border: 2px solid red;
+            box-sizing: border-box;
+        }
+        
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+        
+        .layout-issue {
+            background: #ffebee !important;
+            border: 2px solid #f44336 !important;
+        }
+        
+        .container {
+            border: 2px dashed yellow;
+            margin: 20px 0;
+            background: rgba(255,255,255,0.05);
+        }
+        
+        /* Highlight problematic elements */
+        .task-celebration {
+            border: 3px solid orange !important;
+        }
+        
+        .cosmic-flow {
+            border: 3px solid purple !important;
+        }
+        
+        .achievement {
+            border: 3px solid lime !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debugInfo">
+        <strong>Layout Debug Info</strong><br>
+        Body overflow: <span id="bodyOverflow"></span><br>
+        Container size: <span id="containerSize"></span><br>
+        Viewport size: <span id="viewportSize"></span><br>
+        Scrollbars: <span id="scrollbars"></span><br>
+        Issues: <span id="issues"></span>
+    </div>
+    
+    <h1>🔍 Layout Issue Reproduction Test</h1>
+    <p>This test will help identify and fix the checkbox layout disruption.</p>
+    
+    <button onclick="runReproductionTest()" style="background: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px;">
+        🚨 Reproduce Layout Issue
+    </button>
+    
+    <button onclick="runFixedTest()" style="background: #4caf50; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px;">
+        ✅ Test With Fix Applied
+    </button>
+    
+    <div class="container" id="testContainer">
+        <h3>Test Area</h3>
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Test task" value="Layout Issue Test Task">
+            <button onclick="addTestTask()">Add Task</button>
+        </div>
+        <ul id="taskList" class="task-list"></ul>
+    </div>
+
+    <!-- Achievement popup -->
+    <div id="achievement" class="achievement">
+        <div id="achievementTitle" class="achievement-title">Achievement</div>
+        <div id="achievementDesc" class="achievement-desc">Description</div>
+    </div>
+
+    <script type="module">
+        import { state } from './js/state.js';
+        import { addTask, toggleTask, renderTasks } from './js/tasks.js';
+        import { showAchievement } from './js/timer.js';
+        
+        window.addTask = addTask;
+        window.toggleTask = toggleTask;
+        window.showAchievement = showAchievement;
+        window.state = state;
+        
+        let isMonitoring = false;
+        let issuesDetected = [];
+        
+        function updateDebugInfo() {
+            const body = document.body;
+            const container = document.querySelector('.container');
+            
+            document.getElementById('bodyOverflow').textContent = getComputedStyle(body).overflow || 'visible';
+            document.getElementById('containerSize').textContent = container ? 
+                `${Math.round(container.getBoundingClientRect().width)}×${Math.round(container.getBoundingClientRect().height)}` : 'N/A';
+            document.getElementById('viewportSize').textContent = `${window.innerWidth}×${window.innerHeight}`;
+            
+            // Check for scrollbars
+            const hasHorizontalScrollbar = document.documentElement.scrollWidth > window.innerWidth;
+            const hasVerticalScrollbar = document.documentElement.scrollHeight > window.innerHeight;
+            document.getElementById('scrollbars').textContent = 
+                `H: ${hasHorizontalScrollbar}, V: ${hasVerticalScrollbar}`;
+            
+            document.getElementById('issues').textContent = issuesDetected.join(', ') || 'None';
+            
+            // Detect layout issues
+            if (hasHorizontalScrollbar && !isMonitoring) {
+                issuesDetected.push('Horizontal scrollbar appeared');
+                console.warn('🚨 LAYOUT ISSUE: Horizontal scrollbar detected!');
+            }
+        }
+        
+        function startMonitoring() {
+            isMonitoring = true;
+            issuesDetected = [];
+            
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const element = mutation.target;
+                        const newClasses = element.className || '';
+                        
+                        // Check for problematic classes
+                        if (newClasses.includes('task-celebration')) {
+                            console.log('🎨 task-celebration class added to', element.tagName);
+                        }
+                        if (newClasses.includes('cosmic-flow')) {
+                            console.log('🌌 cosmic-flow class added to', element.tagName);
+                        }
+                        if (newClasses.includes('show') && element.classList.contains('achievement')) {
+                            console.log('🏆 achievement popup shown');
+                        }
+                    }
+                });
+                updateDebugInfo();
+            });
+            
+            observer.observe(document.body, {
+                attributes: true,
+                subtree: true,
+                attributeFilter: ['class', 'style']
+            });
+            
+            // Monitor for 5 seconds
+            setTimeout(() => {
+                observer.disconnect();
+                isMonitoring = false;
+                console.log('🏁 Monitoring stopped');
+            }, 5000);
+        }
+        
+        window.addTestTask = function() {
+            addTask();
+            updateDebugInfo();
+        }
+        
+        window.runReproductionTest = function() {
+            console.log('🚨 REPRODUCING LAYOUT ISSUE...');
+            issuesDetected = [];
+            
+            // Clear tasks
+            state.tasks = [];
+            renderTasks();
+            
+            // Add test task
+            document.getElementById('taskInput').value = 'Layout Test Task';
+            addTask();
+            
+            if (state.tasks.length === 0) {
+                console.error('Failed to add task');
+                return;
+            }
+            
+            updateDebugInfo();
+            startMonitoring();
+            
+            // Toggle checkbox after short delay
+            setTimeout(() => {
+                const taskId = state.tasks[0].id;
+                console.log('☑️ Toggling checkbox for task:', taskId);
+                toggleTask(taskId);
+            }, 500);
+        }
+        
+        window.runFixedTest = function() {
+            console.log('✅ TESTING WITH FIXES APPLIED...');
+            
+            // Apply fixes before running test
+            applyLayoutFixes();
+            
+            // Run the same test
+            window.runReproductionTest();
+        }
+        
+        function applyLayoutFixes() {
+            console.log('🔧 Applying layout fixes...');
+            
+            // Fix 1: Prevent scale animations from affecting layout
+            const style = document.createElement('style');
+            style.innerHTML = `
+                /* Fix task-celebration animation to not affect layout */
+                .task-celebration {
+                    animation: taskBurst-fixed 0.8s ease-out;
+                }
+                
+                @keyframes taskBurst-fixed {
+                    0% { 
+                        transform: scale(1);
+                        box-shadow: 0 0 0 0 rgba(6, 214, 160, 0.7);
+                    }
+                    25% {
+                        transform: scale(1.05);
+                        box-shadow: 0 0 0 10px rgba(6, 214, 160, 0.4);
+                    }
+                    50% {
+                        transform: scale(1.1);
+                        box-shadow: 0 0 0 20px rgba(6, 214, 160, 0.2);
+                    }
+                    100% {
+                        transform: scale(1);
+                        box-shadow: 0 0 0 40px rgba(6, 214, 160, 0);
+                    }
+                }
+                
+                /* Fix cosmic-flow to not affect layout */
+                .cosmic-flow {
+                    position: relative;
+                    /* Remove overflow: hidden that can cause issues */
+                    /* overflow: hidden; */
+                }
+                
+                /* Fix achievement popup positioning */
+                .achievement {
+                    position: fixed;
+                    top: 100px;
+                    right: -400px;
+                    background: var(--bg-glass);
+                    backdrop-filter: blur(20px);
+                    border: 1px solid var(--border-glass);
+                    border-radius: 15px;
+                    padding: 20px;
+                    box-shadow: 0 8px 32px var(--shadow);
+                    z-index: 1500;
+                    transition: right 0.5s ease;
+                    max-width: 300px;
+                    /* Ensure it doesn't cause horizontal scroll */
+                    max-width: min(300px, calc(100vw - 40px));
+                }
+                
+                .achievement.show {
+                    right: 20px; /* Reduced from 30px to ensure margin */
+                }
+                
+                /* Ensure body doesn't get unexpected overflow */
+                body {
+                    overflow-x: hidden;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Initialize
+        renderTasks();
+        updateDebugInfo();
+        
+        // Update debug info periodically
+        setInterval(updateDebugInfo, 100);
+    </script>
+</body>
+</html>

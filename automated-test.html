@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Checkbox Test - Layout Investigation</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f0f23;
+            color: #cccccc;
+            padding: 20px;
+        }
+        
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 400px;
+            z-index: 9999;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .highlight-change {
+            background: yellow !important;
+            color: black !important;
+            transition: all 0.3s ease;
+        }
+        
+        .step {
+            background: #1a1a2e;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .issue-detected {
+            background: #ffebee !important;
+            border-left-color: #f44336 !important;
+        }
+        
+        .container {
+            position: relative;
+            border: 2px dashed #333;
+            min-height: 300px;
+        }
+        
+        .layout-measurement {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 10px;
+            color: #666;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-panel">
+        <h3>🔍 Layout Investigation Results</h3>
+        <div id="debugLog"></div>
+    </div>
+    
+    <h1>Automated Checkbox Toggle Test</h1>
+    
+    <div class="container" id="mainContainer">
+        <div class="layout-measurement" id="containerMeasure"></div>
+        
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Test task" value="Investigate checkbox behavior">
+            <button class="btn" onclick="runTest()">🚀 Run Automated Test</button>
+        </div>
+        
+        <ul id="taskList" class="task-list">
+            <!-- Tasks will be rendered here -->
+        </ul>
+    </div>
+
+    <script type="module">
+        import { state } from './js/state.js';
+        import { addTask, toggleTask, renderTasks } from './js/tasks.js';
+        import { initUIEffects, updateUIBasedOnProductivity } from './js/ui-effects.js';
+        
+        // Global functions
+        window.addTask = addTask;
+        window.toggleTask = toggleTask;
+        
+        let debugLog = [];
+        let measurements = [];
+        
+        function log(message, isIssue = false) {
+            console.log(message);
+            debugLog.push({
+                time: new Date().toLocaleTimeString(),
+                message,
+                isIssue
+            });
+            updateDebugPanel();
+        }
+        
+        function updateDebugPanel() {
+            const panel = document.getElementById('debugLog');
+            panel.innerHTML = debugLog.slice(-10).map(entry => 
+                `<div class="step ${entry.isIssue ? 'issue-detected' : ''}">
+                    <strong>${entry.time}:</strong> ${entry.message}
+                </div>`
+            ).join('');
+        }
+        
+        function measureLayout() {
+            const container = document.querySelector('.container');
+            const taskList = document.getElementById('taskList');
+            
+            const containerRect = container.getBoundingClientRect();
+            const taskListRect = taskList.getBoundingClientRect();
+            
+            const measurement = {
+                timestamp: Date.now(),
+                container: {
+                    width: containerRect.width,
+                    height: containerRect.height,
+                    top: containerRect.top,
+                    left: containerRect.left,
+                    classes: container.className
+                },
+                taskList: {
+                    width: taskListRect.width,
+                    height: taskListRect.height,
+                    top: taskListRect.top,
+                    left: taskListRect.left,
+                    scrollHeight: taskList.scrollHeight,
+                    scrollTop: taskList.scrollTop,
+                    children: taskList.children.length
+                },
+                tasks: state.tasks.length,
+                completedTasks: state.tasks.filter(t => t.completed).length
+            };
+            
+            measurements.push(measurement);
+            
+            // Update visual measurement display
+            const display = document.getElementById('containerMeasure');
+            display.textContent = `${Math.round(containerRect.width)}x${Math.round(containerRect.height)} | Tasks: ${measurement.tasks} | Classes: ${container.className}`;
+            
+            return measurement;
+        }
+        
+        function compareLayoutMeasurements(before, after) {
+            const issues = [];
+            
+            // Check container dimensions
+            if (Math.abs(before.container.width - after.container.width) > 1) {
+                issues.push(`Container width changed: ${before.container.width} → ${after.container.width}`);
+            }
+            if (Math.abs(before.container.height - after.container.height) > 1) {
+                issues.push(`Container height changed: ${before.container.height} → ${after.container.height}`);
+            }
+            
+            // Check position shifts
+            if (Math.abs(before.container.top - after.container.top) > 1) {
+                issues.push(`Container shifted vertically: ${before.container.top} → ${after.container.top}`);
+            }
+            if (Math.abs(before.container.left - after.container.left) > 1) {
+                issues.push(`Container shifted horizontally: ${before.container.left} → ${after.container.left}`);
+            }
+            
+            // Check task list changes
+            if (Math.abs(before.taskList.height - after.taskList.height) > 1) {
+                issues.push(`Task list height changed: ${before.taskList.height} → ${after.taskList.height}`);
+            }
+            
+            // Check scroll changes
+            if (before.taskList.scrollTop !== after.taskList.scrollTop) {
+                issues.push(`Scroll position changed: ${before.taskList.scrollTop} → ${after.taskList.scrollTop}`);
+            }
+            
+            // Check class changes
+            if (before.container.classes !== after.container.classes) {
+                issues.push(`Container classes changed: "${before.container.classes}" → "${after.container.classes}"`);
+            }
+            
+            return issues;
+        }
+        
+        window.runTest = async function() {
+            log("🚀 Starting automated checkbox toggle test...");
+            
+            // Clear any existing tasks
+            state.tasks = [];
+            renderTasks();
+            
+            // Step 1: Measure initial state
+            log("📏 Measuring initial layout...");
+            const initialMeasurement = measureLayout();
+            
+            // Step 2: Add a task
+            log("➕ Adding test task...");
+            const beforeAddTask = measureLayout();
+            
+            document.getElementById('taskInput').value = 'Test Task for Layout Investigation';
+            addTask();
+            
+            await new Promise(resolve => setTimeout(resolve, 100)); // Allow rendering
+            
+            const afterAddTask = measureLayout();
+            const addTaskIssues = compareLayoutMeasurements(beforeAddTask, afterAddTask);
+            
+            if (addTaskIssues.length > 0) {
+                log(`⚠️ Layout issues after adding task: ${addTaskIssues.join(', ')}`, true);
+            } else {
+                log("✅ No layout issues after adding task");
+            }
+            
+            // Step 3: Toggle checkbox to complete task
+            log("☑️ Toggling checkbox to complete task...");
+            const beforeToggle = measureLayout();
+            
+            const taskId = state.tasks[0].id;
+            toggleTask(taskId);
+            
+            await new Promise(resolve => setTimeout(resolve, 100)); // Allow immediate effects
+            
+            const afterToggle = measureLayout();
+            const toggleIssues = compareLayoutMeasurements(beforeToggle, afterToggle);
+            
+            if (toggleIssues.length > 0) {
+                log(`🚨 LAYOUT ISSUES DETECTED AFTER CHECKBOX TOGGLE: ${toggleIssues.join(', ')}`, true);
+            } else {
+                log("✅ No immediate layout issues after checkbox toggle");
+            }
+            
+            // Step 4: Wait for animations/effects to complete
+            log("⏰ Waiting for animations and effects to complete...");
+            
+            for (let i = 1; i <= 10; i++) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                const currentMeasurement = measureLayout();
+                const currentIssues = compareLayoutMeasurements(beforeToggle, currentMeasurement);
+                
+                if (currentIssues.length > 0) {
+                    log(`🔄 Layout changes at ${i * 100}ms: ${currentIssues.join(', ')}`, true);
+                }
+            }
+            
+            // Step 5: Check for periodic effects (from updateUIBasedOnProductivity)
+            log("🔄 Monitoring for periodic layout changes (5 seconds)...");
+            const periodicStart = measureLayout();
+            
+            for (let i = 1; i <= 50; i++) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                const periodicCurrent = measureLayout();
+                const periodicIssues = compareLayoutMeasurements(periodicStart, periodicCurrent);
+                
+                if (periodicIssues.length > 0) {
+                    log(`🔁 Periodic layout changes detected at ${i * 100}ms: ${periodicIssues.join(', ')}`, true);
+                }
+            }
+            
+            log("🏁 Test completed! Check results above for any layout issues.");
+        };
+        
+        // Initialize
+        initUIEffects();
+        renderTasks();
+        measureLayout();
+        
+        log("🔧 Page initialized. Click 'Run Automated Test' to start investigation.");
+    </script>
+</body>
+</html>
