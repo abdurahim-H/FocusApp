@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Fix Verification Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        body {
+            padding: 20px;
+            background: #0f0f23;
+            color: #ccc;
+        }
+        
+        .test-results {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 350px;
+            z-index: 9999;
+            font-size: 12px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        
+        .result-pass {
+            background: #1b5e20;
+            color: #4caf50;
+        }
+        
+        .result-fail {
+            background: #b71c1c;
+            color: #f44336;
+        }
+        
+        .result-info {
+            background: #0d47a1;
+            color: #2196f3;
+        }
+        
+        .container {
+            border: 2px dashed #333;
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button.test {
+            background: #2196f3;
+        }
+        
+        button.clear {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-results" id="testResults">
+        <strong>🔧 Layout Fix Verification</strong>
+        <div id="results"></div>
+    </div>
+    
+    <h1>🔧 Layout Fix Verification Test</h1>
+    <p>Testing that checkbox toggle no longer causes layout disruption.</p>
+    
+    <button class="test" onclick="runComprehensiveTest()">🧪 Run Comprehensive Test</button>
+    <button onclick="runQuickTest()">⚡ Quick Test</button>
+    <button class="clear" onclick="clearResults()">🗑️ Clear Results</button>
+    
+    <div class="container" id="testContainer">
+        <h3>Test Area</h3>
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Test task" value="Layout Fix Verification Task">
+            <button onclick="addTestTask()">Add Task</button>
+        </div>
+        <ul id="taskList" class="task-list"></ul>
+    </div>
+
+    <!-- Achievement popup (for testing) -->
+    <div id="achievement" class="achievement">
+        <div id="achievementTitle" class="achievement-title">Achievement</div>
+        <div id="achievementDesc" class="achievement-desc">Description</div>
+    </div>
+
+    <script type="module">
+        import { state } from './js/state.js';
+        import { addTask, toggleTask, renderTasks } from './js/tasks.js';
+        import { showAchievement } from './js/timer.js';
+        import { initUIEffects } from './js/ui-effects.js';
+        
+        window.addTask = addTask;
+        window.toggleTask = toggleTask;
+        window.showAchievement = showAchievement;
+        window.state = state;
+        
+        let testResults = [];
+        
+        function addResult(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push({ timestamp, message, type });
+            updateResultsDisplay();
+            console.log(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
+        }
+        
+        function updateResultsDisplay() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = testResults.slice(-15).map(r => 
+                `<div class="result-item result-${r.type}">
+                    <strong>${r.timestamp}:</strong> ${r.message}
+                </div>`
+            ).join('');
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function measureViewport() {
+            const body = document.body;
+            const html = document.documentElement;
+            
+            return {
+                viewportWidth: window.innerWidth,
+                viewportHeight: window.innerHeight,
+                documentWidth: Math.max(
+                    body.scrollWidth, body.offsetWidth,
+                    html.clientWidth, html.scrollWidth, html.offsetWidth
+                ),
+                documentHeight: Math.max(
+                    body.scrollHeight, body.offsetHeight,
+                    html.clientHeight, html.scrollHeight, html.offsetHeight
+                ),
+                hasHorizontalScroll: html.scrollWidth > window.innerWidth,
+                hasVerticalScroll: html.scrollHeight > window.innerHeight,
+                bodyOverflow: getComputedStyle(body).overflowX
+            };
+        }
+        
+        function checkLayoutStability(before, after, testName) {
+            let issues = [];
+            
+            if (after.hasHorizontalScroll && !before.hasHorizontalScroll) {
+                issues.push('Horizontal scrollbar appeared');
+            }
+            
+            if (after.documentWidth > before.documentWidth + 5) {
+                issues.push(`Document width increased by ${after.documentWidth - before.documentWidth}px`);
+            }
+            
+            if (after.documentHeight > before.documentHeight + 100) { // Allow some height increase for new tasks
+                issues.push(`Document height increased significantly by ${after.documentHeight - before.documentHeight}px`);
+            }
+            
+            if (issues.length === 0) {
+                addResult(`✅ ${testName}: Layout stable`, 'pass');
+                return true;
+            } else {
+                addResult(`❌ ${testName}: ${issues.join(', ')}`, 'fail');
+                return false;
+            }
+        }
+        
+        window.clearResults = function() {
+            testResults = [];
+            updateResultsDisplay();
+        }
+        
+        window.addTestTask = function() {
+            addTask();
+            addResult('➕ Test task added manually', 'info');
+        }
+        
+        window.runQuickTest = async function() {
+            addResult('⚡ Starting quick layout test...', 'info');
+            
+            // Clear and add task
+            state.tasks = [];
+            renderTasks();
+            document.getElementById('taskInput').value = 'Quick Test Task';
+            addTask();
+            
+            if (state.tasks.length === 0) {
+                addResult('❌ Failed to add task', 'fail');
+                return;
+            }
+            
+            const before = measureViewport();
+            addResult(`📏 Before: ${before.viewportWidth}×${before.viewportHeight}, Doc: ${before.documentWidth}×${before.documentHeight}`, 'info');
+            
+            // Toggle checkbox
+            const taskId = state.tasks[0].id;
+            toggleTask(taskId);
+            
+            // Check immediately and after delay
+            setTimeout(() => {
+                const after = measureViewport();
+                addResult(`📏 After: ${after.viewportWidth}×${after.viewportHeight}, Doc: ${after.documentWidth}×${after.documentHeight}`, 'info');
+                checkLayoutStability(before, after, 'Quick Test');
+            }, 1000);
+        }
+        
+        window.runComprehensiveTest = async function() {
+            addResult('🧪 Starting comprehensive layout fix verification...', 'info');
+            
+            let allTestsPassed = true;
+            
+            // Test 1: Single task toggle
+            addResult('📋 Test 1: Single task toggle', 'info');
+            state.tasks = [];
+            renderTasks();
+            document.getElementById('taskInput').value = 'Comprehensive Test Task 1';
+            addTask();
+            
+            const test1Before = measureViewport();
+            toggleTask(state.tasks[0].id);
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const test1After = measureViewport();
+            
+            if (!checkLayoutStability(test1Before, test1After, 'Single Task Toggle')) {
+                allTestsPassed = false;
+            }
+            
+            // Test 2: Multiple rapid toggles
+            addResult('📋 Test 2: Multiple rapid toggles', 'info');
+            const test2Before = measureViewport();
+            
+            for (let i = 0; i < 3; i++) {
+                toggleTask(state.tasks[0].id);
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const test2After = measureViewport();
+            
+            if (!checkLayoutStability(test2Before, test2After, 'Rapid Toggles')) {
+                allTestsPassed = false;
+            }
+            
+            // Test 3: Multiple tasks
+            addResult('📋 Test 3: Multiple tasks test', 'info');
+            
+            // Add more tasks
+            for (let i = 2; i <= 5; i++) {
+                document.getElementById('taskInput').value = `Test Task ${i}`;
+                addTask();
+            }
+            
+            const test3Before = measureViewport();
+            
+            // Toggle multiple tasks
+            state.tasks.forEach((task, index) => {
+                setTimeout(() => {
+                    toggleTask(task.id);
+                }, index * 300);
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            const test3After = measureViewport();
+            
+            if (!checkLayoutStability(test3Before, test3After, 'Multiple Tasks')) {
+                allTestsPassed = false;
+            }
+            
+            // Test 4: Achievement popup test
+            addResult('📋 Test 4: Achievement popup positioning', 'info');
+            const test4Before = measureViewport();
+            
+            showAchievement('Test Achievement', 'Testing popup positioning');
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const test4After = measureViewport();
+            
+            if (!checkLayoutStability(test4Before, test4After, 'Achievement Popup')) {
+                allTestsPassed = false;
+            }
+            
+            // Test 5: CSS class effects test
+            addResult('📋 Test 5: CSS effects test', 'info');
+            const container = document.querySelector('.container');
+            const test5Before = measureViewport();
+            
+            // Manually trigger effects to test CSS changes
+            container.classList.add('task-celebration');
+            setTimeout(() => container.classList.remove('task-celebration'), 800);
+            
+            container.classList.add('cosmic-flow');
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const test5After = measureViewport();
+            
+            container.classList.remove('cosmic-flow');
+            
+            if (!checkLayoutStability(test5Before, test5After, 'CSS Effects')) {
+                allTestsPassed = false;
+            }
+            
+            // Final result
+            if (allTestsPassed) {
+                addResult('🎉 ALL TESTS PASSED! Layout fixes successful!', 'pass');
+            } else {
+                addResult('⚠️ Some tests failed. Layout issues may still exist.', 'fail');
+            }
+            
+            addResult('🏁 Comprehensive test completed', 'info');
+        }
+        
+        // Initialize
+        initUIEffects();
+        renderTasks();
+        addResult('🔧 Layout fix verification ready', 'info');
+    </script>
+</body>
+</html>

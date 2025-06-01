@@ -34,9 +34,7 @@ export function toggleTask(id) {
             showAchievement('Task Complete!', 'Great job!');
             
             // Trigger spectacular black hole burst effect
-            // DISABLED: Unwanted yellow ring effect
-            // triggerTaskCompletionBurst();
-            console.log('🔥 DISABLED: Yellow ring burst effect (triggerTaskCompletionBurst)');
+            triggerTaskCompletionBurst();
             
             // Trigger camera shake for impact
             triggerTaskCompletionShake();

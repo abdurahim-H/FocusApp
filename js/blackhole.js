@@ -491,6 +491,11 @@ export function updateBlackHoleEffects() {
 
 // Trigger special effects
 export function triggerTaskCompletionBurst() {
+    console.log('🔥 WARNING: triggerTaskCompletionBurst() called - this should be DISABLED!');
+    
+    // DISABLED: This function creates the unwanted yellow ring
+    return; // Early return to prevent execution
+    
     // Create a spectacular burst effect when tasks are completed
     const burstGeometry = new THREE.RingGeometry(1, 50, 32);
     const burstMaterial = new THREE.ShaderMaterial({
@@ -565,3 +570,25 @@ export function triggerFocusIntensification() {
         }, 2000);
     }
 }
+
+
+// === ADD THIS CODE TO THE END OF YOUR blackhole.js FILE ===
+
+// Expose blackHoleSystem globally for debugging
+window.blackHoleSystem = blackHoleSystem;
+
+// Debug function to hide/show accretion disk
+window.toggleAccretionDisk = function() {
+    if (blackHoleSystem.accretionDisk) {
+        blackHoleSystem.accretionDisk.visible = !blackHoleSystem.accretionDisk.visible;
+        console.log('Accretion disk visibility:', blackHoleSystem.accretionDisk.visible);
+    }
+};
+
+// Debug function to hide/show entire black hole
+window.toggleBlackHole = function() {
+    if (blackHoleSystem.group) {
+        blackHoleSystem.group.visible = !blackHoleSystem.group.visible;
+        console.log('Black hole visibility:', blackHoleSystem.group.visible);
+    }
+};
