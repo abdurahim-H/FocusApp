@@ -1,4 +1,3 @@
-/* Base Styles and CSS Variables */
 * {
     margin: 0;
     padding: 0;
@@ -6,7 +5,6 @@
 }
 
 :root {
-    /* Enhanced Visual Effects Variables */
     --time-scale: 1;
     --redshift-intensity: 0;
 }
@@ -20,15 +18,14 @@ body {
     transition: all 0.3s ease;
 }
 
-/* 3D Scene Container - FIXED Z-INDEX */
 #scene-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1; /* Behind everything */
-    pointer-events: none; /* Prevent interference with UI */
+    z-index: 1;
+    pointer-events: none;
 }
 
 #scene-container canvas {
@@ -37,7 +34,6 @@ body {
     height: 100%;
 }
 
-/* Container - ENSURE IT'S ABOVE 3D SCENE */
 .container {
     min-height: 100vh;
     display: flex;
@@ -45,8 +41,8 @@ body {
     justify-content: center;
     padding: 120px 20px 40px;
     position: relative;
-    z-index: 10; /* Above 3D scene */
-    pointer-events: auto; /* Re-enable pointer events */
+    z-index: 10;
+    pointer-events: auto;
 }
 
 /* Mode Displays */

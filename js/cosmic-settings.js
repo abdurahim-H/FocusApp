@@ -1,6 +1,3 @@
-// Enhanced Cosmic Settings Module
-// Transforms settings into a spectacular cosmic control panel with "Whoa!" factor
-
 import { state } from './state.js';
 import { updateTimerDisplay } from './timer.js';
 import { triggerTaskCompletionUI } from './ui-effects.js';
@@ -9,13 +6,10 @@ let cosmicSettingsInitialized = false;
 let particleSystem = null;
 let settingsAnimationFrame = null;
 
-// Simple UI effect function for cosmic settings
 function triggerUIEffect(effectType) {
     console.log(`🌟 Cosmic Effect: ${effectType}`);
-    // For now, just log the effect. Could be enhanced later.
 }
 
-// Initialize spectacular cosmic settings
 export function initCosmicSettings() {
     if (cosmicSettingsInitialized) return;
     
@@ -29,7 +23,6 @@ export function initCosmicSettings() {
     cosmicSettingsInitialized = true;
 }
 
-// Create particle background for settings modal
 function createParticleBackground() {
     const settingsModal = document.querySelector('.settings-modal');
     if (!settingsModal) return;

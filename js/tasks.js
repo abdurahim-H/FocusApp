@@ -1,6 +1,3 @@
-// Task Management Module
-// Handles all task creation, completion, and rendering functionality
-
 import { state } from './state.js';
 import { updateUniverseStats, showAchievement } from './timer.js';
 import { triggerTaskCompletionBurst } from './blackhole.js';
@@ -27,25 +24,19 @@ export function toggleTask(id) {
     if (task) {
         task.completed = !task.completed;
         if (task.completed) {
-            task.completedAt = Date.now(); // Track completion time for effects
+            task.completedAt = Date.now();
             state.universe.tasksCompleted++;
             state.universe.stars += 0.5;
             updateUniverseStats();
             showAchievement('Task Complete!', 'Great job!');
             
-            // Trigger spectacular black hole burst effect
-            // DISABLED: Unwanted yellow ring effect
-            // triggerTaskCompletionBurst();
             console.log('🔥 DISABLED: Yellow ring burst effect (triggerTaskCompletionBurst)');
             
-            // Trigger camera shake for impact
             triggerTaskCompletionShake();
             
-            // Trigger UI celebration effect
             const taskElement = document.querySelector(`[data-task-id="${id}"]`);
             triggerTaskCompletionUI(taskElement);
             
-            // Every 3rd task completion gets time dilation effect
             if (state.universe.tasksCompleted % 3 === 0) {
                 triggerTimeDilationEffect();
                 triggerTimeDilationUI();
