@@ -32,7 +32,9 @@ export function toggleTask(id) {
             
             console.log('🔥 DISABLED: Yellow ring burst effect (triggerTaskCompletionBurst)');
             
-            triggerTaskCompletionShake();
+            // LAYOUT STABILITY FIX: Disable camera shake to prevent visual disruption
+            // triggerTaskCompletionShake();
+            console.log('🛡️ LAYOUT FIX: Camera shake disabled to prevent layout disruption');
             
             const taskElement = document.querySelector(`[data-task-id="${id}"]`);
             triggerTaskCompletionUI(taskElement);

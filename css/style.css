@@ -142,11 +142,16 @@ body[style*="--redshift-intensity"] {
     }
 }
 
-/* Task completion celebration */
+/* Task completion celebration - LAYOUT STABILITY FIX: Disabled scaling animation */
 .task-celebration {
-    animation: taskBurst 0.8s ease-out;
+    /* DISABLED: animation: taskBurst 0.8s ease-out; */
+    /* Keep static visual enhancement without problematic scaling */
+    border-color: var(--accent);
+    box-shadow: 0 0 30px rgba(6, 214, 160, 0.5);
+    filter: brightness(1.1);
 }
 
+/* DISABLED: Task burst animation that was causing layout disruption
 @keyframes taskBurst {
     0% { 
         transform: scale(1);
@@ -165,12 +170,17 @@ body[style*="--redshift-intensity"] {
         box-shadow: 0 0 0 40px rgba(6, 214, 160, 0);
     }
 }
+*/
 
-/* Focus mode intensity */
+/* Focus mode intensity - LAYOUT STABILITY FIX: Disabled animation to prevent scrollbar issues */
 .focus-intense {
-    animation: focusIntensity 3s ease-in-out infinite;
+    /* DISABLED: animation: focusIntensity 3s ease-in-out infinite; */
+    /* Keep static visual enhancement without animation */
+    border-color: var(--accent);
+    box-shadow: 0 0 30px rgba(6, 214, 160, 0.4);
 }
 
+/* DISABLED: Focus intensity animation that was causing layout disruption
 @keyframes focusIntensity {
     0%, 100% { 
         border-color: var(--primary);
@@ -181,12 +191,18 @@ body[style*="--redshift-intensity"] {
         box-shadow: 0 0 40px rgba(6, 214, 160, 0.5);
     }
 }
+*/
 
-/* Session completion epic effect */
+/* Session completion epic effect - LAYOUT STABILITY FIX: Disabled scaling animation */
 .session-complete {
-    animation: sessionComplete 4s ease-out;
+    /* DISABLED: animation: sessionComplete 4s ease-out; */
+    /* Keep static visual enhancement without problematic scaling */
+    filter: brightness(1.2) contrast(1.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 40px rgba(6, 214, 160, 0.3);
 }
 
+/* DISABLED: Session complete animation that was causing layout disruption
 @keyframes sessionComplete {
     0% { 
         transform: scale(1) rotate(0deg);
@@ -209,6 +225,7 @@ body[style*="--redshift-intensity"] {
         filter: brightness(1) contrast(1);
     }
 }
+*/
 
 /* Black hole gravitational effect on UI */
 .gravitational-pull {
