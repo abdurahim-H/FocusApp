@@ -131,6 +131,10 @@ function returnToNormalOrbit() {
 
 // Apply camera shake effect
 export function updateCameraEffects() {
+    // LAYOUT STABILITY FIX: Disable all camera shake effects to prevent visual disruption
+    // This prevents the shaking that occurs when tasks are completed
+    
+    /* DISABLED: Camera shake application that causes viewport disruption
     if (shakeMagnitude > 0) {
         const shakeX = (Math.random() - 0.5) * shakeMagnitude;
         const shakeY = (Math.random() - 0.5) * shakeMagnitude;
@@ -140,17 +144,28 @@ export function updateCameraEffects() {
         camera.position.y += shakeY;
         camera.position.z += shakeZ;
     }
+    */
     
-    // Dynamic field of view based on productivity
+    // LAYOUT STABILITY FIX: Disable dynamic FOV changes that cause zoom effects
+    // This was causing the "zoom out" effect when toggling checkboxes
+    
+    // Keep FOV constant to prevent layout disruption
+    const baseFOV = 75;
+    if (Math.abs(camera.fov - baseFOV) > 0.1) {
+        camera.fov = baseFOV;
+        camera.updateProjectionMatrix();
+    }
+    
+    /* ORIGINAL DYNAMIC FOV CODE - DISABLED FOR LAYOUT STABILITY
     const completedTasks = appState.tasks.filter(task => task.completed).length;
     const totalTasks = appState.tasks.length;
     const productivity = totalTasks > 0 ? completedTasks / totalTasks : 0;
     
-    // Slightly adjust FOV based on productivity (more productive = wider view)
     const baseFOV = 75;
     const fovBonus = productivity * 5;
     camera.fov = baseFOV + fovBonus;
     camera.updateProjectionMatrix();
+    */
 }
 
 // Orbit camera around specific target (like a completed task celebration)

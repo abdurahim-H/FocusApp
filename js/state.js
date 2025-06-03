@@ -1,8 +1,7 @@
-// Application State Management
 export const state = {
     mode: 'home',
-    currentMode: 'home', // Added for blackhole.js compatibility
-    timerState: 'stopped', // Added for blackhole.js compatibility
+    currentMode: 'home',
+    timerState: 'stopped',
     timer: {
         minutes: 25,
         seconds: 0,
@@ -29,5 +28,4 @@ export const state = {
     }
 };
 
-// Export as appState alias for blackhole.js compatibility
 export const appState = state;

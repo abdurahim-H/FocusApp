@@ -1,6 +1,3 @@
-// Timer Module
-// Handles all timer-related functionality for pomodoro sessions
-
 import { state } from './state.js';
 import { triggerFocusIntensification } from './blackhole.js';
 import { triggerFocusZoom, triggerSessionCompleteZoom, approachBlackHole } from './camera-effects.js';
@@ -18,21 +15,19 @@ export function updateTimerDisplay() {
 
 export function startTimer() {
     state.timer.isRunning = true;
-    state.timerState = 'running'; // Update for black hole effects
-    state.currentMode = state.timer.isBreak ? 'break' : 'focus'; // Update mode
+    state.timerState = 'running';
+    state.currentMode = state.timer.isBreak ? 'break' : 'focus';
     
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     if (startBtn) startBtn.classList.add('hidden');
     if (pauseBtn) pauseBtn.classList.remove('hidden');
     
-    // Trigger black hole intensification when starting focus session
     if (!state.timer.isBreak) {
         triggerFocusIntensification();
-        triggerFocusZoom(); // Add cinematic zoom effect
-        triggerFocusIntensity(); // Add UI intensity effects
+        triggerFocusZoom();
+        triggerFocusIntensity();
     } else {
-        // Break mode - dramatic approach to black hole
         approachBlackHole();
         triggerBlackHoleApproachUI();
     }

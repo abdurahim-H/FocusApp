@@ -1,7 +1,3 @@
-// Main App Module
-// Handles initialization, event listeners, and app startup
-
-// Import modules with error handling
 let modules = {};
 
 async function loadModules() {

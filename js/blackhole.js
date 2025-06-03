@@ -1,6 +1,3 @@
-// Enhanced Black Hole Visual Effects Module
-// Creates stunning black hole effects with impressive animations
-
 import { scene } from './scene3d.js';
 import { appState } from './state.js';
 import { trackRequestAnimationFrame } from './cleanup.js';
@@ -19,9 +16,8 @@ export function createEnhancedBlackHole() {
 
         const blackHoleGroup = new THREE.Group();
     
-    // 1. Event Horizon with distortion effect
-    const eventHorizonGeometry = new THREE.SphereGeometry(3, 64, 64);
-    const eventHorizonMaterial = new THREE.ShaderMaterial({
+        const eventHorizonGeometry = new THREE.SphereGeometry(3, 64, 64);
+        const eventHorizonMaterial = new THREE.ShaderMaterial({
         uniforms: {
             time: { value: 0 },
             intensity: { value: 1.0 }
