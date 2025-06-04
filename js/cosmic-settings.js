@@ -646,6 +646,7 @@ export function setupSettingsControls() {
         themeBtns: {
             light: document.getElementById('themeLightBtn'),
             dark: document.getElementById('themeDarkBtn'),
+            cosmos: document.getElementById('themeCosmosBtn'),
             auto: document.getElementById('themeAutoBtn')
         }
     };
