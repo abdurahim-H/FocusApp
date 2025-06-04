@@ -237,6 +237,18 @@
         rgba(50, 25, 100, 1) 100%);
 }
 
+.cosmic-orb[data-cosmic-theme="cosmos"] {
+    background: radial-gradient(circle, 
+        rgba(139, 92, 246, 0.9) 0%,
+        rgba(6, 214, 160, 0.7) 30%,
+        rgba(11, 20, 38, 0.95) 70%,
+        rgba(8, 15, 28, 1) 100%);
+    color: rgba(255, 255, 255, 0.95);
+    box-shadow: 
+        0 0 20px rgba(139, 92, 246, 0.4),
+        inset 0 0 15px rgba(6, 214, 160, 0.2);
+}
+
 .orb-constellation {
     position: absolute;
     width: 100%;

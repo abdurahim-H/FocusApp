@@ -120,7 +120,7 @@ function enhanceThemeButtons() {
         btn.className = 'cosmic-orb';
         
         // Add cosmic data attributes
-        const themes = ['light', 'dark', 'auto'];
+        const themes = ['light', 'dark', 'cosmos', 'auto'];
         btn.setAttribute('data-cosmic-theme', themes[index]);
         
         // Add constellation pattern

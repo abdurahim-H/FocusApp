@@ -58,3 +58,17 @@ body[data-theme="light"] {
         --shadow: rgba(0, 0, 0, 0.3);
     }
 }
+
+/* Cosmos Theme */
+body[data-theme="cosmos"] {
+    --primary: #8B5CF6;
+    --secondary: #A855F7;
+    --accent: #06D6A0;
+    --bg-dark: #0B1426;
+    --bg-glass: rgba(139, 92, 246, 0.15);
+    --bg-glass-dark: rgba(11, 20, 38, 0.8);
+    --text-primary: #FFFFFF;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --border-glass: rgba(139, 92, 246, 0.3);
+    --shadow: rgba(139, 92, 246, 0.2);
+}

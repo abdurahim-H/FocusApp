@@ -170,7 +170,7 @@ export async function initApp() {
             });
         };
         
-        console.log('🎨 Theme testing: Use testThemeSwitch("light"|"dark"|"auto") in console');
+        console.log('🎨 Theme testing: Use testThemeSwitch("light"|"dark"|"cosmos"|"auto") in console');
         
         // Initialize UI effects system
         if (loadedModules.uiEffects?.initUIEffects) {
