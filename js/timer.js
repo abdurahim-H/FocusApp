@@ -16,13 +16,15 @@ export function updateTimerDisplay() {
 export function startTimer() {
     state.timer.isRunning = true;
     state.timerState = 'running';
+    // Fix: Keep both state properties in sync
     state.currentMode = state.timer.isBreak ? 'break' : 'focus';
-    
+    state.mode = 'timer'; // Ensure navigation knows we're in timer mode
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     if (startBtn) startBtn.classList.add('hidden');
     if (pauseBtn) pauseBtn.classList.remove('hidden');
-    
+
     if (!state.timer.isBreak) {
         triggerFocusIntensification();
         triggerFocusZoom();
@@ -31,7 +33,7 @@ export function startTimer() {
         approachBlackHole();
         triggerBlackHoleApproachUI();
     }
-    
+
     const skipBtn = document.getElementById('skipBtn');
     if (skipBtn) {
         if (state.timer.isBreak) {
@@ -60,7 +62,7 @@ export function pauseTimer() {
     state.timer.isRunning = false;
     state.timerState = 'paused'; // Update for black hole effects
     clearInterval(state.timer.interval);
-    
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     if (startBtn) {
@@ -74,23 +76,23 @@ export function pauseTimer() {
 
 export function resetTimer() {
     state.timer.isRunning = false;
-    state.timerState = 'stopped'; // Update for black hole effects
-    state.currentMode = 'home'; // Reset mode
+    state.timerState = 'stopped';
+    // Fix: Don't force mode change here - let navigation handle it
     clearInterval(state.timer.interval);
-    
+
     if (state.timer.isBreak) {
         state.timer.minutes = state.timer.settings.shortBreak;
     } else {
         state.timer.minutes = state.timer.settings.focusDuration;
     }
-    
+
     state.timer.seconds = 0;
     updateTimerDisplay();
-    
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const skipBtn = document.getElementById('skipBtn');
-    
+
     if (startBtn) {
         startBtn.classList.remove('hidden');
         startBtn.textContent = 'Start Focus';
@@ -109,6 +111,7 @@ export function skipBreak() {
     }
 }
 
+// --- MODIFIED FUNCTION FOR AUTO-SESSION SWITCHING & PROPER MODE ---
 export function completeSession() {
     clearInterval(state.timer.interval);
     state.timer.isRunning = false;
@@ -119,7 +122,7 @@ export function completeSession() {
         state.timer.isBreak = false;
         state.timer.minutes = state.timer.settings.focusDuration;
         state.timer.seconds = 0;
-        state.currentMode = 'home'; // Reset mode
+        state.currentMode = 'focus'; // Corrected: set to focus mode
         const sessionType = document.getElementById('sessionType');
         if (sessionType) {
             sessionType.textContent = 'Focus Time';
@@ -135,41 +138,39 @@ export function completeSession() {
         triggerSessionCompleteZoom();
         triggerSessionCompleteUI();
 
-        // Delay achievement popup slightly to avoid interference with other effects
-        setTimeout(() => {
-            if (state.timer.pomodoroCount % 4 === 0) {
-                // Long break after 4 pomodoros
-                state.timer.minutes = state.timer.settings.longBreak;
-                showAchievement('Pomodoro Cycle Complete!', 'Take a long break');
-            } else {
-                // Short break
-                state.timer.minutes = state.timer.settings.shortBreak;
-                showAchievement('Focus Complete!', 'Time for a short break');
-            }
+        if (state.timer.pomodoroCount % 4 === 0) {
+            // Long break after 4 pomodoros
+            state.timer.minutes = state.timer.settings.longBreak;
+            showAchievement('Pomodoro Cycle Complete!', 'Take a long break');
+        } else {
+            // Short break
+            state.timer.minutes = state.timer.settings.shortBreak;
+            showAchievement('Focus Complete!', 'Time for a short break');
+        }
 
-            state.timer.isBreak = true;
-            state.timer.seconds = 0;
-            state.currentMode = 'break'; // Update mode
-            const sessionType = document.getElementById('sessionType');
-            if (sessionType) {
-                sessionType.textContent = 'Break Time';
-            }
-        }, 300); // Small delay to let camera effects start first
+        state.timer.isBreak = true;
+        state.timer.seconds = 0;
+        state.currentMode = 'break'; // Corrected: set to break/ambient mode
+        const sessionType = document.getElementById('sessionType');
+        if (sessionType) {
+            sessionType.textContent = 'Break Time';
+        }
     }
 
     updateTimerDisplay();
     updateUniverseStats();
-    
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const skipBtn = document.getElementById('skipBtn');
-    
+
+    // Hide start button during auto transition
     if (startBtn) {
-        startBtn.classList.remove('hidden');
+        startBtn.classList.add('hidden');
         startBtn.textContent = state.timer.isBreak ? 'Start Break' : 'Start Focus';
     }
     if (pauseBtn) {
-        pauseBtn.classList.add('hidden');
+        pauseBtn.classList.remove('hidden');
     }
     if (skipBtn) {
         if (state.timer.isBreak) {
@@ -178,6 +179,11 @@ export function completeSession() {
             skipBtn.classList.add('hidden');
         }
     }
+
+    // --- AUTO-START NEXT SESSION ---
+    setTimeout(() => {
+        startTimer();
+    }, 1200); // 1.2 seconds for achievement to show, adjust as needed
 }
 
 // Update universe stats
@@ -186,7 +192,7 @@ export function updateUniverseStats() {
     const galaxyLevel = document.getElementById('galaxyLevel');
     const focusTime = document.getElementById('focusTime');
     const tasksComplete = document.getElementById('tasksComplete');
-    
+
     if (starsCount) starsCount.textContent = state.universe.stars;
     if (galaxyLevel) galaxyLevel.textContent = state.universe.level;
     if (focusTime) focusTime.textContent = state.universe.focusMinutes;
@@ -222,7 +228,7 @@ export function updateDateTime() {
 export function startBreathing() {
     const guide = document.getElementById('breathingGuide');
     let breathIn = true;
-    
+
     setInterval(() => {
         if (breathIn) {
             guide.textContent = 'Breathe In...';
@@ -233,25 +239,4 @@ export function startBreathing() {
         }
         breathIn = !breathIn;
     }, 4000);
-}
-
-// Test function to verify achievement popup (can be removed in production)
-export function testAchievementPopup() {
-    console.log('🧪 Testing achievement popup...');
-    showAchievement('Test Achievement', 'Checking for layout stability');
-    
-    // Check for horizontal scrollbar after showing achievement
-    setTimeout(() => {
-        const hasHorizontalScroll = document.body.scrollWidth > document.body.clientWidth;
-        if (hasHorizontalScroll) {
-            console.warn('⚠️ Horizontal scrollbar detected after achievement popup!');
-        } else {
-            console.log('✅ No horizontal scrollbar - achievement popup is stable');
-        }
-    }, 600); // Check after animation completes
-}
-
-// Auto-test on page load (remove in production)
-if (typeof window !== 'undefined') {
-    window.testAchievement = testAchievementPopup;
 }
