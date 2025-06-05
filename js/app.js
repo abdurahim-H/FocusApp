@@ -32,7 +32,7 @@ async function loadModules() {
     }
     
     try {
-        modules.settings = await import('./settings.js');
+        modules.settings = await import('./cosmic-settings.js');
         console.log('✅ settings loaded');
     } catch (error) {
         console.error('❌ Failed to load settings:', error);
@@ -149,8 +149,8 @@ export async function initApp() {
         }
         
         console.log('🚀 Setting up settings...');
-        if (loadedModules.settings?.setupSettingsModal) {
-            loadedModules.settings.setupSettingsModal();
+        if (loadedModules.settings?.setupCosmicSettingsModal) {
+            loadedModules.settings.setupCosmicSettingsModal();
             loadedModules.settings.setupSettingsControls();
             console.log('✅ Settings setup complete');
         }

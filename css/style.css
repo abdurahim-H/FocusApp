@@ -431,3 +431,30 @@ body.debug-layout {
 .debug-layout * {
     outline: 1px solid rgba(255, 0, 0, 0.1);
 }
+
+/* Add cosmic settings loading animation */
+.settings-modal-overlay {
+    background: radial-gradient(circle at center, 
+        rgba(20, 10, 40, 0.9) 0%, 
+        rgba(0, 0, 0, 0.95) 100%);
+}
+
+.settings-modal-overlay.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(6, 214, 160, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 100, 100, 0.1) 0%, transparent 70%);
+    animation: cosmicBackground 10s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes cosmicBackground {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
+    50% { transform: scale(1.1) rotate(180deg); opacity: 0.8; }
+}

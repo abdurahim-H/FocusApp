@@ -727,6 +727,316 @@
     100% { transform: scale(1.1); }
 }
 
+/* Cosmic Sound Visualizer */
+.cosmic-sound-visualizer {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(20, 10, 40, 0.6);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.sound-waves {
+    width: 100%;
+    height: 60px;
+    opacity: 0.8;
+}
+
+.sound-orbs {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.sound-orb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.sound-orb[data-frequency="low"] {
+    background: radial-gradient(circle, #ff006e 0%, #ff006e 50%, transparent 100%);
+}
+
+.sound-orb[data-frequency="mid"] {
+    background: radial-gradient(circle, #8338ec 0%, #8338ec 50%, transparent 100%);
+}
+
+.sound-orb[data-frequency="high"] {
+    background: radial-gradient(circle, #06ffa5 0%, #06ffa5 50%, transparent 100%);
+}
+
+/* Cosmic Theme Transition Overlay */
+.cosmic-theme-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.cosmic-theme-transition.active {
+    opacity: 0.8;
+}
+
+/* Cosmic Confirmation Portal */
+.cosmic-confirmation-portal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cosmic-confirmation-portal.active {
+    opacity: 1;
+}
+
+.confirmation-vortex {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border: 2px solid rgba(139, 92, 246, 0.5);
+    border-radius: 50%;
+    animation: vortexSpin 3s linear infinite;
+}
+
+.confirmation-vortex::before,
+.confirmation-vortex::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 50%;
+    top: -10px;
+    left: -10px;
+    animation: vortexSpin 4s linear infinite reverse;
+}
+
+.confirmation-vortex::after {
+    top: -20px;
+    left: -20px;
+    animation-duration: 5s;
+}
+
+@keyframes vortexSpin {
+    to { transform: rotate(360deg); }
+}
+
+.confirmation-content {
+    background: linear-gradient(135deg, 
+        rgba(40, 20, 80, 0.95) 0%,
+        rgba(20, 10, 40, 0.95) 100%);
+    border: 2px solid rgba(139, 92, 246, 0.5);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    box-shadow: 
+        0 0 50px rgba(139, 92, 246, 0.3),
+        inset 0 0 20px rgba(139, 92, 246, 0.1);
+}
+
+.confirmation-icon {
+    font-size: 3em;
+    margin-bottom: 20px;
+    animation: warningPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes warningPulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+.confirmation-message {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.cosmic-confirm-btn,
+.cosmic-cancel-btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cosmic-confirm-btn {
+    background: linear-gradient(135deg, #ff006e 0%, #ff4458 100%);
+    color: white;
+}
+
+.cosmic-cancel-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.cosmic-confirm-btn:hover,
+.cosmic-cancel-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+}
+
+/* Cosmic Reset Explosion */
+.cosmic-reset-explosion {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, -50%);
+    z-index: 2999;
+    pointer-events: none;
+}
+
+.reset-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #8338ec;
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.cosmic-reset-explosion.active .reset-particle {
+    animation: particleExplosion 1.5s ease-out forwards;
+}
+
+@keyframes particleExplosion {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(
+            calc(cos(var(--angle)) * 200px),
+            calc(sin(var(--angle)) * 200px)
+        ) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Orb Selection Aura */
+.orb-selection-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%);
+    transform: translate(-50%, -50%) scale(0);
+    animation: auraExpand 1s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes auraExpand {
+    to {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* Enhanced Range Slider Track Effects */
+.stellar-slider::-webkit-slider-runnable-track {
+    background: linear-gradient(90deg, 
+        #8338ec 0%, 
+        #8338ec var(--value-percent), 
+        rgba(131, 56, 236, 0.2) var(--value-percent), 
+        rgba(131, 56, 236, 0.2) 100%);
+    height: 6px;
+    border-radius: 3px;
+}
+
+/* Cosmic Settings Section Hover Effect */
+.settings-section {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.settings-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(139, 92, 246, 0.1), 
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.settings-section:hover::before {
+    left: 100%;
+}
+
+/* Floating Settings Icon */
+.settings-btn {
+    animation: settingsFloat 3s ease-in-out infinite;
+}
+
+@keyframes settingsFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.settings-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0;
+    animation: settingsPulse 2s ease-in-out infinite;
+}
+
+@keyframes settingsPulse {
+    0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+    50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.4); }
+}
+
 /* Responsive Design for Cosmic Settings */
 @media (max-width: 768px) {
     .cosmic-preview-container {
@@ -752,6 +1062,29 @@
     .cosmic-action-btn {
         padding: 12px 24px;
         font-size: 0.9em;
+    }
+    
+    .cosmic-sound-visualizer {
+        padding: 10px;
+    }
+    
+    .sound-waves {
+        height: 40px;
+    }
+    
+    .confirmation-content {
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    .confirmation-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .cosmic-confirm-btn,
+    .cosmic-cancel-btn {
+        width: 100%;
     }
 }
 
@@ -800,4 +1133,398 @@
 @keyframes titleGradientShift {
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
+}
+
+/* Cosmic Settings - Additional Enhancements */
+
+/* Cosmic Sound Visualizer */
+.cosmic-sound-visualizer {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(20, 10, 40, 0.6);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.sound-waves {
+    width: 100%;
+    height: 60px;
+    opacity: 0.8;
+}
+
+.sound-orbs {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.sound-orb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.sound-orb[data-frequency="low"] {
+    background: radial-gradient(circle, #ff006e 0%, #ff006e 50%, transparent 100%);
+}
+
+.sound-orb[data-frequency="mid"] {
+    background: radial-gradient(circle, #8338ec 0%, #8338ec 50%, transparent 100%);
+}
+
+.sound-orb[data-frequency="high"] {
+    background: radial-gradient(circle, #06ffa5 0%, #06ffa5 50%, transparent 100%);
+}
+
+/* Cosmic Theme Transition Overlay */
+.cosmic-theme-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.cosmic-theme-transition.active {
+    opacity: 0.8;
+}
+
+/* Cosmic Confirmation Portal */
+.cosmic-confirmation-portal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cosmic-confirmation-portal.active {
+    opacity: 1;
+}
+
+.confirmation-vortex {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border: 2px solid rgba(139, 92, 246, 0.5);
+    border-radius: 50%;
+    animation: vortexSpin 3s linear infinite;
+}
+
+.confirmation-vortex::before,
+.confirmation-vortex::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 50%;
+    top: -10px;
+    left: -10px;
+    animation: vortexSpin 4s linear infinite reverse;
+}
+
+.confirmation-vortex::after {
+    top: -20px;
+    left: -20px;
+    animation-duration: 5s;
+}
+
+@keyframes vortexSpin {
+    to { transform: rotate(360deg); }
+}
+
+.confirmation-content {
+    background: linear-gradient(135deg, 
+        rgba(40, 20, 80, 0.95) 0%,
+        rgba(20, 10, 40, 0.95) 100%);
+    border: 2px solid rgba(139, 92, 246, 0.5);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    box-shadow: 
+        0 0 50px rgba(139, 92, 246, 0.3),
+        inset 0 0 20px rgba(139, 92, 246, 0.1);
+}
+
+.confirmation-icon {
+    font-size: 3em;
+    margin-bottom: 20px;
+    animation: warningPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes warningPulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+.confirmation-message {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.cosmic-confirm-btn,
+.cosmic-cancel-btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cosmic-confirm-btn {
+    background: linear-gradient(135deg, #ff006e 0%, #ff4458 100%);
+    color: white;
+}
+
+.cosmic-cancel-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.cosmic-confirm-btn:hover,
+.cosmic-cancel-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+}
+
+/* Cosmic Reset Explosion */
+.cosmic-reset-explosion {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, -50%);
+    z-index: 2999;
+    pointer-events: none;
+}
+
+.reset-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #8338ec;
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.cosmic-reset-explosion.active .reset-particle {
+    animation: particleExplosion 1.5s ease-out forwards;
+}
+
+@keyframes particleExplosion {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(
+            calc(cos(var(--angle)) * 200px),
+            calc(sin(var(--angle)) * 200px)
+        ) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Orb Selection Aura */
+.orb-selection-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%);
+    transform: translate(-50%, -50%) scale(0);
+    animation: auraExpand 1s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes auraExpand {
+    to {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* Enhanced Range Slider Track Effects */
+.stellar-slider::-webkit-slider-runnable-track {
+    background: linear-gradient(90deg, 
+        #8338ec 0%, 
+        #8338ec var(--value-percent), 
+        rgba(131, 56, 236, 0.2) var(--value-percent), 
+        rgba(131, 56, 236, 0.2) 100%);
+    height: 6px;
+    border-radius: 3px;
+}
+
+/* Cosmic Settings Section Hover Effect */
+.settings-section {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.settings-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(139, 92, 246, 0.1), 
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.settings-section:hover::before {
+    left: 100%;
+}
+
+/* Floating Settings Icon */
+.settings-btn {
+    animation: settingsFloat 3s ease-in-out infinite;
+}
+
+@keyframes settingsFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.settings-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0;
+    animation: settingsPulse 2s ease-in-out infinite;
+}
+
+@keyframes settingsPulse {
+    0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+    50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.4); }
+}
+
+/* Responsive Design for Cosmic Settings */
+@media (max-width: 768px) {
+    .cosmic-preview-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .mini-universe {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .cosmic-theme-orbs {
+        gap: 15px;
+    }
+    
+    .cosmic-orb {
+        width: 60px;
+        height: 60px;
+        font-size: 0.8em;
+    }
+    
+    .cosmic-action-btn {
+        padding: 12px 24px;
+        font-size: 0.9em;
+    }
+    
+    .cosmic-sound-visualizer {
+        padding: 10px;
+    }
+    
+    .sound-waves {
+        height: 40px;
+    }
+    
+    .confirmation-content {
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    .confirmation-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .cosmic-confirm-btn,
+    .cosmic-cancel-btn {
+        width: 100%;
+    }
+}
+
+/* Additional Enhancement for Saved Message */
+.settings-saved-msg {
+    position: relative;
+    overflow: hidden;
+}
+
+.settings-saved-msg::before {
+    content: '✨';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: sparkleMove 1.5s ease-out;
+}
+
+.settings-saved-msg::after {
+    content: '✨';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: sparkleMove 1.5s ease-out reverse;
+}
+
+@keyframes sparkleMove {
+    to {
+        transform: translateY(-50%) translateX(calc(100vw / 2));
+        opacity: 0;
+    }
 }
