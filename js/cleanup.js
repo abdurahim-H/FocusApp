@@ -37,11 +37,14 @@ export function initCleanupSystem() {
         cleanupApplication();
     });
     
-    // Setup cleanup on page visibility change
+    // Setup tab visibility handling for animation pause/resume
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            console.log('🧹 Page hidden, performing cleanup...');
-            cleanupApplication();
+            console.log('🔄 Tab hidden - pausing animations');
+            pauseAnimations();
+        } else {
+            console.log('🔄 Tab visible - resuming animations');
+            resumeAnimations();
         }
     });
     
