@@ -123,9 +123,17 @@ export function resetTimer() {
     // Fix: Don't force mode change here - let navigation handle it
     clearInterval(state.timer.interval);
     state.timer.interval = null;
+    
+    // Clear achievement queue and notifications on reset
+    clearAchievementQueue();
 
     if (state.timer.isBreak) {
-        state.timer.minutes = state.timer.settings.shortBreak;
+        // Reset to appropriate break duration
+        if (state.timer.isLongBreak) {
+            state.timer.minutes = state.timer.settings.longBreak;
+        } else {
+            state.timer.minutes = state.timer.settings.shortBreak;
+        }
     } else {
         state.timer.minutes = state.timer.settings.focusDuration;
     }
@@ -141,7 +149,16 @@ export function resetTimer() {
 
     if (startBtn) {
         startBtn.classList.remove('hidden');
-        startBtn.textContent = 'Start Focus';
+        // Set correct button text based on current session type
+        if (state.timer.isBreak) {
+            if (state.timer.isLongBreak) {
+                startBtn.textContent = 'Start Long Break';
+            } else {
+                startBtn.textContent = 'Start Break';
+            }
+        } else {
+            startBtn.textContent = 'Start Focus';
+        }
     }
     if (pauseBtn) {
         pauseBtn.classList.add('hidden');
@@ -182,6 +199,7 @@ export function completeSession() {
     if (state.timer.isBreak) {
         // Break completed, start new focus session
         state.timer.isBreak = false;
+        state.timer.isLongBreak = false;
         state.timer.minutes = state.timer.settings.focusDuration;
         state.timer.seconds = 0;
         state.currentMode = 'focus'; // Corrected: set to focus mode
@@ -211,10 +229,12 @@ export function completeSession() {
         if (state.timer.pomodoroCount % 4 === 0) {
             // Long break after 4 pomodoros
             state.timer.minutes = state.timer.settings.longBreak;
+            state.timer.isLongBreak = true;
             showAchievement('Pomodoro Cycle Complete!', `Take a ${state.timer.settings.longBreak}-minute long break`);
         } else {
             // Short break
             state.timer.minutes = state.timer.settings.shortBreak;
+            state.timer.isLongBreak = false;
             showAchievement('Focus Complete!', `Time for a ${state.timer.settings.shortBreak}-minute break`);
         }
 
@@ -274,15 +294,69 @@ export function updateUniverseStats() {
     if (tasksComplete) tasksComplete.textContent = state.universe.tasksCompleted;
 }
 
-// Show achievement
+// Achievement notification queue system
+let achievementQueue = [];
+let currentAchievementTimeout = null;
+let isShowingAchievement = false;
+
+// Show achievement with proper queuing
 export function showAchievement(title, desc) {
+    // Add to queue
+    achievementQueue.push({ title, desc });
+    
+    // If not currently showing, start the queue
+    if (!isShowingAchievement) {
+        processAchievementQueue();
+    }
+}
+
+// Process achievement queue one by one
+function processAchievementQueue() {
+    if (achievementQueue.length === 0) {
+        isShowingAchievement = false;
+        return;
+    }
+    
+    isShowingAchievement = true;
     const achievement = document.getElementById('achievement');
+    const { title, desc } = achievementQueue.shift();
+    
+    // Update content
     document.getElementById('achievementTitle').textContent = title;
     document.getElementById('achievementDesc').textContent = desc;
+    
+    // Clear any existing timeout
+    if (currentAchievementTimeout) {
+        clearTimeout(currentAchievementTimeout);
+    }
+    
+    // Show the achievement
     achievement.classList.add('show');
-    setTimeout(() => {
+    
+    // Set new timeout for this achievement
+    currentAchievementTimeout = setTimeout(() => {
         achievement.classList.remove('show');
+        
+        // Wait for hide animation to complete before showing next
+        setTimeout(() => {
+            processAchievementQueue();
+        }, 500); // Allow for CSS transition time
     }, 3000);
+}
+
+// Clear all pending achievements (useful for cleanup)
+export function clearAchievementQueue() {
+    achievementQueue = [];
+    if (currentAchievementTimeout) {
+        clearTimeout(currentAchievementTimeout);
+        currentAchievementTimeout = null;
+    }
+    isShowingAchievement = false;
+    
+    const achievement = document.getElementById('achievement');
+    if (achievement) {
+        achievement.classList.remove('show');
+    }
 }
 
 // Date and Time
