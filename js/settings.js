@@ -13,10 +13,14 @@ export function setupSettingsControls() {
         focusValue: document.getElementById('focusLengthValue'),
         soundRange: document.getElementById('soundVolumeRange'),
         soundValue: document.getElementById('soundVolumeValue'),
+        cosmicEnergyRange: document.getElementById('cosmicEnergyRange'),
+        cosmicEnergyValue: document.getElementById('cosmicEnergyValue'),
         greetingInput: document.getElementById('greetingInput'),
+        previewBtn: document.getElementById('previewCosmosBtn'),
         themeBtns: {
             light: document.getElementById('themeLightBtn'),
             dark: document.getElementById('themeDarkBtn'),
+            cosmos: document.getElementById('themeCosmosBtn'),
             auto: document.getElementById('themeAutoBtn')
         }
     };
@@ -24,13 +28,18 @@ export function setupSettingsControls() {
     console.log('Setting up controls, elements found:', {
         saveBtn: !!elements.saveBtn,
         resetBtn: !!elements.resetBtn,
-        focusRange: !!elements.focusRange
+        focusRange: !!elements.focusRange,
+        cosmicEnergyRange: !!elements.cosmicEnergyRange
     });
+
+    // Initialize cosmic effects
+    initCosmicEffects();
 
     // Focus length range
     if (elements.focusRange && elements.focusValue) {
         elements.focusRange.addEventListener('input', () => {
             elements.focusValue.textContent = elements.focusRange.value;
+            updateStellarTrack(elements.focusRange);
         });
     }
 
@@ -38,9 +47,18 @@ export function setupSettingsControls() {
     if (elements.soundRange && elements.soundValue) {
         elements.soundRange.addEventListener('input', () => {
             elements.soundValue.textContent = elements.soundRange.value;
+            updateStellarTrack(elements.soundRange);
             if (state.sounds.audio) {
                 state.sounds.audio.volume = elements.soundRange.value / 100;
             }
+        });
+    }
+
+    // Cosmic energy range
+    if (elements.cosmicEnergyRange && elements.cosmicEnergyValue) {
+        elements.cosmicEnergyRange.addEventListener('input', () => {
+            elements.cosmicEnergyValue.textContent = elements.cosmicEnergyRange.value;
+            updateStellarTrack(elements.cosmicEnergyRange);
         });
     }
 
@@ -49,6 +67,13 @@ export function setupSettingsControls() {
         elements.greetingInput.addEventListener('input', () => {
             const greetingText = elements.greetingInput.value || 'Welcome to Your Universe!';
             document.getElementById('greeting').textContent = greetingText;
+        });
+    }
+
+    // Preview cosmos button
+    if (elements.previewBtn) {
+        elements.previewBtn.addEventListener('click', () => {
+            triggerCosmicPreview();
         });
     }
 
@@ -70,15 +95,20 @@ export function setupSettingsControls() {
                 // Get values
                 const focusDuration = parseInt(elements.focusRange.value);
                 const soundVolume = parseInt(elements.soundRange.value);
+                const cosmicEnergy = parseInt(elements.cosmicEnergyRange.value) || 75;
                 const greeting = elements.greetingInput.value;
                 const theme = document.body.getAttribute('data-theme') || 'auto';
                 
-                console.log('Saving settings:', { focusDuration, soundVolume, greeting, theme });
+                console.log('Saving settings:', { focusDuration, soundVolume, cosmicEnergy, greeting, theme });
+                
+                // Add cosmic saving animation
+                elements.saveBtn.classList.add('cosmic-saving');
                 
                 // Save to localStorage
                 localStorage.setItem('fu_theme', theme);
                 localStorage.setItem('fu_focusLength', focusDuration);
                 localStorage.setItem('fu_soundVolume', soundVolume);
+                localStorage.setItem('fu_cosmicEnergy', cosmicEnergy);
                 localStorage.setItem('fu_greeting', greeting);
                 
                 // Apply settings immediately
@@ -113,11 +143,13 @@ export function setupSettingsControls() {
                 // Update greeting
                 document.getElementById('greeting').textContent = greeting || 'Welcome to Your Universe!';
                 
-                // Show success message
-                elements.savedMsg.style.opacity = 1;
+                // Show cosmic success message
+                showCosmicSuccessMessage();
+                
+                // Remove cosmic saving animation
                 setTimeout(() => {
-                    elements.savedMsg.style.opacity = 0;
-                }, 1500);
+                    elements.saveBtn.classList.remove('cosmic-saving');
+                }, 2000);
                 
                 console.log('Settings saved successfully!');
                 
@@ -137,13 +169,23 @@ export function setupSettingsControls() {
             elements.focusValue.textContent = '25';
             elements.soundRange.value = 30;
             elements.soundValue.textContent = '30';
+            if (elements.cosmicEnergyRange && elements.cosmicEnergyValue) {
+                elements.cosmicEnergyRange.value = 75;
+                elements.cosmicEnergyValue.textContent = '75';
+                updateStellarTrack(elements.cosmicEnergyRange);
+            }
             elements.greetingInput.value = '';
             document.getElementById('greeting').textContent = 'Welcome to Your Universe!';
+            
+            // Update stellar tracks
+            updateStellarTrack(elements.focusRange);
+            updateStellarTrack(elements.soundRange);
             
             // Clear localStorage
             localStorage.removeItem('fu_theme');
             localStorage.removeItem('fu_focusLength');
             localStorage.removeItem('fu_soundVolume');
+            localStorage.removeItem('fu_cosmicEnergy');
             localStorage.removeItem('fu_greeting');
             
             // Reset timer settings
@@ -153,6 +195,9 @@ export function setupSettingsControls() {
                 state.timer.seconds = 0;
                 updateTimerDisplay();
             }
+            
+            // Show reset confirmation
+            showCosmicSuccessMessage();
         });
     }
 }
@@ -211,9 +256,10 @@ export function loadSettings() {
     const theme = localStorage.getItem('fu_theme') || 'auto';
     const focusLength = localStorage.getItem('fu_focusLength') || '25';
     const soundVolume = localStorage.getItem('fu_soundVolume') || '30';
+    const cosmicEnergy = localStorage.getItem('fu_cosmicEnergy') || '75';
     const greeting = localStorage.getItem('fu_greeting') || '';
     
-    console.log('Loading settings:', { theme, focusLength, soundVolume, greeting });
+    console.log('Loading settings:', { theme, focusLength, soundVolume, cosmicEnergy, greeting });
     
     // Always set theme, even if it's the default
     setTheme(theme);
@@ -223,6 +269,7 @@ export function loadSettings() {
     if (focusRange && focusValue) {
         focusRange.value = focusLength;
         focusValue.textContent = focusLength;
+        updateStellarTrack(focusRange);
     }
     
     const soundRange = document.getElementById('soundVolumeRange');
@@ -230,6 +277,15 @@ export function loadSettings() {
     if (soundRange && soundValue) {
         soundRange.value = soundVolume;
         soundValue.textContent = soundVolume;
+        updateStellarTrack(soundRange);
+    }
+    
+    const cosmicEnergyRange = document.getElementById('cosmicEnergyRange');
+    const cosmicEnergyValue = document.getElementById('cosmicEnergyValue');
+    if (cosmicEnergyRange && cosmicEnergyValue) {
+        cosmicEnergyRange.value = cosmicEnergy;
+        cosmicEnergyValue.textContent = cosmicEnergy;
+        updateStellarTrack(cosmicEnergyRange);
     }
     
     const greetingInput = document.getElementById('greetingInput');
@@ -257,17 +313,207 @@ export function loadSettings() {
 export function setupSettingsModal() {
     // Settings modal
     document.getElementById('settingsBtn').addEventListener('click', () => {
-        document.getElementById('settingsModalOverlay').classList.add('active');
+        const overlay = document.getElementById('settingsModalOverlay');
+        const modal = document.querySelector('.settings-modal');
+        
+        overlay.classList.add('active');
+        
+        // Add cosmic entrance animation
+        setTimeout(() => {
+            if (modal) {
+                modal.classList.add('cosmic-entrance-active');
+            }
+        }, 50);
+        
         loadSettings();
     });
 
     document.getElementById('closeSettingsBtn').addEventListener('click', () => {
-        document.getElementById('settingsModalOverlay').classList.remove('active');
+        const overlay = document.getElementById('settingsModalOverlay');
+        const modal = document.querySelector('.settings-modal');
+        
+        // Add cosmic exit animation
+        if (modal) {
+            modal.classList.remove('cosmic-entrance-active');
+            modal.classList.add('cosmic-exit-active');
+        }
+        
+        setTimeout(() => {
+            overlay.classList.remove('active');
+            if (modal) {
+                modal.classList.remove('cosmic-exit-active');
+            }
+        }, 400);
     });
 
     document.getElementById('settingsModalOverlay').addEventListener('click', (e) => {
         if (e.target === e.currentTarget) {
-            document.getElementById('settingsModalOverlay').classList.remove('active');
+            const overlay = document.getElementById('settingsModalOverlay');
+            const modal = document.querySelector('.settings-modal');
+            
+            // Add cosmic exit animation
+            if (modal) {
+                modal.classList.remove('cosmic-entrance-active');
+                modal.classList.add('cosmic-exit-active');
+            }
+            
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                if (modal) {
+                    modal.classList.remove('cosmic-exit-active');
+                }
+            }, 400);
         }
     });
+}
+
+// Cosmic Effects Functions
+function initCosmicEffects() {
+    // Initialize stellar tracks for all sliders
+    const sliders = document.querySelectorAll('.stellar-slider');
+    sliders.forEach(slider => {
+        updateStellarTrack(slider);
+        
+        // Add cosmic thumb tracking
+        const container = slider.closest('.stellar-control-container');
+        if (container) {
+            const cosmicThumb = container.querySelector('.cosmic-thumb');
+            if (cosmicThumb) {
+                slider.addEventListener('input', () => {
+                    updateCosmicThumb(slider, cosmicThumb);
+                });
+                updateCosmicThumb(slider, cosmicThumb);
+            }
+        }
+    });
+
+    // Add cosmic entrance animation to modal
+    const modal = document.querySelector('.settings-modal');
+    if (modal) {
+        setTimeout(() => {
+            modal.classList.add('cosmic-entrance-active');
+        }, 100);
+    }
+}
+
+function updateStellarTrack(slider) {
+    const container = slider.closest('.stellar-control-container');
+    if (!container) return;
+    
+    const track = container.querySelector('.stellar-track');
+    if (!track) return;
+    
+    const value = slider.value;
+    const max = slider.max;
+    const percentage = (value / max) * 100;
+    
+    // Update track fill
+    track.style.setProperty('--value-percent', `${percentage}%`);
+    
+    // Update stellar points
+    const existingStars = container.querySelectorAll('.track-star');
+    existingStars.forEach(star => star.remove());
+    
+    const starCount = Math.floor(percentage / 20); // One star per 20%
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'track-star star-active';
+        star.style.left = `${(i + 1) * 20}%`;
+        container.appendChild(star);
+    }
+}
+
+function updateCosmicThumb(slider, cosmicThumb) {
+    const value = slider.value;
+    const max = slider.max;
+    const percentage = (value / max) * 100;
+    
+    cosmicThumb.style.left = `${percentage}%`;
+    cosmicThumb.style.opacity = '1';
+}
+
+function triggerCosmicPreview() {
+    console.log('🌌 Triggering cosmic preview...');
+    
+    // Add ripple effect to preview button
+    const previewBtn = document.getElementById('previewCosmosBtn');
+    if (previewBtn) {
+        const ripple = document.createElement('div');
+        ripple.className = 'cosmic-ripple';
+        previewBtn.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 1000);
+    }
+    
+    // Trigger UI effect (this will be filtered by cosmic-settings.js)
+    if (window.triggerUIEffect) {
+        window.triggerUIEffect('cosmicPortalOpen');
+    }
+    
+    // Add temporary cosmic glow to modal
+    const modal = document.querySelector('.settings-modal');
+    if (modal) {
+        modal.style.boxShadow = '0 0 50px rgba(139, 92, 246, 0.8), 0 0 100px rgba(139, 92, 246, 0.4)';
+        setTimeout(() => {
+            modal.style.boxShadow = '';
+        }, 3000);
+    }
+}
+
+function showCosmicSuccessMessage() {
+    const successMsg = document.getElementById('settingsSavedMsg');
+    if (successMsg) {
+        successMsg.classList.add('show', 'success-visible');
+        
+        setTimeout(() => {
+            successMsg.classList.remove('show', 'success-visible');
+        }, 3000);
+    }
+}
+
+// Add particle effect to buttons
+function addButtonParticleEffect(button) {
+    const particleBurst = button.querySelector('.btn-particle-burst');
+    if (!particleBurst) return;
+    
+    for (let i = 0; i < 6; i++) {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            pointer-events: none;
+            animation: particleExplosion 0.6s ease-out forwards;
+            animation-delay: ${i * 50}ms;
+        `;
+        particleBurst.appendChild(particle);
+        
+        setTimeout(() => {
+            particle.remove();
+        }, 600);
+    }
+}
+
+// Add CSS for particle explosion if not already present
+if (!document.querySelector('#cosmic-particle-styles')) {
+    const style = document.createElement('style');
+    style.id = 'cosmic-particle-styles';
+    style.textContent = `
+        @keyframes particleExplosion {
+            to {
+                transform: translate(
+                    ${Math.random() * 60 - 30}px,
+                    ${Math.random() * 60 - 30}px
+                ) scale(0);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }

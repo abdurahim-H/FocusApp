@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Focus - Test Mode</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/cosmic-settings.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <script>
+        const savedTheme = localStorage.getItem('fu_theme') || 'cosmos';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.body.setAttribute('data-theme', savedTheme);
+    </script>
+    
+    <style>
+        .test-overlay {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            z-index: 10000;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 300px;
+        }
+        .test-button {
+            background: rgba(139, 92, 246, 0.8);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 0;
+            width: 100%;
+        }
+        .test-button:hover {
+            background: rgba(139, 92, 246, 1);
+        }
+    </style>
+</head>
+<body data-theme="cosmos">
+    <div class="test-overlay" id="testOverlay">
+        <h4>🧪 Cosmic Settings Test</h4>
+        <button class="test-button" onclick="window.runCosmicTests()">Run Tests</button>
+        <button class="test-button" onclick="document.getElementById('settingsBtn').click()">Open Settings</button>
+        <button class="test-button" onclick="toggleTestOverlay()">Hide Panel</button>
+        <div id="testConsole" style="margin-top: 10px; font-size: 10px; max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-text">Initializing Universe...</div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+    </div>
+
+    <div id="scene-container"></div>
+
+    <nav class="nav">
+        <button class="nav-btn active" data-mode="home">Home</button>
+        <button class="nav-btn" data-mode="focus">Focus</button>
+        <button class="nav-btn" data-mode="ambient">Ambient</button>
+    </nav>
+
+    <div class="container">
+        <div class="mode active" id="home">
+            <div class="home-content">
+                <h1>Cosmic Focus</h1>
+                <div class="greeting" id="greeting">Welcome to Your Universe!</div>
+                <div class="date-time" id="dateTime"></div>
+            </div>
+        </div>
+
+        <div class="mode" id="focus">
+            <div class="focus-content">
+                <div class="session-info">
+                    <h2 id="sessionType" class="session-type">Focus Time</h2>
+                    <div class="session-progress">
+                        Session <span id="pomodoroCount">1</span> of <span id="pomodoroTotal">4</span>
+                    </div>
+                </div>
+
+                <div class="timer-container">
+                    <div class="timer-display" id="timerDisplay">25:00</div>
+                    <div class="universe-stats">
+                        <div class="stat">Stars: <span id="starsCount">0</span></div>
+                        <div class="stat">Level: <span id="universeLevel">1</span></div>
+                        <div class="stat">Focus: <span id="focusMinutes">0</span>min</div>
+                    </div>
+                </div>
+
+                <div class="timer-controls">
+                    <button class="control-btn" id="startBtn">Start</button>
+                    <button class="control-btn" id="pauseBtn">Pause</button>
+                    <button class="control-btn" id="resetBtn">Reset</button>
+                </div>
+
+                <div class="skip-controls" id="skipControls" style="display: none;">
+                    <button class="control-btn secondary" id="skipBreakBtn">Skip Break</button>
+                    <button class="control-btn secondary" id="skipFocusBtn">Skip Focus</button>
+                </div>
+
+                <div class="breathing-guide" id="breathingGuide">
+                    <div class="breathing-circle"></div>
+                    <div class="breathing-text">Breathe</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mode" id="ambient">
+            <div class="ambient-content">
+                <h2>Ambient Sounds</h2>
+                <div class="sound-controls">
+                    <button class="sound-btn" data-sound="rain">🌧️ Rain</button>
+                    <button class="sound-btn" data-sound="forest">🌲 Forest</button>
+                    <button class="sound-btn" data-sound="ocean">🌊 Ocean</button>
+                    <button class="sound-btn" data-sound="cafe">☕ Cafe</button>
+                    <button class="sound-btn" data-sound="white-noise">📻 White Noise</button>
+                </div>
+                <div class="volume-control">
+                    <label for="volumeSlider">Volume</label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                    <span id="volumeValue">50%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="settings-btn" id="settingsBtn">⚙️</button>
+
+    <div class="settings-modal-overlay" id="settingsModalOverlay">
+        <div class="settings-modal">
+            <button class="close-btn" id="closeSettingsBtn" title="Close">✕</button>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                
+                <!-- Cosmic Preview Section -->
+                <div class="cosmic-preview-section">
+                    <h4>🌌 Universe Preview</h4>
+                    <div class="cosmic-preview-display">
+                        <button class="cosmic-action-btn" id="previewCosmosBtn">
+                            <span class="btn-text">Preview Cosmos</span>
+                            <div class="btn-energy-core"></div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h4>🎨 Theme</h4>
+                    <div class="theme-buttons">
+                        <button class="btn" id="themeLightBtn" data-theme="light">☀️ Light</button>
+                        <button class="btn" id="themeDarkBtn" data-theme="dark">🌙 Dark</button>
+                        <button class="btn" id="themeCosmosBtn" data-theme="cosmos">🌌 Cosmos</button>
+                        <button class="btn btn-primary" id="themeAutoBtn" data-theme="auto">⚙️ Auto</button>
+                    </div>
+                </div>
+                
+                <!-- Focus Intensity -->
+                <div class="settings-section">
+                    <label for="focusLengthRange" class="settings-label">
+                        <span>⚡ Focus Intensity</span>
+                        <span class="settings-value"><span id="focusLengthValue">25</span> min</span>
+                    </label>
+                    <div class="stellar-control-container">
+                        <div class="stellar-track"></div>
+                        <input type="range" min="1" max="60" value="25" id="focusLengthRange" class="stellar-slider range-input">
+                        <div class="cosmic-thumb"></div>
+                    </div>
+                </div>
+                
+                <!-- Cosmic Energy -->
+                <div class="settings-section">
+                    <label for="cosmicEnergyRange" class="settings-label">
+                        <span>🌟 Cosmic Energy</span>
+                        <span class="settings-value"><span id="cosmicEnergyValue">75</span>%</span>
+                    </label>
+                    <div class="stellar-control-container">
+                        <div class="stellar-track"></div>
+                        <input type="range" min="0" max="100" value="75" id="cosmicEnergyRange" class="stellar-slider range-input">
+                        <div class="cosmic-thumb"></div>
+                    </div>
+                </div>
+                
+                <div class="settings-actions">
+                    <div class="action-buttons">
+                        <button class="btn cosmic-action-btn" id="saveSettingsBtn">
+                            <span class="btn-text">Save Settings</span>
+                            <div class="btn-energy-core"></div>
+                        </button>
+                        <button class="btn cosmic-action-btn" id="resetSettingsBtn">
+                            <span class="btn-text">Reset to Default</span>
+                            <div class="btn-energy-core"></div>
+                        </button>
+                    </div>
+                    <div class="settings-saved-message" id="settingsSavedMsg">
+                        ✨ Settings saved to the cosmic database!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+    <script src="js/test-cosmic-settings.js"></script>
+    
+    <script>
+        function toggleTestOverlay() {
+            const overlay = document.getElementById('testOverlay');
+            overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Capture console logs for test panel
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            
+            const testConsole = document.getElementById('testConsole');
+            if (testConsole && args[0] && (args[0].includes('✅') || args[0].includes('❌') || args[0].includes('🧪'))) {
+                const logEntry = document.createElement('div');
+                logEntry.textContent = args.join(' ');
+                logEntry.style.marginBottom = '2px';
+                testConsole.appendChild(logEntry);
+                testConsole.scrollTop = testConsole.scrollHeight;
+            }
+        };
+    </script>
+</body>
+</html>

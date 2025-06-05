@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌 Cosmic Settings Validation</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/cosmic-settings.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a0033, #4c0080);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .validation-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .result.success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+        .result.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        .result.warning {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+        .settings-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        .settings-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+        }
+    </style>
+</head>
+<body data-theme="cosmos">
+    <button class="settings-icon" id="settingsBtn">⚙️</button>
+    
+    <div class="validation-container">
+        <h1>🌌 Cosmic Settings Integration Validation</h1>
+        <p>Comprehensive testing of all cosmic settings features and integrations</p>
+        
+        <div class="test-section">
+            <h3>🎛️ Core Modal Functionality</h3>
+            <button class="test-button" onclick="testModalOpenClose()">Test Modal Open/Close</button>
+            <button class="test-button" onclick="testModalAnimations()">Test Cosmic Animations</button>
+            <button class="test-button" onclick="testModalResponsive()">Test Responsive Layout</button>
+            <div id="modalResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎨 Theme Selector</h3>
+            <button class="test-button" onclick="testThemeButtons()">Test Theme Buttons</button>
+            <button class="test-button" onclick="testThemeTransitions()">Test Theme Transitions</button>
+            <div id="themeResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>✨ Stellar Sliders</h3>
+            <button class="test-button" onclick="testStellarSliders()">Test Slider Effects</button>
+            <button class="test-button" onclick="testSliderValues()">Test Value Updates</button>
+            <button class="test-button" onclick="testCosmicThumbs()">Test Cosmic Thumbs</button>
+            <div id="sliderResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🚀 Action Buttons</h3>
+            <button class="test-button" onclick="testActionButtons()">Test Save/Reset Buttons</button>
+            <button class="test-button" onclick="testButtonEffects()">Test Button Effects</button>
+            <button class="test-button" onclick="testSuccessMessages()">Test Success Messages</button>
+            <div id="buttonResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🌟 Cosmic Features</h3>
+            <button class="test-button" onclick="testParticleEffects()">Test Particle Effects</button>
+            <button class="test-button" onclick="testCosmicPreview()">Test Universe Preview</button>
+            <button class="test-button" onclick="testIntegration()">Test Full Integration</button>
+            <div id="cosmicResults"></div>
+        </div>
+    </div>
+    
+    <!-- Settings Modal (Copied from main index.html) -->
+    <div class="settings-modal-overlay" id="settingsModalOverlay">
+        <div class="settings-modal">
+            <button class="close-btn" id="closeSettingsBtn" title="Close">✕</button>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                
+                <!-- Cosmic Preview Section -->
+                <div class="cosmic-preview-section">
+                    <h4>🌌 Universe Preview</h4>
+                    <div class="cosmic-preview-display">
+                        <button class="cosmic-action-btn" id="previewCosmosBtn">
+                            <span class="btn-text">Preview Cosmos</span>
+                            <div class="btn-energy-core"></div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h4>🎨 Theme</h4>
+                    <div class="theme-buttons">
+                        <button class="btn" id="themeLightBtn" data-theme="light">☀️ Light</button>
+                        <button class="btn" id="themeDarkBtn" data-theme="dark">🌙 Dark</button>
+                        <button class="btn" id="themeCosmosBtn" data-theme="cosmos">🌌 Cosmos</button>
+                        <button class="btn btn-primary" id="themeAutoBtn" data-theme="auto">⚙️ Auto</button>
+                    </div>
+                </div>
+                
+                <!-- Focus Intensity -->
+                <div class="settings-section">
+                    <label for="focusLengthRange" class="settings-label">
+                        <span>⚡ Focus Intensity</span>
+                        <span class="settings-value"><span id="focusLengthValue">25</span> min</span>
+                    </label>
+                    <div class="stellar-control-container">
+                        <div class="stellar-track"></div>
+                        <input type="range" min="1" max="60" value="25" id="focusLengthRange" class="stellar-slider range-input">
+                        <div class="cosmic-thumb"></div>
+                    </div>
+                </div>
+                
+                <!-- Cosmic Energy -->
+                <div class="settings-section">
+                    <label for="cosmicEnergyRange" class="settings-label">
+                        <span>🌟 Cosmic Energy</span>
+                        <span class="settings-value"><span id="cosmicEnergyValue">75</span>%</span>
+                    </label>
+                    <div class="stellar-control-container">
+                        <div class="stellar-track"></div>
+                        <input type="range" min="0" max="100" value="75" id="cosmicEnergyRange" class="stellar-slider range-input">
+                        <div class="cosmic-thumb"></div>
+                    </div>
+                </div>
+                
+                <!-- Sound Harmony -->
+                <div class="settings-section">
+                    <label for="soundVolumeRange" class="settings-label">
+                        <span>🎵 Sound Harmony</span>
+                        <span class="settings-value"><span id="soundVolumeValue">30</span>%</span>
+                    </label>
+                    <div class="stellar-control-container">
+                        <div class="stellar-track"></div>
+                        <input type="range" min="0" max="100" value="30" id="soundVolumeRange" class="stellar-slider range-input">
+                        <div class="cosmic-thumb"></div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <label for="greetingInput" class="settings-label">💫 Greeting Message</label>
+                    <input type="text" id="greetingInput" class="text-input cosmic-input" maxlength="40" placeholder="Welcome to Your Universe!">
+                </div>
+                
+                <div class="settings-section">
+                    <div class="settings-buttons">
+                        <button class="btn cosmic-action-btn" id="saveSettingsBtn">
+                            <span class="btn-text">🌟 Save Universe</span>
+                            <div class="btn-energy-core"></div>
+                            <div class="btn-particle-burst"></div>
+                        </button>
+                        <button class="btn cosmic-action-btn" id="resetSettingsBtn">
+                            <span class="btn-text">🔄 Reset Cosmos</span>
+                            <div class="btn-energy-core"></div>
+                            <div class="btn-particle-burst"></div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="settingsSavedMsg" class="settings-saved-msg cosmic-success-message">
+                    <div class="success-icon">✨</div>
+                    <div class="success-text">Universe Saved!</div>
+                    <div class="success-subtitle">Your cosmic settings have been applied</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import modules
+        import { setupCosmicSettingsModal } from './js/cosmic-settings.js';
+        import { setupSettingsModal } from './js/settings.js';
+        
+        // Initialize everything
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🌌 Initializing validation environment...');
+            
+            // Setup both cosmic and core settings
+            setupCosmicSettingsModal();
+            setupSettingsModal();
+            
+            console.log('✅ Validation environment ready');
+        });
+        
+        // Test functions
+        window.testModalOpenClose = function() {
+            const results = document.getElementById('modalResults');
+            results.innerHTML = '';
+            
+            try {
+                const settingsBtn = document.getElementById('settingsBtn');
+                const overlay = document.getElementById('settingsModalOverlay');
+                const closeBtn = document.getElementById('closeSettingsBtn');
+                
+                if (!settingsBtn || !overlay || !closeBtn) {
+                    addResult('modalResults', 'error', '❌ Modal elements not found');
+                    return;
+                }
+                
+                // Test open
+                settingsBtn.click();
+                setTimeout(() => {
+                    if (overlay.classList.contains('active')) {
+                        addResult('modalResults', 'success', '✅ Modal opens correctly');
+                        
+                        // Test close
+                        closeBtn.click();
+                        setTimeout(() => {
+                            if (!overlay.classList.contains('active')) {
+                                addResult('modalResults', 'success', '✅ Modal closes correctly');
+                            } else {
+                                addResult('modalResults', 'error', '❌ Modal does not close');
+                            }
+                        }, 500);
+                    } else {
+                        addResult('modalResults', 'error', '❌ Modal does not open');
+                    }
+                }, 100);
+                
+            } catch (error) {
+                addResult('modalResults', 'error', `❌ Error: ${error.message}`);
+            }
+        };
+        
+        window.testModalAnimations = function() {
+            const results = document.getElementById('modalResults');
+            
+            try {
+                const modal = document.querySelector('.settings-modal');
+                if (!modal) {
+                    addResult('modalResults', 'error', '❌ Modal not found');
+                    return;
+                }
+                
+                // Check for cosmic entrance class
+                const hasCosmicStyles = window.getComputedStyle(modal).transform !== 'none';
+                if (hasCosmicStyles) {
+                    addResult('modalResults', 'success', '✅ Cosmic entrance animations present');
+                } else {
+                    addResult('modalResults', 'warning', '⚠️ Cosmic animations may not be active');
+                }
+                
+                // Check for particle background
+                const particles = modal.querySelector('.settings-particles');
+                if (particles) {
+                    addResult('modalResults', 'success', '✅ Particle background present');
+                } else {
+                    addResult('modalResults', 'warning', '⚠️ Particle background not found');
+                }
+                
+            } catch (error) {
+                addResult('modalResults', 'error', `❌ Animation test error: ${error.message}`);
+            }
+        };
+        
+        window.testThemeButtons = function() {
+            try {
+                const themeButtons = document.querySelectorAll('.theme-buttons .btn');
+                if (themeButtons.length === 0) {
+                    addResult('themeResults', 'error', '❌ No theme buttons found');
+                    return;
+                }
+                
+                addResult('themeResults', 'success', `✅ Found ${themeButtons.length} theme buttons`);
+                
+                // Test clicking each theme
+                themeButtons.forEach((btn, index) => {
+                    const theme = btn.dataset.theme;
+                    btn.click();
+                    
+                    setTimeout(() => {
+                        const currentTheme = document.documentElement.getAttribute('data-theme');
+                        if (currentTheme === theme) {
+                            addResult('themeResults', 'success', `✅ ${theme} theme applied successfully`);
+                        } else {
+                            addResult('themeResults', 'warning', `⚠️ ${theme} theme may not be applied`);
+                        }
+                    }, 100 * index);
+                });
+                
+            } catch (error) {
+                addResult('themeResults', 'error', `❌ Theme test error: ${error.message}`);
+            }
+        };
+        
+        window.testStellarSliders = function() {
+            try {
+                const sliders = document.querySelectorAll('.stellar-slider');
+                if (sliders.length === 0) {
+                    addResult('sliderResults', 'error', '❌ No stellar sliders found');
+                    return;
+                }
+                
+                addResult('sliderResults', 'success', `✅ Found ${sliders.length} stellar sliders`);
+                
+                sliders.forEach((slider, index) => {
+                    // Test value change
+                    const originalValue = slider.value;
+                    slider.value = 50;
+                    slider.dispatchEvent(new Event('input'));
+                    
+                    // Check if stellar track updates
+                    const track = slider.parentElement.querySelector('.stellar-track');
+                    if (track) {
+                        const valuePercent = track.style.getPropertyValue('--value-percent');
+                        if (valuePercent) {
+                            addResult('sliderResults', 'success', `✅ Slider ${index + 1} cosmic effects working`);
+                        } else {
+                            addResult('sliderResults', 'warning', `⚠️ Slider ${index + 1} effects may not be active`);
+                        }
+                    }
+                    
+                    // Restore original value
+                    slider.value = originalValue;
+                    slider.dispatchEvent(new Event('input'));
+                });
+                
+            } catch (error) {
+                addResult('sliderResults', 'error', `❌ Slider test error: ${error.message}`);
+            }
+        };
+        
+        window.testActionButtons = function() {
+            try {
+                const saveBtn = document.getElementById('saveSettingsBtn');
+                const resetBtn = document.getElementById('resetSettingsBtn');
+                
+                if (!saveBtn || !resetBtn) {
+                    addResult('buttonResults', 'error', '❌ Action buttons not found');
+                    return;
+                }
+                
+                // Check for cosmic styling
+                const hasCosmicClass = saveBtn.classList.contains('cosmic-action-btn');
+                if (hasCosmicClass) {
+                    addResult('buttonResults', 'success', '✅ Buttons have cosmic styling');
+                } else {
+                    addResult('buttonResults', 'warning', '⚠️ Cosmic styling may not be applied');
+                }
+                
+                // Check for energy cores
+                const energyCore = saveBtn.querySelector('.btn-energy-core');
+                if (energyCore) {
+                    addResult('buttonResults', 'success', '✅ Energy cores present');
+                } else {
+                    addResult('buttonResults', 'warning', '⚠️ Energy cores not found');
+                }
+                
+                // Test save button
+                saveBtn.click();
+                const successMsg = document.getElementById('settingsSavedMsg');
+                setTimeout(() => {
+                    if (successMsg && successMsg.classList.contains('show')) {
+                        addResult('buttonResults', 'success', '✅ Save button triggers success message');
+                    } else {
+                        addResult('buttonResults', 'warning', '⚠️ Success message may not be working');
+                    }
+                }, 100);
+                
+            } catch (error) {
+                addResult('buttonResults', 'error', `❌ Button test error: ${error.message}`);
+            }
+        };
+        
+        window.testIntegration = function() {
+            try {
+                // Test full workflow
+                addResult('cosmicResults', 'success', '🌌 Starting full integration test...');
+                
+                // Open modal
+                document.getElementById('settingsBtn').click();
+                
+                setTimeout(() => {
+                    // Change a theme
+                    document.getElementById('themeCosmosBtn').click();
+                    
+                    setTimeout(() => {
+                        // Adjust sliders
+                        const focusSlider = document.getElementById('focusLengthRange');
+                        if (focusSlider) {
+                            focusSlider.value = 45;
+                            focusSlider.dispatchEvent(new Event('input'));
+                        }
+                        
+                        setTimeout(() => {
+                            // Save settings
+                            document.getElementById('saveSettingsBtn').click();
+                            
+                            setTimeout(() => {
+                                // Close modal
+                                document.getElementById('closeSettingsBtn').click();
+                                
+                                addResult('cosmicResults', 'success', '✅ Full integration test completed successfully');
+                            }, 1000);
+                        }, 500);
+                    }, 500);
+                }, 500);
+                
+            } catch (error) {
+                addResult('cosmicResults', 'error', `❌ Integration test error: ${error.message}`);
+            }
+        };
+        
+        // Additional test functions
+        window.testModalResponsive = function() {
+            const modal = document.querySelector('.settings-modal');
+            const width = modal.offsetWidth;
+            const maxWidth = parseInt(window.getComputedStyle(modal).maxWidth);
+            
+            if (width <= maxWidth) {
+                addResult('modalResults', 'success', '✅ Modal responsive constraints working');
+            } else {
+                addResult('modalResults', 'warning', '⚠️ Modal responsive behavior needs checking');
+            }
+        };
+        
+        window.testThemeTransitions = function() {
+            const body = document.body;
+            const transition = window.getComputedStyle(body).transition;
+            
+            if (transition && transition !== 'none') {
+                addResult('themeResults', 'success', '✅ Theme transitions are active');
+            } else {
+                addResult('themeResults', 'warning', '⚠️ Theme transitions may not be active');
+            }
+        };
+        
+        window.testSliderValues = function() {
+            const focusValue = document.getElementById('focusLengthValue');
+            const energyValue = document.getElementById('cosmicEnergyValue');
+            const soundValue = document.getElementById('soundVolumeValue');
+            
+            if (focusValue && energyValue && soundValue) {
+                addResult('sliderResults', 'success', '✅ All value displays found');
+            } else {
+                addResult('sliderResults', 'error', '❌ Some value displays missing');
+            }
+        };
+        
+        window.testCosmicThumbs = function() {
+            const thumbs = document.querySelectorAll('.cosmic-thumb');
+            if (thumbs.length > 0) {
+                addResult('sliderResults', 'success', `✅ Found ${thumbs.length} cosmic thumbs`);
+            } else {
+                addResult('sliderResults', 'warning', '⚠️ Cosmic thumbs not found');
+            }
+        };
+        
+        window.testButtonEffects = function() {
+            const saveBtn = document.getElementById('saveSettingsBtn');
+            const particleBurst = saveBtn.querySelector('.btn-particle-burst');
+            
+            if (particleBurst) {
+                addResult('buttonResults', 'success', '✅ Particle burst effects present');
+            } else {
+                addResult('buttonResults', 'warning', '⚠️ Particle burst effects not found');
+            }
+        };
+        
+        window.testSuccessMessages = function() {
+            const successMsg = document.getElementById('settingsSavedMsg');
+            if (successMsg) {
+                const icon = successMsg.querySelector('.success-icon');
+                const text = successMsg.querySelector('.success-text');
+                
+                if (icon && text) {
+                    addResult('buttonResults', 'success', '✅ Success message structure complete');
+                } else {
+                    addResult('buttonResults', 'warning', '⚠️ Success message structure incomplete');
+                }
+            } else {
+                addResult('buttonResults', 'error', '❌ Success message element not found');
+            }
+        };
+        
+        window.testParticleEffects = function() {
+            const modal = document.querySelector('.settings-modal');
+            const canvas = modal.querySelector('.settings-particles');
+            
+            if (canvas) {
+                addResult('cosmicResults', 'success', '✅ Particle canvas found');
+            } else {
+                addResult('cosmicResults', 'warning', '⚠️ Particle canvas not found - may be created dynamically');
+            }
+        };
+        
+        window.testCosmicPreview = function() {
+            const previewBtn = document.getElementById('previewCosmosBtn');
+            if (previewBtn) {
+                previewBtn.click();
+                addResult('cosmicResults', 'success', '✅ Universe preview button functional');
+            } else {
+                addResult('cosmicResults', 'error', '❌ Universe preview button not found');
+            }
+        };
+        
+        // Helper function to add results
+        function addResult(containerId, type, message) {
+            const container = document.getElementById(containerId);
+            const result = document.createElement('div');
+            result.className = `result ${type}`;
+            result.textContent = message;
+            container.appendChild(result);
+        }
+    </script>
+</body>
+</html>

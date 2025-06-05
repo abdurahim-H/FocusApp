@@ -32,10 +32,17 @@ async function loadModules() {
     }
     
     try {
-        modules.settings = await import('./settings.js');
-        console.log('✅ settings loaded');
+        modules.settings = await import('./cosmic-settings.js');
+        console.log('✅ cosmic-settings loaded');
     } catch (error) {
-        console.error('❌ Failed to load settings:', error);
+        console.error('❌ Failed to load cosmic-settings:', error);
+    }
+    
+    try {
+        modules.settingsCore = await import('./settings.js');
+        console.log('✅ settings-core loaded');
+    } catch (error) {
+        console.error('❌ Failed to load settings-core:', error);
     }
     
     try {
@@ -149,28 +156,36 @@ export async function initApp() {
         }
         
         console.log('🚀 Setting up settings...');
-        if (loadedModules.settings?.setupSettingsModal) {
-            loadedModules.settings.setupSettingsModal();
-            loadedModules.settings.setupSettingsControls();
-            console.log('✅ Settings setup complete');
+        if (loadedModules.settings?.setupCosmicSettingsModal) {
+            loadedModules.settings.setupCosmicSettingsModal();
+            console.log('✅ Cosmic Settings Modal setup complete');
         }
         
-        // Load saved settings including theme
+        if (loadedModules.settings?.setupSettingsControls) {
+            loadedModules.settings.setupSettingsControls();
+            console.log('✅ Cosmic Settings Controls setup complete');
+        }
+        
+        // Skip core settings modal setup to avoid conflicts with cosmic settings
+        // if (loadedModules.settingsCore?.setupSettingsModal) {
+        //     loadedModules.settingsCore.setupSettingsModal();
+        //     console.log('✅ Core Settings Modal setup complete');
+        // }
+        
+        if (loadedModules.settingsCore?.setupSettingsControls) {
+            loadedModules.settingsCore.setupSettingsControls();
+            console.log('✅ Core Settings Controls setup complete');
+        }
+        
+        // Load saved settings including theme - prioritize cosmic settings
         console.log('🚀 Loading settings...');
         if (loadedModules.settings?.loadSettings) {
             loadedModules.settings.loadSettings();
-            console.log('✅ Settings loaded');
+            console.log('✅ Cosmic Settings loaded');
+        } else if (loadedModules.settingsCore?.loadSettings) {
+            loadedModules.settingsCore.loadSettings();
+            console.log('✅ Core Settings loaded');
         }
-        
-        // Add global theme testing function for debugging
-        window.testThemeSwitch = function(theme) {
-            console.log('🎨 Global theme test:', theme);
-            import('./settings.js').then(({ setTheme }) => {
-                setTheme(theme);
-            });
-        };
-        
-        console.log('🎨 Theme testing: Use testThemeSwitch("light"|"dark"|"auto") in console');
         
         // Initialize UI effects system
         if (loadedModules.uiEffects?.initUIEffects) {
@@ -200,6 +215,11 @@ export async function initApp() {
             console.log('✅ Timer display updated');
         }
 
+        if (loadedModules.timer?.updateSessionDisplay) {
+            loadedModules.timer.updateSessionDisplay();
+            console.log('✅ Session display updated');
+        }
+
         // Make functions globally accessible for HTML onclick handlers
         if (loadedModules.tasks?.toggleTask) {
             window.toggleTask = loadedModules.tasks.toggleTask;
@@ -224,28 +244,11 @@ function setupTimerControls(loadedModules) {
         document.getElementById('startBtn').addEventListener('click', loadedModules.timer.startTimer);
         document.getElementById('pauseBtn').addEventListener('click', loadedModules.timer.pauseTimer);
         document.getElementById('resetBtn').addEventListener('click', loadedModules.timer.resetTimer);
-        document.getElementById('skipBtn').addEventListener('click', loadedModules.timer.skipBreak);
+        document.getElementById('skipBreakBtn').addEventListener('click', loadedModules.timer.skipBreak);
+        document.getElementById('skipFocusBtn').addEventListener('click', loadedModules.timer.skipFocus);
         console.log('✅ Timer controls setup complete');
     } else {
         console.error('❌ Timer module not available for controls setup');
-    }
-    
-    // Theme debug button (temporary)
-    const themeDebugBtn = document.getElementById('themeDebugBtn');
-    if (themeDebugBtn) {
-        let currentDebugTheme = 0;
-        const themes = ['auto', 'light', 'dark'];
-        
-        themeDebugBtn.addEventListener('click', () => {
-            currentDebugTheme = (currentDebugTheme + 1) % themes.length;
-            const theme = themes[currentDebugTheme];
-            console.log('🎨 Debug: Switching to theme:', theme);
-            
-            // Import and use setTheme function
-            import('./settings.js').then(({ setTheme }) => {
-                setTheme(theme);
-            });
-        });
     }
 }
 

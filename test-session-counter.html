@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Counter Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .session-progress {
+            font-size: 1.5em;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(6, 214, 160, 0.2);
+            border-radius: 5px;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5855eb;
+        }
+        .state-display {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pomodoro Session Counter Test</h1>
+    
+    <div class="test-section">
+        <h2>Current Session Progress</h2>
+        <div class="session-progress">
+            Session <span id="pomodoroCount">1</span> of <span id="pomodoroTotal">4</span>
+        </div>
+        
+        <div class="state-display">
+            <strong>Current State:</strong>
+            <div>Mode: <span id="currentMode">focus</span></div>
+            <div>Is Break: <span id="isBreak">false</span></div>
+            <div>Pomodoro Count: <span id="pomodoroCountState">0</span></div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="simulateCompleteSession()">Complete Current Session</button>
+        <button onclick="resetSession()">Reset to Start</button>
+        <button onclick="showCurrentState()">Show State</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Expected Behavior</h2>
+        <ul>
+            <li><strong>Initial:</strong> "Session 1 of 4" (ready to start first focus)</li>
+            <li><strong>After Focus 1:</strong> "Session 1 of 4" (on break after completing session 1)</li>
+            <li><strong>After Break 1:</strong> "Session 2 of 4" (ready to start second focus)</li>
+            <li><strong>After Focus 2:</strong> "Session 2 of 4" (on break after completing session 2)</li>
+            <li><strong>After Break 2:</strong> "Session 3 of 4" (ready to start third focus)</li>
+            <li><strong>After Focus 3:</strong> "Session 3 of 4" (on break after completing session 3)</li>
+            <li><strong>After Break 3:</strong> "Session 4 of 4" (ready to start fourth focus)</li>
+            <li><strong>After Focus 4:</strong> "Session 4 of 4" (on LONG break - 15 min instead of 5 min)</li>
+            <li><strong>After Long Break:</strong> "Session 1 of 4" (cycle starts over)</li>
+        </ul>
+    </div>
+
+    <script type="module">
+        // Import the state and timer functions
+        import { state } from './js/state.js';
+        import { updateSessionDisplay } from './js/timer.js';
+        
+        // Make functions globally accessible
+        window.state = state;
+        window.updateSessionDisplay = updateSessionDisplay;
+        
+        window.simulateCompleteSession = function() {
+            if (state.timer.isBreak) {
+                // Complete break, start new focus session
+                state.timer.isBreak = false;
+                state.currentMode = 'focus';
+                console.log('Break completed, starting new focus session');
+            } else {
+                // Complete focus session
+                state.timer.pomodoroCount++;
+                
+                if (state.timer.pomodoroCount % 4 === 0) {
+                    // Long break after 4 pomodoros
+                    console.log('Pomodoro cycle complete! Starting long break');
+                    state.timer.isBreak = true;
+                    state.currentMode = 'break';
+                    
+                    // Reset cycle after long break is completed
+                    if (state.timer.pomodoroCount >= 4) {
+                        console.log('Full cycle completed, will reset after long break');
+                    }
+                } else {
+                    // Short break
+                    console.log('Focus session completed, starting short break');
+                    state.timer.isBreak = true;
+                    state.currentMode = 'break';
+                }
+            }
+            
+            updateSessionDisplay();
+            showCurrentState();
+        };
+        
+        window.resetSession = function() {
+            state.timer.pomodoroCount = 0;
+            state.timer.isBreak = false;
+            state.currentMode = 'focus';
+            console.log('Session reset to beginning');
+            updateSessionDisplay();
+            showCurrentState();
+        };
+        
+        window.showCurrentState = function() {
+            document.getElementById('currentMode').textContent = state.currentMode;
+            document.getElementById('isBreak').textContent = state.timer.isBreak;
+            document.getElementById('pomodoroCountState').textContent = state.timer.pomodoroCount;
+            
+            console.log('Current state:', {
+                currentMode: state.currentMode,
+                isBreak: state.timer.isBreak,
+                pomodoroCount: state.timer.pomodoroCount
+            });
+        };
+        
+        // Initialize display
+        updateSessionDisplay();
+        showCurrentState();
+        
+        console.log('Session counter test loaded. Use the buttons to test functionality.');
+    </script>
+</body>
+</html>

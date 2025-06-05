@@ -8,6 +8,20 @@ let settingsAnimationFrame = null;
 
 function triggerUIEffect(effectType) {
     console.log(`🌟 Cosmic Effect: ${effectType}`);
+    // Prevent unwanted background animations when opening settings
+    // Only allow intended effects for Universe Preview, Theme, Focus Duration, and Ambient Sound Volume
+    const allowedEffects = [
+        'cosmicPortalOpen',
+        'cosmicPortalClose', 
+        'themeTransition',
+        'focusPreview',
+        'soundPreview'
+    ];
+    
+    if (!allowedEffects.includes(effectType)) {
+        console.log(`🚫 Blocking unwanted effect: ${effectType}`);
+        return;
+    }
 }
 
 export function initCosmicSettings() {
@@ -25,16 +39,35 @@ export function initCosmicSettings() {
 
 function createParticleBackground() {
     const settingsModal = document.querySelector('.settings-modal');
-    if (!settingsModal) return;
+    if (!settingsModal) {
+        console.warn('🌌 Settings modal not found for particle background');
+        return;
+    }
     
-    // Create particle canvas
+    // Remove existing particle canvas if present
+    const existingCanvas = settingsModal.querySelector('.settings-particles');
+    if (existingCanvas) {
+        existingCanvas.remove();
+    }
+    
+    // Create particle canvas with responsive dimensions
     const particleCanvas = document.createElement('canvas');
     particleCanvas.className = 'settings-particles';
-    particleCanvas.width = 800;
-    particleCanvas.height = 600;
+    
+    // Set responsive canvas size
+    const modalWidth = settingsModal.offsetWidth || 600;
+    const modalHeight = settingsModal.offsetHeight || 400;
+    particleCanvas.width = Math.min(modalWidth, 800);
+    particleCanvas.height = Math.min(modalHeight, 600);
+    
     settingsModal.appendChild(particleCanvas);
     
     const ctx = particleCanvas.getContext('2d');
+    if (!ctx) {
+        console.error('🌌 Could not get canvas context for particles');
+        return;
+    }
+    
     const particles = [];
     
     // Initialize particles
@@ -52,6 +85,11 @@ function createParticleBackground() {
     
     // Animate particles
     function animateParticles() {
+        if (!ctx || !particleCanvas) {
+            console.warn('🌌 Canvas context lost, stopping particle animation');
+            return;
+        }
+        
         ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
         
         particles.forEach(particle => {
@@ -90,6 +128,7 @@ function createParticleBackground() {
         settingsAnimationFrame = requestAnimationFrame(animateParticles);
     }
     
+    console.log('🌌 Starting particle animation with', particles.length, 'particles');
     animateParticles();
 }
 
@@ -106,6 +145,9 @@ function enhanceSettingsControls() {
     
     // Transform action buttons into cosmic controls
     enhanceActionButtons();
+    
+    // Add cosmic sound preview
+    addCosmicSoundPreview();
 }
 
 function enhanceThemeButtons() {
@@ -113,35 +155,71 @@ function enhanceThemeButtons() {
     if (!themeSection) return;
     
     const themeButtons = themeSection.querySelector('.theme-buttons');
-    themeButtons.className = 'cosmic-theme-orbs';
+    themeButtons.className = 'cosmic-theme-selector';
     
-    const buttons = themeButtons.querySelectorAll('.btn');
-    buttons.forEach((btn, index) => {
-        btn.className = 'cosmic-orb';
+    // Create a more elegant theme selector
+    const themeContainer = document.createElement('div');
+    themeContainer.className = 'theme-selector-container';
+    themeContainer.innerHTML = `
+        <div class="theme-selector-track"></div>
+        <div class="theme-selector-glow"></div>
+    `;
+    
+    themeButtons.innerHTML = '';
+    themeButtons.appendChild(themeContainer);
+    
+    const themes = [
+        { id: 'light', label: 'Light', icon: '☀️', color: '#FFD700' },
+        { id: 'dark', label: 'Dark', icon: '🌙', color: '#4B0082' },
+        { id: 'cosmos', label: 'Cosmos', icon: '🌌', color: '#8B5CF6' },
+        { id: 'auto', label: 'Auto', icon: '✨', color: '#9333EA' }
+    ];
+    
+    themes.forEach((theme, index) => {
+        const themeOption = document.createElement('button');
+        themeOption.className = 'theme-option';
+        themeOption.setAttribute('data-theme', theme.id);
+        themeOption.innerHTML = `
+            <span class="theme-icon">${theme.icon}</span>
+            <span class="theme-label">${theme.label}</span>
+        `;
+        themeOption.style.setProperty('--theme-color', theme.color);
         
-        // Add cosmic data attributes
-        const themes = ['light', 'dark', 'auto'];
-        btn.setAttribute('data-cosmic-theme', themes[index]);
-        
-        // Add constellation pattern
-        const constellation = document.createElement('div');
-        constellation.className = 'orb-constellation';
-        btn.appendChild(constellation);
-        
-        // Add energy rings
-        const energyRings = document.createElement('div');
-        energyRings.className = 'orb-energy-rings';
-        btn.appendChild(energyRings);
-        
-        // Add hover effects
-        btn.addEventListener('mouseenter', () => {
-            btn.classList.add('orb-activated');
-            triggerCosmicRipple(btn);
+        themeOption.addEventListener('click', () => {
+            setTheme(theme.id);
+            updateThemeSelector(theme.id);
         });
         
-        btn.addEventListener('mouseleave', () => {
-            btn.classList.remove('orb-activated');
-        });
+        themeContainer.appendChild(themeOption);
+    });
+    
+    // Initialize with current theme
+    const currentTheme = document.body.getAttribute('data-theme') || 'auto';
+    updateThemeSelector(currentTheme);
+}
+
+function updateThemeSelector(activeTheme) {
+    const options = document.querySelectorAll('.theme-option');
+    const glow = document.querySelector('.theme-selector-glow');
+    
+    options.forEach(option => {
+        if (option.getAttribute('data-theme') === activeTheme) {
+            option.classList.add('active');
+            
+            // Move glow to active option
+            if (glow) {
+                const rect = option.getBoundingClientRect();
+                const containerRect = option.parentElement.getBoundingClientRect();
+                const left = rect.left - containerRect.left;
+                const width = rect.width;
+                
+                glow.style.left = `${left}px`;
+                glow.style.width = `${width}px`;
+                glow.style.backgroundColor = option.style.getPropertyValue('--theme-color');
+            }
+        } else {
+            option.classList.remove('active');
+        }
     });
 }
 
@@ -173,10 +251,26 @@ function enhanceSliderControls() {
         
         slider.className = 'stellar-slider';
         
+        // Set initial value percentage for CSS
+        const percentage = (slider.value / slider.max) * 100;
+        slider.style.setProperty('--value-percent', `${percentage}%`);
+        
         // Add real-time cosmic feedback
         slider.addEventListener('input', () => {
+            const newPercentage = (slider.value / slider.max) * 100;
+            slider.style.setProperty('--value-percent', `${newPercentage}%`);
             updateStellarVisualization(slider);
-            triggerCosmicPulse(cosmicThumb);
+            
+            // Smooth thumb animation
+            if (cosmicThumb) {
+                cosmicThumb.style.opacity = '1';
+                cosmicThumb.style.left = `${newPercentage}%`;
+                
+                clearTimeout(cosmicThumb.fadeTimeout);
+                cosmicThumb.fadeTimeout = setTimeout(() => {
+                    cosmicThumb.style.opacity = '0';
+                }, 300);
+            }
         });
     });
 }
@@ -227,6 +321,71 @@ function enhanceActionButtons() {
             <div class="btn-particle-burst"></div>
         `;
     }
+}
+
+// Add cosmic sound preview with visualization
+function addCosmicSoundPreview() {
+    const soundSection = document.querySelector('#soundVolumeRange')?.closest('.settings-section');
+    if (!soundSection) return;
+    
+    // Create cosmic sound visualizer
+    const visualizer = document.createElement('div');
+    visualizer.className = 'cosmic-sound-visualizer';
+    visualizer.innerHTML = `
+        <canvas class="sound-waves" width="300" height="60"></canvas>
+        <div class="sound-orbs">
+            <div class="sound-orb" data-frequency="low"></div>
+            <div class="sound-orb" data-frequency="mid"></div>
+            <div class="sound-orb" data-frequency="high"></div>
+        </div>
+    `;
+    
+    soundSection.appendChild(visualizer);
+    
+    // Initialize sound wave animation
+    const canvas = visualizer.querySelector('.sound-waves');
+    const ctx = canvas.getContext('2d');
+    let waveAnimation;
+    
+    function drawSoundWaves(volume) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const amplitude = (volume / 100) * 20;
+        const frequency = 0.02;
+        
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(139, 92, 246, 0.8)`;
+        ctx.lineWidth = 2;
+        
+        for (let x = 0; x < canvas.width; x++) {
+            const y = canvas.height / 2 + Math.sin(x * frequency + Date.now() * 0.002) * amplitude;
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        
+        ctx.stroke();
+        
+        // Update sound orbs
+        const orbs = visualizer.querySelectorAll('.sound-orb');
+        orbs.forEach((orb, i) => {
+            const scale = 1 + (volume / 100) * 0.5 * Math.sin(Date.now() * 0.001 + i);
+            orb.style.transform = `scale(${scale})`;
+            orb.style.opacity = 0.3 + (volume / 100) * 0.7;
+        });
+        
+        waveAnimation = requestAnimationFrame(() => drawSoundWaves(volume));
+    }
+    
+    // Start animation when hovering over sound section
+    soundSection.addEventListener('mouseenter', () => {
+        const volume = parseInt(document.getElementById('soundVolumeRange').value);
+        drawSoundWaves(volume);
+    });
+    
+    soundSection.addEventListener('mouseleave', () => {
+        cancelAnimationFrame(waveAnimation);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
 }
 
 // Setup cosmic preview that shows how settings affect the universe
@@ -475,9 +634,6 @@ export function setupCosmicSettingsModal() {
         const newSettingsBtn = settingsBtn.cloneNode(true);
         settingsBtn.parentNode.replaceChild(newSettingsBtn, settingsBtn);
         
-        // Initialize cosmic enhancements
-        initCosmicSettings();
-        
         // Open modal with spectacular entrance
         newSettingsBtn.addEventListener('click', function(event) {
             console.log('🌌 Settings button clicked!');
@@ -488,13 +644,16 @@ export function setupCosmicSettingsModal() {
             const modal = settingsOverlay.querySelector('.settings-modal');
             if (modal) {
                 modal.classList.add('cosmic-entrance-active');
+                
+                // Initialize cosmic enhancements after modal is visible
+                setTimeout(() => {
+                    initCosmicSettings();
+                    updatePreviewStats();
+                }, 50);
             }
             
             // Trigger cosmic opening effect
             triggerUIEffect('cosmicPortalOpen');
-            
-            // Update preview stats
-            setTimeout(updatePreviewStats, 100);
         });
         
         console.log('🌌 Click event listener added to settings button');
@@ -646,15 +805,28 @@ export function setupSettingsControls() {
         themeBtns: {
             light: document.getElementById('themeLightBtn'),
             dark: document.getElementById('themeDarkBtn'),
+            cosmos: document.getElementById('themeCosmosBtn'),
             auto: document.getElementById('themeAutoBtn')
         }
     };
     
-    // Enhanced focus range with cosmic effects
+    // Enhanced focus range with cosmic effects and REAL-TIME UPDATE FIX
     if (elements.focusRange && elements.focusValue) {
         elements.focusRange.addEventListener('input', () => {
-            elements.focusValue.textContent = elements.focusRange.value;
+            const newValue = elements.focusRange.value;
+            elements.focusValue.textContent = newValue;
             updateStellarVisualization(elements.focusRange);
+            
+            // CRITICAL FIX: Update timer display in real-time when not running
+            if (!state.timer.isRunning && !state.timer.isBreak) {
+                state.timer.minutes = parseInt(newValue);
+                state.timer.seconds = 0;
+                updateTimerDisplay();
+                console.log(`Timer display updated to: ${newValue}:00`);
+            }
+            
+            // Update the state for future sessions
+            state.timer.settings.focusDuration = parseInt(newValue);
         });
     }
     
@@ -676,7 +848,14 @@ export function setupSettingsControls() {
             const greetingText = elements.greetingInput.value || 'Welcome to Your Universe!';
             const greetingElement = document.getElementById('greeting');
             if (greetingElement) {
-                greetingElement.textContent = greetingText;
+                // Holographic text update effect
+                greetingElement.style.opacity = '0.5';
+                greetingElement.style.filter = 'blur(2px)';
+                setTimeout(() => {
+                    greetingElement.textContent = greetingText;
+                    greetingElement.style.opacity = '1';
+                    greetingElement.style.filter = 'blur(0)';
+                }, 150);
             }
             
             const floatingLetters = document.querySelector('.floating-letters');
@@ -690,8 +869,8 @@ export function setupSettingsControls() {
     Object.entries(elements.themeBtns).forEach(([theme, btn]) => {
         if (btn) {
             btn.addEventListener('click', () => {
-                triggerCosmicRipple(btn);
                 setTheme(theme);
+                // Don't trigger extra transition effects
             });
         }
     });
@@ -701,29 +880,196 @@ export function setupSettingsControls() {
         elements.saveBtn.addEventListener('click', saveCosmicSettings);
     }
     
-    // Enhanced reset button
+    // Enhanced reset button with confirmation portal
     if (elements.resetBtn) {
         elements.resetBtn.addEventListener('click', () => {
-            triggerUIEffect('cosmicReset');
-            // Reset logic here
+            // Create cosmic confirmation portal
+            createCosmicConfirmation('Reset all settings to default?', () => {
+                // Reset logic
+                setTheme('auto');
+                elements.focusRange.value = 25;
+                elements.focusValue.textContent = '25';
+                elements.soundRange.value = 30;
+                elements.soundValue.textContent = '30';
+                elements.greetingInput.value = '';
+                document.getElementById('greeting').textContent = 'Welcome to Your Universe!';
+                
+                // Clear localStorage
+                localStorage.removeItem('fu_theme');
+                localStorage.removeItem('fu_focusLength');
+                localStorage.removeItem('fu_soundVolume');
+                localStorage.removeItem('fu_greeting');
+                
+                // Reset timer settings
+                state.timer.settings.focusDuration = 25;
+                if (!state.timer.isRunning && !state.timer.isBreak) {
+                    state.timer.minutes = 25;
+                    state.timer.seconds = 0;
+                    updateTimerDisplay();
+                }
+                
+                // Trigger cosmic reset effect
+                triggerCosmicResetEffect();
+            });
         });
     }
 }
 
-// Theme setting function (from original)
-function setTheme(theme) {
-    document.body.setAttribute('data-theme', theme);
+// New cosmic functions
+function triggerCosmicThemeTransition(theme) {
+    const body = document.body;
+    const overlay = document.createElement('div');
+    overlay.className = 'cosmic-theme-transition';
+    overlay.style.background = getThemeTransitionGradient(theme);
+    body.appendChild(overlay);
     
-    // Update theme button states with cosmic effects
-    const buttons = document.querySelectorAll('.cosmic-orb');
-    buttons.forEach(btn => {
-        btn.classList.remove('orb-active');
-        if (btn.getAttribute('data-cosmic-theme') === theme) {
-            btn.classList.add('orb-active');
-            triggerCosmicPulse(btn);
-        }
+    setTimeout(() => {
+        overlay.classList.add('active');
+    }, 10);
+    
+    setTimeout(() => {
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.remove(), 500);
+    }, 1000);
+}
+
+function getThemeTransitionGradient(theme) {
+    const gradients = {
+        light: 'radial-gradient(circle, rgba(255,220,100,0.8) 0%, rgba(255,255,255,0.9) 100%)',
+        dark: 'radial-gradient(circle, rgba(20,10,40,0.8) 0%, rgba(0,0,0,0.9) 100%)',
+        cosmos: 'radial-gradient(circle, rgba(139,92,246,0.8) 0%, rgba(11,20,38,0.9) 100%)',
+        auto: 'radial-gradient(circle, rgba(100,50,200,0.8) 0%, rgba(50,25,100,0.9) 100%)'
+    };
+    return gradients[theme] || gradients.auto;
+}
+
+function createCosmicConfirmation(message, onConfirm) {
+    const portal = document.createElement('div');
+    portal.className = 'cosmic-confirmation-portal';
+    portal.innerHTML = `
+        <div class="confirmation-vortex"></div>
+        <div class="confirmation-content">
+            <div class="confirmation-icon">⚠️</div>
+            <div class="confirmation-message">${message}</div>
+            <div class="confirmation-buttons">
+                <button class="cosmic-confirm-btn">Confirm</button>
+                <button class="cosmic-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(portal);
+    
+    // Animate entrance
+    setTimeout(() => portal.classList.add('active'), 10);
+    
+    // Button handlers
+    portal.querySelector('.cosmic-confirm-btn').addEventListener('click', () => {
+        onConfirm();
+        closePortal();
     });
     
-    // Trigger cosmic theme change effect
-    triggerUIEffect('cosmicThemeChange');
+    portal.querySelector('.cosmic-cancel-btn').addEventListener('click', closePortal);
+    
+    function closePortal() {
+        portal.classList.remove('active');
+        setTimeout(() => portal.remove(), 500);
+    }
+}
+
+function triggerCosmicResetEffect() {
+    // Create particle explosion
+    const explosion = document.createElement('div');
+    explosion.className = 'cosmic-reset-explosion';
+    
+    for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'reset-particle';
+        particle.style.setProperty('--angle', `${(360 / 20) * i}deg`);
+        particle.style.setProperty('--delay', `${Math.random() * 0.3}s`);
+        explosion.appendChild(particle);
+    }
+    
+    document.body.appendChild(explosion);
+    
+    setTimeout(() => {
+        explosion.classList.add('active');
+    }, 10);
+    
+    setTimeout(() => {
+        explosion.remove();
+    }, 2000);
+}
+
+// Theme setting function (from original) - SMOOTH TRANSITION FIX
+function setTheme(theme) {
+    // Add transition class for smooth change
+    document.body.classList.add('theme-transitioning');
+    
+    // Set theme on both body and document element
+    document.body.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    
+    // Remove transition class after animation
+    setTimeout(() => {
+        document.body.classList.remove('theme-transitioning');
+    }, 300);
+    
+    // Update theme button states with cosmic effects
+    updateThemeSelector(theme);
+    
+    // Save theme to localStorage
+    localStorage.setItem('fu_theme', theme);
+    
+    // Log for debugging
+    console.log(`Theme changed to: ${theme}`);
+}
+
+// Load settings function update
+export function loadSettings() {
+    const theme = localStorage.getItem('fu_theme') || 'auto';
+    const focusLength = localStorage.getItem('fu_focusLength') || '25';
+    const soundVolume = localStorage.getItem('fu_soundVolume') || '30';
+    const greeting = localStorage.getItem('fu_greeting') || '';
+    
+    console.log('Loading settings:', { theme, focusLength, soundVolume, greeting });
+    
+    // Always set theme, even if it's the default
+    setTheme(theme);
+    
+    const focusRange = document.getElementById('focusLengthRange');
+    const focusValue = document.getElementById('focusLengthValue');
+    if (focusRange && focusValue) {
+        focusRange.value = focusLength;
+        focusValue.textContent = focusLength;
+        
+        // CRITICAL: Update timer display immediately on load
+        const loadedFocusDuration = parseInt(focusLength);
+        if (loadedFocusDuration && loadedFocusDuration > 0) {
+            state.timer.settings.focusDuration = loadedFocusDuration;
+            if (!state.timer.isRunning && !state.timer.isBreak) {
+                state.timer.minutes = loadedFocusDuration;
+                state.timer.seconds = 0;
+                updateTimerDisplay();
+                console.log(`Timer initialized to: ${loadedFocusDuration}:00`);
+            }
+        }
+    }
+    
+    const soundRange = document.getElementById('soundVolumeRange');
+    const soundValue = document.getElementById('soundVolumeValue');
+    if (soundRange && soundValue) {
+        soundRange.value = soundVolume;
+        soundValue.textContent = soundVolume;
+    }
+    
+    const greetingInput = document.getElementById('greetingInput');
+    if (greetingInput) {
+        greetingInput.value = greeting;
+        document.getElementById('greeting').textContent = greeting || 'Welcome to Your Universe!';
+    }
+    
+    if (state.sounds.audio) {
+        state.sounds.audio.volume = parseInt(soundVolume) / 100;
+    }
 }
