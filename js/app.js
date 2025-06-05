@@ -162,16 +162,6 @@ export async function initApp() {
             console.log('✅ Settings loaded');
         }
         
-        // Add global theme testing function for debugging
-        window.testThemeSwitch = function(theme) {
-            console.log('🎨 Global theme test:', theme);
-            import('./settings.js').then(({ setTheme }) => {
-                setTheme(theme);
-            });
-        };
-        
-        console.log('🎨 Theme testing: Use testThemeSwitch("light"|"dark"|"cosmos"|"auto") in console');
-        
         // Initialize UI effects system
         if (loadedModules.uiEffects?.initUIEffects) {
             loadedModules.uiEffects.initUIEffects();
@@ -233,24 +223,6 @@ function setupTimerControls(loadedModules) {
         console.log('✅ Timer controls setup complete');
     } else {
         console.error('❌ Timer module not available for controls setup');
-    }
-    
-    // Theme debug button (temporary)
-    const themeDebugBtn = document.getElementById('themeDebugBtn');
-    if (themeDebugBtn) {
-        let currentDebugTheme = 0;
-        const themes = ['auto', 'light', 'dark'];
-        
-        themeDebugBtn.addEventListener('click', () => {
-            currentDebugTheme = (currentDebugTheme + 1) % themes.length;
-            const theme = themes[currentDebugTheme];
-            console.log('🎨 Debug: Switching to theme:', theme);
-            
-            // Import and use setTheme function
-            import('./settings.js').then(({ setTheme }) => {
-                setTheme(theme);
-            });
-        });
     }
 }
 
