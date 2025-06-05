@@ -20,9 +20,12 @@ export function updateSessionDisplay() {
     
     if (pomodoroCountElement) {
         // Show current session number (1-based)
-        const currentSession = state.timer.isBreak 
+        let currentSession = state.timer.isBreak 
             ? state.timer.pomodoroCount  // If on break, we've completed this many sessions
             : state.timer.pomodoroCount + 1;  // If focusing, we're working on the next session
+        
+        // Ensure we never display more than 4 sessions
+        currentSession = Math.min(currentSession, 4);
         
         pomodoroCountElement.textContent = currentSession;
     }
@@ -163,7 +166,15 @@ export function completeSession() {
         if (sessionType) {
             sessionType.textContent = 'Focus Time';
         }
-        showAchievement('Break Complete!', 'Ready for another focus session');
+        
+        // Check if we just completed a long break (after 4th session)
+        if (state.timer.pomodoroCount >= 4) {
+            // Reset the cycle after completing long break
+            state.timer.pomodoroCount = 0;
+            showAchievement('New Cycle Started!', 'Beginning fresh pomodoro cycle');
+        } else {
+            showAchievement('Break Complete!', 'Ready for another focus session');
+        }
     } else {
         // Focus session completed
         state.timer.pomodoroCount++;
