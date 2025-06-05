@@ -219,7 +219,8 @@ function setupTimerControls(loadedModules) {
         document.getElementById('startBtn').addEventListener('click', loadedModules.timer.startTimer);
         document.getElementById('pauseBtn').addEventListener('click', loadedModules.timer.pauseTimer);
         document.getElementById('resetBtn').addEventListener('click', loadedModules.timer.resetTimer);
-        document.getElementById('skipBtn').addEventListener('click', loadedModules.timer.skipBreak);
+        document.getElementById('skipBreakBtn').addEventListener('click', loadedModules.timer.skipBreak);
+        document.getElementById('skipFocusBtn').addEventListener('click', loadedModules.timer.skipFocus);
         console.log('✅ Timer controls setup complete');
     } else {
         console.error('❌ Timer module not available for controls setup');

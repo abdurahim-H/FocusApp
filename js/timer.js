@@ -53,12 +53,15 @@ export function startTimer() {
         triggerBlackHoleApproachUI();
     }
 
-    const skipBtn = document.getElementById('skipBtn');
-    if (skipBtn) {
+    const skipBreakBtn = document.getElementById('skipBreakBtn');
+    const skipFocusBtn = document.getElementById('skipFocusBtn');
+    if (skipBreakBtn && skipFocusBtn) {
         if (state.timer.isBreak) {
-            skipBtn.classList.remove('hidden');
+            skipBreakBtn.classList.remove('hidden');
+            skipFocusBtn.classList.add('hidden');
         } else {
-            skipBtn.classList.add('hidden');
+            skipBreakBtn.classList.add('hidden');
+            skipFocusBtn.classList.remove('hidden');
         }
     }
 
@@ -114,7 +117,8 @@ export function resetTimer() {
 
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
-    const skipBtn = document.getElementById('skipBtn');
+    const skipBreakBtn = document.getElementById('skipBreakBtn');
+    const skipFocusBtn = document.getElementById('skipFocusBtn');
 
     if (startBtn) {
         startBtn.classList.remove('hidden');
@@ -123,13 +127,22 @@ export function resetTimer() {
     if (pauseBtn) {
         pauseBtn.classList.add('hidden');
     }
-    if (skipBtn) {
-        skipBtn.classList.add('hidden');
+    if (skipBreakBtn) {
+        skipBreakBtn.classList.add('hidden');
+    }
+    if (skipFocusBtn) {
+        skipFocusBtn.classList.add('hidden');
     }
 }
 
 export function skipBreak() {
     if (state.timer.isBreak) {
+        completeSession();
+    }
+}
+
+export function skipFocus() {
+    if (!state.timer.isBreak) {
         completeSession();
     }
 }
@@ -186,7 +199,8 @@ export function completeSession() {
 
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
-    const skipBtn = document.getElementById('skipBtn');
+    const skipBreakBtn = document.getElementById('skipBreakBtn');
+    const skipFocusBtn = document.getElementById('skipFocusBtn');
 
     // Hide start button during auto transition
     if (startBtn) {
@@ -196,11 +210,13 @@ export function completeSession() {
     if (pauseBtn) {
         pauseBtn.classList.remove('hidden');
     }
-    if (skipBtn) {
+    if (skipBreakBtn && skipFocusBtn) {
         if (state.timer.isBreak) {
-            skipBtn.classList.remove('hidden');
+            skipBreakBtn.classList.remove('hidden');
+            skipFocusBtn.classList.add('hidden');
         } else {
-            skipBtn.classList.add('hidden');
+            skipBreakBtn.classList.add('hidden');
+            skipFocusBtn.classList.remove('hidden');
         }
     }
 
