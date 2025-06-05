@@ -9,6 +9,7 @@ export const state = {
         interval: null,
         isBreak: false,
         pomodoroCount: 0,
+        transitioning: false,
         settings: {
             focusDuration: 25,
             shortBreak: 5,

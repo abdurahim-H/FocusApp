@@ -36,7 +36,19 @@ export function updateSessionDisplay() {
 }
 
 export function startTimer() {
+    // Prevent starting if already running or in transition
+    if (state.timer.isRunning || state.timer.transitioning) {
+        return;
+    }
+    
+    // Clear any existing interval first
+    if (state.timer.interval) {
+        clearInterval(state.timer.interval);
+        state.timer.interval = null;
+    }
+    
     state.timer.isRunning = true;
+    state.timer.transitioning = false;
     state.timerState = 'running';
     // Fix: Keep both state properties in sync
     state.currentMode = state.timer.isBreak ? 'break' : 'focus';
@@ -88,8 +100,10 @@ export function startTimer() {
 
 export function pauseTimer() {
     state.timer.isRunning = false;
+    state.timer.transitioning = false;
     state.timerState = 'paused'; // Update for black hole effects
     clearInterval(state.timer.interval);
+    state.timer.interval = null;
 
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
@@ -104,9 +118,11 @@ export function pauseTimer() {
 
 export function resetTimer() {
     state.timer.isRunning = false;
+    state.timer.transitioning = false;
     state.timerState = 'stopped';
     // Fix: Don't force mode change here - let navigation handle it
     clearInterval(state.timer.interval);
+    state.timer.interval = null;
 
     if (state.timer.isBreak) {
         state.timer.minutes = state.timer.settings.shortBreak;
@@ -139,21 +155,28 @@ export function resetTimer() {
 }
 
 export function skipBreak() {
-    if (state.timer.isBreak) {
+    if (state.timer.isBreak && state.timer.isRunning) {
         completeSession();
     }
 }
 
 export function skipFocus() {
-    if (!state.timer.isBreak) {
+    if (!state.timer.isBreak && state.timer.isRunning) {
         completeSession();
     }
 }
 
 // --- MODIFIED FUNCTION FOR AUTO-SESSION SWITCHING & PROPER MODE ---
 export function completeSession() {
+    // Prevent multiple simultaneous calls
+    if (!state.timer.isRunning || state.timer.transitioning) {
+        return;
+    }
+    
     clearInterval(state.timer.interval);
+    state.timer.interval = null;
     state.timer.isRunning = false;
+    state.timer.transitioning = true;
     state.timerState = 'completed'; // Update state
 
     if (state.timer.isBreak) {
@@ -233,6 +256,7 @@ export function completeSession() {
 
     // --- AUTO-START NEXT SESSION ---
     setTimeout(() => {
+        state.timer.transitioning = false;
         startTimer();
     }, 1200); // 1.2 seconds for achievement to show, adjust as needed
 }
