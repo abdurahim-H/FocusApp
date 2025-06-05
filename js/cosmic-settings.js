@@ -116,35 +116,71 @@ function enhanceThemeButtons() {
     if (!themeSection) return;
     
     const themeButtons = themeSection.querySelector('.theme-buttons');
-    themeButtons.className = 'cosmic-theme-orbs';
+    themeButtons.className = 'cosmic-theme-selector';
     
-    const buttons = themeButtons.querySelectorAll('.btn');
-    buttons.forEach((btn, index) => {
-        btn.className = 'cosmic-orb';
+    // Create a more elegant theme selector
+    const themeContainer = document.createElement('div');
+    themeContainer.className = 'theme-selector-container';
+    themeContainer.innerHTML = `
+        <div class="theme-selector-track"></div>
+        <div class="theme-selector-glow"></div>
+    `;
+    
+    themeButtons.innerHTML = '';
+    themeButtons.appendChild(themeContainer);
+    
+    const themes = [
+        { id: 'light', label: 'Light', icon: '☀️', color: '#FFD700' },
+        { id: 'dark', label: 'Dark', icon: '🌙', color: '#4B0082' },
+        { id: 'cosmos', label: 'Cosmos', icon: '🌌', color: '#8B5CF6' },
+        { id: 'auto', label: 'Auto', icon: '✨', color: '#9333EA' }
+    ];
+    
+    themes.forEach((theme, index) => {
+        const themeOption = document.createElement('button');
+        themeOption.className = 'theme-option';
+        themeOption.setAttribute('data-theme', theme.id);
+        themeOption.innerHTML = `
+            <span class="theme-icon">${theme.icon}</span>
+            <span class="theme-label">${theme.label}</span>
+        `;
+        themeOption.style.setProperty('--theme-color', theme.color);
         
-        // Add cosmic data attributes
-        const themes = ['light', 'dark', 'cosmos', 'auto'];
-        btn.setAttribute('data-cosmic-theme', themes[index]);
-        
-        // Add constellation pattern
-        const constellation = document.createElement('div');
-        constellation.className = 'orb-constellation';
-        btn.appendChild(constellation);
-        
-        // Add energy rings
-        const energyRings = document.createElement('div');
-        energyRings.className = 'orb-energy-rings';
-        btn.appendChild(energyRings);
-        
-        // Add hover effects
-        btn.addEventListener('mouseenter', () => {
-            btn.classList.add('orb-activated');
-            triggerCosmicRipple(btn);
+        themeOption.addEventListener('click', () => {
+            setTheme(theme.id);
+            updateThemeSelector(theme.id);
         });
         
-        btn.addEventListener('mouseleave', () => {
-            btn.classList.remove('orb-activated');
-        });
+        themeContainer.appendChild(themeOption);
+    });
+    
+    // Initialize with current theme
+    const currentTheme = document.body.getAttribute('data-theme') || 'auto';
+    updateThemeSelector(currentTheme);
+}
+
+function updateThemeSelector(activeTheme) {
+    const options = document.querySelectorAll('.theme-option');
+    const glow = document.querySelector('.theme-selector-glow');
+    
+    options.forEach(option => {
+        if (option.getAttribute('data-theme') === activeTheme) {
+            option.classList.add('active');
+            
+            // Move glow to active option
+            if (glow) {
+                const rect = option.getBoundingClientRect();
+                const containerRect = option.parentElement.getBoundingClientRect();
+                const left = rect.left - containerRect.left;
+                const width = rect.width;
+                
+                glow.style.left = `${left}px`;
+                glow.style.width = `${width}px`;
+                glow.style.backgroundColor = option.style.getPropertyValue('--theme-color');
+            }
+        } else {
+            option.classList.remove('active');
+        }
     });
 }
 
@@ -176,10 +212,26 @@ function enhanceSliderControls() {
         
         slider.className = 'stellar-slider';
         
+        // Set initial value percentage for CSS
+        const percentage = (slider.value / slider.max) * 100;
+        slider.style.setProperty('--value-percent', `${percentage}%`);
+        
         // Add real-time cosmic feedback
         slider.addEventListener('input', () => {
+            const newPercentage = (slider.value / slider.max) * 100;
+            slider.style.setProperty('--value-percent', `${newPercentage}%`);
             updateStellarVisualization(slider);
-            triggerCosmicPulse(cosmicThumb);
+            
+            // Smooth thumb animation
+            if (cosmicThumb) {
+                cosmicThumb.style.opacity = '1';
+                cosmicThumb.style.left = `${newPercentage}%`;
+                
+                clearTimeout(cosmicThumb.fadeTimeout);
+                cosmicThumb.fadeTimeout = setTimeout(() => {
+                    cosmicThumb.style.opacity = '0';
+                }, 300);
+            }
         });
     });
 }
@@ -719,11 +771,23 @@ export function setupSettingsControls() {
         }
     };
     
-    // Enhanced focus range with cosmic effects
+    // Enhanced focus range with cosmic effects and REAL-TIME UPDATE FIX
     if (elements.focusRange && elements.focusValue) {
         elements.focusRange.addEventListener('input', () => {
-            elements.focusValue.textContent = elements.focusRange.value;
+            const newValue = elements.focusRange.value;
+            elements.focusValue.textContent = newValue;
             updateStellarVisualization(elements.focusRange);
+            
+            // CRITICAL FIX: Update timer display in real-time when not running
+            if (!state.timer.isRunning && !state.timer.isBreak) {
+                state.timer.minutes = parseInt(newValue);
+                state.timer.seconds = 0;
+                updateTimerDisplay();
+                console.log(`Timer display updated to: ${newValue}:00`);
+            }
+            
+            // Update the state for future sessions
+            state.timer.settings.focusDuration = parseInt(newValue);
         });
     }
     
@@ -767,8 +831,7 @@ export function setupSettingsControls() {
         if (btn) {
             btn.addEventListener('click', () => {
                 setTheme(theme);
-                // Trigger cosmic theme transition
-                triggerCosmicThemeTransition(theme);
+                // Don't trigger extra transition effects
             });
         }
     });
@@ -899,25 +962,75 @@ function triggerCosmicResetEffect() {
     }, 2000);
 }
 
-// Theme setting function (from original)
+// Theme setting function (from original) - SMOOTH TRANSITION FIX
 function setTheme(theme) {
+    // Add transition class for smooth change
+    document.body.classList.add('theme-transitioning');
+    
+    // Set theme on both body and document element
     document.body.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    
+    // Remove transition class after animation
+    setTimeout(() => {
+        document.body.classList.remove('theme-transitioning');
+    }, 300);
     
     // Update theme button states with cosmic effects
-    const buttons = document.querySelectorAll('.cosmic-orb');
-    buttons.forEach(btn => {
-        if (btn.getAttribute('data-cosmic-theme') === theme) {
-            btn.classList.add('orb-active');
-            // Create selection aura
-            const aura = document.createElement('div');
-            aura.className = 'orb-selection-aura';
-            btn.appendChild(aura);
-            setTimeout(() => aura.remove(), 1000);
-        } else {
-            btn.classList.remove('orb-active');
-        }
-    });
+    updateThemeSelector(theme);
     
-    // Trigger cosmic theme change effect
-    triggerUIEffect('cosmicThemeChange');
+    // Save theme to localStorage
+    localStorage.setItem('fu_theme', theme);
+    
+    // Log for debugging
+    console.log(`Theme changed to: ${theme}`);
+}
+
+// Load settings function update
+export function loadSettings() {
+    const theme = localStorage.getItem('fu_theme') || 'auto';
+    const focusLength = localStorage.getItem('fu_focusLength') || '25';
+    const soundVolume = localStorage.getItem('fu_soundVolume') || '30';
+    const greeting = localStorage.getItem('fu_greeting') || '';
+    
+    console.log('Loading settings:', { theme, focusLength, soundVolume, greeting });
+    
+    // Always set theme, even if it's the default
+    setTheme(theme);
+    
+    const focusRange = document.getElementById('focusLengthRange');
+    const focusValue = document.getElementById('focusLengthValue');
+    if (focusRange && focusValue) {
+        focusRange.value = focusLength;
+        focusValue.textContent = focusLength;
+        
+        // CRITICAL: Update timer display immediately on load
+        const loadedFocusDuration = parseInt(focusLength);
+        if (loadedFocusDuration && loadedFocusDuration > 0) {
+            state.timer.settings.focusDuration = loadedFocusDuration;
+            if (!state.timer.isRunning && !state.timer.isBreak) {
+                state.timer.minutes = loadedFocusDuration;
+                state.timer.seconds = 0;
+                updateTimerDisplay();
+                console.log(`Timer initialized to: ${loadedFocusDuration}:00`);
+            }
+        }
+    }
+    
+    const soundRange = document.getElementById('soundVolumeRange');
+    const soundValue = document.getElementById('soundVolumeValue');
+    if (soundRange && soundValue) {
+        soundRange.value = soundVolume;
+        soundValue.textContent = soundVolume;
+    }
+    
+    const greetingInput = document.getElementById('greetingInput');
+    if (greetingInput) {
+        greetingInput.value = greeting;
+        document.getElementById('greeting').textContent = greeting || 'Welcome to Your Universe!';
+    }
+    
+    if (state.sounds.audio) {
+        state.sounds.audio.volume = parseInt(soundVolume) / 100;
+    }
 }
