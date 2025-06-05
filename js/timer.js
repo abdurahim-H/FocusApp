@@ -13,6 +13,25 @@ export function updateTimerDisplay() {
     }
 }
 
+// Update session counter display
+export function updateSessionDisplay() {
+    const pomodoroCountElement = document.getElementById('pomodoroCount');
+    const pomodoroTotalElement = document.getElementById('pomodoroTotal');
+    
+    if (pomodoroCountElement) {
+        // Show current session number (1-based)
+        const currentSession = state.timer.isBreak 
+            ? state.timer.pomodoroCount  // If on break, we've completed this many sessions
+            : state.timer.pomodoroCount + 1;  // If focusing, we're working on the next session
+        
+        pomodoroCountElement.textContent = currentSession;
+    }
+    
+    if (pomodoroTotalElement) {
+        pomodoroTotalElement.textContent = '4';  // Standard pomodoro cycle is 4 sessions
+    }
+}
+
 export function startTimer() {
     state.timer.isRunning = true;
     state.timerState = 'running';
@@ -42,6 +61,9 @@ export function startTimer() {
             skipBtn.classList.add('hidden');
         }
     }
+
+    // Update session display when starting timer
+    updateSessionDisplay();
 
     state.timer.interval = trackSetInterval(() => {
         if (state.timer.seconds === 0) {
