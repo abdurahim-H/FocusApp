@@ -8,6 +8,20 @@ let settingsAnimationFrame = null;
 
 function triggerUIEffect(effectType) {
     console.log(`🌟 Cosmic Effect: ${effectType}`);
+    // Prevent unwanted background animations when opening settings
+    // Only allow intended effects for Universe Preview, Theme, Focus Duration, and Ambient Sound Volume
+    const allowedEffects = [
+        'cosmicPortalOpen',
+        'cosmicPortalClose', 
+        'themeTransition',
+        'focusPreview',
+        'soundPreview'
+    ];
+    
+    if (!allowedEffects.includes(effectType)) {
+        console.log(`🚫 Blocking unwanted effect: ${effectType}`);
+        return;
+    }
 }
 
 export function initCosmicSettings() {
@@ -25,16 +39,35 @@ export function initCosmicSettings() {
 
 function createParticleBackground() {
     const settingsModal = document.querySelector('.settings-modal');
-    if (!settingsModal) return;
+    if (!settingsModal) {
+        console.warn('🌌 Settings modal not found for particle background');
+        return;
+    }
     
-    // Create particle canvas
+    // Remove existing particle canvas if present
+    const existingCanvas = settingsModal.querySelector('.settings-particles');
+    if (existingCanvas) {
+        existingCanvas.remove();
+    }
+    
+    // Create particle canvas with responsive dimensions
     const particleCanvas = document.createElement('canvas');
     particleCanvas.className = 'settings-particles';
-    particleCanvas.width = 800;
-    particleCanvas.height = 600;
+    
+    // Set responsive canvas size
+    const modalWidth = settingsModal.offsetWidth || 600;
+    const modalHeight = settingsModal.offsetHeight || 400;
+    particleCanvas.width = Math.min(modalWidth, 800);
+    particleCanvas.height = Math.min(modalHeight, 600);
+    
     settingsModal.appendChild(particleCanvas);
     
     const ctx = particleCanvas.getContext('2d');
+    if (!ctx) {
+        console.error('🌌 Could not get canvas context for particles');
+        return;
+    }
+    
     const particles = [];
     
     // Initialize particles
@@ -52,6 +85,11 @@ function createParticleBackground() {
     
     // Animate particles
     function animateParticles() {
+        if (!ctx || !particleCanvas) {
+            console.warn('🌌 Canvas context lost, stopping particle animation');
+            return;
+        }
+        
         ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
         
         particles.forEach(particle => {
@@ -90,6 +128,7 @@ function createParticleBackground() {
         settingsAnimationFrame = requestAnimationFrame(animateParticles);
     }
     
+    console.log('🌌 Starting particle animation with', particles.length, 'particles');
     animateParticles();
 }
 
@@ -595,9 +634,6 @@ export function setupCosmicSettingsModal() {
         const newSettingsBtn = settingsBtn.cloneNode(true);
         settingsBtn.parentNode.replaceChild(newSettingsBtn, settingsBtn);
         
-        // Initialize cosmic enhancements
-        initCosmicSettings();
-        
         // Open modal with spectacular entrance
         newSettingsBtn.addEventListener('click', function(event) {
             console.log('🌌 Settings button clicked!');
@@ -608,13 +644,16 @@ export function setupCosmicSettingsModal() {
             const modal = settingsOverlay.querySelector('.settings-modal');
             if (modal) {
                 modal.classList.add('cosmic-entrance-active');
+                
+                // Initialize cosmic enhancements after modal is visible
+                setTimeout(() => {
+                    initCosmicSettings();
+                    updatePreviewStats();
+                }, 50);
             }
             
             // Trigger cosmic opening effect
             triggerUIEffect('cosmicPortalOpen');
-            
-            // Update preview stats
-            setTimeout(updatePreviewStats, 100);
         });
         
         console.log('🌌 Click event listener added to settings button');

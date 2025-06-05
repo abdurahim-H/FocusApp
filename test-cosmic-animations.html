@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Animations Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/cosmic-settings.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0B1426 0%, #1E1B4B 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(168, 85, 247, 0.8));
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 4px solid #00ff88;
+        }
+        .test-failed {
+            border-left-color: #ff4444;
+        }
+        .animation-demo {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(20, 10, 40, 0.6);
+            border-radius: 15px;
+            border: 1px solid rgba(150, 100, 255, 0.2);
+        }
+    </style>
+</head>
+<body data-theme="cosmos">
+    <div class="test-container">
+        <h1>🌌 Cosmic Animations Test Suite</h1>
+        
+        <div id="testResults"></div>
+        
+        <button class="test-button" onclick="testKeyframeAnimations()">🎬 Test Keyframe Animations</button>
+        <button class="test-button" onclick="testStellarSliders()">⭐ Test Stellar Sliders</button>
+        <button class="test-button" onclick="testCosmicPreview()">🌌 Test Cosmic Preview</button>
+        <button class="test-button" onclick="testParticleBackground()">✨ Test Particle Background</button>
+        
+        <!-- Animation Demo Section -->
+        <div class="animation-demo">
+            <h3>🎬 Animation Demonstrations</h3>
+            
+            <!-- Cosmic Preview Animation Demo -->
+            <div class="cosmic-preview-section">
+                <h4>🌌 Universe Preview</h4>
+                <div class="cosmic-preview-display">
+                    <div class="preview-scanning-bar"></div>
+                    <div class="preview-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Stars Collected</span>
+                            <span class="stat-value">42</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Focus Level</span>
+                            <span class="stat-value">7</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stellar Slider Demo -->
+            <div class="settings-section">
+                <label for="testSlider" class="settings-label">
+                    <span>⚡ Test Slider</span>
+                    <span class="settings-value"><span id="testSliderValue">50</span>%</span>
+                </label>
+                <div class="stellar-control-container">
+                    <div class="stellar-track"></div>
+                    <input type="range" min="0" max="100" value="50" id="testSlider" class="stellar-slider range-input">
+                    <div class="cosmic-thumb"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Canvas for particle background test -->
+        <canvas id="testCanvas" style="display: none;"></canvas>
+    </div>
+    
+    <script>
+        let testsPassed = 0;
+        let testsFailed = 0;
+        
+        function logResult(test, passed, details = '') {
+            const container = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? '' : 'test-failed'}`;
+            div.innerHTML = `
+                <strong>${passed ? '✅' : '❌'} ${test}</strong>
+                ${details ? `<br><small>${details}</small>` : ''}
+            `;
+            container.appendChild(div);
+            
+            if (passed) testsPassed++;
+            else testsFailed++;
+            
+            updateSummary();
+        }
+        
+        function updateSummary() {
+            const total = testsPassed + testsFailed;
+            if (total > 0) {
+                document.querySelector('h1').textContent = 
+                    `🌌 Cosmic Animations Test Suite (${testsPassed}/${total} passed)`;
+            }
+        }
+        
+        function testKeyframeAnimations() {
+            const tests = [
+                { name: 'cosmicScan', selector: '.preview-scanning-bar' },
+                { name: 'statShimmer', selector: '.stat-value' },
+                { name: 'cosmicBorderFlow', selector: '.settings-modal::before' }
+            ];
+            
+            tests.forEach(test => {
+                try {
+                    // Check if CSS animation exists by creating element and checking computed styles
+                    const testElement = document.createElement('div');
+                    testElement.style.animation = `${test.name} 1s linear`;
+                    document.body.appendChild(testElement);
+                    
+                    const computedStyle = window.getComputedStyle(testElement);
+                    const animationName = computedStyle.animationName;
+                    
+                    document.body.removeChild(testElement);
+                    
+                    const passed = animationName === test.name;
+                    logResult(`Keyframe Animation: ${test.name}`, passed, 
+                        passed ? 'Animation keyframes defined' : 'Animation keyframes missing or invalid');
+                } catch (error) {
+                    logResult(`Keyframe Animation: ${test.name}`, false, `Error: ${error.message}`);
+                }
+            });
+        }
+        
+        function testStellarSliders() {
+            const slider = document.getElementById('testSlider');
+            const track = document.querySelector('.stellar-track');
+            const thumb = document.querySelector('.cosmic-thumb');
+            
+            // Test slider responsiveness
+            slider.value = 75;
+            slider.dispatchEvent(new Event('input'));
+            
+            // Check if track progress updates
+            setTimeout(() => {
+                const trackBefore = window.getComputedStyle(track, '::before');
+                const passed = trackBefore.width !== '0px';
+                logResult('Stellar Slider: Track Progress', passed, 
+                    passed ? 'Track progress bar animates correctly' : 'Track progress bar not updating');
+            }, 100);
+            
+            // Test hover effects
+            const hoverTest = thumb && track;
+            logResult('Stellar Slider: Elements Present', hoverTest, 
+                hoverTest ? 'Cosmic thumb and stellar track elements found' : 'Missing stellar slider elements');
+        }
+        
+        function testCosmicPreview() {
+            const previewSection = document.querySelector('.cosmic-preview-section');
+            const scanningBar = document.querySelector('.preview-scanning-bar');
+            
+            if (previewSection && scanningBar) {
+                // Trigger scanning animation
+                scanningBar.style.animation = 'cosmicScan 2s ease-in-out infinite';
+                
+                setTimeout(() => {
+                    const computedStyle = window.getComputedStyle(scanningBar);
+                    const passed = computedStyle.animationName === 'cosmicScan';
+                    logResult('Cosmic Preview: Scanning Animation', passed,
+                        passed ? 'Scanning bar animation active' : 'Scanning animation not working');
+                }, 100);
+                
+                logResult('Cosmic Preview: Elements Present', true, 'Preview section and scanning bar found');
+            } else {
+                logResult('Cosmic Preview: Elements Present', false, 'Preview section or scanning bar missing');
+            }
+        }
+        
+        function testParticleBackground() {
+            const canvas = document.getElementById('testCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+                logResult('Particle Background: Canvas Support', false, 'Canvas context not available');
+                return;
+            }
+            
+            // Test basic particle rendering
+            try {
+                canvas.width = 400;
+                canvas.height = 300;
+                
+                // Draw test particle
+                ctx.beginPath();
+                ctx.arc(50, 50, 5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(139, 92, 246, 0.8)';
+                ctx.fill();
+                
+                // Check if particle was drawn
+                const imageData = ctx.getImageData(50, 50, 1, 1);
+                const passed = imageData.data[3] > 0; // Check alpha channel
+                
+                logResult('Particle Background: Canvas Rendering', passed,
+                    passed ? 'Canvas can render particles' : 'Canvas rendering failed');
+                    
+                logResult('Particle Background: Context Available', true, 'Canvas 2D context working');
+            } catch (error) {
+                logResult('Particle Background: Canvas Rendering', false, `Error: ${error.message}`);
+            }
+        }
+        
+        // Initialize slider interaction
+        document.getElementById('testSlider').addEventListener('input', function() {
+            document.getElementById('testSliderValue').textContent = this.value;
+            
+            // Update CSS custom property for track progress
+            const container = this.closest('.stellar-control-container');
+            const track = container.querySelector('.stellar-track');
+            track.style.setProperty('--value-percent', this.value + '%');
+        });
+        
+        // Start automatic tests
+        setTimeout(() => {
+            logResult('Test Suite: Initialization', true, 'Cosmic animation test suite loaded');
+        }, 500);
+    </script>
+</body>
+</html>

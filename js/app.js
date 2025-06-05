@@ -33,9 +33,16 @@ async function loadModules() {
     
     try {
         modules.settings = await import('./cosmic-settings.js');
-        console.log('✅ settings loaded');
+        console.log('✅ cosmic-settings loaded');
     } catch (error) {
-        console.error('❌ Failed to load settings:', error);
+        console.error('❌ Failed to load cosmic-settings:', error);
+    }
+    
+    try {
+        modules.settingsCore = await import('./settings.js');
+        console.log('✅ settings-core loaded');
+    } catch (error) {
+        console.error('❌ Failed to load settings-core:', error);
     }
     
     try {
@@ -151,15 +158,33 @@ export async function initApp() {
         console.log('🚀 Setting up settings...');
         if (loadedModules.settings?.setupCosmicSettingsModal) {
             loadedModules.settings.setupCosmicSettingsModal();
-            loadedModules.settings.setupSettingsControls();
-            console.log('✅ Settings setup complete');
+            console.log('✅ Cosmic Settings Modal setup complete');
         }
         
-        // Load saved settings including theme
+        if (loadedModules.settings?.setupSettingsControls) {
+            loadedModules.settings.setupSettingsControls();
+            console.log('✅ Cosmic Settings Controls setup complete');
+        }
+        
+        // Skip core settings modal setup to avoid conflicts with cosmic settings
+        // if (loadedModules.settingsCore?.setupSettingsModal) {
+        //     loadedModules.settingsCore.setupSettingsModal();
+        //     console.log('✅ Core Settings Modal setup complete');
+        // }
+        
+        if (loadedModules.settingsCore?.setupSettingsControls) {
+            loadedModules.settingsCore.setupSettingsControls();
+            console.log('✅ Core Settings Controls setup complete');
+        }
+        
+        // Load saved settings including theme - prioritize cosmic settings
         console.log('🚀 Loading settings...');
         if (loadedModules.settings?.loadSettings) {
             loadedModules.settings.loadSettings();
-            console.log('✅ Settings loaded');
+            console.log('✅ Cosmic Settings loaded');
+        } else if (loadedModules.settingsCore?.loadSettings) {
+            loadedModules.settingsCore.loadSettings();
+            console.log('✅ Core Settings loaded');
         }
         
         // Initialize UI effects system

@@ -105,45 +105,91 @@
                 <h2>Settings</h2>
                 <div class="settings-content">
                     
+                    <!-- Cosmic Preview Section -->
+                    <div class="cosmic-preview-section">
+                        <h4>🌌 Universe Preview</h4>
+                        <div class="cosmic-preview-display">
+                            <button class="cosmic-action-btn" id="previewCosmosBtn">
+                                <span class="btn-text">Preview Cosmos</span>
+                                <div class="btn-energy-core"></div>
+                            </button>
+                        </div>
+                    </div>
+                    
                     <div class="settings-section">
-                        <h4>Theme</h4>
+                        <h4>🎨 Theme</h4>
                         <div class="theme-buttons">
-                            <button class="btn" id="themeLightBtn" data-theme="light">Light</button>
-                            <button class="btn" id="themeDarkBtn" data-theme="dark">Dark</button>
-                            <button class="btn" id="themeCosmosBtn" data-theme="cosmos">Cosmos</button>
-                            <button class="btn btn-primary" id="themeAutoBtn" data-theme="auto">Auto</button>
+                            <button class="btn" id="themeLightBtn" data-theme="light">☀️ Light</button>
+                            <button class="btn" id="themeDarkBtn" data-theme="dark">🌙 Dark</button>
+                            <button class="btn" id="themeCosmosBtn" data-theme="cosmos">🌌 Cosmos</button>
+                            <button class="btn btn-primary" id="themeAutoBtn" data-theme="auto">⚙️ Auto</button>
                         </div>
                     </div>
                     
-                    <!-- Focus Session Length -->
+                    <!-- Focus Intensity -->
                     <div class="settings-section">
-                        <label for="focusLengthRange" class="settings-label">Focus Duration: <span id="focusLengthValue">25</span> min</label>
-                        <div class="range-container">
-                            <input type="range" min="1" max="60" value="25" id="focusLengthRange" class="range-input">
+                        <label for="focusLengthRange" class="settings-label">
+                            <span>⚡ Focus Intensity</span>
+                            <span class="settings-value"><span id="focusLengthValue">25</span> min</span>
+                        </label>
+                        <div class="stellar-control-container">
+                            <div class="stellar-track"></div>
+                            <input type="range" min="1" max="60" value="25" id="focusLengthRange" class="stellar-slider range-input">
+                            <div class="cosmic-thumb"></div>
                         </div>
                     </div>
                     
-                    <!-- Ambient Sound Volume -->
+                    <!-- Cosmic Energy -->
                     <div class="settings-section">
-                        <label for="soundVolumeRange" class="settings-label">Ambient Sound Volume: <span id="soundVolumeValue">30</span>%</label>
-                        <div class="range-container">
-                            <input type="range" min="0" max="100" value="30" id="soundVolumeRange" class="range-input">
+                        <label for="cosmicEnergyRange" class="settings-label">
+                            <span>🌟 Cosmic Energy</span>
+                            <span class="settings-value"><span id="cosmicEnergyValue">75</span>%</span>
+                        </label>
+                        <div class="stellar-control-container">
+                            <div class="stellar-track"></div>
+                            <input type="range" min="0" max="100" value="75" id="cosmicEnergyRange" class="stellar-slider range-input">
+                            <div class="cosmic-thumb"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sound Harmony -->
+                    <div class="settings-section">
+                        <label for="soundVolumeRange" class="settings-label">
+                            <span>🎵 Sound Harmony</span>
+                            <span class="settings-value"><span id="soundVolumeValue">30</span>%</span>
+                        </label>
+                        <div class="stellar-control-container">
+                            <div class="stellar-track"></div>
+                            <input type="range" min="0" max="100" value="30" id="soundVolumeRange" class="stellar-slider range-input">
+                            <div class="cosmic-thumb"></div>
                         </div>
                     </div>
                     
                     <div class="settings-section">
-                        <label for="greetingInput" class="settings-label">Greeting Message</label>
-                        <input type="text" id="greetingInput" class="text-input" maxlength="40" placeholder="Welcome to Your Universe!">
+                        <label for="greetingInput" class="settings-label">💫 Greeting Message</label>
+                        <input type="text" id="greetingInput" class="text-input cosmic-input" maxlength="40" placeholder="Welcome to Your Universe!">
                     </div>
                     
                     <div class="settings-section">
                         <div class="settings-buttons">
-                            <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
-                            <button class="btn" id="resetSettingsBtn">Reset to Default</button>
+                            <button class="btn cosmic-action-btn" id="saveSettingsBtn">
+                                <span class="btn-text">🌟 Save Universe</span>
+                                <div class="btn-energy-core"></div>
+                                <div class="btn-particle-burst"></div>
+                            </button>
+                            <button class="btn cosmic-action-btn" id="resetSettingsBtn">
+                                <span class="btn-text">🔄 Reset Cosmos</span>
+                                <div class="btn-energy-core"></div>
+                                <div class="btn-particle-burst"></div>
+                            </button>
                         </div>
                     </div>
                     
-                    <div id="settingsSavedMsg" class="settings-saved-msg">Settings Saved!</div>
+                    <div id="settingsSavedMsg" class="settings-saved-msg cosmic-success-message">
+                        <div class="success-icon">✨</div>
+                        <div class="success-text">Universe Saved!</div>
+                        <div class="success-subtitle">Your cosmic settings have been applied</div>
+                    </div>
                 </div>
             </div>
         </div>
