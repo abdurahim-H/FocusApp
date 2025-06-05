@@ -135,23 +135,26 @@ export function completeSession() {
         triggerSessionCompleteZoom();
         triggerSessionCompleteUI();
 
-        if (state.timer.pomodoroCount % 4 === 0) {
-            // Long break after 4 pomodoros
-            state.timer.minutes = state.timer.settings.longBreak;
-            showAchievement('Pomodoro Cycle Complete!', 'Take a long break');
-        } else {
-            // Short break
-            state.timer.minutes = state.timer.settings.shortBreak;
-            showAchievement('Focus Complete!', 'Time for a short break');
-        }
+        // Delay achievement popup slightly to avoid interference with other effects
+        setTimeout(() => {
+            if (state.timer.pomodoroCount % 4 === 0) {
+                // Long break after 4 pomodoros
+                state.timer.minutes = state.timer.settings.longBreak;
+                showAchievement('Pomodoro Cycle Complete!', 'Take a long break');
+            } else {
+                // Short break
+                state.timer.minutes = state.timer.settings.shortBreak;
+                showAchievement('Focus Complete!', 'Time for a short break');
+            }
 
-        state.timer.isBreak = true;
-        state.timer.seconds = 0;
-        state.currentMode = 'break'; // Update mode
-        const sessionType = document.getElementById('sessionType');
-        if (sessionType) {
-            sessionType.textContent = 'Break Time';
-        }
+            state.timer.isBreak = true;
+            state.timer.seconds = 0;
+            state.currentMode = 'break'; // Update mode
+            const sessionType = document.getElementById('sessionType');
+            if (sessionType) {
+                sessionType.textContent = 'Break Time';
+            }
+        }, 300); // Small delay to let camera effects start first
     }
 
     updateTimerDisplay();
@@ -230,4 +233,25 @@ export function startBreathing() {
         }
         breathIn = !breathIn;
     }, 4000);
+}
+
+// Test function to verify achievement popup (can be removed in production)
+export function testAchievementPopup() {
+    console.log('🧪 Testing achievement popup...');
+    showAchievement('Test Achievement', 'Checking for layout stability');
+    
+    // Check for horizontal scrollbar after showing achievement
+    setTimeout(() => {
+        const hasHorizontalScroll = document.body.scrollWidth > document.body.clientWidth;
+        if (hasHorizontalScroll) {
+            console.warn('⚠️ Horizontal scrollbar detected after achievement popup!');
+        } else {
+            console.log('✅ No horizontal scrollbar - achievement popup is stable');
+        }
+    }, 600); // Check after animation completes
+}
+
+// Auto-test on page load (remove in production)
+if (typeof window !== 'undefined') {
+    window.testAchievement = testAchievementPopup;
 }

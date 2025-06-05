@@ -73,7 +73,7 @@ export function removeFocusIntensity() {
     activeEffects.delete('focus-intensity');
 }
 
-// Session completion epic effect
+// Session completion epic effect - LAYOUT STABILITY FIX
 export function triggerSessionCompleteUI() {
     const container = document.querySelector('.container');
     const achievement = document.querySelector('.achievement');
@@ -81,16 +81,19 @@ export function triggerSessionCompleteUI() {
     container.classList.add('session-complete');
     achievement?.classList.add('session-complete');
     
-    // Add gravitational pull effect to simulate black hole influence
+    // LAYOUT STABILITY FIX: Delay gravitational pull and make it less disruptive
     setTimeout(() => {
-        container.classList.add('gravitational-pull');
-    }, 1000);
+        // Only add gravitational pull if container is still in session-complete state
+        if (container.classList.contains('session-complete')) {
+            container.classList.add('gravitational-pull');
+        }
+    }, 1500); // Increased delay to let achievement animation complete first
     
-    // Remove effects after animation
+    // Remove effects after animation with proper cleanup
     setTimeout(() => {
         container.classList.remove('session-complete', 'gravitational-pull');
         achievement?.classList.remove('session-complete');
-    }, 4000);
+    }, 5000); // Slightly longer duration for smoother experience
 }
 
 // Black hole approach effect (for break time)

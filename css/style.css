@@ -13,9 +13,20 @@ body {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: var(--bg-dark);
     color: var(--text-primary);
-    overflow-x: hidden;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    overflow-y: auto; /* Allow vertical scroll when needed */
     min-height: 100vh;
     transition: all 0.3s ease;
+    
+    /* Additional layout stability measures */
+    position: relative;
+    max-width: 100vw; /* Ensure body never exceeds viewport width */
+}
+
+/* Additional safeguard for html element */
+html {
+    overflow-x: hidden;
+    max-width: 100vw;
 }
 
 #scene-container {
@@ -43,6 +54,11 @@ body {
     position: relative;
     z-index: 10;
     pointer-events: auto;
+    
+    /* LAYOUT STABILITY FIX: Prevent container from causing overflow */
+    max-width: 100%;
+    overflow: hidden;
+    contain: layout style paint; /* Optimize for frequent changes */
 }
 
 /* Mode Displays */
@@ -227,11 +243,33 @@ body[style*="--redshift-intensity"] {
 }
 */
 
-/* Black hole gravitational effect on UI */
+/* Black hole gravitational effect on UI - LAYOUT STABILITY FIX */
 .gravitational-pull {
-    animation: gravitationalWarp 5s ease-in-out infinite;
+    /* DISABLED: animation that can cause layout shifts */
+    /* animation: gravitationalWarp 5s ease-in-out infinite; */
+    
+    /* Use subtle filter effects instead of transforms to prevent layout shifts */
+    filter: blur(0.5px) brightness(0.95);
+    animation: gravitationalFilter 5s ease-in-out infinite;
 }
 
+/* Replacement animation using filters instead of transforms */
+@keyframes gravitationalFilter {
+    0%, 100% {
+        filter: blur(0px) brightness(1) hue-rotate(0deg);
+    }
+    25% {
+        filter: blur(0.3px) brightness(0.98) hue-rotate(1deg);
+    }
+    50% {
+        filter: blur(0.5px) brightness(0.95) hue-rotate(2deg);
+    }
+    75% {
+        filter: blur(0.2px) brightness(0.97) hue-rotate(-1deg);
+    }
+}
+
+/* DISABLED: Original transform-based animation that was causing layout shifts
 @keyframes gravitationalWarp {
     0%, 100% {
         transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
@@ -246,6 +284,7 @@ body[style*="--redshift-intensity"] {
         transform: perspective(1000px) rotateX(1deg) rotateY(-2deg);
     }
 }
+*/
 
 /* Particle trail effect for buttons - FIXED */
 .btn-particle {
@@ -351,4 +390,44 @@ body[style*="--redshift-intensity"] {
     position: relative !important;
     z-index: 101 !important;
     isolation: isolate !important;
+}
+
+/* COMPREHENSIVE LAYOUT STABILITY FIXES */
+/* Prevent any elements from causing horizontal overflow */
+* {
+    max-width: 100vw;
+    box-sizing: border-box;
+}
+
+/* Ensure all fixed positioned elements stay within viewport */
+*[position="fixed"], 
+.achievement,
+.nav,
+.settings-btn,
+.progress-3d,
+.settings-modal-overlay {
+    contain: layout style paint;
+    will-change: auto; /* Reset will-change after animations */
+}
+
+/* Additional safeguard for transform-based animations */
+*[style*="transform"] {
+    contain: layout;
+}
+
+/* Force hardware acceleration for smooth animations without layout shifts */
+.achievement,
+.nav,
+.settings-btn {
+    transform: translateZ(0); /* Force GPU layer */
+    backface-visibility: hidden; /* Prevent flickering */
+}
+
+/* Debug helper - remove in production if needed */
+body.debug-layout {
+    outline: 2px solid red;
+}
+
+.debug-layout * {
+    outline: 1px solid rgba(255, 0, 0, 0.1);
 }

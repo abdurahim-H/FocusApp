@@ -147,6 +147,12 @@
                 </div>
             </div>
         </div>
+
+        <!-- Debug/Test controls - remove in production -->
+        <div style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; display: flex; gap: 10px;">
+            <button onclick="window.testAchievement()" style="padding: 8px 12px; background: #06d6a0; border: none; border-radius: 5px; color: white; font-size: 12px;">Test Achievement</button>
+            <button onclick="document.querySelector('.container').classList.toggle('debug-layout')" style="padding: 8px 12px; background: #ff006e; border: none; border-radius: 5px; color: white; font-size: 12px;">Debug Layout</button>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

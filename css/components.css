@@ -345,11 +345,11 @@
     color: var(--accent);
 }
 
-/* Achievement Popup */
+/* Achievement Popup - LAYOUT STABILITY FIX */
 .achievement {
     position: fixed;
     top: 100px;
-    right: -400px;
+    right: 30px; /* Final visible position */
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
     border: 1px solid var(--border-glass);
@@ -357,12 +357,19 @@
     padding: 20px;
     box-shadow: 0 8px 32px var(--shadow);
     z-index: 1500;
-    transition: right 0.5s ease;
     max-width: 300px;
+    
+    /* Use transform to move completely off-screen by default */
+    transform: translateX(calc(100% + 30px + 20px)); /* Hidden: width + right offset + extra margin */
+    transition: transform 0.5s ease;
+    
+    /* Prevent any potential overflow issues */
+    will-change: transform;
+    contain: layout style paint;
 }
 
 .achievement.show {
-    right: 30px;
+    transform: translateX(0); /* Visible position */
 }
 
 .achievement-title {
