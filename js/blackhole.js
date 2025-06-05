@@ -568,23 +568,3 @@ export function triggerFocusIntensification() {
 }
 
 
-// === ADD THIS CODE TO THE END OF YOUR blackhole.js FILE ===
-
-// Expose blackHoleSystem globally for debugging
-window.blackHoleSystem = blackHoleSystem;
-
-// Debug function to hide/show accretion disk
-window.toggleAccretionDisk = function() {
-    if (blackHoleSystem.accretionDisk) {
-        blackHoleSystem.accretionDisk.visible = !blackHoleSystem.accretionDisk.visible;
-        console.log('Accretion disk visibility:', blackHoleSystem.accretionDisk.visible);
-    }
-};
-
-// Debug function to hide/show entire black hole
-window.toggleBlackHole = function() {
-    if (blackHoleSystem.group) {
-        blackHoleSystem.group.visible = !blackHoleSystem.group.visible;
-        console.log('Black hole visibility:', blackHoleSystem.group.visible);
-    }
-};
