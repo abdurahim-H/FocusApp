@@ -17,12 +17,12 @@ export function startTimer() {
     state.timer.isRunning = true;
     state.timerState = 'running';
     state.currentMode = state.timer.isBreak ? 'break' : 'focus';
-    
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     if (startBtn) startBtn.classList.add('hidden');
     if (pauseBtn) pauseBtn.classList.remove('hidden');
-    
+
     if (!state.timer.isBreak) {
         triggerFocusIntensification();
         triggerFocusZoom();
@@ -31,7 +31,7 @@ export function startTimer() {
         approachBlackHole();
         triggerBlackHoleApproachUI();
     }
-    
+
     const skipBtn = document.getElementById('skipBtn');
     if (skipBtn) {
         if (state.timer.isBreak) {
@@ -60,7 +60,7 @@ export function pauseTimer() {
     state.timer.isRunning = false;
     state.timerState = 'paused'; // Update for black hole effects
     clearInterval(state.timer.interval);
-    
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     if (startBtn) {
@@ -77,20 +77,20 @@ export function resetTimer() {
     state.timerState = 'stopped'; // Update for black hole effects
     state.currentMode = 'home'; // Reset mode
     clearInterval(state.timer.interval);
-    
+
     if (state.timer.isBreak) {
         state.timer.minutes = state.timer.settings.shortBreak;
     } else {
         state.timer.minutes = state.timer.settings.focusDuration;
     }
-    
+
     state.timer.seconds = 0;
     updateTimerDisplay();
-    
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const skipBtn = document.getElementById('skipBtn');
-    
+
     if (startBtn) {
         startBtn.classList.remove('hidden');
         startBtn.textContent = 'Start Focus';
@@ -109,6 +109,7 @@ export function skipBreak() {
     }
 }
 
+// --- MODIFIED FUNCTION FOR AUTO-SESSION SWITCHING & PROPER MODE ---
 export function completeSession() {
     clearInterval(state.timer.interval);
     state.timer.isRunning = false;
@@ -119,7 +120,7 @@ export function completeSession() {
         state.timer.isBreak = false;
         state.timer.minutes = state.timer.settings.focusDuration;
         state.timer.seconds = 0;
-        state.currentMode = 'home'; // Reset mode
+        state.currentMode = 'focus'; // Corrected: set to focus mode
         const sessionType = document.getElementById('sessionType');
         if (sessionType) {
             sessionType.textContent = 'Focus Time';
@@ -147,7 +148,7 @@ export function completeSession() {
 
         state.timer.isBreak = true;
         state.timer.seconds = 0;
-        state.currentMode = 'break'; // Update mode
+        state.currentMode = 'break'; // Corrected: set to break/ambient mode
         const sessionType = document.getElementById('sessionType');
         if (sessionType) {
             sessionType.textContent = 'Break Time';
@@ -156,17 +157,18 @@ export function completeSession() {
 
     updateTimerDisplay();
     updateUniverseStats();
-    
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const skipBtn = document.getElementById('skipBtn');
-    
+
+    // Hide start button during auto transition
     if (startBtn) {
-        startBtn.classList.remove('hidden');
+        startBtn.classList.add('hidden');
         startBtn.textContent = state.timer.isBreak ? 'Start Break' : 'Start Focus';
     }
     if (pauseBtn) {
-        pauseBtn.classList.add('hidden');
+        pauseBtn.classList.remove('hidden');
     }
     if (skipBtn) {
         if (state.timer.isBreak) {
@@ -175,6 +177,11 @@ export function completeSession() {
             skipBtn.classList.add('hidden');
         }
     }
+
+    // --- AUTO-START NEXT SESSION ---
+    setTimeout(() => {
+        startTimer();
+    }, 1200); // 1.2 seconds for achievement to show, adjust as needed
 }
 
 // Update universe stats
@@ -183,7 +190,7 @@ export function updateUniverseStats() {
     const galaxyLevel = document.getElementById('galaxyLevel');
     const focusTime = document.getElementById('focusTime');
     const tasksComplete = document.getElementById('tasksComplete');
-    
+
     if (starsCount) starsCount.textContent = state.universe.stars;
     if (galaxyLevel) galaxyLevel.textContent = state.universe.level;
     if (focusTime) focusTime.textContent = state.universe.focusMinutes;
@@ -219,7 +226,7 @@ export function updateDateTime() {
 export function startBreathing() {
     const guide = document.getElementById('breathingGuide');
     let breathIn = true;
-    
+
     setInterval(() => {
         if (breathIn) {
             guide.textContent = 'Breathe In...';
