@@ -63,6 +63,7 @@
 .btn-primary {
     background: var(--primary);
     border-color: var(--primary);
+    color: white;
 }
 
 .btn-primary:hover {
@@ -420,14 +421,123 @@
     font-size: 1rem;
 }
 
+/* COMPLETE FIX FOR THEME BUTTONS */
 .theme-buttons {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
     gap: 10px;
-    flex-wrap: wrap;
+    max-width: 400px; /* Control maximum width */
 }
 
-.theme-buttons .btn {
-    min-width: 80px;
+/* Force all theme buttons to have consistent dimensions */
+.theme-buttons .btn,
+.theme-buttons button {
+    /* Reset any inherited styles */
+    all: unset;
+    
+    /* Essential button properties */
+    cursor: pointer;
+    font-family: inherit;
+    
+    /* Fixed dimensions */
+    width: 100%; /* Fill grid cell */
+    height: 45px;
+    min-height: 45px;
+    max-height: 45px;
+    
+    /* Flexbox for perfect centering */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Consistent padding */
+    padding: 0 16px;
+    
+    /* Visual styling */
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    color: var(--text-primary);
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: 500;
+    
+    /* Transitions */
+    transition: all 0.3s ease;
+    
+    /* Box model */
+    box-sizing: border-box;
+    
+    /* Text handling */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    
+    /* Prevent any size changes */
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+/* Hover state for non-active buttons */
+.theme-buttons .btn:hover:not(.active):not(.btn-primary),
+.theme-buttons button:hover:not(.active):not(.btn-primary) {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary);
+    /* Maintain exact same dimensions */
+    height: 45px;
+    min-height: 45px;
+    max-height: 45px;
+}
+
+/* Active state - NO SIZE CHANGES */
+.theme-buttons .btn.active,
+.theme-buttons .btn.btn-primary,
+.theme-buttons button.active,
+.theme-buttons button.btn-primary {
+    /* Visual changes only - NO dimension changes */
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    font-weight: 600;
+    
+    /* Force exact same dimensions */
+    height: 45px !important;
+    min-height: 45px !important;
+    max-height: 45px !important;
+    width: 100% !important;
+    
+    /* Ensure consistent padding */
+    padding: 0 16px !important;
+    
+    /* NO TRANSFORMS OR SCALING */
+    transform: none !important;
+}
+
+/* Optional: Add indicator dot below active button */
+.theme-buttons .btn.active::after,
+.theme-buttons .btn.btn-primary::after,
+.theme-buttons button.active::after,
+.theme-buttons button.btn-primary::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+}
+
+/* Responsive adjustment for smaller screens */
+@media (max-width: 480px) {
+    .theme-buttons {
+        grid-template-columns: repeat(2, 1fr); /* 2x2 grid on mobile */
+        max-width: 100%;
+    }
 }
 
 .range-container {
