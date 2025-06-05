@@ -110,6 +110,7 @@ export function resetTimer() {
 
     state.timer.seconds = 0;
     updateTimerDisplay();
+    updateSessionDisplay(); // Update session counter on reset
 
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
@@ -163,11 +164,11 @@ export function completeSession() {
         if (state.timer.pomodoroCount % 4 === 0) {
             // Long break after 4 pomodoros
             state.timer.minutes = state.timer.settings.longBreak;
-            showAchievement('Pomodoro Cycle Complete!', 'Take a long break');
+            showAchievement('Pomodoro Cycle Complete!', `Take a ${state.timer.settings.longBreak}-minute long break`);
         } else {
             // Short break
             state.timer.minutes = state.timer.settings.shortBreak;
-            showAchievement('Focus Complete!', 'Time for a short break');
+            showAchievement('Focus Complete!', `Time for a ${state.timer.settings.shortBreak}-minute break`);
         }
 
         state.timer.isBreak = true;
@@ -180,6 +181,7 @@ export function completeSession() {
     }
 
     updateTimerDisplay();
+    updateSessionDisplay(); // Update session counter
     updateUniverseStats();
 
     const startBtn = document.getElementById('startBtn');

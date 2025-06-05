@@ -200,6 +200,11 @@ export async function initApp() {
             console.log('✅ Timer display updated');
         }
 
+        if (loadedModules.timer?.updateSessionDisplay) {
+            loadedModules.timer.updateSessionDisplay();
+            console.log('✅ Session display updated');
+        }
+
         // Make functions globally accessible for HTML onclick handlers
         if (loadedModules.tasks?.toggleTask) {
             window.toggleTask = loadedModules.tasks.toggleTask;
