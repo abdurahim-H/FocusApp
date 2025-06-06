@@ -161,25 +161,25 @@ export function createEnhancedBlackHole() {
             `,
             transparent: true,
             side: THREE.DoubleSide,
-            blending: THREE.AdditiveBlending
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            depthTest: true
         });
     
         const accretionDisk = new THREE.Mesh(diskGeometry, diskMaterial);
         accretionDisk.rotation.x = Math.PI / 2;
+        accretionDisk.renderOrder = 1; // Render after background but before UI
         blackHoleGroup.add(accretionDisk);
         shaderMaterials.push(diskMaterial);
     
         // KEEP THE CYAN POLAR JETS - No changes to this!
         createPolarJets(blackHoleGroup);
         
-        // Gravitational lensing rings - CLOSER TOGETHER
-        createGravitationalLensing(blackHoleGroup);
+        // Enhanced gravitational lensing rings with improvements
+        createEnhancedGravitationalLensing(blackHoleGroup);
         
         // Smooth energy particles
         createSmoothEnergyParticles(blackHoleGroup);
-        
-        // Space-time distortion waves - CLOSER TOGETHER
-        createGravitationalWaves(blackHoleGroup);
         
         scene.add(blackHoleGroup);
         
@@ -220,7 +220,12 @@ export function createEnhancedBlackHole() {
 function updateTheme() {
     const theme = document.body.getAttribute('data-theme');
     const isLightTheme = theme === 'light';
-    const themeValue = isLightTheme ? 1.0 : 0.0;
+    const isCosmosTheme = theme === 'cosmos';
+    const isDarkTheme = theme === 'dark';
+    
+    let themeValue = 0; // Default dark
+    if (isLightTheme) themeValue = 1;
+    else if (isCosmosTheme) themeValue = 0.5;
     
     // Update disk material
     if (blackHoleSystem.diskMaterial && blackHoleSystem.diskMaterial.uniforms.theme) {
@@ -282,41 +287,116 @@ function createPolarJets(parentGroup) {
             `,
             transparent: true,
             blending: THREE.AdditiveBlending,
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
+            depthWrite: false
         });
         
         const jet = new THREE.Mesh(jetGeometry, jetMaterial);
         jet.position.y = direction * 25;
         jet.rotation.z = direction > 0 ? 0 : Math.PI;
+        jet.renderOrder = 2;
         parentGroup.add(jet);
         shaderMaterials.push(jetMaterial);
     });
 }
 
-// CLOSER gravitational lensing rings with BETTER VISIBILITY
-function createGravitationalLensing(parentGroup) {
-    // Rings closer together
+// ENHANCED gravitational lensing rings with all improvements
+function createEnhancedGravitationalLensing(parentGroup) {
+    // Three hero rings with rational size progression (1.3x)
+    const baseRadius = 20;
     const ringConfigs = [
-        { radius: 25, tiltRange: 30 },     // Ring 1
-        { radius: 35, tiltRange: 45 },     // Ring 2 (was 50)
-        { radius: 45, tiltRange: 60 }      // Ring 3 (was 65)
+        { 
+            radius: baseRadius, 
+            width: 2.0,
+            tiltRange: 30,
+            wobbleSpeed: 0.2
+        },
+        { 
+            radius: baseRadius * 1.3, 
+            width: 2.5,
+            tiltRange: 45,
+            wobbleSpeed: 0.3
+        },
+        { 
+            radius: baseRadius * 1.69, // 1.3 * 1.3
+            width: 3.0,
+            tiltRange: 60,
+            wobbleSpeed: 0.25
+        }
     ];
     
     ringConfigs.forEach((config, i) => {
-        const ringGeometry = new THREE.RingGeometry(config.radius - 0.5, config.radius + 0.5, 128);
+        // Create tapered ring geometry
+        const ringSegments = 128;
+        const ringThickness = 32;
+        const geometry = new THREE.BufferGeometry();
+        
+        const positions = [];
+        const normals = [];
+        const uvs = [];
+        const indices = [];
+        
+        // Generate vertices for tapered ring
+        for (let j = 0; j <= ringSegments; j++) {
+            const angle = (j / ringSegments) * Math.PI * 2;
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            
+            for (let k = 0; k <= ringThickness; k++) {
+                const t = k / ringThickness;
+                
+                // Taper the width based on viewing angle
+                const viewAngle = Math.atan2(sin, cos);
+                const taper = 1.0 - Math.abs(Math.sin(viewAngle)) * 0.3;
+                
+                const innerRadius = config.radius - config.width * 0.5 * taper;
+                const outerRadius = config.radius + config.width * 0.5 * taper;
+                const radius = innerRadius + (outerRadius - innerRadius) * t;
+                
+                positions.push(cos * radius, sin * radius, 0);
+                normals.push(0, 0, 1);
+                uvs.push(j / ringSegments, t);
+            }
+        }
+        
+        // Generate indices
+        for (let j = 0; j < ringSegments; j++) {
+            for (let k = 0; k < ringThickness; k++) {
+                const a = j * (ringThickness + 1) + k;
+                const b = a + ringThickness + 1;
+                const c = a + 1;
+                const d = b + 1;
+                
+                indices.push(a, b, c);
+                indices.push(b, d, c);
+            }
+        }
+        
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+        geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+        geometry.setIndex(indices);
+        
         const ringMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: { value: 0 },
                 ringIndex: { value: i },
-                theme: { value: 0 }
+                theme: { value: 0 },
+                wobbleSpeed: { value: config.wobbleSpeed }
             },
             vertexShader: `
                 varying vec2 vUv;
+                varying vec3 vPosition;
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
                 uniform float time;
                 uniform float ringIndex;
+                uniform float wobbleSpeed;
                 
                 void main() {
                     vUv = uv;
+                    vPosition = position;
+                    vNormal = normal;
                     
                     // Subtle wave distortion
                     vec3 pos = position;
@@ -324,50 +404,101 @@ function createGravitationalLensing(parentGroup) {
                     wave *= sin(length(position.xy) * 0.1 + time * 0.2);
                     pos.z += wave;
                     
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                    vViewPosition = -mvPosition.xyz;
+                    gl_Position = projectionMatrix * mvPosition;
                 }
             `,
             fragmentShader: `
                 varying vec2 vUv;
+                varying vec3 vPosition;
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
                 uniform float time;
                 uniform float ringIndex;
                 uniform float theme;
+                uniform float wobbleSpeed;
                 
                 void main() {
+                    // Edge fade using fresnel
+                    vec3 viewDir = normalize(vViewPosition);
+                    float fresnel = 1.0 - abs(dot(viewDir, vNormal));
+                    float edgeFade = pow(fresnel, 1.5);
+                    
+                    // Radial gradient for dusty halo effect
+                    float radialFade = 1.0 - smoothstep(0.0, 1.0, abs(vUv.y - 0.5) * 2.0);
+                    
+                    // Animated glow
                     float pulse = sin(time * 1.0 + ringIndex * 0.8) * 0.3 + 0.7;
                     
-                    vec3 color;
+                    vec3 baseColor;
+                    vec3 emissiveColor;
                     float opacity;
+                    float emissiveIntensity;
                     
-                    if (theme > 0.5) {
-                        // Light theme - keep purple but darker
-                        color = vec3(0.6, 0.3, 1.0) * pulse;
-                        opacity = 0.5;
+                    // Theme-specific colors and settings
+                    if (theme > 0.75) {
+                        // Light theme - high contrast purple with emissive
+                        baseColor = vec3(0.463, 0.376, 0.902); // #7660E6
+                        emissiveColor = vec3(0.686, 0.608, 1.0); // #AF9BFF
+                        emissiveIntensity = 0.6;
+                        opacity = 0.7 * radialFade;
+                        
+                        // Add extra edge highlight for light theme
+                        vec3 edgeColor = vec3(0.3, 0.2, 0.5); // Dark purple edge
+                        baseColor = mix(baseColor, edgeColor, pow(1.0 - radialFade, 3.0));
+                        
+                    } else if (theme > 0.25) {
+                        // Cosmos theme - vibrant with bloom
+                        baseColor = vec3(0.416, 0.325, 0.831); // #6A53D4
+                        emissiveColor = baseColor;
+                        emissiveIntensity = 0.2;
+                        opacity = 0.5 * radialFade;
+                        
+                        // Enhanced fresnel glow for cosmos
+                        emissiveIntensity += edgeFade * 0.3;
+                        
                     } else {
-                        // Dark/Cosmos theme - brighter, more vibrant colors
-                        color = mix(
-                            vec3(0.4, 0.8, 1.0),  // Cyan
-                            vec3(1.0, 0.4, 0.8),  // Pink
-                            sin(time * 0.5 + ringIndex)
-                        ) * pulse;
-                        opacity = 0.7;
+                        // Dark theme - current violet with higher emissive
+                        baseColor = vec3(0.6, 0.3, 1.0);
+                        emissiveColor = baseColor;
+                        emissiveIntensity = 0.35;
+                        opacity = 0.5 * radialFade;
+                        
+                        // Fresnel edge enhancement
+                        emissiveIntensity += edgeFade * 0.2;
                     }
                     
-                    // Smooth fade based on angle
+                    // Apply pulse animation
+                    vec3 color = baseColor * pulse;
+                    
+                    // Add emissive glow
+                    color += emissiveColor * emissiveIntensity * (0.7 + pulse * 0.3);
+                    
+                    // Additional glow based on edge fade
+                    color += emissiveColor * pow(edgeFade, 2.0) * 0.3;
+                    
+                    // Smooth fade based on angle for animation
                     float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
                     float angleFade = sin(angle * 4.0 + time * 0.5) * 0.5 + 0.5;
+                    opacity *= angleFade;
                     
-                    gl_FragColor = vec4(color, opacity * angleFade);
+                    // Ensure minimum visibility
+                    opacity = max(opacity, 0.15);
+                    
+                    gl_FragColor = vec4(color, opacity);
                 }
             `,
             transparent: true,
             blending: THREE.AdditiveBlending,
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            depthTest: true
         });
         
-        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+        const ring = new THREE.Mesh(geometry, ringMaterial);
         
-        // Apply randomized tilt
+        // Apply initial randomized tilt
         const tiltRadians = (config.tiltRange * Math.PI / 180);
         const randomTiltX = (Math.random() - 0.5) * 2 * tiltRadians;
         const randomTiltY = (Math.random() - 0.5) * 2 * tiltRadians;
@@ -375,6 +506,15 @@ function createGravitationalLensing(parentGroup) {
         ring.rotation.x = Math.PI / 2 + randomTiltX;
         ring.rotation.y = randomTiltY;
         
+        // Store wobble parameters
+        ring.userData = {
+            baseTiltX: ring.rotation.x,
+            baseTiltY: ring.rotation.y,
+            wobbleSpeed: config.wobbleSpeed,
+            wobblePhase: Math.random() * Math.PI * 2
+        };
+        
+        ring.renderOrder = 0; // Render behind everything else
         parentGroup.add(ring);
         shaderMaterials.push(ringMaterial);
         gravitationalWaves.push(ring);
@@ -472,101 +612,10 @@ function createSmoothEnergyParticles(parentGroup) {
     });
     
     const particles = new THREE.Points(particleGeometry, particleMaterial);
+    particles.renderOrder = 3;
     parentGroup.add(particles);
     shaderMaterials.push(particleMaterial);
     energyParticles.push(particles);
-}
-
-// CLOSER gravitational waves with BETTER VISIBILITY
-function createGravitationalWaves(parentGroup) {
-    // Waves closer together
-    const waveConfigs = [
-        { innerRadius: 30, outerRadius: 32, tiltRange: 15 },
-        { innerRadius: 42, outerRadius: 44, tiltRange: 30 },   // was 60
-        { innerRadius: 54, outerRadius: 56, tiltRange: 45 }    // was 80
-    ];
-    
-    waveConfigs.forEach((config, i) => {
-        const waveGeometry = new THREE.RingGeometry(config.innerRadius, config.outerRadius, 64);
-        const waveMaterial = new THREE.ShaderMaterial({
-            uniforms: {
-                time: { value: 0 },
-                waveIndex: { value: i },
-                productivity: { value: 0.5 },
-                theme: { value: 0 }
-            },
-            vertexShader: `
-                varying vec2 vUv;
-                uniform float time;
-                uniform float waveIndex;
-                
-                void main() {
-                    vUv = uv;
-                    
-                    vec3 pos = position;
-                    float wave = sin(time * 0.3 + waveIndex * 0.5) * 0.5;
-                    pos.z += wave;
-                    
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-                }
-            `,
-            fragmentShader: `
-                varying vec2 vUv;
-                uniform float time;
-                uniform float waveIndex;
-                uniform float productivity;
-                uniform float theme;
-                
-                void main() {
-                    float wave = sin(time * 0.8 + waveIndex * 1.2) * 0.5 + 0.5;
-                    
-                    vec3 color;
-                    float opacity;
-                    
-                    if (theme > 0.5) {
-                        // Light theme - visible but not overpowering
-                        vec3 lowColor = vec3(0.8, 0.4, 0.8);   // Pink
-                        vec3 highColor = vec3(0.4, 0.2, 0.8);  // Purple
-                        color = mix(lowColor, highColor, productivity);
-                        opacity = wave * 0.15 * (productivity + 0.5);
-                    } else {
-                        // Dark/Cosmos theme - brighter for visibility
-                        vec3 lowColor = vec3(0.2, 0.6, 1.0);   // Bright blue
-                        vec3 highColor = vec3(1.0, 0.2, 0.6);  // Hot pink
-                        color = mix(lowColor, highColor, productivity);
-                        opacity = wave * 0.25 * (productivity + 0.5);
-                    }
-                    
-                    gl_FragColor = vec4(color, opacity);
-                }
-            `,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            side: THREE.DoubleSide
-        });
-        
-        const wave = new THREE.Mesh(waveGeometry, waveMaterial);
-        
-        // Apply randomized tilt
-        const tiltRadians = (config.tiltRange * Math.PI / 180);
-        
-        // Randomize which axis to rotate around for variety
-        const axisChoice = Math.random();
-        if (axisChoice < 0.33) {
-            wave.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 2 * tiltRadians;
-        } else if (axisChoice < 0.66) {
-            wave.rotation.x = Math.PI / 2;
-            wave.rotation.y = (Math.random() - 0.5) * 2 * tiltRadians;
-        } else {
-            wave.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * tiltRadians;
-            wave.rotation.y = (Math.random() - 0.5) * tiltRadians;
-        }
-        
-        wave.position.y = (Math.random() - 0.5) * 2;
-        parentGroup.add(wave);
-        shaderMaterials.push(waveMaterial);
-        gravitationalWaves.push(wave);
-    });
 }
 
 // Smooth animation update function
@@ -576,7 +625,12 @@ export function updateBlackHoleEffects() {
     // Update theme for all materials
     const theme = document.body.getAttribute('data-theme');
     const isLightTheme = theme === 'light';
-    const themeValue = isLightTheme ? 1.0 : 0.0;
+    const isCosmosTheme = theme === 'cosmos';
+    const isDarkTheme = theme === 'dark';
+    
+    let themeValue = 0; // Default dark
+    if (isLightTheme) themeValue = 1;
+    else if (isCosmosTheme) themeValue = 0.5;
     
     // Update all shader materials with smooth transitions
     shaderMaterials.forEach(material => {
@@ -634,9 +688,19 @@ export function updateBlackHoleEffects() {
         }
     }
     
-    // Smooth gravitational wave animations
+    // Enhanced gravitational wave animations with orbital wobble
     gravitationalWaves.forEach((wave, index) => {
-        // Only rotate around Z axis to maintain the randomized tilts
+        // Orbital wobble (precession)
+        if (wave.userData) {
+            const wobbleAmount = 0.1; // radians
+            const wobbleX = Math.sin(time * wave.userData.wobbleSpeed + wave.userData.wobblePhase) * wobbleAmount;
+            const wobbleY = Math.cos(time * wave.userData.wobbleSpeed * 0.7 + wave.userData.wobblePhase) * wobbleAmount;
+            
+            wave.rotation.x = wave.userData.baseTiltX + wobbleX;
+            wave.rotation.y = wave.userData.baseTiltY + wobbleY;
+        }
+        
+        // Gentle rotation around Z axis
         wave.rotation.z += 0.0005 + index * 0.0002;
         
         // Smooth scale pulsing

@@ -85,11 +85,11 @@ export function init3D() {
             scene.add(light);
         });
 
-        // Create galaxy elements
+        // Create galaxy elements - STARS FIRST for immediate visibility
         createStarField();
+        createNebula();
         createEnhancedBlackHole();
         createPlanets();
-        createNebula();
         createComets();
         createSpaceObjects();
 
@@ -172,25 +172,24 @@ export function animate() {
         }
     });
 
-    // Enhanced star animations
+    // Enhanced star animations - FIXED to always be visible
     stars.forEach((starField, index) => {
+        // Ensure stars are always visible
+        starField.visible = true;
+        
         // Update shader time for animated stars
         if (starField.material.uniforms && starField.material.uniforms.time) {
             starField.material.uniforms.time.value = time;
         }
         
-        if (starField.material.opacity !== undefined) {
-            // Gentle pulsing
-            starField.material.opacity = 0.7 + Math.sin(time * 0.5 + index) * 0.2;
-        }
-        
+        // Only update rotation for star fields, not opacity
         if (starField.userData && starField.userData.rotationSpeed) {
             starField.rotation.y += starField.userData.rotationSpeed * 0.5;
             starField.rotation.x += starField.userData.rotationSpeed * 0.3;
         }
         
-        // Subtle drift for star fields
-        if (index % 2 === 0) {
+        // Subtle drift for nebula clouds only (not main star field)
+        if (starField.userData && starField.userData.isNebula) {
             starField.position.x = Math.sin(time * 0.05) * 2;
             starField.position.y = Math.cos(time * 0.07) * 2;
         }
