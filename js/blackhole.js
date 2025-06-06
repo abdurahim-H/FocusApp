@@ -6,6 +6,8 @@ export let blackHoleSystem = {};
 let shaderMaterials = [];
 let energyParticles = [];
 let gravitationalWaves = [];
+let dustParticleSystem = null;
+let lensingPlane = null;
 
 export function createEnhancedBlackHole() {
     try {
@@ -15,6 +17,9 @@ export function createEnhancedBlackHole() {
         }
 
         const blackHoleGroup = new THREE.Group();
+    
+        // Create gravitational lensing effect plane
+        createGravitationalLensingEffect(blackHoleGroup);
     
         // Event Horizon with smooth warping
         const eventHorizonGeometry = new THREE.SphereGeometry(3, 64, 64);
@@ -172,6 +177,9 @@ export function createEnhancedBlackHole() {
         blackHoleGroup.add(accretionDisk);
         shaderMaterials.push(diskMaterial);
     
+        // Create dust particle stream along accretion disk
+        createDustParticleStream(blackHoleGroup);
+    
         // KEEP THE CYAN POLAR JETS - No changes to this!
         createPolarJets(blackHoleGroup);
         
@@ -214,6 +222,174 @@ export function createEnhancedBlackHole() {
             console.error('Failed to create fallback black hole:', fallbackError);
         }
     }
+}
+
+// Create gravitational lensing effect
+function createGravitationalLensingEffect(parentGroup) {
+    const lensGeometry = new THREE.PlaneGeometry(100, 100, 1, 1);
+    const lensMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 },
+            blackHolePosition: { value: new THREE.Vector3(0, 0, 0) },
+            lensStrength: { value: 0.3 }
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            varying vec2 vUv;
+            uniform float time;
+            uniform vec3 blackHolePosition;
+            uniform float lensStrength;
+            
+            void main() {
+                vec2 center = vec2(0.5, 0.5);
+                vec2 pos = vUv - center;
+                float dist = length(pos);
+                
+                // Gravitational lensing distortion
+                float distortion = 1.0 / (1.0 + dist * dist * 10.0);
+                vec2 distortedPos = pos * (1.0 - distortion * lensStrength) + center;
+                
+                // Create warping effect
+                float warp = sin(time * 0.5 + dist * 20.0) * 0.01 * distortion;
+                distortedPos += vec2(warp);
+                
+                // Subtle color shift based on distortion
+                vec3 color = vec3(0.0);
+                float alpha = distortion * 0.1;
+                
+                gl_FragColor = vec4(color, alpha);
+            }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+    
+    lensingPlane = new THREE.Mesh(lensGeometry, lensMaterial);
+    lensingPlane.position.z = -20;
+    lensingPlane.renderOrder = -1; // Render behind everything
+    parentGroup.add(lensingPlane);
+    shaderMaterials.push(lensMaterial);
+}
+
+// Create dust particle stream along accretion disk
+function createDustParticleStream(parentGroup) {
+    const dustCount = 2000;
+    const dustGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(dustCount * 3);
+    const velocities = new Float32Array(dustCount * 3);
+    const ages = new Float32Array(dustCount);
+    const sizes = new Float32Array(dustCount);
+    const diskRadii = new Float32Array(dustCount);
+    
+    for (let i = 0; i < dustCount; i++) {
+        const i3 = i * 3;
+        
+        // Start particles along the accretion disk
+        const radius = 3.5 + Math.random() * 4; // Between inner and outer disk radius
+        const angle = Math.random() * Math.PI * 2;
+        const height = (Math.random() - 0.5) * 0.5; // Thin vertical spread
+        
+        positions[i3] = Math.cos(angle) * radius;
+        positions[i3 + 1] = height;
+        positions[i3 + 2] = Math.sin(angle) * radius;
+        
+        // Orbital velocity (faster closer to black hole)
+        const orbitalSpeed = 0.02 / Math.sqrt(radius);
+        velocities[i3] = -Math.sin(angle) * orbitalSpeed;
+        velocities[i3 + 1] = 0;
+        velocities[i3 + 2] = Math.cos(angle) * orbitalSpeed;
+        
+        ages[i] = Math.random() * 100;
+        sizes[i] = 0.5 + Math.random() * 1.5;
+        diskRadii[i] = radius;
+    }
+    
+    dustGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    dustGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+    dustGeometry.setAttribute('age', new THREE.BufferAttribute(ages, 1));
+    dustGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    dustGeometry.setAttribute('diskRadius', new THREE.BufferAttribute(diskRadii, 1));
+    
+    const dustMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 },
+            focusMode: { value: 0 }
+        },
+        vertexShader: `
+            attribute vec3 velocity;
+            attribute float age;
+            attribute float size;
+            attribute float diskRadius;
+            varying float vAge;
+            varying float vDiskRadius;
+            uniform float time;
+            
+            void main() {
+                vAge = age;
+                vDiskRadius = diskRadius;
+                
+                // Orbital motion with spiral
+                float angle = atan(position.z, position.x);
+                float radius = diskRadius;
+                
+                // Add spiral motion
+                angle += time * velocity.length() * 20.0;
+                radius -= time * 0.01; // Slowly spiral inward
+                
+                vec3 pos = vec3(
+                    cos(angle) * radius,
+                    position.y + sin(time * 2.0 + age) * 0.1,
+                    sin(angle) * radius
+                );
+                
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                gl_PointSize = size * (100.0 / -gl_Position.z);
+            }
+        `,
+        fragmentShader: `
+            varying float vAge;
+            varying float vDiskRadius;
+            uniform float time;
+            uniform float focusMode;
+            
+            void main() {
+                float life = mod(vAge + time * 10.0, 100.0) / 100.0;
+                float opacity = smoothstep(1.0, 0.0, life) * 0.3;
+                
+                // Dust color - yellowish brown
+                vec3 dustColor = vec3(0.8, 0.6, 0.3);
+                
+                // Fade based on distance from optimal radius
+                float radialFade = 1.0 - smoothstep(3.5, 7.5, vDiskRadius);
+                opacity *= radialFade;
+                
+                // Reduce visibility in focus mode
+                opacity *= 1.0 - focusMode * 0.7;
+                
+                // Soft particle edges
+                vec2 center = gl_PointCoord - vec2(0.5);
+                float dist = length(center);
+                float alpha = smoothstep(0.5, 0.0, dist);
+                
+                gl_FragColor = vec4(dustColor, opacity * alpha);
+            }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+    
+    dustParticleSystem = new THREE.Points(dustGeometry, dustMaterial);
+    dustParticleSystem.renderOrder = 2;
+    parentGroup.add(dustParticleSystem);
+    shaderMaterials.push(dustMaterial);
 }
 
 // Update theme for all materials
@@ -300,7 +476,7 @@ function createPolarJets(parentGroup) {
     });
 }
 
-// ENHANCED gravitational lensing rings with all improvements
+// ENHANCED gravitational lensing rings with focus mode desaturation
 function createEnhancedGravitationalLensing(parentGroup) {
     // Three hero rings with rational size progression (1.3x)
     const baseRadius = 20;
@@ -382,7 +558,8 @@ function createEnhancedGravitationalLensing(parentGroup) {
                 time: { value: 0 },
                 ringIndex: { value: i },
                 theme: { value: 0 },
-                wobbleSpeed: { value: config.wobbleSpeed }
+                wobbleSpeed: { value: config.wobbleSpeed },
+                focusMode: { value: 0 }
             },
             vertexShader: `
                 varying vec2 vUv;
@@ -418,6 +595,7 @@ function createEnhancedGravitationalLensing(parentGroup) {
                 uniform float ringIndex;
                 uniform float theme;
                 uniform float wobbleSpeed;
+                uniform float focusMode;
                 
                 void main() {
                     // Edge fade using fresnel
@@ -469,6 +647,16 @@ function createEnhancedGravitationalLensing(parentGroup) {
                         emissiveIntensity += edgeFade * 0.2;
                     }
                     
+                    // Focus mode desaturation
+                    if (focusMode > 0.0) {
+                        // Convert to grayscale
+                        float gray = dot(baseColor, vec3(0.299, 0.587, 0.114));
+                        baseColor = mix(baseColor, vec3(gray), focusMode * 0.8);
+                        emissiveColor = mix(emissiveColor, vec3(gray), focusMode * 0.8);
+                        emissiveIntensity *= (1.0 - focusMode * 0.5);
+                        opacity *= (1.0 - focusMode * 0.3);
+                    }
+                    
                     // Apply pulse animation
                     vec3 color = baseColor * pulse;
                     
@@ -476,7 +664,7 @@ function createEnhancedGravitationalLensing(parentGroup) {
                     color += emissiveColor * emissiveIntensity * (0.7 + pulse * 0.3);
                     
                     // Additional glow based on edge fade
-                    color += emissiveColor * pow(edgeFade, 2.0) * 0.3;
+                    color += emissiveColor * pow(edgeFade, 2.0) * 0.3 * (1.0 - focusMode * 0.5);
                     
                     // Smooth fade based on angle for animation
                     float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
@@ -484,7 +672,7 @@ function createEnhancedGravitationalLensing(parentGroup) {
                     opacity *= angleFade;
                     
                     // Ensure minimum visibility
-                    opacity = max(opacity, 0.15);
+                    opacity = max(opacity, 0.15 * (1.0 - focusMode * 0.5));
                     
                     gl_FragColor = vec4(color, opacity);
                 }
@@ -645,7 +833,7 @@ export function updateBlackHoleEffects() {
         }
         
         // Smooth focus mode transition
-        if (material.uniforms.focusMode) {
+        if (material.uniforms.focusMode !== undefined) {
             const targetFocus = appState.currentMode === 'focus' ? 1.0 : 0.0;
             const currentFocus = material.uniforms.focusMode.value;
             material.uniforms.focusMode.value += (targetFocus - currentFocus) * 0.05;
@@ -669,6 +857,11 @@ export function updateBlackHoleEffects() {
             material.uniforms.taskCompletion.value += (targetCompletion - currentCompletion) * 0.05;
         }
     });
+    
+    // Update gravitational lensing effect
+    if (lensingPlane) {
+        lensingPlane.rotation.z += 0.0001;
+    }
     
     // Smooth black hole rotation
     if (blackHoleSystem.group) {
