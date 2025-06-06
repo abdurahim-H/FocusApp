@@ -180,10 +180,10 @@ export function createEnhancedBlackHole() {
         // Create dust particle stream along accretion disk
         createDustParticleStream(blackHoleGroup);
     
-        // KEEP THE CYAN POLAR JETS - No changes to this!
-        createPolarJets(blackHoleGroup);
+        // ENHANCED POLAR JETS with perfect symmetry
+        createSymmetricPolarJets(blackHoleGroup);
         
-        // Enhanced gravitational lensing rings with improvements
+        // Enhanced gravitational lensing rings - now with 6 rings
         createEnhancedGravitationalLensing(blackHoleGroup);
         
         // Smooth energy particles
@@ -416,11 +416,11 @@ function updateTheme() {
     });
 }
 
-// KEEP THE ORIGINAL POLAR JETS - They are the cyan beams!
-function createPolarJets(parentGroup) {
-    // Create two jets shooting from the poles
+// ENHANCED SYMMETRIC POLAR JETS with animated ripple
+function createSymmetricPolarJets(parentGroup) {
+    // Create symmetrical jets using uniform cylinder with gradient
     [-1, 1].forEach(direction => {
-        const jetGeometry = new THREE.CylinderGeometry(0.2, 1, 40, 8, 1, true);
+        const jetGeometry = new THREE.CylinderGeometry(0.6, 0.6, 50, 32, 1, true); // Increased radius and segments
         const jetMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: { value: 0 },
@@ -429,78 +429,112 @@ function createPolarJets(parentGroup) {
             vertexShader: `
                 varying vec2 vUv;
                 varying float vY;
+                varying vec3 vPosition;
+                varying vec3 vWorldPosition;
                 uniform float time;
                 uniform float direction;
                 
                 void main() {
                     vUv = uv;
                     vY = position.y;
+                    vPosition = position;
                     
-                    // Add energy flow animation
+                    // Subtle wave animation for energy flow
                     vec3 pos = position;
-                    float wave = sin(time * 4.0 + position.y * 0.3) * 0.1;
-                    pos.x += wave;
-                    pos.z += wave * 0.7;
+                    float wave = sin(time * 3.0 + position.y * 0.2) * 0.1;
+                    pos.x += wave * (1.0 - abs(position.y) / 25.0);
+                    pos.z += wave * 0.7 * (1.0 - abs(position.y) / 25.0);
                     
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                    vec4 worldPos = modelMatrix * vec4(pos, 1.0);
+                    vWorldPosition = worldPos.xyz;
+                    
+                    gl_Position = projectionMatrix * viewMatrix * worldPos;
                 }
             `,
             fragmentShader: `
                 varying vec2 vUv;
                 varying float vY;
+                varying vec3 vPosition;
+                varying vec3 vWorldPosition;
                 uniform float time;
                 uniform float direction;
                 
                 void main() {
-                    float intensity = 1.0 - abs(vY) / 20.0;
-                    float flow = sin(time * 6.0 + vY * 0.5) * 0.5 + 0.5;
+                    // Calculate distance from center axis for radial gradient
+                    vec2 centerOffset = vec2(vUv.x - 0.5, 0.0) * 2.0;
+                    float radialDist = length(centerOffset);
                     
-                    vec3 jetColor = vec3(0.2, 0.8, 1.0); // Cyan energy
-                    float opacity = intensity * flow * 0.8;
+                    // Core glow effect - bright center, fading to edges
+                    float coreGlow = 1.0 - smoothstep(0.0, 0.8, radialDist);
+                    coreGlow = pow(coreGlow, 1.5);
                     
-                    gl_FragColor = vec4(jetColor, opacity);
+                    // Vertical fade at both ends - symmetric
+                    float distFromCenter = abs(vY) / 25.0;
+                    float verticalFade = 1.0 - smoothstep(0.6, 1.0, distFromCenter);
+                    
+                    // Energy flow animation
+                    float flowSpeed = 8.0;
+                    float flow = sin(vY * 0.3 - time * flowSpeed) * 0.5 + 0.5;
+                    flow *= sin(vY * 0.2 + time * flowSpeed * 0.7) * 0.5 + 0.5;
+                    
+                    // Ripple effect
+                    float ripple = sin(time * 4.0 + vY * 0.5) * 0.3 + 0.7;
+                    
+                    // Cyan energy color
+                    vec3 coreColor = vec3(0.4, 1.0, 1.0); // Bright cyan core
+                    vec3 glowColor = vec3(0.2, 0.8, 1.0); // Standard cyan glow
+                    vec3 jetColor = mix(glowColor, coreColor, coreGlow);
+                    
+                    // Combine all effects
+                    float intensity = coreGlow * verticalFade * ripple;
+                    intensity = intensity * 0.7 + flow * 0.3;
+                    
+                    // Ensure minimum visibility
+                    intensity = max(intensity, verticalFade * 0.2);
+                    
+                    // Output with additive blending
+                    gl_FragColor = vec4(jetColor * 1.5, intensity);
                 }
             `,
             transparent: true,
             blending: THREE.AdditiveBlending,
             side: THREE.DoubleSide,
-            depthWrite: false
+            depthWrite: false,
+            depthTest: true
         });
         
         const jet = new THREE.Mesh(jetGeometry, jetMaterial);
         jet.position.y = direction * 25;
-        jet.rotation.z = direction > 0 ? 0 : Math.PI;
-        jet.renderOrder = 2;
+        
+        // Add inner glow cylinder for extra brightness
+        const innerGlowGeometry = new THREE.CylinderGeometry(0.2, 0.2, 50, 16);
+        const innerGlowMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+        const innerGlow = new THREE.Mesh(innerGlowGeometry, innerGlowMaterial);
+        jet.add(innerGlow);
+        
+        jet.renderOrder = 10; // Render on top of most things
         parentGroup.add(jet);
         shaderMaterials.push(jetMaterial);
     });
 }
 
-// ENHANCED gravitational lensing rings with focus mode desaturation
+// ENHANCED gravitational lensing rings - increased to 6 rings with continuous precession
 function createEnhancedGravitationalLensing(parentGroup) {
-    // Three hero rings with rational size progression (1.3x)
-    const baseRadius = 20;
+    // Six rings with progressive spacing
+    const baseRadius = 14;
     const ringConfigs = [
-        { 
-            radius: baseRadius, 
-            width: 2.0,
-            tiltRange: 30,
-            wobbleSpeed: 0.2
-        },
-        { 
-            radius: baseRadius * 1.3, 
-            width: 2.5,
-            tiltRange: 45,
-            wobbleSpeed: 0.3
-        },
-        { 
-            radius: baseRadius * 1.69, // 1.3 * 1.3
-            width: 3.0,
-            tiltRange: 60,
-            wobbleSpeed: 0.25
-        }
+        { radius: baseRadius, width: 1.5 },
+        { radius: baseRadius * 1.4, width: 1.8 },
+        { radius: baseRadius * 1.8, width: 2.0 },
+        { radius: baseRadius * 2.3, width: 2.3 },
+        { radius: baseRadius * 2.9, width: 2.5 },
     ];
-    
+
     ringConfigs.forEach((config, i) => {
         // Create tapered ring geometry
         const ringSegments = 128;
@@ -558,7 +592,6 @@ function createEnhancedGravitationalLensing(parentGroup) {
                 time: { value: 0 },
                 ringIndex: { value: i },
                 theme: { value: 0 },
-                wobbleSpeed: { value: config.wobbleSpeed },
                 focusMode: { value: 0 }
             },
             vertexShader: `
@@ -568,7 +601,6 @@ function createEnhancedGravitationalLensing(parentGroup) {
                 varying vec3 vViewPosition;
                 uniform float time;
                 uniform float ringIndex;
-                uniform float wobbleSpeed;
                 
                 void main() {
                     vUv = uv;
@@ -594,7 +626,6 @@ function createEnhancedGravitationalLensing(parentGroup) {
                 uniform float time;
                 uniform float ringIndex;
                 uniform float theme;
-                uniform float wobbleSpeed;
                 uniform float focusMode;
                 
                 void main() {
@@ -686,20 +717,19 @@ function createEnhancedGravitationalLensing(parentGroup) {
         
         const ring = new THREE.Mesh(geometry, ringMaterial);
         
-        // Apply initial randomized tilt
-        const tiltRadians = (config.tiltRange * Math.PI / 180);
-        const randomTiltX = (Math.random() - 0.5) * 2 * tiltRadians;
-        const randomTiltY = (Math.random() - 0.5) * 2 * tiltRadians;
+        // Initial random orientation
+        const initialTiltX = (Math.random() - 0.5) * Math.PI * 0.3;
+        const initialTiltY = (Math.random() - 0.5) * Math.PI * 0.2;
         
-        ring.rotation.x = Math.PI / 2 + randomTiltX;
-        ring.rotation.y = randomTiltY;
+        ring.rotation.x = Math.PI / 2 + initialTiltX;
+        ring.rotation.y = initialTiltY;
         
-        // Store wobble parameters
+        // Store precession parameters
         ring.userData = {
-            baseTiltX: ring.rotation.x,
-            baseTiltY: ring.rotation.y,
-            wobbleSpeed: config.wobbleSpeed,
-            wobblePhase: Math.random() * Math.PI * 2
+            precessionPhaseX: i * 0.4 * Math.PI, // Phase offset based on ring index
+            precessionPhaseY: i * 0.7 * Math.PI,
+            initialTiltX: ring.rotation.x,
+            initialTiltY: ring.rotation.y
         };
         
         ring.renderOrder = 0; // Render behind everything else
@@ -881,20 +911,22 @@ export function updateBlackHoleEffects() {
         }
     }
     
-    // Enhanced gravitational wave animations with orbital wobble
+    // Enhanced gravitational wave animations with continuous precession
     gravitationalWaves.forEach((wave, index) => {
-        // Orbital wobble (precession)
+        // Continuous precession animation
         if (wave.userData) {
-            const wobbleAmount = 0.1; // radians
-            const wobbleX = Math.sin(time * wave.userData.wobbleSpeed + wave.userData.wobblePhase) * wobbleAmount;
-            const wobbleY = Math.cos(time * wave.userData.wobbleSpeed * 0.7 + wave.userData.wobblePhase) * wobbleAmount;
+            // X-axis precession: ±15° amplitude, ~40s period
+            const precessionX = Math.sin(time * (2 * Math.PI / 40) + wave.userData.precessionPhaseX) * (15 * Math.PI / 180);
             
-            wave.rotation.x = wave.userData.baseTiltX + wobbleX;
-            wave.rotation.y = wave.userData.baseTiltY + wobbleY;
+            // Y-axis precession: ±10° amplitude, ~55s period
+            const precessionY = Math.sin(time * (2 * Math.PI / 55) + wave.userData.precessionPhaseY) * (10 * Math.PI / 180);
+            
+            // Apply precession to initial tilts
+            wave.rotation.x = wave.userData.initialTiltX + precessionX;
+            wave.rotation.y = wave.userData.initialTiltY + precessionY;
         }
         
-        // Gentle rotation around Z axis
-        wave.rotation.z += 0.0005 + index * 0.0002;
+        // No Z-axis rotation as requested
         
         // Smooth scale pulsing
         if (appState.timerState === 'running') {
