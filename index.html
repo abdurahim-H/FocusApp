@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cosmic Focus - 3D Productivity Universe</title>
+    
+    <!-- Core Styles -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/themes.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
     
+    <!-- Theme Initialization Script -->
     <script>
         const savedTheme = localStorage.getItem('fu_theme') || 'auto';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -16,6 +19,7 @@
     </script>
 </head>
 <body data-theme="auto">
+    <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-text">Initializing Universe...</div>
         <div class="loading-bar">
@@ -23,15 +27,19 @@
         </div>
     </div>
 
+    <!-- 3D Scene Container -->
     <div id="scene-container"></div>
 
+    <!-- Main Navigation -->
     <nav class="nav">
         <button class="nav-btn active" data-mode="home">Home</button>
         <button class="nav-btn" data-mode="focus">Focus</button>
         <button class="nav-btn" data-mode="ambient">Ambient</button>
     </nav>
 
+    <!-- Main Content Container -->
     <div class="container">
+        <!-- Home Mode -->
         <div class="mode active" id="home">
             <div class="home-content">
                 <h1>Cosmic Focus</h1>
@@ -40,6 +48,7 @@
             </div>
         </div>
 
+        <!-- Focus Mode - Pomodoro Timer and Tasks -->
         <div class="mode" id="focus">
             <div class="focus-content">
                 <div class="session-info">
@@ -58,6 +67,7 @@
                     <button class="btn hidden" id="skipFocusBtn">Skip Focus</button>
                 </div>
 
+                <!-- Task Management Section -->
                 <div class="task-section">
                     <h3 class="tasks-title">Tasks for this session</h3>
                     <div class="task-input-group">
@@ -69,6 +79,7 @@
             </div>
         </div>
 
+        <!-- Ambient Mode - Relaxation and Sounds -->
         <div class="mode" id="ambient">
             <div class="ambient-content">
                 <div class="breathing-circle"></div>
@@ -86,24 +97,29 @@
             </div>
         </div>
 
+        <!-- Progress Indicator -->
         <div class="progress-3d" id="progress3d" style="display: none;">
             <span class="progress-label">Universe Energy:</span>
             <span class="progress-value" id="progressValue">0%</span>
         </div>
 
+        <!-- Achievement Notifications -->
         <div class="achievement" id="achievement">
             <div class="achievement-title" id="achievementTitle">First Star!</div>
             <div class="achievement-desc" id="achievementDesc">You've started your journey</div>
         </div>
 
+        <!-- Settings Button -->
         <button class="settings-btn" id="settingsBtn">⚙️</button>
 
+        <!-- Settings Modal -->
         <div class="settings-modal-overlay" id="settingsModalOverlay">
             <div class="settings-modal">
                 <button class="close-btn" id="closeSettingsBtn" title="Close">✕</button>
                 <h2>Settings</h2>
                 <div class="settings-content">
                     
+                    <!-- Theme Selection -->
                     <div class="settings-section">
                         <h4>Theme</h4>
                         <div class="theme-buttons">
@@ -130,11 +146,13 @@
                         </div>
                     </div>
                     
+                    <!-- Custom Greeting -->
                     <div class="settings-section">
                         <label for="greetingInput" class="settings-label">Greeting Message</label>
                         <input type="text" id="greetingInput" class="text-input" maxlength="40" placeholder="Welcome to Your Universe!">
                     </div>
                     
+                    <!-- Action Buttons -->
                     <div class="settings-section">
                         <div class="settings-buttons">
                             <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
@@ -142,12 +160,14 @@
                         </div>
                     </div>
                     
+                    <!-- Save Confirmation Message -->
                     <div id="settingsSavedMsg" class="settings-saved-msg">Settings Saved!</div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- External Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
