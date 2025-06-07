@@ -8,7 +8,7 @@ const ambientSounds = {
     rain: './mixkit-calm-thunderstorm-in-the-jungle-2415.wav', // Local file for seamless looping
     ocean: 'https://www.soundjay.com/misc/sounds/ocean-waves.wav',
     forest: 'https://www.soundjay.com/misc/sounds/forest.wav',
-    space: 'https://www.soundjay.com/misc/sounds/space-ambient.wav'
+    cafe: 'https://www.soundjay.com/misc/sounds/cafe-ambient.wav'
 };
 
 // Web Audio API context and nodes
@@ -174,8 +174,8 @@ export function setupAmbientControls() {
         await initAudioContext();
         playAmbientSound('forest');
     });
-    document.getElementById('spaceBtn').addEventListener('click', async () => {
+    document.getElementById('cafeBtn').addEventListener('click', async () => {
         await initAudioContext();
-        playAmbientSound('space');
+        playAmbientSound('cafe');
     });
 }
