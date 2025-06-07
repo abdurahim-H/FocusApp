@@ -13,12 +13,12 @@
     
     <!-- Theme Initialization Script -->
     <script>
-        const savedTheme = localStorage.getItem('fu_theme') || 'auto';
+        const savedTheme = localStorage.getItem('fu_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
         document.body.setAttribute('data-theme', savedTheme);
     </script>
 </head>
-<body data-theme="auto">
+<body data-theme="dark">
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-text">Initializing Universe...</div>
@@ -124,9 +124,9 @@
                         <h4>Theme</h4>
                         <div class="theme-buttons">
                             <button class="btn" id="themeLightBtn" data-theme="light">Light</button>
-                            <button class="btn" id="themeDarkBtn" data-theme="dark">Dark</button>
+                            <button class="btn btn-primary" id="themeDarkBtn" data-theme="dark">Dark</button>
                             <button class="btn" id="themeCosmosBtn" data-theme="cosmos">Cosmos</button>
-                            <button class="btn btn-primary" id="themeAutoBtn" data-theme="auto">Auto</button>
+                            <button class="btn" id="themeAutoBtn" data-theme="auto">Auto</button>
                         </div>
                     </div>
                     
@@ -135,6 +135,22 @@
                         <label for="focusLengthRange" class="settings-label">Focus Duration: <span id="focusLengthValue">25</span> min</label>
                         <div class="range-container">
                             <input type="range" min="1" max="60" value="25" id="focusLengthRange" class="range-input">
+                        </div>
+                    </div>
+                    
+                    <!-- Short Break Duration -->
+                    <div class="settings-section">
+                        <label for="shortBreakRange" class="settings-label">Short Break Duration: <span id="shortBreakValue">5</span> min</label>
+                        <div class="range-container">
+                            <input type="range" min="1" max="30" value="5" id="shortBreakRange" class="range-input">
+                        </div>
+                    </div>
+                    
+                    <!-- Long Break Duration -->
+                    <div class="settings-section">
+                        <label for="longBreakRange" class="settings-label">Long Break Duration: <span id="longBreakValue">15</span> min</label>
+                        <div class="range-container">
+                            <input type="range" min="5" max="60" value="15" id="longBreakRange" class="range-input">
                         </div>
                     </div>
                     

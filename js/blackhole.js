@@ -284,46 +284,236 @@ function createGravitationalLensingHalo(parentGroup) {
     shaderMaterials.push(lensMaterial);
 }
 
+// -----------------------------------------------------------------------------------------------------//
+
+// // Create relativistic polar jets with particle system
+// function createRelativisticPolarJets(parentGroup) {
+//     [-1, 1].forEach(direction => {
+//         // Create particle jet
+//         const jetParticleCount = 1000;
+//         const jetGeometry = new THREE.BufferGeometry();
+//         const positions = new Float32Array(jetParticleCount * 3);
+//         const velocities = new Float32Array(jetParticleCount * 3);
+//         const ages = new Float32Array(jetParticleCount);
+//         const sizes = new Float32Array(jetParticleCount);
+        
+//         for (let i = 0; i < jetParticleCount; i++) {
+//             const i3 = i * 3;
+            
+//             // Start particles near event horizon
+//             const spreadRadius = 0.5;
+//             const x = (Math.random() - 0.5) * spreadRadius;
+//             const z = (Math.random() - 0.5) * spreadRadius;
+//             const y = direction * 3; // Start at black hole poles
+            
+//             positions[i3] = x;
+//             positions[i3 + 1] = y;
+//             positions[i3 + 2] = z;
+            
+//             // Relativistic velocity (near speed of light)
+//             const speed = 0.5 + Math.random() * 0.3;
+//             velocities[i3] = x * 0.1; // Slight spread
+//             velocities[i3 + 1] = direction * speed;
+//             velocities[i3 + 2] = z * 0.1;
+            
+//             ages[i] = Math.random() * 100;
+//             sizes[i] = 1 + Math.random() * 2;
+//         }
+        
+//         jetGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+//         jetGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+//         jetGeometry.setAttribute('age', new THREE.BufferAttribute(ages, 1));
+//         jetGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        
+//         const jetMaterial = new THREE.ShaderMaterial({
+//             uniforms: {
+//                 time: { value: 0 },
+//                 direction: { value: direction }
+//             },
+//             vertexShader: `
+//                 attribute vec3 velocity;
+//                 attribute float age;
+//                 attribute float size;
+//                 varying float vAge;
+//                 varying float vDistance;
+//                 varying float vSpeed;
+//                 uniform float time;
+//                 uniform float direction;
+                
+//                 void main() {
+//                     vAge = mod(age + time * 20.0, 100.0);
+                    
+//                     // Calculate position along jet
+//                     float lifeTime = vAge / 100.0;
+//                     vec3 pos = position + velocity * lifeTime * 50.0;
+                    
+//                     // Cone shape - wider as it travels
+//                     float spread = lifeTime * 0.5;
+//                     pos.x += pos.x * spread;
+//                     pos.z += pos.z * spread;
+                    
+//                     vDistance = length(pos - position);
+//                     vSpeed = length(velocity);
+                    
+//                     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+//                     gl_PointSize = size * (100.0 / -gl_Position.z) * (2.0 - lifeTime);
+//                 }
+//             `,
+//             fragmentShader: `
+//                 varying float vAge;
+//                 varying float vDistance;
+//                 varying float vSpeed;
+//                 uniform float time;
+//                 uniform float direction;
+                
+//                 void main() {
+//                     float life = vAge / 100.0;
+                    
+//                     // Pulse effect
+//                     float pulse = sin(time * 3.0 + vDistance * 0.1) * 0.3 + 0.7;
+                    
+//                     // Color cooling as particles travel
+//                     vec3 hotColor = vec3(0.5, 0.8, 1.0); // Blue-white hot
+//                     vec3 coolColor = vec3(0.2, 0.6, 1.0); // Cooler blue
+//                     vec3 color = mix(hotColor, coolColor, life);
+                    
+//                     // Brightness based on speed and distance
+//                     float brightness = (1.0 - life) * pulse * vSpeed;
+//                     brightness = pow(brightness, 1.5);
+                    
+//                     // Soft particle edges
+//                     vec2 center = gl_PointCoord - vec2(0.5);
+//                     float dist = length(center);
+//                     float alpha = smoothstep(0.5, 0.0, dist);
+                    
+//                     gl_FragColor = vec4(color * brightness * 2.0, alpha * brightness);
+//                 }
+//             `,
+//             transparent: true,
+//             blending: THREE.AdditiveBlending,
+//             depthWrite: false
+//         });
+        
+//         const jetParticles = new THREE.Points(jetGeometry, jetMaterial);
+//         jetParticles.renderOrder = 5;
+//         parentGroup.add(jetParticles);
+//         shaderMaterials.push(jetMaterial);
+//         polarJetParticles.push(jetParticles);
+//     });
+// }
+
 // Create relativistic polar jets with particle system
 function createRelativisticPolarJets(parentGroup) {
     [-1, 1].forEach(direction => {
-        // Create particle jet
-        const jetParticleCount = 1000;
-        const jetGeometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(jetParticleCount * 3);
-        const velocities = new Float32Array(jetParticleCount * 3);
-        const ages = new Float32Array(jetParticleCount);
-        const sizes = new Float32Array(jetParticleCount);
+        // Create jet container
+        const jetGroup = new THREE.Group();
         
-        for (let i = 0; i < jetParticleCount; i++) {
+        // 1. PLASMA SPINE - Razor-thin core with flowing texture
+        const spineGeometry = new THREE.CylinderGeometry(0.15, 0.05, 60, 16, 32, true);
+        const spineMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                direction: { value: direction }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                varying float vY;
+                varying float vFade;
+                uniform float time;
+                
+                void main() {
+                    vUv = uv;
+                    vY = position.y;
+                    
+                    // Fade at the ends
+                    vFade = 1.0 - smoothstep(20.0, 30.0, abs(position.y));
+                    
+                    vec3 pos = position;
+                    
+                    // Subtle wave along spine
+                    float wave = sin(time * 2.0 + position.y * 0.1) * 0.02;
+                    pos.x += wave;
+                    pos.z += wave * 0.7;
+                    
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec2 vUv;
+                varying float vY;
+                varying float vFade;
+                uniform float time;
+                uniform float direction;
+                
+                void main() {
+                    // Flowing texture
+                    float flow = fract(vY * 0.1 - time * 0.4);
+                    flow = pow(flow, 2.0);
+                    
+                    // Core colors: cyan-white
+                    vec3 coreColor = vec3(0.9, 1.0, 1.0); // #E6FFFF
+                    vec3 midColor = vec3(0.43, 0.95, 1.0); // #6DF2FF
+                    
+                    vec3 color = mix(coreColor, midColor, flow);
+                    
+                    // Radial fade
+                    float radialFade = 1.0 - smoothstep(0.0, 1.0, abs(vUv.x - 0.5) * 2.0);
+                    
+                    // Combined opacity
+                    float opacity = radialFade * vFade * (0.8 + flow * 0.2);
+                    
+                    gl_FragColor = vec4(color * 1.5, opacity);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            side: THREE.DoubleSide,
+            depthWrite: false
+        });
+        
+        const spine = new THREE.Mesh(spineGeometry, spineMaterial);
+        jetGroup.add(spine);
+        shaderMaterials.push(spineMaterial);
+        
+        // 2. PARTICLE SHEATH - Thousands of spiraling particles
+        const particleCount = 5000;
+        const sheathGeometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = new Float32Array(particleCount * 3);
+        const ages = new Float32Array(particleCount);
+        const sizes = new Float32Array(particleCount);
+        const angles = new Float32Array(particleCount);
+        
+        for (let i = 0; i < particleCount; i++) {
             const i3 = i * 3;
             
-            // Start particles near event horizon
-            const spreadRadius = 0.5;
-            const x = (Math.random() - 0.5) * spreadRadius;
-            const z = (Math.random() - 0.5) * spreadRadius;
-            const y = direction * 3; // Start at black hole poles
+            // Start near black hole in a cone
+            const coneAngle = (Math.random() - 0.5) * 10 * Math.PI / 180; // 5-10 degree cone
+            const radius = Math.random() * 0.3;
+            const theta = Math.random() * Math.PI * 2;
             
-            positions[i3] = x;
-            positions[i3 + 1] = y;
-            positions[i3 + 2] = z;
+            positions[i3] = Math.cos(theta) * radius;
+            positions[i3 + 1] = direction * 3; // Start at black hole pole
+            positions[i3 + 2] = Math.sin(theta) * radius;
             
-            // Relativistic velocity (near speed of light)
-            const speed = 0.5 + Math.random() * 0.3;
-            velocities[i3] = x * 0.1; // Slight spread
+            // Velocity with slight outward curve
+            const speed = 0.3 + Math.random() * 0.2;
+            velocities[i3] = Math.sin(coneAngle) * Math.cos(theta) * 0.1;
             velocities[i3 + 1] = direction * speed;
-            velocities[i3 + 2] = z * 0.1;
+            velocities[i3 + 2] = Math.sin(coneAngle) * Math.sin(theta) * 0.1;
             
             ages[i] = Math.random() * 100;
-            sizes[i] = 1 + Math.random() * 2;
+            sizes[i] = 0.5 + Math.random() * 1.5;
+            angles[i] = Math.random() * Math.PI * 2;
         }
         
-        jetGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        jetGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
-        jetGeometry.setAttribute('age', new THREE.BufferAttribute(ages, 1));
-        jetGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        sheathGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        sheathGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+        sheathGeometry.setAttribute('age', new THREE.BufferAttribute(ages, 1));
+        sheathGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        sheathGeometry.setAttribute('angle', new THREE.BufferAttribute(angles, 1));
         
-        const jetMaterial = new THREE.ShaderMaterial({
+        const sheathMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: { value: 0 },
                 direction: { value: direction }
@@ -332,59 +522,66 @@ function createRelativisticPolarJets(parentGroup) {
                 attribute vec3 velocity;
                 attribute float age;
                 attribute float size;
+                attribute float angle;
                 varying float vAge;
                 varying float vDistance;
-                varying float vSpeed;
                 uniform float time;
                 uniform float direction;
                 
                 void main() {
-                    vAge = mod(age + time * 20.0, 100.0);
+                    float lifetime = mod(age + time * 20.0, 100.0);
+                    vAge = lifetime / 100.0;
                     
-                    // Calculate position along jet
-                    float lifeTime = vAge / 100.0;
-                    vec3 pos = position + velocity * lifeTime * 50.0;
+                    // Particle position along jet with spiral
+                    vec3 pos = position;
+                    float travelDistance = vAge * 50.0;
                     
-                    // Cone shape - wider as it travels
-                    float spread = lifeTime * 0.5;
-                    pos.x += pos.x * spread;
-                    pos.z += pos.z * spread;
+                    // Spiral motion
+                    float spiralRadius = 0.2 + vAge * 0.5;
+                    float spiralAngle = angle + time * 2.0 + travelDistance * 0.2;
                     
-                    vDistance = length(pos - position);
-                    vSpeed = length(velocity);
+                    pos.x = cos(spiralAngle) * spiralRadius;
+                    pos.z = sin(spiralAngle) * spiralRadius;
+                    pos.y = direction * (3.0 + travelDistance);
+                    
+                    // Slight outward curve
+                    pos.x += vAge * vAge * velocity.x * 10.0;
+                    pos.z += vAge * vAge * velocity.z * 10.0;
+                    
+                    vDistance = travelDistance;
                     
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-                    gl_PointSize = size * (100.0 / -gl_Position.z) * (2.0 - lifeTime);
+                    gl_PointSize = size * (100.0 / -gl_Position.z) * (1.0 - vAge * 0.5);
                 }
             `,
             fragmentShader: `
                 varying float vAge;
                 varying float vDistance;
-                varying float vSpeed;
                 uniform float time;
-                uniform float direction;
                 
                 void main() {
-                    float life = vAge / 100.0;
+                    // Color gradient from white-hot to aqua to magenta
+                    vec3 hotColor = vec3(1.0, 1.0, 1.0);
+                    vec3 midColor = vec3(0.0, 0.81, 1.0); // #00CFFF
+                    vec3 coolColor = vec3(0.58, 0.34, 1.0); // #9457FF
                     
-                    // Pulse effect
-                    float pulse = sin(time * 3.0 + vDistance * 0.1) * 0.3 + 0.7;
+                    vec3 color;
+                    if (vAge < 0.5) {
+                        color = mix(hotColor, midColor, vAge * 2.0);
+                    } else {
+                        color = mix(midColor, coolColor, (vAge - 0.5) * 2.0);
+                    }
                     
-                    // Color cooling as particles travel
-                    vec3 hotColor = vec3(0.5, 0.8, 1.0); // Blue-white hot
-                    vec3 coolColor = vec3(0.2, 0.6, 1.0); // Cooler blue
-                    vec3 color = mix(hotColor, coolColor, life);
+                    // Particle fade
+                    float opacity = 1.0 - smoothstep(0.7, 1.0, vAge);
+                    opacity *= 0.8;
                     
-                    // Brightness based on speed and distance
-                    float brightness = (1.0 - life) * pulse * vSpeed;
-                    brightness = pow(brightness, 1.5);
-                    
-                    // Soft particle edges
+                    // Soft edges
                     vec2 center = gl_PointCoord - vec2(0.5);
                     float dist = length(center);
                     float alpha = smoothstep(0.5, 0.0, dist);
                     
-                    gl_FragColor = vec4(color * brightness * 2.0, alpha * brightness);
+                    gl_FragColor = vec4(color * 1.2, alpha * opacity);
                 }
             `,
             transparent: true,
@@ -392,11 +589,154 @@ function createRelativisticPolarJets(parentGroup) {
             depthWrite: false
         });
         
-        const jetParticles = new THREE.Points(jetGeometry, jetMaterial);
-        jetParticles.renderOrder = 5;
-        parentGroup.add(jetParticles);
-        shaderMaterials.push(jetMaterial);
-        polarJetParticles.push(jetParticles);
+        const sheath = new THREE.Points(sheathGeometry, sheathMaterial);
+        jetGroup.add(sheath);
+        shaderMaterials.push(sheathMaterial);
+        
+        // 3. SHOCK WAVE RINGS
+        const shockWaves = [];
+        const maxShockWaves = 5;
+        
+        for (let i = 0; i < maxShockWaves; i++) {
+            const ringGeometry = new THREE.RingGeometry(0.1, 0.5, 32, 1);
+            const ringMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    birthTime: { value: -1 },
+                    direction: { value: direction }
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    uniform float time;
+                    uniform float birthTime;
+                    uniform float direction;
+                    
+                    void main() {
+                        vUv = uv;
+                        
+                        vec3 pos = position;
+                        
+                        if (birthTime > 0.0) {
+                            float age = time - birthTime;
+                            float travelDistance = age * 15.0;
+                            
+                            // Move along jet
+                            pos.y += direction * travelDistance;
+                            
+                            // Expand radius
+                            float expansion = 1.0 + age * 2.0;
+                            pos.x *= expansion;
+                            pos.z *= expansion;
+                        }
+                        
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    varying vec2 vUv;
+                    uniform float time;
+                    uniform float birthTime;
+                    
+                    void main() {
+                        if (birthTime < 0.0) {
+                            discard;
+                        }
+                        
+                        float age = time - birthTime;
+                        
+                        // Fade out over 1 second
+                        float opacity = 1.0 - smoothstep(0.0, 1.0, age);
+                        
+                        // Ring gradient
+                        float ring = 1.0 - abs(vUv.y - 0.5) * 2.0;
+                        
+                        vec3 color = vec3(0.8, 0.95, 1.0);
+                        
+                        gl_FragColor = vec4(color * 2.0, ring * opacity * 0.8);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            
+            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = direction * 3;
+            ring.visible = false;
+            jetGroup.add(ring);
+            shaderMaterials.push(ringMaterial);
+            
+            shockWaves.push({
+                mesh: ring,
+                material: ringMaterial,
+                lastEmit: -10
+            });
+        }
+        
+        // 4. SOFT HALO/BLOOM
+        const haloGeometry = new THREE.CylinderGeometry(2, 0.5, 60, 8, 1, true);
+        const haloMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                intensity: { value: 1.0 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                varying float vY;
+                
+                void main() {
+                    vUv = uv;
+                    vY = position.y;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec2 vUv;
+                varying float vY;
+                uniform float time;
+                uniform float intensity;
+                
+                void main() {
+                    // Soft radial fade
+                    float radialFade = 1.0 - smoothstep(0.0, 1.0, abs(vUv.x - 0.5) * 2.0);
+                    radialFade = pow(radialFade, 3.0);
+                    
+                    // Vertical fade
+                    float verticalFade = 1.0 - smoothstep(20.0, 30.0, abs(vY));
+                    
+                    // Breathing intensity
+                    float breathing = 0.85 + sin(time * 0.314) * 0.15; // ~20s cycle
+                    
+                    vec3 haloColor = vec3(0.31, 0.44, 1.0); // #4F70FF
+                    
+                    float opacity = radialFade * verticalFade * breathing * intensity * 0.2;
+                    
+                    gl_FragColor = vec4(haloColor, opacity);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            side: THREE.DoubleSide,
+            depthWrite: false
+        });
+        
+        const halo = new THREE.Mesh(haloGeometry, haloMaterial);
+        jetGroup.add(halo);
+        shaderMaterials.push(haloMaterial);
+        
+        // Position and add the complete jet
+        jetGroup.position.y = direction * 25;
+        jetGroup.userData = {
+            direction: direction,
+            shockWaves: shockWaves,
+            sheathGeometry: sheathGeometry,
+            lastShockTime: 0
+        };
+        
+        parentGroup.add(jetGroup);
+        polarJetParticles.push(jetGroup);
     });
 }
 
@@ -907,6 +1247,97 @@ function createSmoothEnergyParticles(parentGroup) {
     energyParticles.push(particles);
 }
 
+// // Smooth animation update function
+// export function updateBlackHoleEffects() {
+//     const time = Date.now() * 0.001;
+    
+//     const theme = document.body.getAttribute('data-theme');
+//     const isLightTheme = theme === 'light';
+//     const isCosmosTheme = theme === 'cosmos';
+//     const isDarkTheme = theme === 'dark';
+    
+//     let themeValue = 0;
+//     if (isLightTheme) themeValue = 1;
+//     else if (isCosmosTheme) themeValue = 0.5;
+    
+//     shaderMaterials.forEach(material => {
+//         if (material.uniforms.time) {
+//             material.uniforms.time.value = time;
+//         }
+        
+//         if (material.uniforms.theme !== undefined) {
+//             const currentTheme = material.uniforms.theme.value;
+//             material.uniforms.theme.value += (themeValue - currentTheme) * 0.05;
+//         }
+        
+//         if (material.uniforms.focusMode !== undefined) {
+//             const targetFocus = appState.currentMode === 'focus' ? 1.0 : 0.0;
+//             const currentFocus = material.uniforms.focusMode.value;
+//             material.uniforms.focusMode.value += (targetFocus - currentFocus) * 0.05;
+//         }
+        
+//         if (material.uniforms.productivity) {
+//             const completedTasks = appState.tasks.filter(task => task.completed).length;
+//             const totalTasks = appState.tasks.length;
+//             const targetProductivity = totalTasks > 0 ? completedTasks / totalTasks : 0.5;
+//             const currentProductivity = material.uniforms.productivity.value;
+//             material.uniforms.productivity.value += (targetProductivity - currentProductivity) * 0.05;
+//         }
+        
+//         if (material.uniforms.taskCompletion) {
+//             const recentCompletions = appState.tasks.filter(task => 
+//                 task.completed && Date.now() - task.completedAt < 5000
+//             ).length;
+//             const targetCompletion = Math.min(recentCompletions / 3, 1.0);
+//             const currentCompletion = material.uniforms.taskCompletion.value;
+//             material.uniforms.taskCompletion.value += (targetCompletion - currentCompletion) * 0.05;
+//         }
+//     });
+    
+//     if (lensingPlane) {
+//         lensingPlane.rotation.z += 0.0001;
+//     }
+    
+//     if (blackHoleSystem.group) {
+//         const completedTasks = appState.tasks.filter(task => task.completed).length;
+//         const baseSpeed = 0.001;
+//         const bonusSpeed = completedTasks * 0.0002;
+//         const rotationSpeed = baseSpeed + bonusSpeed;
+        
+//         blackHoleSystem.group.rotation.y += rotationSpeed;
+        
+//         if (appState.currentMode === 'focus' && blackHoleSystem.eventHorizonMaterial) {
+//             const targetIntensity = 0.7 + Math.sin(time * 2) * 0.3;
+//             const currentIntensity = blackHoleSystem.eventHorizonMaterial.uniforms.intensity.value;
+//             blackHoleSystem.eventHorizonMaterial.uniforms.intensity.value += 
+//                 (targetIntensity - currentIntensity) * 0.05;
+//         }
+//     }
+    
+//     // Enhanced gravitational wave animations with precession and breathing
+//     gravitationalWaves.forEach((wave, index) => {
+//         if (wave.userData) {
+//             // Continuous precession (multi-minute loops)
+//             const precessionX = Math.sin(time * (2 * Math.PI / 120) + wave.userData.precessionPhaseX) * (15 * Math.PI / 180);
+//             const precessionY = Math.sin(time * (2 * Math.PI / 165) + wave.userData.precessionPhaseY) * (10 * Math.PI / 180);
+            
+//             wave.rotation.x = wave.userData.initialTiltX + precessionX;
+//             wave.rotation.y = wave.userData.initialTiltY + precessionY;
+            
+//             // Subtle radial breathing
+//             const breathingScale = 1 + Math.sin(time * (2 * Math.PI / 90) + wave.userData.breathingPhase) * 0.03;
+//             wave.scale.setScalar(breathingScale);
+//         }
+        
+//         if (appState.timerState === 'running') {
+//             const targetScale = wave.scale.x * (1 + Math.sin(time * 0.3 + index) * 0.02);
+//             const currentScale = wave.scale.x;
+//             const newScale = currentScale + (targetScale - currentScale) * 0.05;
+//             wave.scale.setScalar(newScale);
+//         }
+//     });
+// }
+
 // Smooth animation update function
 export function updateBlackHoleEffects() {
     const time = Date.now() * 0.001;
@@ -951,6 +1382,38 @@ export function updateBlackHoleEffects() {
             const targetCompletion = Math.min(recentCompletions / 3, 1.0);
             const currentCompletion = material.uniforms.taskCompletion.value;
             material.uniforms.taskCompletion.value += (targetCompletion - currentCompletion) * 0.05;
+        }
+    });
+    
+    // Update relativistic jets and shock waves
+    polarJetParticles.forEach(jetGroup => {
+        if (jetGroup.userData && jetGroup.userData.shockWaves) {
+            // Emit shock waves every 6-8 seconds
+            const timeSinceLastShock = time - jetGroup.userData.lastShockTime;
+            const shockInterval = 6 + Math.random() * 2;
+            
+            if (timeSinceLastShock > shockInterval) {
+                // Find an available shock wave
+                const availableShock = jetGroup.userData.shockWaves.find(shock => 
+                    shock.material.uniforms.birthTime.value < 0 || 
+                    (time - shock.material.uniforms.birthTime.value) > 1.5
+                );
+                
+                if (availableShock) {
+                    availableShock.material.uniforms.birthTime.value = time;
+                    availableShock.mesh.visible = true;
+                    jetGroup.userData.lastShockTime = time;
+                }
+            }
+            
+            // Update particle ages for respawning
+            if (jetGroup.userData.sheathGeometry) {
+                const ages = jetGroup.userData.sheathGeometry.attributes.age.array;
+                for (let i = 0; i < ages.length; i++) {
+                    ages[i] = (ages[i] + 0.5) % 100; // Cycle through lifetimes
+                }
+                jetGroup.userData.sheathGeometry.attributes.age.needsUpdate = true;
+            }
         }
     });
     
