@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Hole Debug Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #container {
+            width: 800px;
+            height: 600px;
+            border: 2px solid #333;
+            margin: 20px 0;
+        }
+        #log {
+            background: #111;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        .log-entry {
+            margin: 2px 0;
+            font-size: 12px;
+        }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .warn { color: #ffd43b; }
+        .info { color: #74c0fc; }
+    </style>
+</head>
+<body>
+    <h1>Black Hole Debug Test</h1>
+    <div id="container"></div>
+    <div id="log"></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Enhanced logging
+        const logDiv = document.getElementById('log');
+        function log(message, type = 'info') {
+            console.log(message);
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        log('Starting Three.js debug test...', 'info');
+        
+        // Basic Three.js setup
+        const container = document.getElementById('container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, 800/600, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(800, 600);
+        renderer.setClearColor(0x000011);
+        container.appendChild(renderer.domElement);
+        
+        camera.position.z = 50;
+        log('Basic Three.js setup complete', 'success');
+        
+        // Add simple test objects
+        const testCubeGeometry = new THREE.BoxGeometry(5, 5, 5);
+        const testCubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const testCube = new THREE.Mesh(testCubeGeometry, testCubeMaterial);
+        testCube.position.set(-20, 0, 0);
+        scene.add(testCube);
+        log('Green test cube added', 'success');
+        
+        // Create simple yellow ring (like our accretion disk)
+        const ringGeometry = new THREE.RingGeometry(8, 35, 64);
+        const ringMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xffff00,
+            transparent: true,
+            opacity: 0.8,
+            side: THREE.DoubleSide
+        });
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+        ring.rotation.x = Math.PI / 2; // Rotate to be horizontal
+        scene.add(ring);
+        log('Yellow ring added (basic accretion disk test)', 'success');
+        
+        // Create black sphere (event horizon)
+        const sphereGeometry = new THREE.SphereGeometry(3, 32, 32);
+        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        scene.add(sphere);
+        log('Black sphere added (event horizon test)', 'success');
+        
+        // Add some lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+        pointLight.position.set(10, 10, 10);
+        scene.add(pointLight);
+        log('Lighting added', 'success');
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate objects for visibility
+            testCube.rotation.x += 0.01;
+            testCube.rotation.y += 0.01;
+            
+            ring.rotation.z += 0.01;
+            
+            sphere.rotation.y += 0.005;
+            
+            renderer.render(scene, camera);
+        }
+        
+        log('Starting animation...', 'info');
+        animate();
+        
+        // Camera controls
+        let mouseDown = false;
+        let mouseX = 0, mouseY = 0;
+        
+        container.addEventListener('mousedown', (e) => { mouseDown = true; mouseX = e.clientX; mouseY = e.clientY; });
+        container.addEventListener('mouseup', () => { mouseDown = false; });
+        container.addEventListener('mousemove', (e) => {
+            if (!mouseDown) return;
+            const deltaX = e.clientX - mouseX;
+            const deltaY = e.clientY - mouseY;
+            camera.position.x += deltaX * 0.1;
+            camera.position.y -= deltaY * 0.1;
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        container.addEventListener('wheel', (e) => {
+            camera.position.z += e.deltaY * 0.01;
+            e.preventDefault();
+        });
+        
+        log('Mouse controls added - drag to move camera, scroll to zoom', 'info');
+        log('Debug test complete!', 'success');
+    </script>
+</body>
+</html>

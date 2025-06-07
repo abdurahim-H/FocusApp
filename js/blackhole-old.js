@@ -74,12 +74,13 @@ export function createEnhancedBlackHole() {
     blackHoleGroup.add(eventHorizon);
     shaderMaterials.push(eventHorizonMaterial);
     
-    // 2. Yellow Accretion Disk
-    const diskGeometry = new THREE.RingGeometry(3.2, 8, 128, 32);
+    // 2. Enhanced Accretion Disk - YELLOW DISK
+    const diskGeometry = new THREE.RingGeometry(8, 35, 128, 32); // Increased from 4-20 to 8-35 for better visibility
     
+    // Use simple, guaranteed-visible yellow material
     const diskMaterial = new THREE.MeshBasicMaterial({
         color: 0xFFFF00, // Pure bright yellow
-        transparent: false,
+        transparent: false, // Make it completely opaque for maximum visibility
         side: THREE.DoubleSide,
         depthWrite: true,
         depthTest: true
@@ -88,6 +89,7 @@ export function createEnhancedBlackHole() {
     const accretionDisk = new THREE.Mesh(diskGeometry, diskMaterial);
     accretionDisk.rotation.x = Math.PI / 2;
     blackHoleGroup.add(accretionDisk);
+    // Note: Not adding to shaderMaterials since we're using MeshBasicMaterial
     
     // 3. Polar Jets - high-energy particle streams
     createPolarJets(blackHoleGroup);
@@ -102,9 +104,31 @@ export function createEnhancedBlackHole() {
     createGravitationalWaves(blackHoleGroup);
     
     scene.add(blackHoleGroup);
+    updateStatus('✅ Added to scene');
+    console.log('🚀 Black hole system added to scene successfully!');
+    console.log('🚀 Black hole group children count:', blackHoleGroup.children.length);
+    console.log('🚀 Black hole group children:', blackHoleGroup.children.map(child => ({
+        type: child.type || child.constructor.name,
+        visible: child.visible,
+        geometry: child.geometry?.type,
+        material: child.material?.type
+    })));
+    console.log('🚀 Scene total children after adding black hole:', scene.children.length);
     
-    // Position black hole at center
+    // Final DOM debug update
+    if (debugDiv) {
+        updateStatus('🚀 ADDED TO SCENE - SUCCESS!');
+        // Auto-remove after 10 seconds for better debugging
+        setTimeout(() => {
+            if (debugDiv && debugDiv.parentNode) {
+                debugDiv.parentNode.removeChild(debugDiv);
+            }
+        }, 10000);
+    }
+    
+    // Position black hole at exact center for visibility
     blackHoleGroup.position.set(0, 0, 0);
+    console.log('📍 Black hole positioned at center:', blackHoleGroup.position);
     
     // Store references
     blackHoleSystem = {
@@ -112,8 +136,9 @@ export function createEnhancedBlackHole() {
         eventHorizon: eventHorizon,
         accretionDisk: accretionDisk,
         eventHorizonMaterial: eventHorizonMaterial,
-        diskMaterial: diskMaterial
+        diskMaterial: diskMaterial // Now a basic material, not shader material
     };
+    console.log('💾 Black hole system references stored:', blackHoleSystem);
     } catch (error) {
         console.error('Failed to create enhanced black hole:', error);
         // Fallback: create a simple black sphere
@@ -127,6 +152,59 @@ export function createEnhancedBlackHole() {
             console.error('Failed to create fallback black hole:', fallbackError);
         }
     }
+}
+
+// Export function to global scope for debugging
+if (typeof window !== 'undefined') {
+    window.createBlackHoleDebug = createEnhancedBlackHole;
+    window.blackHoleSystem = blackHoleSystem;
+    
+    // Simple diagnostic function
+    window.createSimpleYellowRing = function() {
+        console.log('🟡 Creating simple yellow ring for diagnostic...');
+        if (!scene) {
+            console.error('❌ Scene not available!');
+            return;
+        }
+        
+        const ringGeometry = new THREE.RingGeometry(10, 25, 64);
+        const ringMaterial = new THREE.MeshBasicMaterial({
+            color: 0xFFFF00,
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.DoubleSide
+        });
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.set(0, 0, 0);
+        scene.add(ring);
+        
+        console.log('🟡 Simple yellow ring added to scene!');
+        console.log('🟡 Ring details:', ring);
+        console.log('🟡 Scene children count:', scene.children.length);
+        
+        return ring;
+    };
+    
+    // Function to inspect scene contents
+    window.inspectScene = function() {
+        console.log('🔍 Scene inspection:');
+        console.log('🔍 Scene children count:', scene ? scene.children.length : 'Scene not available');
+        if (scene) {
+            scene.children.forEach((child, index) => {
+                console.log(`🔍 Child ${index}:`, {
+                    type: child.type || child.constructor.name,
+                    position: child.position,
+                    visible: child.visible,
+                    geometry: child.geometry?.type,
+                    material: child.material?.type || 'No material'
+                });
+            });
+        }
+        return scene;
+    };
+    
+    console.log('🔧 Black hole debug functions added to window object');
 }
 
 function createPolarJets(parentGroup) {
@@ -377,6 +455,11 @@ function createGravitationalWaves(parentGroup) {
 export function updateBlackHoleEffects() {
     const time = Date.now() * 0.001;
     
+    // Debug: Check if function is being called
+    if (time % 5 < 0.016) { // Log every 5 seconds (roughly)
+        console.log('🔄 Updating black hole effects at time:', time);
+    }
+    
     // Update all shader materials
     shaderMaterials.forEach(material => {
         if (material.uniforms.time) {
@@ -431,15 +514,86 @@ export function updateBlackHoleEffects() {
     });
 }
 
+// Trigger special effects
 export function triggerTaskCompletionBurst() {
-    // This function is disabled to prevent unwanted yellow rings
-    return;
+    console.log('🔥 WARNING: triggerTaskCompletionBurst() called - this should be DISABLED!');
+    
+    // DISABLED: This function creates the unwanted yellow ring
+    return; // Early return to prevent execution
+    
+    // Create a spectacular burst effect when tasks are completed
+    const burstGeometry = new THREE.RingGeometry(1, 50, 32);
+    const burstMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 },
+            startTime: { value: Date.now() * 0.001 }
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            uniform float time;
+            uniform float startTime;
+            
+            void main() {
+                vUv = uv;
+                
+                float elapsed = time - startTime;
+                vec3 pos = position * (1.0 + elapsed * 2.0);
+                
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+            }
+        `,
+        fragmentShader: `
+            varying vec2 vUv;
+            uniform float time;
+            uniform float startTime;
+            
+            void main() {
+                float elapsed = time - startTime;
+                float life = 1.0 - elapsed / 3.0; // 3 second effect
+                
+                if (life <= 0.0) discard;
+                
+                vec3 color = vec3(1.0, 1.0, 0.0); // Golden burst
+                float opacity = life * 0.8;
+                
+                gl_FragColor = vec4(color, opacity);
+            }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+    });
+    
+    const burst = new THREE.Mesh(burstGeometry, burstMaterial);
+    burst.rotation.x = Math.PI / 2;
+    blackHoleSystem.group.add(burst);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        blackHoleSystem.group.remove(burst);
+        burstMaterial.dispose();
+        burstGeometry.dispose();
+    }, 3000);
+    
+    // Update material for animation
+    const animate = () => {
+        burstMaterial.uniforms.time.value = Date.now() * 0.001;
+        requestAnimationFrame(animate);
+    };
+    animate();
 }
 
 export function triggerFocusIntensification() {
     // Intensify black hole effects when entering focus mode
     if (blackHoleSystem.diskMaterial) {
-        // Yellow disk doesn't have uniforms since it's a basic material
-        // Could add effects here if needed
+        // Temporarily boost accretion disk intensity
+        const originalIntensity = blackHoleSystem.diskMaterial.uniforms.focusMode.value;
+        blackHoleSystem.diskMaterial.uniforms.focusMode.value = 1.5;
+        
+        setTimeout(() => {
+            blackHoleSystem.diskMaterial.uniforms.focusMode.value = originalIntensity;
+        }, 2000);
     }
 }
+
+

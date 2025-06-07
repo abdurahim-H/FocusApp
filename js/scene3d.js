@@ -32,7 +32,7 @@ function checkWebGLSupport() {
 // Initialize 3D Scene
 export function init3D() {
     if (!window.THREE) {
-        console.warn('Three.js not loaded, skipping 3D initialization');
+        console.error('Three.js not loaded, skipping 3D initialization');
         return false;
     }
 
@@ -52,7 +52,9 @@ export function init3D() {
 
         // Camera
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 50;
+        camera.position.z = 20; // Even closer than before (was 30, then 50 originally)
+        camera.position.y = 5; // Slightly elevated to get a better angle
+        camera.lookAt(0, 0, 0); // Explicitly look at the center where black hole is
 
         // Renderer
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -70,11 +72,17 @@ export function init3D() {
 
         // Create galaxy elements
         createStarField();
-        createEnhancedBlackHole(); // Use enhanced black hole instead of basic one
+        
+        // Create enhanced black hole with delay
+        setTimeout(() => {
+            createEnhancedBlackHole();
+        }, 100);
         createPlanets();
         createNebula();
         createComets();
         createSpaceObjects();
+        
+        // Components loaded successfully
 
         // Initialize camera effects
         initCameraEffects(camera);
@@ -179,10 +187,10 @@ export function animate() {
         }
     });
 
-    // Camera movement
+    // Camera movement - reduced orbit distance to see black hole better
     cameraRotation += 0.002;
-    camera.position.x = Math.sin(cameraRotation) * 60;
-    camera.position.z = Math.cos(cameraRotation) * 60;
+    camera.position.x = Math.sin(cameraRotation) * 40; // Reduced from 60 to 40
+    camera.position.z = Math.cos(cameraRotation) * 40; // Reduced from 60 to 40
     camera.lookAt(cameraTarget);
 
     renderer.render(scene, camera);

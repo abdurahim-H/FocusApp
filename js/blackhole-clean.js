@@ -75,7 +75,7 @@ export function createEnhancedBlackHole() {
     shaderMaterials.push(eventHorizonMaterial);
     
     // 2. Yellow Accretion Disk
-    const diskGeometry = new THREE.RingGeometry(3.2, 8, 128, 32);
+    const diskGeometry = new THREE.RingGeometry(8, 35, 128, 32);
     
     const diskMaterial = new THREE.MeshBasicMaterial({
         color: 0xFFFF00, // Pure bright yellow

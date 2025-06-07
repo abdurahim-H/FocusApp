@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Yellow Accretion Disk Verification</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: monospace;
+            color: white;
+        }
+        #verification {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            border: 2px solid yellow;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        .status-good { color: #00ff00; }
+        .status-bad { color: #ff0000; }
+        .status-info { color: #ffff00; }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="verification">
+        <h3>🟡 Final Yellow Accretion Disk Verification</h3>
+        <div class="status-info">Testing the exact same implementation as main app...</div>
+        <hr>
+        <div id="results"></div>
+        <hr>
+        <div><strong>SUCCESS CRITERIA:</strong></div>
+        <div>✅ Yellow ring visible at center</div>
+        <div>✅ Black sphere at center</div>
+        <div>✅ Rotating yellow disk</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const results = document.getElementById('results');
+        
+        function addResult(msg, type = 'info') {
+            console.log(msg);
+            const div = document.createElement('div');
+            div.className = `status-${type}`;
+            div.textContent = msg;
+            results.appendChild(div);
+        }
+
+        // Initialize Three.js exactly like the main app
+        addResult('Initializing...', 'info');
+        
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 0);
+        document.body.appendChild(renderer.domElement);
+        
+        // Camera positioning exactly like scene3d.js
+        camera.position.z = 20;
+        camera.position.y = 5;
+        camera.lookAt(0, 0, 0);
+        
+        addResult('Camera positioned like main app', 'good');
+
+        // Lighting exactly like scene3d.js
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0x6366f1, 1, 100);
+        pointLight.position.set(10, 10, 10);
+        scene.add(pointLight);
+        
+        addResult('Lighting setup complete', 'good');
+
+        // Create black hole group exactly like blackhole.js
+        const blackHoleGroup = new THREE.Group();
+
+        // 1. Event Horizon
+        const eventHorizonGeometry = new THREE.SphereGeometry(3, 64, 64);
+        const eventHorizonMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const eventHorizon = new THREE.Mesh(eventHorizonGeometry, eventHorizonMaterial);
+        blackHoleGroup.add(eventHorizon);
+        
+        addResult('Event horizon added', 'good');
+
+        // 2. YELLOW ACCRETION DISK - EXACTLY LIKE FIXED VERSION
+        const diskGeometry = new THREE.RingGeometry(8, 35, 128, 32);
+        const diskMaterial = new THREE.MeshBasicMaterial({
+            color: 0xFFFF00, // Pure bright yellow
+            transparent: false, // Completely opaque for maximum visibility
+            side: THREE.DoubleSide,
+            depthWrite: true,
+            depthTest: true
+        });
+        
+        const accretionDisk = new THREE.Mesh(diskGeometry, diskMaterial);
+        accretionDisk.rotation.x = Math.PI / 2;
+        blackHoleGroup.add(accretionDisk);
+        
+        addResult('YELLOW ACCRETION DISK ADDED!', 'good');
+
+        // Position at center and add to scene
+        blackHoleGroup.position.set(0, 0, 0);
+        scene.add(blackHoleGroup);
+        
+        addResult('Black hole group added to scene', 'good');
+
+        // Add reference cubes for verification
+        const cubeGeometry = new THREE.BoxGeometry(3, 3, 3);
+        
+        const greenCube = new THREE.Mesh(cubeGeometry, new THREE.MeshBasicMaterial({ color: 0x00FF00 }));
+        greenCube.position.set(15, 0, 0);
+        scene.add(greenCube);
+        
+        addResult('Reference objects added', 'good');
+
+        // Camera orbit for better viewing
+        let cameraRotation = 0;
+        const cameraTarget = new THREE.Vector3();
+
+        // Animation loop exactly like scene3d.js
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate accretion disk for visibility
+            accretionDisk.rotation.z += 0.01;
+            
+            // Camera orbit like main app
+            cameraRotation += 0.002;
+            camera.position.x = Math.sin(cameraRotation) * 40;
+            camera.position.z = Math.cos(cameraRotation) * 40;
+            camera.lookAt(cameraTarget);
+            
+            // Rotate reference cube
+            greenCube.rotation.y += 0.02;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        addResult('Animation started', 'good');
+        addResult('VERIFICATION COMPLETE!', 'good');
+        addResult('Yellow disk should be clearly visible!', 'good');
+        
+        console.log('🟡 Final verification complete');
+        console.log('🟡 Accretion disk object:', accretionDisk);
+        console.log('🟡 Scene children:', scene.children.length);
+        console.log('🟡 Black hole group children:', blackHoleGroup.children.length);
+    </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Yellow Disk Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: monospace;
+            color: white;
+        }
+        #status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border: 1px solid yellow;
+            z-index: 1000;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">
+        <h3>🟡 Simple Yellow Disk Test</h3>
+        <div>Status: <span id="status-text">Loading...</span></div>
+        <div>Objects: <span id="object-count">0</span></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const statusText = document.getElementById('status-text');
+        const objectCount = document.getElementById('object-count');
+        
+        function updateStatus(msg) {
+            console.log(msg);
+            statusText.textContent = msg;
+        }
+
+        // Initialize Three.js
+        updateStatus('Initializing Three.js...');
+        
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000011);
+        document.body.appendChild(renderer.domElement);
+        
+        // Position camera
+        camera.position.set(0, 10, 30);
+        camera.lookAt(0, 0, 0);
+        
+        updateStatus('Three.js initialized');
+
+        // Create simple yellow accretion disk - EXACTLY like we want
+        const diskGeometry = new THREE.RingGeometry(8, 35, 64);
+        const diskMaterial = new THREE.MeshBasicMaterial({
+            color: 0xFFFF00, // Pure bright yellow
+            transparent: false, // Completely opaque
+            side: THREE.DoubleSide
+        });
+        
+        const accretionDisk = new THREE.Mesh(diskGeometry, diskMaterial);
+        accretionDisk.rotation.x = Math.PI / 2; // Make it horizontal
+        accretionDisk.position.set(0, 0, 0); // At center
+        scene.add(accretionDisk);
+        
+        updateStatus('Yellow accretion disk added');
+
+        // Add black sphere for contrast
+        const sphereGeometry = new THREE.SphereGeometry(3, 32, 32);
+        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        scene.add(sphere);
+        
+        updateStatus('Black sphere added');
+
+        // Add reference objects
+        const cubeGeometry = new THREE.BoxGeometry(3, 3, 3);
+        
+        // Green cube (left)
+        const greenCube = new THREE.Mesh(cubeGeometry, new THREE.MeshBasicMaterial({ color: 0x00FF00 }));
+        greenCube.position.set(-25, 0, 0);
+        scene.add(greenCube);
+        
+        // Red cube (right)
+        const redCube = new THREE.Mesh(cubeGeometry, new THREE.MeshBasicMaterial({ color: 0xFF0000 }));
+        redCube.position.set(25, 0, 0);
+        scene.add(redCube);
+        
+        // Blue cube (top)
+        const blueCube = new THREE.Mesh(cubeGeometry, new THREE.MeshBasicMaterial({ color: 0x0000FF }));
+        blueCube.position.set(0, 25, 0);
+        scene.add(blueCube);
+        
+        updateStatus('Reference cubes added');
+
+        // Add lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+        pointLight.position.set(10, 10, 10);
+        scene.add(pointLight);
+        
+        updateStatus('Lighting added');
+
+        // Update object count
+        objectCount.textContent = scene.children.length;
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate everything for visibility
+            accretionDisk.rotation.z += 0.01;
+            greenCube.rotation.y += 0.02;
+            redCube.rotation.y += 0.02;
+            blueCube.rotation.y += 0.02;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        updateStatus('Animation started - YELLOW DISK SHOULD BE VISIBLE!');
+        
+        console.log('🟡 Simple test complete - yellow disk at center:', accretionDisk);
+        console.log('🟡 Scene children:', scene.children.length);
+    </script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Black Hole Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <div>Status: <span id="status">Loading...</span></div>
+        <div>Scene Children: <span id="children">0</span></div>
+        <div>Camera Position: <span id="camera">Unknown</span></div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const statusEl = document.getElementById('status');
+        const childrenEl = document.getElementById('children');
+        const cameraEl = document.getElementById('camera');
+        
+        function updateStatus(msg) {
+            statusEl.textContent = msg;
+            console.log(msg);
+        }
+        
+        updateStatus('Initializing...');
+        
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000011);
+        document.body.appendChild(renderer.domElement);
+        
+        // Position camera
+        camera.position.set(0, 5, 20);
+        camera.lookAt(0, 0, 0);
+        cameraEl.textContent = `(${camera.position.x}, ${camera.position.y}, ${camera.position.z})`;
+        
+        updateStatus('Creating black hole...');
+        
+        // Create black hole group
+        const blackHoleGroup = new THREE.Group();
+        
+        // 1. Event Horizon - simple black sphere
+        const eventHorizonGeometry = new THREE.SphereGeometry(3, 32, 32);
+        const eventHorizonMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const eventHorizon = new THREE.Mesh(eventHorizonGeometry, eventHorizonMaterial);
+        blackHoleGroup.add(eventHorizon);
+        
+        // 2. Yellow Accretion Disk - SIMPLE VERSION
+        const diskGeometry = new THREE.RingGeometry(8, 35, 64);
+        const diskMaterial = new THREE.MeshBasicMaterial({
+            color: 0xFFFF00,
+            transparent: true,
+            opacity: 0.8,
+            side: THREE.DoubleSide
+        });
+        const accretionDisk = new THREE.Mesh(diskGeometry, diskMaterial);
+        accretionDisk.rotation.x = Math.PI / 2; // Make it horizontal
+        blackHoleGroup.add(accretionDisk);
+        
+        // 3. Backup yellow circle
+        const circleGeometry = new THREE.CircleGeometry(15, 32);
+        const circleMaterial = new THREE.MeshBasicMaterial({
+            color: 0xFFFF00,
+            transparent: true,
+            opacity: 0.5,
+            side: THREE.DoubleSide
+        });
+        const circle = new THREE.Mesh(circleGeometry, circleMaterial);
+        circle.rotation.x = Math.PI / 2;
+        circle.position.y = 0.1;
+        blackHoleGroup.add(circle);
+        
+        // 4. Test cubes for reference
+        const testCubeGeometry = new THREE.BoxGeometry(3, 3, 3);
+        const greenCube = new THREE.Mesh(testCubeGeometry, new THREE.MeshBasicMaterial({ color: 0x00FF00 }));
+        greenCube.position.set(20, 0, 0);
+        scene.add(greenCube);
+        
+        const redCube = new THREE.Mesh(testCubeGeometry, new THREE.MeshBasicMaterial({ color: 0xFF0000 }));
+        redCube.position.set(-20, 0, 0);
+        scene.add(redCube);
+        
+        const blueCube = new THREE.Mesh(testCubeGeometry, new THREE.MeshBasicMaterial({ color: 0x0000FF }));
+        blueCube.position.set(0, 20, 0);
+        scene.add(blueCube);
+        
+        // Add black hole to scene
+        scene.add(blackHoleGroup);
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+        pointLight.position.set(10, 10, 10);
+        scene.add(pointLight);
+        
+        updateStatus('Rendering...');
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate test cubes
+            greenCube.rotation.x += 0.01;
+            greenCube.rotation.y += 0.01;
+            redCube.rotation.x += 0.01;
+            redCube.rotation.y += 0.01;
+            blueCube.rotation.x += 0.01;
+            blueCube.rotation.y += 0.01;
+            
+            // Rotate accretion disk
+            accretionDisk.rotation.z += 0.01;
+            circle.rotation.z += 0.005;
+            
+            // Rotate black hole group
+            blackHoleGroup.rotation.y += 0.002;
+            
+            renderer.render(scene, camera);
+            
+            // Update info
+            childrenEl.textContent = scene.children.length;
+        }
+        
+        animate();
+        updateStatus('Running!');
+        
+        // Mouse controls for camera
+        let mouseDown = false;
+        let mouseX = 0, mouseY = 0;
+        
+        document.addEventListener('mousedown', (e) => { 
+            mouseDown = true; 
+            mouseX = e.clientX; 
+            mouseY = e.clientY; 
+        });
+        
+        document.addEventListener('mouseup', () => { 
+            mouseDown = false; 
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!mouseDown) return;
+            const deltaX = e.clientX - mouseX;
+            const deltaY = e.clientY - mouseY;
+            
+            // Orbit camera around origin
+            const spherical = new THREE.Spherical();
+            spherical.setFromVector3(camera.position);
+            spherical.theta -= deltaX * 0.01;
+            spherical.phi += deltaY * 0.01;
+            spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+            
+            camera.position.setFromSpherical(spherical);
+            camera.lookAt(0, 0, 0);
+            
+            cameraEl.textContent = `(${camera.position.x.toFixed(1)}, ${camera.position.y.toFixed(1)}, ${camera.position.z.toFixed(1)})`;
+            
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        document.addEventListener('wheel', (e) => {
+            const spherical = new THREE.Spherical();
+            spherical.setFromVector3(camera.position);
+            spherical.radius += e.deltaY * 0.01;
+            spherical.radius = Math.max(5, Math.min(100, spherical.radius));
+            
+            camera.position.setFromSpherical(spherical);
+            camera.lookAt(0, 0, 0);
+            
+            cameraEl.textContent = `(${camera.position.x.toFixed(1)}, ${camera.position.y.toFixed(1)}, ${camera.position.z.toFixed(1)})`;
+            
+            e.preventDefault();
+        });
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'w': camera.position.z -= 1; break;
+                case 's': camera.position.z += 1; break;
+                case 'a': camera.position.x -= 1; break;
+                case 'd': camera.position.x += 1; break;
+                case 'q': camera.position.y += 1; break;
+                case 'e': camera.position.y -= 1; break;
+            }
+            camera.lookAt(0, 0, 0);
+            cameraEl.textContent = `(${camera.position.x.toFixed(1)}, ${camera.position.y.toFixed(1)}, ${camera.position.z.toFixed(1)})`;
+        });
+        
+        console.log('🚀 Minimal black hole test initialized!');
+        console.log('🎮 Controls: Mouse to orbit, scroll to zoom, WASD+QE to move camera');
+    </script>
+</body>
+</html>

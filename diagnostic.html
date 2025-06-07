@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accretion Disk Diagnostic</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #diagnostic {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #FFD700;
+            max-width: 400px;
+        }
+        .status-item {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .status-success { background: rgba(0,255,0,0.2); }
+        .status-error { background: rgba(255,0,0,0.2); }
+        .status-warning { background: rgba(255,255,0,0.2); }
+        .status-info { background: rgba(0,150,255,0.2); }
+        #controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.9);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 12px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background: #555; }
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="diagnostic">
+        <h3>🌌 Accretion Disk Diagnostic</h3>
+        <div id="status-list"></div>
+        <div>Objects in Scene: <span id="object-count">0</span></div>
+        <div>Yellow Objects: <span id="yellow-count">0</span></div>
+        <div>Visible Objects: <span id="visible-count">0</span></div>
+    </div>
+    
+    <div id="controls">
+        <button onclick="createBasicYellowRing()">Create Basic Yellow Ring</button>
+        <button onclick="createShaderYellowRing()">Create Shader Yellow Ring</button>
+        <button onclick="createAccretionDisk()">Create Full Accretion Disk</button>
+        <button onclick="toggleVisibility()">Toggle Visibility</button>
+        <button onclick="resetCamera()">Reset Camera</button>
+        <button onclick="inspectScene()">Inspect Scene</button>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer;
+        let yellowObjects = [];
+        let diagnosticElements = [];
+        
+        const statusList = document.getElementById('status-list');
+        const objectCount = document.getElementById('object-count');
+        const yellowCount = document.getElementById('yellow-count');
+        const visibleCount = document.getElementById('visible-count');
+        
+        function addStatus(message, type = 'info') {
+            console.log(message);
+            const div = document.createElement('div');
+            div.className = `status-item status-${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            statusList.appendChild(div);
+            if (statusList.children.length > 10) {
+                statusList.removeChild(statusList.firstChild);
+            }
+        }
+        
+        function updateCounts() {
+            objectCount.textContent = scene ? scene.children.length : 0;
+            yellowCount.textContent = yellowObjects.length;
+            const visible = yellowObjects.filter(obj => obj.visible).length;
+            visibleCount.textContent = visible;
+        }
+        
+        // Initialize Three.js
+        function init() {
+            addStatus('Initializing Three.js...', 'info');
+            
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x001122);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            // Position camera
+            camera.position.set(0, 10, 30);
+            camera.lookAt(0, 0, 0);
+            
+            addStatus('Three.js initialized successfully', 'success');
+            
+            // Add basic lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+            pointLight.position.set(10, 10, 10);
+            scene.add(pointLight);
+            
+            // Add reference cubes
+            addReferenceCubes();
+            
+            // Start animation
+            animate();
+            
+            addStatus('Ready for testing!', 'success');
+        }
+        
+        function addReferenceCubes() {
+            // Green cube (right)
+            const greenGeometry = new THREE.BoxGeometry(3, 3, 3);
+            const greenMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const greenCube = new THREE.Mesh(greenGeometry, greenMaterial);
+            greenCube.position.set(25, 0, 0);
+            scene.add(greenCube);
+            
+            // Red cube (left)
+            const redMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const redCube = new THREE.Mesh(greenGeometry, redMaterial);
+            redCube.position.set(-25, 0, 0);
+            scene.add(redCube);
+            
+            // Blue cube (top)
+            const blueMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+            const blueCube = new THREE.Mesh(greenGeometry, blueMaterial);
+            blueCube.position.set(0, 25, 0);
+            scene.add(blueCube);
+            
+            addStatus('Reference cubes added (RGB)', 'info');
+        }
+        
+        function createBasicYellowRing() {
+            addStatus('Creating basic yellow ring...', 'info');
+            
+            try {
+                const geometry = new THREE.RingGeometry(8, 20, 64);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0xFFFF00,
+                    transparent: true,
+                    opacity: 0.8,
+                    side: THREE.DoubleSide
+                });
+                
+                const ring = new THREE.Mesh(geometry, material);
+                ring.rotation.x = Math.PI / 2;
+                ring.position.set(0, 0, 0);
+                ring.name = 'BasicYellowRing';
+                
+                scene.add(ring);
+                yellowObjects.push(ring);
+                
+                addStatus('Basic yellow ring created successfully!', 'success');
+                updateCounts();
+                
+                return ring;
+            } catch (error) {
+                addStatus(`Error creating basic ring: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        function createShaderYellowRing() {
+            addStatus('Creating shader yellow ring...', 'info');
+            
+            try {
+                const geometry = new THREE.RingGeometry(12, 30, 128);
+                const material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        time: { value: 0 }
+                    },
+                    vertexShader: `
+                        varying vec2 vUv;
+                        void main() {
+                            vUv = uv;
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        varying vec2 vUv;
+                        uniform float time;
+                        
+                        void main() {
+                            float radius = length(vUv - 0.5) * 2.0;
+                            float intensity = 1.0 - radius;
+                            
+                            vec3 yellow = vec3(1.0, 1.0, 0.0);
+                            float alpha = intensity * (0.5 + 0.5 * sin(time * 2.0));
+                            
+                            gl_FragColor = vec4(yellow, alpha);
+                        }
+                    `,
+                    transparent: true,
+                    side: THREE.DoubleSide
+                });
+                
+                const ring = new THREE.Mesh(geometry, material);
+                ring.rotation.x = Math.PI / 2;
+                ring.position.set(0, 0, 2);
+                ring.name = 'ShaderYellowRing';
+                
+                scene.add(ring);
+                yellowObjects.push(ring);
+                diagnosticElements.push({ ring, material, type: 'shader' });
+                
+                addStatus('Shader yellow ring created successfully!', 'success');
+                updateCounts();
+                
+                return ring;
+            } catch (error) {
+                addStatus(`Error creating shader ring: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        function createAccretionDisk() {
+            addStatus('Creating full accretion disk...', 'info');
+            
+            try {
+                // Create the exact same accretion disk as in the main app
+                const diskGeometry = new THREE.RingGeometry(8, 35, 128, 32);
+                const diskMaterial = new THREE.ShaderMaterial({
+                    uniforms: {
+                        time: { value: 0 },
+                        focusMode: { value: 0.0 },
+                        productivity: { value: 0.5 }
+                    },
+                    vertexShader: `
+                        varying vec2 vUv;
+                        varying vec3 vPosition;
+                        uniform float time;
+                        
+                        void main() {
+                            vUv = uv;
+                            vPosition = position;
+                            
+                            float radius = length(position.xy);
+                            float height = sin(time * 2.0 + radius * 0.5) * 0.2;
+                            
+                            vec3 pos = position;
+                            pos.z += height;
+                            
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        varying vec2 vUv;
+                        varying vec3 vPosition;
+                        uniform float time;
+                        uniform float focusMode;
+                        uniform float productivity;
+                        
+                        void main() {
+                            float radius = length(vPosition.xy);
+                            float normalizedRadius = (radius - 8.0) / 27.0;
+                            
+                            float temperature = 1.0 - normalizedRadius;
+                            float angle = atan(vPosition.y, vPosition.x);
+                            float spiral = sin(angle * 8.0 + time * 2.0 - radius * 0.3) * 0.5 + 0.5;
+                            
+                            vec3 innerYellow = vec3(1.0, 1.0, 0.6);
+                            vec3 outerYellow = vec3(0.9, 0.8, 0.1);
+                            
+                            vec3 baseColor = mix(outerYellow, innerYellow, temperature);
+                            
+                            float turbulence = spiral * temperature;
+                            float opacity = turbulence * (1.0 + sin(time + radius) * 0.3);
+                            
+                            gl_FragColor = vec4(baseColor, opacity);
+                        }
+                    `,
+                    transparent: true,
+                    side: THREE.DoubleSide,
+                    blending: THREE.AdditiveBlending
+                });
+                
+                const accretionDisk = new THREE.Mesh(diskGeometry, diskMaterial);
+                accretionDisk.rotation.x = Math.PI / 2;
+                accretionDisk.position.set(0, 0, -2);
+                accretionDisk.name = 'AccretionDisk';
+                
+                scene.add(accretionDisk);
+                yellowObjects.push(accretionDisk);
+                diagnosticElements.push({ ring: accretionDisk, material: diskMaterial, type: 'accretion' });
+                
+                addStatus('Full accretion disk created successfully!', 'success');
+                updateCounts();
+                
+                return accretionDisk;
+            } catch (error) {
+                addStatus(`Error creating accretion disk: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        function toggleVisibility() {
+            yellowObjects.forEach(obj => {
+                obj.visible = !obj.visible;
+            });
+            addStatus(`Toggled visibility of ${yellowObjects.length} yellow objects`, 'info');
+            updateCounts();
+        }
+        
+        function resetCamera() {
+            camera.position.set(0, 10, 30);
+            camera.lookAt(0, 0, 0);
+            addStatus('Camera reset to default position', 'info');
+        }
+        
+        function inspectScene() {
+            addStatus('=== SCENE INSPECTION ===', 'warning');
+            addStatus(`Total objects in scene: ${scene.children.length}`, 'info');
+            
+            scene.children.forEach((child, index) => {
+                const info = `${index}: ${child.name || child.type} at (${child.position.x.toFixed(1)}, ${child.position.y.toFixed(1)}, ${child.position.z.toFixed(1)}) visible:${child.visible}`;
+                addStatus(info, 'info');
+            });
+            
+            addStatus('=== END INSPECTION ===', 'warning');
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = Date.now() * 0.001;
+            
+            // Update shader materials
+            diagnosticElements.forEach(element => {
+                if (element.material.uniforms && element.material.uniforms.time) {
+                    element.material.uniforms.time.value = time;
+                }
+            });
+            
+            // Rotate yellow objects
+            yellowObjects.forEach(obj => {
+                obj.rotation.z += 0.01;
+            });
+            
+            renderer.render(scene, camera);
+            updateCounts();
+        }
+        
+        // Mouse controls
+        let isMouseDown = false;
+        let mouseX = 0, mouseY = 0;
+        
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.tagName !== 'BUTTON') {
+                isMouseDown = true;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => { isMouseDown = false; });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            
+            const deltaX = e.clientX - mouseX;
+            const deltaY = e.clientY - mouseY;
+            
+            // Orbit camera
+            const spherical = new THREE.Spherical();
+            spherical.setFromVector3(camera.position);
+            spherical.theta -= deltaX * 0.01;
+            spherical.phi += deltaY * 0.01;
+            spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+            
+            camera.position.setFromSpherical(spherical);
+            camera.lookAt(0, 0, 0);
+            
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        document.addEventListener('wheel', (e) => {
+            const spherical = new THREE.Spherical();
+            spherical.setFromVector3(camera.position);
+            spherical.radius += e.deltaY * 0.01;
+            spherical.radius = Math.max(5, Math.min(100, spherical.radius));
+            
+            camera.position.setFromSpherical(spherical);
+            camera.lookAt(0, 0, 0);
+            
+            e.preventDefault();
+        });
+        
+        // Initialize on load
+        init();
+        
+        console.log('🚀 Accretion Disk Diagnostic Tool Loaded!');
+        console.log('🎮 Use the buttons to test different yellow ring types');
+        console.log('🖱️ Mouse: drag to orbit, scroll to zoom');
+    </script>
+</body>
+</html>

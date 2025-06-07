@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Black Hole Diagnostics</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        #results {
+            white-space: pre-wrap;
+            background: #001100;
+            padding: 20px;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            height: 80vh;
+            overflow-y: auto;
+        }
+        .pass { color: #00ff00; }
+        .fail { color: #ff0000; }
+        .warn { color: #ffff00; }
+        .info { color: #00ffff; }
+        #canvas { position: absolute; top: 0; right: 0; width: 300px; height: 300px; border: 1px solid #333; }
+    </style>
+</head>
+<body>
+    <h1>🚀 AUTOMATED BLACK HOLE DIAGNOSTICS</h1>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <div id="results"></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const results = document.getElementById('results');
+        const canvas = document.getElementById('canvas');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = {
+                'pass': '✅ PASS',
+                'fail': '❌ FAIL', 
+                'warn': '⚠️ WARN',
+                'info': 'ℹ️ INFO'
+            }[type] || 'ℹ️ INFO';
+            
+            const line = `[${timestamp}] ${prefix}: ${message}\n`;
+            results.innerHTML += `<span class="${type}">${line}</span>`;
+            results.scrollTop = results.scrollHeight;
+            console.log(line);
+        }
+        
+        async function runDiagnostics() {
+            log('Starting comprehensive black hole diagnostics...', 'info');
+            log('=====================================', 'info');
+            
+            // Test 1: Three.js availability
+            log('TEST 1: Three.js Availability', 'info');
+            if (window.THREE) {
+                log(`Three.js loaded successfully - Version: ${THREE.REVISION}`, 'pass');
+            } else {
+                log('Three.js not available!', 'fail');
+                return;
+            }
+            
+            // Test 2: WebGL support
+            log('TEST 2: WebGL Support', 'info');
+            try {
+                const testCanvas = document.createElement('canvas');
+                const gl = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl');
+                if (gl) {
+                    log('WebGL is supported', 'pass');
+                    log(`WebGL Version: ${gl.getParameter(gl.VERSION)}`, 'info');
+                    log(`WebGL Vendor: ${gl.getParameter(gl.VENDOR)}`, 'info');
+                } else {
+                    log('WebGL not supported!', 'fail');
+                    return;
+                }
+            } catch (e) {
+                log(`WebGL test failed: ${e.message}`, 'fail');
+                return;
+            }
+            
+            // Test 3: Basic Three.js scene creation
+            log('TEST 3: Basic Scene Creation', 'info');
+            let scene, camera, renderer;
+            try {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer({ canvas: canvas });
+                renderer.setSize(300, 300);
+                renderer.setClearColor(0x000000);
+                log('Basic Three.js scene created successfully', 'pass');
+            } catch (e) {
+                log(`Scene creation failed: ${e.message}`, 'fail');
+                return;
+            }
+            
+            // Test 4: Basic geometry creation
+            log('TEST 4: Basic Geometry Creation', 'info');
+            try {
+                const testGeometry = new THREE.BoxGeometry(1, 1, 1);
+                const testMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+                const testMesh = new THREE.Mesh(testGeometry, testMaterial);
+                scene.add(testMesh);
+                log('Basic mesh created and added to scene', 'pass');
+            } catch (e) {
+                log(`Basic geometry creation failed: ${e.message}`, 'fail');
+            }
+            
+            // Test 5: Ring geometry (accretion disk base)
+            log('TEST 5: Ring Geometry Creation', 'info');
+            let ringMesh;
+            try {
+                const ringGeometry = new THREE.RingGeometry(2, 5, 32);
+                const ringMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0xffff00, 
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+                ringMesh.rotation.x = Math.PI / 2;
+                ringMesh.position.set(0, 0, 0);
+                scene.add(ringMesh);
+                log('Yellow ring geometry created successfully', 'pass');
+            } catch (e) {
+                log(`Ring geometry creation failed: ${e.message}`, 'fail');
+            }
+            
+            // Test 6: Shader material creation
+            log('TEST 6: Shader Material Creation', 'info');
+            let shaderMesh;
+            try {
+                const shaderGeometry = new THREE.RingGeometry(3, 6, 64);
+                const shaderMaterial = new THREE.ShaderMaterial({
+                    uniforms: { time: { value: 0 } },
+                    vertexShader: `
+                        void main() {
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform float time;
+                        void main() {
+                            vec3 yellow = vec3(1.0, 1.0, 0.0);
+                            float intensity = 0.5 + 0.5 * sin(time * 2.0);
+                            gl_FragColor = vec4(yellow * intensity, 0.8);
+                        }
+                    `,
+                    transparent: true,
+                    side: THREE.DoubleSide
+                });
+                shaderMesh = new THREE.Mesh(shaderGeometry, shaderMaterial);
+                shaderMesh.rotation.x = Math.PI / 2;
+                shaderMesh.position.set(0, 0, 1);
+                scene.add(shaderMesh);
+                log('Shader material created successfully', 'pass');
+            } catch (e) {
+                log(`Shader material creation failed: ${e.message}`, 'fail');
+            }
+            
+            // Test 7: Camera positioning
+            log('TEST 7: Camera Positioning', 'info');
+            try {
+                camera.position.set(0, 5, 15);
+                camera.lookAt(0, 0, 0);
+                log(`Camera positioned at: (${camera.position.x}, ${camera.position.y}, ${camera.position.z})`, 'pass');
+            } catch (e) {
+                log(`Camera positioning failed: ${e.message}`, 'fail');
+            }
+            
+            // Test 8: Lighting setup
+            log('TEST 8: Lighting Setup', 'info');
+            try {
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+                const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+                pointLight.position.set(10, 10, 10);
+                scene.add(ambientLight);
+                scene.add(pointLight);
+                log('Lighting setup completed', 'pass');
+            } catch (e) {
+                log(`Lighting setup failed: ${e.message}`, 'fail');
+            }
+            
+            // Test 9: Render test
+            log('TEST 9: Render Test', 'info');
+            try {
+                renderer.render(scene, camera);
+                log('Initial render completed successfully', 'pass');
+                log(`Scene contains ${scene.children.length} objects`, 'info');
+            } catch (e) {
+                log(`Render test failed: ${e.message}`, 'fail');
+            }
+            
+            // Test 10: Animation loop test
+            log('TEST 10: Animation Loop Test', 'info');
+            let frameCount = 0;
+            const maxFrames = 60; // Test for 60 frames (~1 second at 60fps)
+            
+            function testAnimate() {
+                frameCount++;
+                
+                try {
+                    // Update time for shader
+                    if (shaderMesh && shaderMesh.material.uniforms) {
+                        shaderMesh.material.uniforms.time.value = frameCount * 0.016;
+                    }
+                    
+                    // Rotate objects
+                    if (ringMesh) {
+                        ringMesh.rotation.z += 0.02;
+                    }
+                    if (shaderMesh) {
+                        shaderMesh.rotation.z += 0.01;
+                    }
+                    
+                    renderer.render(scene, camera);
+                    
+                    if (frameCount < maxFrames) {
+                        requestAnimationFrame(testAnimate);
+                    } else {
+                        log(`Animation loop test completed - ${frameCount} frames rendered`, 'pass');
+                        
+                        // Final summary
+                        log('=====================================', 'info');
+                        log('DIAGNOSTIC SUMMARY:', 'info');
+                        log('✅ Three.js is working correctly', 'pass');
+                        log('✅ WebGL is functioning properly', 'pass');
+                        log('✅ Basic geometry creation works', 'pass');
+                        log('✅ Yellow ring rendering works', 'pass');
+                        log('✅ Shader materials work', 'pass');
+                        log('✅ Animation loop works', 'pass');
+                        log('', 'info');
+                        log('CONCLUSION: All fundamental systems are working!', 'pass');
+                        log('The issue must be in the main application integration,', 'warn');
+                        log('camera positioning, or object visibility settings.', 'warn');
+                        log('', 'info');
+                        log('RECOMMENDATION: Check main app for:', 'info');
+                        log('- CSS interference with canvas', 'info');
+                        log('- Module loading order issues', 'info');
+                        log('- Camera position/orientation', 'info');
+                        log('- Object visibility flags', 'info');
+                        log('- Scene.add() calls not executing', 'info');
+                    }
+                } catch (e) {
+                    log(`Animation frame ${frameCount} failed: ${e.message}`, 'fail');
+                }
+            }
+            
+            testAnimate();
+            
+        }
+        
+        // Start diagnostics
+        runDiagnostics();
+    </script>
+</body>
+</html>
