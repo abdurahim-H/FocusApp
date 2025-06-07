@@ -44,6 +44,11 @@ export async function initApp() {
         loadedModules.cleanup.initCleanupSystem();
     }
     
+    // Initialize audio system early for better performance
+    if (loadedModules.sounds?.initAudioSystem) {
+        loadedModules.sounds.initAudioSystem();
+    }
+    
     function doInit() {
         // Hide loading screen after delay
         setTimeout(() => {

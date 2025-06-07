@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound System Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            background: #0a0a0f;
+            color: white;
+        }
+        .test-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+        button {
+            margin: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5b5ac7;
+        }
+        button.active {
+            background: #06d6a0;
+        }
+        .status {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #1a1a1f;
+            border-radius: 4px;
+        }
+        .timer {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #06d6a0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Sound System Test - Delay Fix Verification</h1>
+    
+    <div class="test-section">
+        <h2>Sound Delay Test</h2>
+        <p>Test if sounds play immediately without delay:</p>
+        <button onclick="testSoundDelay('rain')">🌧️ Test Rain (Should play instantly)</button>
+        <button onclick="testSoundDelay('ocean')">🌊 Test Ocean (Should play instantly)</button>
+        <button onclick="testSoundDelay('forest')">🌲 Test Forest (Should play instantly)</button>
+        <button onclick="testSoundDelay('cafe')">☕ Test Cafe (Should play instantly)</button>
+        <div class="status" id="delayStatus">Click any sound button to test delay...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Sound Toggle Test</h2>
+        <p>Test sound toggling functionality:</p>
+        <button id="rainToggle" onclick="toggleSound('rain', this)">🌧️ Rain OFF</button>
+        <button id="oceanToggle" onclick="toggleSound('ocean', this)">🌊 Ocean OFF</button>
+        <button id="forestToggle" onclick="toggleSound('forest', this)">🌲 Forest OFF</button>
+        <button id="cafeToggle" onclick="toggleSound('cafe', this)">☕ Cafe OFF</button>
+        <div class="status" id="toggleStatus">Click to toggle sounds on/off...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Pre-loading Status</h2>
+        <div class="status" id="preloadStatus">Checking audio pre-loading...</div>
+        <button onclick="checkPreloadStatus()">🔄 Refresh Status</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Multiple Sounds Test</h2>
+        <p>Test playing multiple sounds simultaneously:</p>
+        <button onclick="playMultipleSounds()">🎶 Play Rain + Ocean</button>
+        <button onclick="stopAllSounds()">⏹️ Stop All Sounds</button>
+        <div class="status" id="multiStatus">Ready to test multiple sounds...</div>
+    </div>
+
+    <script type="module">
+        import { toggleAmbientSound, initAudioSystem, setupAmbientControls } from './js/sounds.js';
+        import { state } from './js/state.js';
+
+        let testStartTimes = {};
+
+        // Initialize audio system
+        window.addEventListener('load', async () => {
+            console.log('🎵 Initializing sound system for testing...');
+            
+            // Initialize the audio system
+            const success = await initAudioSystem();
+            document.getElementById('preloadStatus').innerHTML = 
+                success ? '✅ Audio system initialized successfully' : '❌ Audio system initialization failed';
+            
+            // Setup controls
+            setupAmbientControls();
+            
+            // Check pre-loading status
+            setTimeout(checkPreloadStatus, 1000);
+        });
+
+        window.testSoundDelay = function(soundType) {
+            const startTime = performance.now();
+            testStartTimes[soundType] = startTime;
+            
+            document.getElementById('delayStatus').innerHTML = 
+                `⏱️ Testing ${soundType}... (Started at ${startTime.toFixed(2)}ms)`;
+            
+            // Test the sound
+            toggleAmbientSound(soundType);
+            
+            // Check if it started playing quickly
+            setTimeout(() => {
+                const endTime = performance.now();
+                const delay = endTime - startTime;
+                const status = delay < 100 ? '✅ PASS' : '❌ FAIL';
+                
+                document.getElementById('delayStatus').innerHTML = 
+                    `${status} ${soundType}: ${delay.toFixed(2)}ms delay (${delay < 100 ? 'GOOD' : 'TOO SLOW'})`;
+                
+                // Stop the sound after test
+                setTimeout(() => {
+                    if (state.sounds.active.includes(soundType)) {
+                        toggleAmbientSound(soundType);
+                    }
+                }, 2000);
+            }, 50);
+        };
+
+        window.toggleSound = function(soundType, button) {
+            const isActive = state.sounds.active.includes(soundType);
+            
+            toggleAmbientSound(soundType);
+            
+            // Update button state
+            if (isActive) {
+                button.classList.remove('active');
+                button.innerHTML = button.innerHTML.replace(' ON', ' OFF');
+            } else {
+                button.classList.add('active');
+                button.innerHTML = button.innerHTML.replace(' OFF', ' ON');
+            }
+            
+            document.getElementById('toggleStatus').innerHTML = 
+                `${soundType} is now ${isActive ? 'OFF' : 'ON'}`;
+        };
+
+        window.checkPreloadStatus = function() {
+            const buffers = state.sounds.buffers;
+            const expectedSounds = ['rain', 'ocean', 'forest', 'cafe'];
+            
+            let status = '<strong>Audio Buffer Status:</strong><br>';
+            let allLoaded = true;
+            
+            expectedSounds.forEach(sound => {
+                const loaded = buffers[sound] ? '✅' : '❌';
+                const duration = buffers[sound] ? ` (${buffers[sound].duration.toFixed(1)}s)` : '';
+                status += `${loaded} ${sound}${duration}<br>`;
+                if (!buffers[sound]) allLoaded = false;
+            });
+            
+            status += `<br><strong>Overall Status:</strong> ${allLoaded ? '✅ All sounds pre-loaded' : '❌ Some sounds missing'}`;
+            
+            document.getElementById('preloadStatus').innerHTML = status;
+        };
+
+        window.playMultipleSounds = function() {
+            // Test playing multiple sounds at once
+            toggleAmbientSound('rain');
+            setTimeout(() => toggleAmbientSound('ocean'), 500);
+            
+            document.getElementById('multiStatus').innerHTML = 
+                '🎶 Playing Rain + Ocean simultaneously...';
+        };
+
+        window.stopAllSounds = function() {
+            const activeSounds = [...state.sounds.active];
+            activeSounds.forEach(sound => {
+                toggleAmbientSound(sound);
+            });
+            
+            // Reset all toggle buttons
+            document.querySelectorAll('[id$="Toggle"]').forEach(btn => {
+                btn.classList.remove('active');
+                btn.innerHTML = btn.innerHTML.replace(' ON', ' OFF');
+            });
+            
+            document.getElementById('multiStatus').innerHTML = 
+                '⏹️ All sounds stopped';
+        };
+
+        // Expose state for debugging
+        window.debugSoundState = () => {
+            console.log('🔍 Current sound state:', {
+                active: state.sounds.active,
+                buffers: Object.keys(state.sounds.buffers),
+                sources: Object.keys(state.sounds.sources)
+            });
+        };
+    </script>
+</body>
+</html>

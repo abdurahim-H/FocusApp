@@ -281,19 +281,6 @@ function setupMeditationControls() {
 function setupSoundMixer() {
     console.log('🎵 Setting up sound mixer...');
     
-    // Get the existing sound toggle buttons (old interface)
-    const oldSoundButtons = {
-        rain: document.getElementById('rainBtn'),
-        ocean: document.getElementById('oceanBtn'),
-        forest: document.getElementById('forestBtn'),
-        cafe: document.getElementById('cafeBtn')
-    };
-    
-    // Hide old buttons if they exist
-    Object.values(oldSoundButtons).forEach(btn => {
-        if (btn) btn.style.display = 'none';
-    });
-    
     // Setup new sound layer controls
     document.querySelectorAll('.sound-layer').forEach(layer => {
         const sound = layer.dataset.sound;
@@ -360,10 +347,8 @@ function activateSound(sound, toggleBtn, layer) {
     toggleBtn.textContent = 'ON';
     layer.classList.add('active');
     
-    // Start the sound
-    if (!state.sounds.active.includes(sound)) {
-        toggleAmbientSound(sound);
-    }
+    // Start the sound using the optimized toggle function
+    toggleAmbientSound(sound);
 }
 
 function deactivateSound(sound, toggleBtn, layer) {
@@ -375,7 +360,7 @@ function deactivateSound(sound, toggleBtn, layer) {
     toggleBtn.textContent = 'OFF';
     layer.classList.remove('active');
     
-    // Stop the sound
+    // Stop the sound using the optimized toggle function
     if (state.sounds.active.includes(sound)) {
         toggleAmbientSound(sound);
     }
