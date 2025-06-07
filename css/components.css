@@ -800,3 +800,36 @@
 .settings-modal {
     isolation: isolate;
 }
+
+/* Ambient Sound Button Active States */
+.btn.active {
+    background: rgba(74, 222, 128, 0.3) !important;
+    border-color: rgba(74, 222, 128, 0.5) !important;
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.4) !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.btn.active:hover {
+    background: rgba(74, 222, 128, 0.4) !important;
+    border-color: rgba(74, 222, 128, 0.6) !important;
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.5) !important;
+}
+
+.btn.active::after {
+    content: '●';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.6em;
+    color: rgba(74, 222, 128, 0.9);
+    line-height: 1;
+    pointer-events: none;
+    text-shadow: 0 0 5px rgba(74, 222, 128, 0.8);
+    animation: activePulse 2s ease-in-out infinite;
+}
+
+@keyframes activePulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+}

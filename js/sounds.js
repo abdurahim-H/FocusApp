@@ -1,4 +1,4 @@
-// Ambient Sounds Module - Enhanced with Web Audio API for seamless looping
+// Ambient Sounds Module - Enhanced with pre-loading, toggle functionality, and multiple simultaneous sounds
 // Handles ambient sound controls and audio management
 
 import { state } from './state.js';
@@ -13,11 +13,8 @@ const ambientSounds = {
 
 // Web Audio API context and nodes
 let audioContext = null;
-let currentSource = null;
 let gainNode = null;
-let audioBuffer = null;
-let isLooping = false;
-let nextStartTime = 0;
+let isInitialized = false;
 
 // Initialize Web Audio API
 async function initAudioContext() {
@@ -32,103 +29,175 @@ async function initAudioContext() {
     if (audioContext.state === 'suspended') {
         await audioContext.resume();
     }
+    
+    return audioContext;
 }
 
-// Load audio file into buffer for seamless looping
-async function loadAudioBuffer(url) {
+// Pre-load all audio buffers for instant playback
+async function preloadAllAudioBuffers() {
+    if (isInitialized) return;
+    
     try {
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-        audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-        console.log(`Audio loaded: ${audioBuffer.duration.toFixed(2)}s, ${audioBuffer.sampleRate}Hz`);
-        return audioBuffer;
+        await initAudioContext();
+        
+        console.log('Pre-loading audio buffers...');
+        const loadPromises = Object.entries(ambientSounds).map(async ([type, url]) => {
+            try {
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                state.sounds.buffers[type] = audioBuffer;
+                console.log(`✓ Loaded ${type}: ${audioBuffer.duration.toFixed(2)}s`);
+            } catch (error) {
+                console.error(`✗ Failed to load ${type}:`, error);
+            }
+        });
+        
+        await Promise.all(loadPromises);
+        isInitialized = true;
+        console.log('All audio buffers pre-loaded successfully');
+        
     } catch (error) {
-        console.error('Failed to load audio buffer:', error);
-        throw error;
+        console.error('Failed to pre-load audio buffers:', error);
     }
 }
 
-// Seamless loop scheduling function
-function scheduleLoop() {
-    if (!isLooping || !audioBuffer) return;
+// Seamless loop scheduling function for a specific sound type
+function scheduleLoop(type) {
+    const audioBuffer = state.sounds.buffers[type];
+    if (!audioBuffer || !state.sounds.sources[type]?.isLooping) return;
     
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
     source.connect(gainNode);
     
     // Schedule precise start time
-    source.start(nextStartTime);
-    currentSource = source;
+    const startTime = state.sounds.sources[type].nextStartTime;
+    source.start(startTime);
+    state.sounds.sources[type].currentSource = source;
     
     // Calculate next loop start time for gapless playback
-    nextStartTime += audioBuffer.duration;
+    state.sounds.sources[type].nextStartTime += audioBuffer.duration;
     
     // Schedule next loop before current one ends (overlap for seamless transition)
     const scheduleNextIn = Math.max(0, (audioBuffer.duration - 0.1) * 1000);
     setTimeout(() => {
-        if (isLooping) scheduleLoop();
+        if (state.sounds.sources[type]?.isLooping) {
+            scheduleLoop(type);
+        }
     }, scheduleNextIn);
 }
 
-export function playAmbientSound(type) {
-    // Stop current sound
-    stopAmbientSound();
-
-    if (type && ambientSounds[type]) {
-        // All sounds are now local files, use Web Audio API for seamless looping
-        playSeamlessLoop(type);
-    }
-}
-
-// Seamless Web Audio API playback
-async function playSeamlessLoop(type) {
+// Start playing a sound with seamless looping
+async function startSound(type) {
     try {
+        // Ensure audio context is ready
         await initAudioContext();
-        await loadAudioBuffer(ambientSounds[type]);
         
-        isLooping = true;
-        nextStartTime = audioContext.currentTime;
-        state.sounds.active = type;
+        // Pre-load if not already done
+        if (!isInitialized) {
+            await preloadAllAudioBuffers();
+        }
+        
+        const audioBuffer = state.sounds.buffers[type];
+        if (!audioBuffer) {
+            console.error(`No audio buffer available for ${type}`);
+            return;
+        }
+        
+        // Initialize source tracking for this sound type
+        state.sounds.sources[type] = {
+            isLooping: true,
+            currentSource: null,
+            nextStartTime: audioContext.currentTime
+        };
+        
+        // Add to active sounds list
+        if (!state.sounds.active.includes(type)) {
+            state.sounds.active.push(type);
+        }
         
         // Start the seamless loop
-        scheduleLoop();
-        console.log(`Started seamless ${type} loop`);
+        scheduleLoop(type);
+        console.log(`✓ Started ${type} loop`);
+        
+        // Update button appearance
+        updateButtonState(type, true);
         
     } catch (error) {
-        console.error('Seamless audio failed, falling back to HTML5:', error);
-        playHTML5Audio(type);
+        console.error(`Failed to start ${type}:`, error);
     }
 }
 
-// Fallback HTML5 audio for external URLs
-function playHTML5Audio(type) {
-    state.sounds.audio = new Audio(ambientSounds[type]);
-    state.sounds.audio.loop = true;
-    state.sounds.audio.volume = 0.3;
-    state.sounds.audio.play().catch(e => console.log('Audio play failed:', e));
-    state.sounds.active = type;
-}
-
-export function stopAmbientSound() {
-    // Stop Web Audio API sources
-    isLooping = false;
-    if (currentSource) {
-        try {
-            currentSource.stop();
-        } catch (e) {
-            // Source might already be stopped
+// Stop playing a specific sound
+function stopSound(type) {
+    if (state.sounds.sources[type]) {
+        // Stop looping
+        state.sounds.sources[type].isLooping = false;
+        
+        // Stop current source
+        if (state.sounds.sources[type].currentSource) {
+            try {
+                state.sounds.sources[type].currentSource.stop();
+            } catch (e) {
+                // Source might already be stopped
+            }
         }
-        currentSource = null;
+        
+        // Clean up source tracking
+        delete state.sounds.sources[type];
     }
     
-    // Stop HTML5 audio
-    if (state.sounds.audio) {
-        state.sounds.audio.pause();
-        state.sounds.audio = null;
+    // Remove from active sounds list
+    const index = state.sounds.active.indexOf(type);
+    if (index > -1) {
+        state.sounds.active.splice(index, 1);
     }
     
-    state.sounds.active = null;
-    audioBuffer = null;
+    // Update button appearance
+    updateButtonState(type, false);
+    console.log(`✓ Stopped ${type}`);
+}
+
+// Toggle sound on/off
+export function toggleAmbientSound(type) {
+    if (state.sounds.active.includes(type)) {
+        stopSound(type);
+    } else {
+        startSound(type);
+    }
+}
+
+// Update button visual state
+function updateButtonState(type, isActive) {
+    const button = document.getElementById(`${type}Btn`);
+    if (button) {
+        if (isActive) {
+            button.classList.add('active');
+            button.style.backgroundColor = 'rgba(74, 222, 128, 0.3)';
+            button.style.borderColor = 'rgba(74, 222, 128, 0.5)';
+        } else {
+            button.classList.remove('active');
+            button.style.backgroundColor = '';
+            button.style.borderColor = '';
+        }
+    }
+}
+
+// Legacy function for backward compatibility - now toggles instead
+export function playAmbientSound(type) {
+    toggleAmbientSound(type);
+}
+
+// Stop all ambient sounds
+export function stopAllAmbientSounds() {
+    const activeSounds = [...state.sounds.active]; // Copy array to avoid modification during iteration
+    activeSounds.forEach(type => stopSound(type));
+}
+
+// Legacy function - now stops all sounds
+export function stopAmbientSound() {
+    stopAllAmbientSounds();
 }
 
 export function setVolume(volume) {
@@ -139,7 +208,7 @@ export function setVolume(volume) {
         gainNode.gain.setTargetAtTime(volumeLevel, audioContext.currentTime, 0.1);
     }
     
-    // Set HTML5 audio volume
+    // Set HTML5 audio volume (legacy support)
     if (state.sounds.audio) {
         state.sounds.audio.volume = volumeLevel;
     }
@@ -156,21 +225,34 @@ export function fadeVolume(targetVolume, duration = 1000) {
 }
 
 export function setupAmbientControls() {
-    // Ambient sound controls with user interaction requirement for audio context
+    // Pre-load audio buffers on first user interaction
+    let hasPreloaded = false;
+    
+    async function ensurePreloaded() {
+        if (!hasPreloaded) {
+            await preloadAllAudioBuffers();
+            hasPreloaded = true;
+        }
+    }
+    
+    // Ambient sound controls with toggle functionality
     document.getElementById('rainBtn').addEventListener('click', async () => {
-        await initAudioContext(); // Ensure context is ready
-        playAmbientSound('rain');
+        await ensurePreloaded();
+        toggleAmbientSound('rain');
     });
+    
     document.getElementById('oceanBtn').addEventListener('click', async () => {
-        await initAudioContext();
-        playAmbientSound('ocean');
+        await ensurePreloaded();
+        toggleAmbientSound('ocean');
     });
+    
     document.getElementById('forestBtn').addEventListener('click', async () => {
-        await initAudioContext();
-        playAmbientSound('forest');
+        await ensurePreloaded();
+        toggleAmbientSound('forest');
     });
+    
     document.getElementById('cafeBtn').addEventListener('click', async () => {
-        await initAudioContext();
-        playAmbientSound('cafe');
+        await ensurePreloaded();
+        toggleAmbientSound('cafe');
     });
 }

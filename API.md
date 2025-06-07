@@ -37,8 +37,10 @@ Central state management for the entire application.
     },
     tasks: [],                       // Task list array
     sounds: {
-        active: null,                // Active sound name
-        audio: null                  // Audio element reference
+        active: [],                  // Array of active sound names
+        audio: null,                 // Audio element reference (legacy)
+        sources: {},                 // Audio sources for each sound type
+        buffers: {}                  // Pre-loaded audio buffers
     }
 }
 ```
@@ -242,14 +244,25 @@ Initializes the audio system.
 - **Parameters**: None
 - **Returns**: void
 
+##### `toggleAmbientSound(soundName)`
+Toggles an ambient sound on/off (play if stopped, stop if playing).
+- **Parameters**:
+  - `soundName` (string): Sound identifier ('rain', 'ocean', 'forest', 'cafe')
+- **Returns**: void
+
 ##### `playAmbientSound(soundName)`
-Plays an ambient sound.
+**DEPRECATED**: Legacy function that now calls `toggleAmbientSound()`.
 - **Parameters**:
   - `soundName` (string): Sound identifier ('rain', 'ocean', 'forest', 'cafe')
 - **Returns**: void
 
 ##### `stopAmbientSound()`
-Stops currently playing ambient sound.
+**DEPRECATED**: Stops all currently playing ambient sounds.
+- **Parameters**: None
+- **Returns**: void
+
+##### `stopAllAmbientSounds()`
+Stops all currently playing ambient sounds.
 - **Parameters**: None
 - **Returns**: void
 

@@ -25,8 +25,10 @@ export const state = {
     },
     tasks: [],
     sounds: {
-        active: null,
-        audio: null
+        active: [], // Array to track multiple active sounds
+        audio: null,
+        sources: {}, // Store audio sources for each sound type
+        buffers: {} // Pre-loaded audio buffers
     }
 };
 
