@@ -274,22 +274,58 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 1.2em !important;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f) !important;
-    border-color: #ff6b6b !important;
-    color: white !important;
+    font-size: 1.3em !important;
+    background: var(--bg-glass) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid var(--border-glass) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 4px 15px var(--shadow) !important;
     min-width: 50px !important;
     flex-shrink: 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease !important;
 }
 
 .reset-session-btn:hover {
-    background: linear-gradient(135deg, #ff5252, #e53e52) !important;
-    transform: translateY(-2px) scale(1.05) !important;
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px var(--shadow) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .reset-session-btn:active {
-    transform: translateY(0) scale(0.95) !important;
+    transform: translateY(-1px) scale(0.95) !important;
+    box-shadow: 0 2px 10px var(--shadow) !important;
+}
+
+/* Reset button click animation */
+.reset-session-btn.clicked {
+    animation: resetClickEffect 0.6s ease-out !important;
+}
+
+@keyframes resetClickEffect {
+    0% {
+        transform: translateY(-2px) scale(1);
+        box-shadow: 0 6px 20px var(--shadow);
+    }
+    15% {
+        transform: translateY(-1px) scale(0.9);
+        box-shadow: 0 2px 10px var(--shadow);
+    }
+    30% {
+        transform: translateY(-2px) scale(1.1);
+        box-shadow: 0 8px 25px rgba(6, 214, 160, 0.4);
+        border-color: var(--accent);
+    }
+    60% {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(6, 214, 160, 0.3);
+    }
+    100% {
+        transform: translateY(-2px) scale(1);
+        box-shadow: 0 6px 20px var(--shadow);
+        border-color: var(--border-glass);
+    }
 }
 
 /* Responsive adjustments for reset session button */

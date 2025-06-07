@@ -143,7 +143,18 @@ function setupTimerControls(loadedModules) {
         document.getElementById('resetBtn').addEventListener('click', loadedModules.timer.resetTimer);
         document.getElementById('skipBreakBtn').addEventListener('click', loadedModules.timer.skipBreak);
         document.getElementById('skipFocusBtn').addEventListener('click', loadedModules.timer.skipFocus);
-        document.getElementById('resetSessionBtn').addEventListener('click', loadedModules.timer.resetSession);
+        
+        // Enhanced reset session button with click animation
+        document.getElementById('resetSessionBtn').addEventListener('click', function() {
+            const btn = this;
+            btn.classList.add('clicked');
+            loadedModules.timer.resetSession();
+            
+            // Remove animation class after animation completes
+            setTimeout(() => {
+                btn.classList.remove('clicked');
+            }, 600);
+        });
         console.log('✅ Timer controls setup complete');
     } else {
         console.error('❌ Timer module not available for controls setup');
