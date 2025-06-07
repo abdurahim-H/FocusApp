@@ -135,6 +135,7 @@
     flex-wrap: wrap;
     position: relative;
     z-index: 22;
+    align-items: center;
 }
 
 /* Task Management Section */
@@ -262,6 +263,58 @@
     background: var(--primary);
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
     filter: brightness(1.1);
+}
+
+/* Reset Session Button */
+.reset-session-btn {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.2em !important;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a6f) !important;
+    border-color: #ff6b6b !important;
+    color: white !important;
+    min-width: 50px !important;
+    flex-shrink: 0 !important;
+}
+
+.reset-session-btn:hover {
+    background: linear-gradient(135deg, #ff5252, #e53e52) !important;
+    transform: translateY(-2px) scale(1.05) !important;
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4) !important;
+}
+
+.reset-session-btn:active {
+    transform: translateY(0) scale(0.95) !important;
+}
+
+/* Responsive adjustments for reset session button */
+@media (max-width: 768px) {
+    .timer-controls {
+        gap: 10px;
+    }
+    
+    .reset-session-btn {
+        width: 45px !important;
+        height: 45px !important;
+        font-size: 1.1em !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .timer-controls {
+        gap: 8px;
+    }
+    
+    .reset-session-btn {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 1em !important;
+    }
 }
 
 /* Settings Modal */

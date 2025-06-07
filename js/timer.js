@@ -388,3 +388,59 @@ export function startBreathing() {
         breathIn = !breathIn;
     }, 4000);
 }
+
+// New function to completely reset the Pomodoro cycle
+export function resetSession() {
+    // Stop any running timer
+    state.timer.isRunning = false;
+    state.timer.transitioning = false;
+    state.timerState = 'stopped';
+    
+    if (state.timer.interval) {
+        clearInterval(state.timer.interval);
+        state.timer.interval = null;
+    }
+    
+    // Clear achievement queue and notifications
+    clearAchievementQueue();
+    
+    // Reset the entire Pomodoro cycle
+    state.timer.pomodoroCount = 0;
+    state.timer.isBreak = false;
+    state.timer.isLongBreak = false;
+    state.timer.minutes = state.timer.settings.focusDuration;
+    state.timer.seconds = 0;
+    state.currentMode = 'focus';
+    
+    // Update UI elements
+    updateTimerDisplay();
+    updateSessionDisplay();
+    
+    const sessionType = document.getElementById('sessionType');
+    if (sessionType) {
+        sessionType.textContent = 'Focus Time';
+    }
+    
+    // Reset button states
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const skipBreakBtn = document.getElementById('skipBreakBtn');
+    const skipFocusBtn = document.getElementById('skipFocusBtn');
+    
+    if (startBtn) {
+        startBtn.classList.remove('hidden');
+        startBtn.textContent = 'Start Focus';
+    }
+    if (pauseBtn) {
+        pauseBtn.classList.add('hidden');
+    }
+    if (skipBreakBtn) {
+        skipBreakBtn.classList.add('hidden');
+    }
+    if (skipFocusBtn) {
+        skipFocusBtn.classList.add('hidden');
+    }
+    
+    // Show achievement for session reset
+    showAchievement('Session Reset!', 'Starting fresh with a new Pomodoro cycle');
+}
