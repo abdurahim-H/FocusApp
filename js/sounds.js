@@ -40,22 +40,19 @@ async function preloadAllAudioBuffers() {
     try {
         await initAudioContext();
         
-        console.log('Pre-loading audio buffers...');
         const loadPromises = Object.entries(ambientSounds).map(async ([type, url]) => {
             try {
                 const response = await fetch(url);
                 const arrayBuffer = await response.arrayBuffer();
                 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
                 state.sounds.buffers[type] = audioBuffer;
-                console.log(`✓ Loaded ${type}: ${audioBuffer.duration.toFixed(2)}s`);
             } catch (error) {
-                console.error(`✗ Failed to load ${type}:`, error);
+                console.error(`Failed to load ${type}:`, error);
             }
         });
         
         await Promise.all(loadPromises);
         isInitialized = true;
-        console.log('All audio buffers pre-loaded successfully');
         
     } catch (error) {
         console.error('Failed to pre-load audio buffers:', error);
@@ -101,7 +98,6 @@ async function startSound(type) {
         
         const audioBuffer = state.sounds.buffers[type];
         if (!audioBuffer) {
-            console.error(`No audio buffer available for ${type}`);
             return;
         }
         
@@ -119,7 +115,6 @@ async function startSound(type) {
         
         // Start the seamless loop
         scheduleLoop(type);
-        console.log(`✓ Started ${type} loop`);
         
         // Update button appearance
         updateButtonState(type, true);
@@ -156,7 +151,6 @@ function stopSound(type) {
     
     // Update button appearance
     updateButtonState(type, false);
-    console.log(`✓ Stopped ${type}`);
 }
 
 // Toggle sound on/off

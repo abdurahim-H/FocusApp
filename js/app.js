@@ -25,7 +25,7 @@ async function loadModules() {
         try {
             modules[module.name] = await import(module.path);
         } catch (error) {
-            console.error(`Failed to load ${module.name}:`, error);
+            // Silently handle module loading errors
         }
     }
 
@@ -70,7 +70,7 @@ export async function initApp() {
                 loadedModules.scene3d.init3D();
             }
         } catch (error) {
-            console.error('3D scene initialization failed:', error);
+            // Silently handle 3D initialization errors
         }
 
         // Setup all modules
@@ -155,9 +155,6 @@ function setupTimerControls(loadedModules) {
                 btn.classList.remove('clicked');
             }, 600);
         });
-        console.log('✅ Timer controls setup complete');
-    } else {
-        console.error('❌ Timer module not available for controls setup');
     }
 }
 
@@ -168,19 +165,12 @@ function setupTaskControls(loadedModules) {
         document.getElementById('taskInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') loadedModules.tasks.addTask();
         });
-        console.log('✅ Task controls setup complete');
-    } else {
-        console.error('❌ Tasks module not available for controls setup');
     }
 }
 
 // Initialize the app
 (async function() {
-    console.log('🚀 Starting app initialization...');
-    
-    // First, hide the loading screen quickly to show the UI
     setTimeout(() => {
-        console.log('🚀 Quick loading screen removal...');
         const loadingScreen = document.getElementById('loadingScreen');
         const loadingProgress = document.getElementById('loadingProgress');
         
@@ -192,19 +182,14 @@ function setupTaskControls(loadedModules) {
             loadingScreen.style.opacity = '0';
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
-                console.log('✅ Loading screen hidden');
             }, 500);
         }
     }, 500);
     
-    // Then try to initialize the full app
     try {
         await initApp();
     } catch (error) {
-        console.error('❌ App initialization failed:', error);
-        console.log('🚀 Continuing with basic functionality...');
-        
-        // Basic date/time update
+        // Basic date/time update fallback
         function updateDateTime() {
             const now = new Date();
             const dateTimeEl = document.getElementById('dateTime');

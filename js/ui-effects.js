@@ -12,9 +12,6 @@ export function updateProductivityGlow() {
     const totalTasks = appState.tasks.length;
     const productivity = totalTasks > 0 ? completedTasks / totalTasks : 0;
     
-    // Debug logging to understand the issue
-    // console.log(`🔍 Productivity calc: ${completedTasks}/${totalTasks} = ${productivity.toFixed(2)}`);
-    
     const container = document.querySelector('.container');
     
     if (productivity > 0.7) {
@@ -73,7 +70,6 @@ export function removeFocusIntensity() {
     activeEffects.delete('focus-intensity');
 }
 
-// Session completion epic effect - LAYOUT STABILITY FIX
 export function triggerSessionCompleteUI() {
     const container = document.querySelector('.container');
     const achievement = document.querySelector('.achievement');
@@ -81,19 +77,16 @@ export function triggerSessionCompleteUI() {
     container.classList.add('session-complete');
     achievement?.classList.add('session-complete');
     
-    // LAYOUT STABILITY FIX: Delay gravitational pull and make it less disruptive
     setTimeout(() => {
-        // Only add gravitational pull if container is still in session-complete state
         if (container.classList.contains('session-complete')) {
             container.classList.add('gravitational-pull');
         }
-    }, 1500); // Increased delay to let achievement animation complete first
+    }, 1500);
     
-    // Remove effects after animation with proper cleanup
     setTimeout(() => {
         container.classList.remove('session-complete', 'gravitational-pull');
         achievement?.classList.remove('session-complete');
-    }, 5000); // Slightly longer duration for smoother experience
+    }, 5000);
 }
 
 // Black hole approach effect (for break time)

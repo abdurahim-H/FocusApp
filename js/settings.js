@@ -23,14 +23,6 @@ export function setupSettingsControls() {
         }
     };
 
-    console.log('Setting up controls, elements found:', {
-        saveBtn: !!elements.saveBtn,
-        resetBtn: !!elements.resetBtn,
-        focusRange: !!elements.focusRange,
-        shortBreakRange: !!elements.shortBreakRange,
-        longBreakRange: !!elements.longBreakRange
-    });
-
     // Focus length range
     if (elements.focusRange && elements.focusValue) {
         elements.focusRange.addEventListener('input', () => {
@@ -79,28 +71,14 @@ export function setupSettingsControls() {
 
     // Save button
     if (elements.saveBtn) {
-        console.log('Attaching save button event listener');
-        
         elements.saveBtn.addEventListener('click', function() {
-            console.log('SAVE BUTTON CLICKED! Processing settings...');
-            
             try {
-                // Get values
                 const focusDuration = parseInt(elements.focusRange.value);
                 const shortBreakDuration = parseInt(elements.shortBreakRange.value);
                 const longBreakDuration = parseInt(elements.longBreakRange.value);
                 const soundVolume = parseInt(elements.soundRange.value);
                 const greeting = elements.greetingInput.value;
                 const theme = document.body.getAttribute('data-theme') || 'auto';
-                
-                console.log('Saving settings:', { 
-                    focusDuration, 
-                    shortBreakDuration, 
-                    longBreakDuration, 
-                    soundVolume, 
-                    greeting, 
-                    theme 
-                });
                 
                 // Save to localStorage
                 localStorage.setItem('fu_theme', theme);
@@ -119,9 +97,7 @@ export function setupSettingsControls() {
                         state.timer.minutes = focusDuration;
                         state.timer.seconds = 0;
                         updateTimerDisplay();
-                        console.log('Timer display updated to:', focusDuration);
                         
-                        // Reset start button
                         const startBtn = document.getElementById('startBtn');
                         if (startBtn) {
                             startBtn.textContent = 'Start Focus';
@@ -138,24 +114,20 @@ export function setupSettingsControls() {
                 if (shortBreakDuration && shortBreakDuration > 0) {
                     state.timer.settings.shortBreakDuration = shortBreakDuration;
                     
-                    // If timer is not running and in short break, update display
                     if (!state.timer.isRunning && state.timer.isBreak && !state.timer.isLongBreak) {
                         state.timer.minutes = shortBreakDuration;
                         state.timer.seconds = 0;
                         updateTimerDisplay();
-                        console.log('Short break timer display updated to:', shortBreakDuration);
                     }
                 }
                 
                 if (longBreakDuration && longBreakDuration > 0) {
                     state.timer.settings.longBreakDuration = longBreakDuration;
                     
-                    // If timer is not running and in long break, update display
                     if (!state.timer.isRunning && state.timer.isBreak && state.timer.isLongBreak) {
                         state.timer.minutes = longBreakDuration;
                         state.timer.seconds = 0;
                         updateTimerDisplay();
-                        console.log('Long break timer display updated to:', longBreakDuration);
                     }
                 }
                 
@@ -173,14 +145,10 @@ export function setupSettingsControls() {
                     elements.savedMsg.style.opacity = 0;
                 }, 1500);
                 
-                console.log('Settings saved successfully!');
-                
             } catch (error) {
-                console.error('Error saving settings:', error);
+                // Silently handle settings save errors
             }
         });
-    } else {
-        console.error('Save button not found!');
     }
 
     // Reset button
@@ -222,8 +190,6 @@ export function setupSettingsControls() {
 
 // Theme function
 export function setTheme(theme) {
-    console.log('Setting theme to:', theme);
-    
     // Set theme on both body and document element for maximum compatibility
     document.body.setAttribute('data-theme', theme);
     document.documentElement.setAttribute('data-theme', theme);
@@ -232,11 +198,6 @@ export function setTheme(theme) {
     document.body.style.display = 'none';
     document.body.offsetHeight; // Force reflow
     document.body.style.display = '';
-    
-    console.log('Theme attributes set:', {
-        body: document.body.getAttribute('data-theme'),
-        documentElement: document.documentElement.getAttribute('data-theme')
-    });
     
     // Update theme buttons
     document.querySelectorAll('.theme-buttons [data-theme]').forEach(btn => {
@@ -248,28 +209,12 @@ export function setTheme(theme) {
     if (activeBtn) {
         activeBtn.classList.remove('btn');
         activeBtn.classList.add('btn-primary');
-        console.log('Set active theme button for theme:', theme);
-    } else {
-        console.warn('Theme button not found for theme:', theme);
     }
     
     // Save theme immediately when changed
     localStorage.setItem('fu_theme', theme);
-    console.log('Theme saved to localStorage:', theme);
-    
-    // Log computed styles for debugging
-    setTimeout(() => {
-        const computedStyle = getComputedStyle(document.body);
-        console.log('Computed styles after theme change:', {
-            backgroundColor: computedStyle.backgroundColor,
-            color: computedStyle.color,
-            bgDark: computedStyle.getPropertyValue('--bg-dark'),
-            textPrimary: computedStyle.getPropertyValue('--text-primary')
-        });
-    }, 100);
 }
 
-// Load settings
 export function loadSettings() {
     const theme = localStorage.getItem('fu_theme') || 'dark';
     const focusLength = localStorage.getItem('fu_focusLength') || '25';
@@ -278,16 +223,6 @@ export function loadSettings() {
     const soundVolume = localStorage.getItem('fu_soundVolume') || '30';
     const greeting = localStorage.getItem('fu_greeting') || '';
     
-    console.log('Loading settings:', { 
-        theme, 
-        focusLength, 
-        shortBreakLength, 
-        longBreakLength, 
-        soundVolume, 
-        greeting 
-    });
-    
-    // Always set theme, even if it's the default
     setTheme(theme);
     
     const focusRange = document.getElementById('focusLengthRange');

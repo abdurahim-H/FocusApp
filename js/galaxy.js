@@ -6,7 +6,6 @@ import { scene, stars, planets, comets, galaxyCore, spaceObjects } from './scene
 export function createStarField() {
     try {
         if (!scene) {
-            console.warn('Scene not available for star field creation');
             return;
         }
 
@@ -133,8 +132,6 @@ export function createStarField() {
         scene.add(starField);
         stars.push(starField);
         
-        console.log('Main star field created with', starCount, 'stars');
-        
         // Create nebula clouds
         createNebulaCloud();
         
@@ -148,7 +145,6 @@ export function createStarField() {
         updateStarTheme();
         
     } catch (error) {
-        console.error('Failed to create star field:', error);
         // Fallback: create a simple star field
         try {
             const fallbackGeometry = new THREE.BufferGeometry();
@@ -172,9 +168,8 @@ export function createStarField() {
             fallbackStars.renderOrder = -10;
             scene.add(fallbackStars);
             stars.push(fallbackStars);
-            console.log('Fallback star field created');
         } catch (fallbackError) {
-            console.error('Failed to create fallback star field:', fallbackError);
+            // Silently handle fallback creation failure
         }
     }
 }
@@ -305,7 +300,6 @@ function createNebulaCloud() {
 export function createGalaxyCore() {
     // The enhanced black hole system will be created separately
     // This function is now a placeholder for compatibility
-    console.log('Enhanced black hole system will be initialized by scene3d.js');
 }
 
 export function createPlanets() {

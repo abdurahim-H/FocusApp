@@ -1,0 +1,52 @@
+{
+  "name": "cosmic-focus",
+  "version": "1.0.0",
+  "description": "A stunning 3D productivity application featuring physics-accurate black hole visualizations and immersive cosmic environments",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "serve": "npx serve .",
+    "dev": "python3 -m http.server 8000 --bind 127.0.0.1"
+  },
+  "keywords": [
+    "productivity",
+    "pomodoro",
+    "3d",
+    "threejs",
+    "webgl",
+    "ambient-sounds",
+    "focus-timer",
+    "task-management",
+    "cosmic",
+    "black-hole"
+  ],
+  "author": "Cosmic Focus Team",
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/cosmic-focus",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/cosmic-focus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/cosmic-focus/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "files": [
+    "index.html",
+    "css/",
+    "js/",
+    "sounds/",
+    "README.md",
+    "LICENSE"
+  ]
+}

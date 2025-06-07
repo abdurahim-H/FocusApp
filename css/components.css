@@ -626,9 +626,6 @@
 
 .range-input::-webkit-slider-thumb:hover {
     background: var(--accent);
-    /* LAYOUT STABILITY FIX: Disabled scaling to prevent layout disruption */
-    /* transform: scale(1.1); */
-    /* Enhanced visual feedback without scaling */
     box-shadow: 0 0 15px rgba(6, 214, 160, 0.5);
     filter: brightness(1.2);
 }
@@ -646,9 +643,6 @@
 
 .range-input::-moz-range-thumb:hover {
     background: var(--accent);
-    /* LAYOUT STABILITY FIX: Disabled scaling to prevent layout disruption */
-    /* transform: scale(1.1); */
-    /* Enhanced visual feedback without scaling */
     box-shadow: 0 0 15px rgba(6, 214, 160, 0.5);
     filter: brightness(1.2);
 }

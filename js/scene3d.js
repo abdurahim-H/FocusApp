@@ -33,18 +33,15 @@ function checkWebGLSupport() {
 // Initialize 3D Scene
 export function init3D() {
     if (!window.THREE) {
-        console.warn('Three.js not loaded, skipping 3D initialization');
         return false;
     }
 
     if (!checkWebGLSupport()) {
-        console.warn('WebGL not supported, skipping 3D initialization');
         return false;
     }
 
     const container = document.getElementById('scene-container');
     if (!container) {
-        console.error('Scene container not found');
         return false;
     }
 
@@ -104,7 +101,6 @@ export function init3D() {
 
         return true;
     } catch (error) {
-        console.error('Failed to initialize 3D scene:', error);
         if (container) {
             container.style.display = 'none';
         }

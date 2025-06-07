@@ -18,8 +18,6 @@ export function initCleanupSystem() {
     if (cleanupInitialized) return;
     cleanupInitialized = true;
     
-    console.log('🧹 Cleanup system initializing...');
-    
     // Store original functions
     originalRequestAnimationFrame = window.requestAnimationFrame;
     originalCancelAnimationFrame = window.cancelAnimationFrame;
@@ -40,25 +38,19 @@ export function initCleanupSystem() {
     // Setup tab visibility handling for animation pause/resume
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            console.log('🔄 Tab hidden - pausing animations');
             pauseAnimations();
         } else {
-            console.log('🔄 Tab visible - resuming animations');
             resumeAnimations();
         }
     });
-    
-    console.log('🧹 Cleanup system initialized - tracking functions ready');
 }
 
 // Enable aggressive tracking (optional - call after app is loaded)
 export function enableAggressiveTracking() {
     if (!cleanupInitialized) {
-        console.warn('🧹 Cleanup system not initialized, cannot enable aggressive tracking');
         return;
     }
     
-    console.log('🧹 Enabling aggressive tracking...');
     setupTrackingWrappers();
 }
 
@@ -115,8 +107,6 @@ function setupTrackingWrappers() {
 
 // Global cleanup function
 export function cleanupApplication() {
-    console.log('🧹 Starting application cleanup...');
-    
     // Cancel all active animation frames
     let frameCount = 0;
     for (const frameId of activeAnimationFrames) {
@@ -124,7 +114,6 @@ export function cleanupApplication() {
         frameCount++;
     }
     activeAnimationFrames.clear();
-    console.log(`🧹 Cancelled ${frameCount} animation frames`);
     
     // Clear all active intervals
     let intervalCount = 0;
@@ -133,7 +122,6 @@ export function cleanupApplication() {
         intervalCount++;
     }
     activeIntervals.clear();
-    console.log(`🧹 Cleared ${intervalCount} intervals`);
     
     // Clear all active timeouts
     let timeoutCount = 0;
@@ -142,15 +130,12 @@ export function cleanupApplication() {
         timeoutCount++;
     }
     activeTimeouts.clear();
-    console.log(`🧹 Cleared ${timeoutCount} timeouts`);
     
     // Cleanup Three.js resources
     cleanup3DResources();
     
     // Cleanup UI effects
     cleanupUIEffects();
-    
-    console.log('🧹 Application cleanup complete');
 }
 
 // Three.js resource cleanup
@@ -189,8 +174,6 @@ function cleanup3DResources() {
         window.renderer.forceContextLoss();
     }
     
-    console.log(`🧹 Disposed ${geometryCount} geometries, ${materialCount} materials, ${textureCount} textures`);
-    
     function disposeMaterial(material) {
         if (material.map) {
             material.map.dispose();
@@ -227,8 +210,6 @@ function cleanupUIEffects() {
     body.style.removeProperty('--redshift-intensity');
     document.documentElement.style.removeProperty('--time-scale');
     document.documentElement.style.removeProperty('--redshift-intensity');
-    
-    console.log('🧹 Cleaned up UI effects');
 }
 
 // Export tracking functions for use by other modules
@@ -254,23 +235,6 @@ export function trackEventListener(element, type, listener, options) {
     return element.addEventListener(type, listener, options);
 }
 
-// Memory monitoring (development only)
-export function reportMemoryUsage() {
-    if (performance.memory) {
-        const memory = performance.memory;
-        console.log('📊 Memory Usage:', {
-            used: `${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-            total: `${(memory.totalJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-            limit: `${(memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB`,
-            activeFrames: activeAnimationFrames.size,
-            activeIntervals: activeIntervals.size,
-            activeTimeouts: activeTimeouts.size
-        });
-    }
-}
-
-// Expose for debugging
 window.cleanupApplication = cleanupApplication;
-window.reportMemoryUsage = reportMemoryUsage;
 
 export { activeAnimationFrames, activeIntervals, activeTimeouts, eventListeners };

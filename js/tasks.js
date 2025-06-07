@@ -1,6 +1,5 @@
 import { state } from './state.js';
 import { updateUniverseStats, showAchievement } from './timer.js';
-import { triggerTaskCompletionBurst } from './blackhole.js';
 import { triggerTaskCompletionShake, triggerTimeDilationEffect } from './camera-effects.js';
 import { triggerTaskCompletionUI, triggerTimeDilationUI } from './ui-effects.js';
 
@@ -29,12 +28,6 @@ export function toggleTask(id) {
             state.universe.stars += 0.5;
             updateUniverseStats();
             showAchievement('Task Complete!', 'Great job!');
-            
-            console.log('🔥 DISABLED: Yellow ring burst effect (triggerTaskCompletionBurst)');
-            
-            // LAYOUT STABILITY FIX: Disable camera shake to prevent visual disruption
-            // triggerTaskCompletionShake();
-            console.log('🛡️ LAYOUT FIX: Camera shake disabled to prevent layout disruption');
             
             const taskElement = document.querySelector(`[data-task-id="${id}"]`);
             triggerTaskCompletionUI(taskElement);

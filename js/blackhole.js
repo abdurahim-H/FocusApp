@@ -13,7 +13,6 @@ let polarJetParticles = [];
 export function createEnhancedBlackHole() {
     try {
         if (!scene) {
-            console.warn('Scene not available for black hole creation');
             return;
         }
 
@@ -1257,9 +1256,4 @@ export function triggerFocusIntensification() {
     if (blackHoleSystem.diskMaterial) {
         // Already handled in updateBlackHoleEffects with smooth transitions
     }
-}
-
-export function triggerTaskCompletionBurst() {
-    console.log('🔥 WARNING: triggerTaskCompletionBurst() called - this should be DISABLED!');
-    return;
 }

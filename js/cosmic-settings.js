@@ -7,13 +7,11 @@ let particleSystem = null;
 let settingsAnimationFrame = null;
 
 function triggerUIEffect(effectType) {
-    console.log(`🌟 Cosmic Effect: ${effectType}`);
+    // Trigger cosmic visual effects based on type
 }
 
 export function initCosmicSettings() {
     if (cosmicSettingsInitialized) return;
-    
-    console.log('🌌 Initializing Cosmic Settings Panel...');
     
     createParticleBackground();
     enhanceSettingsControls();
@@ -450,7 +448,6 @@ function triggerHolographicEffect(container, text) {
 
 // Enhanced setup function that replaces the original
 export function setupCosmicSettingsModal() {
-    console.log('🌌 setupCosmicSettingsModal called!');
     
     // Use a more robust element selection with retry mechanism
     function findAndSetupElements() {
@@ -458,18 +455,10 @@ export function setupCosmicSettingsModal() {
         const settingsOverlay = document.getElementById('settingsModalOverlay');
         const closeBtn = document.getElementById('closeSettingsBtn');
         
-        console.log('🌌 Elements found:');
-        console.log('🌌 - settingsBtn:', settingsBtn);
-        console.log('🌌 - settingsOverlay:', settingsOverlay);
-        console.log('🌌 - closeBtn:', closeBtn);
-        
         if (!settingsBtn || !settingsOverlay || !closeBtn) {
-            console.error('🌌 Settings modal elements not found, retrying in 100ms...');
             setTimeout(findAndSetupElements, 100);
             return;
         }
-        
-        console.log('🌌 All elements found, setting up event listeners...');
         
         // Remove any existing event listeners by cloning the element
         const newSettingsBtn = settingsBtn.cloneNode(true);
@@ -480,7 +469,6 @@ export function setupCosmicSettingsModal() {
         
         // Open modal with spectacular entrance
         newSettingsBtn.addEventListener('click', function(event) {
-            console.log('🌌 Settings button clicked!');
             event.preventDefault();
             event.stopPropagation();
             
@@ -496,8 +484,6 @@ export function setupCosmicSettingsModal() {
             // Update preview stats
             setTimeout(updatePreviewStats, 100);
         });
-        
-        console.log('🌌 Click event listener added to settings button');
         
         // Close modal with spectacular exit
         function closeModal() {
@@ -522,8 +508,6 @@ export function setupCosmicSettingsModal() {
             if (e.target === settingsOverlay) closeModal();
         });
         
-        console.log('🌌 setupCosmicSettingsModal completed successfully!');
-        
         // Make the setup function globally available as backup
         window.cosmicSettingsReady = true;
     }
@@ -538,8 +522,6 @@ window.initCosmicSettings = initCosmicSettings;
 
 // Spectacular save function with cosmic effects
 export function saveCosmicSettings() {
-    console.log('🌌 Saving cosmic settings with spectacular effects...');
-    
     // Trigger massive cosmic burst effect
     triggerUIEffect('cosmicSaveExplosion');
     
@@ -591,8 +573,6 @@ export function saveCosmicSettings() {
             updateTimerDisplay();
         }
     }
-    
-    console.log('✨ Cosmic settings saved successfully!');
 }
 
 function showCosmicSuccessMessage() {
@@ -633,8 +613,6 @@ export { saveCosmicSettings as handleSaveSettings };
 
 // Legacy compatibility exports
 export function setupSettingsControls() {
-    console.log('🌌 Setting up cosmic settings controls...');
-    
     const elements = {
         saveBtn: document.getElementById('saveSettingsBtn'),
         resetBtn: document.getElementById('resetSettingsBtn'),
