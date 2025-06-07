@@ -1,143 +1,81 @@
+/**
+ * Cosmic Focus - Main Application Entry Point
+ * Handles module loading, initialization, and core app setup
+ */
+
 let modules = {};
 
+/**
+ * Dynamically loads all application modules
+ * @returns {Object} Loaded modules object
+ */
 async function loadModules() {
-    console.log('🚀 Loading modules...');
-    
-    try {
-        modules.scene3d = await import('./scene3d.js');
-        console.log('✅ scene3d loaded');
-    } catch (error) {
-        console.error('❌ Failed to load scene3d:', error);
+    const moduleList = [
+        { name: 'scene3d', path: './scene3d.js' },
+        { name: 'timer', path: './timer.js' },
+        { name: 'tasks', path: './tasks.js' },
+        { name: 'sounds', path: './sounds.js' },
+        { name: 'settings', path: './settings.js' },
+        { name: 'navigation', path: './navigation.js' },
+        { name: 'uiEffects', path: './ui-effects.js' },
+        { name: 'cleanup', path: './cleanup.js' }
+    ];
+
+    for (const module of moduleList) {
+        try {
+            modules[module.name] = await import(module.path);
+        } catch (error) {
+            console.error(`Failed to load ${module.name}:`, error);
+        }
     }
-    
-    try {
-        modules.timer = await import('./timer.js');
-        console.log('✅ timer loaded');
-    } catch (error) {
-        console.error('❌ Failed to load timer:', error);
-    }
-    
-    try {
-        modules.tasks = await import('./tasks.js');
-        console.log('✅ tasks loaded');
-    } catch (error) {
-        console.error('❌ Failed to load tasks:', error);
-    }
-    
-    try {
-        modules.sounds = await import('./sounds.js');
-        console.log('✅ sounds loaded');
-    } catch (error) {
-        console.error('❌ Failed to load sounds:', error);
-    }
-    
-    try {
-        modules.settings = await import('./settings.js');
-        console.log('✅ settings loaded');
-    } catch (error) {
-        console.error('❌ Failed to load settings:', error);
-    }
-    
-    try {
-        modules.navigation = await import('./navigation.js');
-        console.log('✅ navigation loaded');
-    } catch (error) {
-        console.error('❌ Failed to load navigation:', error);
-    }
-    
-    try {
-        modules.uiEffects = await import('./ui-effects.js');
-        console.log('✅ ui-effects loaded');
-    } catch (error) {
-        console.error('❌ Failed to load ui-effects:', error);
-    }
-    
-    try {
-        modules.cleanup = await import('./cleanup.js');
-        console.log('✅ cleanup loaded');
-    } catch (error) {
-        console.error('❌ Failed to load cleanup:', error);
-    }
-    
-    console.log('🚀 Module loading complete');
+
     return modules;
 }
 
-// Initialize the application
+/**
+ * Initialize the application
+ * Sets up all modules and core functionality
+ */
 export async function initApp() {
-    console.log('🚀 App initialization starting...');
-    
-    // Load all modules first
     const loadedModules = await loadModules();
     
-    try {
-        // Initialize cleanup system first
-        if (loadedModules.cleanup?.initCleanupSystem) {
-            loadedModules.cleanup.initCleanupSystem();
-            console.log('✅ Cleanup system initialized');
-        } else {
-            console.warn('⚠️ Cleanup system not available');
-        }
-    } catch (error) {
-        console.error('❌ Error initializing cleanup system:', error);
+    // Initialize cleanup system first
+    if (loadedModules.cleanup?.initCleanupSystem) {
+        loadedModules.cleanup.initCleanupSystem();
     }
     
     function doInit() {
-        console.log('🚀 Running main initialization...');
-        
-        try {
-            // Hide loading screen
+        // Hide loading screen after delay
+        setTimeout(() => {
+            const loadingProgress = document.getElementById('loadingProgress');
+            const loadingScreen = document.getElementById('loadingScreen');
+            
+            if (loadingProgress) {
+                loadingProgress.style.width = '100%';
+            }
+            
             setTimeout(() => {
-                console.log('🚀 Starting loading screen timeout...');
-                const loadingProgress = document.getElementById('loadingProgress');
-                const loadingScreen = document.getElementById('loadingScreen');
-                
-                if (loadingProgress) {
-                    loadingProgress.style.width = '100%';
-                    console.log('✅ Loading progress set to 100%');
-                } else {
-                    console.error('❌ Loading progress element not found');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('hide');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
                 }
-                
-                setTimeout(() => {
-                    if (loadingScreen) {
-                        loadingScreen.classList.add('hide');
-                        console.log('✅ Loading screen hidden');
-                        
-                        // Properly hide after transition completes
-                        setTimeout(() => {
-                            loadingScreen.style.display = 'none';
-                        }, 500);
-                    } else {
-                        console.error('❌ Loading screen element not found');
-                    }
-                }, 500);
-            }, 1000);
-        } catch (error) {
-            console.error('❌ Error in loading screen logic:', error);
-        }
+            }, 500);
+        }, 1000);
 
+        // Initialize 3D scene
         try {
-            // Initialize 3D scene with error handling
-            console.log('🚀 Initializing 3D scene...');
             if (loadedModules.scene3d?.init3D) {
-                const scene3DInitialized = loadedModules.scene3d.init3D();
-                if (!scene3DInitialized) {
-                    console.warn('3D scene initialization failed, continuing with 2D fallback');
-                } else {
-                    console.log('✅ 3D scene initialized successfully');
-                }
-            } else {
-                console.warn('⚠️ 3D scene module not available');
+                loadedModules.scene3d.init3D();
             }
         } catch (error) {
-            console.error('❌ Error initializing 3D scene:', error);
+            console.error('3D scene initialization failed:', error);
         }
 
         // Setup all modules
         if (loadedModules.navigation?.setupNavigation) {
             loadedModules.navigation.setupNavigation();
-            console.log('✅ Navigation setup complete');
         }
         
         setupTimerControls(loadedModules);
@@ -145,65 +83,49 @@ export async function initApp() {
         
         if (loadedModules.sounds?.setupAmbientControls) {
             loadedModules.sounds.setupAmbientControls();
-            console.log('✅ Ambient controls setup complete');
         }
         
-        console.log('🚀 Setting up settings...');
         if (loadedModules.settings?.setupSettingsModal) {
             loadedModules.settings.setupSettingsModal();
             loadedModules.settings.setupSettingsControls();
-            console.log('✅ Settings setup complete');
         }
         
-        // Load saved settings including theme
-        console.log('🚀 Loading settings...');
         if (loadedModules.settings?.loadSettings) {
             loadedModules.settings.loadSettings();
-            console.log('✅ Settings loaded');
         }
         
-        // Initialize UI effects system
         if (loadedModules.uiEffects?.initUIEffects) {
             loadedModules.uiEffects.initUIEffects();
-            console.log('✅ UI effects initialized');
         }
 
-        // Start breathing animation
+        // Start core timers and displays
         if (loadedModules.timer?.startBreathing) {
             loadedModules.timer.startBreathing();
-            console.log('✅ Breathing animation started');
         }
 
-        // Initialize stats and displays
         if (loadedModules.timer?.updateUniverseStats) {
             loadedModules.timer.updateUniverseStats();
-            console.log('✅ Universe stats updated');
         }
         
         if (loadedModules.timer?.updateDateTime) {
             loadedModules.timer.updateDateTime();
-            console.log('✅ Date/time updated');
         }
         
         if (loadedModules.timer?.updateTimerDisplay) {
             loadedModules.timer.updateTimerDisplay();
-            console.log('✅ Timer display updated');
         }
 
         if (loadedModules.timer?.updateSessionDisplay) {
             loadedModules.timer.updateSessionDisplay();
-            console.log('✅ Session display updated');
         }
 
-        // Make functions globally accessible for HTML onclick handlers
+        // Make task functions globally accessible
         if (loadedModules.tasks?.toggleTask) {
             window.toggleTask = loadedModules.tasks.toggleTask;
         }
         if (loadedModules.tasks?.deleteTask) {
             window.deleteTask = loadedModules.tasks.deleteTask;
         }
-        
-        console.log('🚀 App initialization complete!');
     }
     
     if (document.readyState === 'loading') {

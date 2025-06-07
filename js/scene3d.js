@@ -1,4 +1,4 @@
-// 3D Scene Setup and Management
+// 3D Scene Setup and Management - Enhanced Cosmic Animations with Fixed Camera
 import { createStarField, createGalaxyCore, createPlanets, createNebula, createComets, createSpaceObjects } from './galaxy.js';
 import { updateBlackHoleEffects, createEnhancedBlackHole } from './blackhole.js';
 import { initCameraEffects, updateCameraEffects } from './camera-effects.js';
@@ -13,8 +13,9 @@ export let planets = [];
 export let comets = [];
 export let spaceObjects = [];
 let ambientLight, pointLight;
-let cameraTarget = new THREE.Vector3();
+let cameraTarget = new THREE.Vector3(0, 0, 0); // Fixed at origin
 let cameraRotation = 0;
+let time = 0;
 
 export { scene };
 
@@ -49,30 +50,46 @@ export function init3D() {
 
     try {
         scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000510, 0.0008);
 
-        // Camera
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 50;
+        // Camera with better initial position
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.set(40, 15, 40); // Start at a good viewing angle
 
-        // Renderer
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        // Renderer with enhanced settings
+        renderer = new THREE.WebGLRenderer({ 
+            antialias: true, 
+            alpha: true,
+            powerPreference: "high-performance"
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.setClearColor(0x000000, 0);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
-        // Lighting
-        ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+        // Enhanced lighting
+        ambientLight = new THREE.AmbientLight(0x404040, 0.3);
         scene.add(ambientLight);
 
-        pointLight = new THREE.PointLight(0x6366f1, 1, 100);
-        pointLight.position.set(10, 10, 10);
-        scene.add(pointLight);
+        // Multiple point lights for depth
+        const lightColors = [0x6366f1, 0x8b5cf6, 0x06d6a0];
+        lightColors.forEach((color, index) => {
+            const light = new THREE.PointLight(color, 0.8, 150);
+            light.position.set(
+                Math.cos(index * Math.PI * 2 / 3) * 30,
+                10 + index * 5,
+                Math.sin(index * Math.PI * 2 / 3) * 30
+            );
+            scene.add(light);
+        });
 
-        // Create galaxy elements
+        // Create galaxy elements - STARS FIRST for immediate visibility
         createStarField();
-        createEnhancedBlackHole(); // Use enhanced black hole instead of basic one
-        createPlanets();
         createNebula();
+        createEnhancedBlackHole();
+        createPlanets();
         createComets();
         createSpaceObjects();
 
@@ -88,7 +105,6 @@ export function init3D() {
         return true;
     } catch (error) {
         console.error('Failed to initialize 3D scene:', error);
-        // Fallback: hide scene container
         if (container) {
             container.style.display = 'none';
         }
@@ -96,9 +112,11 @@ export function init3D() {
     }
 }
 
-// Animation loop
+// Enhanced animation loop with stable camera movement
 export function animate() {
     trackRequestAnimationFrame(animate);
+    
+    time += 0.01;
 
     // Update enhanced black hole effects
     updateBlackHoleEffects();
@@ -106,86 +124,174 @@ export function animate() {
     // Update camera effects
     updateCameraEffects();
 
-    // Animate planets
-    planets.forEach(planet => {
-        planet.userData.angle += planet.userData.speed;
-        planet.position.x = Math.cos(planet.userData.angle) * planet.userData.distance;
-        planet.position.z = Math.sin(planet.userData.angle) * planet.userData.distance;
-        planet.rotation.y += planet.userData.rotationSpeed;
-        planet.rotation.x += planet.userData.rotationSpeed * 0.3;
-    });
+    // FIXED CAMERA MOVEMENT - Keep everything in view
+    cameraRotation += 0.001; // Slower rotation
+    
+    // Camera orbits around the center at a fixed angle
+    const cameraRadius = 50; // Fixed distance
+    const cameraHeight = 20 + Math.sin(time * 0.1) * 5; // Gentle vertical movement
+    
+    camera.position.x = Math.sin(cameraRotation) * cameraRadius;
+    camera.position.y = cameraHeight;
+    camera.position.z = Math.cos(cameraRotation) * cameraRadius;
+    
+    // Always look at the center where the black hole is
+    camera.lookAt(cameraTarget);
 
-    // Animate stars and cosmic elements
-    stars.forEach((starField, index) => {
-        if (starField.material.opacity !== undefined) {
-            const time = Date.now() * 0.001;
-            starField.material.opacity = 0.6 + Math.sin(time + index) * 0.3;
+    // Enhanced planet animations
+    planets.forEach((planet, index) => {
+        // Orbital motion
+        planet.userData.angle += planet.userData.speed * 0.7;
+        const orbitRadius = planet.userData.distance + Math.sin(time + index) * 2;
+        planet.position.x = Math.cos(planet.userData.angle) * orbitRadius;
+        planet.position.z = Math.sin(planet.userData.angle) * orbitRadius;
+        planet.position.y = Math.sin(planet.userData.angle * 2 + index) * 3;
+        
+        // Smooth rotation
+        planet.rotation.y += planet.userData.rotationSpeed;
+        planet.rotation.x = Math.sin(time * 0.5 + index) * 0.1;
+        
+        // Gentle bobbing
+        planet.position.y += Math.sin(time * 2 + index * 0.5) * 0.05;
+        
+        // Update planet shader time uniform
+        if (planet.userData.material && planet.userData.material.uniforms.time) {
+            planet.userData.material.uniforms.time.value = time;
         }
         
-        if (starField.userData && starField.userData.rotationSpeed) {
-            starField.rotation.y += starField.userData.rotationSpeed;
-            starField.rotation.x += starField.userData.rotationSpeed * 0.5;
+        // Animate moons
+        if (planet.children) {
+            planet.children.forEach((child, moonIndex) => {
+                if (child.userData && child.userData.angle !== undefined) {
+                    child.userData.angle += child.userData.speed;
+                    child.position.x = Math.cos(child.userData.angle) * child.userData.distance;
+                    child.position.z = Math.sin(child.userData.angle) * child.userData.distance;
+                    child.position.y = Math.sin(child.userData.angle * 3) * 0.5;
+                }
+            });
         }
     });
 
-    // Animate comets
+    // Enhanced star animations - FIXED to always be visible
+    stars.forEach((starField, index) => {
+        // Ensure stars are always visible
+        starField.visible = true;
+        
+        // Update shader time for animated stars
+        if (starField.material.uniforms && starField.material.uniforms.time) {
+            starField.material.uniforms.time.value = time;
+        }
+        
+        // Only update rotation for star fields, not opacity
+        if (starField.userData && starField.userData.rotationSpeed) {
+            starField.rotation.y += starField.userData.rotationSpeed * 0.5;
+            starField.rotation.x += starField.userData.rotationSpeed * 0.3;
+        }
+        
+        // Subtle drift for nebula clouds only (not main star field)
+        if (starField.userData && starField.userData.isNebula) {
+            starField.position.x = Math.sin(time * 0.05) * 2;
+            starField.position.y = Math.cos(time * 0.07) * 2;
+        }
+    });
+
+    // Enhanced comet animations
     comets.forEach((comet, index) => {
+        // Curved paths for comets
+        const curve = Math.sin(time * 0.5 + index) * 0.02;
+        comet.userData.velocity.y += curve;
+        
         comet.position.add(comet.userData.velocity);
         comet.userData.life--;
         
-        const opacity = comet.userData.life / comet.userData.maxLife;
-        comet.material.opacity = opacity;
+        // Smooth opacity fade
+        const opacity = Math.pow(comet.userData.life / comet.userData.maxLife, 2);
+        if (comet.userData.tailMaterial) {
+            comet.userData.tailMaterial.uniforms.opacity.value = opacity;
+            comet.userData.tailMaterial.uniforms.time.value = time;
+        }
+        if (comet.userData.auraMaterial) {
+            comet.userData.auraMaterial.uniforms.time.value = time;
+        }
+        
+        // Update tail orientation
+        if (comet.children[0]) {
+            comet.children[0].lookAt(
+                comet.position.clone().sub(comet.userData.velocity.clone().multiplyScalar(10))
+            );
+        }
         
         if (comet.userData.life <= 0 || comet.position.length() > 200) {
-            const angle = Math.random() * Math.PI * 2;
-            comet.position.set(
-                Math.cos(angle) * 150,
-                (Math.random() - 0.5) * 100,
-                Math.sin(angle) * 150
-            );
-            
-            comet.userData.velocity.set(
-                (Math.random() - 0.5) * 0.5,
-                (Math.random() - 0.5) * 0.2,
-                (Math.random() - 0.5) * 0.5
-            );
-            
-            comet.userData.life = Math.random() * 1000 + 500;
-            comet.material.opacity = 1;
+            resetComet(comet, index);
         }
     });
 
-    // Animate space objects
+    // Enhanced space object animations
     spaceObjects.forEach((spaceObject, index) => {
-        const time = Date.now() * 0.001;
+        const floatSpeed = 0.3;
+        const driftRadius = 2;
         
-        spaceObject.position.y += Math.sin(time + index * 0.5) * 0.01;
-        spaceObject.position.x += Math.cos(time * 0.7 + index * 0.3) * 0.005;
-        spaceObject.position.z += Math.sin(time * 0.5 + index * 0.7) * 0.005;
+        // Smooth floating motion
+        const floatX = Math.sin(time * floatSpeed + index * 0.5) * driftRadius;
+        const floatY = Math.sin(time * floatSpeed * 0.7 + index * 0.3) * driftRadius;
+        const floatZ = Math.cos(time * floatSpeed * 0.5 + index * 0.7) * driftRadius;
         
-        if (spaceObject.userData.type === 'satellite') {
-            spaceObject.rotation.y += 0.02;
-            spaceObject.rotation.x += 0.01;
-        } else if (spaceObject.userData.type === 'spaceStation') {
-            spaceObject.rotation.y += 0.005;
-        } else if (spaceObject.userData.type === 'asteroid') {
-            spaceObject.rotation.x += 0.015;
-            spaceObject.rotation.y += 0.012;
-            spaceObject.rotation.z += 0.008;
-        } else if (spaceObject.userData.type === 'debris') {
-            spaceObject.rotation.x += 0.025;
-            spaceObject.rotation.y += 0.03;
-            spaceObject.rotation.z += 0.02;
+        spaceObject.position.x += floatX * 0.01;
+        spaceObject.position.y += floatY * 0.01;
+        spaceObject.position.z += floatZ * 0.01;
+        
+        // Different rotation patterns for different objects
+        switch (spaceObject.userData.type) {
+            case 'satellite':
+                spaceObject.rotation.y += 0.01;
+                spaceObject.rotation.x = Math.sin(time) * 0.2;
+                break;
+            case 'spaceStation':
+                spaceObject.rotation.y += 0.003;
+                spaceObject.rotation.z = Math.sin(time * 0.5) * 0.05;
+                break;
+            case 'asteroid':
+                spaceObject.rotation.x += 0.008;
+                spaceObject.rotation.y += 0.006;
+                spaceObject.rotation.z += 0.004;
+                break;
+            case 'debris':
+                spaceObject.rotation.x += 0.015 * Math.sin(time + index);
+                spaceObject.rotation.y += 0.012;
+                spaceObject.rotation.z += 0.010;
+                break;
+        }
+        
+        // Keep objects within bounds
+        if (spaceObject.position.length() > 250) {
+            spaceObject.position.multiplyScalar(0.99);
         }
     });
-
-    // Camera movement
-    cameraRotation += 0.002;
-    camera.position.x = Math.sin(cameraRotation) * 60;
-    camera.position.z = Math.cos(cameraRotation) * 60;
-    camera.lookAt(cameraTarget);
 
     renderer.render(scene, camera);
+}
+
+// Reset comet with smooth transition
+function resetComet(comet, index) {
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 150 + Math.random() * 50;
+    
+    comet.position.set(
+        Math.cos(angle) * distance,
+        (Math.random() - 0.5) * 100,
+        Math.sin(angle) * distance
+    );
+    
+    // Velocity towards center with variation
+    const targetPoint = new THREE.Vector3(
+        (Math.random() - 0.5) * 30,
+        (Math.random() - 0.5) * 30,
+        (Math.random() - 0.5) * 30
+    );
+    
+    comet.userData.velocity = targetPoint.sub(comet.position).normalize().multiplyScalar(0.3 + Math.random() * 0.2);
+    comet.userData.life = 500 + Math.random() * 500;
+    comet.userData.maxLife = comet.userData.life;
 }
 
 // Handle window resize

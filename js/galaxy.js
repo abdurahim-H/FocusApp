@@ -1,5 +1,5 @@
-// Galaxy Creation Module
-// Handles all galaxy and space object creation functionality
+// Enhanced Galaxy Creation Module
+// Creates beautiful, smooth cosmic elements
 
 import { scene, stars, planets, comets, galaxyCore, spaceObjects } from './scene3d.js';
 
@@ -10,55 +10,143 @@ export function createStarField() {
             return;
         }
 
+        // Create main star field with varied sizes
+        const starCount = 15000;
         const starGeometry = new THREE.BufferGeometry();
-    const starMaterial = new THREE.PointsMaterial({
-        color: 0xffffff,
-        size: 1,
-        sizeAttenuation: true
-    });
-
-    const starVertices = [];
-    for (let i = 0; i < 10000; i++) {
-        const x = (Math.random() - 0.5) * 2000;
-        const y = (Math.random() - 0.5) * 2000;
-        const z = (Math.random() - 0.5) * 2000;
-        starVertices.push(x, y, z);
-    }
-
-    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-    const starField = new THREE.Points(starGeometry, starMaterial);
-    scene.add(starField);
-    
-    // Create distant colorful stars
-    const colorfulStarGeometry = new THREE.BufferGeometry();
-    const colorfulStarMaterial = new THREE.PointsMaterial({
-        size: 2,
-        sizeAttenuation: true,
-        vertexColors: true
-    });
-
-    const colorfulVertices = [];
-    const colors = [];
-    
-    for (let i = 0; i < 2000; i++) {
-        const x = (Math.random() - 0.5) * 3000;
-        const y = (Math.random() - 0.5) * 3000;
-        const z = (Math.random() - 0.5) * 3000;
-        colorfulVertices.push(x, y, z);
+        const starPositions = new Float32Array(starCount * 3);
+        const starSizes = new Float32Array(starCount);
+        const starColors = new Float32Array(starCount * 3);
+        const starBrightness = new Float32Array(starCount); // For twinkling
         
-        // Random star colors
-        const color = new THREE.Color();
-        color.setHSL(Math.random(), 0.8, 0.9);
-        colors.push(color.r, color.g, color.b);
-    }
-
-    colorfulStarGeometry.setAttribute('position', new THREE.Float32BufferAttribute(colorfulVertices, 3));
-    colorfulStarGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    
-    const colorfulStars = new THREE.Points(colorfulStarGeometry, colorfulStarMaterial);
-    scene.add(colorfulStars);
-    
-    stars.push(starField, colorfulStars);
+        for (let i = 0; i < starCount; i++) {
+            const i3 = i * 3;
+            
+            // Distribute stars in a sphere with clustering
+            const radius = 300 + Math.random() * 700;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            starPositions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+            starPositions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+            starPositions[i3 + 2] = radius * Math.cos(phi);
+            
+            // Varied star sizes - some larger for twinkling effect
+            starSizes[i] = Math.random() < 0.1 ? 3 + Math.random() * 2 : 0.5 + Math.random() * 2;
+            
+            // Track which stars will twinkle
+            starBrightness[i] = starSizes[i] > 3 ? 1.0 : 0.0;
+            
+            // Subtle color variations
+            const colorType = Math.random();
+            if (colorType < 0.7) {
+                // White/blue stars
+                starColors[i3] = 0.9 + Math.random() * 0.1;
+                starColors[i3 + 1] = 0.9 + Math.random() * 0.1;
+                starColors[i3 + 2] = 1;
+            } else if (colorType < 0.9) {
+                // Yellow stars
+                starColors[i3] = 1;
+                starColors[i3 + 1] = 0.9 + Math.random() * 0.1;
+                starColors[i3 + 2] = 0.7 + Math.random() * 0.2;
+            } else {
+                // Red stars
+                starColors[i3] = 1;
+                starColors[i3 + 1] = 0.7 + Math.random() * 0.2;
+                starColors[i3 + 2] = 0.6 + Math.random() * 0.2;
+            }
+        }
+        
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        starGeometry.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+        starGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+        starGeometry.setAttribute('brightness', new THREE.BufferAttribute(starBrightness, 1));
+        
+        const starMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                theme: { value: 0 }
+            },
+            vertexShader: `
+                attribute float size;
+                attribute float brightness;
+                varying vec3 vColor;
+                varying float vBrightness;
+                uniform float time;
+                
+                void main() {
+                    vColor = color;
+                    vBrightness = brightness;
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    
+                    // Twinkling effect for larger stars
+                    float twinkle = 1.0;
+                    if (brightness > 0.5) {
+                        twinkle = 0.7 + sin(time * 3.0 + position.x * 0.1) * 0.3;
+                        twinkle *= 0.8 + sin(time * 2.0 - position.y * 0.1) * 0.2;
+                    }
+                    
+                    gl_PointSize = size * (300.0 / -mvPosition.z) * twinkle;
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                varying float vBrightness;
+                uniform float theme;
+                
+                void main() {
+                    vec2 center = gl_PointCoord - vec2(0.5);
+                    float dist = length(center);
+                    float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
+                    
+                    // Add subtle bloom for bright stars
+                    if (vBrightness > 0.5) {
+                        float bloom = 1.0 - smoothstep(0.0, 1.0, dist);
+                        alpha = max(alpha, bloom * 0.3);
+                    }
+                    
+                    // Theme-aware star rendering
+                    vec3 finalColor = vColor;
+                    float finalAlpha = alpha;
+                    
+                    if (theme > 0.5) {
+                        // Light theme - make stars darker and more visible
+                        finalColor = vColor * 0.3;
+                        finalAlpha = alpha * 1.5;
+                    }
+                    
+                    gl_FragColor = vec4(finalColor, finalAlpha);
+                }
+            `,
+            transparent: true,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+        
+        const starField = new THREE.Points(starGeometry, starMaterial);
+        starField.userData.rotationSpeed = 0.00005;
+        starField.userData.isMainStarField = true;
+        starField.visible = true;
+        starField.frustumCulled = false;
+        starField.renderOrder = -10; // Ensure stars render first
+        scene.add(starField);
+        stars.push(starField);
+        
+        console.log('Main star field created with', starCount, 'stars');
+        
+        // Create nebula clouds
+        createNebulaCloud();
+        
+        // Listen for theme changes
+        const observer = new MutationObserver(() => {
+            updateStarTheme();
+        });
+        observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+        
+        // Initial theme update
+        updateStarTheme();
+        
     } catch (error) {
         console.error('Failed to create star field:', error);
         // Fallback: create a simple star field
@@ -73,13 +161,144 @@ export function createStarField() {
                 );
             }
             fallbackGeometry.setAttribute('position', new THREE.Float32BufferAttribute(fallbackVertices, 3));
-            const fallbackMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1 });
+            const fallbackMaterial = new THREE.PointsMaterial({ 
+                color: 0xffffff, 
+                size: 1,
+                sizeAttenuation: true
+            });
             const fallbackStars = new THREE.Points(fallbackGeometry, fallbackMaterial);
+            fallbackStars.visible = true;
+            fallbackStars.frustumCulled = false;
+            fallbackStars.renderOrder = -10;
             scene.add(fallbackStars);
             stars.push(fallbackStars);
+            console.log('Fallback star field created');
         } catch (fallbackError) {
             console.error('Failed to create fallback star field:', fallbackError);
         }
+    }
+}
+
+// Update star theme
+function updateStarTheme() {
+    const theme = document.body.getAttribute('data-theme');
+    const isLightTheme = theme === 'light';
+    const themeValue = isLightTheme ? 1.0 : 0.0;
+    
+    stars.forEach(starField => {
+        // Always keep stars visible
+        starField.visible = true;
+        
+        if (starField.material && starField.material.uniforms && starField.material.uniforms.theme) {
+            starField.material.uniforms.theme.value = themeValue;
+        }
+    });
+}
+
+function createNebulaCloud() {
+    const cloudCount = 5;
+    
+    for (let i = 0; i < cloudCount; i++) {
+        const cloudGeometry = new THREE.BufferGeometry();
+        const cloudParticles = 500;
+        const positions = new Float32Array(cloudParticles * 3);
+        const colors = new Float32Array(cloudParticles * 3);
+        const sizes = new Float32Array(cloudParticles);
+        
+        // Nebula colors
+        const nebulaColors = [
+            { r: 0.4, g: 0.2, b: 0.8 }, // Purple
+            { r: 0.2, g: 0.4, b: 0.8 }, // Blue
+            { r: 0.8, g: 0.2, b: 0.4 }, // Pink
+            { r: 0.2, g: 0.8, b: 0.6 }  // Cyan
+        ];
+        
+        const baseColor = nebulaColors[i % nebulaColors.length];
+        const centerX = (Math.random() - 0.5) * 600;
+        const centerY = (Math.random() - 0.5) * 300;
+        const centerZ = (Math.random() - 0.5) * 600;
+        
+        for (let j = 0; j < cloudParticles; j++) {
+            const j3 = j * 3;
+            
+            // Gaussian distribution for cloud shape
+            const u1 = Math.random();
+            const u2 = Math.random();
+            const radius = Math.sqrt(-2.0 * Math.log(u1)) * 50;
+            const theta = 2.0 * Math.PI * u2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            positions[j3] = centerX + radius * Math.sin(phi) * Math.cos(theta);
+            positions[j3 + 1] = centerY + radius * Math.sin(phi) * Math.sin(theta);
+            positions[j3 + 2] = centerZ + radius * Math.cos(phi);
+            
+            // Color variation
+            colors[j3] = baseColor.r + Math.random() * 0.2;
+            colors[j3 + 1] = baseColor.g + Math.random() * 0.2;
+            colors[j3 + 2] = baseColor.b + Math.random() * 0.2;
+            
+            sizes[j] = 5 + Math.random() * 10;
+        }
+        
+        cloudGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        cloudGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        cloudGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        
+        const cloudMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                theme: { value: 0 }
+            },
+            vertexShader: `
+                attribute float size;
+                varying vec3 vColor;
+                uniform float time;
+                
+                void main() {
+                    vColor = color;
+                    vec3 pos = position;
+                    pos += sin(time * 0.2 + position.x * 0.01) * 2.0;
+                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                    gl_PointSize = size * (300.0 / -mvPosition.z);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                uniform float theme;
+                
+                void main() {
+                    vec2 center = gl_PointCoord - vec2(0.5);
+                    float dist = length(center);
+                    float alpha = 0.3 * (1.0 - smoothstep(0.0, 0.5, dist));
+                    
+                    // Theme-aware nebula
+                    vec3 finalColor = vColor;
+                    float finalAlpha = alpha;
+                    
+                    if (theme > 0.5) {
+                        // Light theme - make nebula slightly more visible
+                        finalColor = vColor * 0.7;
+                        finalAlpha = alpha * 1.2;
+                    }
+                    
+                    gl_FragColor = vec4(finalColor, finalAlpha);
+                }
+            `,
+            transparent: true,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+        
+        const cloud = new THREE.Points(cloudGeometry, cloudMaterial);
+        cloud.userData.rotationSpeed = 0.00003;
+        cloud.userData.isNebula = true;
+        cloud.visible = true;
+        cloud.frustumCulled = false;
+        cloud.renderOrder = -9; // Render after stars but before everything else
+        scene.add(cloud);
+        stars.push(cloud);
     }
 }
 
@@ -97,7 +316,8 @@ export function createPlanets() {
             emissive: 0x441111, 
             distance: 25, 
             speed: 0.02,
-            name: 'Mars-like'
+            name: 'Mars-like',
+            texture: 'rocky'
         },
         { 
             size: 3, 
@@ -105,7 +325,8 @@ export function createPlanets() {
             emissive: 0x114444, 
             distance: 35, 
             speed: 0.015,
-            name: 'Neptune-like'
+            name: 'Neptune-like',
+            texture: 'ice'
         },
         { 
             size: 1.5, 
@@ -113,7 +334,8 @@ export function createPlanets() {
             emissive: 0x444411, 
             distance: 45, 
             speed: 0.01,
-            name: 'Venus-like'
+            name: 'Venus-like',
+            texture: 'cloudy'
         },
         { 
             size: 4, 
@@ -121,7 +343,9 @@ export function createPlanets() {
             emissive: 0x224422, 
             distance: 60, 
             speed: 0.008,
-            name: 'Gas Giant'
+            name: 'Gas Giant',
+            texture: 'gas',
+            rings: true
         },
         { 
             size: 1, 
@@ -129,17 +353,56 @@ export function createPlanets() {
             emissive: 0x332244, 
             distance: 15, 
             speed: 0.03,
-            name: 'Small World'
+            name: 'Small World',
+            texture: 'rocky'
         }
     ];
 
     planetConfigs.forEach((config, index) => {
-        const geometry = new THREE.SphereGeometry(config.size, 16, 16);
-        const material = new THREE.MeshPhongMaterial({
-            color: config.color,
-            emissive: config.emissive,
-            emissiveIntensity: 0.1,
-            shininess: 30
+        const geometry = new THREE.SphereGeometry(config.size, 32, 32);
+        
+        // Create procedural texture based on planet type with bloom effect
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                baseColor: { value: new THREE.Color(config.color) },
+                emissiveColor: { value: new THREE.Color(config.emissive) }
+            },
+            vertexShader: `
+                varying vec3 vNormal;
+                varying vec3 vPosition;
+                
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float time;
+                uniform vec3 baseColor;
+                uniform vec3 emissiveColor;
+                varying vec3 vNormal;
+                varying vec3 vPosition;
+                
+                void main() {
+                    vec3 light = normalize(vec3(1.0, 1.0, 0.5));
+                    float lighting = max(dot(vNormal, light), 0.0);
+                    
+                    // Add some surface detail
+                    float noise = sin(vPosition.x * 10.0) * sin(vPosition.y * 10.0) * sin(vPosition.z * 10.0);
+                    vec3 color = mix(baseColor, baseColor * 1.2, noise * 0.5 + 0.5);
+                    
+                    // Atmospheric glow on edges with subtle bloom
+                    float fresnel = 1.0 - abs(dot(vNormal, normalize(cameraPosition - vPosition)));
+                    vec3 atmosphere = emissiveColor * pow(fresnel, 2.0);
+                    
+                    // Add subtle bloom effect
+                    vec3 bloom = emissiveColor * 0.3 * pow(fresnel, 1.5);
+                    
+                    gl_FragColor = vec4(color * lighting + atmosphere * 0.5 + bloom, 1.0);
+                }
+            `
         });
 
         const planet = new THREE.Mesh(geometry, material);
@@ -148,55 +411,93 @@ export function createPlanets() {
         const startAngle = (Math.PI * 2 * index) / planetConfigs.length;
         planet.position.x = Math.cos(startAngle) * config.distance;
         planet.position.z = Math.sin(startAngle) * config.distance;
-        planet.position.y = (Math.random() - 0.5) * 10; // Some vertical variation
+        planet.position.y = (Math.random() - 0.5) * 10;
         
         // Store orbital properties
         planet.userData = {
             distance: config.distance,
             speed: config.speed,
             angle: startAngle,
-            rotationSpeed: (Math.random() + 0.5) * 0.02,
-            name: config.name
+            rotationSpeed: (Math.random() + 0.5) * 0.01,
+            name: config.name,
+            material: material
         };
 
         scene.add(planet);
         planets.push(planet);
 
-        // Add asteroid ring to larger planets
-        if (config.size >= 3) {
-            createAsteroidRing(planet, config.size + 2, config.color);
+        // Add rings to gas giant
+        if (config.rings) {
+            createPlanetRings(planet, config.size);
+        }
+
+        // Add moons to larger planets
+        if (config.size >= 2) {
+            createMoons(planet, config.size);
         }
     });
 }
 
-function createAsteroidRing(planet, ringRadius, planetColor) {
-    const asteroidGeometry = new THREE.BufferGeometry();
-    const asteroidMaterial = new THREE.PointsMaterial({
-        color: planetColor,
-        size: 0.5,
-        sizeAttenuation: true,
+function createPlanetRings(planet, planetSize) {
+    const innerRadius = planetSize * 1.5;
+    const outerRadius = planetSize * 2.5;
+    
+    const ringGeometry = new THREE.RingGeometry(innerRadius, outerRadius, 64, 8);
+    const ringMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 }
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            varying vec2 vUv;
+            uniform float time;
+            
+            void main() {
+                float dist = length(vUv - 0.5) * 2.0;
+                float ring = sin(dist * 50.0 + time) * 0.5 + 0.5;
+                float alpha = ring * 0.6 * (1.0 - dist);
+                vec3 color = vec3(0.8, 0.7, 0.6);
+                gl_FragColor = vec4(color, alpha);
+            }
+        `,
         transparent: true,
-        opacity: 0.6
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
     });
-
-    const asteroidVertices = [];
-    const asteroidCount = 200;
     
-    for (let i = 0; i < asteroidCount; i++) {
-        const angle = (Math.PI * 2 * i) / asteroidCount;
-        const radius = ringRadius + (Math.random() - 0.5) * 2;
-        const x = Math.cos(angle) * radius;
-        const z = Math.sin(angle) * radius;
-        const y = (Math.random() - 0.5) * 0.5; // Thin ring
+    const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+    rings.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 0.2;
+    planet.add(rings);
+}
+
+function createMoons(planet, planetSize) {
+    const moonCount = Math.floor(Math.random() * 2) + 1;
+    
+    for (let i = 0; i < moonCount; i++) {
+        const moonSize = planetSize * 0.2;
+        const moonGeometry = new THREE.SphereGeometry(moonSize, 16, 16);
+        const moonMaterial = new THREE.MeshPhongMaterial({
+            color: 0xcccccc,
+            emissive: 0x111111
+        });
         
-        asteroidVertices.push(x, y, z);
+        const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+        const moonDistance = planetSize * (2 + i);
+        
+        moon.userData = {
+            angle: Math.random() * Math.PI * 2,
+            distance: moonDistance,
+            speed: 0.03 + Math.random() * 0.02
+        };
+        
+        planet.add(moon);
     }
-
-    asteroidGeometry.setAttribute('position', new THREE.Float32BufferAttribute(asteroidVertices, 3));
-    const asteroidRing = new THREE.Points(asteroidGeometry, asteroidMaterial);
-    
-    // Attach ring to planet
-    planet.add(asteroidRing);
 }
 
 export function createNebula() {
@@ -233,6 +534,8 @@ export function createNebula() {
 
     dustGeometry.setAttribute('position', new THREE.Float32BufferAttribute(dustVertices, 3));
     const cosmicDust = new THREE.Points(dustGeometry, dustMaterial);
+    cosmicDust.visible = true;
+    cosmicDust.frustumCulled = false;
     scene.add(cosmicDust);
     
     // Store for animation
@@ -241,56 +544,109 @@ export function createNebula() {
 }
 
 export function createComets() {
-    // Create a few comets that will streak across the sky
-    for (let i = 0; i < 3; i++) {
-        const cometGeometry = new THREE.SphereGeometry(0.5, 8, 8);
+    for (let i = 0; i < 5; i++) {
+        const cometGroup = new THREE.Group();
+        
+        // Comet head with bloom
+        const cometGeometry = new THREE.SphereGeometry(0.3, 16, 16);
         const cometMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
-            transparent: true,
-            opacity: 0.8
+            emissive: 0xaaaaff,
+            emissiveIntensity: 2
         });
-
-        const comet = new THREE.Mesh(cometGeometry, cometMaterial);
+        const cometHead = new THREE.Mesh(cometGeometry, cometMaterial);
+        cometGroup.add(cometHead);
         
-        // Random starting position far away
+        // Glowing aura
+        const auraGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+        const auraMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 }
+            },
+            vertexShader: `
+                varying vec3 vNormal;
+                void main() {
+                    vNormal = normal;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                uniform float time;
+                
+                void main() {
+                    float intensity = pow(0.8 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+                    vec3 color = vec3(0.3, 0.6, 1.0);
+                    gl_FragColor = vec4(color, intensity * 0.8);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending
+        });
+        const aura = new THREE.Mesh(auraGeometry, auraMaterial);
+        cometGroup.add(aura);
+        
+        // Create comet tail
+        const tailGeometry = new THREE.ConeGeometry(0.5, 20, 8, 1, true);
+        const tailMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                opacity: { value: 0.6 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                void main() {
+                    vUv = uv;
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                uniform float time;
+                uniform float opacity;
+                
+                void main() {
+                    float fade = 1.0 - vUv.y;
+                    float wave = sin(vUv.y * 10.0 + time * 5.0) * 0.5 + 0.5;
+                    vec3 color = mix(vec3(0.5, 0.8, 1.0), vec3(1.0, 1.0, 1.0), wave);
+                    gl_FragColor = vec4(color, fade * opacity * 0.4);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            side: THREE.DoubleSide
+        });
+        
+        const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+        tail.rotation.x = Math.PI / 2;
+        tail.position.z = 10;
+        cometGroup.add(tail);
+        
+        // Set initial position
         const angle = Math.random() * Math.PI * 2;
-        comet.position.set(
+        cometGroup.position.set(
             Math.cos(angle) * 150,
             (Math.random() - 0.5) * 100,
             Math.sin(angle) * 150
         );
-
-        // Create comet tail
-        const tailGeometry = new THREE.BufferGeometry();
-        const tailMaterial = new THREE.PointsMaterial({
-            color: 0x06d6a0,
-            size: 2,
-            transparent: true,
-            opacity: 0.6,
-            sizeAttenuation: true
-        });
-
-        const tailVertices = [];
-        for (let j = 0; j < 50; j++) {
-            tailVertices.push(0, 0, j * -2); // Trail behind comet
-        }
-
-        tailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(tailVertices, 3));
-        const tail = new THREE.Points(tailGeometry, tailMaterial);
-        comet.add(tail);
-
-        comet.userData = {
+        
+        cometGroup.userData = {
             velocity: new THREE.Vector3(
                 (Math.random() - 0.5) * 0.5,
                 (Math.random() - 0.5) * 0.2,
                 (Math.random() - 0.5) * 0.5
             ),
-            life: Math.random() * 1000 + 500,
-            maxLife: 1000
+            life: 500 + Math.random() * 500,
+            maxLife: 1000,
+            tailMaterial: tailMaterial,
+            auraMaterial: auraMaterial
         };
-
-        scene.add(comet);
-        comets.push(comet);
+        
+        scene.add(cometGroup);
+        comets.push(cometGroup);
     }
 }
 
@@ -387,6 +743,7 @@ export function createSpaceObjects() {
                     vertices[i + 2] += (Math.random() - 0.5) * 0.3;
                 }
                 geometry.attributes.position.needsUpdate = true;
+                geometry.computeVertexNormals();
                 
                 const material = new THREE.MeshPhongMaterial({ 
                     color: 0x8B4513,
