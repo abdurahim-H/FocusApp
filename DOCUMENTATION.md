@@ -10,7 +10,7 @@ Cosmic Focus is a stunning 3D productivity application featuring physics-accurat
 - **Pomodoro Timer**: 25-minute focus sessions with 5-minute breaks
 - **Task Management**: Add, complete, and track tasks with visual celebrations
 - **3D Black Hole**: Physics-accurate visualization that responds to productivity
-- **Ambient Sounds**: Space, rain, ocean, and forest soundscapes
+- **Ambient Sounds**: Cafe, rain, ocean, and forest soundscapes
 - **Theme System**: Light, dark, and auto themes with smooth transitions
 - **Cosmic Settings**: Enhanced settings panel with particle effects
 

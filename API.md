@@ -245,7 +245,7 @@ Initializes the audio system.
 ##### `playAmbientSound(soundName)`
 Plays an ambient sound.
 - **Parameters**:
-  - `soundName` (string): Sound identifier ('rain', 'ocean', 'forest', 'space')
+  - `soundName` (string): Sound identifier ('rain', 'ocean', 'forest', 'cafe')
 - **Returns**: void
 
 ##### `stopAmbientSound()`

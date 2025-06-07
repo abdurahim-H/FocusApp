@@ -5,10 +5,10 @@ import { state } from './state.js';
 
 // Ambient sounds configuration
 const ambientSounds = {
-    rain: './mixkit-calm-thunderstorm-in-the-jungle-2415.wav', // Local file for seamless looping
-    ocean: 'https://www.soundjay.com/misc/sounds/ocean-waves.wav',
-    forest: 'https://www.soundjay.com/misc/sounds/forest.wav',
-    cafe: 'https://www.soundjay.com/misc/sounds/cafe-ambient.wav'
+    rain: './sounds/rain_00.wav',
+    ocean: './sounds/ocean_04.wav',
+    forest: './sounds/forest_00.wav',
+    cafe: './sounds/crowd_0.wav'
 };
 
 // Web Audio API context and nodes
@@ -75,13 +75,8 @@ export function playAmbientSound(type) {
     stopAmbientSound();
 
     if (type && ambientSounds[type]) {
-        // For local files, use Web Audio API for seamless looping
-        if (type === 'rain' || ambientSounds[type].startsWith('./')) {
-            playSeamlessLoop(type);
-        } else {
-            // Fallback to HTML5 audio for external URLs
-            playHTML5Audio(type);
-        }
+        // All sounds are now local files, use Web Audio API for seamless looping
+        playSeamlessLoop(type);
     }
 }
 
