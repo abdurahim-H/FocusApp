@@ -1,0 +1,482 @@
+/**
+ * Cosmic Meditation Styles
+ * Revolutionary ambient mode with interactive meditation experience
+ */
+
+/* Cosmic Meditation Container */
+.cosmic-meditation-container {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    position: relative;
+    z-index: 20;
+}
+
+/* Meditation Stats Panel */
+.meditation-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 8px 32px var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.meditation-stats::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        var(--accent), 
+        transparent);
+    animation: statsScan 3s ease-in-out infinite;
+}
+
+@keyframes statsScan {
+    to { left: 100%; }
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.stat-icon {
+    font-size: 2em;
+    display: block;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 10px currentColor);
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+.stat-item:nth-child(1) .stat-icon { animation-delay: 0s; }
+.stat-item:nth-child(2) .stat-icon { animation-delay: 1s; }
+.stat-item:nth-child(3) .stat-icon { animation-delay: 2s; }
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.stat-value {
+    font-size: 1.8em;
+    font-weight: 300;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 5px;
+    text-shadow: 0 0 20px currentColor;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Enhanced Breathing Guide */
+.breathing-guide-enhanced {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 25px;
+    padding: 40px;
+    box-shadow: 0 8px 32px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.breath-circle {
+    width: 200px;
+    height: 200px;
+    border: 3px solid var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: radial-gradient(circle, 
+        rgba(6, 214, 160, 0.1) 0%, 
+        rgba(6, 214, 160, 0.05) 50%, 
+        transparent 70%);
+    box-shadow: 
+        inset 0 0 30px rgba(6, 214, 160, 0.2),
+        0 0 50px rgba(6, 214, 160, 0.3);
+    animation: breathCircle 4s ease-in-out infinite;
+}
+
+@keyframes breathCircle {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 
+            inset 0 0 30px rgba(6, 214, 160, 0.2),
+            0 0 50px rgba(6, 214, 160, 0.3);
+    }
+    50% { 
+        transform: scale(1.15); 
+        box-shadow: 
+            inset 0 0 40px rgba(6, 214, 160, 0.3),
+            0 0 70px rgba(6, 214, 160, 0.4);
+    }
+}
+
+.breath-text {
+    font-size: 1.4em;
+    font-weight: 300;
+    color: var(--text-primary);
+    text-align: center;
+    z-index: 2;
+    position: relative;
+}
+
+.breath-progress {
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        var(--accent) 0deg,
+        var(--accent) var(--progress, 0deg),
+        transparent var(--progress, 0deg)
+    );
+    opacity: 0.5;
+    transition: --progress 1s linear;
+}
+
+/* Breathing Pattern Selector */
+.breath-pattern-selector {
+    display: flex;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 5px;
+    border-radius: 25px;
+}
+
+.pattern-btn {
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.pattern-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pattern-btn.active {
+    background: var(--accent);
+    color: var(--bg-dark);
+    box-shadow: 0 0 20px rgba(6, 214, 160, 0.4);
+}
+
+/* Journey Selection */
+.meditation-journeys {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 25px;
+    padding: 30px;
+    box-shadow: 0 8px 32px var(--shadow);
+}
+
+.meditation-journeys h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 1.4em;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.journey-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.journey-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.journey-card::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: all 0.5s ease;
+    opacity: 0.3;
+}
+
+.journey-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    box-shadow: 0 10px 30px rgba(6, 214, 160, 0.2);
+}
+
+.journey-card:hover::before {
+    width: 150%;
+    height: 150%;
+}
+
+.journey-card.active {
+    border-color: var(--accent);
+    background: rgba(6, 214, 160, 0.1);
+}
+
+.journey-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+    display: block;
+    filter: drop-shadow(0 0 15px currentColor);
+    animation: journeyIconPulse 2s ease-in-out infinite;
+}
+
+.journey-card:nth-child(1) .journey-icon { animation-delay: 0s; }
+.journey-card:nth-child(2) .journey-icon { animation-delay: 0.7s; }
+.journey-card:nth-child(3) .journey-icon { animation-delay: 1.4s; }
+
+@keyframes journeyIconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.journey-name {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.journey-duration {
+    font-size: 0.9em;
+    opacity: 0.7;
+    color: var(--accent);
+}
+
+/* Enhanced Sound Grid */
+.ambient-soundscape {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 25px;
+    padding: 30px;
+    box-shadow: 0 8px 32px var(--shadow);
+}
+
+.ambient-soundscape h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 1.3em;
+    color: var(--text-primary);
+}
+
+.sound-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.sound-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+}
+
+.sound-btn:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.sound-btn.active {
+    background: rgba(6, 214, 160, 0.2);
+    border-color: var(--accent);
+    box-shadow: 0 0 30px rgba(6, 214, 160, 0.3);
+}
+
+.sound-icon {
+    font-size: 2em;
+    display: block;
+}
+
+.sound-name {
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.sound-visualizer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+    opacity: 0;
+}
+
+.sound-btn.active .sound-visualizer {
+    opacity: 1;
+    animation: soundWave 2s ease-in-out infinite;
+}
+
+@keyframes soundWave {
+    0%, 100% { transform: scaleX(0.3); }
+    50% { transform: scaleX(1); }
+}
+
+/* Cosmic Meditation Button */
+.cosmic-meditation-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 20px 50px;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    margin: 20px auto;
+    display: block;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+}
+
+.cosmic-meditation-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+}
+
+.cosmic-meditation-btn.active {
+    background: linear-gradient(135deg, var(--accent) 0%, #04b08f 100%);
+    box-shadow: 0 10px 30px rgba(6, 214, 160, 0.3);
+}
+
+.btn-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: all 0.5s ease;
+}
+
+.cosmic-meditation-btn:hover .btn-aura {
+    opacity: 1;
+    width: 150%;
+    height: 150%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .cosmic-meditation-container {
+        padding: 0 15px;
+    }
+    
+    .meditation-stats {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 20px;
+    }
+    
+    .breath-circle {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .journey-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .sound-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Active Meditation State */
+.meditation-active .cosmic-meditation-container {
+    filter: brightness(1.1);
+}
+
+.meditation-active .breath-circle {
+    box-shadow: 
+        inset 0 0 50px rgba(6, 214, 160, 0.4),
+        0 0 100px rgba(6, 214, 160, 0.5);
+}
+
+/* Journey-specific styles */
+.journey-active-tranquility {
+    --accent: #4fc3f7;
+}
+
+.journey-active-focus {
+    --accent: #ab47bc;
+}
+
+.journey-active-energy {
+    --accent: #ff7043;
+}

@@ -6,6 +6,7 @@ import { scene, stars, planets, comets, galaxyCore, spaceObjects } from './scene
 export function createStarField() {
     try {
         if (!scene) {
+            console.warn('Scene not available for star field creation');
             return;
         }
 
@@ -132,6 +133,8 @@ export function createStarField() {
         scene.add(starField);
         stars.push(starField);
         
+        console.log('Main star field created with', starCount, 'stars');
+        
         // Create nebula clouds
         createNebulaCloud();
         
@@ -145,6 +148,7 @@ export function createStarField() {
         updateStarTheme();
         
     } catch (error) {
+        console.error('Failed to create star field:', error);
         // Fallback: create a simple star field
         try {
             const fallbackGeometry = new THREE.BufferGeometry();
@@ -168,8 +172,9 @@ export function createStarField() {
             fallbackStars.renderOrder = -10;
             scene.add(fallbackStars);
             stars.push(fallbackStars);
+            console.log('Fallback star field created');
         } catch (fallbackError) {
-            // Silently handle fallback creation failure
+            console.error('Failed to create fallback star field:', fallbackError);
         }
     }
 }
@@ -300,6 +305,7 @@ function createNebulaCloud() {
 export function createGalaxyCore() {
     // The enhanced black hole system will be created separately
     // This function is now a placeholder for compatibility
+    console.log('Enhanced black hole system will be initialized by scene3d.js');
 }
 
 export function createPlanets() {
@@ -568,9 +574,9 @@ export function createComets() {
     for (let i = 0; i < 5; i++) {
         const cometGroup = new THREE.Group();
         
-        // Comet head with bloom
+        // Comet head with bloom - FIXED: Use MeshPhongMaterial instead of MeshBasicMaterial
         const cometGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-        const cometMaterial = new THREE.MeshBasicMaterial({
+        const cometMaterial = new THREE.MeshPhongMaterial({
             color: 0xffffff,
             emissive: 0xaaaaff,
             emissiveIntensity: 2
@@ -766,9 +772,9 @@ export function createSpaceObjects() {
                 geometry.attributes.position.needsUpdate = true;
                 geometry.computeVertexNormals();
                 
+                // FIXED: Use MeshPhongMaterial without roughness
                 const material = new THREE.MeshPhongMaterial({ 
-                    color: 0x8B4513,
-                    roughness: 0.8
+                    color: 0x8B4513
                 });
                 
                 return new THREE.Mesh(geometry, material);

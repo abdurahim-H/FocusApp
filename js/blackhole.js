@@ -622,6 +622,116 @@ function createRelativisticPolarJets(parentGroup) {
 }
 
 // Create dust particle stream along accretion disk
+// function createDustParticleStream(parentGroup) {
+//     const dustCount = 2000;
+//     const dustGeometry = new THREE.BufferGeometry();
+//     const positions = new Float32Array(dustCount * 3);
+//     const velocities = new Float32Array(dustCount * 3);
+//     const ages = new Float32Array(dustCount);
+//     const sizes = new Float32Array(dustCount);
+//     const diskRadii = new Float32Array(dustCount);
+    
+//     for (let i = 0; i < dustCount; i++) {
+//         const i3 = i * 3;
+        
+//         // Start particles along the accretion disk
+//         const radius = 3.5 + Math.random() * 4;
+//         const angle = Math.random() * Math.PI * 2;
+//         const height = (Math.random() - 0.5) * 0.5;
+        
+//         positions[i3] = Math.cos(angle) * radius;
+//         positions[i3 + 1] = height;
+//         positions[i3 + 2] = Math.sin(angle) * radius;
+        
+//         // Orbital velocity
+//         const orbitalSpeed = 0.02 / Math.sqrt(radius);
+//         velocities[i3] = -Math.sin(angle) * orbitalSpeed;
+//         velocities[i3 + 1] = 0;
+//         velocities[i3 + 2] = Math.cos(angle) * orbitalSpeed;
+        
+//         ages[i] = Math.random() * 100;
+//         sizes[i] = 0.5 + Math.random() * 1.5;
+//         diskRadii[i] = radius;
+//     }
+    
+//     dustGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+//     dustGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+//     dustGeometry.setAttribute('age', new THREE.BufferAttribute(ages, 1));
+//     dustGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+//     dustGeometry.setAttribute('diskRadius', new THREE.BufferAttribute(diskRadii, 1));
+    
+//     const dustMaterial = new THREE.ShaderMaterial({
+//         uniforms: {
+//             time: { value: 0 },
+//             focusMode: { value: 0 }
+//         },
+//         vertexShader: `
+//             attribute vec3 velocity;
+//             attribute float age;
+//             attribute float size;
+//             attribute float diskRadius;
+//             varying float vAge;
+//             varying float vDiskRadius;
+//             uniform float time;
+            
+//             void main() {
+//                 vAge = age;
+//                 vDiskRadius = diskRadius;
+                
+//                 // Orbital motion with spiral
+//                 float angle = atan(position.z, position.x);
+//                 float radius = diskRadius;
+                
+//                 // Add spiral motion
+//                 angle += time * velocity.length() * 20.0;
+//                 radius -= time * 0.01;
+                
+//                 vec3 pos = vec3(
+//                     cos(angle) * radius,
+//                     position.y + sin(time * 2.0 + age) * 0.1,
+//                     sin(angle) * radius
+//                 );
+                
+//                 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+//                 gl_PointSize = size * (100.0 / -gl_Position.z);
+//             }
+//         `,
+//         fragmentShader: `
+//             varying float vAge;
+//             varying float vDiskRadius;
+//             uniform float time;
+//             uniform float focusMode;
+            
+//             void main() {
+//                 float life = mod(vAge + time * 10.0, 100.0) / 100.0;
+//                 float opacity = smoothstep(1.0, 0.0, life) * 0.3;
+                
+//                 vec3 dustColor = vec3(0.8, 0.6, 0.3);
+                
+//                 float radialFade = 1.0 - smoothstep(3.5, 7.5, vDiskRadius);
+//                 opacity *= radialFade;
+                
+//                 opacity *= 1.0 - focusMode * 0.7;
+                
+//                 vec2 center = gl_PointCoord - vec2(0.5);
+//                 float dist = length(center);
+//                 float alpha = smoothstep(0.5, 0.0, dist);
+                
+//                 gl_FragColor = vec4(dustColor, opacity * alpha);
+//             }
+//         `,
+//         transparent: true,
+//         blending: THREE.AdditiveBlending,
+//         depthWrite: false
+//     });
+    
+//     dustParticleSystem = new THREE.Points(dustGeometry, dustMaterial);
+//     dustParticleSystem.renderOrder = 2;
+//     parentGroup.add(dustParticleSystem);
+//     shaderMaterials.push(dustMaterial);
+// }
+
+// Create dust particle stream along accretion disk
 function createDustParticleStream(parentGroup) {
     const dustCount = 2000;
     const dustGeometry = new THREE.BufferGeometry();
@@ -682,8 +792,9 @@ function createDustParticleStream(parentGroup) {
                 float angle = atan(position.z, position.x);
                 float radius = diskRadius;
                 
-                // Add spiral motion
-                angle += time * velocity.length() * 20.0;
+                // Add spiral motion - FIXED: use length() function properly
+                float velocityMagnitude = length(velocity);
+                angle += time * velocityMagnitude * 20.0;
                 radius -= time * 0.01;
                 
                 vec3 pos = vec3(

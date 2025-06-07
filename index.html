@@ -13,9 +13,20 @@
     
     <!-- Theme Initialization Script -->
     <script>
-        const savedTheme = localStorage.getItem('fu_theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        document.body.setAttribute('data-theme', savedTheme);
+        (function() {
+            const savedTheme = localStorage.getItem('fu_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Wait for body to exist
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.body.setAttribute('data-theme', savedTheme);
+                });
+            } else {
+                // DOM already loaded
+                document.body.setAttribute('data-theme', savedTheme);
+            }
+        })();
     </script>
 </head>
 <body data-theme="dark">
@@ -189,5 +200,4 @@
     <script type="module" src="js/app.js"></script>
 </body>
 </html>
-
 
