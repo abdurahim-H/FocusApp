@@ -104,6 +104,12 @@ export function pauseTimer() {
     clearInterval(state.timer.interval);
     state.timer.interval = null;
 
+    // Clear any pending auto-start timeout
+    if (state.timer.autoStartTimeout) {
+        clearTimeout(state.timer.autoStartTimeout);
+        state.timer.autoStartTimeout = null;
+    }
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     if (startBtn) {
@@ -122,6 +128,12 @@ export function resetTimer() {
     // Fix: Don't force mode change here - let navigation handle it
     clearInterval(state.timer.interval);
     state.timer.interval = null;
+    
+    // Clear any pending auto-start timeout
+    if (state.timer.autoStartTimeout) {
+        clearTimeout(state.timer.autoStartTimeout);
+        state.timer.autoStartTimeout = null;
+    }
     
     // Clear achievement queue and notifications on reset
     clearAchievementQueue();
@@ -274,7 +286,7 @@ export function completeSession() {
     }
 
     // --- AUTO-START NEXT SESSION ---
-    setTimeout(() => {
+    state.timer.autoStartTimeout = setTimeout(() => {
         state.timer.transitioning = false;
         startTimer();
     }, 1200); // 1.2 seconds for achievement to show, adjust as needed
@@ -399,6 +411,12 @@ export function resetSession() {
     if (state.timer.interval) {
         clearInterval(state.timer.interval);
         state.timer.interval = null;
+    }
+    
+    // Clear any pending auto-start timeout
+    if (state.timer.autoStartTimeout) {
+        clearTimeout(state.timer.autoStartTimeout);
+        state.timer.autoStartTimeout = null;
     }
     
     // Clear achievement queue and notifications
