@@ -614,14 +614,15 @@ function createSymmetricEnergyBeam(parentGroup) {
 
 // Enhanced gravitational lensing rings with breathing and heat shimmer
 function createEnhancedGravitationalLensing(parentGroup) {
-    const baseRadius = 14.5;
+    const baseRadius = 15;
     const ringConfigs = [
         { radius: baseRadius, width: 1.5 },
         { radius: baseRadius * 1.4, width: 1.8 },
         { radius: baseRadius * 1.8, width: 2.0 },
         { radius: baseRadius * 2.3, width: 2.3 },
-        { radius: baseRadius * 2.9, width: 2.5 },
+        { radius: baseRadius * 2.9, width: 2.5 }
     ];
+    
     
     ringConfigs.forEach((config, i) => {
         const ringSegments = 128;
