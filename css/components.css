@@ -569,7 +569,9 @@
     padding: 12px 16px;
     background: var(--bg-glass);
     border: 1px solid var(--border-glass);
-    /* Form Elements */
+}
+
+/* Form Elements */
 .range-container {
     display: flex;
     align-items: center;
