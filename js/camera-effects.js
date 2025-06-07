@@ -254,12 +254,10 @@ export function approachBlackHole() {
         const currentDistance = 50 + (targetDistance - 50) * eased;
         camera.position.setLength(currentDistance);
         
-        // Add gravitational time dilation visual effect
-        const distortionFactor = 1 - (progress * 0.3);
-        camera.aspect = (window.innerWidth / window.innerHeight) * distortionFactor;
-        camera.updateProjectionMatrix();
+        // LAYOUT STABILITY FIX: Remove aspect ratio manipulation that causes WebGL distortion
+        // The gravitational time dilation effect was causing the entire 3D scene to balloon/stretch
         
-        // Reddish tint as we approach (redshift effect)
+        // Keep redshift effect for visual feedback
         const intensity = progress * 0.3;
         document.documentElement.style.setProperty('--redshift-intensity', intensity.toString());
         
@@ -293,11 +291,10 @@ function escapeBlackHole() {
         const currentDistance = startDistance + (targetDistance - startDistance) * eased;
         camera.position.setLength(currentDistance);
         
-        // Remove visual distortions
-        const distortionFactor = 0.7 + (0.3 * progress);
-        camera.aspect = (window.innerWidth / window.innerHeight) * distortionFactor;
-        camera.updateProjectionMatrix();
+        // LAYOUT STABILITY FIX: Remove aspect ratio manipulation that causes WebGL distortion
+        // The gravitational distortion effect was causing the scene to balloon and stretch
         
+        // Keep redshift fade effect
         const redshiftIntensity = 0.3 * (1 - progress);
         document.documentElement.style.setProperty('--redshift-intensity', redshiftIntensity.toString());
         
@@ -305,6 +302,7 @@ function escapeBlackHole() {
             trackRequestAnimationFrame(animate);
         } else {
             cameraEffectActive = false;
+            // Ensure aspect ratio is properly reset to prevent any lingering distortion
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             document.documentElement.style.removeProperty('--redshift-intensity');
