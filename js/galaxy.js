@@ -308,6 +308,136 @@ export function createGalaxyCore() {
     console.log('Enhanced black hole system will be initialized by scene3d.js');
 }
 
+// export function createPlanets() {
+//     const planetConfigs = [
+//         { 
+//             size: 2, 
+//             color: 0xff6b6b, 
+//             emissive: 0x441111, 
+//             distance: 25, 
+//             speed: 0.02,
+//             name: 'Mars-like',
+//             texture: 'rocky'
+//         },
+//         { 
+//             size: 3, 
+//             color: 0x4ecdc4, 
+//             emissive: 0x114444, 
+//             distance: 35, 
+//             speed: 0.015,
+//             name: 'Neptune-like',
+//             texture: 'ice'
+//         },
+//         { 
+//             size: 1.5, 
+//             color: 0xffe66d, 
+//             emissive: 0x444411, 
+//             distance: 45, 
+//             speed: 0.01,
+//             name: 'Venus-like',
+//             texture: 'cloudy'
+//         },
+//         { 
+//             size: 4, 
+//             color: 0xa8e6cf, 
+//             emissive: 0x224422, 
+//             distance: 60, 
+//             speed: 0.008,
+//             name: 'Gas Giant',
+//             texture: 'gas',
+//             rings: true
+//         },
+//         { 
+//             size: 1, 
+//             color: 0xddbdfc, 
+//             emissive: 0x332244, 
+//             distance: 15, 
+//             speed: 0.03,
+//             name: 'Small World',
+//             texture: 'rocky'
+//         }
+//     ];
+
+//     planetConfigs.forEach((config, index) => {
+//         const geometry = new THREE.SphereGeometry(config.size, 32, 32);
+        
+//         // Create procedural texture based on planet type with bloom effect
+//         const material = new THREE.ShaderMaterial({
+//             uniforms: {
+//                 time: { value: 0 },
+//                 baseColor: { value: new THREE.Color(config.color) },
+//                 emissiveColor: { value: new THREE.Color(config.emissive) }
+//             },
+//             vertexShader: `
+//                 varying vec3 vNormal;
+//                 varying vec3 vPosition;
+                
+//                 void main() {
+//                     vNormal = normalize(normalMatrix * normal);
+//                     vPosition = position;
+//                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+//                 }
+//             `,
+//             fragmentShader: `
+//                 uniform float time;
+//                 uniform vec3 baseColor;
+//                 uniform vec3 emissiveColor;
+//                 varying vec3 vNormal;
+//                 varying vec3 vPosition;
+                
+//                 void main() {
+//                     vec3 light = normalize(vec3(1.0, 1.0, 0.5));
+//                     float lighting = max(dot(vNormal, light), 0.0);
+                    
+//                     // Add some surface detail
+//                     float noise = sin(vPosition.x * 10.0) * sin(vPosition.y * 10.0) * sin(vPosition.z * 10.0);
+//                     vec3 color = mix(baseColor, baseColor * 1.2, noise * 0.5 + 0.5);
+                    
+//                     // Atmospheric glow on edges with subtle bloom
+//                     float fresnel = 1.0 - abs(dot(vNormal, normalize(cameraPosition - vPosition)));
+//                     vec3 atmosphere = emissiveColor * pow(fresnel, 2.0);
+                    
+//                     // Add subtle bloom effect
+//                     vec3 bloom = emissiveColor * 0.3 * pow(fresnel, 1.5);
+                    
+//                     gl_FragColor = vec4(color * lighting + atmosphere * 0.5 + bloom, 1.0);
+//                 }
+//             `
+//         });
+
+//         const planet = new THREE.Mesh(geometry, material);
+        
+//         // Random starting position on orbit
+//         const startAngle = (Math.PI * 2 * index) / planetConfigs.length;
+//         planet.position.x = Math.cos(startAngle) * config.distance;
+//         planet.position.z = Math.sin(startAngle) * config.distance;
+//         planet.position.y = (Math.random() - 0.5) * 10;
+        
+//         // Store orbital properties
+//         planet.userData = {
+//             distance: config.distance,
+//             speed: config.speed,
+//             angle: startAngle,
+//             rotationSpeed: (Math.random() + 0.5) * 0.01,
+//             name: config.name,
+//             material: material
+//         };
+
+//         scene.add(planet);
+//         planets.push(planet);
+
+//         // Add rings to gas giant
+//         if (config.rings) {
+//             createPlanetRings(planet, config.size);
+//         }
+
+//         // Add moons to larger planets
+//         if (config.size >= 2) {
+//             createMoons(planet, config.size);
+//         }
+//     });
+// }
+
 export function createPlanets() {
     const planetConfigs = [
         { 
@@ -359,6 +489,21 @@ export function createPlanets() {
     ];
 
     planetConfigs.forEach((config, index) => {
+        // Create an orbital plane group for each planet
+        const orbitGroup = new THREE.Group();
+        
+        // Random orbital tilt between 0° and ±30°
+        const tiltAmount = Math.random() * 30 * Math.PI / 180; // 0 to 30 degrees in radians
+        const tiltDirection = Math.random() * Math.PI * 2; // Random direction in 360 degrees
+        
+        // Apply tilt to the orbit group
+        // Break down the tilt into X and Z rotations for more natural distribution
+        orbitGroup.rotation.x = Math.sin(tiltDirection) * tiltAmount;
+        orbitGroup.rotation.z = Math.cos(tiltDirection) * tiltAmount;
+        
+        // Add a small random Y rotation for additional variation
+        orbitGroup.rotation.y = (Math.random() - 0.5) * 0.2;
+        
         const geometry = new THREE.SphereGeometry(config.size, 32, 32);
         
         // Create procedural texture based on planet type with bloom effect
@@ -408,23 +553,35 @@ export function createPlanets() {
         const planet = new THREE.Mesh(geometry, material);
         
         // Random starting position on orbit
-        const startAngle = (Math.PI * 2 * index) / planetConfigs.length;
+        const startAngle = (Math.PI * 2 * index) / planetConfigs.length + (Math.random() - 0.5) * 0.5;
         planet.position.x = Math.cos(startAngle) * config.distance;
         planet.position.z = Math.sin(startAngle) * config.distance;
-        planet.position.y = (Math.random() - 0.5) * 10;
+        planet.position.y = 0; // Keep Y at 0 within the tilted plane
         
-        // Store orbital properties
+        // Store orbital properties including the tilt info
         planet.userData = {
             distance: config.distance,
             speed: config.speed,
             angle: startAngle,
             rotationSpeed: (Math.random() + 0.5) * 0.01,
             name: config.name,
-            material: material
+            material: material,
+            orbitTiltX: orbitGroup.rotation.x,
+            orbitTiltZ: orbitGroup.rotation.z
         };
 
-        scene.add(planet);
-        planets.push(planet);
+        // Add planet to its orbit group
+        orbitGroup.add(planet);
+        
+        // Add the orbit group to the scene
+        scene.add(orbitGroup);
+        
+        // Store reference to both planet and its orbit group
+        planets.push({
+            mesh: planet,
+            orbitGroup: orbitGroup,
+            config: config
+        });
 
         // Add rings to gas giant
         if (config.rings) {
