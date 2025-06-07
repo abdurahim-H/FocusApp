@@ -129,9 +129,9 @@ export function resetTimer() {
     if (state.timer.isBreak) {
         // Reset to appropriate break duration
         if (state.timer.isLongBreak) {
-            state.timer.minutes = state.timer.settings.longBreak;
+            state.timer.minutes = state.timer.settings.longBreakDuration;
         } else {
-            state.timer.minutes = state.timer.settings.shortBreak;
+            state.timer.minutes = state.timer.settings.shortBreakDuration;
         }
     } else {
         state.timer.minutes = state.timer.settings.focusDuration;
@@ -227,14 +227,14 @@ export function completeSession() {
 
         if (state.timer.pomodoroCount % 4 === 0) {
             // Long break after 4 pomodoros
-            state.timer.minutes = state.timer.settings.longBreak;
+            state.timer.minutes = state.timer.settings.longBreakDuration;
             state.timer.isLongBreak = true;
-            showAchievement('Pomodoro Cycle Complete!', `Take a ${state.timer.settings.longBreak}-minute long break`);
+            showAchievement('Pomodoro Cycle Complete!', `Take a ${state.timer.settings.longBreakDuration}-minute long break`);
         } else {
             // Short break
-            state.timer.minutes = state.timer.settings.shortBreak;
+            state.timer.minutes = state.timer.settings.shortBreakDuration;
             state.timer.isLongBreak = false;
-            showAchievement('Focus Complete!', `Time for a ${state.timer.settings.shortBreak}-minute break`);
+            showAchievement('Focus Complete!', `Time for a ${state.timer.settings.shortBreakDuration}-minute break`);
         }
 
         state.timer.isBreak = true;

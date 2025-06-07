@@ -13,8 +13,8 @@ export const state = {
         transitioning: false,
         settings: {
             focusDuration: 25,
-            shortBreak: 5,
-            longBreak: 15
+            shortBreakDuration: 5,
+            longBreakDuration: 15
         }
     },
     universe: {

@@ -416,10 +416,26 @@ export function setupSettingsControls() {
                 // Update break durations
                 if (shortBreakDuration && shortBreakDuration > 0) {
                     state.timer.settings.shortBreakDuration = shortBreakDuration;
+                    
+                    // If timer is not running and in short break, update display
+                    if (!state.timer.isRunning && state.timer.isBreak && !state.timer.isLongBreak) {
+                        state.timer.minutes = shortBreakDuration;
+                        state.timer.seconds = 0;
+                        updateTimerDisplay();
+                        console.log('Short break timer display updated to:', shortBreakDuration);
+                    }
                 }
                 
                 if (longBreakDuration && longBreakDuration > 0) {
                     state.timer.settings.longBreakDuration = longBreakDuration;
+                    
+                    // If timer is not running and in long break, update display
+                    if (!state.timer.isRunning && state.timer.isBreak && state.timer.isLongBreak) {
+                        state.timer.minutes = longBreakDuration;
+                        state.timer.seconds = 0;
+                        updateTimerDisplay();
+                        console.log('Long break timer display updated to:', longBreakDuration);
+                    }
                 }
                 
                 // Update sound volume
