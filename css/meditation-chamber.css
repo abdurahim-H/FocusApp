@@ -1,0 +1,390 @@
+/* Cosmic Meditation Chamber Styles */
+
+/* Main Container */
+.ambient-content {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Meditation Orb Container */
+.meditation-orb-container {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    margin: 0 auto 3rem;
+}
+
+#meditationOrb {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(10, 10, 15, 0.8);
+    box-shadow: 0 0 60px rgba(99, 102, 241, 0.3),
+                0 0 100px rgba(6, 214, 160, 0.2),
+                inset 0 0 60px rgba(99, 102, 241, 0.1);
+}
+
+.breathing-phase {
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--text-primary);
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    text-align: center;
+    width: 100%;
+    letter-spacing: 2px;
+    transition: all 0.5s ease;
+}
+
+/* Meditation Controls */
+.meditation-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding: 1.5rem;
+    background: var(--bg-glass);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.meditation-modes {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.meditation-btn {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.meditation-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.3);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+}
+
+.meditation-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 6px 30px rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
+}
+
+.session-timer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.session-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.session-time {
+    font-size: 2.5rem;
+    font-weight: 200;
+    color: var(--accent);
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 20px rgba(6, 214, 160, 0.3);
+}
+
+/* Cosmic Sound Mixer */
+.cosmic-sound-mixer {
+    background: var(--bg-glass);
+    border-radius: 25px;
+    padding: 2.5rem;
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--border-glass);
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.mixer-title {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.sound-layers {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.sound-layer {
+    display: grid;
+    grid-template-columns: 50px 130px 1fr 90px;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.sound-layer:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateX(5px);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.sound-layer.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 214, 160, 0.05));
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+}
+
+.sound-icon {
+    font-size: 1.8rem;
+    text-align: center;
+    filter: grayscale(0.3);
+    transition: all 0.3s ease;
+}
+
+.sound-layer.active .sound-icon {
+    filter: grayscale(0);
+    transform: scale(1.1);
+}
+
+.sound-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.sound-layer.active .sound-name {
+    color: var(--text-primary);
+}
+
+.layer-volume {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: linear-gradient(to right, 
+        var(--accent) 0%, 
+        var(--accent) var(--value, 0%), 
+        rgba(255, 255, 255, 0.1) var(--value, 0%), 
+        rgba(255, 255, 255, 0.1) 100%);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.layer-volume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, var(--accent), var(--primary));
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(6, 214, 160, 0.5);
+    transition: all 0.2s ease;
+}
+
+.layer-volume::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 25px rgba(6, 214, 160, 0.7);
+}
+
+.layer-toggle {
+    padding: 0.5rem 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.layer-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.layer-toggle.active {
+    background: var(--accent);
+    color: var(--bg-dark);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(6, 214, 160, 0.4);
+    font-weight: 600;
+}
+
+/* Master Controls */
+.master-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.preset-btn {
+    padding: 0.75rem 1.75rem;
+    font-size: 0.95rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.preset-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Meditation Stats */
+.meditation-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+}
+
+.stat-card {
+    background: var(--bg-glass);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--border-glass);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent, rgba(99, 102, 241, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+/* Meditation Orb Animation */
+@keyframes orbPulse {
+    0%, 100% {
+        box-shadow: 0 0 60px rgba(99, 102, 241, 0.3),
+                    0 0 100px rgba(6, 214, 160, 0.2),
+                    inset 0 0 60px rgba(99, 102, 241, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 80px rgba(99, 102, 241, 0.5),
+                    0 0 140px rgba(6, 214, 160, 0.3),
+                    inset 0 0 80px rgba(99, 102, 241, 0.15);
+    }
+}
+
+#meditationOrb {
+    animation: orbPulse 4s ease-in-out infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .meditation-orb-container {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .meditation-controls {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .meditation-modes {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .sound-layer {
+        grid-template-columns: 40px 100px 1fr;
+        grid-template-rows: auto auto;
+    }
+    
+    .layer-toggle {
+        grid-column: 1 / -1;
+        margin-top: 0.5rem;
+    }
+    
+    .master-controls {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .meditation-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Theme-specific adjustments */
+[data-theme="light"] .meditation-orb-container {
+    filter: brightness(1.2) contrast(0.9);
+}
+
+[data-theme="light"] .breathing-phase {
+    color: var(--text-primary);
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+[data-theme="cosmos"] #meditationOrb {
+    background: rgba(20, 10, 40, 0.8);
+}

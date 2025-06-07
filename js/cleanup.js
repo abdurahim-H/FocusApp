@@ -69,6 +69,19 @@ function pauseAnimations() {
 // Resume animations when tab becomes visible
 function resumeAnimations() {
     animationsPaused = false;
+    // Restart the main animation loop for scene3d
+    // Import and call the animate function to restart the loop
+    if (window.scene3dAnimate) {
+        window.scene3dAnimate();
+    }
+    // Restart meditation animation if ambient mode is active
+    if (window.restartMeditationAnimation) {
+        window.restartMeditationAnimation();
+    }
+    // Restart cosmic settings animations if modal is open
+    if (window.restartCosmicSettingsAnimations) {
+        window.restartCosmicSettingsAnimations();
+    }
     // Note: Individual modules will need to restart their animation loops
     // This is typically handled by the animate() function in scene3d.js
 }
@@ -255,7 +268,11 @@ function cleanupUIEffects() {
 
 // Export tracking functions for use by other modules
 export function trackRequestAnimationFrame(callback) {
-    if (animationsPaused) return null;
+    if (animationsPaused) {
+        // Don't completely block - return a dummy ID but don't schedule
+        // The animation will be restarted when tab becomes visible
+        return -1;
+    }
     const id = originalRequestAnimationFrame(callback);
     activeAnimationFrames.add(id);
     return id;

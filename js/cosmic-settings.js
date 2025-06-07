@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { updateTimerDisplay } from './timer.js';
 import { triggerTaskCompletionUI } from './ui-effects.js';
+import { trackRequestAnimationFrame } from './cleanup.js';
 
 let cosmicSettingsInitialized = false;
 let particleSystem = null;
@@ -85,7 +86,7 @@ function createParticleBackground() {
         });
         
         ctx.globalAlpha = 1;
-        settingsAnimationFrame = requestAnimationFrame(animateParticles);
+        settingsAnimationFrame = trackRequestAnimationFrame(animateParticles);
     }
     
     animateParticles();
@@ -335,7 +336,7 @@ function initMiniUniverse() {
         }
         
         rotation += 0.02;
-        requestAnimationFrame(drawMiniUniverse);
+        trackRequestAnimationFrame(drawMiniUniverse);
     }
     
     drawMiniUniverse();
@@ -606,6 +607,20 @@ export function cleanupCosmicSettings() {
         settingsAnimationFrame = null;
     }
 }
+
+// Restart cosmic settings animations - used by cleanup system
+function restartCosmicSettingsAnimations() {
+    const settingsModal = document.querySelector('.settings-modal');
+    if (settingsModal && settingsModal.closest('.settings-modal-overlay.active')) {
+        // Only restart if settings modal is open
+        if (!settingsAnimationFrame) {
+            createParticleBackground();
+        }
+    }
+}
+
+// Expose restart function globally for cleanup system
+window.restartCosmicSettingsAnimations = restartCosmicSettingsAnimations;
 
 // Export enhanced setup functions
 export { setupCosmicSettingsModal as setupSettingsModal };

@@ -95,6 +95,9 @@ export function init3D() {
 
         // Start animation loop
         animate();
+        
+        // Make animate function available globally for cleanup system
+        window.scene3dAnimate = animate;
 
         // Handle window resize
         window.addEventListener('resize', onWindowResize);
