@@ -35,34 +35,6 @@ export class CosmicMeditationSystem {
         this.cosmicParticles = [];
         this.journeyPaths = {};
         this.reachedMilestones = [];
-
-        // Performance monitoring
-        this.performanceMonitor = {
-            fps: 60,
-            qualityLevel: 'high', // 'low', 'medium', 'high'
-            lastFrameTime: 0,
-            frameCount: 0,
-            adaptiveQuality: true
-        };
-
-        // LOD system
-        this.lodSystem = {
-            particleCount: {
-                high: 2000,
-                medium: 1000,
-                low: 500
-            },
-            audioVisualizerComplexity: {
-                high: 8,
-                medium: 4,
-                low: 2
-            },
-            shaderComplexity: {
-                high: 'full',
-                medium: 'simplified',
-                low: 'basic'
-            }
-        };
     }
 
     initialize() {
@@ -1008,9 +980,6 @@ export class CosmicMeditationSystem {
         // This method can be called from the main animation loop if needed
         if (!this.isActive) return;
         
-        // Performance monitoring
-        this.monitorPerformance();
-        
         // Auto-adjust calmness based on consistency
         const breathingConsistency = Math.sin(this.breathPhase) * 0.5 + 0.5;
         const targetCalmness = Math.min(breathingConsistency * (this.meditationTime / 300), 1); // 5 minutes to max
@@ -1040,112 +1009,6 @@ export class CosmicMeditationSystem {
                 });
             }
         }
-    }
-
-    // Performance monitoring and adaptive quality
-    monitorPerformance() {
-        if (!scene || !scene.getEngine()) return;
-        
-        const currentTime = performance.now();
-        this.performanceMonitor.frameCount++;
-        
-        // Check FPS every second
-        if (currentTime - this.performanceMonitor.lastFrameTime >= 1000) {
-            this.performanceMonitor.fps = scene.getEngine().getFps();
-            this.performanceMonitor.lastFrameTime = currentTime;
-            this.performanceMonitor.frameCount = 0;
-            
-            if (this.performanceMonitor.adaptiveQuality) {
-                this.adjustQualityBasedOnPerformance();
-            }
-        }
-    }
-
-    adjustQualityBasedOnPerformance() {
-        const currentFps = this.performanceMonitor.fps;
-        let newQuality = this.performanceMonitor.qualityLevel;
-        
-        // Adaptive quality based on FPS
-        if (currentFps < 30 && this.performanceMonitor.qualityLevel !== 'low') {
-            newQuality = 'low';
-        } else if (currentFps > 50 && this.performanceMonitor.qualityLevel !== 'high') {
-            newQuality = 'high';
-        } else if (currentFps >= 30 && currentFps <= 50 && this.performanceMonitor.qualityLevel !== 'medium') {
-            newQuality = 'medium';
-        }
-        
-        if (newQuality !== this.performanceMonitor.qualityLevel) {
-            console.log(`🎯 Meditation: Adjusting quality from ${this.performanceMonitor.qualityLevel} to ${newQuality} (FPS: ${currentFps.toFixed(1)})`);
-            this.performanceMonitor.qualityLevel = newQuality;
-            this.applyQualitySettings(newQuality);
-        }
-    }
-
-    applyQualitySettings(quality) {
-        // Adjust particle count for breathing particles
-        if (this.breathingParticles) {
-            const particleCount = this.lodSystem.particleCount[quality];
-            this.breathingParticles.emitRate = particleCount * 0.1;
-        }
-        
-        // Adjust cosmic particle density
-        this.cosmicParticles.forEach(particleSystem => {
-            if (particleSystem && !particleSystem.isDisposed()) {
-                const baseRate = particleSystem._baseEmitRate || particleSystem.emitRate;
-                particleSystem._baseEmitRate = baseRate;
-                
-                switch(quality) {
-                    case 'low':
-                        particleSystem.emitRate = baseRate * 0.3;
-                        break;
-                    case 'medium':
-                        particleSystem.emitRate = baseRate * 0.6;
-                        break;
-                    case 'high':
-                        particleSystem.emitRate = baseRate;
-                        break;
-                }
-            }
-        });
-        
-        // Adjust sound visualizer complexity
-        const complexity = this.lodSystem.audioVisualizerComplexity[quality];
-        this.soundVisualizers.forEach((visualizer, type) => {
-            if (visualizer && visualizer.getChildren) {
-                const children = visualizer.getChildren();
-                children.forEach((child, index) => {
-                    child.setEnabled(index < complexity);
-                });
-            }
-        });
-        
-        // Adjust aurora effects
-        this.auroras.forEach((aurora, index) => {
-            if (aurora) {
-                switch(quality) {
-                    case 'low':
-                        aurora.setEnabled(index < 2);
-                        break;
-                    case 'medium':
-                        aurora.setEnabled(index < 4);
-                        break;
-                    case 'high':
-                        aurora.setEnabled(true);
-                        break;
-                }
-            }
-        });
-    }
-
-    // Get performance stats for debugging
-    getPerformanceStats() {
-        return {
-            fps: this.performanceMonitor.fps,
-            quality: this.performanceMonitor.qualityLevel,
-            particleSystemsActive: this.cosmicParticles.filter(p => p && !p.isDisposed()).length,
-            visualizersActive: this.soundVisualizers.size,
-            auroraaActive: this.auroras.filter(a => a && a.isEnabled()).length
-        };
     }
 }
 

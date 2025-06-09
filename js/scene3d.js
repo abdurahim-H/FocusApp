@@ -1,29 +1,31 @@
-// 3D Scene Setup and Management - Enhanced Cosmic Animations with Fixed Camera
+// 3D Scene Setup and Management - Enhanced Cosmic Animations with Babylon.js
 import { createStarField, createGalaxyCore, createPlanets, createNebula, createComets, createSpaceObjects } from './galaxy.js';
 import { updateBlackHoleEffects, createEnhancedBlackHole } from './blackhole.js';
 import { initCameraEffects, updateCameraEffects } from './camera-effects.js';
 import { trackRequestAnimationFrame } from './cleanup.js';
 
-let scene, camera, renderer, composer;
+let engine, scene, camera;
 export let stars = [];
 export let focusOrbs = [];
-let particleSystem;
 export let galaxyCore = {};
 export let planets = [];
 export let comets = [];
 export let spaceObjects = [];
-let ambientLight, pointLight;
-let cameraTarget = new THREE.Vector3(0, 0, 0); // Fixed at origin
-let cameraRotation = 0;
+let ambientLight, pointLights = [];
+let cameraAlpha = 0;
+let cameraRadius = 50;
 let time = 0;
 
-export { scene };
+// Post processing pipeline
+let pipeline, glowLayer, lensEffect;
+
+export { scene, engine };
 
 // Check WebGL availability
 function checkWebGLSupport() {
     try {
         const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         return !!gl;
     } catch (e) {
         return false;
@@ -32,166 +34,332 @@ function checkWebGLSupport() {
 
 // Initialize 3D Scene
 export function init3D() {
-    if (!window.THREE) {
+    if (!window.BABYLON) {
+        console.error('Babylon.js not loaded');
         return false;
     }
 
     if (!checkWebGLSupport()) {
+        console.error('WebGL not supported');
         return false;
     }
 
-    const container = document.getElementById('scene-container');
-    if (!container) {
+    const canvas = document.getElementById('renderCanvas');
+    if (!canvas) {
+        console.error('Canvas element not found');
         return false;
     }
 
     try {
-        scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000510, 0.0008);
-
-        // Camera with better initial position
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
-        camera.position.set(40, 15, 40); // Start at a good viewing angle
-
-        // Renderer with enhanced settings
-        renderer = new THREE.WebGLRenderer({ 
-            antialias: true, 
-            alpha: true,
-            powerPreference: "high-performance"
-        });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setClearColor(0x000000, 0);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        container.appendChild(renderer.domElement);
-
-        // Enhanced lighting
-        ambientLight = new THREE.AmbientLight(0x404040, 0.3);
-        scene.add(ambientLight);
-
-        // Multiple point lights for depth
-        const lightColors = [0x6366f1, 0x8b5cf6, 0x06d6a0];
-        lightColors.forEach((color, index) => {
-            const light = new THREE.PointLight(color, 0.8, 150);
-            light.position.set(
-                Math.cos(index * Math.PI * 2 / 3) * 30,
-                10 + index * 5,
-                Math.sin(index * Math.PI * 2 / 3) * 30
-            );
-            scene.add(light);
+        // Create Babylon.js engine with enhanced settings
+        engine = new BABYLON.Engine(canvas, true, {
+            preserveDrawingBuffer: true,
+            stencil: true,
+            antialias: true,
+            powerPreference: "high-performance",
+            audioEngine: true
         });
 
-        // Create galaxy elements - STARS FIRST for immediate visibility
-        createStarField();
-        createNebula();
-        createEnhancedBlackHole();
-        createPlanets();
-        createComets();
-        createSpaceObjects();
+        // Enable advanced features
+        engine.enableOfflineSupport = false;
+        engine.doNotHandleContextLost = false;
+
+        // Create scene with physics
+        scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+        
+        // Enable fog for depth
+        scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+        scene.fogColor = new BABYLON.Color3(0, 0.02, 0.04);
+        scene.fogDensity = 0.0008;
+
+        // Create camera with smooth animations
+        camera = new BABYLON.ArcRotateCamera(
+            "camera",
+            Math.PI / 4, // alpha
+            Math.PI / 3, // beta
+            cameraRadius, // radius
+            BABYLON.Vector3.Zero(),
+            scene
+        );
+        
+        // Camera settings
+        camera.minZ = 0.1;
+        camera.maxZ = 2000;
+        camera.wheelPrecision = 50;
+        camera.lowerRadiusLimit = 30;
+        camera.upperRadiusLimit = 100;
+        camera.lowerBetaLimit = 0.1;
+        camera.upperBetaLimit = Math.PI / 2.2;
+        
+        // Attach camera but disable controls (we'll animate it)
+        camera.attachControl(canvas, false);
+        camera.inputs.clear();
+
+        // Advanced lighting setup
+        setupLighting();
+
+        // Initialize post-processing effects
+        setupPostProcessing();
+
+        // Create galaxy elements
+        createStarField(scene);
+        createNebula(scene);
+        createEnhancedBlackHole(scene);
+        createPlanets(scene);
+        createComets(scene);
+        createSpaceObjects(scene);
 
         // Initialize camera effects
-        initCameraEffects(camera);
+        initCameraEffects(camera, scene);
 
-        // Start animation loop
-        animate();
-        
-        // Make animate function available globally for cleanup system
-        window.scene3dAnimate = animate;
+        // Optimize scene
+        scene.autoClear = false;
+        scene.autoClearDepthAndStencil = false;
+        scene.blockMaterialDirtyMechanism = true;
+
+        // Start render loop
+        engine.runRenderLoop(() => {
+            animate();
+        });
 
         // Handle window resize
-        window.addEventListener('resize', onWindowResize);
+        window.addEventListener('resize', () => {
+            engine.resize();
+        });
+
+        // Handle visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                engine.stopRenderLoop();
+            } else {
+                engine.runRenderLoop(() => {
+                    animate();
+                });
+            }
+        });
 
         return true;
     } catch (error) {
-        if (container) {
-            container.style.display = 'none';
+        console.error('Failed to initialize 3D scene:', error);
+        if (canvas) {
+            canvas.style.display = 'none';
         }
         return false;
     }
 }
 
-// Enhanced animation loop with stable camera movement
+// Setup enhanced lighting
+function setupLighting() {
+    // Ambient lighting with HDR
+    ambientLight = new BABYLON.HemisphericLight("ambient", new BABYLON.Vector3(0, 1, 0), scene);
+    ambientLight.intensity = 0.3;
+    ambientLight.diffuse = new BABYLON.Color3(0.25, 0.25, 0.4);
+    ambientLight.specular = new BABYLON.Color3(0, 0, 0);
+    ambientLight.groundColor = new BABYLON.Color3(0.1, 0.1, 0.2);
+
+    // Multiple colored point lights for cosmic effect
+    const lightColors = [
+        { color: new BABYLON.Color3(0.39, 0.4, 0.95), intensity: 0.8 }, // Purple-blue
+        { color: new BABYLON.Color3(0.55, 0.36, 0.96), intensity: 0.8 }, // Purple
+        { color: new BABYLON.Color3(0.02, 0.84, 0.63), intensity: 0.8 }  // Cyan
+    ];
+
+    lightColors.forEach((lightData, index) => {
+        const angle = (index * Math.PI * 2) / 3;
+        const light = new BABYLON.PointLight(
+            `pointLight${index}`,
+            new BABYLON.Vector3(
+                Math.cos(angle) * 30,
+                10 + index * 5,
+                Math.sin(angle) * 30
+            ),
+            scene
+        );
+        light.diffuse = lightData.color;
+        light.specular = lightData.color;
+        light.intensity = lightData.intensity;
+        light.range = 150;
+        
+        // Add light animation
+        light.metadata = {
+            angle: angle,
+            baseY: 10 + index * 5,
+            radius: 30
+        };
+        
+        pointLights.push(light);
+    });
+
+    // Directional light for shadows
+    const shadowLight = new BABYLON.DirectionalLight(
+        "shadowLight",
+        new BABYLON.Vector3(-1, -2, -1),
+        scene
+    );
+    shadowLight.intensity = 0.3;
+    shadowLight.shadowEnabled = true;
+    
+    // Shadow generator
+    const shadowGenerator = new BABYLON.ShadowGenerator(2048, shadowLight);
+    shadowGenerator.useBlurExponentialShadowMap = true;
+    shadowGenerator.blurScale = 2;
+    shadowGenerator.setDarkness(0.7);
+    
+    // Store for later use
+    scene.shadowGenerator = shadowGenerator;
+}
+
+// Setup post-processing effects
+function setupPostProcessing() {
+    // Default rendering pipeline with HDR
+    pipeline = new BABYLON.DefaultRenderingPipeline(
+        "defaultPipeline",
+        true,
+        scene,
+        [camera]
+    );
+
+    // HDR settings
+    pipeline.samples = 4;
+    pipeline.bloomEnabled = true;
+    pipeline.bloomThreshold = 0.8;
+    pipeline.bloomWeight = 0.6;
+    pipeline.bloomKernel = 64;
+    pipeline.bloomScale = 0.5;
+
+    // Enhanced DOF for cosmic depth
+    pipeline.depthOfFieldEnabled = true;
+    pipeline.depthOfFieldBlurLevel = BABYLON.DepthOfFieldEffectBlurLevel.Medium;
+    pipeline.depthOfField.focalLength = 50;
+    pipeline.depthOfField.fStop = 1.4;
+    pipeline.depthOfField.focusDistance = 50;
+
+    // Chromatic aberration for cosmic distortion
+    pipeline.chromaticAberrationEnabled = true;
+    pipeline.chromaticAberration.aberrationAmount = 30;
+    pipeline.chromaticAberration.radialIntensity = 0.5;
+
+    // FXAA antialiasing
+    pipeline.fxaaEnabled = true;
+
+    // Glow layer for emissive objects
+    glowLayer = new BABYLON.GlowLayer("glow", scene, {
+        mainTextureFixedSize: 1024,
+        blurKernelSize: 64
+    });
+    glowLayer.intensity = 1.5;
+
+    // Custom lens effects
+    const lensRenderingPipeline = new BABYLON.LensRenderingPipeline(
+        "lens",
+        {
+            edge_blur: 1.0,
+            chromatic_aberration: 1.0,
+            distortion: 0.5,
+            dof_focus_distance: 50,
+            dof_aperture: 0.5,
+            grain_amount: 0.5,
+            dof_pentagon: true,
+            dof_threshold: 0.5,
+            dof_gain: 1.0,
+            dof_darken: 0.5
+        },
+        scene,
+        1.0,
+        [camera]
+    );
+
+    // Store effects for dynamic updates
+    scene.postProcessing = { pipeline, glowLayer, lensRenderingPipeline };
+}
+
+// Enhanced animation loop
 export function animate() {
+    if (!scene || !engine) return;
+    
     trackRequestAnimationFrame(animate);
     
-    time += 0.01;
+    const deltaTime = engine.getDeltaTime() / 1000;
+    time += deltaTime;
 
     // Update enhanced black hole effects
-    updateBlackHoleEffects();
+    updateBlackHoleEffects(scene, time);
 
     // Update camera effects
-    updateCameraEffects();
+    updateCameraEffects(scene, time);
 
-    // FIXED CAMERA MOVEMENT - Keep everything in view
-    cameraRotation += 0.001; // Slower rotation
+    // Smooth camera orbit with dynamic movement
+    cameraAlpha += 0.001;
+    const cameraHeight = 20 + Math.sin(time * 0.1) * 5;
+    const dynamicRadius = cameraRadius + Math.sin(time * 0.05) * 5;
     
-    // Camera orbits around the center at a fixed angle
-    const cameraRadius = 50; // Fixed distance
-    const cameraHeight = 20 + Math.sin(time * 0.1) * 5; // Gentle vertical movement
-    
-    camera.position.x = Math.sin(cameraRotation) * cameraRadius;
-    camera.position.y = cameraHeight;
-    camera.position.z = Math.cos(cameraRotation) * cameraRadius;
-    
-    // Always look at the center where the black hole is
-    camera.lookAt(cameraTarget);
+    camera.alpha = cameraAlpha;
+    camera.beta = Math.PI / 3 + Math.sin(time * 0.08) * 0.1;
+    camera.radius = dynamicRadius;
 
-    // Enhanced planet animations with tilted orbits
+    // Animate point lights
+    pointLights.forEach((light, index) => {
+        const meta = light.metadata;
+        const lightTime = time + index * 0.5;
+        light.position.x = Math.cos(meta.angle + lightTime * 0.1) * meta.radius;
+        light.position.z = Math.sin(meta.angle + lightTime * 0.1) * meta.radius;
+        light.position.y = meta.baseY + Math.sin(lightTime * 0.3) * 3;
+        light.intensity = 0.8 + Math.sin(lightTime * 0.5) * 0.2;
+    });
+
+    // Enhanced planet animations
     planets.forEach((planetData, index) => {
         const planet = planetData.mesh;
+        const orbitSpeed = planet.metadata.speed * 0.7;
         
-        // Orbital motion within the tilted plane
-        planet.userData.angle += planet.userData.speed * 0.7;
-        const orbitRadius = planet.userData.distance + Math.sin(time + index) * 2;
+        planet.metadata.angle += orbitSpeed * deltaTime;
+        const orbitRadius = planet.metadata.distance + Math.sin(time + index) * 2;
         
-        // Calculate position in the orbital plane
-        planet.position.x = Math.cos(planet.userData.angle) * orbitRadius;
-        planet.position.z = Math.sin(planet.userData.angle) * orbitRadius;
-        planet.position.y = 0; // Keep Y at 0 within the tilted orbital plane
+        // Elliptical orbit with tilt
+        const tilt = planet.metadata.orbitTilt || 0;
+        planet.position.x = Math.cos(planet.metadata.angle) * orbitRadius;
+        planet.position.z = Math.sin(planet.metadata.angle) * orbitRadius * Math.cos(tilt);
+        planet.position.y = Math.sin(planet.metadata.angle) * orbitRadius * Math.sin(tilt);
         
-        // The tilt is handled by the parent orbitGroup, so no need to adjust Y here
-        
-        // Smooth rotation
-        planet.rotation.y += planet.userData.rotationSpeed;
+        // Planet rotation
+        planet.rotation.y += planet.metadata.rotationSpeed * deltaTime;
         planet.rotation.x = Math.sin(time * 0.5 + index) * 0.1;
         
-        // Update planet shader time uniform
-        if (planet.userData.material && planet.userData.material.uniforms.time) {
-            planet.userData.material.uniforms.time.value = time;
+        // Update shader uniforms if using custom shaders
+        if (planet.material && planet.material.metadata && planet.material.metadata.shader) {
+            planet.material.metadata.shader.setFloat("time", time);
         }
         
         // Animate moons
-        if (planet.children) {
-            planet.children.forEach((child, moonIndex) => {
-                if (child.userData && child.userData.angle !== undefined) {
-                    child.userData.angle += child.userData.speed;
-                    child.position.x = Math.cos(child.userData.angle) * child.userData.distance;
-                    child.position.z = Math.sin(child.userData.angle) * child.userData.distance;
-                    child.position.y = Math.sin(child.userData.angle * 3) * 0.5;
-                }
-            });
-        }
+        planet.getChildren().forEach((moon, moonIndex) => {
+            if (moon.metadata && moon.metadata.angle !== undefined) {
+                moon.metadata.angle += moon.metadata.speed * deltaTime;
+                moon.position.x = Math.cos(moon.metadata.angle) * moon.metadata.distance;
+                moon.position.z = Math.sin(moon.metadata.angle) * moon.metadata.distance;
+                moon.position.y = Math.sin(moon.metadata.angle * 3) * 0.5;
+                moon.rotation.y += 0.02;
+            }
+        });
     });
 
-    // Enhanced star animations - FIXED to always be visible with twinkling
+    // Enhanced star field animations
     stars.forEach((starField, index) => {
-        // Ensure stars are always visible
-        starField.visible = true;
+        starField.isVisible = true;
         
-        // Update shader time for animated stars and twinkling
-        if (starField.material.uniforms && starField.material.uniforms.time) {
-            starField.material.uniforms.time.value = time;
+        // Update shader time for twinkling
+        if (starField.material && starField.material.metadata && starField.material.metadata.shader) {
+            starField.material.metadata.shader.setFloat("time", time);
         }
         
-        // Only update rotation for star fields, not opacity
-        if (starField.userData && starField.userData.rotationSpeed) {
-            starField.rotation.y += starField.userData.rotationSpeed * 0.5;
-            starField.rotation.x += starField.userData.rotationSpeed * 0.3;
+        // Rotation for dynamic feel
+        if (starField.metadata && starField.metadata.rotationSpeed) {
+            starField.rotation.y += starField.metadata.rotationSpeed * 0.5 * deltaTime;
+            starField.rotation.x += starField.metadata.rotationSpeed * 0.3 * deltaTime;
         }
         
-        // Subtle drift for nebula clouds only (not main star field)
-        if (starField.userData && starField.userData.isNebula) {
+        // Nebula drift
+        if (starField.metadata && starField.metadata.isNebula) {
             starField.position.x = Math.sin(time * 0.05) * 2;
             starField.position.y = Math.cos(time * 0.07) * 2;
         }
@@ -199,37 +367,42 @@ export function animate() {
 
     // Enhanced comet animations
     comets.forEach((comet, index) => {
-        // Curved paths for comets
-        const curve = Math.sin(time * 0.5 + index) * 0.02;
-        comet.userData.velocity.y += curve;
+        if (!comet.metadata) return;
         
-        comet.position.add(comet.userData.velocity);
-        comet.userData.life--;
+        // Curved comet paths
+        const curve = Math.sin(time * 0.5 + index) * 0.02;
+        comet.metadata.velocity.y += curve;
+        
+        comet.position.addInPlace(comet.metadata.velocity);
+        comet.metadata.life -= deltaTime * 60;
         
         // Smooth opacity fade
-        const opacity = Math.pow(comet.userData.life / comet.userData.maxLife, 2);
-        if (comet.userData.tailMaterial) {
-            comet.userData.tailMaterial.uniforms.opacity.value = opacity;
-            comet.userData.tailMaterial.uniforms.time.value = time;
-        }
-        if (comet.userData.auraMaterial) {
-            comet.userData.auraMaterial.uniforms.time.value = time;
+        const lifeRatio = Math.max(0, comet.metadata.life / comet.metadata.maxLife);
+        const opacity = Math.pow(lifeRatio, 2);
+        
+        if (comet.material) {
+            comet.material.alpha = opacity;
+            if (comet.material.emissiveColor) {
+                comet.material.emissiveColor = comet.material.emissiveColor.scale(opacity);
+            }
         }
         
-        // Update tail orientation
-        if (comet.children[0]) {
-            comet.children[0].lookAt(
-                comet.position.clone().sub(comet.userData.velocity.clone().multiplyScalar(10))
-            );
+        // Update tail
+        const tail = comet.getChildren()[0];
+        if (tail) {
+            const direction = comet.metadata.velocity.normalize();
+            tail.lookAt(comet.position.subtract(direction.scale(10)));
         }
         
-        if (comet.userData.life <= 0 || comet.position.length() > 200) {
+        if (comet.metadata.life <= 0 || comet.position.length() > 200) {
             resetComet(comet, index);
         }
     });
 
     // Enhanced space object animations
     spaceObjects.forEach((spaceObject, index) => {
+        if (!spaceObject.metadata) return;
+        
         const floatSpeed = 0.3;
         const driftRadius = 2;
         
@@ -242,15 +415,22 @@ export function animate() {
         spaceObject.position.y += floatY * 0.01;
         spaceObject.position.z += floatZ * 0.01;
         
-        // Different rotation patterns for different objects
-        switch (spaceObject.userData.type) {
+        // Object-specific rotations
+        switch (spaceObject.metadata.type) {
             case 'satellite':
                 spaceObject.rotation.y += 0.01;
                 spaceObject.rotation.x = Math.sin(time) * 0.2;
+                if (spaceObject.metadata.solarPanels) {
+                    spaceObject.metadata.solarPanels.rotation.y = Math.sin(time * 0.5) * 0.3;
+                }
                 break;
             case 'spaceStation':
                 spaceObject.rotation.y += 0.003;
                 spaceObject.rotation.z = Math.sin(time * 0.5) * 0.05;
+                // Animate rotating sections
+                if (spaceObject.metadata.rotatingSection) {
+                    spaceObject.metadata.rotatingSection.rotation.x += 0.02;
+                }
                 break;
             case 'asteroid':
                 spaceObject.rotation.x += 0.008;
@@ -266,11 +446,32 @@ export function animate() {
         
         // Keep objects within bounds
         if (spaceObject.position.length() > 250) {
-            spaceObject.position.multiplyScalar(0.99);
+            spaceObject.position.scaleInPlace(0.99);
         }
     });
 
-    renderer.render(scene, camera);
+    // Update post-processing based on mode
+    updatePostProcessingEffects();
+
+    // Render scene
+    scene.render();
+}
+
+// Update post-processing effects dynamically
+function updatePostProcessingEffects() {
+    if (!scene.postProcessing) return;
+    
+    const { pipeline, glowLayer } = scene.postProcessing;
+    
+    // Dynamic bloom based on scene activity
+    const bloomIntensity = 0.6 + Math.sin(time * 0.1) * 0.1;
+    pipeline.bloomWeight = bloomIntensity;
+    
+    // Adjust DOF based on camera distance
+    pipeline.depthOfField.focusDistance = camera.radius;
+    
+    // Pulsing glow effect
+    glowLayer.intensity = 1.5 + Math.sin(time * 0.5) * 0.3;
 }
 
 // Reset comet with smooth transition
@@ -278,27 +479,30 @@ function resetComet(comet, index) {
     const angle = Math.random() * Math.PI * 2;
     const distance = 150 + Math.random() * 50;
     
-    comet.position.set(
+    comet.position = new BABYLON.Vector3(
         Math.cos(angle) * distance,
         (Math.random() - 0.5) * 100,
         Math.sin(angle) * distance
     );
     
     // Velocity towards center with variation
-    const targetPoint = new THREE.Vector3(
+    const targetPoint = new BABYLON.Vector3(
         (Math.random() - 0.5) * 30,
         (Math.random() - 0.5) * 30,
         (Math.random() - 0.5) * 30
     );
     
-    comet.userData.velocity = targetPoint.sub(comet.position).normalize().multiplyScalar(0.3 + Math.random() * 0.2);
-    comet.userData.life = 500 + Math.random() * 500;
-    comet.userData.maxLife = comet.userData.life;
+    comet.metadata.velocity = targetPoint.subtract(comet.position).normalize().scale(0.3 + Math.random() * 0.2);
+    comet.metadata.life = 500 + Math.random() * 500;
+    comet.metadata.maxLife = comet.metadata.life;
 }
 
-// Handle window resize
-export function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+// Cleanup function
+export function dispose3DScene() {
+    if (scene) {
+        scene.dispose();
+    }
+    if (engine) {
+        engine.dispose();
+    }
 }

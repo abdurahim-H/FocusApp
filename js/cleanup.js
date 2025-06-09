@@ -1,4 +1,4 @@
-// Application Cleanup and Resource Management
+// Application Cleanup and Resource Management for Babylon.js
 // Handles proper cleanup of animations, event listeners, and 3D resources
 
 let activeAnimationFrames = new Set();
@@ -17,12 +17,23 @@ let originalAddEventListener;
 let animationsPaused = false;
 let pausedAnimationFrames = new Set();
 
+// Babylon.js specific tracking
+let activeBabylonResources = {
+    meshes: new Set(),
+    materials: new Set(),
+    textures: new Set(),
+    shaders: new Set(),
+    particleSystems: new Set(),
+    postProcesses: new Set(),
+    sounds: new Set()
+};
+
 // Initialize cleanup system
 export function initCleanupSystem() {
     if (cleanupInitialized) return;
     cleanupInitialized = true;
     
-    console.log('🧹 Cleanup system initializing...');
+    console.log('🧹 Babylon.js Cleanup system initializing...');
     
     // Store original functions
     originalRequestAnimationFrame = window.requestAnimationFrame;
@@ -32,9 +43,6 @@ export function initCleanupSystem() {
     originalSetTimeout = window.setTimeout;
     originalClearTimeout = window.clearTimeout;
     originalAddEventListener = EventTarget.prototype.addEventListener;
-    
-    // Don't override global functions immediately - wait for app to initialize first
-    // We'll use wrapper functions instead
     
     // Setup automatic cleanup on page unload
     window.addEventListener('beforeunload', () => {
@@ -52,12 +60,86 @@ export function initCleanupSystem() {
         }
     });
     
+    // Babylon.js specific error handling
+    if (window.BABYLON) {
+        BABYLON.Engine.audioEngine?.useCustomUnlockedButton = true;
+        
+        // Handle WebGL context loss
+        window.addEventListener('webglcontextlost', (event) => {
+            event.preventDefault();
+            console.error('🚨 WebGL context lost - attempting recovery...');
+            handleWebGLContextLoss();
+        });
+        
+        window.addEventListener('webglcontextrestored', () => {
+            console.log('✅ WebGL context restored');
+            handleWebGLContextRestored();
+        });
+    }
+    
     console.log('🧹 Cleanup system initialized - tracking functions ready');
+}
+
+// Handle WebGL context loss
+function handleWebGLContextLoss() {
+    // Stop render loop if engine exists
+    if (window.engine) {
+        window.engine.stopRenderLoop();
+    }
+    
+    // Mark all resources for recreation
+    activeBabylonResources.meshes.forEach(mesh => mesh._needsRecreation = true);
+    activeBabylonResources.materials.forEach(material => material._needsRecreation = true);
+    activeBabylonResources.textures.forEach(texture => texture._needsRecreation = true);
+}
+
+// Handle WebGL context restoration
+function handleWebGLContextRestored() {
+    // Restart engine if it exists
+    if (window.engine && window.scene && window.animate) {
+        window.engine.runRenderLoop(() => {
+            window.animate();
+        });
+    }
+    
+    // Recreate lost resources
+    recreateLostResources();
+}
+
+// Recreate resources after context loss
+function recreateLostResources() {
+    console.log('🔧 Recreating lost WebGL resources...');
+    
+    // Textures need to be reloaded
+    activeBabylonResources.textures.forEach(texture => {
+        if (texture._needsRecreation && texture.url) {
+            texture.releaseInternalTexture();
+            texture.updateURL(texture.url);
+        }
+    });
+    
+    // Materials may need shader recompilation
+    activeBabylonResources.materials.forEach(material => {
+        if (material._needsRecreation) {
+            material.markDirty();
+        }
+    });
 }
 
 // Pause all animations when tab is hidden
 function pauseAnimations() {
     animationsPaused = true;
+    
+    // Pause Babylon.js engine
+    if (window.engine) {
+        window.engine.stopRenderLoop();
+        
+        // Pause audio engine
+        if (BABYLON.Engine.audioEngine) {
+            BABYLON.Engine.audioEngine.suspend();
+        }
+    }
+    
     // Store currently active animation frames
     pausedAnimationFrames = new Set(activeAnimationFrames);
     // Cancel all active animation frames
@@ -69,21 +151,28 @@ function pauseAnimations() {
 // Resume animations when tab becomes visible
 function resumeAnimations() {
     animationsPaused = false;
-    // Restart the main animation loop for scene3d
-    // Import and call the animate function to restart the loop
-    if (window.scene3dAnimate) {
-        window.scene3dAnimate();
+    
+    // Resume Babylon.js engine
+    if (window.engine && window.scene && window.animate) {
+        window.engine.runRenderLoop(() => {
+            window.animate();
+        });
+        
+        // Resume audio engine
+        if (BABYLON.Engine.audioEngine) {
+            BABYLON.Engine.audioEngine.resume();
+        }
     }
+    
     // Restart meditation animation if ambient mode is active
     if (window.restartMeditationAnimation) {
         window.restartMeditationAnimation();
     }
+    
     // Restart cosmic settings animations if modal is open
     if (window.restartCosmicSettingsAnimations) {
         window.restartCosmicSettingsAnimations();
     }
-    // Note: Individual modules will need to restart their animation loops
-    // This is typically handled by the animate() function in scene3d.js
 }
 
 // Enable aggressive tracking (optional - call after app is loaded)
@@ -95,6 +184,33 @@ export function enableAggressiveTracking() {
     
     console.log('🧹 Enabling aggressive tracking...');
     setupTrackingWrappers();
+    setupBabylonResourceTracking();
+}
+
+// Setup Babylon.js resource tracking
+function setupBabylonResourceTracking() {
+    if (!window.BABYLON) return;
+    
+    // Track mesh creation
+    const originalCreateMesh = BABYLON.Mesh.prototype.constructor;
+    BABYLON.Mesh.prototype.constructor = function(...args) {
+        originalCreateMesh.apply(this, args);
+        activeBabylonResources.meshes.add(this);
+    };
+    
+    // Track material creation
+    const originalCreateMaterial = BABYLON.Material.prototype.constructor;
+    BABYLON.Material.prototype.constructor = function(...args) {
+        originalCreateMaterial.apply(this, args);
+        activeBabylonResources.materials.add(this);
+    };
+    
+    // Track texture creation
+    const originalCreateTexture = BABYLON.Texture.prototype.constructor;
+    BABYLON.Texture.prototype.constructor = function(...args) {
+        originalCreateTexture.apply(this, args);
+        activeBabylonResources.textures.add(this);
+    };
 }
 
 // Setup tracking wrappers for global functions
@@ -150,7 +266,7 @@ function setupTrackingWrappers() {
 
 // Global cleanup function
 export function cleanupApplication() {
-    console.log('🧹 Starting application cleanup...');
+    console.log('🧹 Starting Babylon.js application cleanup...');
     
     // Cancel all active animation frames
     let frameCount = 0;
@@ -179,7 +295,7 @@ export function cleanupApplication() {
     activeTimeouts.clear();
     console.log(`🧹 Cleared ${timeoutCount} timeouts`);
     
-    // Cleanup Three.js resources
+    // Cleanup Babylon.js resources
     cleanup3DResources();
     
     // Cleanup UI effects
@@ -188,54 +304,82 @@ export function cleanupApplication() {
     console.log('🧹 Application cleanup complete');
 }
 
-// Three.js resource cleanup
+// Babylon.js resource cleanup
 function cleanup3DResources() {
-    if (typeof THREE === 'undefined') return;
+    if (typeof BABYLON === 'undefined') return;
     
-    let geometryCount = 0;
+    let meshCount = 0;
     let materialCount = 0;
     let textureCount = 0;
+    let particleCount = 0;
+    let postProcessCount = 0;
     
-    // Find and dispose of all Three.js resources in the scene
+    // Dispose scene if it exists
     if (window.scene) {
-        window.scene.traverse((object) => {
-            if (object.geometry) {
-                object.geometry.dispose();
-                geometryCount++;
-            }
-            
-            if (object.material) {
-                if (Array.isArray(object.material)) {
-                    object.material.forEach(material => {
-                        disposeMaterial(material);
-                        materialCount++;
-                    });
-                } else {
-                    disposeMaterial(object.material);
-                    materialCount++;
-                }
+        // Stop all animations
+        window.scene.stopAllAnimations();
+        
+        // Dispose all particle systems
+        window.scene.particleSystems?.forEach(ps => {
+            ps.dispose();
+            particleCount++;
+        });
+        
+        // Dispose all meshes
+        window.scene.meshes?.forEach(mesh => {
+            if (mesh && !mesh.isDisposed()) {
+                mesh.dispose(false, true); // Don't dispose materials yet
+                meshCount++;
             }
         });
+        
+        // Dispose all materials
+        window.scene.materials?.forEach(material => {
+            if (material && !material.isDisposed()) {
+                material.dispose(true, true); // Force dispose textures
+                materialCount++;
+            }
+        });
+        
+        // Dispose all textures
+        window.scene.textures?.forEach(texture => {
+            if (texture && !texture.isDisposed()) {
+                texture.dispose();
+                textureCount++;
+            }
+        });
+        
+        // Dispose post-processes
+        window.scene.postProcesses?.forEach(pp => {
+            pp.dispose();
+            postProcessCount++;
+        });
+        
+        // Dispose render targets
+        window.scene.customRenderTargets?.forEach(rt => {
+            rt.dispose();
+        });
+        
+        // Clear the scene
+        window.scene.dispose();
     }
     
-    // Cleanup renderer
-    if (window.renderer) {
-        window.renderer.dispose();
-        window.renderer.forceContextLoss();
+    // Dispose engine
+    if (window.engine) {
+        window.engine.stopRenderLoop();
+        window.engine.dispose();
     }
     
-    console.log(`🧹 Disposed ${geometryCount} geometries, ${materialCount} materials, ${textureCount} textures`);
+    // Clear tracked resources
+    activeBabylonResources.meshes.clear();
+    activeBabylonResources.materials.clear();
+    activeBabylonResources.textures.clear();
+    activeBabylonResources.shaders.clear();
+    activeBabylonResources.particleSystems.clear();
+    activeBabylonResources.postProcesses.clear();
+    activeBabylonResources.sounds.clear();
     
-    function disposeMaterial(material) {
-        if (material.map) {
-            material.map.dispose();
-            textureCount++;
-        }
-        if (material.normalMap) material.normalMap.dispose();
-        if (material.roughnessMap) material.roughnessMap.dispose();
-        if (material.metalnessMap) material.metalnessMap.dispose();
-        material.dispose();
-    }
+    console.log(`🧹 Disposed ${meshCount} meshes, ${materialCount} materials, ${textureCount} textures, ${particleCount} particle systems, ${postProcessCount} post-processes`);
 }
 
 // UI effects cleanup
@@ -294,19 +438,96 @@ export function trackEventListener(element, type, listener, options) {
     return element.addEventListener(type, listener, options);
 }
 
+// Babylon.js resource tracking helpers
+export function trackBabylonMesh(mesh) {
+    activeBabylonResources.meshes.add(mesh);
+}
+
+export function trackBabylonMaterial(material) {
+    activeBabylonResources.materials.add(material);
+}
+
+export function trackBabylonTexture(texture) {
+    activeBabylonResources.textures.add(texture);
+}
+
+export function trackBabylonParticleSystem(particleSystem) {
+    activeBabylonResources.particleSystems.add(particleSystem);
+}
+
 // Memory monitoring (development only)
 export function reportMemoryUsage() {
+    const report = {
+        activeFrames: activeAnimationFrames.size,
+        activeIntervals: activeIntervals.size,
+        activeTimeouts: activeTimeouts.size
+    };
+    
     if (performance.memory) {
         const memory = performance.memory;
-        console.log('📊 Memory Usage:', {
+        report.memory = {
             used: `${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
             total: `${(memory.totalJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-            limit: `${(memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB`,
-            activeFrames: activeAnimationFrames.size,
-            activeIntervals: activeIntervals.size,
-            activeTimeouts: activeTimeouts.size
-        });
+            limit: `${(memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB`
+        };
     }
+    
+    if (window.BABYLON && window.scene) {
+        report.babylon = {
+            meshes: window.scene.meshes?.length || 0,
+            materials: window.scene.materials?.length || 0,
+            textures: window.scene.textures?.length || 0,
+            particleSystems: window.scene.particleSystems?.length || 0,
+            activeMeshes: window.scene.getActiveMeshes()?.length || 0,
+            totalVertices: window.scene.getTotalVertices() || 0,
+            drawCalls: window.engine?.drawCalls || 0,
+            fps: window.engine?.getFps()?.toFixed(2) || 0
+        };
+    }
+    
+    console.log('📊 Memory & Performance Report:', report);
+    return report;
+}
+
+// Babylon.js specific cleanup helpers
+export function disposeUnusedTextures() {
+    if (!window.scene) return;
+    
+    let disposed = 0;
+    window.scene.textures?.forEach(texture => {
+        if (texture.references === 0 && !texture.isDisposed()) {
+            texture.dispose();
+            disposed++;
+        }
+    });
+    
+    console.log(`🧹 Disposed ${disposed} unused textures`);
+}
+
+export function optimizeMeshes() {
+    if (!window.scene) return;
+    
+    // Merge meshes with same material
+    const meshesByMaterial = new Map();
+    window.scene.meshes.forEach(mesh => {
+        if (mesh.material && mesh.isVisible && !mesh.skeleton) {
+            const key = mesh.material.uniqueId;
+            if (!meshesByMaterial.has(key)) {
+                meshesByMaterial.set(key, []);
+            }
+            meshesByMaterial.get(key).push(mesh);
+        }
+    });
+    
+    let mergedCount = 0;
+    meshesByMaterial.forEach((meshes, materialId) => {
+        if (meshes.length > 1) {
+            const merged = BABYLON.Mesh.MergeMeshes(meshes, true, true);
+            if (merged) mergedCount++;
+        }
+    });
+    
+    console.log(`🧹 Merged ${mergedCount} mesh groups`);
 }
 
 // Check if animations are paused
@@ -317,5 +538,7 @@ export function areAnimationsPaused() {
 // Expose for debugging
 window.cleanupApplication = cleanupApplication;
 window.reportMemoryUsage = reportMemoryUsage;
+window.disposeUnusedTextures = disposeUnusedTextures;
+window.optimizeMeshes = optimizeMeshes;
 
-export { activeAnimationFrames, activeIntervals, activeTimeouts, eventListeners };
+export { activeAnimationFrames, activeIntervals, activeTimeouts, eventListeners, activeBabylonResources };

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <style>
+        body {
+            background: #0a0a0f;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Page</h1>
+    <p>If you can see this, the server is working.</p>
+    
+    <script>
+        console.log('JavaScript is working!');
+        
+        // Test module loading
+        (async function() {
+            try {
+                console.log('Testing module import...');
+                const state = await import('./js/state.js');
+                console.log('State module loaded successfully:', state);
+            } catch (error) {
+                console.error('Failed to load state module:', error);
+            }
+        })();
+    </script>
+</body>
+</html>

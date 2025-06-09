@@ -1,6 +1,6 @@
 # Cosmic Focus
 
-A stunning 3D productivity application featuring physics-accurate black hole visualizations and immersive cosmic environments that respond to your productivity patterns. Built with Three.js and modern web technologies.
+A stunning 3D productivity application featuring physics-accurate black hole visualizations and immersive cosmic environments that respond to your productivity patterns. Built with Babylon.js and modern web technologies.
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge)](https://abdurahim-h.github.io/FocusApp/)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge&logo=github)](https://github.com/abdurahim-H/FocusApp)
@@ -16,6 +16,17 @@ A stunning 3D productivity application featuring physics-accurate black hole vis
 - **🧘 Meditation Mode**: Guided cosmic meditation with breathing exercises
 - **🌙 Theme System**: Light, dark, and cosmos themes with auto-switching
 - **📱 Mobile Responsive**: Optimized for desktop and mobile devices
+
+## 🎮 Babylon.js 3D Engine
+
+This application leverages **Babylon.js** for high-performance 3D graphics:
+
+- **Advanced Shaders**: Custom GLSL shaders for realistic black hole effects
+- **Particle Systems**: Millions of particles for cosmic dust and energy streams
+- **Post-Processing**: Glow effects, depth of field, and gravitational lensing
+- **Physics Simulation**: Realistic particle dynamics and gravitational effects
+- **Performance Optimized**: Efficient memory management and resource tracking
+- **WebGL 2.0**: Modern graphics pipeline for stunning visual fidelity
 
 ## 🚀 Quick Start
 
@@ -98,7 +109,7 @@ FocusApp/
 ## 🛠️ Technology Stack
 
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **3D Graphics**: Three.js (WebGL)
+- **3D Graphics**: Babylon.js (WebGL)
 - **Audio**: Web Audio API
 - **Storage**: localStorage
 - **Build Tools**: None (vanilla JavaScript for simplicity)
@@ -156,7 +167,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Three.js community for excellent 3D graphics library
+- Babylon.js community for excellent 3D graphics library
 - Web Audio API for seamless audio management
 - Modern browser vendors for WebGL support
 - Open source community for inspiration and tools

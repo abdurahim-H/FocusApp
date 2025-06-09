@@ -196,109 +196,248 @@ export function triggerTimeDilationUI(duration = 3000) {
 export function enhanceAchievement(achievementElement, type = 'task') {
     if (!achievementElement) return;
     
-    achievementElement.classList.add('cosmic-flow');
+    // Add cosmic particles around achievement
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'achievement-particles';
+    achievementElement.appendChild(particleContainer);
     
-    switch (type) {
-        case 'task':
-            achievementElement.classList.add('task-celebration');
-            break;
-        case 'session':
-            achievementElement.classList.add('session-complete');
-            break;
-        case 'focus':
-            achievementElement.classList.add('focus-intense');
-            break;
+    // Create particle effects based on achievement type
+    const particleCount = type === 'milestone' ? 20 : 10;
+    const colors = {
+        task: ['#06d6a0', '#7209b7', '#560bad'],
+        milestone: ['#f72585', '#b5179e', '#7209b7'],
+        session: ['#4cc9f0', '#4361ee', '#3f37c9']
+    };
+    
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('span');
+        particle.className = 'cosmic-particle';
+        
+        // Random positioning around the achievement
+        const angle = (Math.PI * 2 * i) / particleCount;
+        const distance = 50 + Math.random() * 50;
+        particle.style.setProperty('--start-x', `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty('--start-y', `${Math.sin(angle) * distance}px`);
+        particle.style.setProperty('--end-x', `${Math.cos(angle) * distance * 2}px`);
+        particle.style.setProperty('--end-y', `${Math.sin(angle) * distance * 2}px`);
+        
+        // Random color from palette
+        const colorPalette = colors[type] || colors.task;
+        particle.style.backgroundColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+        
+        // Random animation delay
+        particle.style.animationDelay = `${Math.random() * 0.5}s`;
+        
+        particleContainer.appendChild(particle);
     }
     
-    // Remove effects after display
-    setTimeout(() => {
-        achievementElement.classList.remove(
-            'cosmic-flow', 
-            'task-celebration', 
-            'session-complete', 
-            'focus-intense'
-        );
+    // Add glow effect
+    achievementElement.classList.add('achievement-enhanced', `achievement-${type}`);
+    
+    // Trigger 3D scene celebration if available
+    if (window.scene && type === 'milestone') {
+        triggerSceneCelebration();
+    }
+    
+    // Clean up particles after animation
+    trackSetTimeout(() => {
+        particleContainer.remove();
+        achievementElement.classList.remove('achievement-enhanced', `achievement-${type}`);
     }, 3000);
 }
 
-// Productivity wave effect across the UI
-export function triggerProductivityWave() {
-    const elements = document.querySelectorAll('.glass-card, .btn, .task-item');
+// Trigger celebration in 3D scene
+function triggerSceneCelebration() {
+    if (!window.scene || !window.BABYLON) return;
     
-    elements.forEach((el, index) => {
-        setTimeout(() => {
-            el.classList.add('productivity-glow');
-            
-            setTimeout(() => {
-                el.classList.remove('productivity-glow');
-            }, 2000);
-        }, index * 100); // Stagger the effect
-    });
+    // Create fireworks particle system
+    const fireworks = new BABYLON.ParticleSystem("fireworks", 500, window.scene);
+    fireworks.particleTexture = new BABYLON.Texture("https://raw.githubusercontent.com/BabylonJS/Babylon.js/master/assets/textures/flare.png", window.scene);
+    
+    // Emitter at center
+    fireworks.emitter = new BABYLON.Vector3(0, 10, 0);
+    
+    // Particle properties
+    fireworks.minEmitBox = new BABYLON.Vector3(-1, 0, -1);
+    fireworks.maxEmitBox = new BABYLON.Vector3(1, 0, 1);
+    
+    fireworks.color1 = new BABYLON.Color4(1, 0.5, 0, 1);
+    fireworks.color2 = new BABYLON.Color4(1, 0, 1, 1);
+    fireworks.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+    
+    fireworks.minSize = 0.5;
+    fireworks.maxSize = 1.5;
+    
+    fireworks.minLifeTime = 0.5;
+    fireworks.maxLifeTime = 1.5;
+    
+    fireworks.emitRate = 200;
+    
+    fireworks.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+    
+    fireworks.gravity = new BABYLON.Vector3(0, -9.81, 0);
+    
+    fireworks.direction1 = new BABYLON.Vector3(-2, 8, -2);
+    fireworks.direction2 = new BABYLON.Vector3(2, 8, 2);
+    
+    fireworks.minAngularSpeed = 0;
+    fireworks.maxAngularSpeed = Math.PI;
+    
+    fireworks.minEmitPower = 10;
+    fireworks.maxEmitPower = 20;
+    
+    fireworks.start();
+    
+    // Stop after burst
+    trackSetTimeout(() => {
+        fireworks.stop();
+        trackSetTimeout(() => fireworks.dispose(), 2000);
+    }, 200);
 }
 
-// Monitor productivity and apply effects automatically
-export function updateUIBasedOnProductivity() {
-    updateProductivityGlow();
+// Enhanced space warp effect for mode transitions
+export function triggerSpaceWarp(fromMode, toMode) {
+    const container = document.querySelector('.container');
+    const body = document.body;
     
-    // Check for major milestones
-    const completedTasks = appState.tasks.filter(task => task.completed).length;
+    // Add warp class
+    body.classList.add('space-warping');
+    container.classList.add('warp-transition', `from-${fromMode}`, `to-${toMode}`);
     
-    // Every 5 tasks completed triggers a wave
-    if (completedTasks > 0 && completedTasks % 5 === 0) {
-        triggerProductivityWave();
+    // Create warp lines
+    const warpContainer = document.createElement('div');
+    warpContainer.className = 'warp-lines-container';
+    body.appendChild(warpContainer);
+    
+    // Generate warp lines
+    for (let i = 0; i < 50; i++) {
+        const line = document.createElement('div');
+        line.className = 'warp-line';
+        line.style.left = `${Math.random() * 100}%`;
+        line.style.top = `${Math.random() * 100}%`;
+        line.style.animationDelay = `${Math.random() * 0.3}s`;
+        line.style.animationDuration = `${0.5 + Math.random() * 0.5}s`;
+        warpContainer.appendChild(line);
     }
     
-    // Focus mode effects
-    if (appState.currentMode === 'focus' && !activeEffects.has('focus-intensity')) {
-        triggerFocusIntensity();
-    } else if (appState.currentMode !== 'focus' && activeEffects.has('focus-intensity')) {
-        removeFocusIntensity();
-    }
+    // Clean up after animation
+    trackSetTimeout(() => {
+        body.classList.remove('space-warping');
+        container.classList.remove('warp-transition', `from-${fromMode}`, `to-${toMode}`);
+        warpContainer.remove();
+    }, 1000);
 }
 
 // Initialize UI effects system
 export function initUIEffects() {
-    // Set up periodic checks
-    setInterval(updateUIBasedOnProductivity, 1000);
-    
-    // Add particle effects to buttons
-    const buttons = document.querySelectorAll('.btn');
-    buttons.forEach(btn => {
-        btn.addEventListener('mouseenter', () => {
-            btn.classList.add('btn-particle');
-        });
+    // Add CSS for new effects
+    const style = document.createElement('style');
+    style.textContent = `
+        .achievement-particles {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: -1;
+        }
         
-        btn.addEventListener('mouseleave', () => {
-            // Only remove if not in focus mode
-            if (!activeEffects.has('focus-intensity')) {
-                btn.classList.remove('btn-particle');
+        .cosmic-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: particleBurst 3s ease-out forwards;
+        }
+        
+        @keyframes particleBurst {
+            0% {
+                transform: translate(0, 0) scale(0);
+                opacity: 1;
             }
-        });
-    });
-}
-
-// Clean up all active effects
-export function cleanupUIEffects() {
-    const body = document.body;
-    const container = document.querySelector('.container');
-    const allElements = document.querySelectorAll('*');
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--end-x), var(--end-y)) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        .achievement-enhanced {
+            animation: achievementGlow 3s ease-out;
+        }
+        
+        @keyframes achievementGlow {
+            0%, 100% {
+                box-shadow: 0 8px 32px var(--shadow);
+            }
+            50% {
+                box-shadow: 0 8px 32px var(--shadow),
+                            0 0 50px rgba(99, 102, 241, 0.5),
+                            inset 0 0 20px rgba(99, 102, 241, 0.1);
+            }
+        }
+        
+        .space-warping {
+            perspective: 1000px;
+            overflow: hidden;
+        }
+        
+        .warp-transition {
+            animation: warpEffect 1s ease-in-out;
+        }
+        
+        @keyframes warpEffect {
+            0% {
+                transform: translateZ(0) scale(1);
+                filter: blur(0);
+            }
+            50% {
+                transform: translateZ(-500px) scale(0.8);
+                filter: blur(5px);
+            }
+            100% {
+                transform: translateZ(0) scale(1);
+                filter: blur(0);
+            }
+        }
+        
+        .warp-lines-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9998;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .warp-line {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, white, transparent);
+            transform-origin: center;
+            animation: warpLineMove linear forwards;
+        }
+        
+        @keyframes warpLineMove {
+            0% {
+                transform: translateY(-100vh) scaleY(1);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) scaleY(3);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
     
-    // Remove all effect classes
-    const effectClasses = [
-        'productivity-glow', 'task-celebration', 'focus-intense',
-        'session-complete', 'gravitational-pull', 'cosmic-flow',
-        'btn-particle'
-    ];
-    
-    allElements.forEach(el => {
-        effectClasses.forEach(className => {
-            el.classList.remove(className);
-        });
-    });
-    
-    // Remove CSS custom properties
-    body.style.removeProperty('--time-scale');
-    body.style.removeProperty('--redshift-intensity');
-    
-    activeEffects.clear();
+    console.log('✨ UI Effects initialized');
 }

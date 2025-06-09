@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="css/themes.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/cosmic-meditation.css">
+    <link rel="stylesheet" href="css/meditation-chambers.css">
     
     <!-- Theme Initialization Script -->
     <script>
@@ -39,7 +41,7 @@
     </div>
 
     <!-- 3D Scene Container -->
-    <div id="scene-container"></div>
+    <canvas id="renderCanvas"></canvas>
 
     <!-- Main Navigation -->
     <nav class="nav">
@@ -195,9 +197,14 @@
         </div>
     </div>
 
-    <!-- External Dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Babylon.js Dependencies -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script src="https://cdn.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+    
+    <!-- App Scripts -->
     <script type="module" src="js/app.js"></script>
 </body>
 </html>
-

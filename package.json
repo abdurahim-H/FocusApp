@@ -1,18 +1,20 @@
 {
   "name": "cosmic-focus",
   "version": "1.0.0",
-  "description": "A stunning 3D productivity application featuring physics-accurate black hole visualizations and immersive cosmic environments",
+  "description": "A stunning 3D productivity application featuring physics-accurate black hole visualizations and immersive cosmic environments built with Babylon.js",
   "main": "index.html",
   "scripts": {
     "start": "python3 -m http.server 8000",
     "serve": "npx serve .",
-    "dev": "python3 -m http.server 8000 --bind 127.0.0.1"
+    "dev": "python3 -m http.server 8000 --bind 127.0.0.1",
+    "preview": "python3 -m http.server 3000",
+    "test": "echo 'Open http://localhost:8000 to test the application'"
   },
   "keywords": [
     "productivity",
     "pomodoro",
     "3d",
-    "threejs",
+    "babylonjs",
     "webgl",
     "ambient-sounds",
     "focus-timer",
