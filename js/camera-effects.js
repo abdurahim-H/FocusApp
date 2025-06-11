@@ -1,5 +1,6 @@
-// Camera Effects and Cinematic Animations
-// Adds "Whoa!" factor camera movements and visual effects
+// camera-effects.js
+// Enhanced Camera Effects and Cinematic Animations - Complete Fixed for Babylon.js
+// Adds spectacular camera movements without breaking FOV
 
 import { scene } from './scene3d.js';
 import { appState } from './state.js';
@@ -17,7 +18,7 @@ export function initCameraEffects(cameraRef) {
     originalCameraRotation = camera.rotation.clone();
 }
 
-// Cinematic zoom into black hole when focus starts
+// Enhanced cinematic zoom into black hole when focus starts
 export function triggerFocusZoom() {
     if (cameraEffectActive) return;
     
@@ -30,75 +31,103 @@ export function triggerFocusZoom() {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Smooth easing function
+        // Enhanced smooth easing function
         const eased = 1 - Math.pow(1 - progress, 3);
         
-        // Zoom towards black hole
+        // Smooth zoom towards black hole
         const currentDistance = 50 + (targetDistance - 50) * eased;
-        camera.position.setLength(currentDistance);
+        const currentPos = camera.position.normalize().scale(currentDistance);
+        camera.position = currentPos;
         
-        // Add slight rotation for dramatic effect
+        // Enhanced dramatic rotation
         camera.rotation.z = Math.sin(progress * Math.PI) * 0.1;
         
         if (progress < 1) {
             trackRequestAnimationFrame(animate);
         } else {
-            // Reset rotation but keep closer distance during focus
-            camera.rotation.z = 0;
-            cameraEffectActive = false;
+            // Smooth reset rotation
+            const resetDuration = 500;
+            const resetStart = Date.now();
+            const resetAnimate = () => {
+                const resetElapsed = Date.now() - resetStart;
+                const resetProgress = Math.min(resetElapsed / resetDuration, 1);
+                const resetEased = resetProgress * resetProgress * (3 - 2 * resetProgress);
+                
+                camera.rotation.z *= (1 - resetEased);
+                
+                if (resetProgress < 1) {
+                    trackRequestAnimationFrame(resetAnimate);
+                } else {
+                    cameraEffectActive = false;
+                }
+            };
+            resetAnimate();
         }
     };
     
     animate();
 }
 
-// Dramatic camera shake when tasks are completed
+// Enhanced camera shake
 export function triggerTaskCompletionShake() {
-    shakeMagnitude = 2.0;
+    shakeMagnitude = 3.0;
     
-    // Gradually reduce shake over 1 second
-    const reduceShake = () => {
-        shakeMagnitude *= 0.95;
-        if (shakeMagnitude > 0.01) {
-            trackRequestAnimationFrame(reduceShake);
+    const startTime = Date.now();
+    const duration = 1500;
+    
+    const shakeAnimate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        shakeMagnitude = 3.0 * (1 - progress * progress);
+        
+        if (progress < 1) {
+            trackRequestAnimationFrame(shakeAnimate);
         } else {
             shakeMagnitude = 0;
         }
     };
-    reduceShake();
+    shakeAnimate();
 }
 
-// Slow-motion zoom out effect when session completes
+// Enhanced slow-motion zoom out effect when session completes
 export function triggerSessionCompleteZoom() {
     if (cameraEffectActive) return;
     
     cameraEffectActive = true;
     const startTime = Date.now();
-    const duration = 3000; // 3 seconds
-    const targetDistance = 80; // Pull back for overview
+    const duration = 4000;
+    const targetDistance = 100;
     
     const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Slow easing for cinematic effect
-        const eased = progress * progress * (3 - 2 * progress);
+        // Enhanced cinematic easing
+        let eased;
+        if (progress < 0.3) {
+            eased = progress * progress / 0.09;
+        } else if (progress < 0.7) {
+            const p = (progress - 0.3) / 0.4;
+            eased = 0.1 + p * p * 0.6;
+        } else {
+            const p = (progress - 0.7) / 0.3;
+            eased = 0.7 + (1 - Math.pow(1 - p, 3)) * 0.3;
+        }
         
-        // Zoom out to show full galaxy
         const currentDistance = camera.position.length();
         const newDistance = currentDistance + (targetDistance - currentDistance) * eased;
-        camera.position.setLength(newDistance);
+        const newPosition = camera.position.normalize().scale(newDistance);
+        camera.position = newPosition;
         
-        // Gentle rotation for dramatic reveal
-        camera.rotation.y += 0.002;
+        camera.rotation.y += 0.003 * (1 + Math.sin(progress * Math.PI) * 0.5);
         
         if (progress < 1) {
             trackRequestAnimationFrame(animate);
         } else {
-            // Return to normal orbit
             trackSetTimeout(() => {
                 returnToNormalOrbit();
-            }, 1000);
+            }, 1500);
             cameraEffectActive = false;
         }
     };
@@ -106,20 +135,25 @@ export function triggerSessionCompleteZoom() {
     animate();
 }
 
-// Smooth return to normal camera orbit
+// Enhanced smooth return to normal camera orbit
 function returnToNormalOrbit() {
     const startTime = Date.now();
-    const duration = 2000;
+    const duration = 3000;
     const startDistance = camera.position.length();
     const targetDistance = 50;
+    const startRotation = camera.rotation.clone();
     
     const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
+        
         const eased = progress * progress * (3 - 2 * progress);
         
         const currentDistance = startDistance + (targetDistance - startDistance) * eased;
-        camera.position.setLength(currentDistance);
+        const newPosition = camera.position.normalize().scale(currentDistance);
+        camera.position = newPosition;
+        
+        camera.rotation = BABYLON.Vector3.Lerp(startRotation, originalCameraRotation, eased);
         
         if (progress < 1) {
             trackRequestAnimationFrame(animate);
@@ -129,48 +163,69 @@ function returnToNormalOrbit() {
     animate();
 }
 
-// Apply camera shake effect
+// Fixed camera effects update - removed FOV modifications
 export function updateCameraEffects() {
-    // LAYOUT STABILITY FIX: Disable all camera shake effects to prevent visual disruption
-    // This prevents the shaking that occurs when tasks are completed
-    
-    // Camera movement is handled by updateCameraPosition for performance
-    
-    // Keep FOV constant to prevent layout disruption
-    const baseFOV = 75;
-    if (Math.abs(camera.fov - baseFOV) > 0.1) {
-        camera.fov = baseFOV;
-        camera.updateProjectionMatrix();
+    // Apply shake effect if active
+    if (shakeMagnitude > 0) {
+        const time = performance.now() * 0.001;
+        const fastShake = Math.sin(time * 20) * shakeMagnitude * 0.4;
+        const mediumShake = Math.sin(time * 8) * shakeMagnitude * 0.35;
+        const slowShake = Math.sin(time * 3) * shakeMagnitude * 0.25;
+        
+        const shakeOffset = new BABYLON.Vector3(
+            fastShake + mediumShake * 0.7,
+            (mediumShake + slowShake) * 0.6,
+            (fastShake + slowShake) * 0.4
+        );
+        
+        const basePosition = camera.position.clone().normalize().scale(camera.position.length());
+        camera.position = basePosition.add(shakeOffset);
+        
+        shakeMagnitude *= 0.98;
+        if (shakeMagnitude < 0.01) {
+            shakeMagnitude = 0;
+        }
     }
+    
+    // NOTE: Removed FOV breathing effect as it causes issues with Babylon.js UniversalCamera
 }
 
-// Orbit camera around specific target (like a completed task celebration)
-export function orbitAroundPoint(targetPoint, duration = 5000) {
+// Enhanced orbit camera around specific target
+export function orbitAroundPoint(targetPoint, duration = 6000) {
     if (cameraEffectActive) return;
     
     cameraEffectActive = true;
     const startTime = Date.now();
-    const radius = 30;
+    const radius = 35;
+    const startPosition = camera.position.clone();
     const initialAngle = Math.atan2(camera.position.z - targetPoint.z, camera.position.x - targetPoint.x);
     
     const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Full 360-degree orbit
-        const angle = initialAngle + (Math.PI * 2 * progress);
+        const eased = progress * progress * (3 - 2 * progress);
         
-        camera.position.x = targetPoint.x + Math.cos(angle) * radius;
-        camera.position.z = targetPoint.z + Math.sin(angle) * radius;
-        camera.position.y = targetPoint.y + Math.sin(progress * Math.PI * 4) * 5; // Gentle up/down motion
+        const angle = initialAngle + (Math.PI * 3 * eased);
+        const radiusVariation = radius + Math.sin(eased * Math.PI * 4) * 5;
         
-        camera.lookAt(targetPoint);
+        const figure8Y = Math.sin(eased * Math.PI * 6) * 8;
+        
+        const targetPos = new BABYLON.Vector3(
+            targetPoint.x + Math.cos(angle) * radiusVariation,
+            targetPoint.y + figure8Y + Math.sin(progress * Math.PI * 8) * 3,
+            targetPoint.z + Math.sin(angle) * radiusVariation
+        );
+        
+        camera.position = BABYLON.Vector3.Lerp(camera.position, targetPos, 0.1);
+        camera.setTarget(targetPoint);
+        
+        camera.rotation.z = Math.sin(eased * Math.PI * 2) * 0.1;
         
         if (progress < 1) {
             trackRequestAnimationFrame(animate);
         } else {
             cameraEffectActive = false;
-            // Return to normal orbit
             returnToNormalOrbit();
         }
     };
@@ -178,27 +233,26 @@ export function orbitAroundPoint(targetPoint, duration = 5000) {
     animate();
 }
 
-// Time dilation effect - slow motion camera movement
-export function triggerTimeDilationEffect(duration = 3000) {
+// Enhanced time dilation effect
+export function triggerTimeDilationEffect(duration = 4000) {
     const originalTimeScale = 1;
-    const slowTimeScale = 0.3;
+    const slowTimeScale = 0.2;
     const startTime = Date.now();
     
     const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Create slow-motion effect by adjusting animation speeds
         let timeScale;
-        if (progress < 0.5) {
-            // Slow down
-            timeScale = originalTimeScale + (slowTimeScale - originalTimeScale) * (progress * 2);
+        if (progress < 0.3) {
+            timeScale = originalTimeScale + (slowTimeScale - originalTimeScale) * (progress / 0.3);
+        } else if (progress < 0.7) {
+            timeScale = slowTimeScale;
         } else {
-            // Speed back up
-            timeScale = slowTimeScale + (originalTimeScale - slowTimeScale) * ((progress - 0.5) * 2);
+            const speedUpProgress = (progress - 0.7) / 0.3;
+            timeScale = slowTimeScale + (originalTimeScale - slowTimeScale) * speedUpProgress;
         }
         
-        // Apply time scale to camera rotation (this would need to be coordinated with scene3d.js)
         document.documentElement.style.setProperty('--time-scale', timeScale.toString());
         
         if (progress < 1) {
@@ -211,77 +265,98 @@ export function triggerTimeDilationEffect(duration = 3000) {
     animate();
 }
 
-// Cinematic black hole approach (for break time)
+// Enhanced cinematic black hole approach
 export function approachBlackHole() {
     if (cameraEffectActive) return;
     
     cameraEffectActive = true;
     const startTime = Date.now();
-    const duration = 4000; // 4 seconds
-    const targetDistance = 15; // Very close to event horizon
+    const duration = 5000;
+    const targetDistance = 12;
     
     const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Accelerating approach (like falling into gravity well)
-        const eased = progress * progress;
+        const eased = progress * progress * progress;
+        
+        const wobbleIntensity = progress * 2;
+        const wobbleX = Math.sin(elapsed * 0.01) * wobbleIntensity;
+        const wobbleY = Math.cos(elapsed * 0.013) * wobbleIntensity * 0.7;
+        const wobbleZ = Math.sin(elapsed * 0.007) * wobbleIntensity * 0.5;
         
         const currentDistance = 50 + (targetDistance - 50) * eased;
-        camera.position.setLength(currentDistance);
+        const basePosition = camera.position.normalize().scale(currentDistance);
         
-        // LAYOUT STABILITY FIX: Remove aspect ratio manipulation that causes WebGL distortion
-        // The gravitational time dilation effect was causing the entire 3D scene to balloon/stretch
+        camera.position = basePosition.add(new BABYLON.Vector3(wobbleX, wobbleY, wobbleZ));
         
-        // Keep redshift effect for visual feedback
-        const intensity = progress * 0.3;
-        document.documentElement.style.setProperty('--redshift-intensity', intensity.toString());
+        // Add visual effects
+        document.documentElement.style.setProperty('--redshift-intensity', (progress * 0.4).toString());
+        document.documentElement.style.setProperty('--lensing-intensity', (progress * 0.3).toString());
+        
+        // Add slight rotation
+        camera.rotation.z += Math.sin(elapsed * 0.01) * progress * 0.02;
         
         if (progress < 1) {
             trackRequestAnimationFrame(animate);
         } else {
-            // Hold at close distance, then pull back
             trackSetTimeout(() => {
                 escapeBlackHole();
-            }, 2000);
+            }, 2500);
         }
     };
     
     animate();
 }
 
-// Dramatic escape from black hole (end of break)
+// Enhanced dramatic escape from black hole
 function escapeBlackHole() {
     const startTime = Date.now();
-    const duration = 2000;
+    const duration = 3000;
     const startDistance = camera.position.length();
     const targetDistance = 50;
+    const startRotation = camera.rotation.clone();
     
     const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Rapid escape
-        const eased = 1 - Math.pow(1 - progress, 4);
+        let eased;
+        if (progress < 0.4) {
+            eased = progress * progress / 0.16;
+        } else if (progress < 0.8) {
+            const p = (progress - 0.4) / 0.4;
+            eased = 0.16 + Math.pow(p, 1.5) * 0.68;
+        } else {
+            const p = (progress - 0.8) / 0.2;
+            eased = 0.84 + (1 - Math.pow(1 - p, 3)) * 0.16;
+        }
         
         const currentDistance = startDistance + (targetDistance - startDistance) * eased;
-        camera.position.setLength(currentDistance);
+        const basePosition = camera.position.normalize().scale(currentDistance);
         
-        // LAYOUT STABILITY FIX: Remove aspect ratio manipulation that causes WebGL distortion
-        // The gravitational distortion effect was causing the scene to balloon and stretch
+        const vibrationIntensity = (1 - progress) * 3;
+        const vibration = new BABYLON.Vector3(
+            Math.sin(elapsed * 0.05) * vibrationIntensity,
+            Math.cos(elapsed * 0.07) * vibrationIntensity * 0.7,
+            Math.sin(elapsed * 0.03) * vibrationIntensity * 0.5
+        );
         
-        // Keep redshift fade effect
-        const redshiftIntensity = 0.3 * (1 - progress);
-        document.documentElement.style.setProperty('--redshift-intensity', redshiftIntensity.toString());
+        camera.position = basePosition.add(vibration);
+        
+        // Fade visual effects
+        document.documentElement.style.setProperty('--redshift-intensity', (0.4 * (1 - eased)).toString());
+        document.documentElement.style.setProperty('--lensing-intensity', (0.3 * (1 - eased)).toString());
+        
+        camera.rotation = BABYLON.Vector3.Lerp(startRotation, originalCameraRotation, eased);
         
         if (progress < 1) {
             trackRequestAnimationFrame(animate);
         } else {
             cameraEffectActive = false;
-            // Ensure aspect ratio is properly reset to prevent any lingering distortion
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
             document.documentElement.style.removeProperty('--redshift-intensity');
+            document.documentElement.style.removeProperty('--lensing-intensity');
+            camera.rotation = originalCameraRotation.clone();
         }
     };
     

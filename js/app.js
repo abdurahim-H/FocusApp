@@ -1,3 +1,5 @@
+// app.js
+
 /**
  * Cosmic Focus - Main Application Entry Point
  * Handles module loading, initialization, and core app setup
@@ -23,9 +25,11 @@ async function loadModules() {
 
     for (const module of moduleList) {
         try {
+            console.log(`Loading module: ${module.name} from ${module.path}`);
             modules[module.name] = await import(module.path);
+            console.log(`✓ Successfully loaded module: ${module.name}`);
         } catch (error) {
-            // Silently handle module loading errors
+            console.error(`✗ Failed to load module ${module.name}:`, error);
         }
     }
 
@@ -72,10 +76,14 @@ export async function initApp() {
         // Initialize 3D scene
         try {
             if (loadedModules.scene3d?.init3D) {
+                console.log('Initializing 3D scene...');
                 loadedModules.scene3d.init3D();
+                console.log('3D scene initialized successfully');
+            } else {
+                console.error('scene3d module or init3D function not found');
             }
         } catch (error) {
-            // Silently handle 3D initialization errors
+            console.error('3D initialization error:', error);
         }
 
         // Setup all modules

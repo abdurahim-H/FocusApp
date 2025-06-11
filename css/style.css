@@ -33,7 +33,7 @@ body {
     max-width: 100vw;
 }
 
-/* 3D Scene Container */
+/* 3D Scene Container - FIXED for Babylon.js */
 #scene-container {
     position: fixed;
     top: 0;
@@ -42,12 +42,18 @@ body {
     height: 100%;
     z-index: 1;
     pointer-events: none;
+    background: #000; /* Fallback background */
 }
 
 #scene-container canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1 !important;
+    pointer-events: auto !important; /* Canvas needs pointer events for Babylon.js */
 }
 
 /* Main Content Container */
@@ -59,10 +65,25 @@ body {
     padding: 120px 20px 40px;
     position: relative;
     z-index: 10;
-    pointer-events: auto;
+    pointer-events: none; /* Allow clicks to pass through to canvas */
     max-width: 100%;
     overflow: hidden;
     contain: layout style paint;
+}
+
+/* Enable pointer events only for interactive elements */
+.container > *,
+.nav,
+.settings-btn,
+.progress-3d,
+.achievement,
+.btn,
+button,
+input,
+textarea,
+select,
+a {
+    pointer-events: auto !important;
 }
 
 /* Mode Display System */
@@ -74,6 +95,7 @@ body {
     animation: fadeIn 0.6s ease;
     position: relative;
     z-index: 15;
+    pointer-events: auto; /* Mode content needs pointer events */
 }
 
 .mode.active {
@@ -127,6 +149,7 @@ body {
     width: 0%;
     transition: width 0.3s ease;
 }
+
 /* Enhanced Visual Effects */
 body {
     transition: filter 0.3s ease;
@@ -261,22 +284,32 @@ body[style*="--redshift-intensity"] {
 }
 
 /* Layout Stability Fixes */
-#scene-container {
-    z-index: 1 !important;
-    pointer-events: none !important;
-}
-
 .task-section {
     position: relative !important;
     z-index: 100 !important;
     isolation: isolate !important;
     background: var(--bg-glass) !important;
+    pointer-events: auto !important;
 }
 
 #addTaskBtn {
     position: relative !important;
     z-index: 101 !important;
     isolation: isolate !important;
+    pointer-events: auto !important;
+}
+
+/* All interactive elements need pointer events */
+.focus-content,
+.home-content,
+.ambient-content,
+.task-section,
+.task-input-group,
+.task-list,
+.timer-controls,
+.ambient-controls,
+.settings-modal {
+    pointer-events: auto !important;
 }
 
 /* Prevent horizontal overflow */
@@ -300,4 +333,29 @@ body[style*="--redshift-intensity"] {
 .settings-btn {
     transform: translateZ(0);
     backface-visibility: hidden;
+}
+
+/* Ensure UI elements are above the 3D scene */
+.nav {
+    z-index: 1000 !important;
+}
+
+.settings-btn {
+    z-index: 1000 !important;
+}
+
+.progress-3d {
+    z-index: 1000 !important;
+}
+
+.achievement {
+    z-index: 1500 !important;
+}
+
+.settings-modal-overlay {
+    z-index: 2000 !important;
+}
+
+.settings-modal {
+    z-index: 2001 !important;
 }
