@@ -14,6 +14,13 @@ let lensingPlane = null;
 let polarJetParticles = [];
 let jetEmissionTimer = 0;
 
+// Cosmic environment elements for animation
+let distantGalaxies = [];
+let cosmicNebulae = [];
+let stellarPhenomena = [];
+let starFieldLayers = [];
+let spaceSkybox = null;
+
 // Unified Color Triad - Deep Violet, Cyan, Ember Orange
 const COLOR_PALETTE = {
     DEEP_VIOLET: { r: 0.4, g: 0.2, b: 0.8 },      // Infrastructure
@@ -1463,74 +1470,521 @@ function createBalancedMoonSystem(planet, moonCount) {
     }
 }
 
-// Create cosmic environment with subtle effects
+// Create cosmic environment with spectacular space visuals
 function createCosmicEnvironment(parentGroup) {
     const envGroup = new BABYLON.TransformNode("cosmicEnvironment", scene);
     envGroup.parent = parentGroup;
     
-    // Dark navy ambient lighting
+    // Enhanced cosmic background with space skybox
+    createSpaceSkybox(envGroup);
+    
+    // Dark navy ambient lighting with cosmic tints
     scene.ambientColor = new BABYLON.Color3(
-        COLOR_PALETTE.DARK_NAVY.r,
-        COLOR_PALETTE.DARK_NAVY.g,
-        COLOR_PALETTE.DARK_NAVY.b
+        COLOR_PALETTE.DARK_NAVY.r * 1.2,
+        COLOR_PALETTE.DARK_NAVY.g * 1.2,
+        COLOR_PALETTE.DARK_NAVY.b * 1.5
     );
     
-    // Cool rim lighting
+    // Cool rim lighting with enhanced cosmic illumination
     const rimLight = new BABYLON.DirectionalLight("rimLight", new BABYLON.Vector3(-0.5, -0.3, -0.8), scene);
     rimLight.diffuse = new BABYLON.Color3(
-        COLOR_PALETTE.CYAN.r * 0.3,
-        COLOR_PALETTE.CYAN.g * 0.4,
-        COLOR_PALETTE.CYAN.b * 0.5
+        COLOR_PALETTE.CYAN.r * 0.4,
+        COLOR_PALETTE.CYAN.g * 0.5,
+        COLOR_PALETTE.CYAN.b * 0.6
     );
-    rimLight.intensity = 0.4;
+    rimLight.intensity = 0.5;
     
-    // Subtle background star field
-    const starField = new BABYLON.ParticleSystem("backgroundStars", 500, scene);
-    starField.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8">
-            <circle cx="4" cy="4" r="1" fill="white" opacity="0.8"/>
-        </svg>
-    `), scene);
+    // Enhanced multi-layered star field
+    starFieldLayers = createEnhancedStarField(envGroup);
     
-    starField.emitter = envGroup;
-    starField.createSphereEmitter(200);
+    // Distant galaxy backgrounds
+    distantGalaxies = createDistantGalaxies(envGroup);
     
-    starField.color1 = new BABYLON.Color4(1, 1, 1, 0.6);
-    starField.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.4);
-    starField.colorDead = new BABYLON.Color4(0.5, 0.6, 0.8, 0);
+    // Cosmic nebula clouds
+    cosmicNebulae = createCosmicNebulae(envGroup);
     
-    starField.minSize = 0.2;
-    starField.maxSize = 0.8;
-    starField.minLifeTime = 60;
-    starField.maxLifeTime = 120;
-    starField.emitRate = 5;
+    // Stellar phenomena
+    stellarPhenomena = createStellarPhenomena(envGroup);
     
-    starField.direction1 = new BABYLON.Vector3(0, 0, 0);
-    starField.direction2 = new BABYLON.Vector3(0, 0, 0);
-    starField.minEmitPower = 0;
-    starField.maxEmitPower = 0;
+    // Enhanced visual effects
+    createCosmicVisualEffects();
     
-    starField.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
-    starField.start();
-    
-    // Depth-of-field blur for distant objects (>500 units)
-    const depthOfFieldEffect = new BABYLON.DepthOfFieldEffect(scene.activeCamera, {
-        focusDistance: 100,
-        fStop: 1.4,
-        focalLength: 50,
-        blurBackgroundEffect: true
-    });
-    
-    // Selective bloom effects
-    const bloomEffect = new BABYLON.BloomEffect(scene, 1.0, 0.4, 512);
-    bloomEffect.luminanceThreshold = 0.3;
-    bloomEffect.luminanceSmoothing = 0.8;
-    bloomEffect.bloomScale = 0.6;
-    
-    energyParticles.push(starField);
+    energyParticles.push(...starFieldLayers);
     
     return envGroup;
 }
+
+// Create a stunning space skybox
+function createSpaceSkybox(parentGroup) {
+    const skybox = BABYLON.MeshBuilder.CreateSphere("spaceSkybox", {
+        diameter: 2000,
+        segments: 32
+    }, scene);
+    
+    const skyboxMaterial = new BABYLON.StandardMaterial("skyboxMat", scene);
+    
+    // Create a procedural space texture with nebulae and star fields
+    const skyboxTexture = new BABYLON.DynamicTexture("spaceTexture", {width: 2048, height: 1024}, scene);
+    const context = skyboxTexture.getContext();
+    
+    // Deep space gradient background
+    const gradient = context.createLinearGradient(0, 0, 0, 1024);
+    gradient.addColorStop(0, 'rgba(5, 5, 25, 1)');      // Deep space blue
+    gradient.addColorStop(0.3, 'rgba(15, 10, 40, 1)');   // Purple-blue
+    gradient.addColorStop(0.6, 'rgba(25, 15, 35, 1)');   // Deep purple
+    gradient.addColorStop(1, 'rgba(10, 5, 20, 1)');      // Almost black
+    
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 2048, 1024);
+    
+    // Add distant star clusters
+    for (let i = 0; i < 800; i++) {
+        const x = Math.random() * 2048;
+        const y = Math.random() * 1024;
+        const size = Math.random() * 2 + 0.5;
+        const brightness = Math.random();
+        
+        // Star colors based on temperature
+        let starColor;
+        const temp = Math.random();
+        if (temp < 0.3) {
+            starColor = `rgba(255, ${180 + Math.random() * 75}, ${100 + Math.random() * 100}, ${brightness})`;
+        } else if (temp < 0.6) {
+            starColor = `rgba(255, 255, ${200 + Math.random() * 55}, ${brightness})`;
+        } else {
+            starColor = `rgba(${150 + Math.random() * 105}, ${200 + Math.random() * 55}, 255, ${brightness})`;
+        }
+        
+        context.fillStyle = starColor;
+        context.beginPath();
+        context.arc(x, y, size, 0, Math.PI * 2);
+        context.fill();
+        
+        // Add star glow
+        const glowGradient = context.createRadialGradient(x, y, 0, x, y, size * 4);
+        glowGradient.addColorStop(0, starColor);
+        glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        context.fillStyle = glowGradient;
+        context.beginPath();
+        context.arc(x, y, size * 4, 0, Math.PI * 2);
+        context.fill();
+    }
+    
+    // Add nebula wisps
+    for (let i = 0; i < 12; i++) {
+        const centerX = Math.random() * 2048;
+        const centerY = Math.random() * 1024;
+        const nebulaSize = 50 + Math.random() * 150;
+        
+        const nebulaGradient = context.createRadialGradient(
+            centerX, centerY, 0,
+            centerX, centerY, nebulaSize
+        );
+        
+        // Colorful nebula variations
+        const nebulaHue = Math.random() * 360;
+        nebulaGradient.addColorStop(0, `hsla(${nebulaHue}, 70%, 60%, 0.15)`);
+        nebulaGradient.addColorStop(0.5, `hsla(${nebulaHue + 30}, 60%, 50%, 0.08)`);
+        nebulaGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        context.fillStyle = nebulaGradient;
+        context.beginPath();
+        context.arc(centerX, centerY, nebulaSize, 0, Math.PI * 2);
+        context.fill();
+    }
+    
+    skyboxTexture.update();
+    
+    skyboxMaterial.diffuseTexture = skyboxTexture;
+    skyboxMaterial.emissiveTexture = skyboxTexture;
+    skyboxMaterial.emissiveColor = new BABYLON.Color3(0.8, 0.8, 1);
+    skyboxMaterial.backFaceCulling = false;
+    skyboxMaterial.alpha = 0.9;
+    
+    skybox.material = skyboxMaterial;
+    skybox.parent = parentGroup;
+    
+    return skybox;
+}
+
+// Create enhanced multi-layered star field
+function createEnhancedStarField(parentGroup) {
+    // Layer 1: Distant background stars
+    const backgroundStars = new BABYLON.ParticleSystem("backgroundStars", 800, scene);
+    backgroundStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12">
+            <defs>
+                <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="80%" style="stop-color:lightblue;stop-opacity:0.6" />
+                    <stop offset="100%" style="stop-color:blue;stop-opacity:0" />
+                </radialGradient>
+            </defs>
+            <circle cx="6" cy="6" r="6" fill="url(#starGlow)" />
+        </svg>
+    `), scene);
+    
+    backgroundStars.emitter = parentGroup;
+    backgroundStars.createSphereEmitter(400);
+    
+    backgroundStars.color1 = new BABYLON.Color4(1, 1, 1, 0.5);
+    backgroundStars.color2 = new BABYLON.Color4(0.7, 0.8, 1, 0.3);
+    backgroundStars.colorDead = new BABYLON.Color4(0.4, 0.5, 0.8, 0);
+    
+    backgroundStars.minSize = 0.1;
+    backgroundStars.maxSize = 0.4;
+    backgroundStars.minLifeTime = Number.MAX_VALUE;
+    backgroundStars.maxLifeTime = Number.MAX_VALUE;
+    backgroundStars.emitRate = 0;
+    
+    backgroundStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    backgroundStars.start();
+    backgroundStars.manualEmitCount = 800;
+    
+    // Layer 2: Medium distance bright stars
+    const mediumStars = new BABYLON.ParticleSystem("mediumStars", 400, scene);
+    mediumStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <defs>
+                <radialGradient id="brightStar" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="60%" style="stop-color:cyan;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:blue;stop-opacity:0" />
+                </radialGradient>
+            </defs>
+            <circle cx="8" cy="8" r="8" fill="url(#brightStar)" />
+        </svg>
+    `), scene);
+    
+    mediumStars.emitter = parentGroup;
+    mediumStars.createSphereEmitter(250);
+    
+    mediumStars.color1 = new BABYLON.Color4(1, 1, 1, 0.8);
+    mediumStars.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.6);
+    mediumStars.colorDead = new BABYLON.Color4(0.6, 0.7, 1, 0);
+    
+    mediumStars.minSize = 0.3;
+    mediumStars.maxSize = 1.2;
+    mediumStars.minLifeTime = Number.MAX_VALUE;
+    mediumStars.maxLifeTime = Number.MAX_VALUE;
+    mediumStars.emitRate = 0;
+    
+    mediumStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    mediumStars.start();
+    mediumStars.manualEmitCount = 400;
+    
+    // Layer 3: Close brilliant stars with twinkling
+    const brilliantStars = new BABYLON.ParticleSystem("brilliantStars", 200, scene);
+    brilliantStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <defs>
+                <radialGradient id="brilliantStar" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="30%" style="stop-color:white;stop-opacity:0.9" />
+                    <stop offset="70%" style="stop-color:lightblue;stop-opacity:0.6" />
+                    <stop offset="100%" style="stop-color:blue;stop-opacity:0" />
+                </radialGradient>
+            </defs>
+            <circle cx="12" cy="12" r="12" fill="url(#brilliantStar)" />
+            <circle cx="12" cy="12" r="3" fill="white" opacity="0.9" />
+        </svg>
+    `), scene);
+    
+    brilliantStars.emitter = parentGroup;
+    brilliantStars.createSphereEmitter(150);
+    
+    brilliantStars.color1 = new BABYLON.Color4(1, 1, 1, 1);
+    brilliantStars.color2 = new BABYLON.Color4(0.9, 0.95, 1, 0.8);
+    brilliantStars.colorDead = new BABYLON.Color4(0.8, 0.9, 1, 0);
+    
+    brilliantStars.minSize = 0.8;
+    brilliantStars.maxSize = 2.5;
+    brilliantStars.minLifeTime = Number.MAX_VALUE;
+    brilliantStars.maxLifeTime = Number.MAX_VALUE;
+    brilliantStars.emitRate = 0;
+    
+    brilliantStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    brilliantStars.start();
+    brilliantStars.manualEmitCount = 200;
+    
+    // Store for animations
+    energyParticles.push(backgroundStars, mediumStars, brilliantStars);
+    
+    // Add twinkling animation data
+    setTimeout(() => {
+        [backgroundStars, mediumStars, brilliantStars].forEach((starSystem, layerIndex) => {
+            starSystem.particles.forEach((particle, i) => {
+                if (particle) {
+                    particle.userData = {
+                        baseBrightness: particle.color.a,
+                        twinkleSpeed: 0.01 + Math.random() * 0.03,
+                        twinklePhase: Math.random() * Math.PI * 2,
+                        layerIndex: layerIndex
+                    };
+                }
+            });
+        });
+    }, 500);
+    
+    return [backgroundStars, mediumStars, brilliantStars];
+}
+
+// Create distant galaxies in the background
+function createDistantGalaxies(parentGroup) {
+    const galaxies = [];
+    
+    for (let i = 0; i < 6; i++) {
+        const galaxyGroup = new BABYLON.TransformNode(`distantGalaxy${i}`, scene);
+        galaxyGroup.parent = parentGroup;
+        
+        // Position galaxies far away in different directions
+        const distance = 600 + Math.random() * 400;
+        const theta = (i / 6) * Math.PI * 2 + Math.random() * 0.5;
+        const phi = Math.random() * Math.PI * 0.6 + Math.PI * 0.2;
+        
+        galaxyGroup.position = new BABYLON.Vector3(
+            distance * Math.sin(phi) * Math.cos(theta),
+            distance * Math.cos(phi) * (Math.random() - 0.5) * 0.3,
+            distance * Math.sin(phi) * Math.sin(theta)
+        );
+        
+        // Create spiral galaxy structure
+        const galaxyCore = BABYLON.MeshBuilder.CreateSphere(`galaxyCore${i}`, {
+            diameter: 8 + Math.random() * 12,
+            segments: 16
+        }, scene);
+        
+        const coreMaterial = new BABYLON.StandardMaterial(`galaxyCoreMat${i}`, scene);
+        
+        // Varied galaxy colors
+        const galaxyType = Math.random();
+        if (galaxyType < 0.3) {
+            // Blue young galaxy
+            coreMaterial.diffuseColor = new BABYLON.Color3(0.4, 0.6, 1);
+            coreMaterial.emissiveColor = new BABYLON.Color3(0.2, 0.3, 0.6);
+        } else if (galaxyType < 0.6) {
+            // Golden mature galaxy
+            coreMaterial.diffuseColor = new BABYLON.Color3(1, 0.8, 0.4);
+            coreMaterial.emissiveColor = new BABYLON.Color3(0.6, 0.4, 0.2);
+        } else {
+            // Red ancient galaxy
+            coreMaterial.diffuseColor = new BABYLON.Color3(1, 0.5, 0.3);
+            coreMaterial.emissiveColor = new BABYLON.Color3(0.5, 0.25, 0.15);
+        }
+        
+        coreMaterial.alpha = 0.4 + Math.random() * 0.3;
+        coreMaterial.backFaceCulling = false;
+        
+        galaxyCore.material = coreMaterial;
+        galaxyCore.parent = galaxyGroup;
+        
+        // Create spiral arms with particle systems
+        for (let arm = 0; arm < 3; arm++) {
+            const spiralArm = new BABYLON.ParticleSystem(`galaxyArm${i}_${arm}`, 150, scene);
+            
+            spiralArm.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8">
+                    <circle cx="4" cy="4" r="3" fill="white" opacity="0.3"/>
+                    <circle cx="4" cy="4" r="1" fill="white" opacity="0.8"/>
+                </svg>
+            `), scene);
+            
+            spiralArm.emitter = galaxyCore;
+            spiralArm.createSphereEmitter(15);
+            
+            spiralArm.color1 = coreMaterial.diffuseColor.toColor4(0.3);
+            spiralArm.color2 = coreMaterial.emissiveColor.toColor4(0.2);
+            spiralArm.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+            
+            spiralArm.minSize = 0.1;
+            spiralArm.maxSize = 0.8;
+            spiralArm.minLifeTime = Number.MAX_VALUE;
+            spiralArm.maxLifeTime = Number.MAX_VALUE;
+            spiralArm.emitRate = 0;
+            
+            spiralArm.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+            spiralArm.start();
+            spiralArm.manualEmitCount = 150;
+            
+            // Position particles in spiral pattern
+            setTimeout(() => {
+                spiralArm.particles.forEach((particle, j) => {
+                    if (particle) {
+                        const spiralAngle = (arm * Math.PI * 2 / 3) + (j / 150) * Math.PI * 4;
+                        const spiralRadius = (j / 150) * 25 + 5;
+                        
+                        particle.position.x = Math.cos(spiralAngle) * spiralRadius;
+                        particle.position.z = Math.sin(spiralAngle) * spiralRadius;
+                        particle.position.y = (Math.random() - 0.5) * 3;
+                    }
+                });
+            }, 200 + arm * 100);
+        }
+        
+        // Store for animation
+        galaxyGroup.userData = {
+            rotationSpeed: 0.0001 + Math.random() * 0.0002,
+            pulseSpeed: 0.001 + Math.random() * 0.002,
+            baseBrightness: coreMaterial.emissiveColor.clone()
+        };
+        
+        galaxies.push(galaxyGroup);
+    }
+    
+    return galaxies;
+}
+
+// Create cosmic nebulae
+function createCosmicNebulae(parentGroup) {
+    const nebulae = [];
+    
+    for (let i = 0; i < 8; i++) {
+        const nebulaSystem = new BABYLON.ParticleSystem(`cosmicNebula${i}`, 300, scene);
+        
+        nebulaSystem.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                <defs>
+                    <radialGradient id="nebulaGrad${i}" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:white;stop-opacity:0.2" />
+                        <stop offset="50%" style="stop-color:cyan;stop-opacity:0.1" />
+                        <stop offset="100%" style="stop-color:purple;stop-opacity:0" />
+                    </radialGradient>
+                </defs>
+                <circle cx="16" cy="16" r="16" fill="url(#nebulaGrad${i})" />
+            </svg>
+        `), scene);
+        
+        // Position nebula in space
+        const emitter = BABYLON.MeshBuilder.CreateSphere(`nebulaEmitter${i}`, {diameter: 0.1}, scene);
+        emitter.isVisible = false;
+        emitter.position = new BABYLON.Vector3(
+            (Math.random() - 0.5) * 600,
+            (Math.random() - 0.5) * 200,
+            (Math.random() - 0.5) * 600
+        );
+        emitter.parent = parentGroup;
+        
+        nebulaSystem.emitter = emitter;
+        nebulaSystem.createSphereEmitter(50);
+        
+        // Colorful nebula variations
+        const nebulaColors = [
+            [new BABYLON.Color4(0.8, 0.4, 1, 0.15), new BABYLON.Color4(0.6, 0.2, 0.8, 0.08)],  // Purple
+            [new BABYLON.Color4(0.4, 0.8, 1, 0.15), new BABYLON.Color4(0.2, 0.6, 0.8, 0.08)],  // Cyan
+            [new BABYLON.Color4(1, 0.6, 0.4, 0.15), new BABYLON.Color4(0.8, 0.4, 0.2, 0.08)],  // Orange
+            [new BABYLON.Color4(0.6, 1, 0.4, 0.15), new BABYLON.Color4(0.4, 0.8, 0.2, 0.08)],  // Green
+        ];
+        
+        const colorPair = nebulaColors[i % nebulaColors.length];
+        nebulaSystem.color1 = colorPair[0];
+        nebulaSystem.color2 = colorPair[1];
+        nebulaSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+        
+        nebulaSystem.minSize = 20;
+        nebulaSystem.maxSize = 60;
+        nebulaSystem.minLifeTime = Number.MAX_VALUE;
+        nebulaSystem.maxLifeTime = Number.MAX_VALUE;
+        nebulaSystem.emitRate = 0;
+        
+        nebulaSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+        nebulaSystem.start();
+        nebulaSystem.manualEmitCount = 300;
+        
+        nebulaSystem.userData = {
+            swaySpeed: 0.001 + Math.random() * 0.002,
+            breathSpeed: 0.002 + Math.random() * 0.003,
+            originalPosition: emitter.position.clone()
+        };
+        
+        nebulae.push(nebulaSystem);
+        energyParticles.push(nebulaSystem);
+    }
+    
+    return nebulae;
+}
+
+// Create stellar phenomena (pulsars, quasars, etc.)
+function createStellarPhenomena(parentGroup, scene, energyParticles) {
+    // Create a distant quasar
+    const quasar = BABYLON.MeshBuilder.CreateSphere("quasar", { diameter: 3 }, scene);
+    quasar.position = new BABYLON.Vector3(800, 200, -600);
+    quasar.parent = parentGroup;
+    
+    const quasarMaterial = new BABYLON.StandardMaterial("quasarMat", scene);
+    quasarMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
+    quasarMaterial.emissiveColor = new BABYLON.Color3(0.8, 0.9, 1);
+    quasarMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+    quasar.material = quasarMaterial;
+    
+    // Quasar jet particle system
+    const quasarJet = new BABYLON.ParticleSystem("quasarJet", 200, scene);
+    quasarJet.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6">
+            <circle cx="3" cy="3" r="3" fill="white" opacity="0.6"/>
+        </svg>
+    `), scene);
+    
+    quasarJet.emitter = quasar;
+    quasarJet.createConeEmitter(0.1, 0.1);
+    quasarJet.direction1 = new BABYLON.Vector3(0, 1, 0);
+    quasarJet.direction2 = new BABYLON.Vector3(0, 1, 0);
+    quasarJet.minEmitPower = 20;
+    quasarJet.maxEmitPower = 40;
+    quasarJet.color1 = new BABYLON.Color4(1, 1, 1, 0.8);
+    quasarJet.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.4);
+    quasarJet.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+    quasarJet.minSize = 0.5;
+    quasarJet.maxSize = 2;
+    quasarJet.minLifeTime = 10;
+    quasarJet.maxLifeTime = 20;
+    quasarJet.emitRate = 10;
+    quasarJet.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    quasarJet.start();
+    
+    // Store for animation
+    quasar.userData = {
+        pulseSpeed: 0.005,
+        baseBrightness: quasarMaterial.emissiveColor.clone()
+    };
+    
+    energyParticles.push(quasarJet);
+    return [quasar, quasarJet];
+}
+
+// Create enhanced visual effects
+function createCosmicVisualEffects(scene) {
+    if (scene.activeCamera) {
+        try {
+            const depthOfFieldEffect = new BABYLON.DepthOfFieldEffect(scene.activeCamera, {
+                focusDistance: 100,
+                fStop: 1.2,
+                focalLength: 50,
+                blurBackgroundEffect: true
+            });
+            const bloomEffect = new BABYLON.BloomEffect(scene, 1.2, 0.5, 512);
+            bloomEffect.luminanceThreshold = 0.25;
+            bloomEffect.luminanceSmoothing = 0.9;
+            bloomEffect.bloomScale = 0.8;
+            console.log('✨ Enhanced cosmic visual effects applied');
+        } catch (error) {
+            console.warn('Visual effects not supported on this device:', error);
+        }
+    }
+}
+
+// Main environment setup
+function createEnvironment(scene, energyParticles) {
+    const envGroup = new BABYLON.TransformNode("envGroup", scene);
+
+    // Add stellar phenomena
+    createStellarPhenomena(envGroup, scene, energyParticles);
+
+    // Apply post-processing / visual effects
+    createCosmicVisualEffects(scene);
+
+    return envGroup;
+}
+
 
 // Enhanced update function with meditative timing and effects
 export function updateBlackHoleEffects() {
@@ -1642,6 +2096,110 @@ export function updateBlackHoleEffects() {
             
             wave.scaling.x = rippleScale;
             wave.scaling.z = rippleScale;
+        }
+    });
+    
+    // ✨ COSMIC ENVIRONMENT ANIMATIONS ✨
+    
+    // Animate star field twinkling across all layers
+    energyParticles.forEach(particleSystem => {
+        if (particleSystem && particleSystem.particles) {
+            particleSystem.particles.forEach(particle => {
+                if (particle && particle.userData) {
+                    const data = particle.userData;
+                    const twinklePhase = time * data.twinkleSpeed + data.twinklePhase;
+                    const twinkleIntensity = 0.3 + Math.sin(twinklePhase) * 0.7;
+                    
+                    // Apply different twinkling patterns based on layer
+                    if (data.layerIndex === 0) {
+                        // Background stars: gentle twinkling
+                        particle.color.a = data.baseBrightness * (0.5 + twinkleIntensity * 0.5);
+                    } else if (data.layerIndex === 1) {
+                        // Medium stars: moderate twinkling
+                        particle.color.a = data.baseBrightness * (0.6 + twinkleIntensity * 0.4);
+                    } else if (data.layerIndex === 2) {
+                        // Brilliant stars: dramatic twinkling
+                        particle.color.a = data.baseBrightness * (0.7 + twinkleIntensity * 0.3);
+                        particle.size = particle.size * (0.9 + Math.sin(twinklePhase * 0.5) * 0.1);
+                    }
+                }
+            });
+        }
+    });
+    
+    // Animate distant galaxies - rotation and pulsing
+    scene.transformNodes.forEach(node => {
+        if (node.name.includes('distantGalaxy') && node.userData) {
+            const data = node.userData;
+            
+            // Slow galaxy rotation
+            node.rotation.y += data.rotationSpeed;
+            
+            // Galaxy core pulsing
+            const pulsePhase = time * data.pulseSpeed;
+            const pulseBrightness = 0.8 + Math.sin(pulsePhase) * 0.2;
+            
+            // Find and update galaxy core material
+            node.getChildren().forEach(child => {
+                if (child.name.includes('galaxyCore') && child.material) {
+                    child.material.emissiveColor = data.baseBrightness.scale(pulseBrightness);
+                }
+            });
+        }
+    });
+    
+    // Animate cosmic nebulae - breathing and swaying
+    energyParticles.forEach(particleSystem => {
+        if (particleSystem.name && particleSystem.name.includes('cosmicNebula') && particleSystem.userData) {
+            const data = particleSystem.userData;
+            
+            // Nebula breathing effect (size pulsation)
+            const breathPhase = time * data.breathSpeed;
+            const breathScale = 0.9 + Math.sin(breathPhase) * 0.1;
+            
+            // Gentle swaying motion
+            const swayPhase = time * data.swaySpeed;
+            const swayOffset = new BABYLON.Vector3(
+                Math.sin(swayPhase) * 10,
+                Math.cos(swayPhase * 0.7) * 5,
+                Math.sin(swayPhase * 0.5) * 8
+            );
+            
+            if (particleSystem.emitter) {
+                particleSystem.emitter.position = data.originalPosition.add(swayOffset);
+            }
+            
+            // Update particle colors for breathing effect
+            particleSystem.particles.forEach(particle => {
+                if (particle) {
+                    particle.size = particle.size * breathScale;
+                }
+            });
+        }
+    });
+    
+    // Animate stellar phenomena (quasar pulsing)
+    scene.meshes.forEach(mesh => {
+        if (mesh.name === 'quasar' && mesh.userData && mesh.material) {
+            const data = mesh.userData;
+            const pulsePhase = time * data.pulseSpeed;
+            const pulseBrightness = 0.6 + Math.sin(pulsePhase) * 0.4;
+            
+            // Quasar core pulsing
+            mesh.material.emissiveColor = data.baseBrightness.scale(pulseBrightness);
+            
+            // Scale pulsing for dramatic effect
+            const scaleMultiplier = 0.8 + Math.sin(pulsePhase * 2) * 0.2;
+            mesh.scaling = new BABYLON.Vector3(scaleMultiplier, scaleMultiplier, scaleMultiplier);
+        }
+    });
+    
+    // Animate space skybox for subtle movement
+    scene.meshes.forEach(mesh => {
+        if (mesh.name === 'spaceSkybox') {
+            // Very slow rotation to create a sense of cosmic movement
+            mesh.rotation.y += 0.00001;
+            mesh.rotation.x += 0.000005;
         }
     });
     
