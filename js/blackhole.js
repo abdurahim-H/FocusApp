@@ -53,6 +53,14 @@ export function createEnhancedBlackHole() {
         createEnergyParticles(blackHoleGroup);
         console.log('Energy particles created');
 
+        // Create central energy column
+        createCentralEnergyColumn(blackHoleGroup);
+        console.log('Central energy column created');
+
+        // Create enhanced orbital rings
+        createEnhancedOrbitalRings(blackHoleGroup);
+        console.log('Enhanced orbital rings created');
+
         // Store the black hole system
         blackHoleSystem = {
             group: blackHoleGroup,
@@ -247,54 +255,322 @@ function createEnergyParticles(parentGroup) {
     energyParticles.push(energyParticleSystem);
 }
 
-// Update black hole effects animation
+// Create spectacular central energy column
+function createCentralEnergyColumn(parentGroup) {
+    const columnGroup = new BABYLON.TransformNode("energyColumnGroup", scene);
+    columnGroup.parent = parentGroup;
+    
+    // Main energy beam
+    const energyBeam = BABYLON.MeshBuilder.CreateCylinder("energyBeam", {
+        height: 200,
+        diameterTop: 0.5,
+        diameterBottom: 3,
+        tessellation: 32
+    }, scene);
+    
+    const beamMaterial = new BABYLON.StandardMaterial("energyBeamMat", scene);
+    beamMaterial.diffuseColor = new BABYLON.Color3(0.4, 1, 1);
+    beamMaterial.emissiveColor = new BABYLON.Color3(0.6, 1, 1);
+    beamMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+    beamMaterial.alpha = 0.8;
+    beamMaterial.backFaceCulling = false;
+    
+    energyBeam.material = beamMaterial;
+    energyBeam.parent = columnGroup;
+    
+    // Energy column particle system
+    const columnParticles = new BABYLON.ParticleSystem("columnParticles", 500, scene);
+    columnParticles.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+            <defs>
+                <radialGradient id="columnGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#98fff6;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#ffffff;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:#7dfcf7;stop-opacity:0" />
+                </radialGradient>
+            </defs>
+            <circle cx="16" cy="16" r="16" fill="url(#columnGrad)" />
+        </svg>
+    `), scene);
+    
+    columnParticles.emitter = energyBeam;
+    columnParticles.createCylinderEmitter(1, 100, 1, 0);
+    
+    columnParticles.color1 = new BABYLON.Color4(0.6, 1, 0.95, 1);
+    columnParticles.color2 = new BABYLON.Color4(1, 1, 1, 1);
+    columnParticles.colorDead = new BABYLON.Color4(0.4, 0.8, 1, 0);
+    
+    columnParticles.minSize = 0.5;
+    columnParticles.maxSize = 2.5;
+    columnParticles.minLifeTime = 2;
+    columnParticles.maxLifeTime = 8;
+    columnParticles.emitRate = 100;
+    
+    columnParticles.direction1 = new BABYLON.Vector3(0, 1, 0);
+    columnParticles.direction2 = new BABYLON.Vector3(0, 1, 0);
+    columnParticles.minEmitPower = 5;
+    columnParticles.maxEmitPower = 15;
+    columnParticles.gravity = new BABYLON.Vector3(0, -2, 0);
+    
+    columnParticles.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    columnParticles.start();
+    
+    // Store for animation
+    energyBeam.userData = {
+        baseIntensity: 0.6,
+        pulseSpeed: 0.02,
+        columnParticles: columnParticles
+    };
+    
+    energyParticles.push(columnParticles);
+    
+    // Add glow rings around the column
+    for (let i = 0; i < 5; i++) {
+        const glowRing = BABYLON.MeshBuilder.CreateTorus(`glowRing${i}`, {
+            diameter: 8 + i * 4,
+            thickness: 0.5,
+            tessellation: 32
+        }, scene);
+        
+        glowRing.position.y = -20 + i * 20;
+        
+        const ringMat = new BABYLON.StandardMaterial(`glowRingMat${i}`, scene);
+        ringMat.diffuseColor = new BABYLON.Color3(0.2, 0.8, 1);
+        ringMat.emissiveColor = new BABYLON.Color3(0.4, 1, 1);
+        ringMat.alpha = 0.6 - i * 0.1;
+        ringMat.backFaceCulling = false;
+        
+        glowRing.material = ringMat;
+        glowRing.parent = columnGroup;
+        
+        glowRing.userData = {
+            pulsePhase: i * Math.PI / 3,
+            rotationSpeed: 0.01 + i * 0.002
+        };
+    }
+}
+
+// Create enhanced orbital rings system
+function createEnhancedOrbitalRings(parentGroup) {
+    const orbitalGroup = new BABYLON.TransformNode("orbitalRingsGroup", scene);
+    orbitalGroup.parent = parentGroup;
+    
+    // Create three main orbital rings
+    for (let i = 0; i < 3; i++) {
+        const ringRadius = 35 + i * 15;
+        const ring = BABYLON.MeshBuilder.CreateTorus(`orbitalRing${i}`, {
+            diameter: ringRadius * 2,
+            thickness: 3,
+            tessellation: 128
+        }, scene);
+        
+        // Apply orbital inclination and rotation
+        ring.rotation.x = Math.PI / 2 + (i * 0.3);
+        ring.rotation.z = -0.2 + (i * 0.1);
+        
+        const ringMaterial = new BABYLON.StandardMaterial(`orbitalRingMat${i}`, scene);
+        ringMaterial.diffuseColor = new BABYLON.Color3(0.7, 0.4, 1);
+        ringMaterial.emissiveColor = new BABYLON.Color3(0.5, 0.2, 0.8);
+        ringMaterial.specularColor = new BABYLON.Color3(1, 0.8, 1);
+        ringMaterial.alpha = 0.55;
+        ringMaterial.backFaceCulling = false;
+        
+        ring.material = ringMaterial;
+        ring.parent = orbitalGroup;
+        
+        // Animation data
+        ring.userData = {
+            baseRotationSpeed: 0.005 - i * 0.001,
+            pulsePhase: i * Math.PI / 2,
+            baseAlpha: 0.55,
+            radius: ringRadius
+        };
+        
+        gravitationalWaves.push(ring);
+        
+        // Add energy particles along the ring
+        const ringParticles = new BABYLON.ParticleSystem(`ringParticles${i}`, 150, scene);
+        ringParticles.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <defs>
+                    <radialGradient id="ringParticleGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:#b26afc;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#b26afc;stop-opacity:0" />
+                    </radialGradient>
+                </defs>
+                <circle cx="8" cy="8" r="8" fill="url(#ringParticleGrad)" />
+            </svg>
+        `), scene);
+        
+        ringParticles.emitter = ring;
+        ringParticles.createSphereEmitter(ringRadius, 1);
+        
+        ringParticles.color1 = new BABYLON.Color4(0.7, 0.4, 1, 0.8);
+        ringParticles.color2 = new BABYLON.Color4(1, 0.6, 1, 0.6);
+        ringParticles.colorDead = new BABYLON.Color4(0.5, 0.2, 0.8, 0);
+        
+        ringParticles.minSize = 0.3;
+        ringParticles.maxSize = 1.2;
+        ringParticles.minLifeTime = 3;
+        ringParticles.maxLifeTime = 8;
+        ringParticles.emitRate = 20;
+        
+        ringParticles.direction1 = new BABYLON.Vector3(-0.1, -0.1, -0.1);
+        ringParticles.direction2 = new BABYLON.Vector3(0.1, 0.1, 0.1);
+        ringParticles.minEmitPower = 0.1;
+        ringParticles.maxEmitPower = 0.3;
+        
+        ringParticles.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+        ringParticles.start();
+        
+        energyParticles.push(ringParticles);
+    }
+}
+
+// Enhanced black hole effects animation with spectacular energy dynamics
 export function updateBlackHoleEffects() {
     const time = performance.now() * 0.001;
     
-    // Get current theme
+    // Get current theme and app state
     const theme = document.body.getAttribute('data-theme');
     const isLightTheme = theme === 'light';
     const isCosmosTheme = theme === 'cosmos';
+    const isFocusMode = appState.currentMode === 'focus';
     
-    // Rotate the entire black hole system
+    // Rotate the entire black hole system with task completion boost
     if (blackHoleSystem.group) {
         const completedTasks = appState.tasks ? appState.tasks.filter(task => task.completed).length : 0;
         const baseSpeed = 0.001;
         const bonusSpeed = completedTasks * 0.0002;
-        const rotationSpeed = baseSpeed + bonusSpeed;
+        const focusBoost = isFocusMode ? 0.0005 : 0;
+        const rotationSpeed = baseSpeed + bonusSpeed + focusBoost;
         
         blackHoleSystem.group.rotation.y += rotationSpeed;
+        
+        // Add subtle wobble during focus mode
+        if (isFocusMode) {
+            const wobble = Math.sin(time * 0.5) * 0.02;
+            blackHoleSystem.group.rotation.x = wobble;
+            blackHoleSystem.group.rotation.z = Math.cos(time * 0.3) * 0.01;
+        }
     }
     
-    // Animate accretion disk
+    // Enhanced accretion disk animation
     if (blackHoleSystem.accretionDisk) {
         const rings = blackHoleSystem.accretionDisk.getChildren();
         rings.forEach(ring => {
             if (ring.metadata && ring.metadata.baseRotationSpeed) {
-                ring.rotation.z += ring.metadata.baseRotationSpeed;
+                // Differential rotation speed based on distance
+                const speedMultiplier = isFocusMode ? 1.5 : 1;
+                ring.rotation.z += ring.metadata.baseRotationSpeed * speedMultiplier;
                 
-                // Pulsing effect
-                const pulseFactor = 1 + Math.sin(time * 2 + ring.metadata.index) * 0.05;
-                ring.scaling.setAll(pulseFactor);
+                // Enhanced pulsing with heat variations
+                const heatPulse = 1 + Math.sin(time * 3 + ring.metadata.index * 0.5) * 0.08;
+                const focusPulse = isFocusMode ? 1 + Math.sin(time * 5) * 0.05 : 1;
+                ring.scaling.setAll(heatPulse * focusPulse);
+                
+                // Dynamic material properties
+                if (ring.material) {
+                    const baseIntensity = 0.8 - ring.metadata.index * 0.3;
+                    const variation = Math.sin(time * 2 + ring.metadata.index) * 0.2;
+                    const focusBoost = isFocusMode ? 0.3 : 0;
+                    
+                    ring.material.emissiveColor = ring.material.emissiveColor.scale(baseIntensity + variation + focusBoost);
+                }
             }
         });
     }
     
-    // Animate gravitational waves
+    // Animate central energy column
+    const energyColumn = scene.getMeshByName("energyBeam");
+    if (energyColumn && energyColumn.userData) {
+        const data = energyColumn.userData;
+        
+        // Pulsing energy intensity
+        const pulseIntensity = data.baseIntensity + Math.sin(time * data.pulseSpeed * 100) * 0.4;
+        const focusIntensity = isFocusMode ? 1.5 : 1;
+        
+        if (energyColumn.material) {
+            energyColumn.material.emissiveColor = new BABYLON.Color3(
+                0.6 * pulseIntensity * focusIntensity,
+                1 * pulseIntensity * focusIntensity,
+                1 * pulseIntensity * focusIntensity
+            );
+            energyColumn.material.alpha = 0.8 + Math.sin(time * 0.5) * 0.2;
+        }
+        
+        // Column particle emission rate based on app state
+        if (data.columnParticles) {
+            data.columnParticles.emitRate = isFocusMode ? 200 : 100;
+        }
+    }
+    
+    // Animate glow rings around energy column
+    for (let i = 0; i < 5; i++) {
+        const glowRing = scene.getMeshByName(`glowRing${i}`);
+        if (glowRing && glowRing.userData) {
+            const data = glowRing.userData;
+            
+            // Rotation
+            glowRing.rotation.z += data.rotationSpeed;
+            
+            // Pulsing glow
+            const pulse = 0.6 + Math.sin(time * 2 + data.pulsePhase) * 0.4;
+            const focusGlow = isFocusMode ? 1.3 : 1;
+            
+            if (glowRing.material) {
+                glowRing.material.alpha = pulse * focusGlow * (0.6 - i * 0.1);
+                glowRing.material.emissiveColor = new BABYLON.Color3(
+                    0.4 * pulse * focusGlow,
+                    1 * pulse * focusGlow,
+                    1 * pulse * focusGlow
+                );
+            }
+        }
+    }
+    
+    // Enhanced gravitational waves and orbital rings
     gravitationalWaves.forEach((wave, index) => {
-        if (wave.metadata) {
-            // Radial pulsing
-            const pulseFactor = 1 + Math.sin(time * wave.metadata.speed * 100 + wave.metadata.phase) * 0.03;
-            wave.scaling.setAll(pulseFactor);
+        if (wave.metadata || wave.userData) {
+            const data = wave.metadata || wave.userData;
             
-            // Gentle rotation
-            wave.rotation.z += wave.metadata.speed;
-            
-            // Opacity fluctuation based on focus mode
-            if (wave.material) {
-                const baseAlpha = 0.3 - index * 0.05;
-                const focusBonus = appState.currentMode === 'focus' ? 0.1 : 0;
-                wave.material.alpha = baseAlpha + focusBonus + Math.sin(time + index) * 0.05;
+            if (data.speed !== undefined) {
+                // Original gravitational lensing rings
+                const pulseFactor = 1 + Math.sin(time * data.speed * 100 + data.phase) * 0.03;
+                wave.scaling.setAll(pulseFactor);
+                wave.rotation.z += data.speed;
+                
+                if (wave.material) {
+                    const baseAlpha = 0.3 - index * 0.05;
+                    const focusBonus = isFocusMode ? 0.15 : 0;
+                    wave.material.alpha = baseAlpha + focusBonus + Math.sin(time + index) * 0.05;
+                }
+            } else if (data.baseRotationSpeed !== undefined) {
+                // Enhanced orbital rings
+                const speedMultiplier = isFocusMode ? 1.2 : 1;
+                wave.rotation.y += data.baseRotationSpeed * speedMultiplier;
+                
+                // Spectacular pulsing effects
+                const mainPulse = 1 + Math.sin(time * 0.8 + data.pulsePhase) * 0.1;
+                const fastPulse = 1 + Math.sin(time * 4 + data.pulsePhase) * 0.05;
+                wave.scaling.setAll(mainPulse * fastPulse);
+                
+                // Dynamic opacity and glow
+                if (wave.material) {
+                    const baseAlpha = data.baseAlpha;
+                    const pulseAlpha = Math.sin(time * 1.5 + data.pulsePhase) * 0.2;
+                    const focusAlpha = isFocusMode ? 0.3 : 0;
+                    
+                    wave.material.alpha = baseAlpha + pulseAlpha + focusAlpha;
+                    
+                    // Enhanced glow during focus
+                    const glowIntensity = isFocusMode ? 1.5 : 1;
+                    wave.material.emissiveColor = new BABYLON.Color3(
+                        0.5 * glowIntensity,
+                        0.2 * glowIntensity,
+                        0.8 * glowIntensity
+                    );
+                }
             }
         }
     });
@@ -308,14 +584,25 @@ export function updateBlackHoleEffects() {
         } else {
             blackHoleSystem.eventHorizonMaterial.emissiveColor = new BABYLON.Color3(0.05, 0, 0.1);
         }
+        
+        // Subtle event horizon pulsing
+        const horizonPulse = 0.05 + Math.sin(time * 0.3) * 0.03;
+        blackHoleSystem.eventHorizonMaterial.emissiveColor = blackHoleSystem.eventHorizonMaterial.emissiveColor.scale(1 + horizonPulse);
     }
     
-    // Update particle systems based on app state
+    // Update all energy particle systems
     energyParticles.forEach(system => {
-        if (appState.currentMode === 'focus') {
-            system.emitRate = 50; // Increase emission in focus mode
+        if (isFocusMode) {
+            system.emitRate = Math.min(system.emitRate * 1.5, 200);
         } else {
-            system.emitRate = 30;
+            // Restore normal emission rates
+            if (system.name && system.name.includes('energyParticles')) {
+                system.emitRate = 30;
+            } else if (system.name && system.name.includes('columnParticles')) {
+                system.emitRate = 100;
+            } else if (system.name && system.name.includes('ringParticles')) {
+                system.emitRate = 20;
+            }
         }
     });
 }
