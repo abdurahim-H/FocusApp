@@ -1,6 +1,6 @@
 // blackhole.js
-// Enhanced Black Hole System - Complete Physics-Driven Implementation
-// Creates spectacular cosmic phenomena with realistic orbital mechanics and gravitational effects
+// Re-architected Black Hole System - Authentic Cosmic Experience
+// Creates a unified, meditative black hole environment with realistic physics
 
 import { scene } from './scene3d.js';
 import { appState } from './state.js';
@@ -12,17 +12,53 @@ let gravitationalWaves = [];
 let dustParticleSystem = null;
 let lensingPlane = null;
 let polarJetParticles = [];
+let jetEmissionTimer = 0;
 
-// Orbital architecture constants
-const ORBITAL_BANDS = {
-    INNER: { inclination: 0, distance: 25, color: [1, 0.8, 0.4] },
-    MIDDLE: { inclination: 0.26, distance: 45, color: [0.8, 1, 0.6] }, // +15° in radians
-    OUTER: { inclination: -0.17, distance: 75, color: [0.6, 0.8, 1] }  // -10° in radians
+// Unified Color Triad - Deep Violet, Cyan, Ember Orange
+const COLOR_PALETTE = {
+    DEEP_VIOLET: { r: 0.4, g: 0.2, b: 0.8 },      // Infrastructure
+    CYAN: { r: 0.2, g: 0.8, b: 1.0 },             // Energetic effects
+    EMBER_ORANGE: { r: 1.0, g: 0.4, b: 0.1 },     // Core highlights
+    DARK_NAVY: { r: 0.05, g: 0.05, b: 0.2 },      // Ambient background
+    DESATURATED_BASE: 0.8                           // 20% desaturation for backgrounds
 };
 
-// Orbital bodies with astrophysical hierarchy
+// Ring architecture constants - smaller vertical orbital rings
+const RING_CONFIG = {
+    COUNT: 6,
+    BASE_RADIUS: 15,        // Smaller rings
+    RADIUS_INCREMENT: 6,    // Closer spacing
+    THICKNESS_OUTER_RATIO: 0.12,  // Thicker for visibility
+    THICKNESS_INNER_RATIO: 0.06,  // Progressive thinning
+    TILT_RANGE: 0.35,       // ±20° random tilt range  
+    ROTATION_PERIOD: [30, 60],     // Faster rotation (30-60 seconds)
+    BASE_TILT_ANGLE: 0       // Start vertical
+};
+
+// Orbital band configuration for balanced system architecture
+const ORBITAL_BANDS = {
+    INNER: {
+        distance: 25,
+        color: [0.8, 0.4, 0.3],
+        inclination: 0.1
+    },
+    MIDDLE: {
+        distance: 50,
+        color: [0.6, 0.7, 0.9],
+        inclination: 0.05
+    },
+    OUTER: {
+        distance: 85,
+        color: [0.7, 0.8, 0.9],
+        inclination: 0.15
+    }
+};
+
+// Orbital bodies with balanced composition
 let orbitalBodies = [];
-let comets = [];
+let authenticRings = [];
+let accretionDisk = null;
+let eventHorizon = null;
 
 export function createEnhancedBlackHole() {
     try {
@@ -31,65 +67,41 @@ export function createEnhancedBlackHole() {
             return;
         }
 
-        console.log('Creating enhanced black hole with orbital architecture...');
+        console.log('Creating re-architected black hole system...');
 
         // Create a TransformNode to group all black hole elements
         const blackHoleGroup = new BABYLON.TransformNode("blackHoleGroup", scene);
         blackHoleGroup.position = new BABYLON.Vector3(0, 0, 0);
 
-        // Create the event horizon (black hole core)
-        const eventHorizon = BABYLON.MeshBuilder.CreateSphere("eventHorizon", {
-            diameter: 8, 
-            segments: 32
-        }, scene);
-        
-        const eventHorizonMaterial = new BABYLON.StandardMaterial("eventHorizonMat", scene);
-        eventHorizonMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-        eventHorizonMaterial.emissiveColor = new BABYLON.Color3(0.05, 0, 0.1);
-        eventHorizonMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-        eventHorizon.material = eventHorizonMaterial;
-        eventHorizon.parent = blackHoleGroup;
-        
-        console.log('Event horizon created');
+        // 1. Create authentic black hole centerpiece
+        createAuthenticBlackHole(blackHoleGroup);
+        console.log('✅ Authentic black hole centerpiece created');
 
-        // Create enhanced accretion disk with temperature gradients
-        const accretionDisk = createRealisticAccretionDisk(blackHoleGroup);
-        console.log('Realistic accretion disk created');
+        // 2. Create unified ring family
+        createUnifiedRingFamily(blackHoleGroup);
+        console.log('✅ Unified ring family with', RING_CONFIG.COUNT, 'rings created');
 
-        // Create gravitational lensing effects with spacetime distortion
-        createSpacetimeLensing(blackHoleGroup);
-        console.log('Spacetime lensing created');
+        // 3. Create balanced orbital composition
+        createBalancedOrbitals(blackHoleGroup);
+        console.log('✅ Balanced orbital system created with', orbitalBodies.length, 'bodies');
 
-        // Create orbital architecture with physics-driven motion
-        createOrbitalArchitecture(blackHoleGroup);
-        console.log('Orbital architecture created');
-
-        // Create comets with eccentric trajectories
-        createCometSwarms(blackHoleGroup);
-        console.log('Comet swarms created');
-
-        // Create energy particles
-        createEnergyParticles(blackHoleGroup);
-        console.log('Energy particles created');
-
-        // Create central energy column
-        createCentralEnergyColumn(blackHoleGroup);
-        console.log('Central energy column created');
+        // 4. Add subtle environmental effects
+        createCosmicEnvironment(blackHoleGroup);
+        console.log('Cosmic environment effects added');
 
         // Store the black hole system
         blackHoleSystem = {
             group: blackHoleGroup,
             eventHorizon: eventHorizon,
             accretionDisk: accretionDisk,
-            eventHorizonMaterial: eventHorizonMaterial,
-            orbitalBodies: orbitalBodies,
-            comets: comets
+            rings: authenticRings,
+            orbitalBodies: orbitalBodies
         };
         
-        console.log('Enhanced black hole system created successfully');
+        console.log('Re-architected black hole system created successfully');
         
     } catch (error) {
-        console.error('Failed to create enhanced black hole:', error);
+        console.error('Failed to create black hole system:', error);
         console.error('Error stack:', error.stack);
         
         // Fallback: create a simple black sphere
@@ -533,7 +545,7 @@ function createOrbitalArchitecture(parentGroup) {
         if (bandName === 'INNER') {
             // Inner band: Hot rocky planets and debris
             createRockyPlanets(bandGroup, bandConfig, 3);
-            createDebrisRings(bbandGroup, bandConfig, 2);
+            createDebrisRings(bandGroup, bandConfig, 2);
         } else if (bandName === 'MIDDLE') {
             // Middle band: Gas giants with moon systems
             createGasGiants(bandGroup, bandConfig, 2);
@@ -987,311 +999,658 @@ function updateCometPosition(comet) {
     }
 }
 
-// Enhanced black hole effects animation with physics-driven orbital mechanics
-export function updateBlackHoleEffects() {
-    const time = performance.now() * 0.001;
+// Create authentic black hole centerpiece with event horizon and accretion disk
+function createAuthenticBlackHole(parentGroup) {
+    const blackHoleCore = new BABYLON.TransformNode("blackHoleCore", scene);
+    blackHoleCore.parent = parentGroup;
     
-    // Get current theme and app state
-    const theme = document.body.getAttribute('data-theme');
-    const isLightTheme = theme === 'light';
-    const isCosmosTheme = theme === 'cosmos';
-    const isFocusMode = appState.currentMode === 'focus';
+    // Event Horizon - Dark sphere with gravitational lensing edge
+    eventHorizon = BABYLON.MeshBuilder.CreateSphere("eventHorizon", {
+        diameter: 8,  // Slightly larger for better visual impact
+        segments: 32
+    }, scene);
     
-    // Rotate the entire black hole system with task completion boost
-    if (blackHoleSystem.group) {
-        const completedTasks = appState.tasks ? appState.tasks.filter(task => task.completed).length : 0;
-        const baseSpeed = 0.0008;
-        const bonusSpeed = completedTasks * 0.0001;
-        const focusBoost = isFocusMode ? 0.0003 : 0;
-        const rotationSpeed = baseSpeed + bonusSpeed + focusBoost;
-        
-        blackHoleSystem.group.rotation.y += rotationSpeed;
-        
-        // Add subtle wobble during focus mode
-        if (isFocusMode) {
-            const wobble = Math.sin(time * 0.5) * 0.015;
-            blackHoleSystem.group.rotation.x = wobble;
-            blackHoleSystem.group.rotation.z = Math.cos(time * 0.3) * 0.008;
-        }
-    }
+    const horizonMaterial = new BABYLON.StandardMaterial("eventHorizonMat", scene);
+    horizonMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    horizonMaterial.emissiveColor = new BABYLON.Color3(0, 0, 0);
+    horizonMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     
-    // Enhanced accretion disk animation with realistic temperature dynamics
-    if (blackHoleSystem.accretionDisk) {
-        const rings = blackHoleSystem.accretionDisk.getChildren();
-        rings.forEach(ring => {
-            if (ring.metadata && ring.metadata.baseRotationSpeed) {
-                // Keplerian rotation with differential speeds
-                const speedMultiplier = isFocusMode ? 1.3 : 1;
-                ring.rotation.z += ring.metadata.baseRotationSpeed * speedMultiplier;
-                
-                // Temperature fluctuations
-                const tempVariation = 1 + Math.sin(time * 2 + ring.metadata.index * 0.8) * 0.1;
-                const focusHeat = isFocusMode ? 1.2 : 1;
-                
-                if (ring.material) {
-                    const baseIntensity = ring.metadata.tempFactor;
-                    const dynamicIntensity = baseIntensity * tempVariation * focusHeat;
-                    
-                    // Update material colors based on temperature
-                    if (baseIntensity > 0.8) {
-                        ring.material.emissiveColor = new BABYLON.Color3(
-                            0.8 * dynamicIntensity,
-                            0.8 * dynamicIntensity,
-                            0.6 * dynamicIntensity
-                        );
-                    } else if (baseIntensity > 0.6) {
-                        ring.material.emissiveColor = new BABYLON.Color3(
-                            0.6 * dynamicIntensity,
-                            0.7 * dynamicIntensity,
-                            0.8 * dynamicIntensity
-                        );
-                    } else {
-                        ring.material.emissiveColor = new BABYLON.Color3(
-                            0.8 * dynamicIntensity,
-                            0.5 * dynamicIntensity,
-                            0.2 * dynamicIntensity
-                        );
-                    }
-                }
-            }
-        });
-    }
+    // Gravitational lensing edge effect
+    horizonMaterial.rimLightColor = new BABYLON.Color3(
+        COLOR_PALETTE.CYAN.r * 0.3,
+        COLOR_PALETTE.CYAN.g * 0.3,
+        COLOR_PALETTE.CYAN.b * 0.3
+    );
+    horizonMaterial.rimLightIntensity = 0.5;
     
-    // Update orbital bodies with realistic physics
-    orbitalBodies.forEach(body => {
-        if (!body.userData) return;
-        
-        const userData = body.userData;
-        
-        if (userData.type === 'debris') {
-            // Simple rotation for debris rings
-            body.rotation.z += userData.orbitalSpeed;
-        } else {
-            // Complex orbital mechanics for planets and objects
-            updateOrbitalMotion(body, time);
-        }
-        
-        // Rotational motion
-        body.rotation.y += userData.rotationSpeed;
-        
-        // Orbital precession (slow drift of orbit orientation)
-        if (userData.precessionRate) {
-            userData.currentAngle += userData.precessionRate;
-        }
-        
-        // Update moon systems
-        if (body.getChildren) {
-            body.getChildren().forEach(child => {
-                if (child.userData && child.userData.type === 'moon') {
-                    updateMoonOrbit(child, time);
-                } else if (child.userData && child.userData.type === 'planetRing') {
-                    child.rotation.z += child.userData.rotationSpeed;
-                }
-            });
-        }
-    });
+    eventHorizon.material = horizonMaterial;
+    eventHorizon.parent = blackHoleCore;
     
-    // Update comet orbits and tails
-    comets.forEach(comet => {
-        updateCometOrbit(comet, time);
-    });
+    // Accretion Disk - positioned tightly around black hole
+    accretionDisk = BABYLON.MeshBuilder.CreateTorus("accretionDisk", {
+        diameter: 16,     // Inner edge starts close to event horizon
+        thickness: 6,     // Wider disk for better visibility
+        tessellation: 128
+    }, scene);
     
-    // Animate central energy column with enhanced physics
-    const energyColumn = scene.getMeshByName("energyBeam");
-    if (energyColumn && energyColumn.userData) {
-        const data = energyColumn.userData;
-        
-        // Pulsing energy intensity
-        const pulseIntensity = data.baseIntensity + Math.sin(time * data.pulseSpeed * 100) * 0.4;
-        const focusIntensity = isFocusMode ? 1.5 : 1;
-        
-        if (energyColumn.material) {
-            energyColumn.material.emissiveColor = new BABYLON.Color3(
-                0.6 * pulseIntensity * focusIntensity,
-                1 * pulseIntensity * focusIntensity,
-                1 * pulseIntensity * focusIntensity
-            );
-            energyColumn.material.alpha = 0.8 + Math.sin(time * 0.5) * 0.2;
-        }
-        
-        // Column particle emission rate based on app state
-        if (data.columnParticles) {
-            data.columnParticles.emitRate = isFocusMode ? 200 : 100;
-        }
-    }
+    // Flat horizontal disk around black hole
+    accretionDisk.rotation.x = Math.PI / 2;
+    accretionDisk.position.y = 0;  // Centered on black hole
+    accretionDisk.parent = blackHoleCore;
     
-    // Animate glow rings around energy column
-    for (let i = 0; i < 5; i++) {
-        const glowRing = scene.getMeshByName(`glowRing${i}`);
-        if (glowRing && glowRing.userData) {
-            const data = glowRing.userData;
-            
-            // Rotation
-            glowRing.rotation.z += data.rotationSpeed;
-            
-            // Pulsing glow
-            const pulse = 0.6 + Math.sin(time * 2 + data.pulsePhase) * 0.4;
-            const focusGlow = isFocusMode ? 1.3 : 1;
-            
-            if (glowRing.material) {
-                glowRing.material.alpha = pulse * focusGlow * (0.6 - i * 0.1);
-                glowRing.material.emissiveColor = new BABYLON.Color3(
-                    0.4 * pulse * focusGlow,
-                    1 * pulse * focusGlow,
-                    1 * pulse * focusGlow
-                );
-            }
-        }
-    }
+    const diskMaterial = new BABYLON.StandardMaterial("accretionDiskMat", scene);
     
-    // Enhanced gravitational waves and spacetime lensing
-    gravitationalWaves.forEach((wave, index) => {
-        if (wave.metadata) {
-            const data = wave.metadata;
-            
-            // Spacetime ripple effects
-            const rippleFactor = 1 + Math.sin(time * data.speed * 100 + data.phase) * data.rippleAmplitude;
-            wave.scaling.setAll(rippleFactor);
-            wave.rotation.z += data.speed;
-            
-            // Dynamic lensing opacity
-            if (wave.material) {
-                const baseAlpha = 0.4 - index * 0.05;
-                const focusBonus = isFocusMode ? 0.2 : 0;
-                const rippleAlpha = Math.sin(time * 0.8 + index) * 0.1;
-                wave.material.alpha = baseAlpha + focusBonus + rippleAlpha;
-                
-                // Enhanced blue-shifted glow during focus
-                const glowIntensity = isFocusMode ? 1.4 : 1;
-                wave.material.emissiveColor = new BABYLON.Color3(
-                    0.1 * glowIntensity,
-                    0.15 * glowIntensity,
-                    0.4 * glowIntensity
-                );
-            }
-        }
-    });
+    // White-hot inner rim to amber/red outer gradient
+    diskMaterial.diffuseColor = new BABYLON.Color3(1, 1, 0.9);
+    diskMaterial.emissiveColor = new BABYLON.Color3(
+        COLOR_PALETTE.EMBER_ORANGE.r * 0.8,
+        COLOR_PALETTE.EMBER_ORANGE.g * 0.6,
+        COLOR_PALETTE.EMBER_ORANGE.b * 0.3
+    );
+    diskMaterial.specularColor = new BABYLON.Color3(1, 0.9, 0.7);
+    diskMaterial.specularPower = 64;
+    diskMaterial.alpha = 0.9;
+    diskMaterial.backFaceCulling = false;
     
-    // Update spacetime lensing plane
-    if (lensingPlane && lensingPlane.material) {
-        const distortionIntensity = 0.15 + Math.sin(time * 0.3) * 0.05;
-        lensingPlane.material.alpha = distortionIntensity * (isFocusMode ? 1.5 : 1);
-    }
+    accretionDisk.material = diskMaterial;
     
-    // Update material properties based on theme
-    if (blackHoleSystem.eventHorizonMaterial) {
-        if (isLightTheme) {
-            blackHoleSystem.eventHorizonMaterial.emissiveColor = new BABYLON.Color3(0.1, 0.05, 0.2);
-        } else if (isCosmosTheme) {
-            blackHoleSystem.eventHorizonMaterial.emissiveColor = new BABYLON.Color3(0.1, 0, 0.15);
-        } else {
-            blackHoleSystem.eventHorizonMaterial.emissiveColor = new BABYLON.Color3(0.05, 0, 0.1);
-        }
-        
-        // Subtle event horizon pulsing
-        const horizonPulse = 0.05 + Math.sin(time * 0.3) * 0.03;
-        blackHoleSystem.eventHorizonMaterial.emissiveColor = 
-            blackHoleSystem.eventHorizonMaterial.emissiveColor.scale(1 + horizonPulse);
-    }
+    // Store pulsation data for core brightness variation
+    accretionDisk.userData = {
+        baseBrightness: 0.8,
+        pulsePeriod: 6.0,  // 6 second pulsation cycle
+        pulseAmplitude: 0.1  // ±10% intensity variation
+    };
     
-    // Update all energy particle systems
-    energyParticles.forEach(system => {
-        if (isFocusMode) {
-            system.emitRate = Math.min(system.emitRate * 1.5, 300);
-        } else {
-            // Restore normal emission rates based on system type
-            if (system.name && system.name.includes('energyParticles')) {
-                system.emitRate = 30;
-            } else if (system.name && system.name.includes('columnParticles')) {
-                system.emitRate = 100;
-            } else if (system.name && system.name.includes('cometTail')) {
-                // Comet tail rate is handled in updateCometPosition
-            } else {
-                system.emitRate = 20;
-            }
-        }
-    });
+    // Dust-plasma emitter above and below disk
+    createDustPlasmaEmitters(blackHoleCore);
+    
+    return blackHoleCore;
 }
 
-// Update orbital motion using realistic physics
-function updateOrbitalMotion(body, time) {
-    const userData = body.userData;
+// Create dust-plasma emitters with polar jets
+function createDustPlasmaEmitters(parentGroup) {
+    // Upper jet emitter
+    const upperJet = new BABYLON.ParticleSystem("upperPolarJet", 300, scene);
+    upperJet.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            <defs>
+                <radialGradient id="jetGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#55ccff;stop-opacity:1" />
+                    <stop offset="70%" style="stop-color:#2288cc;stop-opacity:0.6" />
+                    <stop offset="100%" style="stop-color:#1144aa;stop-opacity:0" />
+                </radialGradient>
+            </defs>
+            <circle cx="8" cy="8" r="8" fill="url(#jetGrad)" />
+        </svg>
+    `), scene);
     
-    // Update mean anomaly
-    userData.currentAngle += userData.orbitalSpeed;
+    upperJet.emitter = parentGroup;
+    upperJet.createConeEmitter(2, 0.3);
+    upperJet.direction1 = new BABYLON.Vector3(-0.1, 0.8, -0.1);
+    upperJet.direction2 = new BABYLON.Vector3(0.1, 1.2, 0.1);
     
-    // Calculate eccentric anomaly (simplified Kepler's equation)
-    const eccentricAnomaly = userData.currentAngle + userData.eccentricity * Math.sin(userData.currentAngle);
+    upperJet.color1 = new BABYLON.Color4(
+        COLOR_PALETTE.CYAN.r,
+        COLOR_PALETTE.CYAN.g,
+        COLOR_PALETTE.CYAN.b,
+        0.8
+    );
+    upperJet.color2 = new BABYLON.Color4(
+        COLOR_PALETTE.DEEP_VIOLET.r,
+        COLOR_PALETTE.DEEP_VIOLET.g,
+        COLOR_PALETTE.DEEP_VIOLET.b,
+        0.6
+    );
+    upperJet.colorDead = new BABYLON.Color4(0.1, 0.1, 0.3, 0);
     
-    // Calculate true anomaly
-    const trueAnomaly = 2 * Math.atan(
-        Math.sqrt((1 + userData.eccentricity) / (1 - userData.eccentricity)) * 
-        Math.tan(eccentricAnomaly / 2)
+    upperJet.minSize = 0.5;
+    upperJet.maxSize = 1.5;
+    upperJet.minLifeTime = 4;
+    upperJet.maxLifeTime = 10;
+    upperJet.emitRate = 0; // Will be triggered every ~8 seconds
+    upperJet.minEmitPower = 8;
+    upperJet.maxEmitPower = 15;
+    upperJet.gravity = new BABYLON.Vector3(0, 0, 0);
+    upperJet.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    
+    // Lower jet emitter (mirror of upper)
+    const lowerJet = upperJet.clone("lowerPolarJet");
+    lowerJet.direction1 = new BABYLON.Vector3(-0.1, -0.8, -0.1);
+    lowerJet.direction2 = new BABYLON.Vector3(0.1, -1.2, 0.1);
+    
+    upperJet.start();
+    lowerJet.start();
+    
+    polarJetParticles.push(upperJet, lowerJet);
+    energyParticles.push(upperJet, lowerJet);
+    
+    // Store jet emission timing
+    parentGroup.userData = {
+        lastJetEmission: 0,
+        jetInterval: 8000,  // 8 seconds between jet emissions
+        upperJet: upperJet,
+        lowerJet: lowerJet
+    };
+}
+
+// Create unified ring family with progressive thinning and balanced composition
+function createUnifiedRingFamily(parentGroup) {
+    const ringGroup = new BABYLON.TransformNode("unifiedRingFamily", scene);
+    ringGroup.parent = parentGroup;
+    
+    authenticRings = [];
+    
+    // Create 6 vertical orbital rings with random tilts
+    for (let i = 0; i < RING_CONFIG.COUNT; i++) {
+        const ringRadius = RING_CONFIG.BASE_RADIUS + (i * RING_CONFIG.RADIUS_INCREMENT);
+        
+        // Progressive thickness: outer rings thicker, inner rings thinner
+        const thicknessRatio = RING_CONFIG.THICKNESS_OUTER_RATIO - 
+            (i / (RING_CONFIG.COUNT - 1)) * (RING_CONFIG.THICKNESS_OUTER_RATIO - RING_CONFIG.THICKNESS_INNER_RATIO);
+        const ringThickness = ringRadius * thicknessRatio;
+        
+        // Create ring mesh
+        const ring = BABYLON.MeshBuilder.CreateTorus(`orbitalRing${i}`, {
+            diameter: ringRadius * 2,
+            thickness: ringThickness,
+            tessellation: 64  // Optimized tessellation
+        }, scene);
+        
+        // Make rings VERTICAL and add random tilts
+        ring.rotation.x = 0;  // Start vertical
+        ring.rotation.y = 0;  
+        ring.rotation.z = (Math.random() - 0.5) * RING_CONFIG.TILT_RANGE;  // Random tilt ±20°
+        
+        // Additional random tilt on Y axis for more variety
+        ring.rotation.y = (Math.random() - 0.5) * RING_CONFIG.TILT_RANGE * 0.5;  // ±10° Y tilt
+        
+        // Realistic orbital ring materials - metallic and industrial
+        const ringMaterial = new BABYLON.StandardMaterial(`orbitalRingMat${i}`, scene);
+        
+        // Space orbital ring colors - metallic grays and blues with industrial look
+        const metallic = 0.7 + Math.random() * 0.3;  // Vary metallic appearance
+        
+        if (i < 2) {
+            // Outer rings - Dark metallic with blue tints
+            ringMaterial.diffuseColor = new BABYLON.Color3(0.3, 0.35, 0.5);
+            ringMaterial.emissiveColor = new BABYLON.Color3(0.05, 0.1, 0.2);
+        } else if (i < 4) {
+            // Middle rings - Steel gray with cyan highlights
+            ringMaterial.diffuseColor = new BABYLON.Color3(0.4, 0.45, 0.5);
+            ringMaterial.emissiveColor = new BABYLON.Color3(0.1, 0.15, 0.25);
+        } else {
+            // Inner rings - Brighter metallic with orange/amber highlights
+            ringMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.45, 0.35);
+            ringMaterial.emissiveColor = new BABYLON.Color3(0.2, 0.15, 0.1);
+        }
+        
+        // Metallic appearance for space structures
+        ringMaterial.specularColor = new BABYLON.Color3(metallic, metallic, metallic * 1.1);
+        ringMaterial.specularPower = 32 + i * 12;
+        ringMaterial.alpha = 0.85 - i * 0.03;  // Slight transparency variation
+        ringMaterial.backFaceCulling = false;
+        
+        ring.material = ringMaterial;
+        ring.parent = ringGroup;
+        
+        // Faster rotation periods for dynamic effect
+        const rotationPeriod = RING_CONFIG.ROTATION_PERIOD[0] + 
+            (i / (RING_CONFIG.COUNT - 1)) * (RING_CONFIG.ROTATION_PERIOD[1] - RING_CONFIG.ROTATION_PERIOD[0]);
+        const rotationSpeed = (Math.PI * 2) / (rotationPeriod * 60); // Convert to radians per frame (60fps)
+        
+        // Each ring rotates on a different axis for more variety
+        const rotationAxis = Math.random() < 0.5 ? 'y' : 'z';  // Random rotation axis
+        
+        // Store ring metadata
+        ring.userData = {
+            baseRotationSpeed: rotationSpeed * (0.5 + Math.random()),  // Vary speed ±50%
+            ringIndex: i,
+            radius: ringRadius,
+            thickness: ringThickness,
+            rotationAxis: rotationAxis,
+            rotationPeriod: rotationPeriod,
+            pulsationPhase: i * Math.PI / 3,
+            initialTiltZ: ring.rotation.z,
+            initialTiltY: ring.rotation.y
+        };
+        
+        authenticRings.push(ring);
+        shaderMaterials.push(ringMaterial);
+    }
+    
+    return ringGroup;
+}
+
+// Create balanced orbital composition with proper scaling
+function createBalancedOrbitals(parentGroup) {
+    const orbitalsGroup = new BABYLON.TransformNode("balancedOrbitals", scene);
+    orbitalsGroup.parent = parentGroup;
+    
+    orbitalBodies = [];
+    
+    // Balanced composition: varied sizes with largest <20% of inner ring diameter
+    const innerRingDiameter = (RING_CONFIG.BASE_RADIUS + 
+        (RING_CONFIG.COUNT - 1) * RING_CONFIG.RADIUS_INCREMENT) * 2;
+    const maxPlanetSize = innerRingDiameter * 0.18; // <20% constraint
+    
+    // Create 3 size categories of orbital bodies
+    
+    // Large planets (3-4 bodies) with random orbital parameters
+    for (let i = 0; i < 3; i++) {
+        const planetSize = maxPlanetSize * (0.7 + Math.random() * 0.3);
+        const distance = 80 + i * 25 + Math.random() * 15;
+        
+        const planet = BABYLON.MeshBuilder.CreateSphere(`largePlanet${i}`, {
+            diameter: planetSize
+        }, scene);
+        
+        const planetMaterial = new BABYLON.StandardMaterial(`largePlanetMat${i}`, scene);
+        
+        // Varied planet types with unified color influence
+        if (i === 0) {
+            // Gas giant with deep violet influence
+            planetMaterial.diffuseColor = new BABYLON.Color3(
+                0.6 + COLOR_PALETTE.DEEP_VIOLET.r * 0.2,
+                0.4 + COLOR_PALETTE.DEEP_VIOLET.g * 0.3,
+                0.3 + COLOR_PALETTE.DEEP_VIOLET.b * 0.4
+            );
+        } else if (i === 1) {
+            // Ice world with cyan influence
+            planetMaterial.diffuseColor = new BABYLON.Color3(
+                0.4 + COLOR_PALETTE.CYAN.r * 0.3,
+                0.6 + COLOR_PALETTE.CYAN.g * 0.2,
+                0.8 + COLOR_PALETTE.CYAN.b * 0.1
+            );
+        } else {
+            // Rocky world with ember orange influence
+            planetMaterial.diffuseColor = new BABYLON.Color3(
+                0.5 + COLOR_PALETTE.EMBER_ORANGE.r * 0.3,
+                0.3 + COLOR_PALETTE.EMBER_ORANGE.g * 0.2,
+                0.2 + COLOR_PALETTE.EMBER_ORANGE.b * 0.1
+            );
+        }
+        
+        planetMaterial.emissiveColor = planetMaterial.diffuseColor.scale(0.1);
+        planetMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+        
+        planet.material = planetMaterial;
+        planet.parent = orbitalsGroup;
+        
+        // Random orbital parameters for non-aligned orbits
+        const orbitalSpeed = Math.sqrt(1 / Math.pow(distance / 20, 3)) * 0.008;
+        const startAngle = Math.random() * Math.PI * 2;
+        const orbitalInclination = (Math.random() - 0.5) * 0.6; // ±17° inclination
+        const orbitalPlaneRotation = Math.random() * Math.PI * 2; // Random orbital plane
+        const eccentricity = 0.05 + Math.random() * 0.15; // Some eccentricity
+        
+        // Initial position using spherical coordinates
+        const x = Math.cos(startAngle) * distance;
+        const z = Math.sin(startAngle) * distance;
+        const y = Math.sin(orbitalInclination) * distance * 0.3;
+        
+        // Apply orbital plane rotation
+        planet.position.x = x * Math.cos(orbitalPlaneRotation) - z * Math.sin(orbitalPlaneRotation);
+        planet.position.z = x * Math.sin(orbitalPlaneRotation) + z * Math.cos(orbitalPlaneRotation);
+        planet.position.y = y;
+        
+        planet.userData = {
+            orbitalDistance: distance,
+            orbitalSpeed: orbitalSpeed,
+            currentAngle: startAngle,
+            rotationSpeed: 0.02 + Math.random() * 0.015,
+            size: planetSize,
+            type: 'largePlanet',
+            orbitalInclination: orbitalInclination,
+            orbitalPlaneRotation: orbitalPlaneRotation,
+            eccentricity: eccentricity
+        };
+        
+        orbitalBodies.push(planet);
+        
+        // Add moons to larger planets
+        if (planetSize > maxPlanetSize * 0.8) {
+            createBalancedMoonSystem(planet, 2 + Math.floor(Math.random() * 3));
+        }
+    }
+    
+    // Medium asteroids (8-12 bodies) with random orbital inclinations
+    for (let i = 0; i < 10; i++) {
+        const asteroidSize = maxPlanetSize * (0.1 + Math.random() * 0.3);
+        const distance = 45 + Math.random() * 80;
+        
+        const asteroid = BABYLON.MeshBuilder.CreateSphere(`asteroid${i}`, {
+            diameter: asteroidSize
+        }, scene);
+        
+        // Make asteroids irregular
+        asteroid.scaling = new BABYLON.Vector3(
+            0.8 + Math.random() * 0.4,
+            0.7 + Math.random() * 0.6,
+            0.9 + Math.random() * 0.2
+        );
+        
+        const asteroidMaterial = new BABYLON.StandardMaterial(`asteroidMat${i}`, scene);
+        asteroidMaterial.diffuseColor = new BABYLON.Color3(
+            0.3 + Math.random() * 0.2,
+            0.2 + Math.random() * 0.1,
+            0.15 + Math.random() * 0.1
+        );
+        asteroidMaterial.emissiveColor = new BABYLON.Color3(0.05, 0.02, 0.01);
+        
+        asteroid.material = asteroidMaterial;
+        asteroid.parent = orbitalsGroup;
+        
+        // Random orbital parameters for asteroids
+        const orbitalSpeed = Math.sqrt(1 / Math.pow(distance / 20, 3)) * 0.015;
+        const startAngle = Math.random() * Math.PI * 2;
+        const orbitalInclination = (Math.random() - 0.5) * 0.8; // ±23° inclination for asteroids
+        const orbitalPlaneRotation = Math.random() * Math.PI * 2;
+        const eccentricity = 0.1 + Math.random() * 0.25; // More eccentric orbits
+        
+        // Initial position with orbital plane rotation
+        const x = Math.cos(startAngle) * distance;
+        const z = Math.sin(startAngle) * distance;
+        const y = Math.sin(orbitalInclination) * distance * 0.4;
+        
+        asteroid.position.x = x * Math.cos(orbitalPlaneRotation) - z * Math.sin(orbitalPlaneRotation);
+        asteroid.position.z = x * Math.sin(orbitalPlaneRotation) + z * Math.cos(orbitalPlaneRotation);
+        asteroid.position.y = y;
+        
+        asteroid.userData = {
+            orbitalDistance: distance,
+            orbitalSpeed: orbitalSpeed,
+            currentAngle: startAngle,
+            rotationSpeed: 0.03 + Math.random() * 0.04,
+            size: asteroidSize,
+            type: 'asteroid',
+            orbitalInclination: orbitalInclination,
+            orbitalPlaneRotation: orbitalPlaneRotation,
+            eccentricity: eccentricity
+        };
+        
+        orbitalBodies.push(asteroid);
+    }
+    
+    // Small debris (15-20 bodies) with highly varied orbital patterns
+    for (let i = 0; i < 18; i++) {
+        const debrisSize = maxPlanetSize * (0.02 + Math.random() * 0.08);
+        const distance = 30 + Math.random() * 120;
+        
+        const debris = BABYLON.MeshBuilder.CreateSphere(`debris${i}`, {
+            diameter: debrisSize
+        }, scene);
+        
+        const debrisMaterial = new BABYLON.StandardMaterial(`debrisMat${i}`, scene);
+        debrisMaterial.diffuseColor = new BABYLON.Color3(
+            0.15 + Math.random() * 0.1,
+            0.1 + Math.random() * 0.05,
+            0.08 + Math.random() * 0.04
+        );
+        
+        debris.material = debrisMaterial;
+        debris.parent = orbitalsGroup;
+        
+        // Highly random orbital parameters for debris
+        const orbitalSpeed = Math.sqrt(1 / Math.pow(distance / 20, 3)) * 0.025;
+        const startAngle = Math.random() * Math.PI * 2;
+        const orbitalInclination = (Math.random() - 0.5) * 1.2; // ±34° inclination for debris
+        const orbitalPlaneRotation = Math.random() * Math.PI * 2;
+        const eccentricity = 0.15 + Math.random() * 0.4; // Highly eccentric orbits
+        
+        // Initial position with maximum orbital variety
+        const x = Math.cos(startAngle) * distance;
+        const z = Math.sin(startAngle) * distance;
+        const y = Math.sin(orbitalInclination) * distance * 0.6;
+        
+        debris.position.x = x * Math.cos(orbitalPlaneRotation) - z * Math.sin(orbitalPlaneRotation);
+        debris.position.z = x * Math.sin(orbitalPlaneRotation) + z * Math.cos(orbitalPlaneRotation);
+        debris.position.y = y;
+        
+        debris.userData = {
+            orbitalDistance: distance,
+            orbitalSpeed: orbitalSpeed,
+            currentAngle: startAngle,
+            rotationSpeed: 0.05 + Math.random() * 0.1,
+            size: debrisSize,
+            type: 'debris',
+            orbitalInclination: orbitalInclination,
+            orbitalPlaneRotation: orbitalPlaneRotation,
+            eccentricity: eccentricity
+        };
+        
+        orbitalBodies.push(debris);
+    }
+    
+    return orbitalsGroup;
+}
+
+// Helper function for balanced moon systems
+function createBalancedMoonSystem(planet, moonCount) {
+    const planetSize = planet.userData.size;
+    
+    for (let i = 0; i < moonCount; i++) {
+        const moonSize = planetSize * (0.1 + Math.random() * 0.3);
+        const moonDistance = planetSize * (2 + i * 1.5);
+        
+        const moon = BABYLON.MeshBuilder.CreateSphere(`moon_${planet.name}_${i}`, {
+            diameter: moonSize
+        }, scene);
+        
+        const moonMaterial = new BABYLON.StandardMaterial(`moonMat_${planet.name}_${i}`, scene);
+        moonMaterial.diffuseColor = new BABYLON.Color3(
+            0.4 + Math.random() * 0.2,
+            0.35 + Math.random() * 0.15,
+            0.3 + Math.random() * 0.1
+        );
+        
+        moon.material = moonMaterial;
+        moon.parent = planet;
+        
+        const moonSpeed = Math.sqrt(1 / Math.pow(moonDistance / planetSize, 3)) * 0.08;
+        const startAngle = Math.random() * Math.PI * 2;
+        
+        moon.position.x = Math.cos(startAngle) * moonDistance;
+        moon.position.z = Math.sin(startAngle) * moonDistance;
+        moon.position.y = (Math.random() - 0.5) * moonDistance * 0.2;
+        
+        moon.userData = {
+            orbitalDistance: moonDistance,
+            orbitalSpeed: moonSpeed,
+            currentAngle: startAngle,
+            rotationSpeed: 0.015 + Math.random() * 0.02,
+            type: 'moon'
+        };
+    }
+}
+
+// Create cosmic environment with subtle effects
+function createCosmicEnvironment(parentGroup) {
+    const envGroup = new BABYLON.TransformNode("cosmicEnvironment", scene);
+    envGroup.parent = parentGroup;
+    
+    // Dark navy ambient lighting
+    scene.ambientColor = new BABYLON.Color3(
+        COLOR_PALETTE.DARK_NAVY.r,
+        COLOR_PALETTE.DARK_NAVY.g,
+        COLOR_PALETTE.DARK_NAVY.b
     );
     
-    // Calculate orbital radius
-    const orbitalRadius = userData.orbitalDistance * (1 - userData.eccentricity * userData.eccentricity) / 
-                         (1 + userData.eccentricity * Math.cos(trueAnomaly));
+    // Cool rim lighting
+    const rimLight = new BABYLON.DirectionalLight("rimLight", new BABYLON.Vector3(-0.5, -0.3, -0.8), scene);
+    rimLight.diffuse = new BABYLON.Color3(
+        COLOR_PALETTE.CYAN.r * 0.3,
+        COLOR_PALETTE.CYAN.g * 0.4,
+        COLOR_PALETTE.CYAN.b * 0.5
+    );
+    rimLight.intensity = 0.4;
     
-    // Update position
-    body.position.x = Math.cos(trueAnomaly) * orbitalRadius;
-    body.position.z = Math.sin(trueAnomaly) * orbitalRadius;
+    // Subtle background star field
+    const starField = new BABYLON.ParticleSystem("backgroundStars", 500, scene);
+    starField.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8">
+            <circle cx="4" cy="4" r="1" fill="white" opacity="0.8"/>
+        </svg>
+    `), scene);
     
-    // Small vertical oscillation
-    body.position.y = Math.sin(time * 0.1 + userData.currentAngle) * 0.8;
+    starField.emitter = envGroup;
+    starField.createSphereEmitter(200);
+    
+    starField.color1 = new BABYLON.Color4(1, 1, 1, 0.6);
+    starField.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.4);
+    starField.colorDead = new BABYLON.Color4(0.5, 0.6, 0.8, 0);
+    
+    starField.minSize = 0.2;
+    starField.maxSize = 0.8;
+    starField.minLifeTime = 60;
+    starField.maxLifeTime = 120;
+    starField.emitRate = 5;
+    
+    starField.direction1 = new BABYLON.Vector3(0, 0, 0);
+    starField.direction2 = new BABYLON.Vector3(0, 0, 0);
+    starField.minEmitPower = 0;
+    starField.maxEmitPower = 0;
+    
+    starField.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    starField.start();
+    
+    // Depth-of-field blur for distant objects (>500 units)
+    const depthOfFieldEffect = new BABYLON.DepthOfFieldEffect(scene.activeCamera, {
+        focusDistance: 100,
+        fStop: 1.4,
+        focalLength: 50,
+        blurBackgroundEffect: true
+    });
+    
+    // Selective bloom effects
+    const bloomEffect = new BABYLON.BloomEffect(scene, 1.0, 0.4, 512);
+    bloomEffect.luminanceThreshold = 0.3;
+    bloomEffect.luminanceSmoothing = 0.8;
+    bloomEffect.bloomScale = 0.6;
+    
+    energyParticles.push(starField);
+    
+    return envGroup;
 }
 
-// Update moon orbits
-function updateMoonOrbit(moon, time) {
-    const userData = moon.userData;
+// Enhanced update function with meditative timing and effects
+export function updateBlackHoleEffects() {
+    if (!blackHoleSystem || !blackHoleSystem.group) return;
     
-    userData.currentAngle += userData.orbitalSpeed;
+    const time = Date.now() * 0.001; // Convert to seconds
     
-    const x = Math.cos(userData.currentAngle) * userData.orbitalDistance;
-    const z = Math.sin(userData.currentAngle) * userData.orbitalDistance;
-    const y = Math.sin(userData.currentAngle * 2) * userData.orbitalDistance * 0.2;
+    // Update unified ring family rotation with varied axes and meditative timing
+    authenticRings.forEach((ring, index) => {
+        if (ring && ring.userData) {
+            // Smooth rotation on the designated axis
+            if (ring.userData.rotationAxis === 'y') {
+                ring.rotation.y += ring.userData.baseRotationSpeed;
+            } else if (ring.userData.rotationAxis === 'z') {
+                ring.rotation.z += ring.userData.baseRotationSpeed;
+            }
+            
+            // Maintain the initial random tilts while spinning
+            if (ring.userData.rotationAxis === 'y') {
+                ring.rotation.z = ring.userData.initialTiltZ;
+            } else {
+                ring.rotation.y = ring.userData.initialTiltY;
+            }
+            
+            // Subtle pulsation effect
+            const pulsePhase = time * 0.5 + ring.userData.pulsationPhase;
+            const pulseIntensity = 0.9 + Math.sin(pulsePhase) * 0.1;
+            
+            if (ring.material && ring.material.emissiveColor) {
+                const baseMaterial = ring.material;
+                baseMaterial.emissiveColor = baseMaterial.emissiveColor.scale(pulseIntensity);
+            }
+        }
+    });
     
-    moon.position.x = x;
-    moon.position.y = y;
-    moon.position.z = z;
+    // Update balanced orbital motion with random orbital planes
+    orbitalBodies.forEach(body => {
+        if (body && body.userData) {
+            // Update orbital angle
+            body.userData.currentAngle += body.userData.orbitalSpeed;
+            
+            // Calculate position based on orbital parameters
+            const distance = body.userData.orbitalDistance;
+            const angle = body.userData.currentAngle;
+            const inclination = body.userData.orbitalInclination || 0;
+            const planeRotation = body.userData.orbitalPlaneRotation || 0;
+            const eccentricity = body.userData.eccentricity || 0;
+            
+            // Apply eccentricity to distance
+            const adjustedDistance = distance * (1 + eccentricity * Math.cos(angle));
+            
+            // Calculate position in orbital plane
+            const x = Math.cos(angle) * adjustedDistance;
+            const z = Math.sin(angle) * adjustedDistance;
+            const y = Math.sin(inclination) * adjustedDistance * 0.5;
+            
+            // Apply orbital plane rotation
+            body.position.x = x * Math.cos(planeRotation) - z * Math.sin(planeRotation);
+            body.position.z = x * Math.sin(planeRotation) + z * Math.cos(planeRotation);
+            body.position.y = y;
+            
+            // Self rotation with varied axes
+            body.rotation.y += body.userData.rotationSpeed;
+            body.rotation.x += body.userData.rotationSpeed * 0.3;
+            body.rotation.z += body.userData.rotationSpeed * 0.1;
+        }
+    });
     
-    moon.rotation.y += userData.rotationSpeed;
-}
-
-// Update comet orbits with tail dynamics
-function updateCometOrbit(comet, time) {
-    const userData = comet.userData;
-    
-    // Update mean anomaly
-    userData.currentAnomaly += userData.orbitalSpeed;
-    
-    // Update position
-    updateCometPosition(comet);
-    
-    // Rotation
-    comet.rotation.x += userData.rotationSpeed;
-    comet.rotation.y += userData.rotationSpeed * 0.7;
-    comet.rotation.z += userData.rotationSpeed * 0.5;
-}
-
-// Trigger focus intensification effect
-export function triggerFocusIntensification() {
-    // This is handled smoothly in updateBlackHoleEffects
-    console.log('Focus mode intensification triggered');
-}
-
-// Clean up function
-export function disposeBlackHole() {
-    if (blackHoleSystem.group) {
-        blackHoleSystem.group.dispose();
+    // Update accretion disk pulsation (6-second cycle)
+    if (accretionDisk && accretionDisk.userData) {
+        const diskData = accretionDisk.userData;
+        const pulsePhase = (time % diskData.pulsePeriod) / diskData.pulsePeriod * Math.PI * 2;
+        const brightness = diskData.baseBrightness + Math.sin(pulsePhase) * diskData.pulseAmplitude;
+        
+        if (accretionDisk.material && accretionDisk.material.emissiveColor) {
+            accretionDisk.material.emissiveColor = accretionDisk.material.emissiveColor.scale(brightness);
+        }
     }
     
-    energyParticles.forEach(system => system.dispose());
-    if (dustParticleSystem) dustParticleSystem.dispose();
+    // Polar jet emissions every ~8 seconds
+    if (blackHoleSystem.group && blackHoleSystem.group.userData) {
+        const jetData = blackHoleSystem.group.userData;
+        if (jetData && time - jetData.lastJetEmission > jetData.jetInterval / 1000) {
+            // Trigger jet burst
+            if (jetData.upperJet) {
+                jetData.upperJet.emitRate = 150;
+                setTimeout(() => {
+                    if (jetData.upperJet) jetData.upperJet.emitRate = 0;
+                }, 2000); // 2-second burst
+            }
+            
+            if (jetData.lowerJet) {
+                jetData.lowerJet.emitRate = 150;
+                setTimeout(() => {
+                    if (jetData.lowerJet) jetData.lowerJet.emitRate = 0;
+                }, 2000);
+            }
+            
+            jetData.lastJetEmission = time;
+        }
+    }
     
-    energyParticles = [];
-    gravitationalWaves = [];
-    shaderMaterials = [];
-    orbitalBodies = [];
-    comets = [];
+    // Update gravitational wave ripples
+    gravitationalWaves.forEach(wave => {
+        if (wave && wave.metadata) {
+            const meta = wave.metadata;
+            const ripplePhase = time * meta.speed + meta.phase;
+            const rippleScale = 1 + Math.sin(ripplePhase) * meta.rippleAmplitude;
+            
+            wave.scaling.x = rippleScale;
+            wave.scaling.z = rippleScale;
+        }
+    });
+    
+    // Subtle shader material updates for realistic lighting
+    shaderMaterials.forEach(material => {
+        if (material && material.emissiveColor) {
+            const flickerPhase = time * 2 + Math.random() * Math.PI;
+            const flicker = 0.95 + Math.sin(flickerPhase) * 0.05;
+            material.emissiveColor = material.emissiveColor.scale(flicker);
+        }
+    });
 }
