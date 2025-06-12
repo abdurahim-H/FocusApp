@@ -169,96 +169,68 @@ function createAuthenticBlackHole(parent) {
     // Set rendering group for proper depth sorting
     glowSphere.renderingGroupId = 1; // Foreground celestial objects
 
-    // Accretion Disk - Multiple layers for better effect
-    // Choose color scheme: true for Cyan+Magenta, false for Yellow+Violet
-    const useCyanMagenta = true; // Change to false for Yellow+Violet scheme
+    // Accretion Disk - DISABLED for cleaner black hole appearance
+    // All torus disk components commented out to remove rings around black hole
     
-    // Inner hot disk
-    const innerDisk = BABYLON.MeshBuilder.CreateTorus('innerAccretionDisk', {
-        diameter: 8.0,
-        thickness: 1.5,
-        tessellation: 128
-    }, scene);
-    innerDisk.rotation.x = Math.PI/2;
-    innerDisk.parent = blackHoleContainer;
+    // // Inner hot disk
+    // const innerDisk = BABYLON.MeshBuilder.CreateTorus('innerAccretionDisk', {
+    //     diameter: 8.0,
+    //     thickness: 1.5,
+    //     tessellation: 128
+    // }, scene);
+    // innerDisk.rotation.x = Math.PI/2;
+    // innerDisk.parent = blackHoleContainer;
     
-    const innerDiskMat = new BABYLON.StandardMaterial('innerDiskMat', scene);
-    if (useCyanMagenta) {
-        innerDiskMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
-        innerDiskMat.emissiveColor = new BABYLON.Color3(1, 0.8, 1); // White-hot with magenta tint
-    } else {
-        innerDiskMat.diffuseColor = new BABYLON.Color3(1, 1, 0.8);
-        innerDiskMat.emissiveColor = new BABYLON.Color3(1, 0.9, 0.4); // Yellow-hot core
-    }
-    innerDiskMat.specularColor = new BABYLON.Color3(1, 1, 1);
-    innerDiskMat.specularPower = 256;
-    innerDiskMat.alpha = 0.9;
-    innerDiskMat.backFaceCulling = false;
-    innerDisk.material = innerDiskMat;
+    // const innerDiskMat = new BABYLON.StandardMaterial('innerDiskMat', scene);
+    // innerDiskMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
+    // innerDiskMat.emissiveColor = new BABYLON.Color3(1, 0.8, 1); // White-hot with magenta tint
+    // innerDiskMat.specularColor = new BABYLON.Color3(1, 1, 1);
+    // innerDiskMat.specularPower = 256;
+    // innerDiskMat.alpha = 0.9;
+    // innerDiskMat.backFaceCulling = false;
+    // innerDisk.material = innerDiskMat;
+    // innerDisk.renderingGroupId = 1;
     
-    // Set rendering group for proper depth sorting
-    innerDisk.renderingGroupId = 1; // Foreground celestial objects
+    // // Middle disk
+    // accretionDisk = BABYLON.MeshBuilder.CreateTorus('accretionDisk', {
+    //     diameter: 10.0,
+    //     thickness: 3.0,
+    //     tessellation: 128
+    // }, scene);
+    // accretionDisk.rotation.x = Math.PI/2;
+    // accretionDisk.parent = blackHoleContainer;
     
-    // Middle disk
-    accretionDisk = BABYLON.MeshBuilder.CreateTorus('accretionDisk', {
-        diameter: 10.0,
-        thickness: 3.0,
-        tessellation: 128
-    }, scene);
-    accretionDisk.rotation.x = Math.PI/2;
-    accretionDisk.parent = blackHoleContainer;
+    // const diskMat = new BABYLON.StandardMaterial('accretionDiskMat', scene);
+    // diskMat.diffuseColor = new BABYLON.Color3(0.8, 0.4, 1); // Purple-magenta
+    // diskMat.emissiveColor = new BABYLON.Color3(0.3, 0.8, 1); // Cyan glow
+    // diskMat.specularColor = new BABYLON.Color3(1, 1, 1);
+    // diskMat.specularPower = 128;
+    // diskMat.alpha = 0.8;
+    // diskMat.backFaceCulling = false;
+    // accretionDisk.material = diskMat;
+    // accretionDisk.renderingGroupId = 1;
     
-    const diskMat = new BABYLON.StandardMaterial('accretionDiskMat', scene);
-    if (useCyanMagenta) {
-        diskMat.diffuseColor = new BABYLON.Color3(0.8, 0.4, 1); // Purple-magenta
-        diskMat.emissiveColor = new BABYLON.Color3(0.3, 0.8, 1); // Cyan glow
-    } else {
-        diskMat.diffuseColor = new BABYLON.Color3(1, 0.8, 0.3); // Yellow-orange
-        diskMat.emissiveColor = new BABYLON.Color3(0.5, 0.2, 0.8); // Violet glow
-    }
-    diskMat.specularColor = new BABYLON.Color3(1, 1, 1);
-    diskMat.specularPower = 128;
-    diskMat.alpha = 0.8;
-    diskMat.backFaceCulling = false;
-    accretionDisk.material = diskMat;
+    // // Outer cooler disk
+    // const outerDisk = BABYLON.MeshBuilder.CreateTorus('outerAccretionDisk', {
+    //     diameter: 14.0,
+    //     thickness: 3.5,
+    //     tessellation: 128
+    // }, scene);
+    // outerDisk.rotation.x = Math.PI/2;
+    // outerDisk.parent = blackHoleContainer;
     
-    // Set rendering group for proper depth sorting
-    accretionDisk.renderingGroupId = 1; // Foreground celestial objects
+    // const outerDiskMat = new BABYLON.StandardMaterial('outerDiskMat', scene);
+    // outerDiskMat.diffuseColor = new BABYLON.Color3(0.2, 0.6, 0.8);
+    // outerDiskMat.emissiveColor = new BABYLON.Color3(0.1, 0.3, 0.5);
+    // outerDiskMat.specularColor = new BABYLON.Color3(0.5, 0.7, 1);
+    // outerDiskMat.specularPower = 64;
+    // outerDiskMat.alpha = 0.5;
+    // outerDiskMat.backFaceCulling = false;
+    // outerDisk.material = outerDiskMat;
+    // outerDisk.renderingGroupId = 1;
     
-    // Outer cooler disk
-    const outerDisk = BABYLON.MeshBuilder.CreateTorus('outerAccretionDisk', {
-        diameter: 14.0,
-        thickness: 3.5,
-        tessellation: 128
-    }, scene);
-    outerDisk.rotation.x = Math.PI/2;
-    outerDisk.parent = blackHoleContainer;
-    
-    const outerDiskMat = new BABYLON.StandardMaterial('outerDiskMat', scene);
-    if (useCyanMagenta) {
-        outerDiskMat.diffuseColor = new BABYLON.Color3(0.2, 0.6, 0.8);
-        outerDiskMat.emissiveColor = new BABYLON.Color3(0.1, 0.3, 0.5);
-    } else {
-        outerDiskMat.diffuseColor = new BABYLON.Color3(0.6, 0.4, 0.8);
-        outerDiskMat.emissiveColor = new BABYLON.Color3(0.3, 0.2, 0.5);
-    }
-    outerDiskMat.specularColor = new BABYLON.Color3(0.5, 0.7, 1);
-    outerDiskMat.specularPower = 64;
-    outerDiskMat.alpha = 0.5;
-    outerDiskMat.backFaceCulling = false;
-    outerDisk.material = outerDiskMat;
-    
-    // Set rendering group for proper depth sorting
-    outerDisk.renderingGroupId = 1; // Foreground celestial objects
-    
-    // Store all disks for animation
-    accretionDisk.userData = {
-        baseBrightness: 0.8,
-        pulsePeriod: 4,
-        pulseAmplitude: 0.15,
-        innerDisk: innerDisk,
-        outerDisk: outerDisk
-    };
+    // Set accretion disk to null since we're not creating it
+    accretionDisk = null;
 
     // Swirling dust outflow
     createDustPlasmaEmitters(blackHoleContainer);
@@ -631,13 +603,13 @@ export function updateBlackHoleEffects() {
         b.rotation.y += 0.02;
     });
 
-    // Accretion disk pulsation
-    if (accretionDisk && accretionDisk.userData) {
-        const d = accretionDisk.userData;
-        const p = (t % d.pulsePeriod)/d.pulsePeriod * Math.PI*2;
-        const br = d.baseBrightness + Math.sin(p)*d.pulseAmplitude;
-        accretionDisk.material.emissiveColor.scaleInPlace(br);
-    }
+    // Accretion disk pulsation - DISABLED since accretion disk removed
+    // if (accretionDisk && accretionDisk.userData) {
+    //     const d = accretionDisk.userData;
+    //     const p = (t % d.pulsePeriod)/d.pulsePeriod * Math.PI*2;
+    //     const br = d.baseBrightness + Math.sin(p)*d.pulseAmplitude;
+    //     accretionDisk.material.emissiveColor.scaleInPlace(br);
+    // }
 
     // Enhanced star twinkling animation
     energyParticles.forEach(particleSystem => {
@@ -669,14 +641,15 @@ export function updateBlackHoleEffects() {
 
 export function triggerFocusIntensification(duration = 5) {
     console.log(`🔦 Focus intensification triggered for ${duration}s`);
-    // Example implementation: temporarily increase accretionDisk pulseAmplitude
-    if (accretionDisk && accretionDisk.userData) {
-        const data = accretionDisk.userData;
-        const originalAmplitude = data.pulseAmplitude;
-        data.pulseAmplitude = originalAmplitude * 2;
-        setTimeout(() => {
-            data.pulseAmplitude = originalAmplitude;
-            console.log('🔦 Focus intensification ended, restored original amplitude');
-        }, duration * 1000);
-    }
+    // Note: Originally would increase accretionDisk pulseAmplitude, but 
+    // accretion disk has been removed for cleaner black hole appearance
+    // if (accretionDisk && accretionDisk.userData) {
+    //     const data = accretionDisk.userData;
+    //     const originalAmplitude = data.pulseAmplitude;
+    //     data.pulseAmplitude = originalAmplitude * 2;
+    //     setTimeout(() => {
+    //         data.pulseAmplitude = originalAmplitude;
+    //         console.log('🔦 Focus intensification ended, restored original amplitude');
+    //     }, duration * 1000);
+    // }
 }
