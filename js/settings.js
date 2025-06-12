@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { updateTimerDisplay } from './timer.js';
+import { setVolume } from './sounds.js';
 
 export function setupSettingsControls() {
     const elements = {
@@ -47,10 +48,13 @@ export function setupSettingsControls() {
     // Sound volume range
     if (elements.soundRange && elements.soundValue) {
         elements.soundRange.addEventListener('input', () => {
-            elements.soundValue.textContent = elements.soundRange.value;
-            if (state.sounds.audio) {
-                state.sounds.audio.volume = elements.soundRange.value / 100;
-            }
+            const volume = parseInt(elements.soundRange.value);
+            elements.soundValue.textContent = volume;
+            
+            // Set the master volume for all ambient sounds
+            setVolume(volume);
+            
+            console.log(`🎛️ Settings: Ambient sound volume set to ${volume}%`);
         });
     }
 
@@ -132,9 +136,7 @@ export function setupSettingsControls() {
                 }
                 
                 // Update sound volume
-                if (state.sounds.audio) {
-                    state.sounds.audio.volume = soundVolume / 100;
-                }
+                setVolume(soundVolume);
                 
                 // Update greeting
                 document.getElementById('greeting').textContent = greeting || 'Welcome to Your Universe!';
@@ -281,8 +283,11 @@ export function loadSettings() {
         state.timer.settings.longBreakDuration = loadedLongBreakDuration;
     }
     
-    if (state.sounds.audio) {
-        state.sounds.audio.volume = parseInt(soundVolume) / 100;
+    // Apply loaded sound volume
+    const loadedSoundVolume = parseInt(soundVolume);
+    if (loadedSoundVolume >= 0) {
+        setVolume(loadedSoundVolume);
+        console.log(`🎛️ Loaded ambient sound volume: ${loadedSoundVolume}%`);
     }
 }
 

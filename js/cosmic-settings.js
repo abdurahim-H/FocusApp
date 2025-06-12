@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { updateTimerDisplay } from './timer.js';
 import { triggerTaskCompletionUI } from './ui-effects.js';
 import { trackRequestAnimationFrame } from './cleanup.js';
+import { setVolume } from './sounds.js';
 
 let cosmicSettingsInitialized = false;
 let particleSystem = null;
@@ -573,6 +574,12 @@ export function saveCosmicSettings() {
             state.timer.seconds = 0;
             updateTimerDisplay();
         }
+    }
+    
+    // Apply sound volume
+    if (soundVolume >= 0) {
+        setVolume(soundVolume);
+        console.log(`🎛️ Cosmic Settings: Ambient sound volume set to ${soundVolume}%`);
     }
 }
 
