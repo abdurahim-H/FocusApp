@@ -406,6 +406,37 @@
     position: relative;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     z-index: 2001;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.25) transparent;
+}
+
+.settings-modal::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+}
+
+.settings-modal::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.settings-modal::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.22);
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px 0 rgba(176,224,230,0.10), 0 0 0 1px rgba(255,255,255,0.10) inset;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.settings-modal::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.33);
+    box-shadow: 0 4px 16px 0 rgba(176,224,230,0.18), 0 0 0 1.5px rgba(255,255,255,0.15) inset;
+}
+
+.settings-modal h2 {
+    margin-bottom: 25px;
+    color: var(--text-primary);
+    text-align: center;
+    width: 100%;
 }
 
 /* --- Enhanced Sticky Close Button for Settings Modal --- */
