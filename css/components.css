@@ -413,13 +413,13 @@
     position: sticky;
     top: 0;
     left: 0;
-    width: 85%;
+    width: 90%;
     min-width: 180px;
     max-width: 600px;
     margin: 0 auto 24px auto;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     z-index: 2100;
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
@@ -432,35 +432,26 @@
     color: var(--text-secondary);
     cursor: pointer;
     transition: box-shadow 0.3s, background 0.3s, filter 0.3s, color 0.3s, opacity 0.4s;
-    opacity: 0;
-    animation: closeBtnFadeIn 0.7s cubic-bezier(.4,1.4,.6,1) 0.1s forwards;
-    /* Prevents scroll hiding */
+    opacity: 1;
 }
 
+/* Remove or comment out the animation for .close-btn */
+/*
 @keyframes closeBtnFadeIn {
     from { opacity: 0; transform: translateY(-16px) scale(0.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+*/
 
-.close-btn:hover {
-    background: rgba(176, 224, 230, 0.18);
-    box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.28), 0 2px 12px 0 rgba(255,255,255,0.18);
-    color: var(--text-primary);
-    filter: brightness(1.08) saturate(1.1);
-}
-
-.close-btn:active {
-    filter: brightness(0.97) saturate(1.2);
-    box-shadow: 0 2px 8px 0 rgba(99, 102, 241, 0.12);
-}
-
-/* Optional: X icon styling for clarity */
 .close-btn .icon-x, .close-btn svg {
-    margin-right: 12px;
+    margin-right: 0;
     font-size: 1.5em;
     color: inherit;
     pointer-events: none;
     filter: drop-shadow(0 0 6px rgba(176,224,230,0.18));
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .settings-modal h2 {
