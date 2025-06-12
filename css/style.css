@@ -49,6 +49,7 @@ body {
     z-index: 1;
     pointer-events: none;
     background: #000; /* Fallback background */
+    transition: opacity 0.3s ease, filter 0.3s ease; /* Add smooth transitions */
 }
 
 #scene-container canvas {
@@ -452,4 +453,60 @@ input, textarea, select {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+/* Theme-specific visual enhancements */
+body.theme-light {
+    --animation-speed: 0.8; /* Slower animations for light theme */
+}
+
+body.theme-cosmos {
+    --animation-speed: 1.2; /* Faster animations for cosmos theme */
+    --particle-density: 1.5; /* More particles in cosmos theme */
+}
+
+/* Enhanced theme-specific glow effects */
+body[data-theme="dark"] .productivity-glow {
+    animation: productivityPulseDark 2s ease-in-out infinite;
+}
+
+body[data-theme="light"] .productivity-glow {
+    animation: productivityPulseLight 2s ease-in-out infinite;
+}
+
+body[data-theme="cosmos"] .productivity-glow {
+    animation: productivityPulseCosmos 2s ease-in-out infinite;
+}
+
+@keyframes productivityPulseDark {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.3),
+                    0 0 40px rgba(99, 102, 241, 0.1);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.5),
+                    0 0 60px rgba(99, 102, 241, 0.2);
+    }
+}
+
+@keyframes productivityPulseLight {
+    0%, 100% { 
+        box-shadow: 0 0 15px rgba(79, 70, 229, 0.2),
+                    0 0 30px rgba(79, 70, 229, 0.1);
+    }
+    50% { 
+        box-shadow: 0 0 25px rgba(79, 70, 229, 0.3),
+                    0 0 50px rgba(79, 70, 229, 0.15);
+    }
+}
+
+@keyframes productivityPulseCosmos {
+    0%, 100% { 
+        box-shadow: 0 0 25px rgba(168, 85, 247, 0.4),
+                    0 0 50px rgba(139, 92, 246, 0.2);
+    }
+    50% { 
+        box-shadow: 0 0 40px rgba(168, 85, 247, 0.6),
+                    0 0 80px rgba(139, 92, 246, 0.3);
+    }
 }

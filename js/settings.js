@@ -2,17 +2,151 @@ import { state } from './state.js';
 import { updateTimerDisplay } from './timer.js';
 import { setVolume } from './sounds.js';
 
+function setTheme(theme) {
+    console.log(`🎨 Applying theme: ${theme}`);
+    
+    // Update DOM attributes
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
+    
+    // Update localStorage
+    localStorage.setItem('fu_theme', theme);
+    
+    // Update theme button states
+    const themeButtons = document.querySelectorAll('[data-theme]');
+    themeButtons.forEach(btn => {
+        if (btn.id && btn.id.includes('theme')) {
+            btn.classList.remove('active', 'btn-primary');
+            if (btn.getAttribute('data-theme') === theme || 
+                (btn.id === `theme${theme.charAt(0).toUpperCase() + theme.slice(1)}Btn`)) {
+                btn.classList.add('active', 'btn-primary');
+            }
+        }
+    });
+    
+    // Apply theme-specific 3D scene adjustments
+    applyThemeTo3DScene(theme);
+    
+    // Apply theme-specific UI adjustments
+    applyThemeToUI(theme);
+}
+
+// Apply theme changes to 3D scene
+function applyThemeTo3DScene(theme) {
+    if (!window.scene) return;
+    
+    try {
+        switch (theme) {
+            case 'light':
+                // Light theme - brighter, more colorful
+                if (window.scene.ambientLight) {
+                    window.scene.ambientLight.intensity = 0.6;
+                    window.scene.ambientLight.diffuse = new BABYLON.Color3(0.9, 0.9, 1);
+                    window.scene.ambientLight.groundColor = new BABYLON.Color3(0.7, 0.7, 0.8);
+                }
+                window.scene.clearColor = new BABYLON.Color4(0.95, 0.95, 1, 1);
+                window.scene.fogColor = new BABYLON.Color3(0.9, 0.9, 0.95);
+                window.scene.fogDensity = 0.0005;
+                break;
+                
+            case 'dark':
+                // Dark theme - default space theme
+                if (window.scene.ambientLight) {
+                    window.scene.ambientLight.intensity = 0.4;
+                    window.scene.ambientLight.diffuse = new BABYLON.Color3(0.4, 0.4, 0.6);
+                    window.scene.ambientLight.groundColor = new BABYLON.Color3(0.1, 0.1, 0.2);
+                }
+                window.scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+                window.scene.fogColor = new BABYLON.Color3(0.02, 0.02, 0.06);
+                window.scene.fogDensity = 0.0008;
+                break;
+                
+            case 'cosmos':
+                // Cosmos theme - deep purple space
+                if (window.scene.ambientLight) {
+                    window.scene.ambientLight.intensity = 0.5;
+                    window.scene.ambientLight.diffuse = new BABYLON.Color3(0.5, 0.3, 0.8);
+                    window.scene.ambientLight.groundColor = new BABYLON.Color3(0.2, 0.1, 0.4);
+                }
+                window.scene.clearColor = new BABYLON.Color4(0.05, 0.02, 0.15, 1);
+                window.scene.fogColor = new BABYLON.Color3(0.1, 0.05, 0.2);
+                window.scene.fogDensity = 0.001;
+                break;
+                
+            case 'auto':
+                // Auto theme - check system preference
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                applyThemeTo3DScene(prefersDark ? 'dark' : 'light');
+                return;
+        }
+        
+        console.log(`✅ 3D scene updated for ${theme} theme`);
+    } catch (error) {
+        console.warn('Could not update 3D scene theme:', error);
+    }
+}
+
+// Apply theme changes to UI elements
+function applyThemeToUI(theme) {
+    // Update any dynamic UI elements that need theme-specific adjustments
+    const achievement = document.getElementById('achievement');
+    const progress3d = document.getElementById('progress3d');
+    
+    // Add theme-specific classes for extra styling if needed
+    document.body.classList.remove('theme-light', 'theme-dark', 'theme-cosmos', 'theme-auto');
+    document.body.classList.add(`theme-${theme}`);
+}
+
+export function setupSettingsModal() {
+    console.log('🔧 Setting up settings modal...');
+    
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => {
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsOverlay = document.getElementById('settingsModalOverlay');
+        const closeBtn = document.getElementById('closeSettingsBtn');
+        
+        if (!settingsBtn || !settingsOverlay || !closeBtn) {
+            console.error('Settings elements not found');
+            return;
+        }
+        
+        // Settings button click
+        settingsBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            settingsOverlay.classList.add('active');
+            console.log('Settings modal opened');
+        });
+        
+        // Close button
+        closeBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            settingsOverlay.classList.remove('active');
+            console.log('Settings modal closed');
+        });
+        
+        // Click outside to close
+        settingsOverlay.addEventListener('click', function(event) {
+            if (event.target === settingsOverlay) {
+                settingsOverlay.classList.remove('active');
+                console.log('Settings modal closed by overlay click');
+            }
+        });
+        
+        console.log('✅ Settings modal event listeners attached');
+    }, 100);
+}
+
 export function setupSettingsControls() {
+    console.log('🎛️ Setting up settings controls...');
+    
     const elements = {
         saveBtn: document.getElementById('saveSettingsBtn'),
         resetBtn: document.getElementById('resetSettingsBtn'),
-        savedMsg: document.getElementById('settingsSavedMsg'),
         focusRange: document.getElementById('focusLengthRange'),
         focusValue: document.getElementById('focusLengthValue'),
-        shortBreakRange: document.getElementById('shortBreakRange'),
-        shortBreakValue: document.getElementById('shortBreakValue'),
-        longBreakRange: document.getElementById('longBreakRange'),
-        longBreakValue: document.getElementById('longBreakValue'),
         soundRange: document.getElementById('soundVolumeRange'),
         soundValue: document.getElementById('soundVolumeValue'),
         greetingInput: document.getElementById('greetingInput'),
@@ -69,7 +203,11 @@ export function setupSettingsControls() {
     // Theme buttons
     Object.entries(elements.themeBtns).forEach(([theme, btn]) => {
         if (btn) {
-            btn.addEventListener('click', () => setTheme(theme));
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                setTheme(theme);
+                console.log(`Theme changed to: ${theme}`);
+            });
         }
     });
 
@@ -190,42 +328,18 @@ export function setupSettingsControls() {
     }
 }
 
-// Theme function
-export function setTheme(theme) {
-    // Set theme on both body and document element for maximum compatibility
-    document.body.setAttribute('data-theme', theme);
-    document.documentElement.setAttribute('data-theme', theme);
-    
-    // Force immediate CSS recalculation
-    document.body.style.display = 'none';
-    document.body.offsetHeight; // Force reflow
-    document.body.style.display = '';
-    
-    // Update theme buttons
-    document.querySelectorAll('.theme-buttons [data-theme]').forEach(btn => {
-        btn.classList.remove('btn-primary');
-        btn.classList.add('btn');
-    });
-    
-    const activeBtn = document.querySelector(`.theme-buttons [data-theme="${theme}"]`);
-    if (activeBtn) {
-        activeBtn.classList.remove('btn');
-        activeBtn.classList.add('btn-primary');
-    }
-    
-    // Save theme immediately when changed
-    localStorage.setItem('fu_theme', theme);
-}
-
 export function loadSettings() {
-    const theme = localStorage.getItem('fu_theme') || 'dark';
+    console.log('📥 Loading saved settings...');
+    
+    // Load theme with proper fallback
+    const savedTheme = localStorage.getItem('fu_theme') || 'dark';
+    setTheme(savedTheme);
+    
     const focusLength = localStorage.getItem('fu_focusLength') || '25';
     const shortBreakLength = localStorage.getItem('fu_shortBreakLength') || '5';
     const longBreakLength = localStorage.getItem('fu_longBreakLength') || '15';
     const soundVolume = localStorage.getItem('fu_soundVolume') || '30';
     const greeting = localStorage.getItem('fu_greeting') || '';
-    
-    setTheme(theme);
     
     const focusRange = document.getElementById('focusLengthRange');
     const focusValue = document.getElementById('focusLengthValue');
@@ -291,20 +405,11 @@ export function loadSettings() {
     }
 }
 
-export function setupSettingsModal() {
-    // Settings modal
-    document.getElementById('settingsBtn').addEventListener('click', () => {
-        document.getElementById('settingsModalOverlay').classList.add('active');
-        loadSettings();
-    });
-
-    document.getElementById('closeSettingsBtn').addEventListener('click', () => {
-        document.getElementById('settingsModalOverlay').classList.remove('active');
-    });
-
-    document.getElementById('settingsModalOverlay').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) {
-            document.getElementById('settingsModalOverlay').classList.remove('active');
-        }
-    });
-}
+// Handle system theme changes for auto mode
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    const currentTheme = document.body.getAttribute('data-theme');
+    if (currentTheme === 'auto') {
+        applyThemeTo3DScene(e.matches ? 'dark' : 'light');
+        applyThemeToUI('auto');
+    }
+});

@@ -1,4 +1,4 @@
-/* Theme System */
+/* Theme System - Enhanced with better visual distinction */
 
 /* Default Dark Theme */
 :root, body[data-theme="dark"] {
@@ -12,35 +12,101 @@
     --text-secondary: rgba(255, 255, 255, 0.7);
     --border-glass: rgba(255, 255, 255, 0.2);
     --shadow: rgba(0, 0, 0, 0.3);
+    
+    /* Theme-specific additions */
+    --glow-color: rgba(99, 102, 241, 0.3);
+    --particle-color: #8b5cf6;
 }
 
 /* Light Theme */
 body[data-theme="light"] {
-    --primary: #6366f1;
-    --secondary: #8b5cf6;
+    --primary: #4f46e5;
+    --secondary: #7c3aed;
     --accent: #059669;
-    --bg-dark: #f8fafc;
-    --bg-glass: rgba(0, 0, 0, 0.1);
-    --bg-glass-dark: rgba(255, 255, 255, 0.9);
-    --text-primary: #1e293b;
-    --text-secondary: rgba(30, 41, 59, 0.7);
-    --border-glass: rgba(0, 0, 0, 0.2);
-    --shadow: rgba(0, 0, 0, 0.1);
+    --bg-dark: #f3f4f6;
+    --bg-glass: rgba(255, 255, 255, 0.8);
+    --bg-glass-dark: rgba(255, 255, 255, 0.95);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31, 41, 55, 0.7);
+    --border-glass: rgba(0, 0, 0, 0.1);
+    --shadow: rgba(0, 0, 0, 0.05);
+    
+    /* Theme-specific additions */
+    --glow-color: rgba(79, 70, 229, 0.2);
+    --particle-color: #7c3aed;
+}
+
+/* Light theme specific adjustments */
+body[data-theme="light"] #scene-container {
+    opacity: 0.7;
+    filter: brightness(1.2) contrast(0.9);
+}
+
+body[data-theme="light"] .nav,
+body[data-theme="light"] .settings-btn,
+body[data-theme="light"] .focus-content,
+body[data-theme="light"] .task-section,
+body[data-theme="light"] .settings-modal {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Cosmos Theme */
+body[data-theme="cosmos"] {
+    --primary: #8B5CF6;
+    --secondary: #A855F7;
+    --accent: #06D6A0;
+    --bg-dark: #0B1426;
+    --bg-glass: rgba(139, 92, 246, 0.15);
+    --bg-glass-dark: rgba(11, 20, 38, 0.8);
+    --text-primary: #FFFFFF;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --border-glass: rgba(139, 92, 246, 0.3);
+    --shadow: rgba(139, 92, 246, 0.2);
+    
+    /* Theme-specific additions */
+    --glow-color: rgba(168, 85, 247, 0.4);
+    --particle-color: #A855F7;
+}
+
+/* Cosmos theme specific adjustments */
+body[data-theme="cosmos"] #scene-container {
+    filter: hue-rotate(30deg) saturate(1.2);
+}
+
+body[data-theme="cosmos"] .nav,
+body[data-theme="cosmos"] .settings-btn,
+body[data-theme="cosmos"] .focus-content,
+body[data-theme="cosmos"] .task-section {
+    background: linear-gradient(135deg, 
+        rgba(139, 92, 246, 0.1) 0%, 
+        rgba(11, 20, 38, 0.9) 100%);
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+body[data-theme="cosmos"] .timer-display {
+    text-shadow: 0 0 40px var(--glow-color);
 }
 
 /* Auto Theme - follows system preference */
 @media (prefers-color-scheme: light) {
     body[data-theme="auto"] {
-        --primary: #6366f1;
-        --secondary: #8b5cf6;
+        --primary: #4f46e5;
+        --secondary: #7c3aed;
         --accent: #059669;
-        --bg-dark: #f8fafc;
-        --bg-glass: rgba(0, 0, 0, 0.1);
-        --bg-glass-dark: rgba(255, 255, 255, 0.9);
-        --text-primary: #1e293b;
-        --text-secondary: rgba(30, 41, 59, 0.7);
-        --border-glass: rgba(0, 0, 0, 0.2);
-        --shadow: rgba(0, 0, 0, 0.1);
+        --bg-dark: #f3f4f6;
+        --bg-glass: rgba(255, 255, 255, 0.8);
+        --bg-glass-dark: rgba(255, 255, 255, 0.95);
+        --text-primary: #1f2937;
+        --text-secondary: rgba(31, 41, 55, 0.7);
+        --border-glass: rgba(0, 0, 0, 0.1);
+        --shadow: rgba(0, 0, 0, 0.05);
+        --glow-color: rgba(79, 70, 229, 0.2);
+        --particle-color: #7c3aed;
+    }
+    
+    body[data-theme="auto"] #scene-container {
+        opacity: 0.7;
+        filter: brightness(1.2) contrast(0.9);
     }
 }
 
@@ -56,19 +122,91 @@ body[data-theme="light"] {
         --text-secondary: rgba(255, 255, 255, 0.7);
         --border-glass: rgba(255, 255, 255, 0.2);
         --shadow: rgba(0, 0, 0, 0.3);
+        --glow-color: rgba(99, 102, 241, 0.3);
+        --particle-color: #8b5cf6;
     }
 }
 
-/* Cosmos Theme */
-body[data-theme="cosmos"] {
-    --primary: #8B5CF6;
-    --secondary: #A855F7;
-    --accent: #06D6A0;
-    --bg-dark: #0B1426;
-    --bg-glass: rgba(139, 92, 246, 0.15);
-    --bg-glass-dark: rgba(11, 20, 38, 0.8);
-    --text-primary: #FFFFFF;
-    --text-secondary: rgba(255, 255, 255, 0.8);
-    --border-glass: rgba(139, 92, 246, 0.3);
-    --shadow: rgba(139, 92, 246, 0.2);
+/* Smooth theme transitions */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav,
+.settings-btn,
+.focus-content,
+.task-section,
+.settings-modal,
+.btn,
+.task-input {
+    transition: background-color 0.3s ease, 
+                border-color 0.3s ease, 
+                box-shadow 0.3s ease,
+                color 0.3s ease;
+}
+
+/* Theme-specific button states */
+body[data-theme="light"] .btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body[data-theme="light"] .btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+body[data-theme="light"] .btn-primary:hover {
+    background: #4338ca;
+}
+
+body[data-theme="cosmos"] .btn:hover {
+    background: rgba(168, 85, 247, 0.2);
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+/* Theme-specific text adjustments */
+body[data-theme="light"] h1,
+body[data-theme="light"] h2,
+body[data-theme="light"] h3 {
+    color: var(--text-primary);
+}
+
+body[data-theme="cosmos"] h1 {
+    background: linear-gradient(135deg, #A855F7, #8B5CF6, #06D6A0);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Theme-specific input styles */
+body[data-theme="light"] .task-input,
+body[data-theme="light"] .text-input {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+}
+
+body[data-theme="light"] .task-input::placeholder,
+body[data-theme="light"] .text-input::placeholder {
+    color: rgba(31, 41, 55, 0.5);
+}
+
+body[data-theme="cosmos"] .task-input,
+body[data-theme="cosmos"] .text-input {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+/* Theme indicator for active theme button */
+#themeLightBtn[data-theme="light"].active::after,
+#themeDarkBtn[data-theme="dark"].active::after,
+#themeCosmosBtn[data-theme="cosmos"].active::after,
+#themeAutoBtn[data-theme="auto"].active::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-size: 0.8em;
+    color: var(--accent);
 }
