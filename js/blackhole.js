@@ -142,8 +142,8 @@ function createAuthenticBlackHole(parent) {
     blackHoleContainer.rotation.z = -Math.PI / 6; // 30 degrees right tilt
     blackHoleContainer.rotation.x = Math.PI / 12; // 15 degrees forward tilt
     
-    // Event Horizon - Pure black sphere with subtle rim lighting
-    eventHorizon = BABYLON.MeshBuilder.CreateSphere('eventHorizon', { diameter:8, segments:32 }, scene);
+    // Event Horizon - Pure black sphere with realistic appearance (SLIGHTLY REDUCED)
+    eventHorizon = BABYLON.MeshBuilder.CreateSphere('eventHorizon', { diameter:12, segments:48 }, scene);
     const horMat = new BABYLON.StandardMaterial('eventHorizonMat', scene);
     horMat.diffuseColor = BABYLON.Color3.Black();
     horMat.emissiveColor = BABYLON.Color3.Black();
@@ -156,11 +156,11 @@ function createAuthenticBlackHole(parent) {
     // Set rendering group for proper depth sorting
     eventHorizon.renderingGroupId = 1; // Foreground celestial objects
     
-    // Add a subtle glow sphere around the event horizon
-    const glowSphere = BABYLON.MeshBuilder.CreateSphere('eventHorizonGlow', { diameter:8.5, segments:32 }, scene);
+    // Add realistic gravitational lensing glow (NO PURPLE - realistic colors)
+    const glowSphere = BABYLON.MeshBuilder.CreateSphere('eventHorizonGlow', { diameter:12.8, segments:48 }, scene);
     const glowMat = new BABYLON.StandardMaterial('glowMat', scene);
     glowMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
-    glowMat.emissiveColor = new BABYLON.Color3(0.2, 0.1, 0.3); // Very subtle purple glow
+    glowMat.emissiveColor = new BABYLON.Color3(0.1, 0.05, 0.02); // Realistic orange-red Hawking radiation glow
     glowMat.alpha = 0.3;
     glowMat.backFaceCulling = false;
     glowSphere.material = glowMat;
@@ -232,8 +232,8 @@ function createAuthenticBlackHole(parent) {
     // Set accretion disk to null since we're not creating it
     accretionDisk = null;
 
-    // Swirling dust outflow
-    createDustPlasmaEmitters(blackHoleContainer);
+    // NO DUST PARTICLES - Clean black hole without unrealistic emissions
+    // createDustPlasmaEmitters(blackHoleContainer);
 }
 
 // 2. Vertical Orbital Rings - DISABLED (rings removed)
@@ -296,28 +296,167 @@ function createAuthenticBlackHole(parent) {
 // }
 
 
-// 3. Randomized Orbiting Bodies
+// 3. Elegant & Graceful Orbital System - Beautiful, organized celestial objects
 function createBalancedOrbitals(parent) {
     const group = new BABYLON.TransformNode('balancedOrbitals', scene);
     group.parent = parent;
     orbitalBodies = [];
 
-    for (let i=0; i<20; i++) {
-        const size = 0.3 + Math.random()*0.7;
-        const body = BABYLON.MeshBuilder.CreateSphere(`body${i}`, { diameter:size*2, segments:16 }, scene);
-        const mat  = new BABYLON.StandardMaterial(`bodyMat${i}`, scene);
-        mat.diffuseColor = new BABYLON.Color3(Math.random(),Math.random(),Math.random());
-        body.material = mat;
-        body.parent   = group;
-        body.userData = {
-            distance:     10 + Math.random()*60,
-            angle:        Math.random()*Math.PI*2,
-            speed:        0.005 + Math.random()*0.01,
-            inclination:  (Math.random()-0.5)*0.5,
-            planeRotation:Math.random()*Math.PI*2
-        };
-        orbitalBodies.push(body);
-    }
+    // Create elegant, organized orbital rings with beautiful objects
+    const orbitalRings = [
+        { 
+            distance: 30, 
+            objects: 4, 
+            size: 0.8, 
+            color: new BABYLON.Color3(0.7, 0.9, 1),    // Ice blue
+            emissive: new BABYLON.Color3(0.1, 0.2, 0.3),
+            name: 'InnerIceWorlds'
+        },
+        { 
+            distance: 50, 
+            objects: 6, 
+            size: 1.2, 
+            color: new BABYLON.Color3(1, 0.8, 0.6),    // Warm gold
+            emissive: new BABYLON.Color3(0.2, 0.15, 0.1),
+            name: 'MiddleGoldenSpheres'
+        },
+        { 
+            distance: 75, 
+            objects: 8, 
+            size: 0.6, 
+            color: new BABYLON.Color3(0.8, 1, 0.8),    // Soft green
+            emissive: new BABYLON.Color3(0.1, 0.2, 0.1),
+            name: 'OuterEmeraldOrbs'
+        }
+    ];
+
+    // Create organized, beautiful orbital rings
+    orbitalRings.forEach((ring, ringIndex) => {
+        for (let i = 0; i < ring.objects; i++) {
+            // Perfect spacing for elegance
+            const angle = (Math.PI * 2 * i) / ring.objects;
+            
+            // Create beautiful sphere
+            const body = BABYLON.MeshBuilder.CreateSphere(`${ring.name}_${i}`, { 
+                diameter: ring.size * 2, 
+                segments: 32
+            }, scene);
+            
+            // Elegant material with subtle variation
+            const material = new BABYLON.StandardMaterial(`${ring.name}Mat_${i}`, scene);
+            const colorVariation = 0.1 * (Math.random() - 0.5);
+            material.diffuseColor = ring.color.add(new BABYLON.Color3(colorVariation, colorVariation, colorVariation));
+            material.emissiveColor = ring.emissive;
+            material.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+            material.specularPower = 64;
+            
+            body.material = material;
+            body.parent = group;
+            
+            // Perfect orbital positioning
+            body.position.x = Math.cos(angle) * ring.distance;
+            body.position.z = Math.sin(angle) * ring.distance;
+            body.position.y = 0;
+            
+            // Smooth, elegant orbital motion
+            body.userData = {
+                distance: ring.distance,
+                angle: angle,
+                speed: 0.004 / (1 + ring.distance * 0.01), // Slower for outer rings (realistic)
+                inclination: 0, // Keep organized and clean
+                planeRotation: 0, // No chaotic tilting
+                rotationSpeed: 0.01 + Math.random() * 0.01,
+                pulsePhase: (Math.PI * 2 * i) / ring.objects, // Synchronized pulsing
+                pulseSpeed: 1.0, // Unified pulse rhythm
+                baseEmission: ring.emissive.clone(),
+                ringIndex: ringIndex,
+                objectIndex: i
+            };
+            
+            // Set rendering group for proper depth sorting
+            body.renderingGroupId = 1;
+            
+            orbitalBodies.push(body);
+        }
+    });
+    
+    console.log(`✨ Created ${orbitalBodies.length} elegantly organized celestial objects in ${orbitalRings.length} orbital rings`);
+    
+    // NO ASTEROID BELTS - Keep it clean and elegant
+    // createAsteroidBelts(parent);
+}
+
+// Create beautiful asteroid belts around the black hole
+function createAsteroidBelts(parent) {
+    const beltGroup = new BABYLON.TransformNode('asteroidBelts', scene);
+    beltGroup.parent = parent;
+    
+    // Create 3 different asteroid belts at various distances
+    const beltConfigs = [
+        { distance: 35, count: 40, size: [0.1, 0.3], color: new BABYLON.Color3(0.6, 0.5, 0.4) },
+        { distance: 60, count: 60, size: [0.2, 0.5], color: new BABYLON.Color3(0.7, 0.6, 0.5) },
+        { distance: 85, count: 80, size: [0.3, 0.8], color: new BABYLON.Color3(0.5, 0.4, 0.3) }
+    ];
+    
+    beltConfigs.forEach((config, beltIndex) => {
+        for (let i = 0; i < config.count; i++) {
+            // Create irregular asteroid shape
+            const baseSize = config.size[0] + Math.random() * (config.size[1] - config.size[0]);
+            const asteroid = BABYLON.MeshBuilder.CreateSphere(`asteroid_${beltIndex}_${i}`, {
+                diameter: baseSize * 2,
+                segments: 8 + Math.floor(Math.random() * 8)
+            }, scene);
+            
+            // Deform for irregular shape
+            const positions = asteroid.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+            for (let j = 0; j < positions.length; j += 3) {
+                positions[j] += (Math.random() - 0.5) * baseSize * 0.4;
+                positions[j + 1] += (Math.random() - 0.5) * baseSize * 0.4;
+                positions[j + 2] += (Math.random() - 0.5) * baseSize * 0.4;
+            }
+            asteroid.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
+            asteroid.createNormals(false);
+            
+            // Enhanced asteroid material
+            const asteroidMaterial = new BABYLON.StandardMaterial(`asteroidMat_${beltIndex}_${i}`, scene);
+            asteroidMaterial.diffuseColor = config.color.add(new BABYLON.Color3(
+                (Math.random() - 0.5) * 0.2,
+                (Math.random() - 0.5) * 0.2,
+                (Math.random() - 0.5) * 0.2
+            ));
+            asteroidMaterial.emissiveColor = config.color.scale(0.05);
+            asteroidMaterial.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+            asteroidMaterial.specularPower = 32;
+            asteroid.material = asteroidMaterial;
+            asteroid.parent = beltGroup;
+            
+            // Position in belt with some variation
+            const angle = (Math.PI * 2 * i) / config.count + (Math.random() - 0.5) * 0.3;
+            const distance = config.distance + (Math.random() - 0.5) * 8;
+            const height = (Math.random() - 0.5) * 4;
+            
+            asteroid.position.x = Math.cos(angle) * distance;
+            asteroid.position.z = Math.sin(angle) * distance;
+            asteroid.position.y = height;
+            
+            // Animation data for belt rotation
+            asteroid.userData = {
+                angle: angle,
+                distance: distance,
+                baseHeight: height,
+                speed: 0.002 + Math.random() * 0.003,
+                rotationSpeed: (Math.random() - 0.5) * 0.02,
+                wobblePhase: Math.random() * Math.PI * 2
+            };
+            
+            // Set rendering group
+            asteroid.renderingGroupId = 1;
+            
+            orbitalBodies.push(asteroid);
+        }
+    });
+    
+    console.log(`✨ Created beautiful asteroid belts`);
 }
 
 
@@ -591,16 +730,27 @@ export function updateBlackHoleEffects() {
     //     r.material.emissiveColor.scaleInPlace(pulse);
     // });
 
-    // Orbiting bodies
-    orbitalBodies.forEach(b=>{
+    // Elegant orbital animations - organized and graceful movement
+    orbitalBodies.forEach(b => {
         const u = b.userData;
+        if (!u) return;
+        
         u.angle += u.speed;
-        const d = u.distance*(1+0.1*Math.cos(u.angle));
-        const x = Math.cos(u.angle)*d, z = Math.sin(u.angle)*d;
-        b.position.x = x*Math.cos(u.planeRotation)-z*Math.sin(u.planeRotation);
-        b.position.z = x*Math.sin(u.planeRotation)+z*Math.cos(u.planeRotation);
-        b.position.y = Math.sin(u.inclination)*d*0.3;
-        b.rotation.y += 0.02;
+        
+        // Elegant circular orbits - no chaos, perfect harmony
+        b.position.x = Math.cos(u.angle) * u.distance;
+        b.position.z = Math.sin(u.angle) * u.distance;
+        b.position.y = 0; // Keep objects in organized planes
+        
+        // Gentle self rotation
+        b.rotation.y += u.rotationSpeed;
+        b.rotation.x += u.rotationSpeed * 0.5;
+        
+        // Synchronized, elegant pulsing within each ring
+        if (b.material && b.material.emissiveColor && u.baseEmission) {
+            const ringSync = Math.sin(t * u.pulseSpeed + u.pulsePhase) * 0.2 + 0.8; // Gentle pulsing
+            b.material.emissiveColor.copyFrom(u.baseEmission.scale(ringSync));
+        }
     });
 
     // Accretion disk pulsation - DISABLED since accretion disk removed

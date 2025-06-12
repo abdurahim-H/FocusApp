@@ -405,19 +405,32 @@ export function createPlanets() {
     ];
 
     planetConfigs.forEach((config, index) => {
-        // Create planet core
+        // Create planet core with enhanced detail
         const planet = BABYLON.MeshBuilder.CreateSphere(`planet_${index}`, {
             diameter: config.size * 2,
-            segments: 64
+            segments: 128  // Higher detail for smoother planets
         }, scene);
         
-        // Enhanced planet material with procedural details
+        // Enhanced planet material with improved lighting and effects
         const planetMaterial = new BABYLON.StandardMaterial(`planetMat_${index}`, scene);
         planetMaterial.diffuseColor = config.color;
-        planetMaterial.emissiveColor = config.emissive;
-        planetMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-        planetMaterial.specularPower = 64;
+        planetMaterial.emissiveColor = config.emissive.scale(1.2);  // Slightly brighter emission
+        planetMaterial.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+        planetMaterial.specularPower = 128;  // Higher specular for better reflections
+        
+        // Add surface detail texture
         planetMaterial.bumpTexture = createProceduralPlanetTexture(config.name, config.color);
+        
+        // Enhanced surface roughness for realism
+        if (config.size > 3) {
+            // Gas giants - smoother, more reflective
+            planetMaterial.specularPower = 256;
+            planetMaterial.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
+        } else {
+            // Rocky planets - more detailed surface
+            planetMaterial.specularPower = 64;
+            planetMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+        }
         
         planet.material = planetMaterial;
         
@@ -667,82 +680,150 @@ export function createNebula() {
 }
 
 export function createComets() {
-    // Create comets
-    for (let i = 0; i < 3; i++) {
+    // Create enhanced spectacular comets
+    for (let i = 0; i < 5; i++) { // More comets for better effect
         const cometGroup = new BABYLON.TransformNode(`cometGroup_${i}`, scene);
         
-        // Comet head
-        const cometHead = BABYLON.MeshBuilder.CreateSphere(`cometHead_${i}`, {diameter: 0.8}, scene);
+        // Enhanced comet head with multiple components
+        const cometCore = BABYLON.MeshBuilder.CreateSphere(`cometCore_${i}`, {diameter: 1.2}, scene);
         
+        // Multi-layered comet material for better visual appeal
         const cometMaterial = new BABYLON.StandardMaterial(`cometMaterial_${i}`, scene);
-        cometMaterial.diffuseColor = new BABYLON.Color3(0.9, 0.9, 1);
-        cometMaterial.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.8);
-        cometHead.material = cometMaterial;
-        cometHead.parent = cometGroup;
+        const cometTypes = [
+            { color: new BABYLON.Color3(0.9, 0.9, 1), emission: new BABYLON.Color3(0.6, 0.6, 0.9) },    // Ice comet
+            { color: new BABYLON.Color3(1, 0.8, 0.6), emission: new BABYLON.Color3(0.8, 0.5, 0.3) },    // Rocky comet  
+            { color: new BABYLON.Color3(0.8, 1, 0.9), emission: new BABYLON.Color3(0.4, 0.7, 0.5) },    // Gas-rich comet
+            { color: new BABYLON.Color3(1, 0.9, 0.7), emission: new BABYLON.Color3(0.9, 0.7, 0.4) },    // Metallic comet
+            { color: new BABYLON.Color3(0.9, 0.7, 1), emission: new BABYLON.Color3(0.6, 0.4, 0.8) }     // Exotic comet
+        ];
+        
+        const cometType = cometTypes[i % cometTypes.length];
+        cometMaterial.diffuseColor = cometType.color;
+        cometMaterial.emissiveColor = cometType.emission;
+        cometMaterial.specularColor = new BABYLON.Color3(0.8, 0.8, 1);
+        cometMaterial.specularPower = 128;
+        cometCore.material = cometMaterial;
+        cometCore.parent = cometGroup;
+        
+        // Add coma (atmosphere around comet)
+        const coma = BABYLON.MeshBuilder.CreateSphere(`coma_${i}`, {diameter: 2.5}, scene);
+        const comaMaterial = new BABYLON.StandardMaterial(`comaMaterial_${i}`, scene);
+        comaMaterial.diffuseColor = cometType.color.scale(0.5);
+        comaMaterial.emissiveColor = cometType.emission.scale(0.3);
+        comaMaterial.alpha = 0.4;
+        comaMaterial.backFaceCulling = false;
+        coma.material = comaMaterial;
+        coma.parent = cometGroup;
         
         // Set rendering group for proper depth sorting
-        cometHead.renderingGroupId = 1; // Foreground celestial objects
+        cometCore.renderingGroupId = 1; // Foreground celestial objects
+        coma.renderingGroupId = 1;
         
-        // Comet tail particles
-        const tailSystem = new BABYLON.ParticleSystem(`cometTail_${i}`, 200, scene);
-        tailSystem.emitter = cometHead;
+        // Enhanced spectacular tail particles with multiple layers
+        const tailSystem = new BABYLON.ParticleSystem(`cometTail_${i}`, 400, scene); // More particles
+        tailSystem.emitter = cometCore;
         
+        // Enhanced tail texture with better glow
         tailSystem.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
                 <defs>
-                    <radialGradient id="tailGrad">
-                        <stop offset="0%" style="stop-color:white;stop-opacity:0.8" />
-                        <stop offset="100%" style="stop-color:cyan;stop-opacity:0" />
+                    <radialGradient id="tailGrad${i}" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:white;stop-opacity:0.9" />
+                        <stop offset="30%" style="stop-color:cyan;stop-opacity:0.7" />
+                        <stop offset="60%" style="stop-color:blue;stop-opacity:0.4" />
+                        <stop offset="100%" style="stop-color:rgba(0,0,255,0)" />
                     </radialGradient>
                 </defs>
-                <circle cx="16" cy="16" r="16" fill="url(#tailGrad)" />
+                <circle cx="32" cy="32" r="32" fill="url(#tailGrad${i})" />
             </svg>
         `), scene);
         
-        tailSystem.color1 = new BABYLON.Color4(0.5, 0.8, 1, 1);
-        tailSystem.color2 = new BABYLON.Color4(1, 1, 1, 1);
+        tailSystem.color1 = new BABYLON.Color4(
+            cometType.emission.r, 
+            cometType.emission.g, 
+            cometType.emission.b, 
+            1
+        );
+        tailSystem.color2 = new BABYLON.Color4(1, 1, 1, 0.8);
         tailSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
-        tailSystem.minSize = 0.3;
-        tailSystem.maxSize = 1.2;
-        tailSystem.minLifeTime = 0.5;
-        tailSystem.maxLifeTime = 2.0;
-        tailSystem.emitRate = 100;
+        tailSystem.minSize = 0.5;
+        tailSystem.maxSize = 2.5; // Larger tail particles
+        tailSystem.minLifeTime = 1.0;
+        tailSystem.maxLifeTime = 4.0; // Longer-lasting tail
+        tailSystem.emitRate = 150; // More particles per second
         tailSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
         tailSystem.gravity = new BABYLON.Vector3(0, 0, 0);
-        tailSystem.direction1 = new BABYLON.Vector3(-2, -0.5, -0.5);
-        tailSystem.direction2 = new BABYLON.Vector3(-4, 0.5, 0.5);
-        tailSystem.minEmitPower = 1;
-        tailSystem.maxEmitPower = 3;
+        tailSystem.direction1 = new BABYLON.Vector3(-3, -1, -1);
+        tailSystem.direction2 = new BABYLON.Vector3(-6, 1, 1);
+        tailSystem.minEmitPower = 2;
+        tailSystem.maxEmitPower = 5;
+        
+        // Add secondary dust tail for realism
+        const dustTail = new BABYLON.ParticleSystem(`dustTail_${i}`, 200, scene);
+        dustTail.emitter = cometCore;
+        dustTail.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <circle cx="8" cy="8" r="8" fill="rgba(255,255,255,0.3)" />
+            </svg>
+        `), scene);
+        
+        dustTail.color1 = new BABYLON.Color4(0.8, 0.7, 0.6, 0.6);
+        dustTail.color2 = new BABYLON.Color4(0.6, 0.5, 0.4, 0.3);
+        dustTail.minSize = 0.2;
+        dustTail.maxSize = 1.0;
+        dustTail.minLifeTime = 2.0;
+        dustTail.maxLifeTime = 6.0;
+        dustTail.emitRate = 80;
+        dustTail.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
+        dustTail.direction1 = new BABYLON.Vector3(-2, -0.5, -0.5);
+        dustTail.direction2 = new BABYLON.Vector3(-4, 0.5, 0.5);
+        dustTail.minEmitPower = 1;
+        dustTail.maxEmitPower = 3;
         
         // Set rendering group for comet tail particles
         tailSystem.renderingGroupId = 1; // Foreground celestial objects
+        dustTail.renderingGroupId = 1;
         
         tailSystem.start();
+        dustTail.start();
         
-        // Initial position
-        const angle = Math.random() * Math.PI * 2;
+        // Enhanced initial positioning with realistic orbital patterns
+        const spawnDistance = 120 + Math.random() * 80;
+        const spawnAngle = Math.random() * Math.PI * 2;
+        const spawnHeight = (Math.random() - 0.5) * 60;
+        
         cometGroup.position = new BABYLON.Vector3(
-            Math.cos(angle) * 150,
-            (Math.random() - 0.5) * 50,
-            Math.sin(angle) * 150
+            Math.cos(spawnAngle) * spawnDistance,
+            spawnHeight,
+            Math.sin(spawnAngle) * spawnDistance
         );
         
-        // Animation data
+        // Enhanced animation data with realistic comet physics
+        const targetCenter = new BABYLON.Vector3(
+            (Math.random() - 0.5) * 40,
+            (Math.random() - 0.5) * 20,
+            (Math.random() - 0.5) * 40
+        );
+        
+        const direction = targetCenter.subtract(cometGroup.position).normalize();
+        const baseSpeed = 0.3 + Math.random() * 0.4;
+        
         cometGroup.metadata = {
-            velocity: new BABYLON.Vector3(
-                (Math.random() - 0.5) * 0.5,
-                (Math.random() - 0.5) * 0.2,
-                (Math.random() - 0.5) * 0.5
-            ),
-            life: 500 + Math.random() * 500,
-            maxLife: 1000,
-            tailSystem: tailSystem
+            velocity: direction.scale(baseSpeed),
+            life: 600 + Math.random() * 600,
+            maxLife: 1200,
+            tailSystem: tailSystem,
+            dustTail: dustTail,
+            coma: coma,
+            rotationSpeed: (Math.random() - 0.5) * 0.02,
+            pulsePeriod: 2 + Math.random() * 4,
+            type: cometType
         };
         
         comets.push(cometGroup);
     }
     
-    console.log('☄️ Comets created');
+    console.log('☄️ Enhanced spectacular comets created');
 }
 
 export function createSpaceObjects() {

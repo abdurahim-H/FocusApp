@@ -372,43 +372,60 @@ function updatePlanetAnimations() {
         const time = performance.now() * 0.001;
         
         if (planet.userData) {
-            // Enhanced orbital mechanics with Kepler's laws
-            planet.userData.angle += planet.userData.speed * 0.7;
+            // Enhanced orbital mechanics with smooth motion
+            planet.userData.angle += planet.userData.speed * 0.8;  // Slightly faster motion
             
-            // Elliptical orbit calculations
+            // Smooth elliptical orbit calculations
             const eccentricity = planet.userData.eccentricity;
             const baseDistance = planet.userData.distance;
             const meanAnomaly = planet.userData.angle;
             
-            // Calculate eccentric anomaly (simplified)
-            const eccentricAnomaly = meanAnomaly + eccentricity * Math.sin(meanAnomaly);
+            // Enhanced eccentric anomaly calculation for smoother orbits
+            const eccentricAnomaly = meanAnomaly + eccentricity * Math.sin(meanAnomaly) * (1 + eccentricity * Math.cos(meanAnomaly));
             const trueAnomaly = 2 * Math.atan(Math.sqrt((1 + eccentricity) / (1 - eccentricity)) * Math.tan(eccentricAnomaly / 2));
             
-            // Calculate orbital radius
+            // Smooth orbital radius with gentle variations
             const orbitRadius = baseDistance * (1 - eccentricity * eccentricity) / (1 + eccentricity * Math.cos(trueAnomaly));
+            const radiusVariation = 1 + Math.sin(time * 0.3 + index) * 0.02;  // Subtle breathing effect
             
-            // Apply orbital inclination
-            const inclinedY = Math.sin(planet.userData.inclination) * orbitRadius * 0.3;
+            // Apply orbital inclination with smooth curves
+            const inclinedY = Math.sin(planet.userData.inclination) * orbitRadius * 0.4;
             
-            // Smooth orbital positioning with realistic physics
-            const targetX = Math.cos(trueAnomaly) * orbitRadius;
-            const targetZ = Math.sin(trueAnomaly) * orbitRadius;
-            const targetY = inclinedY + Math.sin(time * 0.2 + index) * 0.5; // Small vertical oscillation
+            // Beautiful orbital positioning with enhanced smoothness
+            const targetX = Math.cos(trueAnomaly) * orbitRadius * radiusVariation;
+            const targetZ = Math.sin(trueAnomaly) * orbitRadius * radiusVariation;
+            const targetY = inclinedY + Math.sin(time * 0.15 + index) * 0.8; // Larger, slower vertical oscillation
             
-            // Smooth interpolation to target position
-            planet.position.x = BABYLON.Scalar.Lerp(planet.position.x, targetX, 0.03);
-            planet.position.z = BABYLON.Scalar.Lerp(planet.position.z, targetZ, 0.03);
-            planet.position.y = BABYLON.Scalar.Lerp(planet.position.y, targetY, 0.02);
+            // Ultra-smooth interpolation for fluid motion
+            const lerpFactor = 0.05;  // Increased smoothness
+            planet.position.x = BABYLON.Scalar.Lerp(planet.position.x, targetX, lerpFactor);
+            planet.position.z = BABYLON.Scalar.Lerp(planet.position.z, targetZ, lerpFactor);
+            planet.position.y = BABYLON.Scalar.Lerp(planet.position.y, targetY, lerpFactor * 0.5);
             
-            // Enhanced planetary rotation with axial tilt
-            planet.rotation.y += planet.userData.rotationSpeed;
-            planet.rotation.x = planet.userData.axialTilt + Math.sin(time * 0.5 + index) * 0.05;
-            planet.rotation.z = Math.sin(time * 0.3 + index) * 0.02;
+            // Enhanced planetary rotation with beautiful axial tilt and wobble
+            planet.rotation.y += planet.userData.rotationSpeed * 1.2;  // Slightly faster rotation
+            planet.rotation.x = planet.userData.axialTilt + Math.sin(time * 0.4 + index) * 0.08;  // More dramatic axial wobble
+            planet.rotation.z = Math.sin(time * 0.25 + index * 0.7) * 0.05;  // Enhanced Z-axis variation
             
-            // Subtle size pulsing for gas giants
+            // Beautiful size pulsing for gas giants with enhanced effects
             if (config.size > 3) {
-                const pulseFactor = 1 + Math.sin(time * 0.8 + planet.userData.pulsePhase) * 0.02;
-                planet.scaling.setAll(pulseFactor);
+                const pulseFactor = 1 + Math.sin(time * 0.6 + planet.userData.pulsePhase) * 0.04;  // More pronounced pulsing
+                const secondaryPulse = 1 + Math.sin(time * 1.2 + planet.userData.pulsePhase * 1.5) * 0.02;
+                planet.scaling.setAll(pulseFactor * secondaryPulse);
+                
+                // Dynamic emission intensity for gas giants
+                if (planet.material && planet.material.emissiveColor) {
+                    const emissionPulse = 1 + Math.sin(time * 0.8 + planet.userData.pulsePhase) * 0.3;
+                    const baseEmission = config.emissive.clone();
+                    planet.material.emissiveColor.copyFrom(baseEmission.scale(emissionPulse));
+                }
+            } else {
+                // Rocky planets get subtle glow variations
+                if (planet.material && planet.material.emissiveColor) {
+                    const rockPulse = 1 + Math.sin(time * 0.3 + planet.userData.pulsePhase) * 0.15;
+                    const baseEmission = config.emissive.clone();
+                    planet.material.emissiveColor.copyFrom(baseEmission.scale(rockPulse));
+                }
             }
             
             // Animate atmospheric effects
@@ -640,19 +657,21 @@ function updateCometAnimations() {
         try {
             // Enhanced curved trajectory with gravitational influence
             const distanceToCenter = comet.position.length();
-            const gravitationalPull = Math.max(0, 100 - distanceToCenter) * 0.0001;
-            const curve = Math.sin(time * 0.5 + index) * 0.02;
+            const gravitationalPull = Math.max(0, 120 - distanceToCenter) * 0.00015;
+            const curve = Math.sin(time * 0.3 + index * 0.7) * 0.03;
             
             if (data.velocity && data.velocity.y !== undefined) {
-                // Apply gravitational acceleration toward center
+                // Apply gravitational acceleration toward center (black hole effect)
                 const centerDirection = comet.position.normalize().scale(-1);
                 data.velocity = data.velocity.add(centerDirection.scale(gravitationalPull));
                 
-                // Add orbital curve
+                // Add beautiful orbital curves and wobbles
                 data.velocity.y += curve;
+                data.velocity.x += Math.sin(time * 0.2 + index) * 0.01;
+                data.velocity.z += Math.cos(time * 0.25 + index) * 0.01;
                 
-                // Velocity dampening for realistic physics
-                data.velocity = data.velocity.scale(0.999);
+                // Enhanced velocity dampening for realistic physics
+                data.velocity = data.velocity.scale(0.9985);
             }
             
             // Smooth position updates with acceleration
@@ -663,64 +682,89 @@ function updateCometAnimations() {
             
             // Enhanced opacity fade with smooth transitions
             const lifeFactor = data.life / data.maxLife;
-            const opacity = Math.pow(lifeFactor, 1.5);
+            const opacity = Math.pow(lifeFactor, 1.2);
             
-            // Update comet head brightness
-            const cometHead = comet.getChildren().find(child => child.name && child.name.includes('cometHead'));
-            if (cometHead && cometHead.material) {
-                const baseIntensity = 0.5;
-                const pulseIntensity = baseIntensity + Math.sin(time * 2 + index) * 0.3;
-                cometHead.material.emissiveColor = new BABYLON.Color3(
-                    pulseIntensity * opacity,
-                    pulseIntensity * opacity,
-                    0.8 * pulseIntensity * opacity
-                );
+            // Update comet core with enhanced pulsing effects
+            const cometCore = comet.getChildren().find(child => child.name && child.name.includes('cometCore'));
+            if (cometCore && cometCore.material && data.type) {
+                const pulsePeriod = data.pulsePeriod || 3;
+                const baseIntensity = 0.6;
+                const pulseIntensity = baseIntensity + Math.sin(time * (2 / pulsePeriod) + index) * 0.4;
+                
+                // Dynamic emission based on comet type and velocity
+                const speed = data.velocity ? data.velocity.length() : 0;
+                const heatBoost = 1 + Math.min(speed * 3, 0.5);
+                
+                cometCore.material.emissiveColor = data.type.emission.scale(pulseIntensity * opacity * heatBoost);
+                
+                // Size pulsing for dramatic effect
+                const sizePulse = 1 + Math.sin(time * (3 / pulsePeriod) + index * 1.5) * 0.1;
+                cometCore.scaling.setAll(sizePulse);
             }
             
-            // Enhanced tail particle effects
+            // Enhanced coma (atmosphere) effects
+            const coma = data.coma;
+            if (coma && coma.material) {
+                const comaIntensity = 0.3 + Math.sin(time * 0.4 + index) * 0.1;
+                coma.material.alpha = comaIntensity * opacity;
+                
+                // Coma breathing effect
+                const breathe = 1 + Math.sin(time * 0.6 + index) * 0.15;
+                coma.scaling.setAll(breathe);
+            }
+            
+            // Enhanced tail particle effects with multiple layers
             if (data.tailSystem) {
-                data.tailSystem.emitRate = Math.max(50, 200 * opacity);
+                const speed = data.velocity ? data.velocity.length() : 0;
+                data.tailSystem.emitRate = Math.max(80, 300 * opacity * (1 + speed * 2));
                 
                 // Dynamic tail direction based on velocity
                 if (data.velocity) {
                     const normalizedVel = data.velocity.normalize();
-                    data.tailSystem.direction1 = normalizedVel.scale(-2);
-                    data.tailSystem.direction2 = normalizedVel.scale(-4);
+                    data.tailSystem.direction1 = normalizedVel.scale(-4);
+                    data.tailSystem.direction2 = normalizedVel.scale(-7);
                     
-                    // Tail particle speed based on comet velocity
-                    const speed = data.velocity.length();
-                    data.tailSystem.minEmitPower = Math.max(1, speed * 2);
-                    data.tailSystem.maxEmitPower = Math.max(3, speed * 4);
+                    // Enhanced tail particle speed based on comet velocity
+                    data.tailSystem.minEmitPower = Math.max(2, speed * 4);
+                    data.tailSystem.maxEmitPower = Math.max(6, speed * 8);
                 }
                 
-                // Spectacular color variations based on speed and position
-                const speed = data.velocity ? data.velocity.length() : 1;
-                const heatFactor = Math.min(speed * 10, 1);
+                // Spectacular color variations based on speed, heat, and distance
+                const heatFactor = Math.min(speed * 8, 1);
+                const distanceFactor = Math.max(0, (150 - distanceToCenter) / 150);
                 
                 data.tailSystem.color1 = new BABYLON.Color4(
-                    0.5 + heatFactor * 0.5,
-                    0.8,
-                    1 - heatFactor * 0.3,
-                    opacity
+                    0.4 + heatFactor * 0.6,
+                    0.7 + distanceFactor * 0.3,
+                    1 - heatFactor * 0.2,
+                    opacity * (0.8 + distanceFactor * 0.2)
                 );
                 data.tailSystem.color2 = new BABYLON.Color4(
                     1,
-                    1 - heatFactor * 0.2,
-                    1 - heatFactor * 0.5,
-                    opacity * 0.8
+                    0.9 - heatFactor * 0.1,
+                    0.8 - heatFactor * 0.3,
+                    opacity * 0.9
                 );
             }
             
-            // Comet rotation based on velocity
-            if (data.velocity) {
-                const rotationSpeed = data.velocity.length() * 0.1;
-                comet.rotation.x += rotationSpeed * 0.02;
-                comet.rotation.y += rotationSpeed * 0.015;
-                comet.rotation.z += rotationSpeed * 0.01;
+            // Enhanced dust tail effects
+            if (data.dustTail) {
+                const dustOpacity = opacity * 0.7;
+                data.dustTail.emitRate = Math.max(40, 120 * dustOpacity);
+                data.dustTail.color1.a = dustOpacity;
+                data.dustTail.color2.a = dustOpacity * 0.6;
+            }
+            
+            // Enhanced comet rotation based on velocity and internal dynamics
+            if (data.velocity && data.rotationSpeed) {
+                const rotationBoost = data.velocity.length() * 0.2;
+                comet.rotation.x += (data.rotationSpeed + rotationBoost) * 1.5;
+                comet.rotation.y += (data.rotationSpeed + rotationBoost) * 1.2;
+                comet.rotation.z += (data.rotationSpeed + rotationBoost) * 0.8;
             }
             
             // Reset comet when needed with enhanced spawn logic
-            if (data.life <= 0 || comet.position.length() > 250) {
+            if (data.life <= 0 || comet.position.length() > 280) {
                 resetComet(comet, index);
             }
         } catch (animationError) {
@@ -846,33 +890,57 @@ function resetComet(comet, index) {
     
     // Calculate enhanced velocity with realistic orbital mechanics
     const direction = targetPoint.subtract(spawnPosition).normalize();
-    const baseSpeed = 0.4 + Math.random() * 0.6;
+    const baseSpeed = 0.3 + Math.random() * 0.5;
     const velocityVariation = new BABYLON.Vector3(
-        (Math.random() - 0.5) * 0.2,
-        (Math.random() - 0.5) * 0.2,
-        (Math.random() - 0.5) * 0.2
+        (Math.random() - 0.5) * 0.15,
+        (Math.random() - 0.5) * 0.15,
+        (Math.random() - 0.5) * 0.15
     );
     
     data.velocity = direction.scale(baseSpeed).add(velocityVariation);
     
-    // Enhanced life span based on trajectory
+    // Enhanced life span based on trajectory and comet type
     const trajectoryLength = spawnPosition.subtract(targetPoint).length();
-    data.life = Math.max(400, trajectoryLength * 2 + Math.random() * 300);
+    data.life = Math.max(500, trajectoryLength * 2.5 + Math.random() * 400);
     data.maxLife = data.life;
     
-    // Reset tail system properties
+    // Reset enhanced tail system properties
     if (data.tailSystem) {
-        data.tailSystem.emitRate = 100;
-        data.tailSystem.color1 = new BABYLON.Color4(0.5, 0.8, 1, 1);
-        data.tailSystem.color2 = new BABYLON.Color4(1, 1, 1, 1);
+        data.tailSystem.emitRate = 150;
+        if (data.type) {
+            data.tailSystem.color1 = new BABYLON.Color4(
+                data.type.emission.r, 
+                data.type.emission.g, 
+                data.type.emission.b, 
+                1
+            );
+        } else {
+            data.tailSystem.color1 = new BABYLON.Color4(0.5, 0.8, 1, 1);
+        }
+        data.tailSystem.color2 = new BABYLON.Color4(1, 1, 1, 0.8);
     }
     
-    // Add subtle spawn effects
-    const cometHead = comet.getChildren().find(child => child.name && child.name.includes('cometHead'));
-    if (cometHead && cometHead.material) {
-        cometHead.material.emissiveColor = new BABYLON.Color3(0.8, 0.8, 1);
+    // Reset dust tail
+    if (data.dustTail) {
+        data.dustTail.emitRate = 80;
+        data.dustTail.color1.a = 0.6;
+        data.dustTail.color2.a = 0.3;
+    }
+    
+    // Reset coma properties
+    if (data.coma && data.coma.material) {
+        data.coma.material.alpha = 0.4;
+        data.coma.scaling.setAll(1);
+    }
+    
+    // Add spectacular spawn effects for comet core
+    const cometCore = comet.getChildren().find(child => child.name && child.name.includes('cometCore'));
+    if (cometCore && cometCore.material && data.type) {
+        cometCore.material.emissiveColor = data.type.emission.clone();
+        cometCore.scaling.setAll(1);
     }
 }
+
 
 // Handle window resize
 export function onWindowResize() {
