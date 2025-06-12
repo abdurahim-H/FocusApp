@@ -126,105 +126,123 @@ function createAuthenticBlackHole(parent) {
     createPolarJets(blackHoleContainer);
 }
 
-// Create realistic accretion disk with gravitational lensing
+// Create ethereal accretion disk using pure particle systems
 function createAccretionDisk(parent) {
     const diskGroup = new BABYLON.TransformNode('accretionDiskGroup', scene);
     diskGroup.parent = parent;
     
-    // Main accretion disk (front side)
-    const diskGeometry = BABYLON.MeshBuilder.CreateGround('accretionDisk', {
-        width: 60,
-        height: 60,
-        subdivisions: 64
-    }, scene);
+    // Create main accretion disk as swirling particles
+    const mainDisk = new BABYLON.ParticleSystem('accretionDiskMain', 2500, scene);
+    mainDisk.particleTexture = new BABYLON.Texture(
+        'data:image/svg+xml;base64,'+btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+              <defs>
+                <radialGradient id="diskGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="white" stop-opacity="1"/>
+                  <stop offset="30%" stop-color="yellow" stop-opacity="0.9"/>
+                  <stop offset="70%" stop-color="orange" stop-opacity="0.6"/>
+                  <stop offset="100%" stop-color="rgba(255,100,0,0)"/>
+                </radialGradient>
+              </defs>
+              <circle cx="16" cy="16" r="16" fill="url(#diskGrad)"/>
+            </svg>
+        `),
+        scene
+    );
     
-    // Create custom shader material for the accretion disk
-    const diskMaterial = new BABYLON.StandardMaterial('accretionDiskMat', scene);
+    mainDisk.emitter = diskGroup;
+    mainDisk.createSphereEmitter(6, 0); // Start from event horizon
+    mainDisk.color1 = new BABYLON.Color4(1, 1, 1, 1);     // White-hot inner
+    mainDisk.color2 = new BABYLON.Color4(1, 0.6, 0.2, 0.8); // Orange outer
+    mainDisk.colorDead = new BABYLON.Color4(0.5, 0.1, 0, 0);
+    mainDisk.minSize = 0.8;
+    mainDisk.maxSize = 3.2;
+    mainDisk.minLifeTime = 8;
+    mainDisk.maxLifeTime = 15;
+    mainDisk.emitRate = 200;
+    mainDisk.gravity = BABYLON.Vector3.Zero();
+    mainDisk.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    mainDisk.renderingGroupId = 1; // Behind black hole
     
-    // Create procedural texture for the disk
-    const diskTexture = new BABYLON.DynamicTexture('diskTexture', 512, scene);
-    const ctx = diskTexture.getContext();
-    
-    // Draw the accretion disk pattern
-    const canvas = ctx.canvas;
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const maxRadius = Math.min(centerX, centerY);
-    const innerRadius = maxRadius * 0.3;
-    
-    // Create radial gradient for the disk
-    for (let r = innerRadius; r < maxRadius; r += 2) {
-        const normalizedR = (r - innerRadius) / (maxRadius - innerRadius);
-        
-        // Temperature-based color (hottest at inner edge)
-        let red, green, blue, alpha;
-        if (normalizedR < 0.3) {
-            // Inner region: white-hot
-            red = 255;
-            green = 255;
-            blue = 255;
-            alpha = 0.9;
-        } else if (normalizedR < 0.6) {
-            // Middle region: yellow-orange
-            red = 255;
-            green = Math.floor(255 - normalizedR * 100);
-            blue = Math.floor(150 - normalizedR * 150);
-            alpha = 0.8;
-        } else {
-            // Outer region: red-orange, fading
-            red = Math.floor(255 - normalizedR * 100);
-            green = Math.floor(100 - normalizedR * 80);
-            blue = Math.floor(50 - normalizedR * 50);
-            alpha = 0.7 - normalizedR * 0.5;
+    // Custom update function for spiral motion
+    mainDisk.updateFunction = (particles) => {
+        for (let p = 0; p < particles.length; p++) {
+            const particle = particles[p];
+            if (!particle) continue;
+            
+            const distance = Math.sqrt(particle.position.x * particle.position.x + particle.position.z * particle.position.z);
+            
+            // Spiral outward motion
+            if (distance < 30) {
+                const angle = Math.atan2(particle.position.z, particle.position.x) + (0.03 / Math.max(1, distance * 0.1));
+                const newDistance = Math.min(30, distance + 0.1);
+                particle.position.x = Math.cos(angle) * newDistance;
+                particle.position.z = Math.sin(angle) * newDistance;
+                
+                // Keep particles in disk plane with slight variation
+                particle.position.y = Math.sin(Date.now() * 0.001 + distance) * 0.5;
+                
+                // Temperature-based color evolution
+                const temp = Math.max(0, 1 - distance / 25);
+                particle.color.r = 1;
+                particle.color.g = 0.8 + temp * 0.2;
+                particle.color.b = 0.2 + temp * 0.6;
+                particle.color.a = 0.7 + temp * 0.3;
+            }
         }
-        
-        // Add some turbulence
-        const turbulence = Math.sin(r * 0.1) * 0.1 + Math.cos(r * 0.15) * 0.1;
-        alpha += turbulence;
-        
-        ctx.globalAlpha = Math.max(0, alpha);
-        ctx.strokeStyle = `rgb(${red}, ${green}, ${blue})`;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
-        ctx.stroke();
-    }
+    };
     
-    diskTexture.update();
+    mainDisk.start();
     
-    // Apply the texture to the material
-    diskMaterial.diffuseTexture = diskTexture;
-    diskMaterial.emissiveTexture = diskTexture;
-    diskMaterial.emissiveColor = new BABYLON.Color3(1.2, 0.8, 0.4);
-    diskMaterial.alpha = 0.8;
-    diskMaterial.backFaceCulling = false;
-    diskMaterial.useAlphaFromDiffuseTexture = true;
+    // Create gravitational lensing effect - curved particle stream above
+    const lensingStream = new BABYLON.ParticleSystem('lensingStream', 800, scene);
+    lensingStream.particleTexture = new BABYLON.Texture(
+        'data:image/svg+xml;base64,'+btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+              <defs>
+                <radialGradient id="lensGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="gold" stop-opacity="0.8"/>
+                  <stop offset="60%" stop-color="orange" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="rgba(255,165,0,0)"/>
+                </radialGradient>
+              </defs>
+              <circle cx="12" cy="12" r="12" fill="url(#lensGrad)"/>
+            </svg>
+        `),
+        scene
+    );
     
-    diskGeometry.material = diskMaterial;
-    diskGeometry.parent = diskGroup;
-    diskGeometry.renderingGroupId = 1; // Behind black hole
+    lensingStream.emitter = diskGroup;
+    lensingStream.createSphereEmitter(20, 0.5);
+    lensingStream.color1 = new BABYLON.Color4(1, 0.8, 0.3, 0.6);
+    lensingStream.color2 = new BABYLON.Color4(1, 0.5, 0.1, 0.4);
+    lensingStream.colorDead = new BABYLON.Color4(0.8, 0.3, 0, 0);
+    lensingStream.minSize = 0.5;
+    lensingStream.maxSize = 2;
+    lensingStream.minLifeTime = 6;
+    lensingStream.maxLifeTime = 12;
+    lensingStream.emitRate = 80;
+    lensingStream.gravity = BABYLON.Vector3.Zero();
+    lensingStream.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    lensingStream.renderingGroupId = 1;
     
-    // Create gravitational lensing effect - top curve (back side of disk visible)
-    const lensingDisk = BABYLON.MeshBuilder.CreateTorus('lensingDisk', {
-        diameter: 45,
-        thickness: 8,
-        tessellation: 64
-    }, scene);
+    // Curved lensing motion - simulate light bending
+    lensingStream.updateFunction = (particles) => {
+        for (let p = 0; p < particles.length; p++) {
+            const particle = particles[p];
+            if (!particle) continue;
+            
+            const distance = Math.sqrt(particle.position.x * particle.position.x + particle.position.z * particle.position.z);
+            const angle = Math.atan2(particle.position.z, particle.position.x) + 0.02;
+            
+            // Create curved arc above black hole
+            particle.position.x = Math.cos(angle) * distance;
+            particle.position.z = Math.sin(angle) * distance;
+            particle.position.y = Math.sin(distance * 0.1) * 8 + 5; // Curved lensing effect
+        }
+    };
     
-    const lensingMaterial = new BABYLON.StandardMaterial('lensingDiskMat', scene);
-    lensingMaterial.diffuseColor = new BABYLON.Color3(1, 0.7, 0.3);
-    lensingMaterial.emissiveColor = new BABYLON.Color3(0.8, 0.5, 0.2);
-    lensingMaterial.alpha = 0.6;
-    lensingMaterial.backFaceCulling = false;
-    
-    lensingDisk.material = lensingMaterial;
-    lensingDisk.parent = diskGroup;
-    lensingDisk.position.y = 8; // Position above the black hole
-    lensingDisk.rotation.x = Math.PI / 2; // Make it horizontal
-    lensingDisk.renderingGroupId = 1; // Behind black hole
+    lensingStream.start();
     
     // Add animated matter streams
     createMatterStreams(diskGroup);
@@ -232,10 +250,8 @@ function createAccretionDisk(parent) {
     // Store reference
     accretionDisk = {
         group: diskGroup,
-        mainDisk: diskGeometry,
-        lensingDisk: lensingDisk,
-        material: diskMaterial,
-        lensingMaterial: lensingMaterial
+        mainDisk: mainDisk,
+        lensingStream: lensingStream
     };
 }
 
@@ -291,57 +307,59 @@ function createPolarJets(parent) {
     polarJetParticles.push(upperJet, lowerJet);
 }
 
-// Create animated matter streams in the accretion disk
+// Create ethereal matter streams in the accretion disk
 function createMatterStreams(parent) {
     const streamGroup = new BABYLON.TransformNode('matterStreamsGroup', scene);
     streamGroup.parent = parent;
     
-    // Create spiraling matter streams
-    for (let i = 0; i < 3; i++) {
-        const stream = new BABYLON.ParticleSystem(`matterStream_${i}`, 500, scene);
+    // Create spiraling matter streams - pure particle effects
+    for (let i = 0; i < 2; i++) {
+        const stream = new BABYLON.ParticleSystem(`matterStream_${i}`, 300, scene);
         stream.particleTexture = new BABYLON.Texture(
             'data:image/svg+xml;base64,'+btoa(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
                   <defs>
                     <radialGradient id="matterGrad" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stop-color="yellow" stop-opacity="0.9"/>
-                      <stop offset="60%" stop-color="orange" stop-opacity="0.6"/>
-                      <stop offset="100%" stop-color="red" stop-opacity="0"/>
+                      <stop offset="0%" stop-color="white" stop-opacity="0.9"/>
+                      <stop offset="40%" stop-color="yellow" stop-opacity="0.7"/>
+                      <stop offset="80%" stop-color="orange" stop-opacity="0.3"/>
+                      <stop offset="100%" stop-color="rgba(255,100,0,0)"/>
                     </radialGradient>
                   </defs>
-                  <circle cx="6" cy="6" r="6" fill="url(#matterGrad)"/>
+                  <circle cx="8" cy="8" r="8" fill="url(#matterGrad)"/>
                 </svg>
             `),
             scene
         );
         
         stream.emitter = streamGroup;
-        stream.createSphereEmitter(25, 0.5);
-        stream.color1 = new BABYLON.Color4(1, 0.8, 0.3, 0.8);
-        stream.color2 = new BABYLON.Color4(1, 0.5, 0.2, 0.6);
-        stream.colorDead = new BABYLON.Color4(0.5, 0.2, 0.1, 0);
-        stream.minSize = 0.3;
-        stream.maxSize = 1.5;
-        stream.minLifeTime = 2;
-        stream.maxLifeTime = 5;
-        stream.emitRate = 100;
-        stream.gravity = new BABYLON.Vector3(0, 0, 0);
+        stream.createSphereEmitter(15, 0.2);
+        stream.color1 = new BABYLON.Color4(1, 0.9, 0.5, 0.8);
+        stream.color2 = new BABYLON.Color4(1, 0.6, 0.2, 0.6);
+        stream.colorDead = new BABYLON.Color4(0.8, 0.2, 0.1, 0);
+        stream.minSize = 0.4;
+        stream.maxSize = 1.8;
+        stream.minLifeTime = 3;
+        stream.maxLifeTime = 8;
+        stream.emitRate = 50;
+        stream.gravity = BABYLON.Vector3.Zero();
         stream.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
         stream.renderingGroupId = 1;
         
-        // Spiral motion towards center
+        // Smooth spiral motion
         stream.updateFunction = (particles) => {
             for (let p = 0; p < particles.length; p++) {
                 const particle = particles[p];
                 if (!particle) continue;
                 
-                // Spiral inward motion
                 const distance = Math.sqrt(particle.position.x * particle.position.x + particle.position.z * particle.position.z);
-                if (distance > 6) {
-                    const angle = Math.atan2(particle.position.z, particle.position.x) + 0.02;
-                    const newDistance = distance * 0.998;
-                    particle.position.x = Math.cos(angle) * newDistance;
-                    particle.position.z = Math.sin(angle) * newDistance;
+                if (distance > 6 && distance < 25) {
+                    const angle = Math.atan2(particle.position.z, particle.position.x) + (0.04 / Math.max(1, distance * 0.2));
+                    particle.position.x = Math.cos(angle) * distance;
+                    particle.position.z = Math.sin(angle) * distance;
+                    
+                    // Subtle vertical oscillation
+                    particle.position.y = Math.sin(Date.now() * 0.002 + distance) * 1.5;
                 }
             }
         };
@@ -778,6 +796,24 @@ function createDustPlasmaEmitters(parentGroup) {
 export function updateBlackHoleEffects() {
     const t = Date.now()*0.001;
 
+    // Animate accretion disk particle effects
+    if (accretionDisk && accretionDisk.group) {
+        // Rotate the entire disk group for overall motion
+        accretionDisk.group.rotation.y += 0.005;
+        
+        // Animate main disk particles intensity
+        if (accretionDisk.mainDisk) {
+            const intensity = Math.sin(t * 1.5) * 0.3 + 1.0;
+            accretionDisk.mainDisk.emitRate = 200 * intensity;
+        }
+        
+        // Animate lensing stream
+        if (accretionDisk.lensingStream) {
+            const lensingIntensity = Math.sin(t * 2) * 0.4 + 0.8;
+            accretionDisk.lensingStream.emitRate = 80 * lensingIntensity;
+        }
+    }
+
     // Elegant orbital animations - organized and graceful movement
     orbitalBodies.forEach(b => {
         const u = b.userData;
@@ -820,6 +856,15 @@ export function updateBlackHoleEffects() {
                     particle.color.a = data.baseAlpha * twinkle;
                 }
             }
+        }
+    });
+
+    // Animate polar jets
+    polarJetParticles.forEach(jet => {
+        if (jet && jet.emitRate) {
+            // Vary jet intensity
+            const jetIntensity = Math.sin(t * 3 + Math.random()) * 0.3 + 0.7;
+            jet.emitRate = 150 * jetIntensity;
         }
     });
 
