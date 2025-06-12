@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/themes.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/liquid-glass-buttons.css">
     <link rel="stylesheet" href="css/responsive.css">
     
     <!-- Theme Initialization Script -->
@@ -43,9 +44,15 @@
 
     <!-- Main Navigation -->
     <nav class="nav">
-        <button class="nav-btn active" data-mode="home">Home</button>
-        <button class="nav-btn" data-mode="focus">Focus</button>
-        <button class="nav-btn" data-mode="ambient">Ambient</button>
+        <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small nav-btn active" data-mode="home">
+            <span class="btn-text">Home</span>
+        </button>
+        <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small nav-btn" data-mode="focus">
+            <span class="btn-text">Focus</span>
+        </button>
+        <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small nav-btn" data-mode="ambient">
+            <span class="btn-text">Ambient</span>
+        </button>
     </nav>
 
     <!-- Main Content Container -->
@@ -71,12 +78,24 @@
                 <div class="timer-display" id="timerDisplay">25:00</div>
                 
                 <div class="timer-controls">
-                    <button class="btn btn-primary" id="startBtn">Start Focus</button>
-                    <button class="btn hidden" id="pauseBtn">Pause</button>
-                    <button class="btn" id="resetBtn">Reset</button>
-                    <button class="btn hidden" id="skipBreakBtn">Skip Break</button>
-                    <button class="btn hidden" id="skipFocusBtn">Skip Focus</button>
-                    <button class="btn reset-session-btn" id="resetSessionBtn" title="Reset entire Pomodoro cycle">⟳</button>
+                    <button class="liquid-glass-btn liquid-glass-btn--primary" id="startBtn">
+                        <span class="btn-text">Start Focus</span>
+                    </button>
+                    <button class="liquid-glass-btn liquid-glass-btn--warning hidden" id="pauseBtn">
+                        <span class="btn-text">Pause</span>
+                    </button>
+                    <button class="liquid-glass-btn" id="resetBtn">
+                        <span class="btn-text">Reset</span>
+                    </button>
+                    <button class="liquid-glass-btn liquid-glass-btn--success hidden" id="skipBreakBtn">
+                        <span class="btn-text">Skip Break</span>
+                    </button>
+                    <button class="liquid-glass-btn liquid-glass-btn--success hidden" id="skipFocusBtn">
+                        <span class="btn-text">Skip Focus</span>
+                    </button>
+                    <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small" id="resetSessionBtn" title="Reset entire Pomodoro cycle">
+                        <span class="btn-icon">⟳</span>
+                    </button>
                 </div>
 
                 <!-- Task Management Section -->
@@ -84,7 +103,9 @@
                     <h3 class="tasks-title">Tasks for this session</h3>
                     <div class="task-input-group">
                         <input type="text" class="task-input" id="taskInput" placeholder="What are you working on?">
-                        <button class="btn" id="addTaskBtn">Add</button>
+                        <button class="liquid-glass-btn liquid-glass-btn--success liquid-glass-btn--small" id="addTaskBtn">
+                            <span class="btn-text">Add</span>
+                        </button>
                     </div>
                     <ul class="task-list" id="taskList"></ul>
                 </div>
@@ -100,10 +121,22 @@
                 <div class="ambient-section">
                     <h3 class="ambient-title">Ambient Sounds</h3>
                     <div class="ambient-controls">
-                        <button class="btn" id="rainBtn">🌧️ Rain</button>
-                        <button class="btn" id="oceanBtn">🌊 Ocean</button>
-                        <button class="btn" id="forestBtn">🌲 Forest</button>
-                        <button class="btn" id="cafeBtn">☕ Cafe</button>
+                        <button class="liquid-glass-btn" id="rainBtn">
+                            <span class="btn-icon">🌧️</span>
+                            <span class="btn-text">Rain</span>
+                        </button>
+                        <button class="liquid-glass-btn" id="oceanBtn">
+                            <span class="btn-icon">🌊</span>
+                            <span class="btn-text">Ocean</span>
+                        </button>
+                        <button class="liquid-glass-btn" id="forestBtn">
+                            <span class="btn-icon">🌲</span>
+                            <span class="btn-text">Forest</span>
+                        </button>
+                        <button class="liquid-glass-btn" id="cafeBtn">
+                            <span class="btn-icon">☕</span>
+                            <span class="btn-text">Cafe</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -122,12 +155,16 @@
         </div>
 
         <!-- Settings Button -->
-        <button class="settings-btn" id="settingsBtn">⚙️</button>
+        <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small settings-btn" id="settingsBtn">
+            <span class="btn-icon">⚙️</span>
+        </button>
 
         <!-- Settings Modal -->
         <div class="settings-modal-overlay" id="settingsModalOverlay">
             <div class="settings-modal">
-                <button class="close-btn" id="closeSettingsBtn" title="Close">✕</button>
+                <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small close-btn" id="closeSettingsBtn" title="Close">
+                    <span class="btn-text">✕</span>
+                </button>
                 <h2>Settings</h2>
                 <div class="settings-content">
                     
@@ -135,10 +172,18 @@
                     <div class="settings-section">
                         <h4>Theme</h4>
                         <div class="theme-buttons">
-                            <button class="btn" id="themeLightBtn" data-theme="light">Light</button>
-                            <button class="btn btn-primary" id="themeDarkBtn" data-theme="dark">Dark</button>
-                            <button class="btn" id="themeCosmosBtn" data-theme="cosmos">Cosmos</button>
-                            <button class="btn" id="themeAutoBtn" data-theme="auto">Auto</button>
+                            <button class="liquid-glass-btn liquid-glass-btn--small" id="themeLightBtn" data-theme="light">
+                                <span class="btn-text">Light</span>
+                            </button>
+                            <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--primary" id="themeDarkBtn" data-theme="dark">
+                                <span class="btn-text">Dark</span>
+                            </button>
+                            <button class="liquid-glass-btn liquid-glass-btn--small" id="themeCosmosBtn" data-theme="cosmos">
+                                <span class="btn-text">Cosmos</span>
+                            </button>
+                            <button class="liquid-glass-btn liquid-glass-btn--small" id="themeAutoBtn" data-theme="auto">
+                                <span class="btn-text">Auto</span>
+                            </button>
                         </div>
                     </div>
                     
@@ -183,8 +228,12 @@
                     <!-- Action Buttons -->
                     <div class="settings-section">
                         <div class="settings-buttons">
-                            <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
-                            <button class="btn" id="resetSettingsBtn">Reset to Default</button>
+                            <button class="liquid-glass-btn liquid-glass-btn--primary" id="saveSettingsBtn">
+                                <span class="btn-text">Save Settings</span>
+                            </button>
+                            <button class="liquid-glass-btn" id="resetSettingsBtn">
+                                <span class="btn-text">Reset to Default</span>
+                            </button>
                         </div>
                     </div>
                     
