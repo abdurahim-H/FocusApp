@@ -194,64 +194,13 @@ function createAccretionDisk(parent) {
     
     mainDisk.start();
     
-    // Create gravitational lensing effect - curved particle stream above
-    const lensingStream = new BABYLON.ParticleSystem('lensingStream', 800, scene);
-    lensingStream.particleTexture = new BABYLON.Texture(
-        'data:image/svg+xml;base64,'+btoa(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-              <defs>
-                <radialGradient id="lensGrad" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="gold" stop-opacity="0.8"/>
-                  <stop offset="60%" stop-color="orange" stop-opacity="0.4"/>
-                  <stop offset="100%" stop-color="rgba(255,165,0,0)"/>
-                </radialGradient>
-              </defs>
-              <circle cx="12" cy="12" r="12" fill="url(#lensGrad)"/>
-            </svg>
-        `),
-        scene
-    );
-    
-    lensingStream.emitter = diskGroup;
-    lensingStream.createSphereEmitter(20, 0.5);
-    lensingStream.color1 = new BABYLON.Color4(1, 0.8, 0.3, 0.6);
-    lensingStream.color2 = new BABYLON.Color4(1, 0.5, 0.1, 0.4);
-    lensingStream.colorDead = new BABYLON.Color4(0.8, 0.3, 0, 0);
-    lensingStream.minSize = 0.5;
-    lensingStream.maxSize = 2;
-    lensingStream.minLifeTime = 6;
-    lensingStream.maxLifeTime = 12;
-    lensingStream.emitRate = 80;
-    lensingStream.gravity = BABYLON.Vector3.Zero();
-    lensingStream.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
-    lensingStream.renderingGroupId = 1;
-    
-    // Curved lensing motion - simulate light bending
-    lensingStream.updateFunction = (particles) => {
-        for (let p = 0; p < particles.length; p++) {
-            const particle = particles[p];
-            if (!particle) continue;
-            
-            const distance = Math.sqrt(particle.position.x * particle.position.x + particle.position.z * particle.position.z);
-            const angle = Math.atan2(particle.position.z, particle.position.x) + 0.02;
-            
-            // Create curved arc above black hole
-            particle.position.x = Math.cos(angle) * distance;
-            particle.position.z = Math.sin(angle) * distance;
-            particle.position.y = Math.sin(distance * 0.1) * 8 + 5; // Curved lensing effect
-        }
-    };
-    
-    lensingStream.start();
-    
     // Add animated matter streams
     createMatterStreams(diskGroup);
     
     // Store reference
     accretionDisk = {
         group: diskGroup,
-        mainDisk: mainDisk,
-        lensingStream: lensingStream
+        mainDisk: mainDisk
     };
 }
 
@@ -805,12 +754,6 @@ export function updateBlackHoleEffects() {
         if (accretionDisk.mainDisk) {
             const intensity = Math.sin(t * 1.5) * 0.3 + 1.0;
             accretionDisk.mainDisk.emitRate = 200 * intensity;
-        }
-        
-        // Animate lensing stream
-        if (accretionDisk.lensingStream) {
-            const lensingIntensity = Math.sin(t * 2) * 0.4 + 0.8;
-            accretionDisk.lensingStream.emitRate = 80 * lensingIntensity;
         }
     }
 
