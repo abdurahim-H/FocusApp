@@ -516,3 +516,29 @@
         0 0 10px rgba(176, 224, 230, 0.4),
         0 0 5px rgba(255, 255, 255, 0.2);
 }
+
+/* Override any remaining purple selection states */
+.liquid-glass-btn.liquid-glass-btn--primary,
+.liquid-glass-btn--primary.liquid-glass-btn,
+.nav-btn.active.liquid-glass-btn,
+.nav-btn.liquid-glass-btn.active {
+    background: rgba(176, 224, 230, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    color: rgba(255, 255, 255, 1) !important;
+    box-shadow: 
+        0 6px 20px rgba(255, 255, 255, 0.12),
+        0 2px 8px rgba(176, 224, 230, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+    text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
+}
+
+/* Force water-glass aesthetic on all active states */
+.liquid-glass-btn:not(.liquid-glass-btn--success):not(.liquid-glass-btn--warning).active,
+.liquid-glass-btn.selected {
+    background: rgba(176, 224, 230, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    color: rgba(255, 255, 255, 1) !important;
+    text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
+}
