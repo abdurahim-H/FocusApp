@@ -24,8 +24,23 @@ function initAudioElements() {
         const audio = new Audio();
         audio.src = url;
         audio.loop = true;
-        audio.volume = 0;
+        audio.volume = masterVolume; // Initialize with master volume instead of 0
         audio.preload = 'metadata'; // Only load metadata, not full audio
+        
+        // Add error handling for audio loading
+        audio.addEventListener('error', (e) => {
+            console.error(`🎵 Error loading ${type} audio:`, e);
+        });
+        
+        // Add audio state event listeners
+        audio.addEventListener('loadstart', () => {
+            console.log(`🎵 Started loading ${type}`);
+        });
+        
+        audio.addEventListener('canplay', () => {
+            console.log(`🎵 ${type} ready to play`);
+        });
+        
         audioElements[type] = audio;
     });
     
@@ -42,11 +57,55 @@ async function startSound(type) {
             return;
         }
 
-        // Set volume and play
-        audio.volume = masterVolume;
-        await audio.play();
+        // Ensure audio is ready before playing
+        if (audio.readyState < 2) {
+            console.log(`🎵 Waiting for ${type} to load...`);
+            await new Promise((resolve, reject) => {
+                const timeoutId = setTimeout(() => {
+                    reject(new Error(`Timeout loading ${type}`));
+                }, 10000); // 10 second timeout
+                
+                audio.addEventListener('canplay', () => {
+                    clearTimeout(timeoutId);
+                    resolve();
+                }, { once: true });
+                
+                audio.addEventListener('error', (e) => {
+                    clearTimeout(timeoutId);
+                    reject(e);
+                }, { once: true });
+                
+                // Trigger loading if not already started
+                audio.load();
+            });
+        }
+
+        // Set volume and play - ensure volume is audible
+        const volumeToSet = masterVolume > 0 ? masterVolume : 0.3;
+        audio.volume = volumeToSet;
         
-        console.log(`🎵 Started playing ${type}`);
+        // Play with retry logic
+        let playAttempts = 0;
+        const maxAttempts = 3;
+        
+        while (playAttempts < maxAttempts) {
+            try {
+                await audio.play();
+                break;
+            } catch (playError) {
+                playAttempts++;
+                console.warn(`🎵 Play attempt ${playAttempts} failed for ${type}:`, playError);
+                
+                if (playAttempts >= maxAttempts) {
+                    throw playError;
+                }
+                
+                // Wait before retry
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+        }
+        
+        console.log(`🎵 Started playing ${type} at volume ${Math.round(volumeToSet * 100)}%`);
 
         // Add to active sounds
         if (!state.sounds.active.includes(type)) {
@@ -55,6 +114,11 @@ async function startSound(type) {
 
     } catch (error) {
         console.error(`🎵 Error starting ${type}:`, error);
+        // Remove from active sounds if it failed to start
+        const index = state.sounds.active.indexOf(type);
+        if (index > -1) {
+            state.sounds.active.splice(index, 1);
+        }
     }
 }
 
@@ -93,6 +157,19 @@ export async function toggleAmbientSound(type) {
     if (isActive) {
         stopSound(type);
     } else {
+        // Ensure audio context is resumed (required by some browsers)
+        try {
+            if (typeof AudioContext !== 'undefined') {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                    console.log('🎵 Audio context resumed');
+                }
+            }
+        } catch (e) {
+            console.warn('🎵 Could not resume audio context:', e);
+        }
+        
         await startSound(type);
     }
     
@@ -133,6 +210,23 @@ export function setAmbientVolume(volumeLevel) {
     });
     
     console.log(`🎵 Master volume set to ${Math.round(masterVolume * 100)}%`);
+}
+
+// Legacy function for backward compatibility with meditation.js
+export function setVolume(volumePercent) {
+    const volumeLevel = Math.max(0, Math.min(100, volumePercent)) / 100;
+    setAmbientVolume(volumeLevel);
+}
+
+// Set volume for a specific sound
+export function setSoundVolume(type, volumePercent) {
+    const volumeLevel = Math.max(0, Math.min(100, volumePercent)) / 100;
+    const audio = audioElements[type];
+    
+    if (audio) {
+        audio.volume = volumeLevel;
+        console.log(`🎵 Set ${type} volume to ${Math.round(volumeLevel * 100)}%`);
+    }
 }
 
 // Setup ambient sound controls

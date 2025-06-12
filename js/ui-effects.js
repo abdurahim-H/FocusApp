@@ -146,11 +146,14 @@ export function triggerBlackHoleEscapeUI() {
 // Time dilation effect
 export function triggerTimeDilationUI(duration = 3000) {
     const body = document.body;
-    const elements = document.querySelectorAll('*');
+    const elements = document.querySelectorAll('*:not(audio):not(video)'); // Exclude audio/video elements
     
     // Apply slow motion
     body.style.setProperty('--time-scale', '0.3');
     elements.forEach(el => {
+        // Skip audio and video elements
+        if (el.tagName === 'AUDIO' || el.tagName === 'VIDEO') return;
+        
         if (el.style.animationDuration || el.style.transitionDuration) {
             el.style.setProperty('--time-scale', '0.3');
         }
@@ -171,6 +174,9 @@ export function triggerTimeDilationUI(duration = 3000) {
                 body.style.setProperty('--time-scale', newScale.toString());
                 
                 elements.forEach(el => {
+                    // Skip audio and video elements
+                    if (el.tagName === 'AUDIO' || el.tagName === 'VIDEO') return;
+                    
                     if (el.style.getPropertyValue('--time-scale')) {
                         el.style.setProperty('--time-scale', newScale.toString());
                     }
@@ -181,7 +187,11 @@ export function triggerTimeDilationUI(duration = 3000) {
                 } else {
                     // Clean up
                     body.style.removeProperty('--time-scale');
-                    elements.forEach(el => el.style.removeProperty('--time-scale'));
+                    elements.forEach(el => {
+                        if (el.tagName !== 'AUDIO' && el.tagName !== 'VIDEO') {
+                            el.style.removeProperty('--time-scale');
+                        }
+                    });
                 }
             };
             

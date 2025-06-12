@@ -3,7 +3,7 @@
 
 import { state } from './state.js';
 import { trackSetInterval, trackRequestAnimationFrame } from './cleanup.js';
-import { toggleAmbientSound, setVolume, stopAmbientSound } from './sounds.js';
+import { toggleAmbientSound, setVolume, setSoundVolume, stopAmbientSound } from './sounds.js';
 
 let meditationCanvas, meditationCtx;
 let meditationTimer = null;
@@ -311,8 +311,8 @@ function setupSoundMixer() {
             
             // Apply volume to active sounds
             if (soundStates[sound].active) {
-                // Set master volume based on this slider
-                setVolume(value);
+                // Set individual sound volume instead of master volume
+                setSoundVolume(sound, value);
             }
         });
         
@@ -332,7 +332,7 @@ function setupSoundMixer() {
                     volumeSlider.value = 50;
                     volumeSlider.style.setProperty('--value', '50%');
                     soundStates[sound].volume = 50;
-                    setVolume(50);
+                    setSoundVolume(sound, 50); // Use individual sound volume
                 }
             }
         });
@@ -418,7 +418,7 @@ function applyPreset(presetName) {
                 
                 // Then activate sound
                 activateSound(sound, toggleBtn, layer);
-                setVolume(volume);
+                setSoundVolume(sound, volume); // Use individual sound volume
             }
         });
     }, 100);

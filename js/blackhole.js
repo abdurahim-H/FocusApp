@@ -157,9 +157,9 @@ function createAccretionDisk(parent) {
     mainDisk.colorDead = new BABYLON.Color4(0.5, 0.1, 0, 0);
     mainDisk.minSize = 0.8;
     mainDisk.maxSize = 3.2;
-    mainDisk.minLifeTime = 8;
-    mainDisk.maxLifeTime = 15;
-    mainDisk.emitRate = 200;
+    mainDisk.minLifeTime = Number.MAX_VALUE;
+    mainDisk.maxLifeTime = Number.MAX_VALUE;
+    mainDisk.emitRate = 400; // Increased from 200 for more particles
     mainDisk.gravity = BABYLON.Vector3.Zero();
     mainDisk.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
     mainDisk.renderingGroupId = 1; // Behind black hole
@@ -237,8 +237,8 @@ function createPolarJets(parent) {
     upperJet.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
     upperJet.minSize = 0.5;
     upperJet.maxSize = 2;
-    upperJet.minLifeTime = 3;
-    upperJet.maxLifeTime = 8;
+    upperJet.minLifeTime = Number.MAX_VALUE;
+    upperJet.maxLifeTime = Number.MAX_VALUE;
     upperJet.emitRate = 150;
     upperJet.minEmitPower = 5;
     upperJet.maxEmitPower = 15;
@@ -288,8 +288,8 @@ function createMatterStreams(parent) {
         stream.colorDead = new BABYLON.Color4(0.8, 0.2, 0.1, 0);
         stream.minSize = 0.4;
         stream.maxSize = 1.8;
-        stream.minLifeTime = 3;
-        stream.maxLifeTime = 8;
+        stream.minLifeTime = Number.MAX_VALUE;
+        stream.maxLifeTime = Number.MAX_VALUE;
         stream.emitRate = 50;
         stream.gravity = BABYLON.Vector3.Zero();
         stream.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
@@ -898,8 +898,8 @@ function createDustPlasmaEmitters(parentGroup) {
         ps.colorDead = new BABYLON.Color4(0.2,0.2,0.4,0);
 
         ps.minSize = 0.2; ps.maxSize = 1.2;
-        ps.minLifeTime = 2; ps.maxLifeTime = 6;
-        ps.emitRate    = 200;
+        ps.minLifeTime = Number.MAX_VALUE; ps.maxLifeTime = Number.MAX_VALUE;
+        ps.emitRate    = 400; // Increased from 200 for more persistent particles
 
         ps.direction1 = dir.add(new BABYLON.Vector3(0.2,0,0.2));
         ps.direction2 = dir.add(new BABYLON.Vector3(-0.2,0,-0.2));
@@ -918,6 +918,16 @@ function createDustPlasmaEmitters(parentGroup) {
 // 5. Animation Loop
 export function updateBlackHoleEffects() {
     const t = Date.now()*0.001;
+
+    // Debug particle counts periodically (every 10 seconds)
+    if (Math.floor(t) % 10 === 0 && Math.floor(t * 10) % 10 === 0) {
+        console.log('🌟 Active particle systems:');
+        energyParticles.forEach((ps, index) => {
+            if (ps && ps.particles) {
+                console.log(`   ${ps.name || 'Unknown'}: ${ps.particles.length} particles`);
+            }
+        });
+    }
 
     // Animate accretion disk particle effects
     if (accretionDisk && accretionDisk.group) {

@@ -748,8 +748,8 @@ export function createComets() {
         tailSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
         tailSystem.minSize = 0.5;
         tailSystem.maxSize = 2.5; // Larger tail particles
-        tailSystem.minLifeTime = 1.0;
-        tailSystem.maxLifeTime = 4.0; // Longer-lasting tail
+        tailSystem.minLifeTime = Number.MAX_VALUE;
+        tailSystem.maxLifeTime = Number.MAX_VALUE; // Persistent particles
         tailSystem.emitRate = 150; // More particles per second
         tailSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
         tailSystem.gravity = new BABYLON.Vector3(0, 0, 0);
@@ -771,8 +771,8 @@ export function createComets() {
         dustTail.color2 = new BABYLON.Color4(0.6, 0.5, 0.4, 0.3);
         dustTail.minSize = 0.2;
         dustTail.maxSize = 1.0;
-        dustTail.minLifeTime = 2.0;
-        dustTail.maxLifeTime = 6.0;
+        dustTail.minLifeTime = Number.MAX_VALUE;
+        dustTail.maxLifeTime = Number.MAX_VALUE;
         dustTail.emitRate = 80;
         dustTail.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
         dustTail.direction1 = new BABYLON.Vector3(-2, -0.5, -0.5);
