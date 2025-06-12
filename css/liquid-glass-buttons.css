@@ -369,12 +369,47 @@
     }
 }
 
+/* Enhanced responsive navigation design */
+@media (max-width: 768px) {
+    .nav.water-cosmic-container {
+        max-width: 320px;
+        min-width: 240px;
+        padding: 6px 16px;
+        top: 20px;
+    }
+    
+    .nav-btn {
+        padding: 10px 16px;
+        font-size: 0.85em;
+        min-width: 60px;
+    }
+}
+
 @media (max-width: 480px) {
-    .liquid-glass-btn {
-        padding: 10px 18px;
-        font-size: 14px;
-        min-height: 40px;
-        border-radius: 20px;
+    .nav.water-cosmic-container {
+        max-width: 280px;
+        min-width: 220px;
+        padding: 6px 12px;
+        gap: 6px;
+    }
+    
+    .nav-btn {
+        padding: 8px 12px;
+        font-size: 0.8em;
+        min-width: 50px;
+    }
+}
+
+/* Ultra-wide screen adjustments */
+@media (min-width: 1400px) {
+    .nav.water-cosmic-container {
+        max-width: 420px;
+        padding: 10px 24px;
+    }
+    
+    .nav-btn {
+        padding: 14px 24px;
+        min-width: 80px;
     }
 }
 
@@ -636,6 +671,31 @@
     ) !important;
     border-radius: 50px;
     backdrop-filter: blur(20px) saturate(1.1);
+    
+    /* Floating capsule constraints */
+    width: fit-content;
+    max-width: 380px;
+    min-width: 280px;
+    padding: 8px 20px;
+    
+    /* Enhanced floating effect */
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.15),
+        0 4px 16px rgba(100, 150, 255, 0.1),
+        0 2px 8px rgba(176, 224, 230, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    
+    /* Subtle hover lift */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav.water-cosmic-container:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.2),
+        0 6px 24px rgba(100, 150, 255, 0.15),
+        0 3px 12px rgba(176, 224, 230, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* Content containers - deeper water pools */
