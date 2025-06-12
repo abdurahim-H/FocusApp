@@ -6,7 +6,6 @@
  */
 import { state } from './state.js';
 import { triggerFocusIntensification } from './blackhole.js';
-import { triggerFocusZoom, triggerSessionCompleteZoom, approachBlackHole } from './camera-effects.js';
 import { triggerFocusIntensity, triggerSessionCompleteUI, triggerBlackHoleApproachUI } from './ui-effects.js';
 import { trackSetInterval } from './cleanup.js';
 
@@ -60,10 +59,8 @@ export function startTimer() {
 
     if (!state.timer.isBreak) {
         triggerFocusIntensification();
-        triggerFocusZoom();
         triggerFocusIntensity();
     } else {
-        approachBlackHole();
         triggerBlackHoleApproachUI();
     }
 
@@ -234,7 +231,6 @@ export function completeSession() {
         state.universe.stars += 1;
 
         // Trigger spectacular session completion effects
-        triggerSessionCompleteZoom();
         triggerSessionCompleteUI();
 
         if (state.timer.pomodoroCount % 4 === 0) {
