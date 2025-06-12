@@ -408,20 +408,59 @@
     z-index: 2001;
 }
 
+/* --- Enhanced Sticky Close Button for Settings Modal --- */
 .close-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    color: var(--text-secondary);
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 85%;
+    min-width: 180px;
+    max-width: 600px;
+    margin: 0 auto 24px auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    z-index: 2100;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 24px;
+    box-shadow: 0 4px 24px 0 rgba(99, 102, 241, 0.18), 0 1.5px 8px 0 rgba(255,255,255,0.10);
+    padding: 0.5em 1.2em;
+    height: 48px;
     font-size: 1.5em;
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: box-shadow 0.3s, background 0.3s, filter 0.3s, color 0.3s, opacity 0.4s;
+    opacity: 0;
+    animation: closeBtnFadeIn 0.7s cubic-bezier(.4,1.4,.6,1) 0.1s forwards;
+    /* Prevents scroll hiding */
+}
+
+@keyframes closeBtnFadeIn {
+    from { opacity: 0; transform: translateY(-16px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .close-btn:hover {
+    background: rgba(176, 224, 230, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.28), 0 2px 12px 0 rgba(255,255,255,0.18);
     color: var(--text-primary);
+    filter: brightness(1.08) saturate(1.1);
+}
+
+.close-btn:active {
+    filter: brightness(0.97) saturate(1.2);
+    box-shadow: 0 2px 8px 0 rgba(99, 102, 241, 0.12);
+}
+
+/* Optional: X icon styling for clarity */
+.close-btn .icon-x, .close-btn svg {
+    margin-right: 12px;
+    font-size: 1.5em;
+    color: inherit;
+    pointer-events: none;
+    filter: drop-shadow(0 0 6px rgba(176,224,230,0.18));
 }
 
 .settings-modal h2 {
