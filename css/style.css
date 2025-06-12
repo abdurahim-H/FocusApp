@@ -15,6 +15,9 @@
 :root {
     --time-scale: 1;
     --redshift-intensity: 0;
+    --animation-speed: 1;
+    --particle-density: 1;
+    --performance-level: 1; /* 1 = high, 0.75 = medium, 0.5 = low */
 }
 
 html, body {
@@ -186,15 +189,22 @@ a {
     transition: width 0.3s ease;
 }
 
-/* Enhanced Visual Effects */
+/* Enhanced Visual Effects - Performance Optimized */
 body {
     transition: filter 0.3s ease;
+    will-change: auto; /* Remove will-change when not animating */
+}
+
+/* Performance optimizations for animations */
+.mode, .nav-btn, .btn, .liquid-glass-btn {
+    will-change: auto; /* Remove unnecessary will-change declarations */
 }
 
 /* Red-shift effect for black hole approach */
 body[style*="--redshift-intensity"] {
     filter: hue-rotate(calc(var(--redshift-intensity, 0) * 30deg)) 
             sepia(calc(var(--redshift-intensity, 0) * 0.3));
+    will-change: filter; /* Only when actively animating */
 }
 
 /* Time dilation effect */
@@ -301,22 +311,36 @@ body[style*="--redshift-intensity"] {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent,
-        rgba(99, 102, 241, 0.03),
-        transparent,
-        rgba(6, 214, 160, 0.03),
-        transparent
-    );
-    animation: cosmicFlow 10s linear infinite;
+    background: conic-gradient(from 0deg, transparent, var(--accent), transparent);
+    animation: cosmicRotate 8s linear infinite;
     z-index: -1;
-    pointer-events: none;
+    opacity: 0.1;
 }
 
-@keyframes cosmicFlow {
-    0% { transform: translateX(-100%) translateY(-100%) rotate(0deg); }
-    100% { transform: translateX(100%) translateY(100%) rotate(360deg); }
+@keyframes cosmicRotate {
+    to { transform: rotate(360deg); }
+}
+
+/* Performance optimization for reduced motion users */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .cosmic-flow::after {
+        animation: none;
+    }
+    
+    .productivity-glow {
+        animation: none;
+    }
+    
+    .btn-particle::before {
+        transition: none;
+    }
 }
 
 /* Layout Stability Fixes */

@@ -13,6 +13,8 @@ let modules = {};
  */
 async function loadModules() {
     const moduleList = [
+        { name: 'performanceMonitor', path: './performance-monitor.js' },
+        { name: 'adaptiveQuality', path: './adaptive-quality.js' },
         { name: 'scene3d', path: './scene3d.js' },
         { name: 'timer', path: './timer.js' },
         { name: 'tasks', path: './tasks.js' },
@@ -43,6 +45,18 @@ async function loadModules() {
 export async function initApp() {
     const loadedModules = await loadModules();
     
+    // Initialize performance monitor first and make it globally available
+    if (loadedModules.performanceMonitor?.performanceMonitor) {
+        window.performanceMonitor = loadedModules.performanceMonitor.performanceMonitor;
+        console.log('✓ Performance monitor initialized and available globally');
+    }
+    
+    // Initialize adaptive quality system
+    if (loadedModules.adaptiveQuality?.adaptiveQuality) {
+        window.adaptiveQuality = loadedModules.adaptiveQuality.adaptiveQuality;
+        console.log('✓ Adaptive quality system initialized');
+    }
+    
     // Initialize cleanup system first
     if (loadedModules.cleanup?.initCleanupSystem) {
         loadedModules.cleanup.initCleanupSystem();
@@ -54,7 +68,7 @@ export async function initApp() {
     }
     
     function doInit() {
-        // Hide loading screen after delay
+        // Faster loading screen progression
         setTimeout(() => {
             const loadingProgress = document.getElementById('loadingProgress');
             const loadingScreen = document.getElementById('loadingScreen');
@@ -68,10 +82,10 @@ export async function initApp() {
                     loadingScreen.classList.add('hide');
                     setTimeout(() => {
                         loadingScreen.style.display = 'none';
-                    }, 500);
+                    }, 300); // Reduced from 500ms
                 }
-            }, 500);
-        }, 1000);
+            }, 200); // Reduced from 500ms
+        }, 400); // Reduced from 1000ms
 
         // Initialize 3D scene
         try {
@@ -198,8 +212,20 @@ function setupTaskControls(loadedModules) {
     }
 }
 
-// Initialize the app
+// Add keyboard shortcut for performance dashboard
+document.addEventListener('keydown', (event) => {
+    // Ctrl+P to toggle performance dashboard
+    if (event.ctrlKey && event.key === 'p') {
+        event.preventDefault();
+        if (window.performanceDashboard) {
+            window.performanceDashboard.toggle();
+        }
+    }
+});
+
+// Initialize the app with performance optimizations
 (async function() {
+    // Show faster loading progression
     setTimeout(() => {
         const loadingScreen = document.getElementById('loadingScreen');
         const loadingProgress = document.getElementById('loadingProgress');
@@ -212,13 +238,15 @@ function setupTaskControls(loadedModules) {
             loadingScreen.style.opacity = '0';
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
-            }, 500);
+            }, 200); // Much faster fade out
         }
-    }, 500);
+    }, 200); // Much faster initial load
     
     try {
         await initApp();
     } catch (error) {
+        console.error('App initialization failed:', error);
+        
         // Basic date/time update fallback
         function updateDateTime() {
             const now = new Date();
