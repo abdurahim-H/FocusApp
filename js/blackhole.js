@@ -664,3 +664,18 @@ export function updateBlackHoleEffects() {
     const gal = scene.getTransformNodeByName('distantGalaxy');
     if (gal && gal.userData) gal.rotation.y += gal.userData.rotationSpeed;
 }
+
+
+export function triggerFocusIntensification(duration = 5) {
+    console.log(`🔦 Focus intensification triggered for ${duration}s`);
+    // Example implementation: temporarily increase accretionDisk pulseAmplitude
+    if (accretionDisk && accretionDisk.userData) {
+        const data = accretionDisk.userData;
+        const originalAmplitude = data.pulseAmplitude;
+        data.pulseAmplitude = originalAmplitude * 2;
+        setTimeout(() => {
+            data.pulseAmplitude = originalAmplitude;
+            console.log('🔦 Focus intensification ended, restored original amplitude');
+        }, duration * 1000);
+    }
+}
