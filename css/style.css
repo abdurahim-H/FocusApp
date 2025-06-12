@@ -9,6 +9,7 @@
     padding: 0;
     box-sizing: border-box;
     max-width: 100vw;
+    max-height: 100vh;
 }
 
 :root {
@@ -16,21 +17,23 @@
     --redshift-intensity: 0;
 }
 
-html {
-    overflow-x: hidden;
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
     max-width: 100vw;
+    max-height: 100vh;
+    position: relative;
 }
 
 body {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: var(--bg-dark);
     color: var(--text-primary);
-    overflow-x: hidden;
-    overflow-y: auto;
-    min-height: 100vh;
     transition: all 0.3s ease;
     position: relative;
-    max-width: 100vw;
 }
 
 /* 3D Scene Container - FIXED for Babylon.js */
@@ -58,7 +61,7 @@ body {
 
 /* Main Content Container */
 .container {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -66,9 +69,10 @@ body {
     position: relative;
     z-index: 10;
     pointer-events: none; /* Allow clicks to pass through to canvas */
-    max-width: 100%;
+    width: 100%;
     overflow: hidden;
     contain: layout style paint;
+    box-sizing: border-box;
 }
 
 /* Enable pointer events only for interactive elements */
@@ -92,10 +96,42 @@ a {
     text-align: center;
     max-width: 600px;
     width: 100%;
+    max-height: calc(100vh - 200px); /* Account for nav and padding */
+    overflow-y: auto;
     animation: fadeIn 0.6s ease;
     position: relative;
     z-index: 15;
     pointer-events: auto; /* Mode content needs pointer events */
+}
+
+/* Ensure task list doesn't cause overflow */
+.task-section {
+    max-height: calc(100vh - 450px); /* Account for timer, controls, and padding */
+    overflow-y: hidden;
+}
+
+.task-list {
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.task-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.task-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.task-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.task-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .mode.active {
@@ -358,4 +394,38 @@ body[style*="--redshift-intensity"] {
 
 .settings-modal {
     z-index: 2001 !important;
+}
+
+/* iOS Safari and Mobile Viewport Fixes */
+@supports (-webkit-touch-callout: none) {
+    html, body {
+        height: -webkit-fill-available;
+    }
+    
+    .container {
+        height: -webkit-fill-available;
+    }
+}
+
+/* Prevent pull-to-refresh and overscroll */
+html {
+    overscroll-behavior: none;
+}
+
+body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Disable iOS zoom and selection */
+input, textarea, select {
+    font-size: 16px; /* Prevents iOS zoom */
+}
+
+/* Prevent text selection on UI elements */
+.nav, .timer-display, .breathing-circle, .progress-3d {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }

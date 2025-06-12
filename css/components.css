@@ -231,8 +231,10 @@
     align-items: center;
     justify-content: center;
     min-height: 50vh;
+    max-height: calc(100vh - 200px); /* Respect viewport bounds */
     position: relative;
     z-index: 20;
+    overflow: hidden;
 }
 
 .breathing-circle {
