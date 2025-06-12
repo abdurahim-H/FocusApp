@@ -62,8 +62,9 @@ export function createEnhancedBlackHole() {
     createAuthenticBlackHole(root);
     console.log('✔ Centerpiece created');
 
-    createUnifiedRingFamily(root);
-    console.log(`✔ ${RING_CONFIG.COUNT} vertical rings created`);
+    // Rings removed for cleaner black hole appearance
+    // createUnifiedRingFamily(root);
+    // console.log(`✔ ${RING_CONFIG.COUNT} vertical rings created`);
 
     createBalancedOrbitals(root);
     console.log(`✔ ${orbitalBodies.length} orbital bodies created`);
@@ -75,7 +76,7 @@ export function createEnhancedBlackHole() {
         group: root,
         eventHorizon,
         accretionDisk,
-        rings: authenticRings,
+        rings: [], // No rings anymore
         orbitalBodies
     };
     console.log('🏁 Black hole system ready');
@@ -263,64 +264,64 @@ function createAuthenticBlackHole(parent) {
     createDustPlasmaEmitters(blackHoleContainer);
 }
 
-// 2. Vertical Orbital Rings
-function createUnifiedRingFamily(parent) {
-    const group = new BABYLON.TransformNode('unifiedRingFamily', scene);
-    group.parent = parent;
-    authenticRings = [];
+// 2. Vertical Orbital Rings - DISABLED (rings removed)
+// function createUnifiedRingFamily(parent) {
+//     const group = new BABYLON.TransformNode('unifiedRingFamily', scene);
+//     group.parent = parent;
+//     authenticRings = [];
 
-    for (let i=0; i<RING_CONFIG.COUNT; i++) {
-        const r = RING_CONFIG.BASE_RADIUS + i*RING_CONFIG.RADIUS_INCREMENT;
-        const thickness = r * (
-            RING_CONFIG.THICKNESS_OUTER_RATIO
-            - (i/(RING_CONFIG.COUNT-1))*(RING_CONFIG.THICKNESS_OUTER_RATIO - RING_CONFIG.THICKNESS_INNER_RATIO)
-        );
-        const ring = BABYLON.MeshBuilder.CreateTorus(`ring${i}`, {
-            diameter: 2*r,
-            thickness,
-            tessellation: 64
-        }, scene);
+//     for (let i=0; i<RING_CONFIG.COUNT; i++) {
+//         const r = RING_CONFIG.BASE_RADIUS + i*RING_CONFIG.RADIUS_INCREMENT;
+//         const thickness = r * (
+//             RING_CONFIG.THICKNESS_OUTER_RATIO
+//             - (i/(RING_CONFIG.COUNT-1))*(RING_CONFIG.THICKNESS_OUTER_RATIO - RING_CONFIG.THICKNESS_INNER_RATIO)
+//         );
+//         const ring = BABYLON.MeshBuilder.CreateTorus(`ring${i}`, {
+//             diameter: 2*r,
+//             thickness,
+//             tessellation: 64
+//         }, scene);
 
-        // Vertical + random tilt
-        ring.rotation.x = 0;
-        ring.rotation.z = (Math.random()-0.5)*RING_CONFIG.TILT_RANGE;
-        ring.rotation.y = (Math.random()-0.5)*(RING_CONFIG.TILT_RANGE*0.5);
+//         // Vertical + random tilt
+//         ring.rotation.x = 0;
+//         ring.rotation.z = (Math.random()-0.5)*RING_CONFIG.TILT_RANGE;
+//         ring.rotation.y = (Math.random()-0.5)*(RING_CONFIG.TILT_RANGE*0.5);
 
-        // Metallic, space-like color
-        const mat = new BABYLON.StandardMaterial(`ringMat${i}`, scene);
-        if (i<2) {
-            mat.diffuseColor  = new BABYLON.Color3(0.3,0.35,0.5);
-            mat.emissiveColor = new BABYLON.Color3(0.05,0.1,0.2);
-        } else if (i<4) {
-            mat.diffuseColor  = new BABYLON.Color3(0.4,0.45,0.5);
-            mat.emissiveColor = new BABYLON.Color3(0.1,0.15,0.25);
-        } else {
-            mat.diffuseColor  = new BABYLON.Color3(0.5,0.45,0.35);
-            mat.emissiveColor = new BABYLON.Color3(0.2,0.15,0.1);
-        }
-        mat.specularColor = new BABYLON.Color3(0.8,0.8,0.9);
-        mat.specularPower = 32 + i*8;
-        mat.alpha         = 0.85 - i*0.03;
-        mat.backFaceCulling = false;
-        ring.material = mat;
+//         // Metallic, space-like color
+//         const mat = new BABYLON.StandardMaterial(`ringMat${i}`, scene);
+//         if (i<2) {
+//             mat.diffuseColor  = new BABYLON.Color3(0.3,0.35,0.5);
+//             mat.emissiveColor = new BABYLON.Color3(0.05,0.1,0.2);
+//         } else if (i<4) {
+//             mat.diffuseColor  = new BABYLON.Color3(0.4,0.45,0.5);
+//             mat.emissiveColor = new BABYLON.Color3(0.1,0.15,0.25);
+//         } else {
+//             mat.diffuseColor  = new BABYLON.Color3(0.5,0.45,0.35);
+//             mat.emissiveColor = new BABYLON.Color3(0.2,0.15,0.1);
+//         }
+//         mat.specularColor = new BABYLON.Color3(0.8,0.8,0.9);
+//         mat.specularPower = 32 + i*8;
+//         mat.alpha         = 0.85 - i*0.03;
+//         mat.backFaceCulling = false;
+//         ring.material = mat;
 
-        ring.parent = group;
+//         ring.parent = group;
         
-        // Set rendering group for proper depth sorting
-        ring.renderingGroupId = 1; // Foreground celestial objects
+//         // Set rendering group for proper depth sorting
+//         ring.renderingGroupId = 1; // Foreground celestial objects
         
-        const period = RING_CONFIG.ROTATION_PERIOD[0] + (i/(RING_CONFIG.COUNT-1))*(RING_CONFIG.ROTATION_PERIOD[1]-RING_CONFIG.ROTATION_PERIOD[0]);
-        const speed  = (Math.PI*2)/(period*60);
-        ring.userData = {
-            baseRotationSpeed: speed*(0.5+Math.random()),
-            rotationAxis:      (Math.random()<0.5?'y':'z'),
-            pulsationPhase:    i*Math.PI/3
-        };
+//         const period = RING_CONFIG.ROTATION_PERIOD[0] + (i/(RING_CONFIG.COUNT-1))*(RING_CONFIG.ROTATION_PERIOD[1]-RING_CONFIG.ROTATION_PERIOD[0]);
+//         const speed  = (Math.PI*2)/(period*60);
+//         ring.userData = {
+//             baseRotationSpeed: speed*(0.5+Math.random()),
+//             rotationAxis:      (Math.random()<0.5?'y':'z'),
+//             pulsationPhase:    i*Math.PI/3
+//         };
 
-        authenticRings.push(ring);
-        shaderMaterials.push(mat);
-    }
-}
+//         authenticRings.push(ring);
+//         shaderMaterials.push(mat);
+//     }
+// }
 
 
 // 3. Randomized Orbiting Bodies
@@ -610,13 +611,13 @@ function createDustPlasmaEmitters(parentGroup) {
 export function updateBlackHoleEffects() {
     const t = Date.now()*0.001;
 
-    // Rings spinning & pulsation
-    authenticRings.forEach(r=>{
-        if(r.userData.rotationAxis==='y') r.rotation.y+=r.userData.baseRotationSpeed;
-        else r.rotation.z+=r.userData.baseRotationSpeed;
-        const pulse = 1 + Math.sin(t*0.5 + r.userData.pulsationPhase)*0.1;
-        r.material.emissiveColor.scaleInPlace(pulse);
-    });
+    // Rings animation removed (no more rings)
+    // authenticRings.forEach(r=>{
+    //     if(r.userData.rotationAxis==='y') r.rotation.y+=r.userData.baseRotationSpeed;
+    //     else r.rotation.z+=r.userData.baseRotationSpeed;
+    //     const pulse = 1 + Math.sin(t*0.5 + r.userData.pulsationPhase)*0.1;
+    //     r.material.emissiveColor.scaleInPlace(pulse);
+    // });
 
     // Orbiting bodies
     orbitalBodies.forEach(b=>{
