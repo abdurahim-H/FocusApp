@@ -87,8 +87,20 @@ export async function initApp() {
         }
 
         // Setup all modules
+        console.log('Setting up navigation module...');
         if (loadedModules.navigation?.setupNavigation) {
-            loadedModules.navigation.setupNavigation();
+            // Ensure DOM is ready before setting up navigation
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    console.log('DOM ready, setting up navigation');
+                    loadedModules.navigation.setupNavigation();
+                });
+            } else {
+                console.log('DOM already ready, setting up navigation immediately');
+                loadedModules.navigation.setupNavigation();
+            }
+        } else {
+            console.error('Navigation module or setupNavigation function not found');
         }
         
         setupTimerControls(loadedModules);

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Button Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/liquid-glass-buttons.css">
+</head>
+<body data-theme="dark">
+    <h1>Simple Navigation Test</h1>
+    
+    <!-- Minimal Navigation Test -->
+    <nav class="nav water-cosmic-container" style="position: relative; top: 50px; margin: 20px auto;">
+        <button class="nav-btn active" data-mode="home" onclick="handleNavClick(this)">
+            Home
+        </button>
+        <button class="nav-btn" data-mode="focus" onclick="handleNavClick(this)">
+            Focus
+        </button>
+        <button class="nav-btn" data-mode="ambient" onclick="handleNavClick(this)">
+            Ambient
+        </button>
+    </nav>
+    
+    <div id="output" style="margin: 20px; padding: 20px; background: var(--bg-glass); border-radius: 10px;">
+        Click a navigation button above
+    </div>
+    
+    <div style="margin: 20px;">
+        <h3>Direct Button Tests:</h3>
+        <button onclick="testClick('Direct HTML onclick')" style="margin: 5px; padding: 10px; background: #444; color: white; border: none; border-radius: 5px;">
+            Direct HTML onclick
+        </button>
+        
+        <button id="js-listener-btn" style="margin: 5px; padding: 10px; background: #444; color: white; border: none; border-radius: 5px;">
+            JS addEventListener
+        </button>
+        
+        <button class="liquid-glass-btn" id="liquid-test" style="margin: 5px;">
+            <span class="btn-text">Liquid Glass Test</span>
+        </button>
+    </div>
+
+    <script>
+        console.log('Script started');
+        
+        function handleNavClick(button) {
+            console.log('Nav button clicked:', button.dataset.mode);
+            document.getElementById('output').innerHTML = 
+                `✅ Navigation "${button.dataset.mode}" clicked at ${new Date().toLocaleTimeString()}`;
+            
+            // Update active state
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+        }
+        
+        function testClick(type) {
+            console.log('Test click:', type);
+            document.getElementById('output').innerHTML = 
+                `✅ ${type} worked at ${new Date().toLocaleTimeString()}`;
+        }
+        
+        // Test JavaScript event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            const jsBtn = document.getElementById('js-listener-btn');
+            if (jsBtn) {
+                jsBtn.addEventListener('click', function() {
+                    testClick('JavaScript addEventListener');
+                });
+                console.log('JS listener added to button');
+            }
+            
+            const liquidBtn = document.getElementById('liquid-test');
+            if (liquidBtn) {
+                liquidBtn.addEventListener('click', function() {
+                    testClick('Liquid Glass Button');
+                });
+                console.log('Liquid glass listener added');
+            }
+            
+            // Test if our navigation buttons have the right structure
+            const navBtns = document.querySelectorAll('.nav-btn');
+            console.log('Found navigation buttons:', navBtns.length);
+            navBtns.forEach((btn, index) => {
+                console.log(`Button ${index}:`, {
+                    mode: btn.dataset.mode,
+                    classes: Array.from(btn.classList),
+                    innerHTML: btn.innerHTML
+                });
+            });
+        });
+        
+        // Test if clicks are being captured at document level
+        document.addEventListener('click', function(e) {
+            console.log('Document click detected:', {
+                target: e.target.tagName,
+                classes: Array.from(e.target.classList),
+                id: e.target.id,
+                dataset: e.target.dataset
+            });
+        });
+    </script>
+</body>
+</html>
