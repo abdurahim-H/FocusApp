@@ -566,6 +566,40 @@ function updateStarAnimations() {
                         particle.color.a = particle.color.a * colorPulse;
                     });
                 }
+                
+                // Handle sparkling stars from blackhole.js
+                if (starField.name && (starField.name.includes('SparklingStars') || starField.name.includes('microStars'))) {
+                    const particles = starField.particles;
+                    particles.forEach((particle, particleIndex) => {
+                        if (!particle || !particle.userData) return;
+                        
+                        const data = particle.userData;
+                        const currentTime = performance.now() * 0.001;
+                        
+                        // Enhanced twinkling for sparkling stars
+                        const twinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.5 + 0.5;
+                        const sparkle = Math.sin(currentTime * (data.twinkleSpeed * 1.5) + data.twinklePhase * 0.7) * 0.3 + 0.7;
+                        
+                        // Update particle size for twinkling
+                        particle.size = data.baseSize * twinkle * sparkle;
+                        
+                        // Update alpha for sparkle effect
+                        if (particle.color && data.baseAlpha) {
+                            particle.color.a = data.baseAlpha * twinkle * sparkle;
+                        }
+                        
+                        // Occasional bright flares for main sparkling stars
+                        if (starField.name.includes('mainSparklingStars')) {
+                            const flareChance = Math.random();
+                            if (flareChance < 0.0008) { // Very rare bright flares
+                                particle.size = data.baseSize * 4;
+                                if (particle.color) {
+                                    particle.color.a = Math.min(1, data.baseAlpha * 3);
+                                }
+                            }
+                        }
+                    });
+                }
             } else {
                 // Handle mesh-based stars (fallback)
                 if (!starField.position) return;

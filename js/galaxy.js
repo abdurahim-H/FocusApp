@@ -51,6 +51,9 @@ export function createStarField() {
         // Enhanced blending for spectacular cosmic glow
         starParticleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
         
+        // Set rendering group for background positioning
+        starParticleSystem.renderingGroupId = 0; // Background layer - renders first
+        
         // Dynamic color variations with stellar classification
         starParticleSystem.color1 = new BABYLON.Color4(1, 1, 1, 0.9);
         starParticleSystem.color2 = new BABYLON.Color4(0.7, 0.9, 1, 0.8);
@@ -418,6 +421,9 @@ export function createPlanets() {
         
         planet.material = planetMaterial;
         
+        // Set rendering group for proper depth sorting
+        planet.renderingGroupId = 1; // Foreground celestial objects
+        
         // Create atmosphere if specified
         if (config.atmosphere) {
             createPlanetAtmosphere(planet, config);
@@ -518,6 +524,9 @@ function createPlanetAtmosphere(planet, config) {
     atmosphere.material = atmosphereMaterial;
     atmosphere.parent = planet;
     
+    // Set rendering group for proper depth sorting
+    atmosphere.renderingGroupId = 1; // Foreground celestial objects
+    
     // Store for animation
     atmosphere.userData = {
         isAtmosphere: true,
@@ -560,6 +569,9 @@ function createEnhancedPlanetRings(planet, config) {
         
         ring.material = ringMaterial;
         
+        // Set rendering group for proper depth sorting
+        ring.renderingGroupId = 1; // Foreground celestial objects
+        
         // Animation data
         ring.userData = {
             rotationSpeed: 0.005 + Math.random() * 0.01,
@@ -593,6 +605,9 @@ function createEnhancedMoons(planet, config) {
         moonMaterial.emissiveColor = moonType.emissive;
         
         moon.material = moonMaterial;
+        
+        // Set rendering group for proper depth sorting
+        moon.renderingGroupId = 1; // Foreground celestial objects
         
         const moonDistance = config.size * (3 + i * 2);
         const moonInclination = (Math.random() - 0.5) * 0.5;
@@ -665,6 +680,9 @@ export function createComets() {
         cometHead.material = cometMaterial;
         cometHead.parent = cometGroup;
         
+        // Set rendering group for proper depth sorting
+        cometHead.renderingGroupId = 1; // Foreground celestial objects
+        
         // Comet tail particles
         const tailSystem = new BABYLON.ParticleSystem(`cometTail_${i}`, 200, scene);
         tailSystem.emitter = cometHead;
@@ -695,6 +713,9 @@ export function createComets() {
         tailSystem.direction2 = new BABYLON.Vector3(-4, 0.5, 0.5);
         tailSystem.minEmitPower = 1;
         tailSystem.maxEmitPower = 3;
+        
+        // Set rendering group for comet tail particles
+        tailSystem.renderingGroupId = 1; // Foreground celestial objects
         
         tailSystem.start();
         
@@ -741,6 +762,9 @@ export function createSpaceObjects() {
                 body.material = bodyMaterial;
                 body.parent = group;
                 
+                // Set rendering group for proper depth sorting
+                body.renderingGroupId = 1; // Foreground celestial objects
+                
                 // Solar panels
                 const panelMaterial = new BABYLON.StandardMaterial("panelMat", scene);
                 panelMaterial.diffuseColor = new BABYLON.Color3(0, 0.1, 0.3);
@@ -752,11 +776,17 @@ export function createSpaceObjects() {
                 leftPanel.material = panelMaterial;
                 leftPanel.parent = group;
                 
+                // Set rendering group for solar panels
+                leftPanel.renderingGroupId = 1; // Foreground celestial objects
+                
                 const rightPanel = BABYLON.MeshBuilder.CreatePlane("rightPanel", {width: 2, height: 0.8}, scene);
                 rightPanel.position.x = 1.5;
                 rightPanel.rotation.y = Math.PI / 2;
                 rightPanel.material = panelMaterial;
                 rightPanel.parent = group;
+                
+                // Set rendering group for solar panels
+                rightPanel.renderingGroupId = 1; // Foreground celestial objects
                 
                 return group;
             }
@@ -784,6 +814,9 @@ export function createSpaceObjects() {
                 material.diffuseColor = new BABYLON.Color3(0.5, 0.4, 0.3);
                 material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
                 asteroid.material = material;
+                
+                // Set rendering group for proper depth sorting
+                asteroid.renderingGroupId = 1; // Foreground celestial objects
                 
                 return asteroid;
             }
