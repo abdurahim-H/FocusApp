@@ -413,7 +413,7 @@
     position: sticky;
     top: 0;
     left: 0;
-    width: 96%;
+    width: 100%;
     min-width: 180px;
     max-width: 600px;
     margin: 0 auto 20px auto;
@@ -457,6 +457,8 @@
 .settings-modal h2 {
     margin-bottom: 25px;
     color: var(--text-primary);
+    text-align: center;
+    width: 100%;
 }
 
 /* Progress Indicator */
