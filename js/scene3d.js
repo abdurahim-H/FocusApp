@@ -243,8 +243,8 @@ function createGalaxyElements() {
         createStarField();
         console.log('Star field creation completed');
         
-        createNebula();
-        console.log('Nebula creation completed');
+        // createNebula(); // DISABLED - This creates cosmic dust particles that spill out of black hole
+        // console.log('Nebula creation completed');
         
         createEnhancedBlackHole();
         console.log('Black hole creation completed');
@@ -252,8 +252,8 @@ function createGalaxyElements() {
         createPlanets();
         console.log('Planets creation completed');
         
-        createComets();
-        console.log('Comets creation completed');
+        // createComets(); // DISABLED - Comets create trailing particle effects
+        // console.log('Comets creation completed');
         
         createSpaceObjects();
         console.log('Space objects creation completed');
