@@ -703,11 +703,11 @@
 .ambient-content.water-cosmic-container,
 .home-content.water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(100, 150, 255, 0.06) 0%,
-        rgba(176, 224, 230, 0.09) 25%,
-        rgba(144, 238, 144, 0.05) 50%,
-        rgba(176, 224, 230, 0.08) 75%,
-        rgba(100, 150, 255, 0.07) 100%
+        rgba(100, 150, 255, 0.03) 0%,
+        rgba(176, 224, 230, 0.04) 25%,
+        rgba(144, 238, 144, 0.02) 50%,
+        rgba(176, 224, 230, 0.035) 75%,
+        rgba(100, 150, 255, 0.03) 100%
     );
     border-radius: 30px;
     backdrop-filter: blur(20px) saturate(1.2);
