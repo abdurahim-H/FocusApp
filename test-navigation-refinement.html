@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Bar Refinement Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/liquid-glass-buttons.css">
+    <style>
+        body {
+            padding-top: 120px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            text-align: center;
+        }
+        .demo-section {
+            margin: 40px auto;
+            max-width: 800px;
+            padding: 20px;
+        }
+        .info-box {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <!-- Navigation Test -->
+    <nav class="nav water-cosmic-container">
+        <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small nav-btn active" data-mode="home">
+            <span class="btn-text">Home</span>
+        </button>
+        <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small nav-btn" data-mode="focus">
+            <span class="btn-text">Focus</span>
+        </button>
+        <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small nav-btn" data-mode="ambient">
+            <span class="btn-text">Ambient</span>
+        </button>
+    </nav>
+
+    <div class="demo-section">
+        <h1>🧊 Navigation Bar Refinement Test</h1>
+        
+        <div class="info-box">
+            <h3>✅ Floating Capsule Design</h3>
+            <p><strong>Width:</strong> Constrained to 280px-380px with fit-content sizing</p>
+            <p><strong>Shape:</strong> Rounded pill with 50px border-radius</p>
+            <p><strong>Positioning:</strong> Centered and floating with enhanced shadow</p>
+            <p><strong>Hover Effect:</strong> Subtle lift with enhanced glow</p>
+        </div>
+
+        <div class="info-box">
+            <h3>🌊 Water-Glass Integration</h3>
+            <p><strong>Background:</strong> Subtle blue water tints</p>
+            <p><strong>Transparency:</strong> Multi-layer opacity for depth</p>
+            <p><strong>Blur:</strong> 20px backdrop blur with saturation enhancement</p>
+        </div>
+
+        <div class="info-box">
+            <h3>📱 Responsive Behavior</h3>
+            <p><strong>Desktop:</strong> 280px-380px width</p>
+            <p><strong>Tablet:</strong> 240px-320px width</p>
+            <p><strong>Mobile:</strong> 220px-280px width</p>
+            <p><strong>Ultra-wide:</strong> Up to 420px width</p>
+        </div>
+
+        <button onclick="testHover()" style="margin: 20px; padding: 10px 20px; border: none; border-radius: 8px; background: var(--primary); color: white; cursor: pointer;">
+            Test Navigation Hover Effect
+        </button>
+        
+        <button onclick="toggleTheme()" style="margin: 20px; padding: 10px 20px; border: none; border-radius: 8px; background: var(--accent); color: white; cursor: pointer;">
+            Toggle Theme
+        </button>
+
+        <div style="margin-top: 40px;">
+            <p><em>The navigation should appear as a gently glowing control panel floating in space, with soft edges, airy spacing, and crystal-clear focus — not a toolbar stuck across the screen.</em></p>
+        </div>
+    </div>
+
+    <script>
+        function testHover() {
+            const nav = document.querySelector('.nav');
+            nav.style.transform = 'translateX(-50%) translateY(-2px)';
+            nav.style.boxShadow = `
+                0 12px 48px rgba(0, 0, 0, 0.2),
+                0 6px 24px rgba(100, 150, 255, 0.15),
+                0 3px 12px rgba(176, 224, 230, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15)
+            `;
+            
+            setTimeout(() => {
+                nav.style.transform = 'translateX(-50%)';
+                nav.style.boxShadow = '';
+            }, 1000);
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme);
+        }
+        
+        // Simulate navigation interaction
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
