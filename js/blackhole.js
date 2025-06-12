@@ -82,56 +82,6 @@ export function createEnhancedBlackHole() {
     console.log('🏁 Black hole system ready');
 }
 
-// function createAuthenticBlackHole(parent) {
-//     // Create a tilted container for the black hole system
-//     const blackHoleContainer = new BABYLON.TransformNode('blackHoleContainer', scene);
-//     blackHoleContainer.parent = parent;
-//     // Tilt to the right (around Z axis) and slightly forward (around X axis)
-//     blackHoleContainer.rotation.z = -Math.PI / 6; // 30 degrees right tilt
-//     blackHoleContainer.rotation.x = Math.PI / 12; // 15 degrees forward tilt
-    
-//     // Event Horizon
-//     eventHorizon = BABYLON.MeshBuilder.CreateSphere('eventHorizon', { diameter:8, segments:32 }, scene);
-//     const horMat = new BABYLON.StandardMaterial('eventHorizonMat', scene);
-//     horMat.diffuseColor = BABYLON.Color3.Black();
-//     horMat.emissiveColor = BABYLON.Color3.Black();
-//     horMat.rimLightColor = new BABYLON.Color3(
-//         COLOR_PALETTE.CYAN.r*0.5,
-//         COLOR_PALETTE.CYAN.g*0.5,
-//         COLOR_PALETTE.CYAN.b*0.5
-//     );
-//     horMat.rimLightIntensity = 0.5;
-//     horMat.backFaceCulling = false;
-//     eventHorizon.material = horMat;
-//     eventHorizon.parent = blackHoleContainer;
-
-//     // Accretion Disk - directly touching the event horizon
-//     accretionDisk = BABYLON.MeshBuilder.CreateTorus('accretionDisk', {
-//         diameter: 8.0, // Same diameter as event horizon
-//         thickness: 3.5, // Thicker for more dramatic effect
-//         tessellation: 128
-//     }, scene);
-//     accretionDisk.rotation.x = Math.PI/2;
-//     accretionDisk.parent = blackHoleContainer;
-    
-//     // Gradient material for accretion disk - Cyan + Magenta + White
-//     const diskMat = new BABYLON.StandardMaterial('accretionDiskMat', scene);
-//     diskMat.diffuseColor = new BABYLON.Color3(1, 0.8, 1); // Light magenta base
-//     diskMat.emissiveColor = new BABYLON.Color3(0.5, 1, 1); // Cyan glow
-//     diskMat.specularColor = new BABYLON.Color3(1, 1, 1); // White highlights
-//     diskMat.specularPower = 128;
-//     diskMat.alpha = 0.95;
-//     diskMat.backFaceCulling = false;
-//     accretionDisk.material = diskMat;
-//     accretionDisk.userData = {
-//         baseBrightness: 0.8,
-//         pulsePeriod:    4,
-//         pulseAmplitude: 0.15
-//     };
-
-//     // Swirling dust outflow instead of blue cylinder jets
-//     createDustPlasmaEmitters(blackHoleContainer);
-// }
 
 // 1. Authentic Black Hole + Accretion Disk
 function createAuthenticBlackHole(parent) {
@@ -169,131 +119,12 @@ function createAuthenticBlackHole(parent) {
     // Set rendering group for proper depth sorting
     glowSphere.renderingGroupId = 1; // Foreground celestial objects
 
-    // Accretion Disk - DISABLED for cleaner black hole appearance
-    // All torus disk components commented out to remove rings around black hole
     
-    // // Inner hot disk
-    // const innerDisk = BABYLON.MeshBuilder.CreateTorus('innerAccretionDisk', {
-    //     diameter: 8.0,
-    //     thickness: 1.5,
-    //     tessellation: 128
-    // }, scene);
-    // innerDisk.rotation.x = Math.PI/2;
-    // innerDisk.parent = blackHoleContainer;
-    
-    // const innerDiskMat = new BABYLON.StandardMaterial('innerDiskMat', scene);
-    // innerDiskMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
-    // innerDiskMat.emissiveColor = new BABYLON.Color3(1, 0.8, 1); // White-hot with magenta tint
-    // innerDiskMat.specularColor = new BABYLON.Color3(1, 1, 1);
-    // innerDiskMat.specularPower = 256;
-    // innerDiskMat.alpha = 0.9;
-    // innerDiskMat.backFaceCulling = false;
-    // innerDisk.material = innerDiskMat;
-    // innerDisk.renderingGroupId = 1;
-    
-    // // Middle disk
-    // accretionDisk = BABYLON.MeshBuilder.CreateTorus('accretionDisk', {
-    //     diameter: 10.0,
-    //     thickness: 3.0,
-    //     tessellation: 128
-    // }, scene);
-    // accretionDisk.rotation.x = Math.PI/2;
-    // accretionDisk.parent = blackHoleContainer;
-    
-    // const diskMat = new BABYLON.StandardMaterial('accretionDiskMat', scene);
-    // diskMat.diffuseColor = new BABYLON.Color3(0.8, 0.4, 1); // Purple-magenta
-    // diskMat.emissiveColor = new BABYLON.Color3(0.3, 0.8, 1); // Cyan glow
-    // diskMat.specularColor = new BABYLON.Color3(1, 1, 1);
-    // diskMat.specularPower = 128;
-    // diskMat.alpha = 0.8;
-    // diskMat.backFaceCulling = false;
-    // accretionDisk.material = diskMat;
-    // accretionDisk.renderingGroupId = 1;
-    
-    // // Outer cooler disk
-    // const outerDisk = BABYLON.MeshBuilder.CreateTorus('outerAccretionDisk', {
-    //     diameter: 14.0,
-    //     thickness: 3.5,
-    //     tessellation: 128
-    // }, scene);
-    // outerDisk.rotation.x = Math.PI/2;
-    // outerDisk.parent = blackHoleContainer;
-    
-    // const outerDiskMat = new BABYLON.StandardMaterial('outerDiskMat', scene);
-    // outerDiskMat.diffuseColor = new BABYLON.Color3(0.2, 0.6, 0.8);
-    // outerDiskMat.emissiveColor = new BABYLON.Color3(0.1, 0.3, 0.5);
-    // outerDiskMat.specularColor = new BABYLON.Color3(0.5, 0.7, 1);
-    // outerDiskMat.specularPower = 64;
-    // outerDiskMat.alpha = 0.5;
-    // outerDiskMat.backFaceCulling = false;
-    // outerDisk.material = outerDiskMat;
-    // outerDisk.renderingGroupId = 1;
     
     // Set accretion disk to null since we're not creating it
     accretionDisk = null;
 
-    // NO DUST PARTICLES - Clean black hole without unrealistic emissions
-    // createDustPlasmaEmitters(blackHoleContainer);
 }
-
-// 2. Vertical Orbital Rings - DISABLED (rings removed)
-// function createUnifiedRingFamily(parent) {
-//     const group = new BABYLON.TransformNode('unifiedRingFamily', scene);
-//     group.parent = parent;
-//     authenticRings = [];
-
-//     for (let i=0; i<RING_CONFIG.COUNT; i++) {
-//         const r = RING_CONFIG.BASE_RADIUS + i*RING_CONFIG.RADIUS_INCREMENT;
-//         const thickness = r * (
-//             RING_CONFIG.THICKNESS_OUTER_RATIO
-//             - (i/(RING_CONFIG.COUNT-1))*(RING_CONFIG.THICKNESS_OUTER_RATIO - RING_CONFIG.THICKNESS_INNER_RATIO)
-//         );
-//         const ring = BABYLON.MeshBuilder.CreateTorus(`ring${i}`, {
-//             diameter: 2*r,
-//             thickness,
-//             tessellation: 64
-//         }, scene);
-
-//         // Vertical + random tilt
-//         ring.rotation.x = 0;
-//         ring.rotation.z = (Math.random()-0.5)*RING_CONFIG.TILT_RANGE;
-//         ring.rotation.y = (Math.random()-0.5)*(RING_CONFIG.TILT_RANGE*0.5);
-
-//         // Metallic, space-like color
-//         const mat = new BABYLON.StandardMaterial(`ringMat${i}`, scene);
-//         if (i<2) {
-//             mat.diffuseColor  = new BABYLON.Color3(0.3,0.35,0.5);
-//             mat.emissiveColor = new BABYLON.Color3(0.05,0.1,0.2);
-//         } else if (i<4) {
-//             mat.diffuseColor  = new BABYLON.Color3(0.4,0.45,0.5);
-//             mat.emissiveColor = new BABYLON.Color3(0.1,0.15,0.25);
-//         } else {
-//             mat.diffuseColor  = new BABYLON.Color3(0.5,0.45,0.35);
-//             mat.emissiveColor = new BABYLON.Color3(0.2,0.15,0.1);
-//         }
-//         mat.specularColor = new BABYLON.Color3(0.8,0.8,0.9);
-//         mat.specularPower = 32 + i*8;
-//         mat.alpha         = 0.85 - i*0.03;
-//         mat.backFaceCulling = false;
-//         ring.material = mat;
-
-//         ring.parent = group;
-        
-//         // Set rendering group for proper depth sorting
-//         ring.renderingGroupId = 1; // Foreground celestial objects
-        
-//         const period = RING_CONFIG.ROTATION_PERIOD[0] + (i/(RING_CONFIG.COUNT-1))*(RING_CONFIG.ROTATION_PERIOD[1]-RING_CONFIG.ROTATION_PERIOD[0]);
-//         const speed  = (Math.PI*2)/(period*60);
-//         ring.userData = {
-//             baseRotationSpeed: speed*(0.5+Math.random()),
-//             rotationAxis:      (Math.random()<0.5?'y':'z'),
-//             pulsationPhase:    i*Math.PI/3
-//         };
-
-//         authenticRings.push(ring);
-//         shaderMaterials.push(mat);
-//     }
-// }
 
 
 // 3. Elegant & Graceful Orbital System - Beautiful, organized celestial objects
@@ -722,14 +553,6 @@ function createDustPlasmaEmitters(parentGroup) {
 export function updateBlackHoleEffects() {
     const t = Date.now()*0.001;
 
-    // Rings animation removed (no more rings)
-    // authenticRings.forEach(r=>{
-    //     if(r.userData.rotationAxis==='y') r.rotation.y+=r.userData.baseRotationSpeed;
-    //     else r.rotation.z+=r.userData.baseRotationSpeed;
-    //     const pulse = 1 + Math.sin(t*0.5 + r.userData.pulsationPhase)*0.1;
-    //     r.material.emissiveColor.scaleInPlace(pulse);
-    // });
-
     // Elegant orbital animations - organized and graceful movement
     orbitalBodies.forEach(b => {
         const u = b.userData;
@@ -752,14 +575,6 @@ export function updateBlackHoleEffects() {
             b.material.emissiveColor.copyFrom(u.baseEmission.scale(ringSync));
         }
     });
-
-    // Accretion disk pulsation - DISABLED since accretion disk removed
-    // if (accretionDisk && accretionDisk.userData) {
-    //     const d = accretionDisk.userData;
-    //     const p = (t % d.pulsePeriod)/d.pulsePeriod * Math.PI*2;
-    //     const br = d.baseBrightness + Math.sin(p)*d.pulseAmplitude;
-    //     accretionDisk.material.emissiveColor.scaleInPlace(br);
-    // }
 
     // Enhanced star twinkling animation
     energyParticles.forEach(particleSystem => {
@@ -791,15 +606,5 @@ export function updateBlackHoleEffects() {
 
 export function triggerFocusIntensification(duration = 5) {
     console.log(`🔦 Focus intensification triggered for ${duration}s`);
-    // Note: Originally would increase accretionDisk pulseAmplitude, but 
-    // accretion disk has been removed for cleaner black hole appearance
-    // if (accretionDisk && accretionDisk.userData) {
-    //     const data = accretionDisk.userData;
-    //     const originalAmplitude = data.pulseAmplitude;
-    //     data.pulseAmplitude = originalAmplitude * 2;
-    //     setTimeout(() => {
-    //         data.pulseAmplitude = originalAmplitude;
-    //         console.log('🔦 Focus intensification ended, restored original amplitude');
-    //     }, duration * 1000);
-    // }
+
 }
