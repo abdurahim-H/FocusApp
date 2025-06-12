@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console Debug Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/liquid-glass-buttons.css">
+    <style>
+        body {
+            padding: 20px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        .console-output {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: #ff4444;
+        }
+        .warning {
+            color: #ffaa00;
+        }
+        .info {
+            color: #44aaff;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <h1>🔧 Console Debug Test</h1>
+    
+    <div>
+        <button onclick="clearOutput()" style="padding: 10px; background: #444; color: white; border: none; border-radius: 5px; margin-bottom: 10px;">
+            Clear Output
+        </button>
+        <button onclick="testButtonClick()" style="padding: 10px; background: #006600; color: white; border: none; border-radius: 5px; margin-bottom: 10px;">
+            Test Basic Click
+        </button>
+    </div>
+    
+    <div class="console-output" id="console-output">Console output will appear here...\n</div>
+    
+    <!-- Test Navigation -->
+    <nav class="nav water-cosmic-container" style="position: relative; margin: 20px auto;">
+        <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small nav-btn active" data-mode="home">
+            <span class="btn-text">Home</span>
+        </button>
+        <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small nav-btn" data-mode="focus">
+            <span class="btn-text">Focus</span>
+        </button>
+        <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small nav-btn" data-mode="ambient">
+            <span class="btn-text">Ambient</span>
+        </button>
+    </nav>
+    
+    <!-- Test Timer Controls -->
+    <div class="timer-controls water-cosmic-container" style="margin: 20px auto; width: fit-content;">
+        <button class="liquid-glass-btn liquid-glass-btn--primary" id="startBtn">
+            <span class="btn-text">Start Focus</span>
+        </button>
+        <button class="liquid-glass-btn" id="resetBtn">
+            <span class="btn-text">Reset</span>
+        </button>
+    </div>
+
+    <script type="module">
+        const output = document.getElementById('console-output');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info';
+            const prefix = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${prefix} ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+            
+            // Also log to browser console
+            if (type === 'error') {
+                console.error(message);
+            } else if (type === 'warning') {
+                console.warn(message);
+            } else {
+                console.log(message);
+            }
+        }
+        
+        window.clearOutput = function() {
+            output.innerHTML = '';
+            console.clear();
+        };
+        
+        window.testButtonClick = function() {
+            log('Basic button click test executed successfully!');
+        };
+        
+        // Override console methods to capture all output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            log(args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            log(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            log(args.join(' '), 'warning');
+        };
+        
+        // Capture unhandled errors
+        window.addEventListener('error', function(e) {
+            log(`Unhandled Error: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`, 'error');
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            log(`Unhandled Promise Rejection: ${e.reason}`, 'error');
+        });
+        
+        log('Console capture initialized');
+        log('Testing DOM ready state: ' + document.readyState);
+        
+        // Test basic DOM queries
+        const navBtns = document.querySelectorAll('.nav-btn');
+        log(`Found ${navBtns.length} navigation buttons`);
+        
+        const timerBtns = document.querySelectorAll('#startBtn, #resetBtn');
+        log(`Found ${timerBtns.length} timer control buttons`);
+        
+        // Test clicking behavior
+        document.addEventListener('click', function(e) {
+            log(`Click detected on: ${e.target.tagName}.${Array.from(e.target.classList).join('.')} ${e.target.id ? '#' + e.target.id : ''}`);
+            
+            if (e.target.closest('.nav-btn')) {
+                const btn = e.target.closest('.nav-btn');
+                log(`Navigation button clicked: ${btn.dataset.mode}`);
+            }
+        });
+        
+        // Try to load navigation module
+        try {
+            log('Attempting to load navigation module...');
+            import('./js/navigation.js').then(navModule => {
+                log('Navigation module loaded successfully');
+                log('Available functions: ' + Object.keys(navModule).join(', '));
+                
+                if (navModule.setupNavigation) {
+                    log('Calling setupNavigation...');
+                    navModule.setupNavigation();
+                    log('setupNavigation completed');
+                } else {
+                    log('setupNavigation function not found', 'error');
+                }
+            }).catch(error => {
+                log('Failed to load navigation module: ' + error.message, 'error');
+                log('Error details: ' + JSON.stringify(error), 'error');
+            });
+        } catch (error) {
+            log('Exception loading navigation module: ' + error.message, 'error');
+        }
+        
+        // Test timer button functionality
+        document.getElementById('startBtn')?.addEventListener('click', function() {
+            log('Start button clicked successfully!');
+        });
+        
+        document.getElementById('resetBtn')?.addEventListener('click', function() {
+            log('Reset button clicked successfully!');
+        });
+        
+        log('Debug setup complete - click buttons to test');
+    </script>
+</body>
+</html>
