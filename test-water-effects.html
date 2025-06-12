@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Container Effects Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/liquid-glass-buttons.css">
+    <style>
+        body {
+            padding: 40px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        .test-container {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .demo-button {
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <h1>Water Container Effects Test</h1>
+    
+    <!-- Navigation Test -->
+    <div class="water-cosmic-container test-container">
+        <h3>Navigation Water Container</h3>
+        <p>Click to see water ripple effect</p>
+        <button class="demo-button">Test Button</button>
+    </div>
+    
+    <!-- Focus Content Test -->
+    <div class="water-cosmic-container test-container focus-content">
+        <h3>Focus Content Water Container</h3>
+        <p>Hover for parallax motion, click for ripples</p>
+        <div class="water-cosmic-container timer-controls">
+            <button class="demo-button">Timer Control 1</button>
+            <button class="demo-button">Timer Control 2</button>
+        </div>
+    </div>
+    
+    <!-- Ambient Test -->
+    <div class="water-cosmic-container water-breathing test-container ambient-content">
+        <h3>Ambient Water Container (with breathing)</h3>
+        <p>This container has breathing animation</p>
+        <div class="water-cosmic-container ambient-controls">
+            <button class="demo-button">Ambient 1</button>
+            <button class="demo-button">Ambient 2</button>
+        </div>
+    </div>
+    
+    <!-- Settings Test -->
+    <div class="water-cosmic-container test-container settings-content">
+        <h3>Settings Water Container</h3>
+        <div class="water-cosmic-container settings-section">
+            <h4>Settings Section</h4>
+            <p>Hover for shimmer effect</p>
+        </div>
+        <div class="water-cosmic-container settings-buttons">
+            <button class="demo-button">Save</button>
+            <button class="demo-button">Reset</button>
+        </div>
+    </div>
+    
+    <div style="margin-top: 40px;">
+        <button onclick="testAllEffects()" class="demo-button">Test All Water Effects</button>
+        <button onclick="toggleTheme()" class="demo-button">Toggle Theme</button>
+    </div>
+
+    <script type="module">
+        import { initWaterContainerEffects, triggerWaterRipple, triggerSubtleShimmer, triggerWaterContainerFocus } from './js/ui-effects.js';
+        
+        // Initialize effects when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initWaterContainerEffects();
+            
+            // Make functions globally available for testing
+            window.testAllEffects = () => {
+                const containers = document.querySelectorAll('.water-cosmic-container');
+                containers.forEach((container, index) => {
+                    setTimeout(() => {
+                        triggerWaterRipple(container);
+                        setTimeout(() => {
+                            triggerSubtleShimmer(container);
+                        }, 300);
+                    }, index * 200);
+                });
+            };
+            
+            window.toggleTheme = () => {
+                const currentTheme = document.body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.body.setAttribute('data-theme', newTheme);
+                document.documentElement.setAttribute('data-theme', newTheme);
+            };
+        });
+    </script>
+</body>
+</html>

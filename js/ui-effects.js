@@ -568,6 +568,9 @@ export function cleanupUIEffects() {
     body.style.removeProperty('--time-scale');
     body.style.removeProperty('--redshift-intensity');
     
+    // Cleanup water effects
+    cleanupWaterEffects();
+    
     activeEffects.clear();
     
     // Cleanup water effects
@@ -607,3 +610,63 @@ export function cleanupWaterEffects() {
         }
     });
 }
+
+// Enhanced interaction for specific containers
+document.addEventListener('DOMContentLoaded', () => {
+    // Auto-trigger water effects demonstration
+    setTimeout(() => {
+        const nav = document.querySelector('.nav.water-cosmic-container');
+        if (nav) {
+            triggerWaterRipple(nav);
+        }
+    }, 2000);
+    
+    // Enhanced focus container interactions
+    const focusContent = document.querySelector('.focus-content.water-cosmic-container');
+    if (focusContent) {
+        focusContent.addEventListener('focus', () => {
+            triggerWaterContainerFocus(focusContent);
+        });
+        
+        focusContent.addEventListener('blur', () => {
+            removeWaterContainerFocus(focusContent);
+        });
+    }
+    
+    // Enhanced timer controls interactions
+    const timerControls = document.querySelector('.timer-controls.water-cosmic-container');
+    if (timerControls) {
+        const buttons = timerControls.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                triggerWaterRipple(timerControls);
+            });
+        });
+    }
+    
+    // Enhanced settings interactions
+    const settingsModal = document.querySelector('.settings-content.water-cosmic-container');
+    if (settingsModal) {
+        const settingSections = settingsModal.querySelectorAll('.settings-section.water-cosmic-container');
+        settingSections.forEach(section => {
+            section.addEventListener('mouseenter', () => {
+                triggerSubtleShimmer(section);
+            });
+        });
+    }
+    
+    // Enhanced ambient breathing sync
+    const ambientContent = document.querySelector('.ambient-content.water-cosmic-container');
+    if (ambientContent) {
+        // Sync water breathing with breathing circle animation
+        setInterval(() => {
+            const breathingCircle = document.querySelector('.breathing-circle');
+            if (breathingCircle && ambientContent.classList.contains('water-breathing')) {
+                // Add extra shimmer during breathing cycle
+                if (Math.random() > 0.6) {
+                    triggerSubtleShimmer(ambientContent);
+                }
+            }
+        }, 4000); // Every 4 seconds to sync with breathing
+    }
+});
