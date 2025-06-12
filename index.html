@@ -43,7 +43,7 @@
     <div id="scene-container"></div>
 
     <!-- Main Navigation -->
-    <nav class="nav">
+    <nav class="nav water-cosmic-container">
         <button class="liquid-glass-btn cosmic-glass-btn liquid-glass-btn--small nav-btn active" data-mode="home">
             <span class="btn-text">Home</span>
         </button>
@@ -59,7 +59,7 @@
     <div class="container">
         <!-- Home Mode -->
         <div class="mode active" id="home">
-            <div class="home-content">
+            <div class="home-content water-cosmic-container">
                 <h1>Cosmic Focus</h1>
                 <div class="greeting" id="greeting">Welcome to Your Universe!</div>
                 <div class="date-time" id="dateTime"></div>
@@ -68,7 +68,7 @@
 
         <!-- Focus Mode - Pomodoro Timer and Tasks -->
         <div class="mode" id="focus">
-            <div class="focus-content">
+            <div class="focus-content water-cosmic-container">
                 <div class="session-info">
                     <h2 id="sessionType" class="session-type">Focus Time</h2>
                     <div class="session-progress">
@@ -77,7 +77,7 @@
                 </div>
                 <div class="timer-display" id="timerDisplay">25:00</div>
                 
-                <div class="timer-controls">
+                <div class="timer-controls water-cosmic-container">
                     <button class="liquid-glass-btn liquid-glass-btn--primary" id="startBtn">
                         <span class="btn-text">Start Focus</span>
                     </button>
@@ -99,7 +99,7 @@
                 </div>
 
                 <!-- Task Management Section -->
-                <div class="task-section">
+                <div class="task-section water-cosmic-container">
                     <h3 class="tasks-title">Tasks for this session</h3>
                     <div class="task-input-group">
                         <input type="text" class="task-input" id="taskInput" placeholder="What are you working on?">
@@ -114,13 +114,13 @@
 
         <!-- Ambient Mode - Relaxation and Sounds -->
         <div class="mode" id="ambient">
-            <div class="ambient-content">
+            <div class="ambient-content water-cosmic-container water-breathing">
                 <div class="breathing-circle"></div>
                 <div id="breathingGuide" class="ambient-text">Breathe In...</div>
                 
-                <div class="ambient-section">
+                <div class="ambient-section water-cosmic-container">
                     <h3 class="ambient-title">Ambient Sounds</h3>
-                    <div class="ambient-controls">
+                    <div class="ambient-controls water-cosmic-container">
                         <button class="liquid-glass-btn" id="rainBtn">
                             <span class="btn-icon">🌧️</span>
                             <span class="btn-text">Rain</span>
@@ -166,12 +166,12 @@
                     <span class="btn-text">✕</span>
                 </button>
                 <h2>Settings</h2>
-                <div class="settings-content">
+                <div class="settings-content water-cosmic-container">
                     
                     <!-- Theme Selection -->
-                    <div class="settings-section">
+                    <div class="settings-section water-cosmic-container">
                         <h4>Theme</h4>
-                        <div class="theme-buttons">
+                        <div class="theme-buttons water-cosmic-container">
                             <button class="liquid-glass-btn liquid-glass-btn--small" id="themeLightBtn" data-theme="light">
                                 <span class="btn-text">Light</span>
                             </button>
@@ -188,7 +188,7 @@
                     </div>
                     
                     <!-- Focus Session Length -->
-                    <div class="settings-section">
+                    <div class="settings-section water-cosmic-container">
                         <label for="focusLengthRange" class="settings-label">Focus Duration: <span id="focusLengthValue">25</span> min</label>
                         <div class="range-container">
                             <input type="range" min="1" max="60" value="25" id="focusLengthRange" class="range-input">
@@ -196,7 +196,7 @@
                     </div>
                     
                     <!-- Short Break Duration -->
-                    <div class="settings-section">
+                    <div class="settings-section water-cosmic-container">
                         <label for="shortBreakRange" class="settings-label">Short Break Duration: <span id="shortBreakValue">5</span> min</label>
                         <div class="range-container">
                             <input type="range" min="1" max="30" value="5" id="shortBreakRange" class="range-input">
@@ -204,7 +204,7 @@
                     </div>
                     
                     <!-- Long Break Duration -->
-                    <div class="settings-section">
+                    <div class="settings-section water-cosmic-container">
                         <label for="longBreakRange" class="settings-label">Long Break Duration: <span id="longBreakValue">15</span> min</label>
                         <div class="range-container">
                             <input type="range" min="5" max="60" value="15" id="longBreakRange" class="range-input">
@@ -212,7 +212,7 @@
                     </div>
                     
                     <!-- Ambient Sound Volume -->
-                    <div class="settings-section">
+                    <div class="settings-section water-cosmic-container">
                         <label for="soundVolumeRange" class="settings-label">Ambient Sound Volume: <span id="soundVolumeValue">30</span>%</label>
                         <div class="range-container">
                             <input type="range" min="0" max="100" value="30" id="soundVolumeRange" class="range-input">
@@ -220,14 +220,14 @@
                     </div>
                     
                     <!-- Custom Greeting -->
-                    <div class="settings-section">
+                    <div class="settings-section water-cosmic-container">
                         <label for="greetingInput" class="settings-label">Greeting Message</label>
                         <input type="text" id="greetingInput" class="text-input" maxlength="40" placeholder="Welcome to Your Universe!">
                     </div>
                     
                     <!-- Action Buttons -->
-                    <div class="settings-section">
-                        <div class="settings-buttons">
+                    <div class="settings-section water-cosmic-container">
+                        <div class="settings-buttons water-cosmic-container">
                             <button class="liquid-glass-btn liquid-glass-btn--primary" id="saveSettingsBtn">
                                 <span class="btn-text">Save Settings</span>
                             </button>

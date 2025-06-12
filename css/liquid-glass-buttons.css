@@ -542,3 +542,260 @@
     color: rgba(255, 255, 255, 1) !important;
     text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
 }
+
+/* =============================================================================
+   WATER-TINTED COSMIC CONTAINERS
+   ============================================================================= */
+
+/* Soft water-tinted container backgrounds with subtle blue undertones */
+.water-cosmic-container {
+    background: linear-gradient(135deg, 
+        rgba(100, 150, 255, 0.05) 0%,
+        rgba(176, 224, 230, 0.08) 30%,
+        rgba(144, 238, 144, 0.04) 60%,
+        rgba(100, 150, 255, 0.06) 100%
+    );
+    border: 1px solid rgba(176, 224, 230, 0.12);
+    position: relative;
+    overflow: hidden;
+}
+
+.water-cosmic-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        transparent 0%,
+        rgba(176, 224, 230, 0.03) 25%,
+        transparent 50%,
+        rgba(144, 238, 144, 0.02) 75%,
+        transparent 100%
+    );
+    animation: cosmicWaterShimmer 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.water-cosmic-container > * {
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes cosmicWaterShimmer {
+    0%, 100% { 
+        opacity: 0.3;
+        transform: translateX(-100%) translateY(-50%) rotate(0deg);
+    }
+    50% { 
+        opacity: 0.7;
+        transform: translateX(100%) translateY(50%) rotate(180deg);
+    }
+}
+
+/* Enhanced hover effects for water containers */
+.water-cosmic-container:hover {
+    background: linear-gradient(135deg, 
+        rgba(100, 150, 255, 0.08) 0%,
+        rgba(176, 224, 230, 0.12) 30%,
+        rgba(144, 238, 144, 0.06) 60%,
+        rgba(100, 150, 255, 0.09) 100%
+    );
+    border-color: rgba(176, 224, 230, 0.18);
+    box-shadow: 
+        0 8px 32px rgba(100, 150, 255, 0.08),
+        0 4px 16px rgba(176, 224, 230, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.water-cosmic-container:hover::before {
+    animation-duration: 4s;
+    opacity: 0.9;
+}
+
+/* Focus state with minor light bloom */
+.water-cosmic-container:focus-within {
+    border-color: rgba(176, 224, 230, 0.25);
+    box-shadow: 
+        0 0 0 2px rgba(176, 224, 230, 0.08),
+        0 8px 32px rgba(100, 150, 255, 0.12),
+        0 4px 16px rgba(176, 224, 230, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Specific container adaptations */
+
+/* Navigation container - shallow water pool */
+.nav.water-cosmic-container {
+    background: linear-gradient(135deg, 
+        rgba(100, 150, 255, 0.04) 0%,
+        rgba(176, 224, 230, 0.06) 50%,
+        rgba(100, 150, 255, 0.05) 100%
+    );
+    border-radius: 50px;
+    backdrop-filter: blur(20px) saturate(1.1);
+}
+
+/* Content containers - deeper water pools */
+.focus-content.water-cosmic-container,
+.ambient-content.water-cosmic-container,
+.home-content.water-cosmic-container {
+    background: linear-gradient(135deg, 
+        rgba(100, 150, 255, 0.06) 0%,
+        rgba(176, 224, 230, 0.09) 25%,
+        rgba(144, 238, 144, 0.05) 50%,
+        rgba(176, 224, 230, 0.08) 75%,
+        rgba(100, 150, 255, 0.07) 100%
+    );
+    border-radius: 30px;
+    backdrop-filter: blur(20px) saturate(1.2);
+}
+
+/* Task section - crystalline water */
+.task-section.water-cosmic-container {
+    background: linear-gradient(135deg, 
+        rgba(176, 224, 230, 0.08) 0%,
+        rgba(100, 150, 255, 0.06) 50%,
+        rgba(176, 224, 230, 0.09) 100%
+    );
+    border-radius: 20px;
+    backdrop-filter: blur(15px) saturate(1.15);
+}
+
+/* Settings sections - delicate water tint */
+.settings-section.water-cosmic-container {
+    background: linear-gradient(135deg, 
+        rgba(100, 150, 255, 0.03) 0%,
+        rgba(176, 224, 230, 0.05) 100%
+    );
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px) saturate(1.1);
+}
+
+/* Button group containers - floating water droplets */
+.timer-controls.water-cosmic-container,
+.ambient-controls.water-cosmic-container,
+.theme-buttons.water-cosmic-container,
+.settings-buttons.water-cosmic-container {
+    background: linear-gradient(135deg, 
+        rgba(176, 224, 230, 0.05) 0%,
+        rgba(100, 150, 255, 0.04) 50%,
+        rgba(176, 224, 230, 0.06) 100%
+    );
+    border-radius: 25px;
+    padding: 20px;
+    backdrop-filter: blur(12px) saturate(1.1);
+}
+
+/* Settings modal content - pristine water chamber */
+.settings-content.water-cosmic-container {
+    background: linear-gradient(135deg, 
+        rgba(100, 150, 255, 0.04) 0%,
+        rgba(176, 224, 230, 0.07) 30%,
+        rgba(144, 238, 144, 0.03) 60%,
+        rgba(100, 150, 255, 0.05) 100%
+    );
+    border-radius: 20px;
+    padding: 25px;
+    backdrop-filter: blur(15px) saturate(1.15);
+}
+
+/* Enhanced water ripple effect on interaction */
+.water-cosmic-container.water-ripple {
+    animation: waterRippleExpansion 0.6s ease-out;
+}
+
+@keyframes waterRippleExpansion {
+    0% {
+        box-shadow: 
+            0 0 0 0 rgba(176, 224, 230, 0.4),
+            0 8px 32px rgba(100, 150, 255, 0.08);
+    }
+    50% {
+        box-shadow: 
+            0 0 0 20px rgba(176, 224, 230, 0.08),
+            0 12px 48px rgba(100, 150, 255, 0.12);
+    }
+    100% {
+        box-shadow: 
+            0 0 0 40px rgba(176, 224, 230, 0),
+            0 8px 32px rgba(100, 150, 255, 0.08);
+    }
+}
+
+/* Subtle parallax motion for depth */
+.water-cosmic-container.water-parallax::before {
+    animation: waterParallaxFlow 12s linear infinite;
+}
+
+@keyframes waterParallaxFlow {
+    0% { 
+        transform: translateX(-100%) translateY(-100%) scale(1);
+        opacity: 0.2;
+    }
+    25% { 
+        transform: translateX(-25%) translateY(-25%) scale(1.1);
+        opacity: 0.5;
+    }
+    50% { 
+        transform: translateX(50%) translateY(50%) scale(1.2);
+        opacity: 0.8;
+    }
+    75% { 
+        transform: translateX(125%) translateY(125%) scale(1.1);
+        opacity: 0.5;
+    }
+    100% { 
+        transform: translateX(200%) translateY(200%) scale(1);
+        opacity: 0.2;
+    }
+}
+
+/* Breathing animation for ambient mode containers */
+.water-cosmic-container.water-breathing {
+    animation: waterBreathing 8s ease-in-out infinite;
+}
+
+@keyframes waterBreathing {
+    0%, 100% { 
+        background-size: 100% 100%;
+        filter: brightness(1) saturate(1);
+    }
+    50% { 
+        background-size: 110% 110%;
+        filter: brightness(1.05) saturate(1.1);
+    }
+}
+
+/* Responsive adjustments for water containers */
+@media (max-width: 768px) {
+    .water-cosmic-container {
+        backdrop-filter: blur(15px) saturate(1.05);
+    }
+    
+    .water-cosmic-container::before {
+        animation-duration: 6s;
+    }
+}
+
+@media (max-width: 480px) {
+    .water-cosmic-container {
+        backdrop-filter: blur(12px) saturate(1.02);
+    }
+    
+    .settings-section.water-cosmic-container {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .timer-controls.water-cosmic-container,
+    .ambient-controls.water-cosmic-container,
+    .theme-buttons.water-cosmic-container,
+    .settings-buttons.water-cosmic-container {
+        padding: 15px;
+    }
+}

@@ -275,6 +275,274 @@ export function initUIEffects() {
             }
         });
     });
+    
+    // Initialize water container effects
+    initWaterContainerEffects();
+}
+
+// =============================================================================
+// WATER COSMIC CONTAINER EFFECTS
+// =============================================================================
+
+// Initialize water container interactive effects
+export function initWaterContainerEffects() {
+    const waterContainers = document.querySelectorAll('.water-cosmic-container');
+    
+    waterContainers.forEach(container => {
+        // Add water ripple effect on click
+        container.addEventListener('click', (e) => {
+            triggerWaterRipple(container, e);
+        });
+        
+        // Add parallax motion on hover
+        container.addEventListener('mouseenter', () => {
+            container.classList.add('water-parallax');
+        });
+        
+        container.addEventListener('mouseleave', () => {
+            container.classList.remove('water-parallax');
+        });
+        
+        // Add breathing effect for ambient containers
+        if (container.classList.contains('ambient-content')) {
+            container.classList.add('water-breathing');
+        }
+    });
+    
+    // Auto-shimmer effect for containers in view
+    observeWaterContainersInView();
+}
+
+// Trigger water ripple effect
+export function triggerWaterRipple(container, event = null) {
+    // Remove any existing ripple
+    container.classList.remove('water-ripple');
+    
+    // Force reflow
+    container.offsetHeight;
+    
+    // Add ripple effect
+    container.classList.add('water-ripple');
+    
+    // Create ripple element at click position
+    if (event) {
+        createWaterRippleElement(container, event);
+    }
+    
+    // Remove ripple class after animation
+    trackSetTimeout(() => {
+        container.classList.remove('water-ripple');
+    }, 600);
+}
+
+// Create visual ripple element at click position
+function createWaterRippleElement(container, event) {
+    const rect = container.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    const ripple = document.createElement('div');
+    ripple.className = 'water-ripple-element';
+    ripple.style.cssText = `
+        position: absolute;
+        left: ${x}px;
+        top: ${y}px;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle, 
+            rgba(176, 224, 230, 0.6) 0%,
+            rgba(176, 224, 230, 0.3) 50%,
+            transparent 100%);
+        pointer-events: none;
+        z-index: 10;
+        animation: waterRippleSpread 0.6s ease-out forwards;
+        transform: translate(-50%, -50%);
+    `;
+    
+    // Add CSS animation keyframes if not already added
+    if (!document.querySelector('#water-ripple-styles')) {
+        const style = document.createElement('style');
+        style.id = 'water-ripple-styles';
+        style.textContent = `
+            @keyframes waterRippleSpread {
+                0% {
+                    width: 0;
+                    height: 0;
+                    opacity: 0.8;
+                }
+                50% {
+                    width: 100px;
+                    height: 100px;
+                    opacity: 0.4;
+                }
+                100% {
+                    width: 200px;
+                    height: 200px;
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    container.style.position = 'relative';
+    container.appendChild(ripple);
+    
+    // Remove ripple element after animation
+    trackSetTimeout(() => {
+        if (ripple.parentNode) {
+            ripple.parentNode.removeChild(ripple);
+        }
+    }, 600);
+}
+
+// Observe water containers for auto-shimmer when in view
+function observeWaterContainersInView() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Add subtle auto-shimmer for containers in view
+                const container = entry.target;
+                container.classList.add('water-in-view');
+                
+                // Random shimmer interval
+                const shimmerInterval = trackSetInterval(() => {
+                    if (Math.random() > 0.7) { // 30% chance every interval
+                        triggerSubtleShimmer(container);
+                    }
+                }, 3000 + Math.random() * 2000); // 3-5 second intervals
+                
+                // Store interval ID on element for cleanup
+                container._shimmerInterval = shimmerInterval;
+            } else {
+                // Remove auto-shimmer when out of view
+                const container = entry.target;
+                container.classList.remove('water-in-view');
+                
+                if (container._shimmerInterval) {
+                    clearInterval(container._shimmerInterval);
+                    delete container._shimmerInterval;
+                }
+            }
+        });
+    }, { threshold: 0.2 });
+    
+    document.querySelectorAll('.water-cosmic-container').forEach(container => {
+        observer.observe(container);
+    });
+}
+
+// Trigger subtle shimmer effect
+function triggerSubtleShimmer(container) {
+    const shimmer = document.createElement('div');
+    shimmer.className = 'water-subtle-shimmer';
+    shimmer.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent 0%,
+            rgba(176, 224, 230, 0.15) 50%,
+            transparent 100%);
+        pointer-events: none;
+        z-index: 1;
+        animation: waterShimmerPass 2s ease-in-out forwards;
+    `;
+    
+    // Add shimmer animation if not already added
+    if (!document.querySelector('#water-shimmer-styles')) {
+        const style = document.createElement('style');
+        style.id = 'water-shimmer-styles';
+        style.textContent = `
+            @keyframes waterShimmerPass {
+                0% {
+                    left: -100%;
+                    opacity: 0;
+                }
+                50% {
+                    left: 0%;
+                    opacity: 1;
+                }
+                100% {
+                    left: 100%;
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    container.style.position = 'relative';
+    container.style.overflow = 'hidden';
+    container.appendChild(shimmer);
+    
+    // Remove shimmer after animation
+    trackSetTimeout(() => {
+        if (shimmer.parentNode) {
+            shimmer.parentNode.removeChild(shimmer);
+        }
+    }, 2000);
+}
+
+// Enhanced focus effects for water containers
+export function triggerWaterContainerFocus(container) {
+    container.classList.add('water-focus-enhanced');
+    
+    // Add light bloom effect
+    const bloom = document.createElement('div');
+    bloom.className = 'water-light-bloom';
+    bloom.style.cssText = `
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background: radial-gradient(circle, 
+            rgba(176, 224, 230, 0.1) 0%,
+            transparent 70%);
+        border-radius: inherit;
+        pointer-events: none;
+        z-index: -1;
+        animation: waterBloomPulse 2s ease-in-out infinite;
+    `;
+    
+    // Add bloom animation
+    if (!document.querySelector('#water-bloom-styles')) {
+        const style = document.createElement('style');
+        style.id = 'water-bloom-styles';
+        style.textContent = `
+            @keyframes waterBloomPulse {
+                0%, 100% {
+                    opacity: 0.5;
+                    transform: scale(1);
+                }
+                50% {
+                    opacity: 0.8;
+                    transform: scale(1.05);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    container.style.position = 'relative';
+    container.appendChild(bloom);
+    
+    // Store bloom element for cleanup
+    container._lightBloom = bloom;
+}
+
+// Remove water container focus effects
+export function removeWaterContainerFocus(container) {
+    container.classList.remove('water-focus-enhanced');
+    
+    if (container._lightBloom && container._lightBloom.parentNode) {
+        container._lightBloom.parentNode.removeChild(container._lightBloom);
+        delete container._lightBloom;
+    }
 }
 
 // Clean up all active effects
@@ -301,4 +569,41 @@ export function cleanupUIEffects() {
     body.style.removeProperty('--redshift-intensity');
     
     activeEffects.clear();
+    
+    // Cleanup water effects
+    cleanupWaterEffects();
+}
+
+// Cleanup water effects
+export function cleanupWaterEffects() {
+    document.querySelectorAll('.water-cosmic-container').forEach(container => {
+        // Clear shimmer intervals
+        if (container._shimmerInterval) {
+            clearInterval(container._shimmerInterval);
+            delete container._shimmerInterval;
+        }
+        
+        // Remove light bloom elements
+        if (container._lightBloom && container._lightBloom.parentNode) {
+            container._lightBloom.parentNode.removeChild(container._lightBloom);
+            delete container._lightBloom;
+        }
+        
+        // Remove all water effect classes
+        container.classList.remove('water-ripple', 'water-parallax', 'water-in-view', 'water-focus-enhanced');
+    });
+    
+    // Remove injected styles
+    const stylesToRemove = [
+        '#water-ripple-styles',
+        '#water-shimmer-styles', 
+        '#water-bloom-styles'
+    ];
+    
+    stylesToRemove.forEach(selector => {
+        const style = document.querySelector(selector);
+        if (style) {
+            style.remove();
+        }
+    });
 }
