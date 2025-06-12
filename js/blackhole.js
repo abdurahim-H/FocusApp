@@ -319,94 +319,256 @@ function createMatterStreams(parent) {
 }
 
 
-// 3. Elegant & Graceful Orbital System - Beautiful, organized celestial objects
+// 3. Solar System - Realistic planetary configuration
 function createBalancedOrbitals(parent) {
-    const group = new BABYLON.TransformNode('balancedOrbitals', scene);
-    group.parent = parent;
+    const solarSystem = new BABYLON.TransformNode('solarSystem', scene);
+    solarSystem.parent = parent;
     orbitalBodies = [];
 
-    // Create elegant, organized orbital rings with beautiful objects
-    const orbitalRings = [
+    // Create central star
+    createCentralStar(solarSystem);
+    
+    // Create 5 distinct planets with individual orbital characteristics
+    const planetConfigs = [
         { 
-            distance: 30, 
-            objects: 4, 
-            size: 0.8, 
-            color: new BABYLON.Color3(0.7, 0.9, 1),    // Ice blue
-            emissive: new BABYLON.Color3(0.1, 0.2, 0.3),
-            name: 'InnerIceWorlds'
-        },
-        { 
-            distance: 50, 
-            objects: 6, 
-            size: 1.2, 
-            color: new BABYLON.Color3(1, 0.8, 0.6),    // Warm gold
-            emissive: new BABYLON.Color3(0.2, 0.15, 0.1),
-            name: 'MiddleGoldenSpheres'
-        },
-        { 
-            distance: 75, 
-            objects: 8, 
+            name: 'InnerRocky',
+            distance: 25, 
             size: 0.6, 
-            color: new BABYLON.Color3(0.8, 1, 0.8),    // Soft green
-            emissive: new BABYLON.Color3(0.1, 0.2, 0.1),
-            name: 'OuterEmeraldOrbs'
+            color: new BABYLON.Color3(0.8, 0.5, 0.3),    // Mars-like red
+            emissive: new BABYLON.Color3(0.1, 0.05, 0.02),
+            speed: 0.012,
+            inclination: Math.PI * 0.05, // 5 degree tilt
+            hasRings: false,
+            moons: 0
+        },
+        { 
+            name: 'VenusLike',
+            distance: 35, 
+            size: 0.8, 
+            color: new BABYLON.Color3(1, 0.9, 0.6),    // Golden Venus
+            emissive: new BABYLON.Color3(0.15, 0.12, 0.08),
+            speed: 0.008,
+            inclination: Math.PI * 0.08, // 8 degree tilt
+            hasRings: false,
+            moons: 1
+        },
+        { 
+            name: 'EarthLike',
+            distance: 50, 
+            size: 1.0, 
+            color: new BABYLON.Color3(0.3, 0.6, 0.9),    // Blue Earth
+            emissive: new BABYLON.Color3(0.05, 0.1, 0.15),
+            speed: 0.006,
+            inclination: Math.PI * 0.12, // 12 degree tilt
+            hasRings: false,
+            moons: 1
+        },
+        { 
+            name: 'SaturnLike',
+            distance: 75, 
+            size: 1.8, 
+            color: new BABYLON.Color3(0.9, 0.8, 0.6),    // Saturn gold
+            emissive: new BABYLON.Color3(0.12, 0.1, 0.08),
+            speed: 0.004,
+            inclination: Math.PI * 0.15, // 15 degree tilt
+            hasRings: true,
+            moons: 2
+        },
+        { 
+            name: 'GasGiant',
+            distance: 95, 
+            size: 1.6, 
+            color: new BABYLON.Color3(0.4, 0.7, 0.9),    // Neptune blue
+            emissive: new BABYLON.Color3(0.08, 0.12, 0.15),
+            speed: 0.003,
+            inclination: Math.PI * 0.18, // 18 degree tilt
+            hasRings: true,
+            moons: 1
         }
     ];
 
-    // Create organized, beautiful orbital rings
-    orbitalRings.forEach((ring, ringIndex) => {
-        for (let i = 0; i < ring.objects; i++) {
-            // Perfect spacing for elegance
-            const angle = (Math.PI * 2 * i) / ring.objects;
-            
-            // Create beautiful sphere
-            const body = BABYLON.MeshBuilder.CreateSphere(`${ring.name}_${i}`, { 
-                diameter: ring.size * 2, 
-                segments: 32
-            }, scene);
-            
-            // Elegant material with subtle variation
-            const material = new BABYLON.StandardMaterial(`${ring.name}Mat_${i}`, scene);
-            const colorVariation = 0.1 * (Math.random() - 0.5);
-            material.diffuseColor = ring.color.add(new BABYLON.Color3(colorVariation, colorVariation, colorVariation));
-            material.emissiveColor = ring.emissive;
-            material.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
-            material.specularPower = 64;
-            
-            body.material = material;
-            body.parent = group;
-            
-            // Perfect orbital positioning
-            body.position.x = Math.cos(angle) * ring.distance;
-            body.position.z = Math.sin(angle) * ring.distance;
-            body.position.y = 0;
-            
-            // Smooth, elegant orbital motion
-            body.userData = {
-                distance: ring.distance,
-                angle: angle,
-                speed: 0.004 / (1 + ring.distance * 0.01), // Slower for outer rings (realistic)
-                inclination: 0, // Keep organized and clean
-                planeRotation: 0, // No chaotic tilting
-                rotationSpeed: 0.01 + Math.random() * 0.01,
-                pulsePhase: (Math.PI * 2 * i) / ring.objects, // Synchronized pulsing
-                pulseSpeed: 1.0, // Unified pulse rhythm
-                baseEmission: ring.emissive.clone(),
-                ringIndex: ringIndex,
-                objectIndex: i
-            };
-            
-            // Set rendering group for proper depth sorting
-            body.renderingGroupId = 1;
-            
-            orbitalBodies.push(body);
-        }
+    // Create each planet independently
+    planetConfigs.forEach((config, index) => {
+        createPlanet(solarSystem, config, index);
     });
     
-    console.log(`✨ Created ${orbitalBodies.length} elegantly organized celestial objects in ${orbitalRings.length} orbital rings`);
+    console.log(`✨ Created solar system with ${planetConfigs.length} planets and central star`);
+}
+
+// Create central star
+function createCentralStar(parent) {
+    const star = BABYLON.MeshBuilder.CreateSphere('centralStar', { 
+        diameter: 8, 
+        segments: 32 
+    }, scene);
     
-    // NO ASTEROID BELTS - Keep it clean and elegant
-    // createAsteroidBelts(parent);
+    const starMaterial = new BABYLON.StandardMaterial('starMat', scene);
+    starMaterial.diffuseColor = new BABYLON.Color3(1, 0.9, 0.7);
+    starMaterial.emissiveColor = new BABYLON.Color3(1, 0.8, 0.4);
+    starMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    
+    star.material = starMaterial;
+    star.parent = parent;
+    star.position.set(0, 0, 0);
+    star.renderingGroupId = 1;
+    
+    // Add star glow
+    const starGlow = BABYLON.MeshBuilder.CreateSphere('starGlow', { 
+        diameter: 12, 
+        segments: 32 
+    }, scene);
+    
+    const glowMaterial = new BABYLON.StandardMaterial('starGlowMat', scene);
+    glowMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    glowMaterial.emissiveColor = new BABYLON.Color3(1, 0.7, 0.3);
+    glowMaterial.alpha = 0.3;
+    glowMaterial.backFaceCulling = false;
+    
+    starGlow.material = glowMaterial;
+    starGlow.parent = parent;
+    starGlow.position.set(0, 0, 0);
+    starGlow.renderingGroupId = 1;
+    
+    // Store star data
+    star.userData = {
+        rotationSpeed: 0.02,
+        pulseSpeed: 2.0,
+        baseBrightness: 1.0
+    };
+    
+    orbitalBodies.push(star, starGlow);
+}
+
+// Create individual planet with its own orbital system
+function createPlanet(parent, config, planetIndex) {
+    // Create orbital pivot for this planet
+    const planetOrbit = new BABYLON.TransformNode(`${config.name}_orbit`, scene);
+    planetOrbit.parent = parent;
+    
+    // Apply orbital inclination
+    planetOrbit.rotation.x = config.inclination;
+    planetOrbit.rotation.z = (Math.random() - 0.5) * 0.2; // Small random tilt
+    
+    // Create planet
+    const planet = BABYLON.MeshBuilder.CreateSphere(config.name, { 
+        diameter: config.size * 2, 
+        segments: 32 
+    }, scene);
+    
+    const planetMaterial = new BABYLON.StandardMaterial(`${config.name}Mat`, scene);
+    planetMaterial.diffuseColor = config.color;
+    planetMaterial.emissiveColor = config.emissive;
+    planetMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+    planetMaterial.specularPower = 64;
+    
+    planet.material = planetMaterial;
+    planet.parent = planetOrbit;
+    planet.position.x = config.distance;
+    planet.renderingGroupId = 1;
+    
+    // Planet animation data
+    planet.userData = {
+        orbitPivot: planetOrbit,
+        distance: config.distance,
+        angle: Math.random() * Math.PI * 2, // Random starting position
+        orbitSpeed: config.speed,
+        rotationSpeed: 0.015 + Math.random() * 0.01,
+        baseEmission: config.emissive.clone(),
+        planetIndex: planetIndex
+    };
+    
+    orbitalBodies.push(planet);
+    
+    // Create ring system if specified
+    if (config.hasRings) {
+        createPlanetRings(planet, config);
+    }
+    
+    // Create moons
+    for (let m = 0; m < config.moons; m++) {
+        createMoon(planet, config, m);
+    }
+}
+
+// Create ring system for a planet
+function createPlanetRings(planet, config) {
+    const ringGroup = new BABYLON.TransformNode(`${config.name}_rings`, scene);
+    ringGroup.parent = planet;
+    
+    // Create multiple ring layers for depth
+    const ringLayers = [
+        { radius: config.size * 1.8, thickness: 0.15, alpha: 0.6 },
+        { radius: config.size * 2.2, thickness: 0.12, alpha: 0.4 },
+        { radius: config.size * 2.6, thickness: 0.08, alpha: 0.3 }
+    ];
+    
+    ringLayers.forEach((layer, index) => {
+        const ring = BABYLON.MeshBuilder.CreateTorus(`${config.name}_ring_${index}`, {
+            diameter: layer.radius * 2,
+            thickness: layer.thickness,
+            tessellation: 64
+        }, scene);
+        
+        const ringMaterial = new BABYLON.StandardMaterial(`${config.name}_ringMat_${index}`, scene);
+        ringMaterial.diffuseColor = config.color.scale(0.8);
+        ringMaterial.emissiveColor = config.emissive.scale(0.5);
+        ringMaterial.alpha = layer.alpha;
+        ringMaterial.backFaceCulling = false;
+        ringMaterial.useAlphaFromDiffuseTexture = false;
+        
+        ring.material = ringMaterial;
+        ring.parent = ringGroup;
+        ring.rotation.x = Math.PI / 2; // Make rings horizontal
+        ring.renderingGroupId = 1;
+        
+        // Individual ring rotation
+        ring.userData = {
+            rotationSpeed: 0.005 + Math.random() * 0.005,
+            layer: index
+        };
+        
+        orbitalBodies.push(ring);
+    });
+    
+    // Tilt the entire ring system slightly
+    ringGroup.rotation.x = (Math.random() - 0.5) * 0.4; // ±20 degree tilt
+    ringGroup.rotation.z = (Math.random() - 0.5) * 0.3; // ±15 degree tilt
+}
+
+// Create moon orbiting a planet
+function createMoon(planet, planetConfig, moonIndex) {
+    const moonOrbit = new BABYLON.TransformNode(`${planetConfig.name}_moon${moonIndex}_orbit`, scene);
+    moonOrbit.parent = planet;
+    
+    const moonDistance = planetConfig.size * 3 + moonIndex * planetConfig.size * 1.5;
+    const moonSize = planetConfig.size * 0.2 + Math.random() * 0.1;
+    
+    const moon = BABYLON.MeshBuilder.CreateSphere(`${planetConfig.name}_moon${moonIndex}`, { 
+        diameter: moonSize * 2, 
+        segments: 16 
+    }, scene);
+    
+    const moonMaterial = new BABYLON.StandardMaterial(`${planetConfig.name}_moonMat${moonIndex}`, scene);
+    moonMaterial.diffuseColor = new BABYLON.Color3(0.6, 0.6, 0.6);
+    moonMaterial.emissiveColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+    moonMaterial.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+    
+    moon.material = moonMaterial;
+    moon.parent = moonOrbit;
+    moon.position.x = moonDistance;
+    moon.renderingGroupId = 1;
+    
+    // Moon animation data
+    moon.userData = {
+        orbitPivot: moonOrbit,
+        distance: moonDistance,
+        angle: Math.random() * Math.PI * 2,
+        orbitSpeed: 0.03 + Math.random() * 0.02, // Faster than planets
+        rotationSpeed: 0.01 + Math.random() * 0.01,
+        moonIndex: moonIndex
+    };
+    
+    orbitalBodies.push(moon);
 }
 
 // Create beautiful asteroid belts around the black hole
@@ -498,16 +660,28 @@ function createCosmicEnvironment(parent) {
     // Additional distant micro stars for depth
     createMicroStarField(parent);
 
-    // Distant galaxy
-    const gal = BABYLON.MeshBuilder.CreateSphere('distantGalaxy', { diameter:80, segments:32 }, scene);
-    gal.position.set(100,50,-200);
-    gal.parent = parent;
-    const gmat = new BABYLON.StandardMaterial('galaxyMat', scene);
-    gmat.diffuseColor  = new BABYLON.Color3(0.8,0.8,1);
-    gmat.emissiveColor = new BABYLON.Color3(0.8,0.8,1);
-    gmat.backFaceCulling=false;
-    gal.material = gmat;
-    gal.userData = { rotationSpeed:0.001 };
+    // Single secondary star for lighting/mood
+    const secondaryStar = BABYLON.MeshBuilder.CreateSphere('secondaryStar', { diameter:6, segments:32 }, scene);
+    secondaryStar.position.set(-80, 30, -150);
+    secondaryStar.parent = parent;
+    const secondaryMat = new BABYLON.StandardMaterial('secondaryStarMat', scene);
+    secondaryMat.diffuseColor = new BABYLON.Color3(0.9, 0.7, 1);
+    secondaryMat.emissiveColor = new BABYLON.Color3(0.6, 0.4, 0.8);
+    secondaryMat.backFaceCulling = false;
+    secondaryStar.material = secondaryMat;
+    secondaryStar.userData = { rotationSpeed: 0.008, pulseSpeed: 1.5 };
+    
+    // Distant galaxy (much smaller and further)
+    const galaxy = BABYLON.MeshBuilder.CreateSphere('distantGalaxy', { diameter:40, segments:32 }, scene);
+    galaxy.position.set(120, 80, -300);
+    galaxy.parent = parent;
+    const galaxyMat = new BABYLON.StandardMaterial('galaxyMat', scene);
+    galaxyMat.diffuseColor = new BABYLON.Color3(0.7, 0.8, 1);
+    galaxyMat.emissiveColor = new BABYLON.Color3(0.4, 0.5, 0.7);
+    galaxyMat.alpha = 0.6;
+    galaxyMat.backFaceCulling = false;
+    galaxy.material = galaxyMat;
+    galaxy.userData = { rotationSpeed: 0.001 };
 }
 
 
@@ -757,26 +931,56 @@ export function updateBlackHoleEffects() {
         }
     }
 
-    // Elegant orbital animations - organized and graceful movement
-    orbitalBodies.forEach(b => {
-        const u = b.userData;
-        if (!u) return;
+    // Solar system animations - planets, moons, and rings
+    orbitalBodies.forEach(body => {
+        const userData = body.userData;
+        if (!userData) return;
         
-        u.angle += u.speed;
+        // Central star animation
+        if (body.name === 'centralStar' || body.name === 'starGlow') {
+            body.rotation.y += userData.rotationSpeed;
+            
+            if (body.material && body.material.emissiveColor && userData.pulseSpeed) {
+                const pulse = Math.sin(t * userData.pulseSpeed) * 0.2 + userData.baseBrightness;
+                body.material.emissiveColor.scaleInPlace(pulse);
+            }
+            return;
+        }
         
-        // Elegant circular orbits - no chaos, perfect harmony
-        b.position.x = Math.cos(u.angle) * u.distance;
-        b.position.z = Math.sin(u.angle) * u.distance;
-        b.position.y = 0; // Keep objects in organized planes
+        // Planet orbital motion
+        if (userData.orbitPivot && userData.orbitSpeed) {
+            userData.angle += userData.orbitSpeed;
+            userData.orbitPivot.rotation.y = userData.angle;
+            
+            // Planet self-rotation
+            body.rotation.y += userData.rotationSpeed;
+            body.rotation.x += userData.rotationSpeed * 0.3;
+            
+            // Planet atmospheric glow effect
+            if (body.material && body.material.emissiveColor && userData.baseEmission) {
+                const glow = Math.sin(t * 1.5 + userData.planetIndex) * 0.1 + 0.9;
+                body.material.emissiveColor.copyFrom(userData.baseEmission.scale(glow));
+            }
+        }
         
-        // Gentle self rotation
-        b.rotation.y += u.rotationSpeed;
-        b.rotation.x += u.rotationSpeed * 0.5;
+        // Moon orbital motion (tighter, faster orbits)
+        if (userData.moonIndex !== undefined && userData.orbitPivot) {
+            userData.angle += userData.orbitSpeed;
+            userData.orbitPivot.rotation.y = userData.angle;
+            
+            // Moon self-rotation
+            body.rotation.y += userData.rotationSpeed;
+        }
         
-        // Synchronized, elegant pulsing within each ring
-        if (b.material && b.material.emissiveColor && u.baseEmission) {
-            const ringSync = Math.sin(t * u.pulseSpeed + u.pulsePhase) * 0.2 + 0.8; // Gentle pulsing
-            b.material.emissiveColor.copyFrom(u.baseEmission.scale(ringSync));
+        // Ring rotation (independent of planet rotation)
+        if (userData.layer !== undefined && userData.rotationSpeed) {
+            body.rotation.y += userData.rotationSpeed;
+            
+            // Subtle ring shimmer effect
+            if (body.material && body.material.emissiveColor) {
+                const shimmer = Math.sin(t * 3 + userData.layer) * 0.15 + 0.85;
+                body.material.alpha = body.material.alpha * shimmer;
+            }
         }
     });
 
@@ -811,9 +1015,18 @@ export function updateBlackHoleEffects() {
         }
     });
 
-    // Distant galaxy slow rotation
-    const gal = scene.getTransformNodeByName('distantGalaxy');
-    if (gal && gal.userData) gal.rotation.y += gal.userData.rotationSpeed;
+    // Animate distant celestial objects
+    const secondaryStar = scene.getTransformNodeByName('secondaryStar');
+    if (secondaryStar && secondaryStar.userData) {
+        secondaryStar.rotation.y += secondaryStar.userData.rotationSpeed;
+        if (secondaryStar.material && secondaryStar.material.emissiveColor) {
+            const pulse = Math.sin(t * secondaryStar.userData.pulseSpeed) * 0.2 + 0.8;
+            secondaryStar.material.emissiveColor.scaleInPlace(pulse);
+        }
+    }
+    
+    const galaxy = scene.getTransformNodeByName('distantGalaxy');
+    if (galaxy && galaxy.userData) galaxy.rotation.y += galaxy.userData.rotationSpeed;
 }
 
 
