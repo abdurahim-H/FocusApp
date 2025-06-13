@@ -142,21 +142,44 @@ export function setupSettingsModal() {
 export function setupSettingsControls() {
     console.log('🎛️ Setting up settings controls...');
     
-    const elements = {
-        saveBtn: document.getElementById('saveSettingsBtn'),
-        resetBtn: document.getElementById('resetSettingsBtn'),
-        focusRange: document.getElementById('focusLengthRange'),
-        focusValue: document.getElementById('focusLengthValue'),
-        soundRange: document.getElementById('soundVolumeRange'),
-        soundValue: document.getElementById('soundVolumeValue'),
-        greetingInput: document.getElementById('greetingInput'),
-        themeBtns: {
-            light: document.getElementById('themeLightBtn'),
-            dark: document.getElementById('themeDarkBtn'),
-            cosmos: document.getElementById('themeCosmosBtn'),
-            auto: document.getElementById('themeAutoBtn')
-        }
-    };
+    // Use setTimeout to ensure DOM is ready, similar to setupSettingsModal
+    setTimeout(() => {
+        const elements = {
+            saveBtn: document.getElementById('saveSettingsBtn'),
+            resetBtn: document.getElementById('resetSettingsBtn'),
+            focusRange: document.getElementById('focusLengthRange'),
+            focusValue: document.getElementById('focusLengthValue'),
+            shortBreakRange: document.getElementById('shortBreakRange'),
+            shortBreakValue: document.getElementById('shortBreakValue'),
+            longBreakRange: document.getElementById('longBreakRange'),
+            longBreakValue: document.getElementById('longBreakValue'),
+            soundRange: document.getElementById('soundVolumeRange'),
+            soundValue: document.getElementById('soundVolumeValue'),
+            greetingInput: document.getElementById('greetingInput'),
+            savedMsg: document.getElementById('settingsSavedMsg'),
+            themeBtns: {
+                light: document.getElementById('themeLightBtn'),
+                dark: document.getElementById('themeDarkBtn'),
+                cosmos: document.getElementById('themeCosmosBtn'),
+                auto: document.getElementById('themeAutoBtn')
+            }
+        };
+
+        // Debug: Log which elements were found
+        console.log('🔍 Settings elements found:', {
+            saveBtn: !!elements.saveBtn,
+            resetBtn: !!elements.resetBtn,
+            focusRange: !!elements.focusRange,
+            focusValue: !!elements.focusValue,
+            shortBreakRange: !!elements.shortBreakRange,
+            shortBreakValue: !!elements.shortBreakValue,
+            longBreakRange: !!elements.longBreakRange,
+            longBreakValue: !!elements.longBreakValue,
+            soundRange: !!elements.soundRange,
+            soundValue: !!elements.soundValue,
+            greetingInput: !!elements.greetingInput,
+            savedMsg: !!elements.savedMsg
+        });
 
     // Focus length range
     if (elements.focusRange && elements.focusValue) {
@@ -214,6 +237,7 @@ export function setupSettingsControls() {
     // Save button
     if (elements.saveBtn) {
         elements.saveBtn.addEventListener('click', function() {
+            console.log('🔧 Save button clicked');
             try {
                 const focusDuration = parseInt(elements.focusRange.value);
                 const shortBreakDuration = parseInt(elements.shortBreakRange.value);
@@ -222,6 +246,15 @@ export function setupSettingsControls() {
                 const greeting = elements.greetingInput.value;
                 const theme = document.body.getAttribute('data-theme') || 'auto';
                 
+                console.log('🔧 Settings to save:', {
+                    focusDuration,
+                    shortBreakDuration,
+                    longBreakDuration,
+                    soundVolume,
+                    greeting,
+                    theme
+                });
+                
                 // Save to localStorage
                 localStorage.setItem('fu_theme', theme);
                 localStorage.setItem('fu_focusLength', focusDuration);
@@ -229,6 +262,8 @@ export function setupSettingsControls() {
                 localStorage.setItem('fu_longBreakLength', longBreakDuration);
                 localStorage.setItem('fu_soundVolume', soundVolume);
                 localStorage.setItem('fu_greeting', greeting);
+                
+                console.log('✅ Settings saved to localStorage');
                 
                 // Apply settings immediately
                 if (focusDuration && focusDuration > 0) {
@@ -280,15 +315,21 @@ export function setupSettingsControls() {
                 document.getElementById('greeting').textContent = greeting || 'Welcome to Your Universe!';
                 
                 // Show success message
-                elements.savedMsg.style.opacity = 1;
-                setTimeout(() => {
-                    elements.savedMsg.style.opacity = 0;
-                }, 1500);
+                if (elements.savedMsg) {
+                    elements.savedMsg.style.opacity = 1;
+                    setTimeout(() => {
+                        elements.savedMsg.style.opacity = 0;
+                    }, 1500);
+                }
+                
+                console.log('✅ Settings applied successfully');
                 
             } catch (error) {
-                // Silently handle settings save errors
+                console.error('❌ Error saving settings:', error);
             }
         });
+    } else {
+        console.error('❌ Save button not found');
     }
 
     // Reset button
@@ -326,6 +367,8 @@ export function setupSettingsControls() {
             }
         });
     }
+    
+    }, 100); // Close setTimeout
 }
 
 export function loadSettings() {

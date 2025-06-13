@@ -13,8 +13,6 @@ let modules = {};
  */
 async function loadModules() {
     const moduleList = [
-        { name: 'performanceMonitor', path: './performance-monitor.js' },
-        { name: 'adaptiveQuality', path: './adaptive-quality.js' },
         { name: 'scene3d', path: './scene3d.js' },
         { name: 'timer', path: './timer.js' },
         { name: 'tasks', path: './tasks.js' },
