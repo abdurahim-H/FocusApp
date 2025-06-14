@@ -66,18 +66,18 @@ export function createEnhancedBlackHole() {
     // createUnifiedRingFamily(root);
     // console.log(`✔ ${RING_CONFIG.COUNT} vertical rings created`);
 
-    createBalancedOrbitals(root);
-    console.log(`✔ ${orbitalBodies.length} orbital bodies created`);
+    // createBalancedOrbitals(root); // DISABLED - All planets and orbital bodies removed for minimalist space
+    // console.log(`✔ ${orbitalBodies.length} orbital bodies created`);
 
-    createCosmicEnvironment(root);
-    console.log('✔ Cosmic environment added');
+    createMinimalistCosmicEnvironment(root);
+    console.log('✔ Minimalist cosmic environment added');
 
     blackHoleSystem = {
         group: root,
         eventHorizon,
         accretionDisk,
-        rings: [], // No rings anymore
-        orbitalBodies
+        rings: [], // No rings in minimalist mode
+        orbitalBodies: [] // No orbital bodies in minimalist mode
     };
     console.log('🏁 Black hole system ready');
 }
@@ -761,6 +761,26 @@ function createCosmicEnvironment(parent) {
 }
 
 
+// Minimalist cosmic environment - only dust particles and sparkling stars
+function createMinimalistCosmicEnvironment(parent) {
+    // Ambient background for deep space
+    scene.ambientColor = new BABYLON.Color3(
+        COLOR_PALETTE.DARK_NAVY.r * 0.8,  // Darker for minimalist space
+        COLOR_PALETTE.DARK_NAVY.g * 0.8,
+        COLOR_PALETTE.DARK_NAVY.b * 1.2
+    );
+
+    // Enhanced sparkling star field with multiple layers (keep the dust particles)
+    createEnhancedSparklingStars(parent);
+    
+    // Additional distant micro stars for depth (keep tiny background stars)
+    createMicroStarField(parent);
+
+    // Secondary star and distant galaxy removed for minimalist space environment
+    // No additional large celestial objects - just the black hole and its effects
+}
+
+
 // Enhanced sparkling star field with multiple layers
 function createEnhancedSparklingStars(parentGroup) {
     // Main sparkly star layer
@@ -1017,74 +1037,13 @@ export function updateBlackHoleEffects() {
         }
     }
 
-    // Solar system animations - planets, moons, and rings
-    orbitalBodies.forEach(body => {
-        const userData = body.userData;
-        if (!userData) return;
-        
-        // Central star animation
-        if (body.name === 'centralStar' || body.name === 'starGlow') {
-            body.rotation.y += userData.rotationSpeed;
-            
-            if (body.material && body.material.emissiveColor && userData.pulseSpeed) {
-                const pulse = Math.sin(t * userData.pulseSpeed) * 0.2 + userData.baseBrightness;
-                body.material.emissiveColor.scaleInPlace(pulse);
-            }
-            return;
-        }
-        
-        // Planet orbital motion
-        if (userData.orbitPivot && userData.orbitSpeed) {
-            userData.angle += userData.orbitSpeed;
-            userData.orbitPivot.rotation.y = userData.angle;
-            
-            // Enhanced planet self-rotation with axial tilt effects
-            body.rotation.y += userData.rotationSpeed;
-            body.rotation.x += userData.rotationSpeed * 0.1; // Slight wobble
-            
-            // Enhanced planetary glow effect with breathing
-            if (body.material && body.material.emissiveColor && userData.baseEmission) {
-                const breathe = Math.sin(t * 0.8 + userData.planetIndex) * 0.1 + 1.0;
-                const glow = Math.sin(t * 1.5 + userData.planetIndex) * 0.1 + 0.9;
-                body.material.emissiveColor.copyFrom(userData.baseEmission.scale(breathe * glow));
-            }
-            
-            // Atmospheric effects for larger planets
-            if (userData.distance > 80) {
-                const atmosphereScale = 1 + Math.sin(t * 0.5 + userData.planetIndex) * 0.02;
-                body.scaling.setAll(atmosphereScale);
-            }
-        }
-        
-        // Enhanced moon orbital motion - proper orbital mechanics
-        if (userData.moonIndex !== undefined && userData.orbitPivot) {
-            userData.angle += userData.orbitSpeed;
-            userData.orbitPivot.rotation.y = userData.angle;
-            
-            // Moon self-rotation (tidally locked effect)
-            body.rotation.y += userData.rotationSpeed;
-            
-            // Subtle moon lighting effects
-            if (body.material && body.material.emissiveColor) {
-                const moonGlow = Math.sin(t * 2 + userData.moonIndex * 2) * 0.05 + 0.95;
-                const baseEmission = new BABYLON.Color3(0.05, 0.05, 0.05);
-                body.material.emissiveColor.copyFrom(baseEmission.scale(moonGlow));
-            }
-        }
-        
-        // Enhanced ring rotation with particle-like effects
-        if (userData.layer !== undefined && userData.rotationSpeed) {
-            body.rotation.y += userData.rotationSpeed;
-            
-            // Ring shimmer effect
-            if (body.material && body.material.alpha !== undefined && userData.baseAlpha) {
-                const shimmer = Math.sin(t * 2 + userData.layer) * 0.1 + 0.9;
-                body.material.alpha = userData.baseAlpha * shimmer;
-            }
-        }
-    });
+    // Solar system animations disabled for minimalist mode
+    // orbitalBodies.forEach(body => {
+    //     ... orbital body animation code removed for clean space
+    // });
+    // No planets, moons, or rings to animate in minimalist mode
 
-    // Enhanced star twinkling animation
+    // Enhanced star twinkling animation for dust particles
     energyParticles.forEach(particleSystem => {
         if (particleSystem && particleSystem.particles) {
             const particles = particleSystem.particles;
@@ -1115,18 +1074,8 @@ export function updateBlackHoleEffects() {
         }
     });
 
-    // Animate distant celestial objects
-    const secondaryStar = scene.getTransformNodeByName('secondaryStar');
-    if (secondaryStar && secondaryStar.userData) {
-        secondaryStar.rotation.y += secondaryStar.userData.rotationSpeed;
-        if (secondaryStar.material && secondaryStar.material.emissiveColor) {
-            const pulse = Math.sin(t * secondaryStar.userData.pulseSpeed) * 0.2 + 0.8;
-            secondaryStar.material.emissiveColor.scaleInPlace(pulse);
-        }
-    }
-    
-    const galaxy = scene.getTransformNodeByName('distantGalaxy');
-    if (galaxy && galaxy.userData) galaxy.rotation.y += galaxy.userData.rotationSpeed;
+    // Animate distant celestial objects - disabled for minimalist space
+    // Secondary star and distant galaxy animations removed for clean environment
 }
 
 
