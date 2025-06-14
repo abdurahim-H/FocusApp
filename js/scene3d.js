@@ -97,6 +97,9 @@ export function init3D() {
         
         console.log('Scene created with clear color:', scene.clearColor);
         
+        // Clean up any residual objects from previous loads
+        cleanupResidualObjects();
+        
         // Enhanced fog for atmosphere
         scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
         scene.fogColor = new BABYLON.Color3(0.02, 0.02, 0.06);
@@ -426,6 +429,67 @@ function createFallbackTinyStars() {
         console.log('Fallback tiny stars created');
     } catch (error) {
         console.error('Failed to create fallback tiny stars:', error);
+    }
+}
+
+// Clean up any residual objects from previous loads
+function cleanupResidualObjects() {
+    try {
+        // Remove any lingering planetary objects by name patterns
+        const objectsToRemove = [];
+        
+        scene.meshes.forEach(mesh => {
+            if (mesh.name && (
+                mesh.name.includes('planet') ||
+                mesh.name.includes('Planet') ||
+                mesh.name.includes('moon') ||
+                mesh.name.includes('Moon') ||
+                mesh.name.includes('asteroid') ||
+                mesh.name.includes('Asteroid') ||
+                mesh.name.includes('satellite') ||
+                mesh.name.includes('Satellite') ||
+                mesh.name.includes('centralStar') ||
+                mesh.name.includes('secondaryStar') ||
+                mesh.name.includes('distantGalaxy') ||
+                mesh.name.includes('nebula') ||
+                mesh.name.includes('Nebula')
+            )) {
+                objectsToRemove.push(mesh);
+            }
+        });
+        
+        // Remove identified objects
+        objectsToRemove.forEach(obj => {
+            if (obj && !obj.isDisposed()) {
+                obj.dispose();
+                console.log('Removed residual object:', obj.name);
+            }
+        });
+        
+        // Also clean up transform nodes
+        const nodesToRemove = [];
+        scene.transformNodes.forEach(node => {
+            if (node.name && (
+                node.name.includes('orbit') ||
+                node.name.includes('Orbit') ||
+                node.name.includes('solarSystem') ||
+                node.name.includes('asteroidBelts')
+            )) {
+                nodesToRemove.push(node);
+            }
+        });
+        
+        nodesToRemove.forEach(node => {
+            if (node && !node.isDisposed()) {
+                node.dispose();
+                console.log('Removed residual node:', node.name);
+            }
+        });
+        
+        console.log('✨ Residual object cleanup completed');
+        
+    } catch (error) {
+        console.warn('Error during residual object cleanup:', error);
     }
 }
 
