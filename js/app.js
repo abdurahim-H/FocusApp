@@ -168,6 +168,9 @@ export async function initApp() {
         if (loadedModules.tasks?.deleteTask) {
             window.deleteTask = loadedModules.tasks.deleteTask;
         }
+        if (loadedModules.tasks?.addTask) {
+            window.addTask = loadedModules.tasks.addTask;
+        }
     }
     
     if (document.readyState === 'loading') {

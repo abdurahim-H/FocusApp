@@ -1075,3 +1075,88 @@
         animation: none;
     }
 }
+
+/* Ensure task input has proper styling */
+.task-input {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(100%);
+    -webkit-backdrop-filter: blur(20px) saturate(100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: rgba(255, 255, 255, 0.95);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 
+        0 4px 12px rgba(255, 255, 255, 0.05),
+        0 1px 4px rgba(176, 224, 230, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.task-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        0 6px 16px rgba(255, 255, 255, 0.08),
+        0 2px 6px rgba(176, 224, 230, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 0 0 2px rgba(176, 224, 230, 0.3);
+    color: rgba(255, 255, 255, 1);
+}
+
+.task-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 300;
+}
+
+/* Task input group layout enhancement */
+.task-input-group {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    margin-bottom: 24px;
+}
+
+.task-input-group .task-input {
+    flex: 1;
+    min-height: 44px;
+}
+
+.task-input-group .liquid-glass-btn {
+    align-self: stretch;
+    min-width: 80px;
+}
+
+/* Enhanced task section */
+.task-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.task-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        transparent 50%,
+        rgba(176, 224, 230, 0.03) 100%
+    );
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.tasks-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(176, 224, 230, 0.3);
+    letter-spacing: -0.01em;
+}
