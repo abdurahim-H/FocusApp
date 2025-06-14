@@ -29,55 +29,43 @@ function initAudioElements() {
     });
 }
 
-// Start playing a sound with immediate response
+// Start playing a sound with immediate response and seamless looping
 async function startSound(type) {
-    try {
-        console.log(`🎵 Starting ${type} sound...`);
-        
-        const audio = audioElements[type];
-        if (!audio) {
-            console.error(`🎵 Audio element for ${type} not found`);
-            return;
-        }
+    console.log(`🎵 Starting ${type} sound...`);
 
-        // Set volume and start playing
-        audio.volume = masterVolume;
-        
-        // Play immediately - browser will stream as needed
-        const playPromise = audio.play();
-        
-        if (playPromise !== undefined) {
-            await playPromise;
-            console.log(`🎵 Started playing ${type}`);
-        }
-
-        // Add to active sounds
-        if (!state.sounds.active.includes(type)) {
-            state.sounds.active.push(type);
-        }
-
-    } catch (error) {
-        console.error(`🎵 Error starting ${type}:`, error);
+    const audio = audioElements[type];
+    if (!audio) {
+        console.error(`🎵 Audio element for ${type} not found`);
+        return;
     }
-}
-        
-        // Add to active sounds list
+
+    // Set volume
+    audio.volume = masterVolume;
+
+    try {
+        // Play immediately (awaits if browser returns a promise)
+        const playPromise = audio.play();
+        if (playPromise) {
+            await playPromise;
+        }
+
+        // Add to active sounds if not already there
         if (!state.sounds.active.includes(type)) {
             state.sounds.active.push(type);
         }
-        
+
         // Start the seamless loop
         scheduleLoop(type);
-        
-        // Update button appearance
+
+        // Update button appearance to "playing"
         updateButtonState(type, true);
-        
+
         console.log(`🎵 Started playing ${type}`);
-        
     } catch (error) {
         console.error(`🎵 Failed to start ${type}:`, error);
     }
 }
+
 
 // Stop playing a specific sound
 function stopSound(type) {

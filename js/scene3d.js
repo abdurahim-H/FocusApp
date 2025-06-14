@@ -240,8 +240,8 @@ function createGalaxyElements() {
         console.log('Test sphere created');
         
         // Create galaxy elements in order
-        createStarField();
-        console.log('Star field creation completed');
+        createMinimalistStarField();
+        console.log('Minimalist star field creation completed');
         
         // createNebula(); // DISABLED - This creates cosmic dust particles that spill out of black hole
         // console.log('Nebula creation completed');
@@ -249,14 +249,14 @@ function createGalaxyElements() {
         createEnhancedBlackHole();
         console.log('Black hole creation completed');
         
-        createPlanets();
-        console.log('Planets creation completed');
+        // createPlanets(); // DISABLED - Planets removed for cleaner space environment
+        // console.log('Planets creation completed');
         
         // createComets(); // DISABLED - Comets create trailing particle effects
         // console.log('Comets creation completed');
         
-        createSpaceObjects();
-        console.log('Space objects creation completed');
+        // createSpaceObjects(); // DISABLED - Space objects removed for minimalist stellar field
+        // console.log('Space objects creation completed');
         
     } catch (error) {
         console.error('Error creating galaxy elements:', error);
@@ -269,6 +269,178 @@ function createGalaxyElements() {
         fallbackMaterial.emissiveColor = new BABYLON.Color3(0.1, 0.2, 0.5);
         fallbackSphere.material = fallbackMaterial;
         console.log('Fallback scene created');
+    }
+}
+
+// Create minimalist star field with only tiny background stars
+function createMinimalistStarField() {
+    try {
+        if (!scene) {
+            console.warn('Scene not available for star field creation');
+            return;
+        }
+
+        // Create enhanced star particle system
+        const starCount = 8000; // Reduced for better performance, focused on tiny stars
+        
+        // Create a custom star particle system
+        const starParticleSystem = new BABYLON.ParticleSystem("minimalistStars", starCount, scene);
+        
+        // Create a dummy emitter (we'll position particles manually)
+        const emitter = BABYLON.MeshBuilder.CreateBox("emitter", {size: 0.01}, scene);
+        emitter.isVisible = false;
+        starParticleSystem.emitter = emitter;
+        
+        // Enhanced star texture - simplified for tiny point-like stars
+        starParticleSystem.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                <defs>
+                    <radialGradient id="starPoint" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                        <stop offset="40%" style="stop-color:white;stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:white;stop-opacity:0" />
+                    </radialGradient>
+                </defs>
+                <circle cx="16" cy="16" r="16" fill="url(#starPoint)" />
+            </svg>
+        `), scene);
+        
+        // Enhanced particle properties with tiny, subtle sizing
+        starParticleSystem.minSize = 0.1;
+        starParticleSystem.maxSize = 1.0; // Much smaller stars
+        starParticleSystem.minLifeTime = Number.MAX_VALUE;
+        starParticleSystem.maxLifeTime = Number.MAX_VALUE;
+        starParticleSystem.emitRate = 0;
+        
+        // Enhanced blending for subtle cosmic glow
+        starParticleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+        
+        // Set rendering group for background positioning
+        starParticleSystem.renderingGroupId = 0; // Background layer - renders first
+        
+        // Subtle color variations for distant stars
+        starParticleSystem.color1 = new BABYLON.Color4(1, 1, 1, 0.6);
+        starParticleSystem.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.4);
+        starParticleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+        
+        // Start the particle system and emit all particles at once
+        starParticleSystem.start();
+        starParticleSystem.manualEmitCount = starCount;
+        
+        // Position star particles manually with distant distribution
+        setTimeout(() => {
+            const particles = starParticleSystem.particles;
+            
+            for (let i = 0; i < particles.length; i++) {
+                const particle = particles[i];
+                if (!particle) continue;
+                
+                // Create realistic distant stellar distribution
+                const distributionType = Math.random();
+                let radius, theta, phi;
+                
+                // All stars are distant background objects
+                radius = 150 + Math.pow(Math.random(), 0.2) * 400; // Much farther away
+                theta = Math.random() * Math.PI * 2;
+                phi = Math.acos(2 * Math.random() - 1); // Uniform sphere distribution
+                
+                particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+                particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+                particle.position.z = radius * Math.cos(phi);
+                
+                // Only tiny, point-like stars
+                particle.size = 0.1 + Math.random() * 0.4; // Very small
+                
+                // Subtle star colors - white, blue-white, slightly yellow
+                const starType = Math.random();
+                if (starType < 0.6) {
+                    // White stars
+                    particle.color = new BABYLON.Color4(
+                        0.9 + Math.random() * 0.1,
+                        0.9 + Math.random() * 0.1,
+                        1,
+                        0.4 + Math.random() * 0.3
+                    );
+                } else if (starType < 0.85) {
+                    // Blue-white stars
+                    particle.color = new BABYLON.Color4(
+                        0.7 + Math.random() * 0.2,
+                        0.8 + Math.random() * 0.2,
+                        1,
+                        0.3 + Math.random() * 0.2
+                    );
+                } else {
+                    // Slightly warm white stars
+                    particle.color = new BABYLON.Color4(
+                        1,
+                        0.9 + Math.random() * 0.1,
+                        0.8 + Math.random() * 0.2,
+                        0.3 + Math.random() * 0.2
+                    );
+                }
+                
+                // Store stellar properties for subtle animation
+                particle.userData = {
+                    baseSize: particle.size,
+                    twinkleSpeed: 0.01 + Math.random() * 0.03, // Slower, subtler twinkling
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    stellarType: 'distant'
+                };
+            }
+        }, 100);
+        
+        // Store particle system with minimal animation data
+        starParticleSystem.userData = {
+            rotationSpeed: 0.000005, // Very slow rotation
+            driftSpeed: 0.000002, // Minimal drift
+            isMainStarField: true,
+            lastUpdateTime: 0
+        };
+        
+        stars.push(starParticleSystem);
+        
+        console.log('✨ Minimalist star field created with', starCount, 'tiny background stars');
+        
+    } catch (error) {
+        console.error('Failed to create minimalist star field:', error);
+        // Create a simple fallback
+        createFallbackTinyStars();
+    }
+}
+
+// Fallback tiny star creation
+function createFallbackTinyStars() {
+    try {
+        // Create simple sphere-based tiny stars
+        for (let i = 0; i < 30; i++) {
+            const star = BABYLON.MeshBuilder.CreateSphere(`tinyStar${i}`, {diameter: 0.5}, scene);
+            
+            // Random distant position
+            const radius = 200 + Math.random() * 300;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            star.position = new BABYLON.Vector3(
+                radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.sin(phi) * Math.sin(theta),
+                radius * Math.cos(phi)
+            );
+            
+            // Simple material
+            const starMat = new BABYLON.StandardMaterial(`tinyStarMat${i}`, scene);
+            starMat.emissiveColor = new BABYLON.Color3(0.8, 0.9, 1);
+            starMat.disableLighting = true;
+            star.material = starMat;
+            
+            // Set rendering group for background
+            star.renderingGroupId = 0;
+            
+            stars.push(star);
+        }
+        
+        console.log('Fallback tiny stars created');
+    } catch (error) {
+        console.error('Failed to create fallback tiny stars:', error);
     }
 }
 
@@ -334,10 +506,10 @@ export function animate() {
             camera.setTarget(dynamicTarget);
 
             // Update animations
-            updatePlanetAnimations();
+            // updatePlanetAnimations(); // DISABLED - No planets in minimalist mode
             updateStarAnimations();
-            updateCometAnimations();
-            updateSpaceObjectAnimations();
+            // updateCometAnimations(); // DISABLED - No comets in minimalist mode
+            // updateSpaceObjectAnimations(); // DISABLED - No space objects in minimalist mode
             
             // Animate nebula background
             const nebulaBackground = scene.getMeshByName("nebulaBackground");
