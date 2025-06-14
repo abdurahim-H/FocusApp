@@ -26,10 +26,19 @@ export function toggleTask(id) {
             task.completedAt = Date.now();
             state.universe.tasksCompleted++;
             state.universe.stars += 0.5;
+            
+            // Add completion animation
+            const taskElement = document.querySelector(`[data-task-id="${id}"]`);
+            if (taskElement) {
+                taskElement.classList.add('completing');
+                setTimeout(() => {
+                    taskElement.classList.remove('completing');
+                }, 400);
+            }
+            
             updateUniverseStats();
             showAchievement('Task Complete!', 'Great job!');
             
-            const taskElement = document.querySelector(`[data-task-id="${id}"]`);
             triggerTaskCompletionUI(taskElement);
             
             if (state.universe.tasksCompleted % 3 === 0) {
@@ -52,15 +61,20 @@ export function renderTasks() {
     
     state.tasks.forEach(task => {
         const li = document.createElement('li');
-        li.className = 'task-item' + (task.completed ? ' completed' : '');
+        li.className = 'task-item liquid-glass-task' + (task.completed ? ' completed' : '');
         li.setAttribute('data-task-id', task.id); // Add for UI effects targeting
         li.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                <input type="checkbox" ${task.completed ? 'checked' : ''} 
-                       onchange="window.toggleTask(${task.id})">
-                <span>${task.text}</span>
+            <div class="task-content">
+                <label class="liquid-glass-checkbox">
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                           onchange="window.toggleTask(${task.id})">
+                    <span class="checkmark"></span>
+                </label>
+                <span class="task-text">${task.text}</span>
             </div>
-            <button class="btn" style="padding: 5px 10px;" onclick="window.deleteTask(${task.id})">✕</button>
+            <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--danger" onclick="window.deleteTask(${task.id})">
+                <span class="btn-icon">✕</span>
+            </button>
         `;
         list.appendChild(li);
     });

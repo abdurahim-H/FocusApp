@@ -190,6 +190,208 @@
     text-shadow: 0 0 12px rgba(255, 223, 186, 0.4);
 }
 
+/* Danger Variant - Subtle Red Tint */
+.liquid-glass-btn--danger {
+    background: rgba(255, 99, 132, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 0 8px rgba(255, 99, 132, 0.3);
+    box-shadow: 
+        0 6px 20px rgba(255, 99, 132, 0.06),
+        0 2px 8px rgba(176, 224, 230, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.liquid-glass-btn--danger:hover {
+    background: rgba(255, 99, 132, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        0 8px 30px rgba(255, 99, 132, 0.1),
+        0 3px 12px rgba(176, 224, 230, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    text-shadow: 0 0 12px rgba(255, 99, 132, 0.4);
+}
+
+/* Task-Specific Liquid Glass Components */
+.liquid-glass-task {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.liquid-glass-task:last-child {
+    border-bottom: none;
+}
+
+.liquid-glass-task .task-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.liquid-glass-task .task-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: -0.01em;
+    transition: all 0.3s ease;
+}
+
+/* Completed Task State */
+.liquid-glass-task.completed {
+    opacity: 0.6;
+}
+
+.liquid-glass-task.completed .task-text {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.5);
+    text-shadow: none;
+}
+
+.liquid-glass-task.completed .liquid-glass-checkbox .checkmark {
+    background: rgba(144, 238, 144, 0.2);
+    border-color: rgba(144, 238, 144, 0.4);
+    box-shadow: 
+        0 0 15px rgba(144, 238, 144, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.liquid-glass-task.completed .liquid-glass-checkbox .checkmark::after {
+    opacity: 1;
+    transform: rotate(45deg) scale(1);
+}
+
+/* Liquid Glass Checkbox Design */
+.liquid-glass-checkbox {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.liquid-glass-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.liquid-glass-checkbox .checkmark {
+    position: relative;
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    
+    /* Liquid Glass Material */
+    background: rgba(176, 224, 230, 0.08);
+    backdrop-filter: blur(20px) saturate(100%);
+    -webkit-backdrop-filter: blur(20px) saturate(100%);
+    
+    /* Border & Shadow */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        0 4px 12px rgba(255, 255, 255, 0.05),
+        0 1px 4px rgba(176, 224, 230, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.liquid-glass-checkbox:hover .checkmark {
+    background: rgba(176, 224, 230, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        0 6px 16px rgba(255, 255, 255, 0.08),
+        0 2px 6px rgba(176, 224, 230, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+}
+
+/* Checkmark Symbol */
+.liquid-glass-checkbox .checkmark::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 10px;
+    border: solid rgba(255, 255, 255, 0.9);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    opacity: 0;
+    transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Active/Pressed Checkbox State */
+.liquid-glass-checkbox:active .checkmark {
+    transform: scale(0.95);
+    background: rgba(176, 224, 230, 0.06);
+    box-shadow: 
+        0 2px 8px rgba(255, 255, 255, 0.06),
+        inset 0 0 8px rgba(255, 255, 255, 0.05);
+}
+
+/* Hover Effect for Task Item */
+.liquid-glass-task:hover {
+    background: rgba(255, 255, 255, 0.02);
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 12px;
+}
+
+.liquid-glass-task:hover .task-text {
+    color: rgba(255, 255, 255, 1);
+    text-shadow: 0 0 8px rgba(176, 224, 230, 0.3);
+}
+
+/* Task Completion Animation */
+@keyframes taskComplete {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.liquid-glass-task.completing {
+    animation: taskComplete 0.4s ease-out;
+}
+
+.liquid-glass-task.completing .liquid-glass-checkbox .checkmark {
+    animation: pulse 0.4s ease-out;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(144, 238, 144, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(144, 238, 144, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(144, 238, 144, 0); }
+}
+
+/* Micro-interaction for Delete Button */
+.liquid-glass-task .liquid-glass-btn--danger {
+    opacity: 0.7;
+    transform: scale(0.9);
+    transition: all 0.25s ease;
+}
+
+.liquid-glass-task:hover .liquid-glass-btn--danger {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.liquid-glass-task .liquid-glass-btn--danger .btn-icon {
+    font-size: 14px;
+    font-weight: 600;
+}
+
 /* Size Variants */
 .liquid-glass-btn--small {
     padding: 8px 16px;
@@ -270,312 +472,166 @@
     text-shadow: 0 0 12px rgba(176, 224, 230, 0.4);
 }
 
-/* Adaptive Background Reflection */
-.liquid-glass-btn--adaptive {
-    background: var(--glass-bg, rgba(176, 224, 230, 0.08));
-    border-color: var(--glass-border, rgba(255, 255, 255, 0.15));
-    box-shadow: 
-        0 6px 20px var(--glass-shadow, rgba(255, 255, 255, 0.08)),
-        0 2px 8px var(--glass-shadow-light, rgba(176, 224, 230, 0.06)),
-        inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.1));
+/* Enhanced Light Refraction and Ambient Adaptation */
+.liquid-glass-btn--starfield {
+    background: rgba(176, 224, 230, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(32px) saturate(120%);
+    -webkit-backdrop-filter: blur(32px) saturate(120%);
 }
 
-/* Floating Animation for Idle State */
-.liquid-glass-btn--floating {
-    animation: float 3s ease-in-out infinite;
+.liquid-glass-btn--starfield::before {
+    background: radial-gradient(
+        circle at 30% 20%,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(176, 224, 230, 0.08) 40%,
+        transparent 70%
+    ),
+    linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 50%,
+        rgba(176, 224, 230, 0.06) 100%
+    );
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-2px); }
+/* Lens Flare Effect on Hover */
+.liquid-glass-btn--lens-flare::after {
+    background: linear-gradient(
+        45deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 45%,
+        rgba(255, 255, 255, 0.6) 50%,
+        rgba(255, 255, 255, 0.4) 55%,
+        transparent 100%
+    );
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -100%;
+    transform: translateX(-200%) rotate(45deg);
+    transition: transform 0.6s ease-out;
 }
 
-/* Micro-interactions */
-.liquid-glass-btn--pulse {
-    animation: pulse 2s ease-in-out infinite;
+.liquid-glass-btn--lens-flare:hover::after {
+    transform: translateX(200%) rotate(45deg);
 }
 
-@keyframes pulse {
-    0%, 100% { 
-        box-shadow: 
-            0 6px 20px rgba(255, 255, 255, 0.08),
-            0 2px 8px rgba(176, 224, 230, 0.06),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-    50% { 
-        box-shadow: 
-            0 8px 30px rgba(255, 255, 255, 0.15),
-            0 3px 12px rgba(176, 224, 230, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.18);
-    }
-}
-
-/* Luminous text effect */
+/* Depth Enhancement for Text */
 .liquid-glass-btn .btn-text {
     position: relative;
-    transition: all 0.25s ease;
+    z-index: 2;
+    font-weight: 300;
+    letter-spacing: -0.005em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.liquid-glass-btn:hover .btn-text {
-    text-shadow: 
-        0 0 12px rgba(176, 224, 230, 0.4),
-        0 0 6px rgba(255, 255, 255, 0.3);
-    color: rgba(255, 255, 255, 1);
+/* Micro-Reflections */
+.liquid-glass-btn--micro-reflect {
+    overflow: visible;
+    position: relative;
 }
 
-/* Weightless floating animation for idle buttons */
-.liquid-glass-btn--idle {
-    animation: weightless-float 5s ease-in-out infinite;
-}
-
-@keyframes weightless-float {
-    0%, 100% { 
-        transform: translateY(0px);
-        box-shadow: 
-            0 6px 20px rgba(255, 255, 255, 0.08),
-            0 2px 8px rgba(176, 224, 230, 0.06),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-    50% { 
-        transform: translateY(-1px);
-        box-shadow: 
-            0 8px 25px rgba(255, 255, 255, 0.12),
-            0 3px 10px rgba(176, 224, 230, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .liquid-glass-btn {
-        padding: 12px 20px;
-        font-size: 15px;
-        min-height: 42px;
-        border-radius: 22px;
-    }
-    
-    .liquid-glass-btn--small {
-        padding: 8px 14px;
-        min-height: 34px;
-        font-size: 13px;
-        border-radius: 18px;
-    }
-    
-    .liquid-glass-btn--large {
-        padding: 14px 28px;
-        min-height: 48px;
-        font-size: 17px;
-        border-radius: 26px;
-    }
-}
-
-/* Enhanced responsive navigation design */
-@media (max-width: 768px) {
-    .nav.water-cosmic-container {
-        max-width: 320px;
-        min-width: 240px;
-        padding: 6px 16px;
-        top: 20px;
-    }
-    
-    .nav-btn {
-        padding: 10px 16px;
-        font-size: 0.85em;
-        min-width: 60px;
-    }
-}
-
-@media (max-width: 480px) {
-    .nav.water-cosmic-container {
-        max-width: 280px;
-        min-width: 220px;
-        padding: 6px 12px;
-        gap: 6px;
-    }
-    
-    .nav-btn {
-        padding: 8px 12px;
-        font-size: 0.8em;
-        min-width: 50px;
-    }
-}
-
-/* Ultra-wide screen adjustments */
-@media (min-width: 1400px) {
-    .nav.water-cosmic-container {
-        max-width: 420px;
-        padding: 10px 24px;
-    }
-    
-    .nav-btn {
-        padding: 14px 24px;
-        min-width: 80px;
-    }
-}
-
-/* Dark Theme Adaptations */
-@media (prefers-color-scheme: dark) {
-    .liquid-glass-btn {
-        background: rgba(176, 224, 230, 0.06);
-        border-color: rgba(255, 255, 255, 0.12);
-        color: rgba(255, 255, 255, 0.92);
-    }
-    
-    .liquid-glass-btn:hover {
-        background: rgba(176, 224, 230, 0.1);
-        border-color: rgba(255, 255, 255, 0.18);
-    }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .liquid-glass-btn {
-        border-width: 1px;
-        background: rgba(176, 224, 230, 0.15);
-        border-color: rgba(255, 255, 255, 0.3);
-    }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .liquid-glass-btn,
-    .liquid-glass-btn::before,
-    .liquid-glass-btn::after {
-        transition: none;
-        animation: none;
-    }
-    
-    .liquid-glass-btn:hover {
-        transform: none;
-    }
-}
-
-/* Theme button specific overrides */
-.theme-buttons .liquid-glass-btn {
-    height: 45px;
-    min-height: 45px;
-    max-height: 45px;
-    width: 100%;
-    padding: 0 16px;
-    flex-shrink: 0;
-    flex-grow: 0;
-    box-sizing: border-box;
-}
-
-.theme-buttons .liquid-glass-btn .btn-text {
-    font-size: 0.9em;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
-}
-
-.theme-buttons .liquid-glass-btn.liquid-glass-btn--primary {
-    box-shadow: 
-        0 6px 20px rgba(255, 255, 255, 0.1),
-        0 2px 8px rgba(176, 224, 230, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    font-weight: 400;
-}
-
-.theme-buttons .liquid-glass-btn.liquid-glass-btn--primary::after {
+.liquid-glass-btn--micro-reflect::after {
     content: '';
     position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 6px;
-    height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-    box-shadow: 0 0 10px var(--accent);
-}
-
-/* Settings button grid layout fix */
-.settings-buttons .liquid-glass-btn {
-    min-width: 140px;
-}
-
-/* Water Ripple Click Effect */
-.liquid-glass-btn {
-    overflow: hidden;
-}
-
-/* Luminous Water Ripple Click Effect */
-.liquid-glass-btn:active::after {
-    background: radial-gradient(
-        circle at center,
-        rgba(255, 255, 255, 0.4) 0%,
-        rgba(176, 224, 230, 0.2) 30%,
-        transparent 70%
+    top: -1px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 20%,
+        rgba(255, 255, 255, 0.6) 50%,
+        rgba(255, 255, 255, 0.4) 80%,
+        transparent 100%
     );
-    transform: scale(0);
-    animation: luminous-ripple 0.8s ease-out;
+    border-radius: 1px;
+    opacity: 0.3;
+    animation: shimmer 3s ease-in-out infinite;
 }
 
-@keyframes luminous-ripple {
-    0% { 
-        transform: scale(0);
-        opacity: 1;
-    }
-    100% { 
-        transform: scale(2.5);
-        opacity: 0;
-    }
+@keyframes shimmer {
+    0%, 100% { opacity: 0.3; transform: scaleX(1); }
+    50% { opacity: 0.6; transform: scaleX(1.1); }
 }
 
-/* Parallax Motion Effect for Enhanced Interactivity */
+/* Advanced Parallax Effect */
 .liquid-glass-btn--parallax {
-    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                transform 0.1s ease-out;
+    transform-style: preserve-3d;
+    perspective: 1000px;
 }
 
 .liquid-glass-btn--parallax:hover {
-    transform: translateY(-0.5px) scale(1.01) perspective(1000px) rotateX(2deg);
+    transform: rotateX(2deg) rotateY(-2deg) scale(1.02);
 }
 
-/* Celestial Focus Effect - Gentle Light Ring */
-.liquid-glass-btn--focused {
+/* Adaptive Color Reflection */
+.liquid-glass-btn--adaptive-reflection {
+    background: var(--adaptive-bg, rgba(176, 224, 230, 0.08));
+    border-color: var(--adaptive-border, rgba(255, 255, 255, 0.15));
+    color: var(--adaptive-text, rgba(255, 255, 255, 0.95));
+    transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+}
+
+/* Button Group Spacing */
+.liquid-glass-btn-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.liquid-glass-btn-group .liquid-glass-btn {
+    flex: 0 0 auto;
+}
+
+/* Focus States for Accessibility */
+.liquid-glass-btn:focus-visible {
+    outline: none;
     box-shadow: 
-        0 6px 20px rgba(255, 255, 255, 0.08),
-        0 2px 8px rgba(176, 224, 230, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        inset 0 0 0 0.5px rgba(176, 224, 230, 0.05),
-        0 0 0 2px rgba(255, 255, 255, 0.05);
-    background: rgba(176, 224, 230, 0.1);
-}
-
-.liquid-glass-btn--focused .btn-text {
-    text-shadow: 
-        0 0 10px rgba(176, 224, 230, 0.4),
-        0 0 5px rgba(255, 255, 255, 0.2);
-}
-
-/* Override any remaining purple selection states */
-.liquid-glass-btn.liquid-glass-btn--primary,
-.liquid-glass-btn--primary.liquid-glass-btn,
-.nav-btn.active.liquid-glass-btn,
-.nav-btn.liquid-glass-btn.active {
-    background: rgba(176, 224, 230, 0.15) !important;
-    border-color: rgba(255, 255, 255, 0.25) !important;
-    color: rgba(255, 255, 255, 1) !important;
-    box-shadow: 
-        0 6px 20px rgba(255, 255, 255, 0.12),
-        0 2px 8px rgba(176, 224, 230, 0.08),
+        0 8px 30px rgba(255, 255, 255, 0.15),
+        0 3px 12px rgba(176, 224, 230, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-        0 0 0 1px rgba(255, 255, 255, 0.08) !important;
-    text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
+        0 0 0 2px rgba(176, 224, 230, 0.4);
 }
 
-/* Force water-glass aesthetic on all active states */
-.liquid-glass-btn:not(.liquid-glass-btn--success):not(.liquid-glass-btn--warning).active,
-.liquid-glass-btn.selected {
-    background: rgba(176, 224, 230, 0.15) !important;
-    border-color: rgba(255, 255, 255, 0.25) !important;
-    color: rgba(255, 255, 255, 1) !important;
-    text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
+.liquid-glass-checkbox input[type="checkbox"]:focus-visible + .checkmark {
+    box-shadow: 
+        0 6px 16px rgba(255, 255, 255, 0.1),
+        0 2px 6px rgba(176, 224, 230, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 0 0 2px rgba(176, 224, 230, 0.5);
+}
+
+/* Theme-Aware Adaptations */
+@media (prefers-color-scheme: light) {
+    .liquid-glass-btn {
+        background: rgba(255, 255, 255, 0.7);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: rgba(0, 0, 0, 0.85);
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    }
+    
+    .liquid-glass-checkbox .checkmark {
+        background: rgba(255, 255, 255, 0.8);
+        border-color: rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .liquid-glass-btn {
+        border-width: 2px;
+        font-weight: 500;
+    }
+    
+    .liquid-glass-checkbox .checkmark {
+        border-width: 2px;
+    }
 }
 
 /* =============================================================================

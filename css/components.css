@@ -200,6 +200,8 @@
     list-style: none;
     position: relative;
     z-index: 25;
+    padding: 0;
+    margin: 0;
 }
 
 .task-item {
@@ -216,6 +218,7 @@
     border-bottom: none;
 }
 
+/* Legacy support - these will be overridden by liquid-glass-task styles */
 .task-item.completed {
     opacity: 0.6;
 }
