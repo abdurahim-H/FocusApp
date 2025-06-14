@@ -154,19 +154,19 @@ export function init3D() {
     }
 }
 
-// Enhanced lighting setup
+// Enhanced lighting setup for minimalist space environment
 function setupLighting() {
-    // Ambient light for base illumination
+    // Subtle ambient light for minimal base illumination
     ambientLight = new BABYLON.HemisphericLight("ambientLight", new BABYLON.Vector3(0, 1, 0), scene);
-    ambientLight.intensity = 0.4;
-    ambientLight.diffuse = new BABYLON.Color3(0.4, 0.4, 0.6);
-    ambientLight.groundColor = new BABYLON.Color3(0.1, 0.1, 0.2);
+    ambientLight.intensity = 0.2; // Reduced for darker space
+    ambientLight.diffuse = new BABYLON.Color3(0.3, 0.3, 0.4);
+    ambientLight.groundColor = new BABYLON.Color3(0.05, 0.05, 0.1);
 
-    // Multiple point lights for dramatic cosmic lighting
+    // Minimal point lights for subtle cosmic lighting focused on black hole
     const lightConfigs = [
-        { color: new BABYLON.Color3(0.4, 0.4, 1), position: new BABYLON.Vector3(30, 10, 30), intensity: 0.8 },
-        { color: new BABYLON.Color3(0.6, 0.4, 1), position: new BABYLON.Vector3(-30, 15, -30), intensity: 0.7 },
-        { color: new BABYLON.Color3(0.2, 0.8, 0.6), position: new BABYLON.Vector3(0, 25, 0), intensity: 0.6 }
+        { color: new BABYLON.Color3(0.3, 0.3, 0.6), position: new BABYLON.Vector3(20, 8, 20), intensity: 0.4 },
+        { color: new BABYLON.Color3(0.4, 0.3, 0.6), position: new BABYLON.Vector3(-20, 10, -20), intensity: 0.3 },
+        { color: new BABYLON.Color3(0.1, 0.4, 0.3), position: new BABYLON.Vector3(0, 15, 0), intensity: 0.3 }
     ];
 
     lightConfigs.forEach((config, index) => {
@@ -176,14 +176,14 @@ function setupLighting() {
         light.intensity = config.intensity;
         light.range = 150;
         
-        // Animate lights for dynamic atmosphere
+        // Subtle light animation for minimalist atmosphere
         scene.registerBeforeRender(() => {
             const time = performance.now() * 0.001;
-            light.intensity = config.intensity + Math.sin(time + index) * 0.2;
+            light.intensity = config.intensity + Math.sin(time + index) * 0.1; // Reduced variation
             
-            // Subtle light movement
-            light.position.x = config.position.x + Math.sin(time * 0.5 + index) * 5;
-            light.position.y = config.position.y + Math.cos(time * 0.3 + index) * 3;
+            // Very subtle light movement
+            light.position.x = config.position.x + Math.sin(time * 0.3 + index) * 2;
+            light.position.y = config.position.y + Math.cos(time * 0.2 + index) * 1;
         });
         
         pointLights.push(light);
@@ -229,17 +229,7 @@ function createGalaxyElements() {
     console.log('Creating galaxy elements...');
     
     try {
-        // Create a simple test sphere to ensure rendering works
-        const testSphere = BABYLON.MeshBuilder.CreateSphere("testSphere", {diameter: 4, segments: 32}, scene);
-        testSphere.position = new BABYLON.Vector3(0, 0, 0);
-        const testMaterial = new BABYLON.StandardMaterial("testMat", scene);
-        testMaterial.diffuseColor = new BABYLON.Color3(1, 0.2, 0.2);
-        testMaterial.emissiveColor = new BABYLON.Color3(0.5, 0.1, 0.1);
-        testMaterial.specularColor = new BABYLON.Color3(1, 0, 0);
-        testSphere.material = testMaterial;
-        console.log('Test sphere created');
-        
-        // Create galaxy elements in order
+        // Create minimalist galaxy elements
         createMinimalistStarField();
         console.log('Minimalist star field creation completed');
         
@@ -259,16 +249,11 @@ function createGalaxyElements() {
         // console.log('Space objects creation completed');
         
     } catch (error) {
-        console.error('Error creating galaxy elements:', error);
+        console.error('Error creating minimalist galaxy elements:', error);
         
-        // Create minimal fallback scene
-        const fallbackSphere = BABYLON.MeshBuilder.CreateSphere("fallback", {diameter: 10}, scene);
-        fallbackSphere.position = new BABYLON.Vector3(0, 0, 0);
-        const fallbackMaterial = new BABYLON.StandardMaterial("fallbackMat", scene);
-        fallbackMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.5, 1);
-        fallbackMaterial.emissiveColor = new BABYLON.Color3(0.1, 0.2, 0.5);
-        fallbackSphere.material = fallbackMaterial;
-        console.log('Fallback scene created');
+        // Create minimal fallback scene - just a few tiny stars
+        createFallbackTinyStars();
+        console.log('Minimal fallback scene created');
     }
 }
 
@@ -511,25 +496,9 @@ export function animate() {
             // updateCometAnimations(); // DISABLED - No comets in minimalist mode
             // updateSpaceObjectAnimations(); // DISABLED - No space objects in minimalist mode
             
-            // Animate nebula background
-            const nebulaBackground = scene.getMeshByName("nebulaBackground");
-            if (nebulaBackground && nebulaBackground.userData) {
-                nebulaBackground.rotation.y += nebulaBackground.userData.rotationSpeed;
-                
-                // Dynamic nebula breathing effect
-                if (nebulaBackground.material) {
-                    const breathe = 0.3 + Math.sin(time * 0.5) * 0.1;
-                    nebulaBackground.material.alpha = breathe;
-                    
-                    // Simple color variation
-                    const colorVariation = Math.sin(time * 0.2) * 0.05;
-                    nebulaBackground.material.emissiveColor = new BABYLON.Color3(
-                        0.1 + colorVariation,
-                        0.1 + colorVariation * 0.5,
-                        0.2 + colorVariation * 0.3
-                    );
-                }
-            }
+            // Nebula animation disabled for minimalist space environment
+            // const nebulaBackground = scene.getMeshByName("nebulaBackground");
+            // ... nebula animation code removed for cleaner space
         });
     }
 }
@@ -723,38 +692,10 @@ function updateStarAnimations() {
                     }
                 }
                 
-                if (userData && userData.isNebula) {
-                    // Enhanced nebula breathing and swaying
-                    const breathingFactor = 1 + Math.sin(time * userData.breathingSpeed) * 0.1;
-                    const swayX = Math.sin(time * 0.05 + index) * 3;
-                    const swayY = Math.cos(time * 0.07 + index) * 2;
-                    
-                    if (starField.emitter) {
-                        starField.emitter.position.x += swayX * 0.01;
-                        starField.emitter.position.y += swayY * 0.01;
-                        starField.emitter.rotation.z += userData.rotationSpeed;
-                    }
-                    
-                    // Dynamic nebula particle animations
-                    const particles = starField.particles;
-                    particles.forEach((particle, particleIndex) => {
-                        if (!particle || !particle.userData) return;
-                        
-                        const data = particle.userData;
-                        
-                        // Breathing effect
-                        particle.size = data.baseSize * breathingFactor;
-                        
-                        // Swaying motion
-                        const swayOffset = Math.sin(time * data.swaySpeed + data.swayPhase + particleIndex * 0.1) * 2;
-                        particle.position.x = data.originalPosition.x + swayOffset;
-                        particle.position.y = data.originalPosition.y + Math.cos(time * data.swaySpeed * 0.7 + data.swayPhase) * 1;
-                        
-                        // Color pulsing
-                        const colorPulse = 0.8 + Math.sin(time * data.pulseSpeed + particleIndex * 0.2) * 0.2;
-                        particle.color.a = particle.color.a * colorPulse;
-                    });
-                }
+                // Nebula animations disabled for minimalist space environment
+                // if (userData && userData.isNebula) {
+                //     ... nebula animation code removed for cleaner space
+                // }
                 
                 // Handle sparkling stars from blackhole.js
                 if (starField.name && (starField.name.includes('SparklingStars') || starField.name.includes('microStars'))) {
