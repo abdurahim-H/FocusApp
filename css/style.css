@@ -430,17 +430,26 @@ body[style*="--redshift-intensity"] {
  * 9999: .loading-screen
  */
 
-/* Override container backgrounds for more transparency */
+/* Override container backgrounds for maximum transparency */
 .water-cosmic-container {
-    --container-opacity: 0.5; /* Reduced base opacity multiplier */
+    --container-opacity: 0.25; /* Further reduced base opacity multiplier */
 }
 
-/* Make all glass backgrounds more transparent */
+/* Make all glass backgrounds extremely transparent */
 .focus-content,
 .ambient-content,
 .task-section,
 .settings-section {
-    background-color: rgba(255, 255, 255, 0.02) !important;
+    background-color: rgba(255, 255, 255, 0.01) !important;
+}
+
+/* Reduce backdrop filter strength for more transparency */
+.water-cosmic-container,
+.focus-content,
+.task-section,
+.settings-section {
+    backdrop-filter: blur(15px) saturate(1.05) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(1.05) !important;
 }
 
 /* iOS Safari and Mobile Viewport Fixes */

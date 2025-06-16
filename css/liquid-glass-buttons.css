@@ -641,12 +641,12 @@
 /* Soft water-tinted container backgrounds with subtle blue undertones */
 .water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(100, 150, 255, 0.02) 0%,    /* Reduced from 0.05 */
-        rgba(176, 224, 230, 0.04) 30%,   /* Reduced from 0.08 */
-        rgba(144, 238, 144, 0.02) 60%,   /* Reduced from 0.04 */
-        rgba(100, 150, 255, 0.03) 100%   /* Reduced from 0.06 */
+        rgba(100, 150, 255, 0.01) 0%,    /* Further reduced from 0.02 */
+        rgba(176, 224, 230, 0.02) 30%,   /* Further reduced from 0.04 */
+        rgba(144, 238, 144, 0.01) 60%,   /* Further reduced from 0.02 */
+        rgba(100, 150, 255, 0.015) 100%  /* Further reduced from 0.03 */
     );
-    border: 1px solid rgba(176, 224, 230, 0.08);  /* Reduced from 0.12 */
+    border: 1px solid rgba(176, 224, 230, 0.04);  /* Further reduced from 0.08 */
     position: relative;
     overflow: hidden;
 }
@@ -660,9 +660,9 @@
     bottom: 0;
     background: linear-gradient(45deg, 
         transparent 0%,
-        rgba(176, 224, 230, 0.015) 25%,   /* Reduced from 0.03 */
+        rgba(176, 224, 230, 0.008) 25%,   /* Further reduced from 0.015 */
         transparent 50%,
-        rgba(144, 238, 144, 0.01) 75%,    /* Reduced from 0.02 */
+        rgba(144, 238, 144, 0.005) 75%,   /* Further reduced from 0.01 */
         transparent 100%
     );
     animation: cosmicWaterShimmer 8s ease-in-out infinite;
@@ -673,24 +673,24 @@
 /* Enhanced hover effects for water containers */
 .water-cosmic-container:hover {
     background: linear-gradient(135deg, 
-        rgba(100, 150, 255, 0.04) 0%,    /* Reduced from 0.08 */
-        rgba(176, 224, 230, 0.06) 30%,   /* Reduced from 0.12 */
-        rgba(144, 238, 144, 0.03) 60%,   /* Reduced from 0.06 */
-        rgba(100, 150, 255, 0.045) 100%  /* Reduced from 0.09 */
+        rgba(100, 150, 255, 0.02) 0%,    /* Further reduced from 0.04 */
+        rgba(176, 224, 230, 0.03) 30%,   /* Further reduced from 0.06 */
+        rgba(144, 238, 144, 0.015) 60%,  /* Further reduced from 0.03 */
+        rgba(100, 150, 255, 0.02) 100%   /* Further reduced from 0.045 */
     );
-    border-color: rgba(176, 224, 230, 0.12);  /* Reduced from 0.18 */
+    border-color: rgba(176, 224, 230, 0.06);  /* Further reduced from 0.12 */
     box-shadow: 
-        0 8px 32px rgba(100, 150, 255, 0.04),   /* Reduced from 0.08 */
-        0 4px 16px rgba(176, 224, 230, 0.03),   /* Reduced from 0.06 */
-        inset 0 1px 0 rgba(255, 255, 255, 0.04);  /* Reduced from 0.08 */
+        0 8px 32px rgba(100, 150, 255, 0.02),    /* Further reduced from 0.04 */
+        0 4px 16px rgba(176, 224, 230, 0.015),   /* Further reduced from 0.03 */
+        inset 0 1px 0 rgba(255, 255, 255, 0.02); /* Further reduced from 0.04 */
 }
 
 /* Navigation container - shallow water pool */
 .nav.water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(100, 150, 255, 0.02) 0%,    /* Reduced from 0.04 */
-        rgba(176, 224, 230, 0.03) 50%,   /* Reduced from 0.06 */
-        rgba(100, 150, 255, 0.025) 100%  /* Reduced from 0.05 */
+        rgba(100, 150, 255, 0.01) 0%,    /* Further reduced from 0.02 */
+        rgba(176, 224, 230, 0.015) 50%,  /* Further reduced from 0.03 */
+        rgba(100, 150, 255, 0.012) 100%  /* Further reduced from 0.025 */
     );
     border-radius: 50px;
     backdrop-filter: blur(20px) saturate(1.1);
@@ -717,11 +717,11 @@
 .ambient-content.water-cosmic-container,
 .home-content.water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(100, 150, 255, 0.015) 0%,    /* Reduced from 0.03 */
-        rgba(176, 224, 230, 0.02) 25%,    /* Reduced from 0.04 */
-        rgba(144, 238, 144, 0.01) 50%,    /* Reduced from 0.02 */
-        rgba(176, 224, 230, 0.0175) 75%,  /* Reduced from 0.035 */
-        rgba(100, 150, 255, 0.015) 100%   /* Reduced from 0.03 */
+        rgba(100, 150, 255, 0.008) 0%,    /* Further reduced from 0.015 */
+        rgba(176, 224, 230, 0.01) 25%,    /* Further reduced from 0.02 */
+        rgba(144, 238, 144, 0.005) 50%,   /* Further reduced from 0.01 */
+        rgba(176, 224, 230, 0.009) 75%,   /* Further reduced from 0.0175 */
+        rgba(100, 150, 255, 0.008) 100%   /* Further reduced from 0.015 */
     );
     border-radius: 30px;
     backdrop-filter: blur(20px) saturate(1.2);
@@ -732,9 +732,9 @@
 /* Task section - crystalline water */
 .task-section.water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(176, 224, 230, 0.04) 0%,    /* Reduced from 0.08 */
-        rgba(100, 150, 255, 0.03) 50%,   /* Reduced from 0.06 */
-        rgba(176, 224, 230, 0.045) 100%  /* Reduced from 0.09 */
+        rgba(176, 224, 230, 0.02) 0%,    /* Further reduced from 0.04 */
+        rgba(100, 150, 255, 0.015) 50%,  /* Further reduced from 0.03 */
+        rgba(176, 224, 230, 0.022) 100%  /* Further reduced from 0.045 */
     );
     border-radius: 20px;
     backdrop-filter: blur(15px) saturate(1.15);
@@ -745,8 +745,8 @@
 /* Settings sections - delicate water tint */
 .settings-section.water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(100, 150, 255, 0.015) 0%,   /* Reduced from 0.03 */
-        rgba(176, 224, 230, 0.025) 100%  /* Reduced from 0.05 */
+        rgba(100, 150, 255, 0.008) 0%,   /* Further reduced from 0.015 */
+        rgba(176, 224, 230, 0.012) 100%  /* Further reduced from 0.025 */
     );
     border-radius: 15px;
     padding: 20px;
@@ -760,9 +760,9 @@
 .theme-buttons.water-cosmic-container,
 .settings-buttons.water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(176, 224, 230, 0.025) 0%,   /* Reduced from 0.05 */
-        rgba(100, 150, 255, 0.02) 50%,   /* Reduced from 0.04 */
-        rgba(176, 224, 230, 0.03) 100%   /* Reduced from 0.06 */
+        rgba(176, 224, 230, 0.012) 0%,   /* Further reduced from 0.025 */
+        rgba(100, 150, 255, 0.01) 50%,   /* Further reduced from 0.02 */
+        rgba(176, 224, 230, 0.015) 100%  /* Further reduced from 0.03 */
     );
     border-radius: 25px;
     padding: 20px;
@@ -774,10 +774,10 @@
 /* Settings modal content - pristine water chamber */
 .settings-content.water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(100, 150, 255, 0.02) 0%,    /* Reduced from 0.04 */
-        rgba(176, 224, 230, 0.035) 30%,  /* Reduced from 0.07 */
-        rgba(144, 238, 144, 0.015) 60%,  /* Reduced from 0.03 */
-        rgba(100, 150, 255, 0.025) 100%  /* Reduced from 0.05 */
+        rgba(100, 150, 255, 0.01) 0%,    /* Further reduced from 0.02 */
+        rgba(176, 224, 230, 0.018) 30%,  /* Further reduced from 0.035 */
+        rgba(144, 238, 144, 0.008) 60%,  /* Further reduced from 0.015 */
+        rgba(100, 150, 255, 0.012) 100%  /* Further reduced from 0.025 */
     );
     border-radius: 20px;
     padding: 25px;
@@ -924,34 +924,34 @@
 /* Dark theme adjustments */
 [data-theme="dark"] .water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(80, 120, 200, 0.03) 0%,     /* Reduced from 0.06 */
-        rgba(140, 190, 200, 0.045) 30%,  /* Reduced from 0.09 */
-        rgba(100, 180, 120, 0.025) 60%,  /* Reduced from 0.05 */
-        rgba(80, 120, 200, 0.035) 100%   /* Reduced from 0.07 */
+        rgba(80, 120, 200, 0.015) 0%,    /* Further reduced from 0.03 */
+        rgba(140, 190, 200, 0.022) 30%,  /* Further reduced from 0.045 */
+        rgba(100, 180, 120, 0.012) 60%,  /* Further reduced from 0.025 */
+        rgba(80, 120, 200, 0.018) 100%   /* Further reduced from 0.035 */
     );
-    border-color: rgba(140, 190, 200, 0.1);  /* Reduced from 0.15 */
+    border-color: rgba(140, 190, 200, 0.05);  /* Further reduced from 0.1 */
 }
 
 /* Light theme adjustments */
 [data-theme="light"] .water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(120, 160, 240, 0.04) 0%,    /* Reduced from 0.08 */
-        rgba(200, 230, 240, 0.06) 30%,   /* Reduced from 0.12 */
-        rgba(160, 220, 160, 0.035) 60%,  /* Reduced from 0.07 */
-        rgba(120, 160, 240, 0.045) 100%  /* Reduced from 0.09 */
+        rgba(120, 160, 240, 0.02) 0%,    /* Further reduced from 0.04 */
+        rgba(200, 230, 240, 0.03) 30%,   /* Further reduced from 0.06 */
+        rgba(160, 220, 160, 0.018) 60%,  /* Further reduced from 0.035 */
+        rgba(120, 160, 240, 0.022) 100%  /* Further reduced from 0.045 */
     );
-    border-color: rgba(200, 230, 240, 0.12);  /* Reduced from 0.18 */
+    border-color: rgba(200, 230, 240, 0.06);  /* Further reduced from 0.12 */
 }
 
 /* Cosmos theme adjustments */
 [data-theme="cosmos"] .water-cosmic-container {
     background: linear-gradient(135deg, 
-        rgba(80, 100, 200, 0.04) 0%,     /* Reduced from 0.08 */
-        rgba(160, 200, 220, 0.055) 30%,  /* Reduced from 0.11 */
-        rgba(120, 200, 140, 0.03) 60%,   /* Reduced from 0.06 */
-        rgba(80, 100, 200, 0.045) 100%   /* Reduced from 0.09 */
+        rgba(80, 100, 200, 0.02) 0%,     /* Further reduced from 0.04 */
+        rgba(160, 200, 220, 0.028) 30%,  /* Further reduced from 0.055 */
+        rgba(120, 200, 140, 0.015) 60%,  /* Further reduced from 0.03 */
+        rgba(80, 100, 200, 0.022) 100%   /* Further reduced from 0.045 */
     );
-    border-color: rgba(160, 200, 220, 0.1);  /* Reduced from 0.16 */
+    border-color: rgba(160, 200, 220, 0.05);  /* Further reduced from 0.1 */
 }
 
 /* Enhanced floating control node effects */
