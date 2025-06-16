@@ -123,11 +123,11 @@
 /* Focus Mode Components */
 .focus-content {
     padding: 40px;
-    background: rgba(255, 255, 255, 0.01);  /* Further reduced from 0.02 */
+    background: rgba(255, 255, 255, 0.005);  /* Nearly invisible */
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.04);  /* Further reduced opacity */
+    border: 1px solid rgba(255, 255, 255, 0.02);  /* Barely visible border */
     border-radius: 30px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.025);  /* Even lighter shadow */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.01);  /* Minimal shadow */
     position: relative;
     z-index: 20;
 }
@@ -155,13 +155,13 @@
 
 /* Task Management Section */
 .task-section {
-    background: rgba(255, 255, 255, 0.01);  /* Further reduced from 0.02 */
+    background: rgba(255, 255, 255, 0.005);  /* Nearly invisible */
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.04);  /* Further reduced opacity */
+    border: 1px solid rgba(255, 255, 255, 0.02);  /* Barely visible border */
     border-radius: 20px;
     padding: 25px;
     margin-top: 30px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.025);  /* Even lighter shadow */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.01);  /* Minimal shadow */
     position: relative;
     z-index: 30;
 }
