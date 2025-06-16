@@ -430,12 +430,12 @@ body[style*="--redshift-intensity"] {
  * 9999: .loading-screen
  */
 
-/* Override container backgrounds for near-invisibility */
+/* Override container backgrounds for maximum transparency */
 .water-cosmic-container {
     --container-opacity: 0.1; /* Extremely low opacity multiplier */
 }
 
-/* Make all glass backgrounds nearly invisible */
+/* Make all glass backgrounds extremely transparent */
 .focus-content,
 .ambient-content,
 .task-section,
@@ -458,6 +458,26 @@ body[style*="--redshift-intensity"] {
 .task-section,
 .settings-section {
     border-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Override any background from theme or other sources */
+.water-cosmic-container,
+.water-cosmic-container.nav,
+.water-cosmic-container.focus-content,
+.water-cosmic-container.ambient-content,
+.water-cosmic-container.task-section,
+.water-cosmic-container.settings-section,
+.water-cosmic-container.timer-controls,
+.water-cosmic-container.ambient-controls,
+.water-cosmic-container.theme-buttons,
+.water-cosmic-container.settings-buttons,
+.water-cosmic-container.settings-content {
+    background: linear-gradient(135deg, 
+        rgba(100, 150, 255, 0.003) 0%,
+        rgba(176, 224, 230, 0.005) 30%,
+        rgba(144, 238, 144, 0.002) 60%,
+        rgba(100, 150, 255, 0.003) 100%
+    ) !important;
 }
 
 /* iOS Safari and Mobile Viewport Fixes */

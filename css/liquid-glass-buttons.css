@@ -883,9 +883,9 @@
 .water-cosmic-container.nav {
     /* Override existing nav background for better integration */
     background: linear-gradient(135deg, 
-        rgba(100, 150, 255, 0.04) 0%,
-        rgba(176, 224, 230, 0.06) 50%,
-        rgba(100, 150, 255, 0.05) 100%
+        rgba(100, 150, 255, 0.003) 0%,
+        rgba(176, 224, 230, 0.005) 50%,
+        rgba(100, 150, 255, 0.004) 100%
     ) !important;
 }
 
