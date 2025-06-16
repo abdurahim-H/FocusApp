@@ -196,11 +196,6 @@ body {
     will-change: auto; /* Remove will-change when not animating */
 }
 
-/* Performance optimizations for animations */
-.mode, .nav-btn, .btn, .liquid-glass-btn {
-    will-change: auto; /* Remove unnecessary will-change declarations */
-}
-
 /* Red-shift effect for black hole approach */
 body[style*="--redshift-intensity"] {
     filter: hue-rotate(calc(var(--redshift-intensity, 0) * 30deg)) 
@@ -419,6 +414,33 @@ body[style*="--redshift-intensity"] {
 
 .settings-modal {
     z-index: 2001 !important;
+}
+
+/* Z-Index Hierarchy (add this comment block for reference) */
+/* 
+ * 1: #scene-container canvas
+ * 10: .container
+ * 15: .mode
+ * 20-30: Content sections (.home-content, .focus-content, .task-section)
+ * 100-101: Task components
+ * 1000: Navigation (.nav, .settings-btn, .progress-3d)
+ * 1500: .achievement
+ * 2000-2001: Settings modal
+ * 2100: .close-btn (sticky)
+ * 9999: .loading-screen
+ */
+
+/* Override container backgrounds for more transparency */
+.water-cosmic-container {
+    --container-opacity: 0.5; /* Reduced base opacity multiplier */
+}
+
+/* Make all glass backgrounds more transparent */
+.focus-content,
+.ambient-content,
+.task-section,
+.settings-section {
+    background-color: rgba(255, 255, 255, 0.02) !important;
 }
 
 /* iOS Safari and Mobile Viewport Fixes */
