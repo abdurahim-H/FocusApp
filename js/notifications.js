@@ -9,15 +9,18 @@ let notificationPermission = 'default';
  * Initialize notification system and request permission
  */
 export function initNotifications() {
+    console.log('🔔 Initializing notification system...');
+    
     if ('Notification' in window) {
         notificationPermission = Notification.permission;
+        console.log('📱 Current notification permission:', notificationPermission);
         
         if (notificationPermission === 'default') {
-            // Request permission on first interaction
-            requestNotificationPermission();
+            console.log('⚠️ Permission is default, will request on user interaction');
+            // Don't auto-request permission on init - wait for user interaction
         }
         
-        console.log('🔔 Notification system initialized, permission:', notificationPermission);
+        console.log('✅ Notification system initialized, permission:', notificationPermission);
     } else {
         console.warn('⚠️ Browser notifications not supported');
     }
@@ -71,12 +74,19 @@ function showTestNotification() {
  * Show notification when focus session completes
  */
 export function notifyFocusComplete(breakDuration, isLongBreak = false) {
-    if (notificationPermission !== 'granted') return;
+    console.log('🔔 Attempting to show focus complete notification', { breakDuration, isLongBreak, permission: notificationPermission });
+    
+    if (notificationPermission !== 'granted') {
+        console.warn('❌ Cannot show notification - permission not granted:', notificationPermission);
+        return;
+    }
 
     const title = isLongBreak ? 'Focus Session Complete! 🎯' : 'Focus Session Complete! 🎯';
     const body = isLongBreak 
         ? `Great work! Time for a ${breakDuration}-minute long break. You've earned it!`
         : `Well done! Take a ${breakDuration}-minute break to recharge.`;
+    
+    console.log('✅ Creating notification:', { title, body });
     
     const notification = new Notification(title, {
         body: body,
@@ -99,6 +109,7 @@ export function notifyFocusComplete(breakDuration, isLongBreak = false) {
 
     // Handle notification clicks
     notification.onclick = function() {
+        console.log('📱 Notification clicked');
         window.focus(); // Bring the app window to front
         this.close();
     };
@@ -247,4 +258,38 @@ export function showNotificationPrompt() {
             requestNotificationPermission();
         }
     }
+}
+
+/**
+ * Test notification function - can be called from browser console
+ */
+export function testNotification() {
+    console.log('🧪 Testing notification...');
+    
+    if (notificationPermission === 'granted') {
+        const notification = new Notification('Test Notification 🧪', {
+            body: 'This is a test notification to verify the system is working!',
+            icon: '/favicon.ico',
+            badge: '/favicon.ico',
+            tag: 'test',
+            silent: false
+        });
+        
+        notification.onclick = function() {
+            console.log('Test notification clicked');
+            this.close();
+        };
+        
+        setTimeout(() => notification.close(), 5000);
+        console.log('✅ Test notification sent');
+    } else {
+        console.warn('❌ Cannot send test notification, permission:', notificationPermission);
+        console.log('💡 Try calling requestNotificationPermission() first');
+    }
+}
+
+// Make test function available globally for console testing
+if (typeof window !== 'undefined') {
+    window.testNotification = testNotification;
+    window.requestNotificationPermissionTest = requestNotificationPermission;
 }

@@ -225,10 +225,20 @@ export function completeSession() {
             // Reset the cycle after completing long break
             state.timer.pomodoroCount = 0;
             showAchievement('New Cycle Started!', 'Beginning fresh pomodoro cycle');
-            // Notifications temporarily disabled for debugging
+            // Notify break complete
+            try {
+                notifyBreakComplete(state.timer.settings.focusDuration);
+            } catch (error) {
+                console.warn('Notification failed:', error);
+            }
         } else {
             showAchievement('Break Complete!', 'Ready for another focus session');
-            // Notifications temporarily disabled for debugging
+            // Notify break complete
+            try {
+                notifyBreakComplete(state.timer.settings.focusDuration);
+            } catch (error) {
+                console.warn('Notification failed:', error);
+            }
         }
     } else {
         // Focus session completed
@@ -244,13 +254,18 @@ export function completeSession() {
             state.timer.minutes = state.timer.settings.longBreakDuration;
             state.timer.isLongBreak = true;
             showAchievement('Pomodoro Cycle Complete!', `Take a ${state.timer.settings.longBreakDuration}-minute long break`);
-            // Notifications temporarily disabled for debugging
+            // Notify pomodoro cycle complete
+            try {
+                notifyPomodoroComplete(state.timer.settings.longBreakDuration);
+            } catch (error) {
+                console.warn('Notification failed:', error);
+            }
         } else {
             // Short break
             state.timer.minutes = state.timer.settings.shortBreakDuration;
             state.timer.isLongBreak = false;
             showAchievement('Focus Complete!', `Time for a ${state.timer.settings.shortBreakDuration}-minute break`);
-            // Re-enable one notification at a time for testing
+            // Notify focus complete
             try {
                 notifyFocusComplete(state.timer.settings.shortBreakDuration, false);
             } catch (error) {
@@ -470,4 +485,42 @@ export function resetSession() {
     
     // Show achievement for session reset
     showAchievement('Session Reset!', 'Starting fresh with a new Pomodoro cycle');
+}
+
+/**
+ * Quick test function for debugging - sets timer to 5 seconds
+ * Call from browser console: window.quickTimerTest()
+ */
+export function quickTimerTest() {
+    console.log('🧪 Starting quick timer test (5 seconds)');
+    
+    // Temporarily override timer settings
+    const originalFocus = state.timer.settings.focusDuration;
+    const originalBreak = state.timer.settings.shortBreakDuration;
+    
+    state.timer.settings.focusDuration = 1/12; // 5 seconds (1/12 of a minute)
+    state.timer.settings.shortBreakDuration = 1/12; // 5 seconds for break too
+    
+    // Reset timer to new duration
+    state.timer.minutes = 0;
+    state.timer.seconds = 5;
+    state.timer.isBreak = false;
+    state.timer.isRunning = false;
+    
+    updateTimerDisplay();
+    
+    console.log('⏰ Timer set to 5 seconds. Click Start Focus to test notifications.');
+    console.log('💡 Make sure to enable notifications first!');
+    
+    // Restore original settings after test completes
+    setTimeout(() => {
+        state.timer.settings.focusDuration = originalFocus;
+        state.timer.settings.shortBreakDuration = originalBreak;
+        console.log('🔄 Timer settings restored to normal');
+    }, 30000); // Restore after 30 seconds
+}
+
+// Make test function available globally
+if (typeof window !== 'undefined') {
+    window.quickTimerTest = quickTimerTest;
 }
