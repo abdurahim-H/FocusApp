@@ -4,7 +4,8 @@
 import { state } from './state.js';
 import { trackSetInterval, trackRequestAnimationFrame } from './cleanup.js';
 import { toggleAmbientSound, setVolume, setSoundVolume, stopAmbientSound } from './sounds.js';
-import { notifyMeditationMilestone } from './notifications.js';
+// Temporarily disabled for debugging
+// import { notifyMeditationMilestone } from './notifications.js';
 
 let meditationCanvas, meditationCtx;
 let meditationTimer = null;
@@ -444,11 +445,15 @@ function startMeditationTimer() {
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
         
-        // Send milestone notifications every 5 minutes
-        if (minutes > 0 && minutes % 5 === 0 && minutes !== lastNotifiedMinute) {
-            notifyMeditationMilestone(minutes);
-            lastNotifiedMinute = minutes;
-        }
+        // Send milestone notifications every 5 minutes - temporarily disabled
+        // if (minutes > 0 && minutes % 5 === 0 && minutes !== lastNotifiedMinute) {
+        //     try {
+        //         notifyMeditationMilestone(minutes);
+        //     } catch (error) {
+        //         console.warn('Meditation notification failed:', error);
+        //     }
+        //     lastNotifiedMinute = minutes;
+        // }
     }, 1000);
     
     // Update timer immediately
