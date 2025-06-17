@@ -151,12 +151,12 @@ function createAccretionDisk(parent) {
     );
     
     mainDisk.emitter = diskGroup;
-    mainDisk.createSphereEmitter(6, 0); // Start from event horizon
+    mainDisk.createSphereEmitter(4, 0); // Smaller diameter - reduced from 6 to 4
     mainDisk.color1 = new BABYLON.Color4(1, 1, 1, 1);     // White-hot inner
     mainDisk.color2 = new BABYLON.Color4(1, 0.6, 0.2, 0.8); // Orange outer
     mainDisk.colorDead = new BABYLON.Color4(0.5, 0.1, 0, 0);
-    mainDisk.minSize = 0.8;
-    mainDisk.maxSize = 3.2;
+    mainDisk.minSize = 0.6; // Reduced from 0.8
+    mainDisk.maxSize = 2.4; // Reduced from 3.2
     mainDisk.minLifeTime = Number.MAX_VALUE;
     mainDisk.maxLifeTime = Number.MAX_VALUE;
     mainDisk.emitRate = 400; // Increased from 200 for more particles
@@ -173,9 +173,9 @@ function createAccretionDisk(parent) {
             const distance = Math.sqrt(particle.position.x * particle.position.x + particle.position.z * particle.position.z);
             
             // Spiral outward motion
-            if (distance < 30) {
+            if (distance < 24) { // Reduced from 30 to 24
                 const angle = Math.atan2(particle.position.z, particle.position.x) + (0.03 / Math.max(1, distance * 0.1));
-                const newDistance = Math.min(30, distance + 0.1);
+                const newDistance = Math.min(24, distance + 0.1); // Reduced from 30 to 24
                 particle.position.x = Math.cos(angle) * newDistance;
                 particle.position.z = Math.sin(angle) * newDistance;
                 
@@ -183,7 +183,7 @@ function createAccretionDisk(parent) {
                 particle.position.y = Math.sin(Date.now() * 0.001 + distance) * 0.5;
                 
                 // Temperature-based color evolution
-                const temp = Math.max(0, 1 - distance / 25);
+                const temp = Math.max(0, 1 - distance / 20); // Adjusted from 25 to 20
                 particle.color.r = 1;
                 particle.color.g = 0.8 + temp * 0.2;
                 particle.color.b = 0.2 + temp * 0.6;
@@ -282,12 +282,12 @@ function createMatterStreams(parent) {
         );
         
         stream.emitter = streamGroup;
-        stream.createSphereEmitter(15, 0.2);
+        stream.createSphereEmitter(12, 0.2); // Reduced from 15 to 12
         stream.color1 = new BABYLON.Color4(1, 0.9, 0.5, 0.8);
         stream.color2 = new BABYLON.Color4(1, 0.6, 0.2, 0.6);
         stream.colorDead = new BABYLON.Color4(0.8, 0.2, 0.1, 0);
-        stream.minSize = 0.4;
-        stream.maxSize = 1.8;
+        stream.minSize = 0.3; // Reduced from 0.4
+        stream.maxSize = 1.4; // Reduced from 1.8
         stream.minLifeTime = Number.MAX_VALUE;
         stream.maxLifeTime = Number.MAX_VALUE;
         stream.emitRate = 50;
@@ -302,7 +302,7 @@ function createMatterStreams(parent) {
                 if (!particle) continue;
                 
                 const distance = Math.sqrt(particle.position.x * particle.position.x + particle.position.z * particle.position.z);
-                if (distance > 6 && distance < 25) {
+                if (distance > 5 && distance < 20) { // Reduced from 6-25 to 5-20
                     const angle = Math.atan2(particle.position.z, particle.position.x) + (0.04 / Math.max(1, distance * 0.2));
                     particle.position.x = Math.cos(angle) * distance;
                     particle.position.z = Math.sin(angle) * distance;
