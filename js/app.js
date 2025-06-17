@@ -20,7 +20,8 @@ async function loadModules() {
         { name: 'settings', path: './settings.js' },
         { name: 'navigation', path: './navigation.js' },
         { name: 'uiEffects', path: './ui-effects.js' },
-        { name: 'cleanup', path: './cleanup.js' }
+        { name: 'cleanup', path: './cleanup.js' },
+        { name: 'notifications', path: './notifications.js' }
     ];
 
     for (const module of moduleList) {
@@ -129,6 +130,18 @@ export async function initApp() {
         
         if (loadedModules.settings?.loadSettings) {
             loadedModules.settings.loadSettings();
+        }
+        
+        // Initialize notifications system
+        if (loadedModules.notifications?.initNotifications) {
+            loadedModules.notifications.initNotifications();
+            
+            // Show notification prompt after a delay (for better UX)
+            setTimeout(() => {
+                if (loadedModules.notifications?.showNotificationPrompt) {
+                    loadedModules.notifications.showNotificationPrompt();
+                }
+            }, 5000); // 5 seconds after app load
         }
         
         if (loadedModules.uiEffects?.initUIEffects) {

@@ -1,6 +1,11 @@
 import { state } from './state.js';
 import { updateTimerDisplay } from './timer.js';
 import { setVolume } from './sounds.js';
+import { 
+    requestNotificationPermission, 
+    getNotificationPermission, 
+    areNotificationsEnabled 
+} from './notifications.js';
 
 function setTheme(theme) {
     console.log(`🎨 Applying theme: ${theme}`);
@@ -157,6 +162,8 @@ export function setupSettingsControls() {
             soundValue: document.getElementById('soundVolumeValue'),
             greetingInput: document.getElementById('greetingInput'),
             savedMsg: document.getElementById('settingsSavedMsg'),
+            enableNotificationsBtn: document.getElementById('enableNotificationsBtn'),
+            notificationStatus: document.getElementById('notificationStatus'),
             themeBtns: {
                 light: document.getElementById('themeLightBtn'),
                 dark: document.getElementById('themeDarkBtn'),
@@ -368,7 +375,91 @@ export function setupSettingsControls() {
         });
     }
     
+    // Notification controls
+    if (elements.enableNotificationsBtn && elements.notificationStatus) {
+        // Update notification status on page load
+        updateNotificationStatus(elements.notificationStatus);
+        
+        elements.enableNotificationsBtn.addEventListener('click', async () => {
+            const button = elements.enableNotificationsBtn;
+            const status = elements.notificationStatus;
+            
+            // Update button state to show loading
+            button.textContent = 'Requesting...';
+            button.disabled = true;
+            status.textContent = 'Requesting permission...';
+            status.className = 'notification-status pending';
+            
+            try {
+                const granted = await requestNotificationPermission();
+                
+                if (granted) {
+                    button.textContent = 'Enabled';
+                    button.disabled = true;
+                    status.textContent = 'Notifications enabled';
+                    status.className = 'notification-status enabled';
+                } else {
+                    button.textContent = 'Enable Notifications';
+                    button.disabled = false;
+                    status.textContent = 'Permission denied';
+                    status.className = 'notification-status disabled';
+                }
+            } catch (error) {
+                console.error('Error enabling notifications:', error);
+                button.textContent = 'Enable Notifications';
+                button.disabled = false;
+                status.textContent = 'Error - try again';
+                status.className = 'notification-status disabled';
+            }
+        });
+    }
+    
     }, 100); // Close setTimeout
+}
+
+/**
+ * Update notification status display based on current permission
+ */
+function updateNotificationStatus(statusElement) {
+    const permission = getNotificationPermission();
+    const button = document.getElementById('enableNotificationsBtn');
+    
+    if (!('Notification' in window)) {
+        statusElement.textContent = 'Not supported';
+        statusElement.className = 'notification-status disabled';
+        if (button) {
+            button.textContent = 'Not Supported';
+            button.disabled = true;
+        }
+        return;
+    }
+    
+    switch (permission) {
+        case 'granted':
+            statusElement.textContent = 'Notifications enabled';
+            statusElement.className = 'notification-status enabled';
+            if (button) {
+                button.textContent = 'Enabled';
+                button.disabled = true;
+            }
+            break;
+        case 'denied':
+            statusElement.textContent = 'Permission denied';
+            statusElement.className = 'notification-status disabled';
+            if (button) {
+                button.textContent = 'Blocked';
+                button.disabled = true;
+            }
+            break;
+        default: // 'default'
+            statusElement.textContent = 'Click to enable';
+            statusElement.className = 'notification-status pending';
+            if (button) {
+                button.textContent = 'Enable Notifications';
+                button.disabled = false;
+            }
+            break;
+    }
 }
 
 export function loadSettings() {

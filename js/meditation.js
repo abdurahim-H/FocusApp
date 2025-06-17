@@ -4,6 +4,7 @@
 import { state } from './state.js';
 import { trackSetInterval, trackRequestAnimationFrame } from './cleanup.js';
 import { toggleAmbientSound, setVolume, setSoundVolume, stopAmbientSound } from './sounds.js';
+import { notifyMeditationMilestone } from './notifications.js';
 
 let meditationCanvas, meditationCtx;
 let meditationTimer = null;
@@ -429,6 +430,7 @@ function startMeditationTimer() {
     
     console.log('⏱️ Starting meditation timer');
     meditationStartTime = Date.now();
+    let lastNotifiedMinute = 0;
     
     // Update timer every second
     meditationTimer = trackSetInterval(() => {
@@ -440,6 +442,12 @@ function startMeditationTimer() {
         if (timerElement) {
             timerElement.textContent = 
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Send milestone notifications every 5 minutes
+        if (minutes > 0 && minutes % 5 === 0 && minutes !== lastNotifiedMinute) {
+            notifyMeditationMilestone(minutes);
+            lastNotifiedMinute = minutes;
         }
     }, 1000);
     

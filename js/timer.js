@@ -1,13 +1,16 @@
 /**
  * Timer Management System
- * Handles pomodoro timer functionality, session    updateSessionDisplay();
-
-    state.timer.interval = trackSetInterval(() => {nsitions, achievements, and UI updates
+ * Handles pomodoro timer functionality, session transitions, achievements, and UI updates
  */
 import { state } from './state.js';
 import { triggerFocusIntensification } from './blackhole.js';
 import { triggerFocusIntensity, triggerSessionCompleteUI, triggerBlackHoleApproachUI } from './ui-effects.js';
 import { trackSetInterval } from './cleanup.js';
+import { 
+    notifyFocusComplete, 
+    notifyBreakComplete, 
+    notifyPomodoroComplete 
+} from './notifications.js';
 
 export function updateTimerDisplay() {
     const minutes = String(state.timer.minutes).padStart(2, '0');
@@ -221,8 +224,12 @@ export function completeSession() {
             // Reset the cycle after completing long break
             state.timer.pomodoroCount = 0;
             showAchievement('New Cycle Started!', 'Beginning fresh pomodoro cycle');
+            // Notify break complete
+            notifyBreakComplete(state.timer.settings.focusDuration);
         } else {
             showAchievement('Break Complete!', 'Ready for another focus session');
+            // Notify break complete
+            notifyBreakComplete(state.timer.settings.focusDuration);
         }
     } else {
         // Focus session completed
@@ -238,11 +245,15 @@ export function completeSession() {
             state.timer.minutes = state.timer.settings.longBreakDuration;
             state.timer.isLongBreak = true;
             showAchievement('Pomodoro Cycle Complete!', `Take a ${state.timer.settings.longBreakDuration}-minute long break`);
+            // Notify pomodoro cycle complete
+            notifyPomodoroComplete(state.timer.settings.longBreakDuration);
         } else {
             // Short break
             state.timer.minutes = state.timer.settings.shortBreakDuration;
             state.timer.isLongBreak = false;
             showAchievement('Focus Complete!', `Time for a ${state.timer.settings.shortBreakDuration}-minute break`);
+            // Notify focus complete
+            notifyFocusComplete(state.timer.settings.shortBreakDuration, false);
         }
 
         state.timer.isBreak = true;

@@ -789,3 +789,54 @@
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
 }
+
+/* Notification Controls */
+.notification-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.notification-status {
+    font-size: 0.9em;
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.notification-status.enabled {
+    background: linear-gradient(135deg, 
+        rgba(6, 214, 160, 0.3) 0%,
+        rgba(6, 214, 160, 0.1) 100%);
+    color: #06d6a0;
+    border: 1px solid rgba(6, 214, 160, 0.4);
+    text-shadow: 0 0 10px rgba(6, 214, 160, 0.3);
+}
+
+.notification-status.disabled {
+    background: linear-gradient(135deg, 
+        rgba(255, 0, 110, 0.3) 0%,
+        rgba(255, 0, 110, 0.1) 100%);
+    color: #ff8fa3;
+    border: 1px solid rgba(255, 0, 110, 0.4);
+    text-shadow: 0 0 10px rgba(255, 0, 110, 0.3);
+}
+
+.notification-status.pending {
+    background: linear-gradient(135deg, 
+        rgba(255, 190, 11, 0.3) 0%,
+        rgba(255, 190, 11, 0.1) 100%);
+    color: #ffbe0b;
+    border: 1px solid rgba(255, 190, 11, 0.4);
+    text-shadow: 0 0 10px rgba(255, 190, 11, 0.3);
+}
+
+.settings-description {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-top: 10px;
+    line-height: 1.4;
+    opacity: 0.8;
+}
