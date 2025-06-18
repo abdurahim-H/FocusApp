@@ -67,4 +67,39 @@
         bottom: 20px;
         left: 20px;
     }
+
+    /* ===== MOBILE SCROLLBAR ADJUSTMENTS ===== */
+    
+    /* Smaller scrollbars for mobile */
+    .task-list::-webkit-scrollbar,
+    .settings-modal::-webkit-scrollbar,
+    .mode::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .task-list::-webkit-scrollbar-thumb,
+    .settings-modal::-webkit-scrollbar-thumb,
+    .mode::-webkit-scrollbar-thumb {
+        border-radius: 8px;
+        min-height: 20px;
+        /* Slightly more visible on mobile for easier touch interaction */
+        background: rgba(176, 224, 230, 0.15);
+        border: 0.5px solid rgba(255, 255, 255, 0.25);
+    }
+    
+    /* Enhanced touch interaction */
+    .task-list::-webkit-scrollbar-thumb:active,
+    .settings-modal::-webkit-scrollbar-thumb:active,
+    .mode::-webkit-scrollbar-thumb:active {
+        background: rgba(176, 224, 230, 0.3);
+        transform: scale(1.1);
+    }
+    
+    /* Ensure smooth scrolling on mobile */
+    .task-list,
+    .settings-modal,
+    .mode {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
 }
