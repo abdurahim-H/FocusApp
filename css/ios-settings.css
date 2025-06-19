@@ -1,0 +1,586 @@
+/* iOS-Style Water Translucent Settings Modal */
+/* This file replaces cosmic-settings.css with modern iOS design */
+
+/* Settings Modal Overlay */
+.settings-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    padding: 20px;
+}
+
+.settings-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.settings-modal-overlay.active .settings-modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Main Settings Modal */
+.settings-modal {
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 
+        0 32px 64px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Water Effect Overlay */
+.settings-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(180deg, 
+        rgba(176, 224, 230, 0.15) 0%,
+        rgba(176, 224, 230, 0.08) 50%,
+        transparent 100%);
+    border-radius: 24px 24px 0 0;
+    pointer-events: none;
+    animation: waterFlow 8s ease-in-out infinite;
+}
+
+@keyframes waterFlow {
+    0%, 100% { opacity: 0.6; transform: translateX(0); }
+    50% { opacity: 0.8; transform: translateX(10px); }
+}
+
+/* Settings Header - FIXED LAYOUT */
+.settings-modal h2 {
+    display: none; /* Hide the old title */
+}
+
+.settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 2;
+}
+
+.settings-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    flex: 1;
+    text-align: left;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(176, 224, 230, 0.9) 50%,
+        rgba(255, 255, 255, 0.95) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: titleShimmer 3s ease-in-out infinite;
+}
+
+@keyframes titleShimmer {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+}
+
+.header-buttons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.header-btn {
+    height: 36px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    padding: 0 12px;
+    min-width: 36px;
+}
+
+.header-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+    transition: left 0.5s;
+}
+
+.header-btn:hover::before {
+    left: 100%;
+}
+
+.header-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Specific button styles */
+.close-btn,
+#closeSettingsBtn {
+    background: rgba(255, 59, 48, 0.15) !important;
+    border-color: rgba(255, 59, 48, 0.3) !important;
+    color: rgba(255, 59, 48, 0.9) !important;
+    width: 36px !important;
+    padding: 0 !important;
+}
+
+.close-btn:hover,
+#closeSettingsBtn:hover {
+    background: rgba(255, 59, 48, 0.25) !important;
+}
+
+.reset-btn,
+#resetSettingsBtn {
+    background: rgba(255, 149, 0, 0.15) !important;
+    border-color: rgba(255, 149, 0, 0.3) !important;
+    color: rgba(255, 149, 0, 0.9) !important;
+    font-size: 12px !important;
+}
+
+.reset-btn:hover,
+#resetSettingsBtn:hover {
+    background: rgba(255, 149, 0, 0.25) !important;
+}
+
+.save-btn,
+#saveSettingsBtn {
+    background: rgba(52, 199, 89, 0.15) !important;
+    border-color: rgba(52, 199, 89, 0.3) !important;
+    color: rgba(52, 199, 89, 0.9) !important;
+    font-size: 12px !important;
+}
+
+.save-btn:hover,
+#saveSettingsBtn:hover {
+    background: rgba(52, 199, 89, 0.25) !important;
+}
+
+/* Settings Content */
+.settings-content {
+    padding: 24px;
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.settings-content::-webkit-scrollbar {
+    display: none;
+}
+
+/* Settings Sections */
+.settings-section {
+    margin-bottom: 32px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.settings-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(176, 224, 230, 0.3), 
+        transparent);
+    animation: liquidFlow 4s ease-in-out infinite;
+}
+
+@keyframes liquidFlow {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+}
+
+.settings-section:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(176, 224, 230, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.settings-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Theme Buttons */
+.theme-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.theme-buttons .liquid-glass-btn,
+.theme-buttons .btn {
+    padding: 12px 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(20px) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    text-align: center !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.theme-buttons .liquid-glass-btn::after,
+.theme-buttons .btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, 
+        rgba(176, 224, 230, 0.2) 0%, 
+        transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+}
+
+.theme-buttons .liquid-glass-btn:hover,
+.theme-buttons .btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(176, 224, 230, 0.3) !important;
+    transform: translateY(-1px) !important;
+}
+
+.theme-buttons .liquid-glass-btn:hover::after,
+.theme-buttons .btn:hover::after {
+    width: 100px;
+    height: 100px;
+}
+
+.theme-buttons .liquid-glass-btn.active,
+.theme-buttons .btn.active,
+.theme-buttons .liquid-glass-btn.btn-primary,
+.theme-buttons .btn.btn-primary {
+    background: rgba(176, 224, 230, 0.15) !important;
+    border-color: rgba(176, 224, 230, 0.4) !important;
+    color: rgba(176, 224, 230, 0.95) !important;
+    box-shadow: 
+        0 4px 16px rgba(176, 224, 230, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Range Controls */
+.range-container {
+    position: relative;
+    margin-top: 12px;
+    padding: 8px 0;
+}
+
+.settings-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 12px;
+}
+
+.range-input {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+}
+
+.range-input::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        rgba(176, 224, 230, 0.8) 0%,
+        rgba(176, 224, 230, 0.6) 100%);
+    border-radius: 3px;
+    width: var(--range-progress, 50%);
+    transition: width 0.3s ease;
+}
+
+.range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    cursor: pointer;
+    border: 2px solid rgba(176, 224, 230, 0.8);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(176, 224, 230, 0.2);
+    transition: all 0.3s ease;
+}
+
+.range-input::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        0 0 0 6px rgba(176, 224, 230, 0.3);
+}
+
+.range-input::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    cursor: pointer;
+    border: 2px solid rgba(176, 224, 230, 0.8);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(176, 224, 230, 0.2);
+}
+
+/* Text Input */
+.text-input,
+#greetingInput {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 14px !important;
+    outline: none !important;
+    transition: all 0.3s ease !important;
+    margin-top: 8px;
+}
+
+.text-input::placeholder,
+#greetingInput::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.text-input:focus,
+#greetingInput:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(176, 224, 230, 0.4) !important;
+    box-shadow: 
+        0 0 0 4px rgba(176, 224, 230, 0.1),
+        0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Notification Controls */
+.notification-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.notification-controls .liquid-glass-btn,
+#enableNotificationsBtn {
+    padding: 10px 16px !important;
+    background: rgba(52, 199, 89, 0.15) !important;
+    border: 1px solid rgba(52, 199, 89, 0.3) !important;
+    border-radius: 8px !important;
+    color: rgba(52, 199, 89, 0.9) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.notification-controls .liquid-glass-btn:hover,
+#enableNotificationsBtn:hover {
+    background: rgba(52, 199, 89, 0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+.notification-status {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+}
+
+.notification-status.enabled {
+    color: rgba(52, 199, 89, 0.9);
+}
+
+.notification-status.disabled {
+    color: rgba(255, 59, 48, 0.9);
+}
+
+.notification-status.pending {
+    color: rgba(255, 149, 0, 0.9);
+}
+
+.settings-description {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.4;
+    margin-top: 8px;
+}
+
+/* Success Message */
+.settings-saved-msg {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(52, 199, 89, 0.15);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(52, 199, 89, 0.3);
+    border-radius: 16px;
+    padding: 20px 32px;
+    color: rgba(52, 199, 89, 0.95);
+    font-weight: 600;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2000;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.settings-saved-msg.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Water ripple effect */
+.water-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(176, 224, 230, 0.4) 0%, 
+        rgba(176, 224, 230, 0.2) 50%, 
+        transparent 100%);
+    transform: scale(0);
+    animation: waterRipple 0.6s ease-out;
+    pointer-events: none;
+}
+
+@keyframes waterRipple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .settings-modal {
+        max-width: 95%;
+        margin: 10px;
+    }
+    
+    .theme-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-buttons {
+        gap: 8px;
+    }
+    
+    .header-btn {
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .header-btn.reset-btn,
+    .header-btn.save-btn,
+    #resetSettingsBtn,
+    #saveSettingsBtn {
+        padding: 0 8px !important;
+        font-size: 11px !important;
+    }
+    
+    .notification-controls {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+}
+
+/* Hide old close button that's not in header */
+.close-btn:not(.header-btn) {
+    display: none !important;
+}
+
+/* Override any conflicting styles */
+.settings-modal .liquid-glass-btn {
+    backdrop-filter: blur(20px) !important;
+}
+
+.settings-modal .btn {
+    backdrop-filter: blur(20px) !important;
+}

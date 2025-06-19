@@ -1,730 +1,580 @@
+// cosmic-settings.js
+
+// Cosmic Meditation Chamber Module
+// Enhanced ambient mode with interactive meditation features
+
 import { state } from './state.js';
-import { updateTimerDisplay } from './timer.js';
-import { triggerTaskCompletionUI } from './ui-effects.js';
-import { trackRequestAnimationFrame } from './cleanup.js';
-import { setVolume } from './sounds.js';
+import { trackSetInterval, trackRequestAnimationFrame } from './cleanup.js';
+import { toggleAmbientSound, setVolume, setSoundVolume, stopAmbientSound } from './sounds.js';
+// Temporarily disabled for debugging
+// import { notifyMeditationMilestone } from './notifications.js';
 
-let cosmicSettingsInitialized = false;
-let particleSystem = null;
-let settingsAnimationFrame = null;
+let meditationCanvas, meditationCtx;
+let meditationTimer = null;
+let meditationStartTime = null;
+let currentMeditationMode = 'breathing';
+let orbParticles = [];
+let animationFrameId = null;
+let soundStates = {
+    rain: { active: false, volume: 0 },
+    ocean: { active: false, volume: 0 },
+    forest: { active: false, volume: 0 },
+    cafe: { active: false, volume: 0 }
+};
 
-function triggerUIEffect(effectType) {
-    // Trigger cosmic visual effects based on type
+let meditationStats = {
+    totalMinutesToday: 0,
+    streak: 0,
+    calmLevel: 0,
+    lastMeditationDate: null
+};
+
+// Breathing patterns for different modes
+const breathingPatterns = {
+    breathing: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 }, // Box breathing
+    focus: { inhale: 4, hold1: 7, exhale: 8, hold2: 0 }, // 4-7-8 technique
+    sleep: { inhale: 4, hold1: 2, exhale: 6, hold2: 2 }, // Relaxing pattern
+    energy: { inhale: 6, hold1: 0, exhale: 2, hold2: 0 } // Energizing breaths
+};
+
+// Sound presets for different moods
+const soundPresets = {
+    'deep-focus': {
+        rain: 30,
+        ocean: 0,
+        forest: 0,
+        cafe: 0
+    },
+    'relaxation': {
+        rain: 20,
+        ocean: 50,
+        forest: 30,
+        cafe: 0
+    },
+    'sleep': {
+        rain: 40,
+        ocean: 30,
+        forest: 0,
+        cafe: 0
+    },
+    'energy': {
+        rain: 0,
+        ocean: 0,
+        forest: 0,
+        cafe: 40
+    }
+};
+
+export function initMeditationChamber() {
+    console.log('🧘 Initializing Meditation Chamber...');
+    
+    meditationCanvas = document.getElementById('meditationOrb');
+    if (!meditationCanvas) {
+        console.error('Meditation canvas not found');
+        return;
+    }
+    
+    meditationCtx = meditationCanvas.getContext('2d');
+    
+    // Initialize orb particles
+    createOrbParticles();
+    
+    // Setup event listeners
+    setupMeditationControls();
+    setupSoundMixer();
+    setupPresetButtons();
+    
+    // Load saved stats
+    loadMeditationStats();
+    
+    // Start animation when ambient mode is active
+    checkAndStartAnimation();
+    
+    // Make restart function available globally for cleanup system
+    window.restartMeditationAnimation = restartMeditationAnimation;
+    
+    console.log('🧘 Meditation Chamber initialized');
 }
 
-export function initCosmicSettings() {
-    if (cosmicSettingsInitialized) return;
-    
-    createParticleBackground();
-    enhanceSettingsControls();
-    setupCosmicPreview();
-    addSpectacularAnimations();
-    
-    cosmicSettingsInitialized = true;
+function checkAndStartAnimation() {
+    const ambientMode = document.getElementById('ambient');
+    if (ambientMode && ambientMode.classList.contains('active')) {
+        startMeditationTimer();
+        if (!animationFrameId) {
+            animateMeditationOrb();
+        }
+    }
 }
 
-function createParticleBackground() {
-    const settingsModal = document.querySelector('.settings-modal');
-    if (!settingsModal) return;
+// Function to restart meditation animation - used by cleanup system
+function restartMeditationAnimation() {
+    const ambientMode = document.getElementById('ambient');
+    if (ambientMode && ambientMode.classList.contains('active') && !animationFrameId) {
+        animateMeditationOrb();
+    }
+}
+
+function createOrbParticles() {
+    orbParticles = [];
+    const particleCount = 100;
     
-    // Create particle canvas
-    const particleCanvas = document.createElement('canvas');
-    particleCanvas.className = 'settings-particles';
-    particleCanvas.width = 800;
-    particleCanvas.height = 600;
-    settingsModal.appendChild(particleCanvas);
-    
-    const ctx = particleCanvas.getContext('2d');
-    const particles = [];
-    
-    // Initialize particles
-    for (let i = 0; i < 50; i++) {
-        particles.push({
-            x: Math.random() * particleCanvas.width,
-            y: Math.random() * particleCanvas.height,
+    for (let i = 0; i < particleCount; i++) {
+        orbParticles.push({
+            x: Math.random() * meditationCanvas.width,
+            y: Math.random() * meditationCanvas.height,
+            radius: Math.random() * 3 + 1,
+            color: `hsla(${200 + Math.random() * 60}, 70%, 60%, ${Math.random() * 0.5 + 0.3})`,
             vx: (Math.random() - 0.5) * 0.5,
             vy: (Math.random() - 0.5) * 0.5,
-            size: Math.random() * 2 + 1,
-            opacity: Math.random() * 0.5 + 0.2,
-            hue: Math.random() * 60 + 200 // Blue to purple range
+            pulse: Math.random() * Math.PI * 2
         });
+    }
+}
+
+function animateMeditationOrb() {
+    if (!meditationCtx) return;
+    
+    const ambientMode = document.getElementById('ambient');
+    if (!ambientMode || !ambientMode.classList.contains('active')) {
+        animationFrameId = null;
+        return;
+    }
+    
+    const centerX = meditationCanvas.width / 2;
+    const centerY = meditationCanvas.height / 2;
+    const time = Date.now() * 0.001;
+    
+    // Clear canvas with fade effect
+    meditationCtx.fillStyle = 'rgba(10, 10, 15, 0.1)';
+    meditationCtx.fillRect(0, 0, meditationCanvas.width, meditationCanvas.height);
+    
+    // Draw breathing orb
+    const pattern = breathingPatterns[currentMeditationMode];
+    const cycleTime = pattern.inhale + pattern.hold1 + pattern.exhale + pattern.hold2;
+    const cyclePosition = (time % cycleTime) / cycleTime;
+    
+    let orbScale = 1;
+    let phaseText = '';
+    
+    // Calculate orb size based on breathing phase
+    const inhaleEnd = pattern.inhale / cycleTime;
+    const hold1End = (pattern.inhale + pattern.hold1) / cycleTime;
+    const exhaleEnd = (pattern.inhale + pattern.hold1 + pattern.exhale) / cycleTime;
+    
+    if (cyclePosition < inhaleEnd) {
+        orbScale = 1 + (cyclePosition / inhaleEnd) * 0.3;
+        phaseText = 'Breathe In...';
+    } else if (cyclePosition < hold1End && pattern.hold1 > 0) {
+        orbScale = 1.3;
+        phaseText = 'Hold...';
+    } else if (cyclePosition < exhaleEnd) {
+        orbScale = 1.3 - ((cyclePosition - hold1End) / (exhaleEnd - hold1End)) * 0.3;
+        phaseText = 'Breathe Out...';
+    } else if (pattern.hold2 > 0) {
+        orbScale = 1;
+        phaseText = 'Hold...';
+    }
+    
+    // Update breathing phase text
+    const phaseElement = document.getElementById('breathingPhase');
+    if (phaseElement && phaseElement.textContent !== phaseText) {
+        phaseElement.textContent = phaseText;
+    }
+    
+    // Draw main orb with gradient
+    const gradient = meditationCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 100 * orbScale);
+    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.8)');
+    gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.5)');
+    gradient.addColorStop(1, 'rgba(6, 214, 160, 0.2)');
+    
+    meditationCtx.beginPath();
+    meditationCtx.arc(centerX, centerY, 100 * orbScale, 0, Math.PI * 2);
+    meditationCtx.fillStyle = gradient;
+    meditationCtx.fill();
+    
+    // Draw energy rings
+    for (let i = 0; i < 3; i++) {
+        const ringScale = orbScale + i * 0.1;
+        const alpha = 0.2 - i * 0.05;
+        
+        meditationCtx.beginPath();
+        meditationCtx.arc(centerX, centerY, (120 + i * 20) * ringScale, 0, Math.PI * 2);
+        meditationCtx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+        meditationCtx.lineWidth = 2;
+        meditationCtx.stroke();
     }
     
     // Animate particles
-    function animateParticles() {
-        ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+    orbParticles.forEach(particle => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.pulse += 0.05;
         
-        particles.forEach(particle => {
-            particle.x += particle.vx;
-            particle.y += particle.vy;
-            
-            // Wrap around edges
-            if (particle.x < 0) particle.x = particleCanvas.width;
-            if (particle.x > particleCanvas.width) particle.x = 0;
-            if (particle.y < 0) particle.y = particleCanvas.height;
-            if (particle.y > particleCanvas.height) particle.y = 0;
-            
-            // Draw particle with glow
-            ctx.beginPath();
-            ctx.globalAlpha = particle.opacity;
-            
-            // Outer glow
-            const gradient = ctx.createRadialGradient(
-                particle.x, particle.y, 0,
-                particle.x, particle.y, particle.size * 3
-            );
-            gradient.addColorStop(0, `hsla(${particle.hue}, 70%, 60%, 0.8)`);
-            gradient.addColorStop(1, `hsla(${particle.hue}, 70%, 60%, 0)`);
-            
-            ctx.fillStyle = gradient;
-            ctx.arc(particle.x, particle.y, particle.size * 3, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Core particle
-            ctx.fillStyle = `hsla(${particle.hue}, 80%, 80%, 1)`;
-            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-            ctx.fill();
-        });
+        // Wrap around edges
+        if (particle.x < 0) particle.x = meditationCanvas.width;
+        if (particle.x > meditationCanvas.width) particle.x = 0;
+        if (particle.y < 0) particle.y = meditationCanvas.height;
+        if (particle.y > meditationCanvas.height) particle.y = 0;
         
-        ctx.globalAlpha = 1;
-        settingsAnimationFrame = trackRequestAnimationFrame(animateParticles);
-    }
-    
-    animateParticles();
-}
-
-// Enhance existing controls with cosmic effects
-function enhanceSettingsControls() {
-    // Transform theme buttons into cosmic orbs
-    enhanceThemeButtons();
-    
-    // Transform sliders into stellar controls
-    enhanceSliderControls();
-    
-    // Transform text input into holographic interface
-    enhanceTextInput();
-    
-    // Transform action buttons into cosmic controls
-    enhanceActionButtons();
-}
-
-function enhanceThemeButtons() {
-    const themeSection = document.querySelector('.settings-section:first-child');
-    if (!themeSection) return;
-    
-    const themeButtons = themeSection.querySelector('.theme-buttons');
-    themeButtons.className = 'cosmic-theme-orbs';
-    
-    const buttons = themeButtons.querySelectorAll('.btn');
-    buttons.forEach((btn, index) => {
-        btn.className = 'cosmic-orb';
-        
-        // Add cosmic data attributes
-        const themes = ['light', 'dark', 'cosmos', 'auto'];
-        btn.setAttribute('data-cosmic-theme', themes[index]);
-        
-        // Add constellation pattern
-        const constellation = document.createElement('div');
-        constellation.className = 'orb-constellation';
-        btn.appendChild(constellation);
-        
-        // Add energy rings
-        const energyRings = document.createElement('div');
-        energyRings.className = 'orb-energy-rings';
-        btn.appendChild(energyRings);
-        
-        // Add hover effects
-        btn.addEventListener('mouseenter', () => {
-            btn.classList.add('orb-activated');
-            triggerCosmicRipple(btn);
-        });
-        
-        btn.addEventListener('mouseleave', () => {
-            btn.classList.remove('orb-activated');
-        });
-    });
-}
-
-function enhanceSliderControls() {
-    const sliders = document.querySelectorAll('.range-input');
-    
-    sliders.forEach(slider => {
-        const container = slider.parentElement;
-        container.className = 'stellar-control-container';
-        
-        // Create stellar track
-        const stellarTrack = document.createElement('div');
-        stellarTrack.className = 'stellar-track';
-        
-        // Add star particles along the track
-        for (let i = 0; i < 20; i++) {
-            const star = document.createElement('div');
-            star.className = 'track-star';
-            star.style.left = `${(i / 19) * 100}%`;
-            stellarTrack.appendChild(star);
-        }
-        
-        container.insertBefore(stellarTrack, slider);
-        
-        // Create cosmic thumb
-        const cosmicThumb = document.createElement('div');
-        cosmicThumb.className = 'cosmic-thumb';
-        container.appendChild(cosmicThumb);
-        
-        slider.className = 'stellar-slider';
-        
-        // Add real-time cosmic feedback
-        slider.addEventListener('input', () => {
-            updateStellarVisualization(slider);
-            triggerCosmicPulse(cosmicThumb);
-        });
-    });
-}
-
-function enhanceTextInput() {
-    const greetingInput = document.getElementById('greetingInput');
-    if (!greetingInput) return;
-    
-    const container = greetingInput.parentElement;
-    container.className = 'holographic-input-container';
-    
-    // Create holographic border
-    const holoBorder = document.createElement('div');
-    holoBorder.className = 'holographic-border';
-    container.appendChild(holoBorder);
-    
-    // Create floating letters effect
-    const floatingLetters = document.createElement('div');
-    floatingLetters.className = 'floating-letters';
-    container.appendChild(floatingLetters);
-    
-    greetingInput.className = 'holographic-input';
-    
-    // Add holographic typing effects
-    greetingInput.addEventListener('input', () => {
-        triggerHolographicEffect(floatingLetters, greetingInput.value);
-    });
-}
-
-function enhanceActionButtons() {
-    const saveBtn = document.getElementById('saveSettingsBtn');
-    const resetBtn = document.getElementById('resetSettingsBtn');
-    
-    if (saveBtn) {
-        saveBtn.className = 'cosmic-action-btn cosmic-save';
-        saveBtn.innerHTML = `
-            <span class="btn-text">Save Universe</span>
-            <div class="btn-energy-core"></div>
-            <div class="btn-particle-burst"></div>
-        `;
-    }
-    
-    if (resetBtn) {
-        resetBtn.className = 'cosmic-action-btn cosmic-reset';
-        resetBtn.innerHTML = `
-            <span class="btn-text">Reset Cosmos</span>
-            <div class="btn-energy-core"></div>
-            <div class="btn-particle-burst"></div>
-        `;
-    }
-}
-
-// Setup cosmic preview that shows how settings affect the universe
-function setupCosmicPreview() {
-    const settingsContent = document.querySelector('.settings-content');
-    if (!settingsContent) return;
-    
-    // Create cosmic preview section
-    const previewSection = document.createElement('div');
-    previewSection.className = 'cosmic-preview-section';
-    previewSection.innerHTML = `
-        <h4 class="preview-title">Universe Preview</h4>
-        <div class="cosmic-preview-container">
-            <canvas class="mini-universe" width="300" height="200"></canvas>
-            <div class="preview-stats">
-                <div class="stat-item">
-                    <span class="stat-label">Focus Intensity</span>
-                    <div class="stat-bar">
-                        <div class="stat-fill" id="focusIntensityBar"></div>
-                    </div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Cosmic Energy</span>
-                    <div class="stat-bar">
-                        <div class="stat-fill" id="cosmicEnergyBar"></div>
-                    </div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Sound Harmony</span>
-                    <div class="stat-bar">
-                        <div class="stat-fill" id="soundHarmonyBar"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Insert preview at the top of settings content
-    settingsContent.insertBefore(previewSection, settingsContent.firstChild);
-    
-    // Initialize mini universe
-    initMiniUniverse();
-}
-
-function initMiniUniverse() {
-    const canvas = document.querySelector('.mini-universe');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    
-    let rotation = 0;
-    
-    function drawMiniUniverse() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw cosmic background
-        const bgGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 150);
-        bgGradient.addColorStop(0, 'rgba(20, 10, 40, 1)');
-        bgGradient.addColorStop(1, 'rgba(5, 5, 15, 1)');
-        ctx.fillStyle = bgGradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw mini black hole
-        const blackHoleSize = 15;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, blackHoleSize, 0, Math.PI * 2);
-        
-        const blackHoleGradient = ctx.createRadialGradient(
-            centerX, centerY, 0,
-            centerX, centerY, blackHoleSize
-        );
-        blackHoleGradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
-        blackHoleGradient.addColorStop(0.7, 'rgba(100, 50, 200, 0.8)');
-        blackHoleGradient.addColorStop(1, 'rgba(200, 100, 255, 0.3)');
-        
-        ctx.fillStyle = blackHoleGradient;
-        ctx.fill();
-        
-        // Draw accretion disk
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(rotation);
-        
-        for (let i = 0; i < 3; i++) {
-            const radius = 25 + i * 8;
-            ctx.beginPath();
-            ctx.arc(0, 0, radius, 0, Math.PI * 2);
-            ctx.strokeStyle = `hsla(${280 + i * 20}, 70%, 60%, ${0.3 - i * 0.1})`;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-        
-        ctx.restore();
-        
-        // Draw orbiting particles
-        for (let i = 0; i < 8; i++) {
-            const angle = (rotation * 2) + (i * Math.PI / 4);
-            const radius = 60 + Math.sin(rotation + i) * 10;
-            const x = centerX + Math.cos(angle) * radius;
-            const y = centerY + Math.sin(angle) * radius;
-            
-            ctx.beginPath();
-            ctx.arc(x, y, 2, 0, Math.PI * 2);
-            ctx.fillStyle = `hsla(${200 + i * 20}, 80%, 70%, 0.8)`;
-            ctx.fill();
-        }
-        
-        rotation += 0.02;
-        trackRequestAnimationFrame(drawMiniUniverse);
-    }
-    
-    drawMiniUniverse();
-}
-
-// Animation and effect functions
-function addSpectacularAnimations() {
-    // Add entrance animation for the entire modal
-    const modal = document.querySelector('.settings-modal');
-    if (modal) {
-        modal.classList.add('cosmic-modal-entrance');
-    }
-    
-    // Add staggered entrance for sections
-    const sections = document.querySelectorAll('.settings-section');
-    sections.forEach((section, index) => {
-        section.style.animationDelay = `${index * 0.1}s`;
-        section.classList.add('cosmic-section-entrance');
-    });
-}
-
-function triggerCosmicRipple(element) {
-    const ripple = document.createElement('div');
-    ripple.className = 'cosmic-ripple';
-    element.appendChild(ripple);
-    
-    setTimeout(() => {
-        ripple.remove();
-    }, 1000);
-}
-
-function triggerCosmicPulse(element) {
-    element.classList.add('cosmic-pulse');
-    setTimeout(() => {
-        element.classList.remove('cosmic-pulse');
-    }, 300);
-}
-
-function updateStellarVisualization(slider) {
-    const value = slider.value;
-    const max = slider.max;
-    const percentage = (value / max) * 100;
-    
-    // Update track stars
-    const stars = slider.parentElement.querySelectorAll('.track-star');
-    stars.forEach((star, index) => {
-        const starPosition = (index / (stars.length - 1)) * 100;
-        if (starPosition <= percentage) {
-            star.classList.add('star-active');
-        } else {
-            star.classList.remove('star-active');
-        }
+        // Draw particle with pulsing effect
+        const pulseScale = 1 + Math.sin(particle.pulse) * 0.3;
+        meditationCtx.beginPath();
+        meditationCtx.arc(particle.x, particle.y, particle.radius * pulseScale, 0, Math.PI * 2);
+        meditationCtx.fillStyle = particle.color;
+        meditationCtx.fill();
     });
     
-    // Update preview stats
-    updatePreviewStats();
-}
-
-function updatePreviewStats() {
-    const focusSlider = document.getElementById('focusLengthRange');
-    const soundSlider = document.getElementById('soundVolumeRange');
-    
-    if (focusSlider) {
-        const focusBar = document.getElementById('focusIntensityBar');
-        if (focusBar) {
-            const percentage = (focusSlider.value / focusSlider.max) * 100;
-            focusBar.style.width = `${percentage}%`;
-            focusBar.style.background = `linear-gradient(90deg, 
-                hsl(${200 + percentage}, 70%, 60%), 
-                hsl(${280 + percentage}, 80%, 70%))`;
+    // Update calm level based on meditation duration
+    if (meditationStartTime) {
+        const duration = (Date.now() - meditationStartTime) / 1000 / 60; // minutes
+        const calmLevel = Math.min(100, Math.floor(duration * 10));
+        const calmElement = document.getElementById('calmLevel');
+        if (calmElement) {
+            calmElement.textContent = `${calmLevel}%`;
         }
     }
     
-    if (soundSlider) {
-        const soundBar = document.getElementById('soundHarmonyBar');
-        if (soundBar) {
-            const percentage = (soundSlider.value / soundSlider.max) * 100;
-            soundBar.style.width = `${percentage}%`;
-            soundBar.style.background = `linear-gradient(90deg, 
-                hsl(${120 + percentage}, 70%, 60%), 
-                hsl(${180 + percentage}, 80%, 70%))`;
-        }
-    }
-    
-    // Update cosmic energy based on overall configuration
-    const cosmicBar = document.getElementById('cosmicEnergyBar');
-    if (cosmicBar) {
-        const avgPercentage = ((focusSlider?.value || 25) / 60 + (soundSlider?.value || 30) / 100) / 2 * 100;
-        cosmicBar.style.width = `${avgPercentage}%`;
-        cosmicBar.style.background = `linear-gradient(90deg, 
-            hsl(${300 + avgPercentage}, 70%, 60%), 
-            hsl(${350 + avgPercentage}, 80%, 70%))`;
-    }
+    animationFrameId = trackRequestAnimationFrame(animateMeditationOrb);
 }
 
-function triggerHolographicEffect(container, text) {
-    // Clear previous letters
-    container.innerHTML = '';
+function setupMeditationControls() {
+    console.log('🧘 Setting up meditation controls...');
     
-    // Create floating letters for the last few characters
-    const recentChars = text.slice(-3);
-    for (let i = 0; i < recentChars.length; i++) {
-        const letter = document.createElement('span');
-        letter.className = 'floating-letter';
-        letter.textContent = recentChars[i];
-        letter.style.animationDelay = `${i * 0.1}s`;
-        container.appendChild(letter);
-    }
-}
-
-// Enhanced setup function that replaces the original
-export function setupCosmicSettingsModal() {
-    
-    // Use a more robust element selection with retry mechanism
-    function findAndSetupElements() {
-        const settingsBtn = document.getElementById('settingsBtn');
-        const settingsOverlay = document.getElementById('settingsModalOverlay');
-        const closeBtn = document.getElementById('closeSettingsBtn');
-        
-        if (!settingsBtn || !settingsOverlay || !closeBtn) {
-            setTimeout(findAndSetupElements, 100);
-            return;
-        }
-        
-        // Remove any existing event listeners by cloning the element
-        const newSettingsBtn = settingsBtn.cloneNode(true);
-        settingsBtn.parentNode.replaceChild(newSettingsBtn, settingsBtn);
-        
-        // Initialize cosmic enhancements
-        initCosmicSettings();
-        
-        // Open modal with spectacular entrance
-        newSettingsBtn.addEventListener('click', function(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            
-            settingsOverlay.classList.add('active');
-            const modal = settingsOverlay.querySelector('.settings-modal');
-            if (modal) {
-                modal.classList.add('cosmic-entrance-active');
-            }
-            
-            // Trigger cosmic opening effect
-            triggerUIEffect('cosmicPortalOpen');
-            
-            // Update preview stats
-            setTimeout(updatePreviewStats, 100);
+    // Meditation mode buttons (Breathing, Focus, Sleep, Energy)
+    document.querySelectorAll('.meditation-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Remove active class from all buttons
+            document.querySelectorAll('.meditation-btn').forEach(b => b.classList.remove('active'));
+            // Add active to clicked button
+            btn.classList.add('active');
+            // Update current mode
+            currentMeditationMode = btn.dataset.mode;
+            console.log(`🧘 Switched to ${currentMeditationMode} breathing pattern`);
         });
-        
-        // Close modal with spectacular exit
-        function closeModal() {
-            const modal = settingsOverlay.querySelector('.settings-modal');
-            if (modal) {
-                modal.classList.add('cosmic-exit-active');
-            }
-            
-            setTimeout(() => {
-                settingsOverlay.classList.remove('active');
-                if (modal) {
-                    modal.classList.remove('cosmic-entrance-active', 'cosmic-exit-active');
+    });
+    
+    // Watch for ambient mode activation/deactivation
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            const target = mutation.target;
+            if (target.id === 'ambient') {
+                if (target.classList.contains('active')) {
+                    console.log('🧘 Ambient mode activated');
+                    startMeditationTimer();
+                    if (!animationFrameId) {
+                        animateMeditationOrb();
+                    }
+                } else {
+                    console.log('🧘 Ambient mode deactivated');
+                    stopMeditationTimer();
+                    if (animationFrameId) {
+                        cancelAnimationFrame(animationFrameId);
+                        animationFrameId = null;
+                    }
                 }
-            }, 500);
-            
-            // Trigger cosmic closing effect
-            triggerUIEffect('cosmicPortalClose');
-        }
+            }
+        });
+    });
+    
+    const ambientMode = document.getElementById('ambient');
+    if (ambientMode) {
+        observer.observe(ambientMode, { attributes: true, attributeFilter: ['class'] });
+    }
+}
 
-        closeBtn.addEventListener('click', closeModal);
-        settingsOverlay.addEventListener('click', (e) => {
-            if (e.target === settingsOverlay) closeModal();
+function setupSoundMixer() {
+    console.log('🎵 Setting up sound mixer...');
+    
+    // Setup new sound layer controls
+    document.querySelectorAll('.sound-layer').forEach(layer => {
+        const sound = layer.dataset.sound;
+        const volumeSlider = layer.querySelector('.layer-volume');
+        const toggleBtn = layer.querySelector('.layer-toggle');
+        
+        if (!volumeSlider || !toggleBtn) return;
+        
+        // Initialize slider visual
+        volumeSlider.style.setProperty('--value', '0%');
+        
+        // Volume slider control
+        volumeSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            e.target.style.setProperty('--value', value + '%');
+            
+            // Update sound state
+            soundStates[sound].volume = value;
+            
+            // If volume > 0 and sound is not active, activate it
+            if (value > 0 && !soundStates[sound].active) {
+                activateSound(sound, toggleBtn, layer);
+            }
+            // If volume = 0 and sound is active, deactivate it
+            else if (value === 0 && soundStates[sound].active) {
+                deactivateSound(sound, toggleBtn, layer);
+            }
+            
+            // Apply volume to active sounds
+            if (soundStates[sound].active) {
+                // Set individual sound volume instead of master volume
+                setSoundVolume(sound, value);
+            }
         });
         
-        // Make the setup function globally available as backup
-        window.cosmicSettingsReady = true;
-    }
-    
-    // Start the setup process
-    findAndSetupElements();
+        // Toggle button control
+        toggleBtn.addEventListener('click', () => {
+            const isActive = soundStates[sound].active;
+            
+            if (isActive) {
+                // Turn OFF
+                deactivateSound(sound, toggleBtn, layer);
+                volumeSlider.value = 0;
+                volumeSlider.style.setProperty('--value', '0%');
+            } else {
+                // Turn ON
+                activateSound(sound, toggleBtn, layer);
+                if (volumeSlider.value === '0') {
+                    volumeSlider.value = 50;
+                    volumeSlider.style.setProperty('--value', '50%');
+                    soundStates[sound].volume = 50;
+                    setSoundVolume(sound, 50); // Use individual sound volume
+                }
+            }
+        });
+    });
 }
 
-// Make functions globally available for fallback
-window.setupCosmicSettingsModal = setupCosmicSettingsModal;
-window.initCosmicSettings = initCosmicSettings;
+function activateSound(sound, toggleBtn, layer) {
+    console.log(`🎵 Activating ${sound} sound`);
+    
+    soundStates[sound].active = true;
+    toggleBtn.classList.add('active');
+    toggleBtn.textContent = 'ON';
+    layer.classList.add('active');
+    
+    // Start the sound using the optimized toggle function
+    toggleAmbientSound(sound);
+}
 
-// Spectacular save function with cosmic effects
-export function saveCosmicSettings() {
-    // Trigger massive cosmic burst effect
-    triggerUIEffect('cosmicSaveExplosion');
+function deactivateSound(sound, toggleBtn, layer) {
+    console.log(`🎵 Deactivating ${sound} sound`);
     
-    // Add cosmic save animation to the button
-    const saveBtn = document.getElementById('saveSettingsBtn');
-    if (saveBtn) {
-        saveBtn.classList.add('cosmic-saving');
-        
-        // Show energy burst
-        const burst = saveBtn.querySelector('.btn-particle-burst');
-        if (burst) {
-            burst.classList.add('burst-active');
-        }
-        
-        setTimeout(() => {
-            saveBtn.classList.remove('cosmic-saving');
-            if (burst) burst.classList.remove('burst-active');
-        }, 2000);
-    }
+    soundStates[sound].active = false;
+    soundStates[sound].volume = 0;
+    toggleBtn.classList.remove('active');
+    toggleBtn.textContent = 'OFF';
+    layer.classList.remove('active');
     
-    // Show cosmic success message
-    showCosmicSuccessMessage();
-    
-    // Save actual settings (existing logic)
-    const elements = {
-        focusRange: document.getElementById('focusLengthRange'),
-        soundRange: document.getElementById('soundVolumeRange'),
-        greetingInput: document.getElementById('greetingInput')
-    };
-    
-    const focusDuration = parseInt(elements.focusRange?.value || 25);
-    const soundVolume = parseInt(elements.soundRange?.value || 30);
-    const greeting = elements.greetingInput?.value || 'Welcome to Your Universe!';
-    const theme = document.body.getAttribute('data-theme') || 'auto';
-    
-    // Save to localStorage
-    localStorage.setItem('fu_theme', theme);
-    localStorage.setItem('fu_focusLength', focusDuration);
-    localStorage.setItem('fu_soundVolume', soundVolume);
-    localStorage.setItem('fu_greeting', greeting);
-    
-    // Apply settings
-    if (focusDuration > 0) {
-        state.timer.settings.focusDuration = focusDuration;
-        
-        if (!state.timer.isRunning && !state.timer.isBreak) {
-            state.timer.minutes = focusDuration;
-            state.timer.seconds = 0;
-            updateTimerDisplay();
-        }
-    }
-    
-    // Apply sound volume
-    if (soundVolume >= 0) {
-        setVolume(soundVolume);
-        console.log(`🎛️ Cosmic Settings: Ambient sound volume set to ${soundVolume}%`);
+    // Stop the sound using the optimized toggle function
+    if (state.sounds.active.includes(sound)) {
+        toggleAmbientSound(sound);
     }
 }
 
-function showCosmicSuccessMessage() {
-    const existingMsg = document.querySelector('.cosmic-success-message');
-    if (existingMsg) existingMsg.remove();
+function setupPresetButtons() {
+    console.log('🎵 Setting up preset buttons...');
     
-    const successMsg = document.createElement('div');
-    successMsg.className = 'cosmic-success-message';
-    successMsg.innerHTML = `
-        <div class="success-icon">✨</div>
-        <div class="success-text">Universe Configuration Saved!</div>
-        <div class="success-subtitle">Your cosmic preferences are now active</div>
-    `;
+    // Preset buttons for quick sound combinations
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const preset = btn.dataset.preset;
+            console.log(`🎵 Applying ${preset} preset`);
+            applyPreset(preset);
+            
+            // Visual feedback
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            setTimeout(() => btn.classList.remove('active'), 2000);
+        });
+    });
+}
+
+function applyPreset(presetName) {
+    const preset = soundPresets[presetName];
+    if (!preset) return;
     
-    document.body.appendChild(successMsg);
+    console.log(`🎵 Applying preset: ${presetName}`, preset);
     
+    // First, stop all currently playing sounds
+    Object.keys(soundStates).forEach(sound => {
+        if (soundStates[sound].active) {
+            const layer = document.querySelector(`.sound-layer[data-sound="${sound}"]`);
+            const toggleBtn = layer?.querySelector('.layer-toggle');
+            if (toggleBtn && layer) {
+                deactivateSound(sound, toggleBtn, layer);
+            }
+        }
+    });
+    
+    // Then apply the preset
     setTimeout(() => {
-        successMsg.classList.add('success-visible');
+        Object.entries(preset).forEach(([sound, volume]) => {
+            const layer = document.querySelector(`.sound-layer[data-sound="${sound}"]`);
+            const volumeSlider = layer?.querySelector('.layer-volume');
+            const toggleBtn = layer?.querySelector('.layer-toggle');
+            
+            if (!layer || !volumeSlider || !toggleBtn) return;
+            
+            if (volume > 0) {
+                // Set volume first
+                volumeSlider.value = volume;
+                volumeSlider.style.setProperty('--value', volume + '%');
+                soundStates[sound].volume = volume;
+                
+                // Then activate sound
+                activateSound(sound, toggleBtn, layer);
+                setSoundVolume(sound, volume); // Use individual sound volume
+            }
+        });
     }, 100);
+}
+
+function startMeditationTimer() {
+    if (meditationTimer) return; // Already running
     
-    setTimeout(() => {
-        successMsg.classList.remove('success-visible');
-        setTimeout(() => successMsg.remove(), 500);
-    }, 3000);
-}
-
-// Cleanup function
-export function cleanupCosmicSettings() {
-    if (settingsAnimationFrame) {
-        cancelAnimationFrame(settingsAnimationFrame);
-        settingsAnimationFrame = null;
-    }
-}
-
-// Restart cosmic settings animations - used by cleanup system
-function restartCosmicSettingsAnimations() {
-    const settingsModal = document.querySelector('.settings-modal');
-    if (settingsModal && settingsModal.closest('.settings-modal-overlay.active')) {
-        // Only restart if settings modal is open
-        if (!settingsAnimationFrame) {
-            createParticleBackground();
+    console.log('⏱️ Starting meditation timer');
+    meditationStartTime = Date.now();
+    let lastNotifiedMinute = 0;
+    
+    // Update timer every second
+    meditationTimer = trackSetInterval(() => {
+        const elapsed = Date.now() - meditationStartTime;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        
+        const timerElement = document.getElementById('meditationTime');
+        if (timerElement) {
+            timerElement.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
+        
+        // Send milestone notifications every 5 minutes - temporarily disabled
+        // if (minutes > 0 && minutes % 5 === 0 && minutes !== lastNotifiedMinute) {
+        //     try {
+        //         notifyMeditationMilestone(minutes);
+        //     } catch (error) {
+        //         console.warn('Meditation notification failed:', error);
+        //     }
+        //     lastNotifiedMinute = minutes;
+        // }
+    }, 1000);
+    
+    // Update timer immediately
+    const timerElement = document.getElementById('meditationTime');
+    if (timerElement) {
+        timerElement.textContent = '00:00';
     }
 }
 
-// Expose restart function globally for cleanup system
-window.restartCosmicSettingsAnimations = restartCosmicSettingsAnimations;
-
-// Export enhanced setup functions
-export { setupCosmicSettingsModal as setupSettingsModal };
-export { saveCosmicSettings as handleSaveSettings };
-
-// Legacy compatibility exports
-export function setupSettingsControls() {
-    const elements = {
-        saveBtn: document.getElementById('saveSettingsBtn'),
-        resetBtn: document.getElementById('resetSettingsBtn'),
-        focusRange: document.getElementById('focusLengthRange'),
-        focusValue: document.getElementById('focusLengthValue'),
-        soundRange: document.getElementById('soundVolumeRange'),
-        soundValue: document.getElementById('soundVolumeValue'),
-        greetingInput: document.getElementById('greetingInput'),
-        themeBtns: {
-            light: document.getElementById('themeLightBtn'),
-            dark: document.getElementById('themeDarkBtn'),
-            cosmos: document.getElementById('themeCosmosBtn'),
-            auto: document.getElementById('themeAutoBtn')
+function stopMeditationTimer() {
+    console.log('⏹️ Stopping meditation timer');
+    
+    if (meditationTimer) {
+        clearInterval(meditationTimer);
+        meditationTimer = null;
+        
+        // Update stats
+        if (meditationStartTime) {
+            const duration = (Date.now() - meditationStartTime) / 1000 / 60; // minutes
+            updateMeditationStats(duration);
         }
-    };
-    
-    // Enhanced focus range with cosmic effects
-    if (elements.focusRange && elements.focusValue) {
-        elements.focusRange.addEventListener('input', () => {
-            elements.focusValue.textContent = elements.focusRange.value;
-            updateStellarVisualization(elements.focusRange);
-        });
+        
+        meditationStartTime = null;
     }
     
-    // Enhanced sound range with cosmic effects
-    if (elements.soundRange && elements.soundValue) {
-        elements.soundRange.addEventListener('input', () => {
-            elements.soundValue.textContent = elements.soundRange.value;
-            updateStellarVisualization(elements.soundRange);
+    // Stop all sounds when leaving ambient mode
+    Object.keys(soundStates).forEach(sound => {
+        if (soundStates[sound].active) {
+            const layer = document.querySelector(`.sound-layer[data-sound="${sound}"]`);
+            const toggleBtn = layer?.querySelector('.layer-toggle');
+            const volumeSlider = layer?.querySelector('.layer-volume');
             
-            if (state.sounds.audio) {
-                state.sounds.audio.volume = elements.soundRange.value / 100;
+            if (toggleBtn && layer) {
+                deactivateSound(sound, toggleBtn, layer);
+                if (volumeSlider) {
+                    volumeSlider.value = 0;
+                    volumeSlider.style.setProperty('--value', '0%');
+                }
             }
-        });
-    }
-    
-    // Enhanced greeting input with holographic effects
-    if (elements.greetingInput) {
-        elements.greetingInput.addEventListener('input', () => {
-            const greetingText = elements.greetingInput.value || 'Welcome to Your Universe!';
-            const greetingElement = document.getElementById('greeting');
-            if (greetingElement) {
-                greetingElement.textContent = greetingText;
-            }
-            
-            const floatingLetters = document.querySelector('.floating-letters');
-            if (floatingLetters) {
-                triggerHolographicEffect(floatingLetters, greetingText);
-            }
-        });
-    }
-    
-    // Enhanced theme buttons with cosmic effects
-    Object.entries(elements.themeBtns).forEach(([theme, btn]) => {
-        if (btn) {
-            btn.addEventListener('click', () => {
-                triggerCosmicRipple(btn);
-                setTheme(theme);
-            });
         }
     });
+}
+
+function updateMeditationStats(duration) {
+    const today = new Date().toDateString();
     
-    // Enhanced save button with spectacular effects
-    if (elements.saveBtn) {
-        elements.saveBtn.addEventListener('click', saveCosmicSettings);
+    // Update total time (only count if more than 1 minute)
+    if (duration >= 1) {
+        meditationStats.totalMinutesToday += Math.floor(duration);
+        
+        // Update streak
+        if (meditationStats.lastMeditationDate !== today) {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (meditationStats.lastMeditationDate === yesterday.toDateString()) {
+                meditationStats.streak++;
+            } else {
+                meditationStats.streak = 1;
+            }
+            
+            meditationStats.lastMeditationDate = today;
+        }
+        
+        // Save stats
+        saveMeditationStats();
     }
     
-    // Enhanced reset button
-    if (elements.resetBtn) {
-        elements.resetBtn.addEventListener('click', () => {
-            triggerUIEffect('cosmicReset');
-            // Reset logic here
-        });
+    // Update UI
+    updateStatsDisplay();
+}
+
+function updateStatsDisplay() {
+    const totalElement = document.getElementById('totalMeditation');
+    const streakElement = document.getElementById('meditationStreak');
+    
+    if (totalElement) totalElement.textContent = meditationStats.totalMinutesToday;
+    if (streakElement) streakElement.textContent = meditationStats.streak;
+}
+
+function saveMeditationStats() {
+    localStorage.setItem('cosmic_meditation_stats', JSON.stringify(meditationStats));
+}
+
+function loadMeditationStats() {
+    const saved = localStorage.getItem('cosmic_meditation_stats');
+    if (saved) {
+        try {
+            meditationStats = JSON.parse(saved);
+            
+            // Reset daily stats if it's a new day
+            const today = new Date().toDateString();
+            if (meditationStats.lastMeditationDate !== today && 
+                meditationStats.lastMeditationDate !== null) {
+                // Check if it's the next day for streak
+                const lastDate = new Date(meditationStats.lastMeditationDate);
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (lastDate.toDateString() !== yesterday.toDateString()) {
+                    // Streak broken
+                    meditationStats.streak = 0;
+                }
+                
+                meditationStats.totalMinutesToday = 0;
+            }
+            
+            // Update UI
+            updateStatsDisplay();
+            
+            // Reset calm level
+            const calmElement = document.getElementById('calmLevel');
+            if (calmElement) calmElement.textContent = '0%';
+            
+        } catch (error) {
+            console.error('Failed to load meditation stats:', error);
+        }
     }
 }
 
-// Theme setting function (from original)
-function setTheme(theme) {
-    document.body.setAttribute('data-theme', theme);
-    
-    // Update theme button states with cosmic effects
-    const buttons = document.querySelectorAll('.cosmic-orb');
-    buttons.forEach(btn => {
-        btn.classList.remove('orb-active');
-        if (btn.getAttribute('data-cosmic-theme') === theme) {
-            btn.classList.add('orb-active');
-            triggerCosmicPulse(btn);
-        }
-    });
-    
-    // Trigger cosmic theme change effect
-    triggerUIEffect('cosmicThemeChange');
-}
+// Export for external use
+export { startMeditationTimer, stopMeditationTimer };

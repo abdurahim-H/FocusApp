@@ -1,12 +1,9 @@
 import { state } from './state.js';
 import { updateTimerDisplay } from './timer.js';
 import { setVolume } from './sounds.js';
-// Temporarily disabled notifications import for debugging
-// import { 
-//     requestNotificationPermission, 
-//     getNotificationPermission, 
-//     areNotificationsEnabled 
-// } from './notifications.js';
+
+// iOS Water Settings Enhancement Variables
+let iosSettingsInitialized = false;
 
 function setTheme(theme) {
     console.log(`🎨 Applying theme: ${theme}`);
@@ -21,12 +18,9 @@ function setTheme(theme) {
     // Update theme button states
     const themeButtons = document.querySelectorAll('[data-theme]');
     themeButtons.forEach(btn => {
-        if (btn.id && btn.id.includes('theme')) {
-            btn.classList.remove('active', 'btn-primary');
-            if (btn.getAttribute('data-theme') === theme || 
-                (btn.id === `theme${theme.charAt(0).toUpperCase() + theme.slice(1)}Btn`)) {
-                btn.classList.add('active', 'btn-primary');
-            }
+        btn.classList.remove('active', 'btn-primary');
+        if (btn.getAttribute('data-theme') === theme) {
+            btn.classList.add('active', 'btn-primary');
         }
     });
     
@@ -37,14 +31,12 @@ function setTheme(theme) {
     applyThemeToUI(theme);
 }
 
-// Apply theme changes to 3D scene
 function applyThemeTo3DScene(theme) {
     if (!window.scene) return;
     
     try {
         switch (theme) {
             case 'light':
-                // Light theme - brighter, more colorful
                 if (window.scene.ambientLight) {
                     window.scene.ambientLight.intensity = 0.6;
                     window.scene.ambientLight.diffuse = new BABYLON.Color3(0.9, 0.9, 1);
@@ -56,7 +48,6 @@ function applyThemeTo3DScene(theme) {
                 break;
                 
             case 'dark':
-                // Dark theme - default space theme
                 if (window.scene.ambientLight) {
                     window.scene.ambientLight.intensity = 0.4;
                     window.scene.ambientLight.diffuse = new BABYLON.Color3(0.4, 0.4, 0.6);
@@ -68,7 +59,6 @@ function applyThemeTo3DScene(theme) {
                 break;
                 
             case 'cosmos':
-                // Cosmos theme - deep purple space
                 if (window.scene.ambientLight) {
                     window.scene.ambientLight.intensity = 0.5;
                     window.scene.ambientLight.diffuse = new BABYLON.Color3(0.5, 0.3, 0.8);
@@ -80,7 +70,6 @@ function applyThemeTo3DScene(theme) {
                 break;
                 
             case 'auto':
-                // Auto theme - check system preference
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 applyThemeTo3DScene(prefersDark ? 'dark' : 'light');
                 return;
@@ -92,45 +81,197 @@ function applyThemeTo3DScene(theme) {
     }
 }
 
-// Apply theme changes to UI elements
 function applyThemeToUI(theme) {
-    // Update any dynamic UI elements that need theme-specific adjustments
-    const achievement = document.getElementById('achievement');
-    const progress3d = document.getElementById('progress3d');
-    
-    // Add theme-specific classes for extra styling if needed
-    document.body.classList.remove('theme-light', 'theme-dark', 'theme-cosmos', 'theme-auto');
-    document.body.classList.add(`theme-${theme}`);
+    const body = document.body;
+    body.classList.remove('theme-light', 'theme-dark', 'theme-cosmos', 'theme-auto');
+    body.classList.add(`theme-${theme}`);
 }
 
-export function setupSettingsModal() {
-    console.log('🔧 Setting up settings modal...');
+// Enhanced Settings Header Creation
+function enhanceSettingsHeader() {
+    console.log('🎨 Enhancing settings header with iOS design...');
     
-    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => {
+        const settingsModal = document.querySelector('.settings-modal');
+        if (!settingsModal) {
+            console.error('Settings modal not found');
+            return;
+        }
+        
+        // Check if header already exists
+        let settingsHeader = settingsModal.querySelector('.settings-header');
+        if (settingsHeader) {
+            console.log('Settings header already exists, updating...');
+        } else {
+            // Create the new header structure
+            settingsHeader = document.createElement('div');
+            settingsHeader.className = 'settings-header';
+            
+            // Insert at the top of the modal
+            const firstChild = settingsModal.firstElementChild;
+            settingsModal.insertBefore(settingsHeader, firstChild);
+        }
+        
+        // Create header content
+        settingsHeader.innerHTML = `
+            <div class="settings-title">Settings</div>
+            <div class="header-buttons">
+                <button class="header-btn reset-btn" id="resetSettingsBtn">Reset</button>
+                <button class="header-btn save-btn" id="saveSettingsBtn">Save</button>
+                <button class="header-btn close-btn" id="closeSettingsBtn">✕</button>
+            </div>
+        `;
+        
+        // Hide the old title if it exists
+        const oldTitle = settingsModal.querySelector('h2');
+        if (oldTitle) {
+            oldTitle.style.display = 'none';
+        }
+        
+        // Hide the old close button if it exists
+        const oldCloseBtn = document.querySelector('.close-btn:not(.header-btn)');
+        if (oldCloseBtn && oldCloseBtn.parentElement !== settingsHeader) {
+            oldCloseBtn.style.display = 'none';
+        }
+        
+        // Setup event listeners for the new buttons
+        setupHeaderButtons();
+        
+        console.log('✅ Settings header enhanced successfully');
+    }, 100);
+}
+
+function setupHeaderButtons() {
+    // Close button
+    const closeBtn = document.getElementById('closeSettingsBtn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Add ripple effect
+            createWaterRipple(closeBtn, event);
+            
+            // Close modal
+            const overlay = document.getElementById('settingsModalOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+            
+            console.log('Settings modal closed');
+        });
+    }
+    
+    // Save button
+    const saveBtn = document.getElementById('saveSettingsBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Add ripple effect
+            createWaterRipple(saveBtn, event);
+            
+            // Call save function
+            saveSettings();
+            
+            console.log('Settings saved with water effect');
+        });
+    }
+    
+    // Reset button
+    const resetBtn = document.getElementById('resetSettingsBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Add ripple effect
+            createWaterRipple(resetBtn, event);
+            
+            // Reset settings
+            resetSettings();
+            
+            console.log('Settings reset with water effect');
+        });
+    }
+}
+
+function createWaterRipple(element, event) {
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+    
+    const ripple = document.createElement('div');
+    ripple.className = 'water-ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    
+    element.style.position = 'relative';
+    element.appendChild(ripple);
+    
+    setTimeout(() => {
+        if (ripple.parentNode) {
+            ripple.parentNode.removeChild(ripple);
+        }
+    }, 600);
+}
+
+function updateRangeProgress(slider) {
+    const value = slider.value;
+    const max = slider.max;
+    const percentage = (value / max) * 100;
+    slider.style.setProperty('--range-progress', percentage + '%');
+}
+
+function showSuccessMessage(message) {
+    // Remove existing message
+    const existingMsg = document.querySelector('.settings-saved-msg');
+    if (existingMsg) existingMsg.remove();
+    
+    // Create new message
+    const successMsg = document.createElement('div');
+    successMsg.className = 'settings-saved-msg show';
+    successMsg.textContent = message || 'Settings Saved! ✨';
+    document.body.appendChild(successMsg);
+    
+    setTimeout(() => {
+        successMsg.classList.remove('show');
+        setTimeout(() => successMsg.remove(), 500);
+    }, 2000);
+}
+
+// Enhanced Settings Modal Setup
+export function setupSettingsModal() {
+    console.log('🔧 Setting up iOS-style settings modal...');
+    
     setTimeout(() => {
         const settingsBtn = document.getElementById('settingsBtn');
         const settingsOverlay = document.getElementById('settingsModalOverlay');
-        const closeBtn = document.getElementById('closeSettingsBtn');
         
-        if (!settingsBtn || !settingsOverlay || !closeBtn) {
+        if (!settingsBtn || !settingsOverlay) {
             console.error('Settings elements not found');
             return;
         }
+        
+        // Enhance the modal structure first
+        enhanceSettingsHeader();
         
         // Settings button click
         settingsBtn.addEventListener('click', function(event) {
             event.preventDefault();
             event.stopPropagation();
             settingsOverlay.classList.add('active');
+            
+            // Initialize iOS enhancements if not done yet
+            if (!iosSettingsInitialized) {
+                initializeIOSEnhancements();
+                iosSettingsInitialized = true;
+            }
+            
             console.log('Settings modal opened');
-        });
-        
-        // Close button
-        closeBtn.addEventListener('click', function(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            settingsOverlay.classList.remove('active');
-            console.log('Settings modal closed');
         });
         
         // Click outside to close
@@ -145,14 +286,153 @@ export function setupSettingsModal() {
     }, 100);
 }
 
+function initializeIOSEnhancements() {
+    console.log('🚀 Initializing iOS enhancements...');
+    
+    // Enhance range inputs
+    enhanceRangeInputs();
+    
+    // Enhance theme buttons
+    enhanceThemeButtons();
+    
+    // Enhance notification button
+    enhanceNotificationButton();
+    
+    // Add water ripple to interactive elements
+    addWaterRippleToElements();
+}
+
+function enhanceRangeInputs() {
+    const rangeInputs = document.querySelectorAll('.range-input');
+    rangeInputs.forEach(slider => {
+        // Set initial progress
+        updateRangeProgress(slider);
+        
+        // Add input event listener
+        slider.addEventListener('input', function() {
+            updateRangeProgress(this);
+            
+            // Update corresponding value display
+            const sliderId = this.id;
+            let valueElementId = '';
+            
+            switch(sliderId) {
+                case 'focusLengthRange':
+                    valueElementId = 'focusLengthValue';
+                    break;
+                case 'shortBreakRange':
+                    valueElementId = 'shortBreakValue';
+                    break;
+                case 'longBreakRange':
+                    valueElementId = 'longBreakValue';
+                    break;
+                case 'soundVolumeRange':
+                    valueElementId = 'soundVolumeValue';
+                    break;
+            }
+            
+            if (valueElementId) {
+                const valueElement = document.getElementById(valueElementId);
+                if (valueElement) {
+                    valueElement.textContent = this.value;
+                }
+            }
+        });
+    });
+}
+
+function enhanceThemeButtons() {
+    const themeButtons = document.querySelectorAll('[data-theme]');
+    themeButtons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            // Add ripple effect
+            createWaterRipple(this, event);
+            
+            // Remove active class from all buttons
+            themeButtons.forEach(btn => {
+                btn.classList.remove('active', 'btn-primary');
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active', 'btn-primary');
+            
+            // Apply theme
+            const theme = this.getAttribute('data-theme');
+            if (theme) {
+                setTheme(theme);
+            }
+        });
+    });
+}
+
+function enhanceNotificationButton() {
+    const notificationBtn = document.getElementById('enableNotificationsBtn');
+    if (notificationBtn) {
+        notificationBtn.addEventListener('click', function(event) {
+            createWaterRipple(this, event);
+            
+            // Request notification permission
+            if ('Notification' in window) {
+                if (Notification.permission === 'default') {
+                    Notification.requestPermission().then(permission => {
+                        updateNotificationStatus(permission);
+                    });
+                } else {
+                    updateNotificationStatus(Notification.permission);
+                }
+            }
+        });
+    }
+}
+
+function updateNotificationStatus(permission) {
+    const statusElement = document.getElementById('notificationStatus');
+    const button = document.getElementById('enableNotificationsBtn');
+    
+    if (!statusElement || !button) return;
+    
+    switch (permission) {
+        case 'granted':
+            statusElement.textContent = 'Notifications enabled ✓';
+            statusElement.className = 'notification-status enabled';
+            button.textContent = 'Enabled';
+            button.style.background = 'rgba(52, 199, 89, 0.25)';
+            break;
+        case 'denied':
+            statusElement.textContent = 'Permission denied';
+            statusElement.className = 'notification-status disabled';
+            button.textContent = 'Blocked';
+            break;
+        default:
+            statusElement.textContent = 'Click to enable';
+            statusElement.className = 'notification-status pending';
+            break;
+    }
+}
+
+function addWaterRippleToElements() {
+    const interactiveElements = document.querySelectorAll(
+        '.settings-section, .text-input, .liquid-glass-btn:not(.header-btn)'
+    );
+    
+    interactiveElements.forEach(element => {
+        element.addEventListener('click', function(event) {
+            if (!this.classList.contains('water-ripple-added')) {
+                createWaterRipple(this, event);
+                this.classList.add('water-ripple-added');
+                setTimeout(() => {
+                    this.classList.remove('water-ripple-added');
+                }, 600);
+            }
+        });
+    });
+}
+
 export function setupSettingsControls() {
     console.log('🎛️ Setting up settings controls...');
     
-    // Use setTimeout to ensure DOM is ready, similar to setupSettingsModal
     setTimeout(() => {
         const elements = {
-            saveBtn: document.getElementById('saveSettingsBtn'),
-            resetBtn: document.getElementById('resetSettingsBtn'),
             focusRange: document.getElementById('focusLengthRange'),
             focusValue: document.getElementById('focusLengthValue'),
             shortBreakRange: document.getElementById('shortBreakRange'),
@@ -162,9 +442,6 @@ export function setupSettingsControls() {
             soundRange: document.getElementById('soundVolumeRange'),
             soundValue: document.getElementById('soundVolumeValue'),
             greetingInput: document.getElementById('greetingInput'),
-            savedMsg: document.getElementById('settingsSavedMsg'),
-            enableNotificationsBtn: document.getElementById('enableNotificationsBtn'),
-            notificationStatus: document.getElementById('notificationStatus'),
             themeBtns: {
                 light: document.getElementById('themeLightBtn'),
                 dark: document.getElementById('themeDarkBtn'),
@@ -173,267 +450,194 @@ export function setupSettingsControls() {
             }
         };
 
-        // Debug: Log which elements were found
-        console.log('🔍 Settings elements found:', {
-            saveBtn: !!elements.saveBtn,
-            resetBtn: !!elements.resetBtn,
-            focusRange: !!elements.focusRange,
-            focusValue: !!elements.focusValue,
-            shortBreakRange: !!elements.shortBreakRange,
-            shortBreakValue: !!elements.shortBreakValue,
-            longBreakRange: !!elements.longBreakRange,
-            longBreakValue: !!elements.longBreakValue,
-            soundRange: !!elements.soundRange,
-            soundValue: !!elements.soundValue,
-            greetingInput: !!elements.greetingInput,
-            savedMsg: !!elements.savedMsg
-        });
-
-    // Focus length range
-    if (elements.focusRange && elements.focusValue) {
-        elements.focusRange.addEventListener('input', () => {
-            elements.focusValue.textContent = elements.focusRange.value;
-        });
-    }
-
-    // Short break length range
-    if (elements.shortBreakRange && elements.shortBreakValue) {
-        elements.shortBreakRange.addEventListener('input', () => {
-            elements.shortBreakValue.textContent = elements.shortBreakRange.value;
-        });
-    }
-
-    // Long break length range
-    if (elements.longBreakRange && elements.longBreakValue) {
-        elements.longBreakRange.addEventListener('input', () => {
-            elements.longBreakValue.textContent = elements.longBreakRange.value;
-        });
-    }
-
-    // Sound volume range
-    if (elements.soundRange && elements.soundValue) {
-        elements.soundRange.addEventListener('input', () => {
-            const volume = parseInt(elements.soundRange.value);
-            elements.soundValue.textContent = volume;
-            
-            // Set the master volume for all ambient sounds
-            setVolume(volume);
-            
-            console.log(`🎛️ Settings: Ambient sound volume set to ${volume}%`);
-        });
-    }
-
-    // Greeting input
-    if (elements.greetingInput) {
-        elements.greetingInput.addEventListener('input', () => {
-            const greetingText = elements.greetingInput.value || 'Welcome to Your Universe!';
-            document.getElementById('greeting').textContent = greetingText;
-        });
-    }
-
-    // Theme buttons
-    Object.entries(elements.themeBtns).forEach(([theme, btn]) => {
-        if (btn) {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                setTheme(theme);
-                console.log(`Theme changed to: ${theme}`);
+        // Focus length range
+        if (elements.focusRange && elements.focusValue) {
+            elements.focusRange.addEventListener('input', () => {
+                elements.focusValue.textContent = elements.focusRange.value;
+                updateRangeProgress(elements.focusRange);
             });
         }
-    });
 
-    // Save button
-    if (elements.saveBtn) {
-        elements.saveBtn.addEventListener('click', function() {
-            console.log('🔧 Save button clicked');
-            try {
-                const focusDuration = parseInt(elements.focusRange.value);
-                const shortBreakDuration = parseInt(elements.shortBreakRange.value);
-                const longBreakDuration = parseInt(elements.longBreakRange.value);
-                const soundVolume = parseInt(elements.soundRange.value);
-                const greeting = elements.greetingInput.value;
-                const theme = document.body.getAttribute('data-theme') || 'auto';
-                
-                console.log('🔧 Settings to save:', {
-                    focusDuration,
-                    shortBreakDuration,
-                    longBreakDuration,
-                    soundVolume,
-                    greeting,
-                    theme
-                });
-                
-                // Save to localStorage
-                localStorage.setItem('fu_theme', theme);
-                localStorage.setItem('fu_focusLength', focusDuration);
-                localStorage.setItem('fu_shortBreakLength', shortBreakDuration);
-                localStorage.setItem('fu_longBreakLength', longBreakDuration);
-                localStorage.setItem('fu_soundVolume', soundVolume);
-                localStorage.setItem('fu_greeting', greeting);
-                
-                console.log('✅ Settings saved to localStorage');
-                
-                // Apply settings immediately
-                if (focusDuration && focusDuration > 0) {
-                    state.timer.settings.focusDuration = focusDuration;
-                    
-                    // If timer is not running and not in break, update display
-                    if (!state.timer.isRunning && !state.timer.isBreak) {
-                        state.timer.minutes = focusDuration;
-                        state.timer.seconds = 0;
-                        updateTimerDisplay();
-                        
-                        const startBtn = document.getElementById('startBtn');
-                        if (startBtn) {
-                            startBtn.textContent = 'Start Focus';
-                            startBtn.classList.remove('hidden');
-                        }
-                        const pauseBtn = document.getElementById('pauseBtn');
-                        if (pauseBtn) {
-                            pauseBtn.classList.add('hidden');
-                        }
-                    }
+        // Short break length range
+        if (elements.shortBreakRange && elements.shortBreakValue) {
+            elements.shortBreakRange.addEventListener('input', () => {
+                elements.shortBreakValue.textContent = elements.shortBreakRange.value;
+                updateRangeProgress(elements.shortBreakRange);
+            });
+        }
+
+        // Long break length range
+        if (elements.longBreakRange && elements.longBreakValue) {
+            elements.longBreakRange.addEventListener('input', () => {
+                elements.longBreakValue.textContent = elements.longBreakRange.value;
+                updateRangeProgress(elements.longBreakRange);
+            });
+        }
+
+        // Sound volume range
+        if (elements.soundRange && elements.soundValue) {
+            elements.soundRange.addEventListener('input', () => {
+                const volume = parseInt(elements.soundRange.value);
+                elements.soundValue.textContent = volume;
+                setVolume(volume);
+                updateRangeProgress(elements.soundRange);
+                console.log(`🎛️ Settings: Ambient sound volume set to ${volume}%`);
+            });
+        }
+
+        // Greeting input
+        if (elements.greetingInput) {
+            elements.greetingInput.addEventListener('input', () => {
+                const greetingText = elements.greetingInput.value || 'Welcome to Your Universe!';
+                const greetingElement = document.getElementById('greeting');
+                if (greetingElement) {
+                    greetingElement.textContent = greetingText;
                 }
-                
-                // Update break durations
-                if (shortBreakDuration && shortBreakDuration > 0) {
-                    state.timer.settings.shortBreakDuration = shortBreakDuration;
-                    
-                    if (!state.timer.isRunning && state.timer.isBreak && !state.timer.isLongBreak) {
-                        state.timer.minutes = shortBreakDuration;
-                        state.timer.seconds = 0;
-                        updateTimerDisplay();
-                    }
-                }
-                
-                if (longBreakDuration && longBreakDuration > 0) {
-                    state.timer.settings.longBreakDuration = longBreakDuration;
-                    
-                    if (!state.timer.isRunning && state.timer.isBreak && state.timer.isLongBreak) {
-                        state.timer.minutes = longBreakDuration;
-                        state.timer.seconds = 0;
-                        updateTimerDisplay();
-                    }
-                }
-                
-                // Update sound volume
-                setVolume(soundVolume);
-                
-                // Update greeting
-                document.getElementById('greeting').textContent = greeting || 'Welcome to Your Universe!';
-                
-                // Show success message
-                if (elements.savedMsg) {
-                    elements.savedMsg.style.opacity = 1;
-                    setTimeout(() => {
-                        elements.savedMsg.style.opacity = 0;
-                    }, 1500);
-                }
-                
-                console.log('✅ Settings applied successfully');
-                
-            } catch (error) {
-                console.error('❌ Error saving settings:', error);
+            });
+        }
+
+        // Theme buttons - will be enhanced by enhanceThemeButtons()
+        Object.entries(elements.themeBtns).forEach(([theme, btn]) => {
+            if (btn) {
+                btn.setAttribute('data-theme', theme);
             }
         });
-    } else {
-        console.error('❌ Save button not found');
-    }
+        
+    }, 100);
+}
 
-    // Reset button
-    if (elements.resetBtn) {
-        elements.resetBtn.addEventListener('click', () => {
-            setTheme('dark');
-            elements.focusRange.value = 25;
-            elements.focusValue.textContent = '25';
-            elements.shortBreakRange.value = 5;
-            elements.shortBreakValue.textContent = '5';
-            elements.longBreakRange.value = 15;
-            elements.longBreakValue.textContent = '15';
-            elements.soundRange.value = 30;
-            elements.soundValue.textContent = '30';
-            elements.greetingInput.value = '';
-            document.getElementById('greeting').textContent = 'Welcome to Your Universe!';
-            
-            // Clear localStorage
-            localStorage.removeItem('fu_theme');
-            localStorage.removeItem('fu_focusLength');
-            localStorage.removeItem('fu_shortBreakLength');
-            localStorage.removeItem('fu_longBreakLength');
-            localStorage.removeItem('fu_soundVolume');
-            localStorage.removeItem('fu_greeting');
-            
-            // Reset timer settings
-            state.timer.settings.focusDuration = 25;
-            state.timer.settings.shortBreakDuration = 5;
-            state.timer.settings.longBreakDuration = 15;
+function saveSettings() {
+    console.log('🔧 Save button clicked');
+    try {
+        const focusRange = document.getElementById('focusLengthRange');
+        const shortBreakRange = document.getElementById('shortBreakRange');
+        const longBreakRange = document.getElementById('longBreakRange');
+        const soundRange = document.getElementById('soundVolumeRange');
+        const greetingInput = document.getElementById('greetingInput');
+        
+        const focusDuration = parseInt(focusRange?.value || 25);
+        const shortBreakDuration = parseInt(shortBreakRange?.value || 5);
+        const longBreakDuration = parseInt(longBreakRange?.value || 15);
+        const soundVolume = parseInt(soundRange?.value || 30);
+        const greeting = greetingInput?.value || 'Welcome to Your Universe!';
+        const theme = document.body.getAttribute('data-theme') || 'dark';
+        
+        // Save to localStorage
+        localStorage.setItem('fu_theme', theme);
+        localStorage.setItem('fu_focusLength', focusDuration);
+        localStorage.setItem('fu_shortBreakLength', shortBreakDuration);
+        localStorage.setItem('fu_longBreakLength', longBreakDuration);
+        localStorage.setItem('fu_soundVolume', soundVolume);
+        localStorage.setItem('fu_greeting', greeting);
+        
+        // Apply settings immediately
+        if (focusDuration > 0) {
+            state.timer.settings.focusDuration = focusDuration;
             
             if (!state.timer.isRunning && !state.timer.isBreak) {
-                state.timer.minutes = 25;
+                state.timer.minutes = focusDuration;
                 state.timer.seconds = 0;
                 updateTimerDisplay();
             }
-        });
+        }
+        
+        if (shortBreakDuration > 0) {
+            state.timer.settings.shortBreakDuration = shortBreakDuration;
+        }
+        
+        if (longBreakDuration > 0) {
+            state.timer.settings.longBreakDuration = longBreakDuration;
+        }
+        
+        // Update sound volume
+        setVolume(soundVolume);
+        
+        // Update greeting
+        const greetingElement = document.getElementById('greeting');
+        if (greetingElement) {
+            greetingElement.textContent = greeting;
+        }
+        
+        // Show success message
+        showSuccessMessage('Settings Saved! ✨');
+        
+        console.log('✅ Settings applied successfully');
+        
+    } catch (error) {
+        console.error('❌ Error saving settings:', error);
     }
-    
-    // Notification controls - temporarily disabled for debugging
-    // if (elements.enableNotificationsBtn && elements.notificationStatus) {
-    //     updateNotificationStatus(elements.notificationStatus);
-    //     elements.enableNotificationsBtn.addEventListener('click', async () => {
-    //         // notification code here
-    //     });
-    // }
-    
-    }, 100); // Close setTimeout
 }
 
-/**
- * Update notification status display based on current permission
- * Temporarily disabled for debugging
- */
-/*
-function updateNotificationStatus(statusElement) {
-    const permission = getNotificationPermission();
-    const button = document.getElementById('enableNotificationsBtn');
+function resetSettings() {
+    // Reset theme to dark
+    setTheme('dark');
     
-    if (!('Notification' in window)) {
-        statusElement.textContent = 'Not supported';
-        statusElement.className = 'notification-status disabled';
-        if (button) {
-            button.textContent = 'Not Supported';
-            button.disabled = true;
-        }
-        return;
+    // Reset range values
+    const focusRange = document.getElementById('focusLengthRange');
+    const focusValue = document.getElementById('focusLengthValue');
+    if (focusRange && focusValue) {
+        focusRange.value = 25;
+        focusValue.textContent = '25';
+        updateRangeProgress(focusRange);
     }
     
-    switch (permission) {
-        case 'granted':
-            statusElement.textContent = 'Notifications enabled';
-            statusElement.className = 'notification-status enabled';
-            if (button) {
-                button.textContent = 'Enabled';
-                button.disabled = true;
-            }
-            break;
-        case 'denied':
-            statusElement.textContent = 'Permission denied';
-            statusElement.className = 'notification-status disabled';
-            if (button) {
-                button.textContent = 'Blocked';
-                button.disabled = true;
-            }
-            break;
-        default: // 'default'
-            statusElement.textContent = 'Click to enable';
-            statusElement.className = 'notification-status pending';
-            if (button) {
-                button.textContent = 'Enable Notifications';
-                button.disabled = false;
-            }
-            break;
+    const shortBreakRange = document.getElementById('shortBreakRange');
+    const shortBreakValue = document.getElementById('shortBreakValue');
+    if (shortBreakRange && shortBreakValue) {
+        shortBreakRange.value = 5;
+        shortBreakValue.textContent = '5';
+        updateRangeProgress(shortBreakRange);
     }
+    
+    const longBreakRange = document.getElementById('longBreakRange');
+    const longBreakValue = document.getElementById('longBreakValue');
+    if (longBreakRange && longBreakValue) {
+        longBreakRange.value = 15;
+        longBreakValue.textContent = '15';
+        updateRangeProgress(longBreakRange);
+    }
+    
+    const soundRange = document.getElementById('soundVolumeRange');
+    const soundValue = document.getElementById('soundVolumeValue');
+    if (soundRange && soundValue) {
+        soundRange.value = 30;
+        soundValue.textContent = '30';
+        updateRangeProgress(soundRange);
+    }
+    
+    // Reset greeting
+    const greetingInput = document.getElementById('greetingInput');
+    if (greetingInput) {
+        greetingInput.value = 'Welcome to Your Universe!';
+    }
+    
+    const greetingElement = document.getElementById('greeting');
+    if (greetingElement) {
+        greetingElement.textContent = 'Welcome to Your Universe!';
+    }
+    
+    // Clear localStorage
+    localStorage.removeItem('fu_theme');
+    localStorage.removeItem('fu_focusLength');
+    localStorage.removeItem('fu_shortBreakLength');
+    localStorage.removeItem('fu_longBreakLength');
+    localStorage.removeItem('fu_soundVolume');
+    localStorage.removeItem('fu_greeting');
+    
+    // Reset timer settings
+    state.timer.settings.focusDuration = 25;
+    state.timer.settings.shortBreakDuration = 5;
+    state.timer.settings.longBreakDuration = 15;
+    
+    if (!state.timer.isRunning && !state.timer.isBreak) {
+        state.timer.minutes = 25;
+        state.timer.seconds = 0;
+        updateTimerDisplay();
+    }
+    
+    // Show success message
+    showSuccessMessage('Settings Reset! ✨');
 }
-*/
 
 export function loadSettings() {
     console.log('📥 Loading saved settings...');
@@ -448,11 +652,13 @@ export function loadSettings() {
     const soundVolume = localStorage.getItem('fu_soundVolume') || '30';
     const greeting = localStorage.getItem('fu_greeting') || '';
     
+    // Set values in form elements
     const focusRange = document.getElementById('focusLengthRange');
     const focusValue = document.getElementById('focusLengthValue');
     if (focusRange && focusValue) {
         focusRange.value = focusLength;
         focusValue.textContent = focusLength;
+        updateRangeProgress(focusRange);
     }
     
     const shortBreakRange = document.getElementById('shortBreakRange');
@@ -460,6 +666,7 @@ export function loadSettings() {
     if (shortBreakRange && shortBreakValue) {
         shortBreakRange.value = shortBreakLength;
         shortBreakValue.textContent = shortBreakLength;
+        updateRangeProgress(shortBreakRange);
     }
     
     const longBreakRange = document.getElementById('longBreakRange');
@@ -467,6 +674,7 @@ export function loadSettings() {
     if (longBreakRange && longBreakValue) {
         longBreakRange.value = longBreakLength;
         longBreakValue.textContent = longBreakLength;
+        updateRangeProgress(longBreakRange);
     }
     
     const soundRange = document.getElementById('soundVolumeRange');
@@ -474,12 +682,16 @@ export function loadSettings() {
     if (soundRange && soundValue) {
         soundRange.value = soundVolume;
         soundValue.textContent = soundVolume;
+        updateRangeProgress(soundRange);
     }
     
     const greetingInput = document.getElementById('greetingInput');
     if (greetingInput) {
         greetingInput.value = greeting;
-        document.getElementById('greeting').textContent = greeting || 'Welcome to Your Universe!';
+        const greetingElement = document.getElementById('greeting');
+        if (greetingElement) {
+            greetingElement.textContent = greeting || 'Welcome to Your Universe!';
+        }
     }
     
     // Apply loaded timer durations to timer state

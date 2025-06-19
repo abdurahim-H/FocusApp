@@ -19,7 +19,7 @@ async function loadModules() {
         { name: 'sounds', path: './sounds.js' },
         { name: 'settings', path: './settings.js' },
         { name: 'navigation', path: './navigation.js' },
-        { name: 'uiEffects', path: './ui-effects.js' },
+        { name: 'uiEffects', path: './ui-efffects.js' },
         { name: 'cleanup', path: './cleanup.js' },
         { name: 'notifications', path: './notifications.js' }
     ];
@@ -123,10 +123,16 @@ export async function initApp() {
             loadedModules.sounds.setupAmbientControls();
         }
         
-        if (loadedModules.settings?.setupSettingsModal) {
-            loadedModules.settings.setupSettingsModal();
-            loadedModules.settings.setupSettingsControls();
-        }
+		if (loadedModules.settings?.setupSettingsModal) {
+			loadedModules.settings.setupSettingsModal();
+			loadedModules.settings.setupSettingsControls();
+			
+			// Initialize iOS water enhancements
+			setTimeout(() => {
+				console.log('🚀 Initializing iOS water settings...');
+				// The iOS enhancements will auto-initialize when settings modal opens
+			}, 500);
+		}
         
         if (loadedModules.settings?.loadSettings) {
             loadedModules.settings.loadSettings();
