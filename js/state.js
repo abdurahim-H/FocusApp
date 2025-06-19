@@ -1,3 +1,5 @@
+// state.js
+
 export const state = {
     mode: 'home',
     currentMode: 'home',

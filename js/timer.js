@@ -1,17 +1,22 @@
 /**
- * Timer Management System
- * Handles pomodoro timer functionality, session transitions, achievements, and UI updates
+ * FIXED Timer Management System
+ * Enhanced with better notification handling and debugging
  */
 import { state } from './state.js';
 import { triggerFocusIntensification } from './blackhole.js';
 import { triggerFocusIntensity, triggerSessionCompleteUI, triggerBlackHoleApproachUI } from './ui-effects.js';
 import { trackSetInterval } from './cleanup.js';
-// Re-enabling notifications step by step
 import { 
     notifyFocusComplete, 
     notifyBreakComplete, 
-    notifyPomodoroComplete 
+    notifyPomodoroComplete,
+    areNotificationsEnabled,
+    requestNotificationPermission,
+    checkNotificationPermission
 } from './notifications.js';
+
+// Debug flag for notification testing
+const DEBUG_NOTIFICATIONS = true;
 
 export function updateTimerDisplay() {
     const minutes = String(state.timer.minutes).padStart(2, '0');
@@ -44,6 +49,9 @@ export function startTimer() {
     if (state.timer.isRunning || state.timer.transitioning) {
         return;
     }
+    
+    // Check notification permission status when starting timer
+    checkNotificationPermission();
     
     if (state.timer.interval) {
         clearInterval(state.timer.interval);
@@ -80,7 +88,6 @@ export function startTimer() {
         }
     }
 
-    // Update session display when starting timer
     updateSessionDisplay();
 
     state.timer.interval = trackSetInterval(() => {
@@ -101,11 +108,10 @@ export function startTimer() {
 export function pauseTimer() {
     state.timer.isRunning = false;
     state.timer.transitioning = false;
-    state.timerState = 'paused'; // Update for black hole effects
+    state.timerState = 'paused';
     clearInterval(state.timer.interval);
     state.timer.interval = null;
 
-    // Clear any pending auto-start timeout
     if (state.timer.autoStartTimeout) {
         clearTimeout(state.timer.autoStartTimeout);
         state.timer.autoStartTimeout = null;
@@ -126,21 +132,17 @@ export function resetTimer() {
     state.timer.isRunning = false;
     state.timer.transitioning = false;
     state.timerState = 'stopped';
-    // Fix: Don't force mode change here - let navigation handle it
     clearInterval(state.timer.interval);
     state.timer.interval = null;
     
-    // Clear any pending auto-start timeout
     if (state.timer.autoStartTimeout) {
         clearTimeout(state.timer.autoStartTimeout);
         state.timer.autoStartTimeout = null;
     }
     
-    // Clear achievement queue and notifications on reset
     clearAchievementQueue();
 
     if (state.timer.isBreak) {
-        // Reset to appropriate break duration
         if (state.timer.isLongBreak) {
             state.timer.minutes = state.timer.settings.longBreakDuration;
         } else {
@@ -152,7 +154,7 @@ export function resetTimer() {
 
     state.timer.seconds = 0;
     updateTimerDisplay();
-    updateSessionDisplay(); // Update session counter on reset
+    updateSessionDisplay();
 
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
@@ -161,7 +163,6 @@ export function resetTimer() {
 
     if (startBtn) {
         startBtn.classList.remove('hidden');
-        // Set correct button text based on current session type
         if (state.timer.isBreak) {
             if (state.timer.isLongBreak) {
                 startBtn.textContent = 'Start Long Break';
@@ -172,15 +173,9 @@ export function resetTimer() {
             startBtn.textContent = 'Start Focus';
         }
     }
-    if (pauseBtn) {
-        pauseBtn.classList.add('hidden');
-    }
-    if (skipBreakBtn) {
-        skipBreakBtn.classList.add('hidden');
-    }
-    if (skipFocusBtn) {
-        skipFocusBtn.classList.add('hidden');
-    }
+    if (pauseBtn) pauseBtn.classList.add('hidden');
+    if (skipBreakBtn) skipBreakBtn.classList.add('hidden');
+    if (skipFocusBtn) skipFocusBtn.classList.add('hidden');
 }
 
 export function skipBreak() {
@@ -195,9 +190,8 @@ export function skipFocus() {
     }
 }
 
-// --- MODIFIED FUNCTION FOR AUTO-SESSION SWITCHING & PROPER MODE ---
+// Enhanced session completion with better notification handling
 export function completeSession() {
-    // Prevent multiple simultaneous calls
     if (!state.timer.isRunning || state.timer.transitioning) {
         return;
     }
@@ -206,7 +200,13 @@ export function completeSession() {
     state.timer.interval = null;
     state.timer.isRunning = false;
     state.timer.transitioning = true;
-    state.timerState = 'completed'; // Update state
+    state.timerState = 'completed';
+
+    if (DEBUG_NOTIFICATIONS) {
+        console.log('🔔 Session completed, checking notification status...');
+        console.log('📱 Notifications enabled:', areNotificationsEnabled());
+        console.log('📊 Current session type:', state.timer.isBreak ? 'break' : 'focus');
+    }
 
     if (state.timer.isBreak) {
         // Break completed, start new focus session
@@ -214,39 +214,30 @@ export function completeSession() {
         state.timer.isLongBreak = false;
         state.timer.minutes = state.timer.settings.focusDuration;
         state.timer.seconds = 0;
-        state.currentMode = 'focus'; // Corrected: set to focus mode
+        state.currentMode = 'focus';
         const sessionType = document.getElementById('sessionType');
         if (sessionType) {
             sessionType.textContent = 'Focus Time';
         }
         
-        // Check if we just completed a long break (after 4th session)
         if (state.timer.pomodoroCount >= 4) {
-            // Reset the cycle after completing long break
             state.timer.pomodoroCount = 0;
             showAchievement('New Cycle Started!', 'Beginning fresh pomodoro cycle');
-            // Notify break complete
-            try {
-                notifyBreakComplete(state.timer.settings.focusDuration);
-            } catch (error) {
-                console.warn('Notification failed:', error);
-            }
         } else {
             showAchievement('Break Complete!', 'Ready for another focus session');
-            // Notify break complete
-            try {
-                notifyBreakComplete(state.timer.settings.focusDuration);
-            } catch (error) {
-                console.warn('Notification failed:', error);
-            }
         }
+        
+        // Send break complete notification
+        sendNotificationSafely(() => 
+            notifyBreakComplete(state.timer.settings.focusDuration)
+        );
+        
     } else {
         // Focus session completed
         state.timer.pomodoroCount++;
         state.universe.focusMinutes += state.timer.settings.focusDuration;
         state.universe.stars += 1;
 
-        // Trigger spectacular session completion effects
         triggerSessionCompleteUI();
 
         if (state.timer.pomodoroCount % 4 === 0) {
@@ -254,28 +245,27 @@ export function completeSession() {
             state.timer.minutes = state.timer.settings.longBreakDuration;
             state.timer.isLongBreak = true;
             showAchievement('Pomodoro Cycle Complete!', `Take a ${state.timer.settings.longBreakDuration}-minute long break`);
-            // Notify pomodoro cycle complete
-            try {
-                notifyPomodoroComplete(state.timer.settings.longBreakDuration);
-            } catch (error) {
-                console.warn('Notification failed:', error);
-            }
+            
+            // Send pomodoro cycle complete notification
+            sendNotificationSafely(() => 
+                notifyPomodoroComplete(state.timer.settings.longBreakDuration)
+            );
+            
         } else {
             // Short break
             state.timer.minutes = state.timer.settings.shortBreakDuration;
             state.timer.isLongBreak = false;
             showAchievement('Focus Complete!', `Time for a ${state.timer.settings.shortBreakDuration}-minute break`);
-            // Notify focus complete
-            try {
-                notifyFocusComplete(state.timer.settings.shortBreakDuration, false);
-            } catch (error) {
-                console.warn('Notification failed:', error);
-            }
+            
+            // Send focus complete notification
+            sendNotificationSafely(() => 
+                notifyFocusComplete(state.timer.settings.shortBreakDuration, false)
+            );
         }
 
         state.timer.isBreak = true;
         state.timer.seconds = 0;
-        state.currentMode = 'break'; // Corrected: set to break/ambient mode
+        state.currentMode = 'break';
         const sessionType = document.getElementById('sessionType');
         if (sessionType) {
             sessionType.textContent = 'Break Time';
@@ -283,7 +273,7 @@ export function completeSession() {
     }
 
     updateTimerDisplay();
-    updateSessionDisplay(); // Update session counter
+    updateSessionDisplay();
     updateUniverseStats();
 
     const startBtn = document.getElementById('startBtn');
@@ -291,7 +281,6 @@ export function completeSession() {
     const skipBreakBtn = document.getElementById('skipBreakBtn');
     const skipFocusBtn = document.getElementById('skipFocusBtn');
 
-    // Hide start button during auto transition
     if (startBtn) {
         startBtn.classList.add('hidden');
         startBtn.textContent = state.timer.isBreak ? 'Start Break' : 'Start Focus';
@@ -309,11 +298,85 @@ export function completeSession() {
         }
     }
 
-    // --- AUTO-START NEXT SESSION ---
+    // Auto-start next session
     state.timer.autoStartTimeout = setTimeout(() => {
         state.timer.transitioning = false;
         startTimer();
-    }, 1200); // 1.2 seconds for achievement to show, adjust as needed
+    }, 1200);
+}
+
+/**
+ * Safely send notifications with proper error handling and debugging
+ */
+function sendNotificationSafely(notificationFunction) {
+    try {
+        // Check if notifications are enabled
+        if (!areNotificationsEnabled()) {
+            if (DEBUG_NOTIFICATIONS) {
+                console.log('⚠️ Notifications not enabled, attempting to request permission...');
+            }
+            
+            // Try to request permission if not already granted
+            requestNotificationPermission().then(granted => {
+                if (granted) {
+                    if (DEBUG_NOTIFICATIONS) {
+                        console.log('✅ Permission granted, sending notification...');
+                    }
+                    const notification = notificationFunction();
+                    if (notification && DEBUG_NOTIFICATIONS) {
+                        console.log('📤 Notification sent successfully');
+                    }
+                } else {
+                    if (DEBUG_NOTIFICATIONS) {
+                        console.log('❌ Permission denied, cannot send notification');
+                    }
+                }
+            }).catch(error => {
+                console.error('Failed to request notification permission:', error);
+            });
+            
+            return;
+        }
+        
+        // Send notification immediately if permission is already granted
+        if (DEBUG_NOTIFICATIONS) {
+            console.log('📤 Sending notification...');
+        }
+        
+        const notification = notificationFunction();
+        
+        if (notification && DEBUG_NOTIFICATIONS) {
+            console.log('✅ Notification created successfully');
+            
+            // Add additional debugging
+            notification.onerror = function(error) {
+                console.error('Notification error:', error);
+            };
+            
+            notification.onshow = function() {
+                console.log('📱 Notification displayed');
+            };
+            
+            notification.onclose = function() {
+                console.log('🔕 Notification closed');
+            };
+        }
+        
+    } catch (error) {
+        console.error('Failed to send notification:', error);
+        
+        // Fallback: show browser alert if notifications fail completely
+        if (DEBUG_NOTIFICATIONS) {
+            console.log('💡 Falling back to browser alert...');
+            setTimeout(() => {
+                if (state.timer.isBreak) {
+                    alert('Break time! Take a moment to rest.');
+                } else {
+                    alert('Focus session complete! Time for a break.');
+                }
+            }, 100);
+        }
+    }
 }
 
 // Update universe stats
@@ -334,18 +397,14 @@ let achievementQueue = [];
 let currentAchievementTimeout = null;
 let isShowingAchievement = false;
 
-// Show achievement with proper queuing
 export function showAchievement(title, desc) {
-    // Add to queue
     achievementQueue.push({ title, desc });
     
-    // If not currently showing, start the queue
     if (!isShowingAchievement) {
         processAchievementQueue();
     }
 }
 
-// Process achievement queue one by one
 function processAchievementQueue() {
     if (achievementQueue.length === 0) {
         isShowingAchievement = false;
@@ -356,30 +415,24 @@ function processAchievementQueue() {
     const achievement = document.getElementById('achievement');
     const { title, desc } = achievementQueue.shift();
     
-    // Update content
     document.getElementById('achievementTitle').textContent = title;
     document.getElementById('achievementDesc').textContent = desc;
     
-    // Clear any existing timeout
     if (currentAchievementTimeout) {
         clearTimeout(currentAchievementTimeout);
     }
     
-    // Show the achievement
     achievement.classList.add('show');
     
-    // Set new timeout for this achievement
     currentAchievementTimeout = setTimeout(() => {
         achievement.classList.remove('show');
         
-        // Wait for hide animation to complete before showing next
         setTimeout(() => {
             processAchievementQueue();
-        }, 500); // Allow for CSS transition time
+        }, 500);
     }, 3000);
 }
 
-// Clear all pending achievements (useful for cleanup)
 export function clearAchievementQueue() {
     achievementQueue = [];
     if (currentAchievementTimeout) {
@@ -405,12 +458,17 @@ export function updateDateTime() {
         hour: '2-digit',
         minute: '2-digit'
     };
-    document.getElementById('dateTime').textContent = now.toLocaleDateString('en-US', options);
+    const dateTimeElement = document.getElementById('dateTime');
+    if (dateTimeElement) {
+        dateTimeElement.textContent = now.toLocaleDateString('en-US', options);
+    }
 }
 
 // Breathing animation
 export function startBreathing() {
     const guide = document.getElementById('breathingGuide');
+    if (!guide) return;
+    
     let breathIn = true;
 
     setInterval(() => {
@@ -425,9 +483,8 @@ export function startBreathing() {
     }, 4000);
 }
 
-// New function to completely reset the Pomodoro cycle
+// Complete reset of Pomodoro cycle
 export function resetSession() {
-    // Stop any running timer
     state.timer.isRunning = false;
     state.timer.transitioning = false;
     state.timerState = 'stopped';
@@ -437,16 +494,13 @@ export function resetSession() {
         state.timer.interval = null;
     }
     
-    // Clear any pending auto-start timeout
     if (state.timer.autoStartTimeout) {
         clearTimeout(state.timer.autoStartTimeout);
         state.timer.autoStartTimeout = null;
     }
     
-    // Clear achievement queue and notifications
     clearAchievementQueue();
     
-    // Reset the entire Pomodoro cycle
     state.timer.pomodoroCount = 0;
     state.timer.isBreak = false;
     state.timer.isLongBreak = false;
@@ -454,7 +508,6 @@ export function resetSession() {
     state.timer.seconds = 0;
     state.currentMode = 'focus';
     
-    // Update UI elements
     updateTimerDisplay();
     updateSessionDisplay();
     
@@ -463,7 +516,6 @@ export function resetSession() {
         sessionType.textContent = 'Focus Time';
     }
     
-    // Reset button states
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const skipBreakBtn = document.getElementById('skipBreakBtn');
@@ -473,35 +525,25 @@ export function resetSession() {
         startBtn.classList.remove('hidden');
         startBtn.textContent = 'Start Focus';
     }
-    if (pauseBtn) {
-        pauseBtn.classList.add('hidden');
-    }
-    if (skipBreakBtn) {
-        skipBreakBtn.classList.add('hidden');
-    }
-    if (skipFocusBtn) {
-        skipFocusBtn.classList.add('hidden');
-    }
+    if (pauseBtn) pauseBtn.classList.add('hidden');
+    if (skipBreakBtn) skipBreakBtn.classList.add('hidden');
+    if (skipFocusBtn) skipFocusBtn.classList.add('hidden');
     
-    // Show achievement for session reset
     showAchievement('Session Reset!', 'Starting fresh with a new Pomodoro cycle');
 }
 
 /**
  * Quick test function for debugging - sets timer to 5 seconds
- * Call from browser console: window.quickTimerTest()
  */
 export function quickTimerTest() {
     console.log('🧪 Starting quick timer test (5 seconds)');
     
-    // Temporarily override timer settings
     const originalFocus = state.timer.settings.focusDuration;
     const originalBreak = state.timer.settings.shortBreakDuration;
     
-    state.timer.settings.focusDuration = 1/12; // 5 seconds (1/12 of a minute)
+    state.timer.settings.focusDuration = 1/12; // 5 seconds
     state.timer.settings.shortBreakDuration = 1/12; // 5 seconds for break too
     
-    // Reset timer to new duration
     state.timer.minutes = 0;
     state.timer.seconds = 5;
     state.timer.isBreak = false;
@@ -512,15 +554,21 @@ export function quickTimerTest() {
     console.log('⏰ Timer set to 5 seconds. Click Start Focus to test notifications.');
     console.log('💡 Make sure to enable notifications first!');
     
-    // Restore original settings after test completes
     setTimeout(() => {
         state.timer.settings.focusDuration = originalFocus;
         state.timer.settings.shortBreakDuration = originalBreak;
         console.log('🔄 Timer settings restored to normal');
-    }, 30000); // Restore after 30 seconds
+    }, 30000);
 }
 
 // Make test function available globally
 if (typeof window !== 'undefined') {
     window.quickTimerTest = quickTimerTest;
+    window.debugNotifications = () => {
+        console.log('🔔 Notification Debug Info:');
+        console.log('- Supported:', 'Notification' in window);
+        console.log('- Permission:', Notification.permission);
+        console.log('- Enabled:', areNotificationsEnabled());
+        console.log('💡 Try: testNotification(), requestNotificationPermissionTest()');
+    };
 }
