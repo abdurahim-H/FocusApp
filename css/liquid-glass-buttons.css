@@ -888,34 +888,42 @@
     top: 0;
     opacity: 0.8;
 }
-
-/* ===== ENHANCED TASK COMPONENTS ===== */
+/* ===== ENHANCED TASK ITEM LAYOUT ===== */
 .liquid-glass-task {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 18px 0;
+    padding: 18px 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     position: relative;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     border-radius: 12px;
     margin: 0 -8px;
-    padding-left: 8px;
-    padding-right: 8px;
+    min-height: 60px; /* Ensure consistent height */
+    
+    /* Enhanced background for better text readability */
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px) saturate(120%);
+    -webkit-backdrop-filter: blur(20px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .liquid-glass-task:last-child {
     border-bottom: none;
 }
 
+/* ===== TASK CONTENT AREA ===== */
 .liquid-glass-task .task-content {
     display: flex;
     align-items: center;
     gap: 16px;
     flex: 1;
+    min-width: 0; /* Allow text to shrink */
+    overflow: hidden; /* Prevent overflow */
 }
 
+/* ===== ENHANCED TEXT READABILITY ===== */
 .liquid-glass-task .task-text {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
     font-size: 16px;
@@ -924,37 +932,80 @@
     letter-spacing: -0.01em;
     line-height: 1.4;
     transition: all 0.3s ease;
+    flex: 1;
+    
+    /* Enhanced text visibility */
+    text-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.8),
+        0 1px 2px rgba(0, 0, 0, 0.9),
+        0 0 8px rgba(0, 0, 0, 0.6);
+    
+    /* Handle text overflow */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: calc(100% - 60px); /* Leave space for delete button */
 }
 
-/* Enhanced Task Hover */
-.liquid-glass-task:hover {
-    background: rgba(255, 255, 255, 0.04);
+/* ===== TASK ACTIONS CONTAINER ===== */
+.liquid-glass-task .task-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0; /* Don't shrink the action buttons */
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.liquid-glass-task:hover .task-actions {
+    opacity: 1;
+}
+
+/* ===== ENHANCED DELETE BUTTON ===== */
+.task-delete-btn {
+    background: rgba(255, 59, 48, 0.15);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-color: rgba(176, 224, 230, 0.15);
-    transform: translateX(4px);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: rgba(255, 59, 48, 0.9);
+    font-size: 14px;
+    font-weight: 600;
+    
+    /* Enhanced visibility */
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(255, 59, 48, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    
+    /* Ensure it's always visible */
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.task-delete-btn:hover {
+    background: rgba(255, 59, 48, 0.25);
+    border-color: rgba(255, 59, 48, 0.5);
+    transform: scale(1.1);
+    opacity: 1;
     
     box-shadow: 
-        0 4px 16px rgba(0, 0, 0, 0.1),
-        0 2px 8px rgba(176, 224, 230, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 6px 24px rgba(0, 0, 0, 0.4),
+        0 3px 12px rgba(255, 59, 48, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 0 16px rgba(255, 59, 48, 0.4);
 }
 
-.liquid-glass-task:hover .task-text {
-    color: rgba(255, 255, 255, 1);
-    text-shadow: 0 0 8px rgba(176, 224, 230, 0.3);
-}
-
-/* Completed Task State */
-.liquid-glass-task.completed {
-    opacity: 0.6;
-    background: rgba(52, 199, 89, 0.05);
-}
-
-.liquid-glass-task.completed .task-text {
-    text-decoration: line-through;
-    color: rgba(255, 255, 255, 0.5);
-    text-shadow: none;
+.task-delete-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 59, 48, 0.3);
 }
 
 /* ===== ENHANCED CHECKBOX DESIGN ===== */
@@ -964,6 +1015,7 @@
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
+    flex-shrink: 0; /* Don't shrink the checkbox */
 }
 
 .liquid-glass-checkbox input[type="checkbox"] {
@@ -981,35 +1033,88 @@
     height: 24px;
     border-radius: 8px;
     
-    /* Enhanced Liquid Glass Material */
-    background: rgba(176, 224, 230, 0.1);
+    /* Enhanced visibility */
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(24px) saturate(120%);
     -webkit-backdrop-filter: blur(24px) saturate(120%);
     
-    /* Refined Border & Shadow */
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 
-        0 4px 16px rgba(0, 0, 0, 0.1),
-        0 2px 8px rgba(176, 224, 230, 0.08),
-        0 1px 4px rgba(255, 255, 255, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(176, 224, 230, 0.1),
+        0 1px 4px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
     
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .liquid-glass-checkbox:hover .checkmark {
-    background: rgba(176, 224, 230, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(176, 224, 230, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
     transform: scale(1.05);
     
     box-shadow: 
-        0 6px 20px rgba(0, 0, 0, 0.15),
-        0 3px 12px rgba(176, 224, 230, 0.12),
-        0 2px 6px rgba(255, 255, 255, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        0 3px 12px rgba(176, 224, 230, 0.15),
+        0 2px 6px rgba(255, 255, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Enhanced Checkmark Symbol */
+/* ===== ENHANCED HOVER STATE ===== */
+.liquid-glass-task:hover {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(24px) saturate(130%);
+    -webkit-backdrop-filter: blur(24px) saturate(130%);
+    border-color: rgba(176, 224, 230, 0.2);
+    transform: translateX(4px);
+    
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 4px 16px rgba(176, 224, 230, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.liquid-glass-task:hover .task-text {
+    color: rgba(255, 255, 255, 1);
+    text-shadow: 
+        0 2px 6px rgba(0, 0, 0, 0.9),
+        0 1px 3px rgba(0, 0, 0, 1),
+        0 0 12px rgba(176, 224, 230, 0.4),
+        0 0 8px rgba(0, 0, 0, 0.8);
+}
+
+/* ===== COMPLETED TASK STATE ===== */
+.liquid-glass-task.completed {
+    opacity: 0.7;
+    background: rgba(52, 199, 89, 0.15);
+    border-color: rgba(52, 199, 89, 0.3);
+}
+
+.liquid-glass-task.completed .task-text {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.6);
+    text-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.8),
+        0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.liquid-glass-task.completed .liquid-glass-checkbox .checkmark {
+    background: rgba(52, 199, 89, 0.3);
+    border-color: rgba(52, 199, 89, 0.5);
+    
+    box-shadow: 
+        0 6px 20px rgba(52, 199, 89, 0.2),
+        0 3px 12px rgba(52, 199, 89, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 0 16px rgba(52, 199, 89, 0.4);
+}
+
+.liquid-glass-task.completed .liquid-glass-checkbox .checkmark::after {
+    opacity: 1;
+    transform: rotate(45deg) scale(1);
+}
+
+/* ===== CHECKMARK SYMBOL ===== */
 .liquid-glass-checkbox .checkmark::after {
     content: '';
     position: absolute;
@@ -1017,28 +1122,245 @@
     top: 4px;
     width: 6px;
     height: 12px;
-    border: solid rgba(255, 255, 255, 0.9);
+    border: solid rgba(255, 255, 255, 0.95);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg) scale(0);
     opacity: 0;
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
-.liquid-glass-task.completed .liquid-glass-checkbox .checkmark {
-    background: rgba(52, 199, 89, 0.2);
-    border-color: rgba(52, 199, 89, 0.4);
+/* ===== TASK INPUT GROUP FIXES ===== */
+.task-input-group {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 10; /* Ensure it's above other elements */
+}
+
+.task-input-group .task-input {
+    flex: 1;
+    min-height: 48px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(24px) saturate(120%);
+    -webkit-backdrop-filter: blur(24px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 14px 20px;
+    color: rgba(255, 255, 255, 0.95);
+    
+    /* Enhanced text visibility */
+    text-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        0 0 4px rgba(0, 0, 0, 0.6);
     
     box-shadow: 
-        0 6px 20px rgba(52, 199, 89, 0.15),
-        0 3px 12px rgba(52, 199, 89, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        0 0 16px rgba(52, 199, 89, 0.3);
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(176, 224, 230, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.liquid-glass-task.completed .liquid-glass-checkbox .checkmark::after {
-    opacity: 1;
-    transform: rotate(45deg) scale(1);
+.task-input-group .task-input:focus {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 1);
+    
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 4px 16px rgba(176, 224, 230, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 0 3px rgba(176, 224, 230, 0.4);
+    
+    text-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.9),
+        0 0 6px rgba(0, 0, 0, 0.8);
+}
+
+.task-input-group .task-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    text-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* ===== ADD TASK BUTTON ENHANCEMENT ===== */
+.task-input-group .liquid-glass-btn {
+    min-width: 80px;
+    min-height: 48px;
+    background: rgba(176, 224, 230, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(176, 224, 230, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.task-input-group .liquid-glass-btn:hover {
+    background: rgba(176, 224, 230, 0.3);
+    transform: translateY(-2px) scale(1.05);
+    
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 4px 16px rgba(176, 224, 230, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        0 0 20px rgba(176, 224, 230, 0.3);
+}
+
+/* ===== TASK SECTION CONTAINER ===== */
+.task-section {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px) saturate(110%);
+    -webkit-backdrop-filter: blur(20px) saturate(110%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 24px;
+    
+    /* Enhanced contrast for better readability */
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.task-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        transparent 50%,
+        rgba(176, 224, 230, 0.03) 100%
+    );
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+/* ===== TASKS TITLE ===== */
+.tasks-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 2;
+    
+    /* Enhanced title visibility */
+    text-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.8),
+        0 1px 2px rgba(0, 0, 0, 0.9),
+        0 0 15px rgba(176, 224, 230, 0.4),
+        0 0 8px rgba(0, 0, 0, 0.6);
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+    .liquid-glass-task {
+        padding: 16px 10px;
+        gap: 12px;
+        min-height: 56px;
+    }
+    
+    .liquid-glass-task .task-text {
+        font-size: 15px;
+        max-width: calc(100% - 50px);
+    }
+    
+    .task-delete-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+    
+    .liquid-glass-checkbox .checkmark {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .liquid-glass-checkbox .checkmark::after {
+        left: 7px;
+        top: 3px;
+        width: 5px;
+        height: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .liquid-glass-task {
+        padding: 14px 8px;
+        gap: 10px;
+        min-height: 52px;
+    }
+    
+    .liquid-glass-task .task-text {
+        font-size: 14px;
+        max-width: calc(100% - 45px);
+    }
+    
+    .task-delete-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 11px;
+    }
+    
+    .liquid-glass-checkbox .checkmark {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* ===== ANIMATION IMPROVEMENTS ===== */
+@keyframes taskComplete {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.liquid-glass-task.completing {
+    animation: taskComplete 0.6s ease-out;
+}
+
+@keyframes checkboxPulse {
+    0% { 
+        box-shadow: 
+            0 4px 16px rgba(0, 0, 0, 0.3),
+            0 0 0 0 rgba(52, 199, 89, 0.6);
+    }
+    50% { 
+        box-shadow: 
+            0 6px 20px rgba(52, 199, 89, 0.3),
+            0 0 0 8px rgba(52, 199, 89, 0.3);
+    }
+    100% { 
+        box-shadow: 
+            0 6px 20px rgba(52, 199, 89, 0.2),
+            0 0 0 0 rgba(52, 199, 89, 0);
+    }
+}
+
+.liquid-glass-task.completing .liquid-glass-checkbox .checkmark {
+    animation: checkboxPulse 0.6s ease-out;
+}
+
+/* ===== DARK BACKGROUND OVERLAY FOR EXTREME CASES ===== */
+.liquid-glass-task.high-contrast {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+}
+
+.liquid-glass-task.high-contrast .task-text {
+    text-shadow: 
+        0 3px 6px rgba(0, 0, 0, 1),
+        0 2px 4px rgba(0, 0, 0, 1),
+        0 1px 2px rgba(0, 0, 0, 1),
+        0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 /* ===== ENHANCED ICON SUPPORT ===== */
