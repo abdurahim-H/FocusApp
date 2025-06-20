@@ -377,15 +377,6 @@
 }
 
 /* Theme-specific adjustments */
-[data-theme="light"] .meditation-orb-container {
-    filter: brightness(1.2) contrast(0.9);
-}
-
-[data-theme="light"] .breathing-phase {
-    color: var(--text-primary);
-    text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
-}
-
 [data-theme="cosmos"] #meditationOrb {
     background: rgba(20, 10, 40, 0.8);
 }

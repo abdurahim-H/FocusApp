@@ -20,38 +20,6 @@
     --particle-color: #8b5cf6;
 }
 
-/* Light Theme */
-body[data-theme="light"] {
-    --primary: #4f46e5;
-    --secondary: #7c3aed;
-    --accent: #059669;
-    --bg-dark: #f3f4f6;
-    --bg-glass: rgba(255, 255, 255, 0.8);
-    --bg-glass-dark: rgba(255, 255, 255, 0.95);
-    --text-primary: #1f2937;
-    --text-secondary: rgba(31, 41, 55, 0.7);
-    --border-glass: rgba(0, 0, 0, 0.1);
-    --shadow: rgba(0, 0, 0, 0.05);
-    
-    /* Theme-specific additions */
-    --glow-color: rgba(79, 70, 229, 0.2);
-    --particle-color: #7c3aed;
-}
-
-/* Light theme specific adjustments */
-body[data-theme="light"] #scene-container {
-    opacity: 0.7;
-    filter: brightness(1.2) contrast(0.9);
-}
-
-body[data-theme="light"] .nav,
-body[data-theme="light"] .settings-btn,
-body[data-theme="light"] .focus-content,
-body[data-theme="light"] .task-section,
-body[data-theme="light"] .settings-modal {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
 /* Cosmos Theme */
 body[data-theme="cosmos"] {
     --primary: #8B5CF6;
@@ -246,7 +214,6 @@ body[data-theme="cosmos"] .text-input {
 */
 
 /* Theme indicator for active theme button */
-#themeLightBtn[data-theme="light"].active::after,
 #themeDarkBtn[data-theme="dark"].active::after,
 #themeCosmosBtn[data-theme="cosmos"].active::after,
 #themeAutoBtn[data-theme="auto"].active::after {

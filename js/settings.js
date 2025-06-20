@@ -36,17 +36,6 @@ function applyThemeTo3DScene(theme) {
     
     try {
         switch (theme) {
-            case 'light':
-                if (window.scene.ambientLight) {
-                    window.scene.ambientLight.intensity = 0.6;
-                    window.scene.ambientLight.diffuse = new BABYLON.Color3(0.9, 0.9, 1);
-                    window.scene.ambientLight.groundColor = new BABYLON.Color3(0.7, 0.7, 0.8);
-                }
-                window.scene.clearColor = new BABYLON.Color4(0.95, 0.95, 1, 1);
-                window.scene.fogColor = new BABYLON.Color3(0.9, 0.9, 0.95);
-                window.scene.fogDensity = 0.0005;
-                break;
-                
             case 'dark':
                 if (window.scene.ambientLight) {
                     window.scene.ambientLight.intensity = 0.4;
@@ -71,7 +60,7 @@ function applyThemeTo3DScene(theme) {
                 
             case 'auto':
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                applyThemeTo3DScene(prefersDark ? 'dark' : 'light');
+                applyThemeTo3DScene(prefersDark ? 'dark' : 'cosmos');
                 return;
         }
         
@@ -83,7 +72,7 @@ function applyThemeTo3DScene(theme) {
 
 function applyThemeToUI(theme) {
     const body = document.body;
-    body.classList.remove('theme-light', 'theme-dark', 'theme-cosmos', 'theme-auto');
+    body.classList.remove('theme-dark', 'theme-cosmos', 'theme-auto');
     body.classList.add(`theme-${theme}`);
 }
 
@@ -443,7 +432,6 @@ export function setupSettingsControls() {
             soundValue: document.getElementById('soundVolumeValue'),
             greetingInput: document.getElementById('greetingInput'),
             themeBtns: {
-                light: document.getElementById('themeLightBtn'),
                 dark: document.getElementById('themeDarkBtn'),
                 cosmos: document.getElementById('themeCosmosBtn'),
                 auto: document.getElementById('themeAutoBtn')
@@ -728,7 +716,7 @@ export function loadSettings() {
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
     const currentTheme = document.body.getAttribute('data-theme');
     if (currentTheme === 'auto') {
-        applyThemeTo3DScene(e.matches ? 'dark' : 'light');
+        applyThemeTo3DScene(e.matches ? 'dark' : 'cosmos');
         applyThemeToUI('auto');
     }
 });

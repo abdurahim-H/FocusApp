@@ -217,14 +217,6 @@
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-.cosmic-orb[data-cosmic-theme="light"] {
-    background: radial-gradient(circle, 
-        rgba(255, 220, 100, 0.8) 0%,
-        rgba(255, 180, 50, 0.9) 70%,
-        rgba(200, 140, 20, 1) 100%);
-    color: rgba(100, 50, 20, 0.9);
-}
-
 .cosmic-orb[data-cosmic-theme="dark"] {
     background: radial-gradient(circle, 
         rgba(50, 50, 150, 0.8) 0%,

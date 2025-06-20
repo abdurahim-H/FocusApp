@@ -571,10 +571,6 @@ input, textarea, select {
 }
 
 /* Theme-specific visual enhancements */
-body.theme-light {
-    --animation-speed: 0.8; /* Slower animations for light theme */
-}
-
 body.theme-cosmos {
     --animation-speed: 1.2; /* Faster animations for cosmos theme */
     --particle-density: 1.5; /* More particles in cosmos theme */
@@ -583,10 +579,6 @@ body.theme-cosmos {
 /* Enhanced theme-specific glow effects */
 body[data-theme="dark"] .productivity-glow {
     animation: productivityPulseDark 2s ease-in-out infinite;
-}
-
-body[data-theme="light"] .productivity-glow {
-    animation: productivityPulseLight 2s ease-in-out infinite;
 }
 
 body[data-theme="cosmos"] .productivity-glow {
@@ -601,17 +593,6 @@ body[data-theme="cosmos"] .productivity-glow {
     50% { 
         box-shadow: 0 0 30px rgba(99, 102, 241, 0.5),
                     0 0 60px rgba(99, 102, 241, 0.2);
-    }
-}
-
-@keyframes productivityPulseLight {
-    0%, 100% { 
-        box-shadow: 0 0 15px rgba(79, 70, 229, 0.2),
-                    0 0 30px rgba(79, 70, 229, 0.1);
-    }
-    50% { 
-        box-shadow: 0 0 25px rgba(79, 70, 229, 0.3),
-                    0 0 50px rgba(79, 70, 229, 0.15);
     }
 }
 

@@ -14,7 +14,7 @@ A stunning 3D productivity application featuring physics-accurate black hole vis
 - **🎨 Visual Effects**: Dynamic animations that respond to productivity streaks
 - **🎵 Ambient Sounds**: Multiple simultaneous soundscapes (rain, ocean, forest, cafe)
 - **🧘 Meditation Mode**: Guided cosmic meditation with breathing exercises
-- **🌙 Theme System**: Light, dark, and cosmos themes with auto-switching
+- **🌙 Theme System**: Dark, cosmos, and auto themes with seamless switching
 - **📱 Mobile Responsive**: Optimized for desktop and mobile devices
 
 ## 🚀 Quick Start
