@@ -124,9 +124,9 @@ function createAccretionDisk(parent) {
     const diskGroup = new BABYLON.TransformNode('accretionDiskGroup', scene);
     diskGroup.parent = parent;
     
-    // Tilt the accretion disk to match the DNA helix angle
-    diskGroup.rotation.z = Math.PI / 5; // 36 degrees tilt to the right (same as helix)
-    diskGroup.rotation.x = Math.PI / 8; // 22.5 degrees forward tilt for depth (same as helix)
+    // Keep the accretion disk completely flat (no tilt)
+    diskGroup.rotation.z = 0; // No tilt
+    diskGroup.rotation.x = 0; // No tilt
     
     // Create main accretion disk as swirling particles
     const mainDisk = new BABYLON.ParticleSystem('accretionDiskMain', 2500, scene);
@@ -161,22 +161,20 @@ function createAccretionDisk(parent) {
     mainDisk.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
     mainDisk.renderingGroupId = 1; // Behind black hole
     
-    // Custom update function for realistic accretion disk motion
+    // Custom update function for flat spinning accretion disk
     mainDisk.updateFunction = (particles) => {
-        const globalTime = Date.now() * 0.001;
         
         for (let p = 0; p < particles.length; p++) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle with realistic orbital characteristics
+            // Initialize particle with static position (rotation handled by group transform)
             if (!particle.userData) {
                 const radius = 6 + Math.random() * 14; // Random radius between 6-20
+                const angle = Math.random() * Math.PI * 2; // Random starting angle
                 particle.userData = {
                     radius: radius,
-                    baseAngle: Math.random() * Math.PI * 2, // Random starting angle
-                    // Keplerian velocity - inner particles orbit faster
-                    angularSpeed: 0.02 / Math.sqrt(radius), // Realistic orbital dynamics
+                    angle: angle, // Fixed angle - rotation handled by group
                     verticalOffset: (Math.random() - 0.5) * 0.5, // Subtle vertical variation
                     baseRadius: radius // Keep track of original radius
                 };
@@ -184,39 +182,13 @@ function createAccretionDisk(parent) {
             
             const data = particle.userData;
             
-            // Calculate angle that maintains relationship with helix
-            // Use same direction and base speed as helix (0.8 factor)
-            const diskAngle = data.baseAngle + (globalTime * data.angularSpeed * 0.8);
-            
-            // Slight radial variation to prevent perfect circles (realistic turbulence)
-            const radiusVariation = Math.sin(diskAngle * 3 + globalTime) * 0.5;
-            const currentRadius = data.baseRadius + radiusVariation;
-            
-            // Calculate orbital position in local disk coordinates
-            const localX = Math.cos(diskAngle) * currentRadius;
-            const localY = data.verticalOffset + Math.sin(globalTime * 0.5 + diskAngle) * 0.2;
-            const localZ = Math.sin(diskAngle) * currentRadius;
-            
-            // Apply rotation transformation to match helix tilt
-            const tiltX = Math.PI / 8; // 22.5 degrees forward tilt (same as helix)
-            const tiltZ = Math.PI / 5; // 36 degrees right tilt (same as helix)
-            
-            // Apply Z rotation (right tilt)
-            const rotatedX = localX * Math.cos(tiltZ) - localY * Math.sin(tiltZ);
-            const rotatedY = localX * Math.sin(tiltZ) + localY * Math.cos(tiltZ);
-            
-            // Apply X rotation (forward tilt)
-            const finalX = rotatedX;
-            const finalY = rotatedY * Math.cos(tiltX) - localZ * Math.sin(tiltX);
-            const finalZ = rotatedY * Math.sin(tiltX) + localZ * Math.cos(tiltX);
-            
-            // Set transformed position
-            particle.position.x = finalX;
-            particle.position.y = finalY;
-            particle.position.z = finalZ;
+            // Static position in flat disk - let group rotation handle spinning
+            particle.position.x = Math.cos(data.angle) * data.radius;
+            particle.position.y = data.verticalOffset;
+            particle.position.z = Math.sin(data.angle) * data.radius;
             
             // Temperature-based color evolution (inner = hotter)
-            const temp = Math.max(0, 1 - currentRadius / 17);
+            const temp = Math.max(0, 1 - data.radius / 17);
             particle.color.r = 1;
             particle.color.g = 0.8 + temp * 0.2;
             particle.color.b = 0.2 + temp * 0.6;
@@ -1370,8 +1342,8 @@ export function updateBlackHoleEffects() {
 
     // Animate accretion disk particle effects
     if (accretionDisk && accretionDisk.group) {
-        // Rotate the entire disk group for overall motion
-        accretionDisk.group.rotation.y += 0.005;
+        // Rotate the entire disk group for normal circular spinning (no tilt)
+        accretionDisk.group.rotation.y += 0.01; // Increased speed for more visible spinning
         
         // Animate main disk particles intensity
         if (accretionDisk.mainDisk) {
