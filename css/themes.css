@@ -142,10 +142,59 @@ body[data-theme="light"] h3 {
 }
 
 body[data-theme="cosmos"] h1 {
-    background: linear-gradient(135deg, #A855F7, #8B5CF6, #06D6A0);
+    background: linear-gradient(135deg, 
+        #A855F7 0%, 
+        #8B5CF6 20%, 
+        #06D6A0 40%, 
+        #60A5FA 60%, 
+        #F59E0B 80%, 
+        #EF4444 100%);
+    background-size: 300% 300%;
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    animation: cosmicTextFlow 10s ease-in-out infinite;
+    text-shadow: 0 0 40px rgba(168, 85, 247, 0.6);
+    filter: drop-shadow(0 0 25px rgba(139, 92, 246, 0.5));
+}
+
+/* Enhanced dark theme text styling */
+body[data-theme="dark"] h1 {
+    background: linear-gradient(135deg, 
+        #6366f1 0%, 
+        #8b5cf6 30%, 
+        #06d6a0 60%, 
+        #60A5FA 100%);
+    background-size: 200% 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: cosmicTextFlow 8s ease-in-out infinite;
+    text-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+    filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.3));
+}
+
+body[data-theme="dark"] .greeting {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(99, 102, 241, 0.8) 50%, 
+        rgba(6, 214, 160, 0.8) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+    filter: drop-shadow(0 0 8px rgba(6, 214, 160, 0.3));
+}
+
+body[data-theme="dark"] .date-time {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.85) 0%, 
+        rgba(99, 102, 241, 0.7) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+    font-weight: 400;
 }
 
 /* Theme-specific input styles */
