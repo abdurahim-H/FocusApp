@@ -202,6 +202,10 @@ function createPolarJets(parent) {
     const spiralGroup = new BABYLON.TransformNode('dnaSpiralGroup', scene);
     spiralGroup.parent = parent;
     
+    // Tilt the entire DNA helix system
+    spiralGroup.rotation.z = Math.PI / 5; // 36 degrees tilt to the right (increased from 22.5°)
+    spiralGroup.rotation.x = Math.PI / 8; // 22.5 degrees forward tilt for depth (increased from 15°)
+    
     // Create particle texture with enhanced glow for helix effect
     const spiralTexture = new BABYLON.Texture(
         'data:image/svg+xml;base64,'+btoa(`
@@ -298,10 +302,28 @@ function createPolarJets(parent) {
             const radius = 0.1 + (currentHeight * 0.15); // Reduced starting diameter: starts at 0.5, grows by 0.12 per unit height
             const helixAngle = currentHeight * 4 + data.phase;
             
-            // First strand position
-            particle.position.x = Math.cos(helixAngle) * radius;
-            particle.position.z = Math.sin(helixAngle) * radius;
-            particle.position.y = currentHeight;
+            // Calculate local helix position
+            const localX = Math.cos(helixAngle) * radius;
+            const localY = currentHeight;
+            const localZ = Math.sin(helixAngle) * radius;
+            
+            // Apply rotation transformation manually (since particle positions bypass transform hierarchy)
+            const rotX = Math.PI / 8; // 22.5 degrees forward tilt
+            const rotZ = Math.PI / 5; // 36 degrees right tilt
+            
+            // Apply Z rotation (right tilt)
+            const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
+            const tempY = localX * Math.sin(rotZ) + localY * Math.cos(rotZ);
+            
+            // Apply X rotation (forward tilt)
+            const finalX = tempX;
+            const finalY = tempY * Math.cos(rotX) - localZ * Math.sin(rotX);
+            const finalZ = tempY * Math.sin(rotX) + localZ * Math.cos(rotX);
+            
+            // Set transformed position
+            particle.position.x = finalX;
+            particle.position.y = finalY;
+            particle.position.z = finalZ;
             
             // Minimal jitter
             particle.position.x += (Math.random() - 0.5) * 0.05;
@@ -351,10 +373,28 @@ function createPolarJets(parent) {
             const radius = 0.5 + (currentHeight * 0.12); // Same reduced starting diameter for counter-rotating strand
             const helixAngle = -currentHeight * 4 + data.phase + Math.PI; // Counter-rotating
             
-            // Second strand position
-            particle.position.x = Math.cos(helixAngle) * radius;
-            particle.position.z = Math.sin(helixAngle) * radius;
-            particle.position.y = currentHeight;
+            // Calculate local helix position
+            const localX = Math.cos(helixAngle) * radius;
+            const localY = currentHeight;
+            const localZ = Math.sin(helixAngle) * radius;
+            
+            // Apply rotation transformation manually (same as first strand)
+            const rotX = Math.PI / 8; // 22.5 degrees forward tilt
+            const rotZ = Math.PI / 5; // 36 degrees right tilt
+            
+            // Apply Z rotation (right tilt)
+            const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
+            const tempY = localX * Math.sin(rotZ) + localY * Math.cos(rotZ);
+            
+            // Apply X rotation (forward tilt)
+            const finalX = tempX;
+            const finalY = tempY * Math.cos(rotX) - localZ * Math.sin(rotX);
+            const finalZ = tempY * Math.sin(rotX) + localZ * Math.cos(rotX);
+            
+            // Set transformed position
+            particle.position.x = finalX;
+            particle.position.y = finalY;
+            particle.position.z = finalZ;
             
             // Minimal jitter
             particle.position.x += (Math.random() - 0.5) * 0.05;
@@ -439,10 +479,28 @@ function createPolarJets(parent) {
             const radius = 0.5 + (currentDepth * 0.12); // Same expansion as upward spiral
             const helixAngle = currentDepth * 4 + data.phase;
             
-            // First downward strand position
-            particle.position.x = Math.cos(helixAngle) * radius;
-            particle.position.z = Math.sin(helixAngle) * radius;
-            particle.position.y = -currentDepth; // Negative Y for downward
+            // Calculate local helix position (downward)
+            const localX = Math.cos(helixAngle) * radius;
+            const localY = -currentDepth; // Negative Y for downward
+            const localZ = Math.sin(helixAngle) * radius;
+            
+            // Apply rotation transformation manually
+            const rotX = Math.PI / 8; // 22.5 degrees forward tilt
+            const rotZ = Math.PI / 5; // 36 degrees right tilt
+            
+            // Apply Z rotation (right tilt)
+            const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
+            const tempY = localX * Math.sin(rotZ) + localY * Math.cos(rotZ);
+            
+            // Apply X rotation (forward tilt)
+            const finalX = tempX;
+            const finalY = tempY * Math.cos(rotX) - localZ * Math.sin(rotX);
+            const finalZ = tempY * Math.sin(rotX) + localZ * Math.cos(rotX);
+            
+            // Set transformed position
+            particle.position.x = finalX;
+            particle.position.y = finalY;
+            particle.position.z = finalZ;
             
             // Minimal jitter
             particle.position.x += (Math.random() - 0.5) * 0.05;
@@ -492,10 +550,28 @@ function createPolarJets(parent) {
             const radius = 0.5 + (currentDepth * 0.12); // Same expansion
             const helixAngle = -currentDepth * 4 + data.phase + Math.PI; // Counter-rotating
             
-            // Second downward strand position
-            particle.position.x = Math.cos(helixAngle) * radius;
-            particle.position.z = Math.sin(helixAngle) * radius;
-            particle.position.y = -currentDepth; // Negative Y for downward
+            // Calculate local helix position (downward counter-rotating)
+            const localX = Math.cos(helixAngle) * radius;
+            const localY = -currentDepth; // Negative Y for downward
+            const localZ = Math.sin(helixAngle) * radius;
+            
+            // Apply rotation transformation manually
+            const rotX = Math.PI / 8; // 22.5 degrees forward tilt
+            const rotZ = Math.PI / 5; // 36 degrees right tilt
+            
+            // Apply Z rotation (right tilt)
+            const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
+            const tempY = localX * Math.sin(rotZ) + localY * Math.cos(rotZ);
+            
+            // Apply X rotation (forward tilt)
+            const finalX = tempX;
+            const finalY = tempY * Math.cos(rotX) - localZ * Math.sin(rotX);
+            const finalZ = tempY * Math.sin(rotX) + localZ * Math.cos(rotX);
+            
+            // Set transformed position
+            particle.position.x = finalX;
+            particle.position.y = finalY;
+            particle.position.z = finalZ;
             
             // Minimal jitter
             particle.position.x += (Math.random() - 0.5) * 0.05;
