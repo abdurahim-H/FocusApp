@@ -1044,10 +1044,10 @@ export function updateBlackHoleEffects() {
     });
 
     // Animate polar jets
-    polarJetParticles.forEach(jet => {
-        if (jet && jet.emitRate) {
-            // Vary jet intensity
-            const jetIntensity = Math.sin(t * 3 + Math.random()) * 0.3 + 0.7;
+    polarJetParticles.forEach((jet, index) => {
+        if (jet && jet.emitRate !== undefined) {
+            // Vary jet intensity with stable oscillation
+            const jetIntensity = Math.sin(t * 2 + index * Math.PI) * 0.3 + 0.7;
             jet.emitRate = 150 * jetIntensity;
         }
     });
