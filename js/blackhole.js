@@ -263,99 +263,109 @@ function createPolarJets(parent) {
     helixStrand2.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
     helixStrand2.renderingGroupId = 1;
     
-    // Custom DNA helix motion for first strand
+    // Custom DNA helix motion for first strand - CONTINUOUS STREAM
     helixStrand1.updateFunction = (particles) => {
         const t = Date.now() * 0.001;
         for (let p = 0; p < particles.length; p++) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle if new
+            // Initialize particle if new - assign birth time and position in stream
             if (!particle.userData) {
                 particle.userData = {
-                    age: 0,
+                    birthTime: t,
+                    streamPosition: p / particles.length, // Position in the stream (0-1)
                     phase: Math.random() * Math.PI * 2,
                     strand: 1
                 };
-                particle.position.set(0, 0, 0);
             }
             
             const data = particle.userData;
-            data.age += 0.03; // Ascent speed
+            const particleAge = (t - data.birthTime) * 8; // Speed multiplier for stream motion
             
-            // DNA helix mathematics
-            const height = data.age;
-            const radius = Math.min(0.5 + height * 0.15, 8); // Expanding radius
-            const helixAngle = height * 2 + data.phase; // Spiral twist
+            // Calculate position along the continuous helix stream
+            const streamHeight = data.streamPosition * 25; // Max stream length
+            const height = streamHeight + particleAge; // Moving height based on age
+            
+            // If particle has moved too far up, recycle it to the bottom
+            if (height > 25) {
+                data.birthTime = t;
+                data.streamPosition = 0;
+                data.phase = Math.random() * Math.PI * 2;
+            }
+            
+            const currentHeight = Math.max(0, height);
+            const radius = Math.min(0.8 + currentHeight * 0.06, 3.5);
+            const helixAngle = currentHeight * 4 + data.phase;
             
             // First strand position
             particle.position.x = Math.cos(helixAngle) * radius;
             particle.position.z = Math.sin(helixAngle) * radius;
-            particle.position.y = height;
+            particle.position.y = currentHeight;
             
-            // Add subtle jitter for realism
-            particle.position.x += (Math.random() - 0.5) * 0.2;
-            particle.position.z += (Math.random() - 0.5) * 0.2;
+            // Minimal jitter
+            particle.position.x += (Math.random() - 0.5) * 0.05;
+            particle.position.z += (Math.random() - 0.5) * 0.05;
             
-            // Fade with distance and reset at max height
-            const fadeDistance = 30;
-            if (height > fadeDistance) {
-                data.age = 0;
-                particle.position.set(0, 0, 0);
-                data.phase = Math.random() * Math.PI * 2;
-            }
-            
-            // Dynamic opacity based on height
-            const alpha = Math.min(1, Math.max(0, 1 - height / fadeDistance));
-            particle.color.a = alpha * 0.8;
+            // Opacity based on height and position in stream
+            const fadeStart = 20;
+            const alpha = currentHeight > fadeStart ? 
+                Math.max(0.1, 1 - (currentHeight - fadeStart) / 5) : 
+                Math.min(0.9, currentHeight / 2);
+            particle.color.a = alpha;
         }
     };
     
-    // Custom DNA helix motion for second strand (counter-rotating)
+    // Custom DNA helix motion for second strand - CONTINUOUS STREAM
     helixStrand2.updateFunction = (particles) => {
         const t = Date.now() * 0.001;
         for (let p = 0; p < particles.length; p++) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle if new
+            // Initialize particle if new - assign birth time and position in stream
             if (!particle.userData) {
                 particle.userData = {
-                    age: 0,
+                    birthTime: t,
+                    streamPosition: p / particles.length, // Position in the stream (0-1)
                     phase: Math.random() * Math.PI * 2,
                     strand: 2
                 };
-                particle.position.set(0, 0, 0);
             }
             
             const data = particle.userData;
-            data.age += 0.03; // Same ascent speed
+            const particleAge = (t - data.birthTime) * 8; // Same speed multiplier
             
-            // DNA helix mathematics (counter-rotating)
-            const height = data.age;
-            const radius = Math.min(0.5 + height * 0.15, 8); // Same expanding radius
-            const helixAngle = -height * 2 + data.phase + Math.PI; // Counter-rotate + offset
+            // Calculate position along the continuous helix stream
+            const streamHeight = data.streamPosition * 25; // Same max stream length
+            const height = streamHeight + particleAge; // Moving height based on age
+            
+            // If particle has moved too far up, recycle it to the bottom
+            if (height > 25) {
+                data.birthTime = t;
+                data.streamPosition = 0;
+                data.phase = Math.random() * Math.PI * 2;
+            }
+            
+            const currentHeight = Math.max(0, height);
+            const radius = Math.min(0.8 + currentHeight * 0.06, 3.5);
+            const helixAngle = -currentHeight * 4 + data.phase + Math.PI; // Counter-rotating
             
             // Second strand position
             particle.position.x = Math.cos(helixAngle) * radius;
             particle.position.z = Math.sin(helixAngle) * radius;
-            particle.position.y = height;
+            particle.position.y = currentHeight;
             
-            // Add subtle jitter for realism
-            particle.position.x += (Math.random() - 0.5) * 0.2;
-            particle.position.z += (Math.random() - 0.5) * 0.2;
+            // Minimal jitter
+            particle.position.x += (Math.random() - 0.5) * 0.05;
+            particle.position.z += (Math.random() - 0.5) * 0.05;
             
-            // Fade with distance and reset at max height
-            const fadeDistance = 30;
-            if (height > fadeDistance) {
-                data.age = 0;
-                particle.position.set(0, 0, 0);
-                data.phase = Math.random() * Math.PI * 2;
-            }
-            
-            // Dynamic opacity based on height
-            const alpha = Math.min(1, Math.max(0, 1 - height / fadeDistance));
-            particle.color.a = alpha * 0.8;
+            // Opacity based on height and position in stream
+            const fadeStart = 20;
+            const alpha = currentHeight > fadeStart ? 
+                Math.max(0.1, 1 - (currentHeight - fadeStart) / 5) : 
+                Math.min(0.9, currentHeight / 2);
+            particle.color.a = alpha;
         }
     };
     
