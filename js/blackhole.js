@@ -62,13 +62,6 @@ export function createEnhancedBlackHole() {
     createAuthenticBlackHole(root);
     console.log('✔ Centerpiece created');
 
-    // Rings removed for cleaner black hole appearance
-    // createUnifiedRingFamily(root);
-    // console.log(`✔ ${RING_CONFIG.COUNT} vertical rings created`);
-
-    // createBalancedOrbitals(root); // DISABLED - All planets and orbital bodies removed for minimalist space
-    // console.log(`✔ ${orbitalBodies.length} orbital bodies created`);
-
     createMinimalistCosmicEnvironment(root);
     console.log('✔ Minimalist cosmic environment added');
 
@@ -776,8 +769,6 @@ function createMinimalistCosmicEnvironment(parent) {
     // Additional distant micro stars for depth (keep tiny background stars)
     createMicroStarField(parent);
 
-    // Secondary star and distant galaxy removed for minimalist space environment
-    // No additional large celestial objects - just the black hole and its effects
 }
 
 
@@ -1037,12 +1028,6 @@ export function updateBlackHoleEffects() {
         }
     }
 
-    // Solar system animations disabled for minimalist mode
-    // orbitalBodies.forEach(body => {
-    //     ... orbital body animation code removed for clean space
-    // });
-    // No planets, moons, or rings to animate in minimalist mode
-
     // Enhanced star twinkling animation for dust particles
     energyParticles.forEach(particleSystem => {
         if (particleSystem && particleSystem.particles) {
@@ -1073,9 +1058,6 @@ export function updateBlackHoleEffects() {
             jet.emitRate = 150 * jetIntensity;
         }
     });
-
-    // Animate distant celestial objects - disabled for minimalist space
-    // Secondary star and distant galaxy animations removed for clean environment
 }
 
 
