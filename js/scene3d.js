@@ -248,7 +248,31 @@ function createGalaxyElements() {
     }
 }
 
-// Enhanced Cosmic Starfield - Beautiful multi-layered stars
+// // Enhanced Cosmic Starfield - Beautiful multi-layered stars
+// function createEnhancedCosmicStarField() {
+//     try {
+//         if (!scene) {
+//             console.warn('Scene not available for star field creation');
+//             return;
+//         }
+
+//         console.log('✨ Creating enhanced cosmic starfield...');
+        
+//         // Create multiple star layers for depth and beauty
+//         createPrimaryStarLayer();
+//         createDistantStarLayer();
+//         createBrightStarLayer();
+//         createNebulaStarClusters();
+//         createShootingStars();
+        
+//         console.log('🌌 Enhanced cosmic starfield complete with multiple layers');
+        
+//     } catch (error) {
+//         console.error('Failed to create enhanced starfield:', error);
+//         createFallbackTinyStars();
+//     }
+// }
+
 function createEnhancedCosmicStarField() {
     try {
         if (!scene) {
@@ -256,21 +280,533 @@ function createEnhancedCosmicStarField() {
             return;
         }
 
-        console.log('✨ Creating enhanced cosmic starfield...');
+        console.log('✨ Creating NASA-quality cosmic starfield...');
         
-        // Create multiple star layers for depth and beauty
-        createPrimaryStarLayer();
-        createDistantStarLayer();
-        createBrightStarLayer();
-        createNebulaStarClusters();
+        // Create multiple star layers for that spectacular NASA look
+        createMainCosmicStars();
+        createBrightBeaconStars();
+        createColorfulDistantStars();
+        createStarDustField();
         createShootingStars();
         
-        console.log('🌌 Enhanced cosmic starfield complete with multiple layers');
+        console.log('🌌 NASA-quality cosmic starfield complete!');
         
     } catch (error) {
         console.error('Failed to create enhanced starfield:', error);
         createFallbackTinyStars();
     }
+}
+
+// Main cosmic stars - visible and beautiful like NASA photos
+function createMainCosmicStars() {
+    const starCount = 2500;
+    const mainStars = new BABYLON.ParticleSystem("mainCosmicStars", starCount, scene);
+    
+    // Enhanced star texture with strong visibility
+    mainStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+            <defs>
+                <radialGradient id="starCore" cx="50%" cy="50%" r="30%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="80%" style="stop-color:white;stop-opacity:0.9" />
+                    <stop offset="100%" style="stop-color:white;stop-opacity:0.7" />
+                </radialGradient>
+                <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:0.8" />
+                    <stop offset="60%" style="stop-color:cyan;stop-opacity:0.4" />
+                    <stop offset="100%" style="stop-color:blue;stop-opacity:0.1" />
+                </radialGradient>
+            </defs>
+            <circle cx="24" cy="24" r="24" fill="url(#starGlow)" />
+            <circle cx="24" cy="24" r="12" fill="url(#starCore)" />
+            <circle cx="24" cy="24" r="4" fill="white" />
+        </svg>
+    `), scene);
+    
+    const emitter = BABYLON.MeshBuilder.CreateBox("mainEmitter", {size: 0.01}, scene);
+    emitter.isVisible = false;
+    mainStars.emitter = emitter;
+    
+    // Increased visibility settings
+    mainStars.minSize = 1.5;  // Increased from 0.8
+    mainStars.maxSize = 4.5;  // Increased from 3.5
+    mainStars.minLifeTime = Number.MAX_VALUE;
+    mainStars.maxLifeTime = Number.MAX_VALUE;
+    mainStars.emitRate = 0;
+    mainStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    mainStars.renderingGroupId = 0;
+    
+    // Brighter colors for better visibility
+    mainStars.color1 = new BABYLON.Color4(1, 1, 1, 1);      // Full white
+    mainStars.color2 = new BABYLON.Color4(0.9, 0.95, 1, 0.9); // Bright blue-white
+    mainStars.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+    
+    mainStars.start();
+    mainStars.manualEmitCount = starCount;
+    
+    // Position stars closer and more visible
+    setTimeout(() => {
+        const particles = mainStars.particles;
+        
+        for (let i = 0; i < particles.length; i++) {
+            const particle = particles[i];
+            if (!particle) continue;
+            
+            // Better distribution for visibility
+            const distributionType = Math.random();
+            let radius, theta, phi;
+            
+            if (distributionType < 0.7) {
+                // Main visible starfield (closer to camera)
+                radius = 120 + Math.random() * 300; // Much closer
+                theta = Math.random() * Math.PI * 2;
+                phi = Math.acos(2 * Math.random() - 1);
+            } else {
+                // Background stars
+                radius = 400 + Math.random() * 200;
+                theta = Math.random() * Math.PI * 2;
+                phi = Math.acos(2 * Math.random() - 1);
+            }
+            
+            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+            particle.position.z = radius * Math.cos(phi);
+            
+            // NASA-like star classification with visible colors
+            const stellarClass = Math.random();
+            let starConfig;
+            
+            if (stellarClass < 0.15) {
+                // Blue giants (very visible)
+                starConfig = {
+                    color: new BABYLON.Color4(0.7, 0.8, 1, 1),
+                    size: 3 + Math.random() * 2,
+                    twinkleSpeed: 0.02,
+                    type: 'blue_giant'
+                };
+            } else if (stellarClass < 0.35) {
+                // White stars (bright)
+                starConfig = {
+                    color: new BABYLON.Color4(1, 1, 1, 0.95),
+                    size: 2.5 + Math.random() * 1.5,
+                    twinkleSpeed: 0.015,
+                    type: 'white_star'
+                };
+            } else if (stellarClass < 0.55) {
+                // Yellow stars (like our Sun)
+                starConfig = {
+                    color: new BABYLON.Color4(1, 0.95, 0.7, 0.9),
+                    size: 2 + Math.random() * 1.2,
+                    twinkleSpeed: 0.012,
+                    type: 'yellow_star'
+                };
+            } else if (stellarClass < 0.75) {
+                // Orange stars
+                starConfig = {
+                    color: new BABYLON.Color4(1, 0.8, 0.5, 0.85),
+                    size: 1.8 + Math.random() * 1,
+                    twinkleSpeed: 0.01,
+                    type: 'orange_star'
+                };
+            } else {
+                // Red stars (still visible)
+                starConfig = {
+                    color: new BABYLON.Color4(1, 0.6, 0.4, 0.8),
+                    size: 1.5 + Math.random() * 0.8,
+                    twinkleSpeed: 0.008,
+                    type: 'red_star'
+                };
+            }
+            
+            particle.color = starConfig.color;
+            particle.size = starConfig.size;
+            
+            particle.userData = {
+                baseSize: starConfig.size,
+                baseAlpha: starConfig.color.a,
+                twinkleSpeed: starConfig.twinkleSpeed,
+                twinklePhase: Math.random() * Math.PI * 2,
+                stellarType: starConfig.type,
+                originalPosition: particle.position.clone(),
+                brightness: 0.8 + Math.random() * 0.4 // Consistent brightness
+            };
+        }
+    }, 100);
+    
+    mainStars.userData = {
+        layerType: 'main',
+        rotationSpeed: 0.00002,
+        driftSpeed: 0.00001
+    };
+    
+    stars.push(mainStars);
+}
+
+// Bright beacon stars - the spectacular bright ones you see in NASA photos
+function createBrightBeaconStars() {
+    const starCount = 80;
+    const beaconStars = new BABYLON.ParticleSystem("brightBeaconStars", starCount, scene);
+    
+    // Cross-shaped bright star texture (NASA telescope style)
+    beaconStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+            <defs>
+                <radialGradient id="beaconCore" cx="50%" cy="50%" r="20%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:white;stop-opacity:0.9" />
+                </radialGradient>
+                <linearGradient id="spike1" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" style="stop-color:transparent" />
+                    <stop offset="30%" style="stop-color:white;stop-opacity:0.7" />
+                    <stop offset="50%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="70%" style="stop-color:white;stop-opacity:0.7" />
+                    <stop offset="100%" style="stop-color:transparent" />
+                </linearGradient>
+                <linearGradient id="spike2" x1="50%" y1="0%" x2="50%" y2="100%">
+                    <stop offset="0%" style="stop-color:transparent" />
+                    <stop offset="30%" style="stop-color:white;stop-opacity:0.7" />
+                    <stop offset="50%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="70%" style="stop-color:white;stop-opacity:0.7" />
+                    <stop offset="100%" style="stop-color:transparent" />
+                </linearGradient>
+            </defs>
+            <rect x="0" y="38" width="80" height="4" fill="url(#spike1)" />
+            <rect x="38" y="0" width="4" height="80" fill="url(#spike2)" />
+            <circle cx="40" cy="40" r="8" fill="url(#beaconCore)" />
+            <circle cx="40" cy="40" r="3" fill="white" />
+        </svg>
+    `), scene);
+    
+    const emitter = BABYLON.MeshBuilder.CreateBox("beaconEmitter", {size: 0.01}, scene);
+    emitter.isVisible = false;
+    beaconStars.emitter = emitter;
+    
+    // Large, very visible sizes
+    beaconStars.minSize = 4;
+    beaconStars.maxSize = 8;
+    beaconStars.minLifeTime = Number.MAX_VALUE;
+    beaconStars.maxLifeTime = Number.MAX_VALUE;
+    beaconStars.emitRate = 0;
+    beaconStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    beaconStars.renderingGroupId = 0;
+    
+    // Maximum brightness
+    beaconStars.color1 = new BABYLON.Color4(1, 1, 1, 1);
+    beaconStars.color2 = new BABYLON.Color4(0.9, 0.95, 1, 1);
+    
+    beaconStars.start();
+    beaconStars.manualEmitCount = starCount;
+    
+    setTimeout(() => {
+        const particles = beaconStars.particles;
+        
+        for (let i = 0; i < particles.length; i++) {
+            const particle = particles[i];
+            if (!particle) continue;
+            
+            // Strategic placement for maximum visibility
+            const radius = 150 + Math.random() * 350;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+            particle.position.z = radius * Math.cos(phi);
+            
+            // Bright star colors
+            const brightColors = [
+                new BABYLON.Color4(1, 1, 1, 1),         // Pure white
+                new BABYLON.Color4(0.8, 0.9, 1, 1),     // Blue-white
+                new BABYLON.Color4(1, 0.95, 0.8, 1),    // Warm white
+                new BABYLON.Color4(0.9, 0.85, 1, 1),    // Purple-white
+                new BABYLON.Color4(1, 0.9, 0.7, 1)      // Golden white
+            ];
+            
+            particle.color = brightColors[Math.floor(Math.random() * brightColors.length)];
+            particle.size = 4 + Math.random() * 4;
+            
+            particle.userData = {
+                baseSize: particle.size,
+                baseAlpha: 1,
+                twinkleSpeed: 0.015 + Math.random() * 0.02,
+                twinklePhase: Math.random() * Math.PI * 2,
+                stellarType: 'beacon',
+                originalPosition: particle.position.clone(),
+                pulseIntensity: 0.3 + Math.random() * 0.4
+            };
+        }
+    }, 200);
+    
+    beaconStars.userData = {
+        layerType: 'beacon',
+        rotationSpeed: 0.00001,
+        breathingSpeed: 0.005
+    };
+    
+    stars.push(beaconStars);
+}
+
+// Colorful distant stars - add cosmic beauty with colors
+function createColorfulDistantStars() {
+    const starCount = 3000;
+    const colorStars = new BABYLON.ParticleSystem("colorfulStars", starCount, scene);
+    
+    colorStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <defs>
+                <radialGradient id="colorStar" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="70%" style="stop-color:white;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:white;stop-opacity:0.3" />
+                </radialGradient>
+            </defs>
+            <circle cx="12" cy="12" r="12" fill="url(#colorStar)" />
+            <circle cx="12" cy="12" r="3" fill="white" />
+        </svg>
+    `), scene);
+    
+    const emitter = BABYLON.MeshBuilder.CreateBox("colorEmitter", {size: 0.01}, scene);
+    emitter.isVisible = false;
+    colorStars.emitter = emitter;
+    
+    colorStars.minSize = 0.8;
+    colorStars.maxSize = 2.5;
+    colorStars.minLifeTime = Number.MAX_VALUE;
+    colorStars.maxLifeTime = Number.MAX_VALUE;
+    colorStars.emitRate = 0;
+    colorStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    colorStars.renderingGroupId = 0;
+    
+    colorStars.color1 = new BABYLON.Color4(1, 1, 1, 0.8);
+    colorStars.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.6);
+    
+    colorStars.start();
+    colorStars.manualEmitCount = starCount;
+    
+    setTimeout(() => {
+        const particles = colorStars.particles;
+        
+        for (let i = 0; i < particles.length; i++) {
+            const particle = particles[i];
+            if (!particle) continue;
+            
+            // Distributed across larger area for depth
+            const radius = 300 + Math.random() * 500;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+            particle.position.z = radius * Math.cos(phi);
+            
+            // Beautiful cosmic colors
+            const cosmicColors = [
+                new BABYLON.Color4(1, 0.9, 0.9, 0.8),    // Soft pink
+                new BABYLON.Color4(0.9, 0.9, 1, 0.8),    // Soft blue
+                new BABYLON.Color4(0.9, 1, 0.9, 0.8),    // Soft green
+                new BABYLON.Color4(1, 1, 0.9, 0.8),      // Soft yellow
+                new BABYLON.Color4(1, 0.95, 0.9, 0.8),   // Soft orange
+                new BABYLON.Color4(0.95, 0.9, 1, 0.8),   // Soft purple
+                new BABYLON.Color4(1, 1, 1, 0.8)         // Pure white
+            ];
+            
+            particle.color = cosmicColors[Math.floor(Math.random() * cosmicColors.length)];
+            particle.size = 0.8 + Math.random() * 1.7;
+            
+            particle.userData = {
+                baseSize: particle.size,
+                baseAlpha: particle.color.a,
+                twinkleSpeed: 0.005 + Math.random() * 0.01,
+                twinklePhase: Math.random() * Math.PI * 2,
+                stellarType: 'colorful',
+                originalPosition: particle.position.clone()
+            };
+        }
+    }, 300);
+    
+    colorStars.userData = {
+        layerType: 'colorful',
+        rotationSpeed: 0.000005,
+        driftSpeed: 0.000002
+    };
+    
+    stars.push(colorStars);
+}
+
+
+// Star dust field - tiny background stars for depth
+function createStarDustField() {
+    const dustCount = 5000;
+    const starDust = new BABYLON.ParticleSystem("starDust", dustCount, scene);
+    
+    starDust.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8">
+            <circle cx="4" cy="4" r="4" fill="white" opacity="0.6" />
+            <circle cx="4" cy="4" r="1" fill="white" />
+        </svg>
+    `), scene);
+    
+    const emitter = BABYLON.MeshBuilder.CreateBox("dustEmitter", {size: 0.01}, scene);
+    emitter.isVisible = false;
+    starDust.emitter = emitter;
+    
+    starDust.minSize = 0.3;
+    starDust.maxSize = 1;
+    starDust.minLifeTime = Number.MAX_VALUE;
+    starDust.maxLifeTime = Number.MAX_VALUE;
+    starDust.emitRate = 0;
+    starDust.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    starDust.renderingGroupId = 0;
+    
+    starDust.color1 = new BABYLON.Color4(1, 1, 1, 0.6);
+    starDust.color2 = new BABYLON.Color4(0.9, 0.9, 1, 0.4);
+    
+    starDust.start();
+    starDust.manualEmitCount = dustCount;
+    
+    setTimeout(() => {
+        const particles = starDust.particles;
+        
+        for (let i = 0; i < particles.length; i++) {
+            const particle = particles[i];
+            if (!particle) continue;
+            
+            // Very distant uniform distribution
+            const radius = 600 + Math.random() * 800;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+            particle.position.z = radius * Math.cos(phi);
+            
+            particle.size = 0.3 + Math.random() * 0.7;
+            particle.color = new BABYLON.Color4(
+                0.9 + Math.random() * 0.1,
+                0.9 + Math.random() * 0.1,
+                1,
+                0.4 + Math.random() * 0.3
+            );
+            
+            particle.userData = {
+                baseSize: particle.size,
+                baseAlpha: particle.color.a,
+                twinkleSpeed: 0.002 + Math.random() * 0.005,
+                twinklePhase: Math.random() * Math.PI * 2,
+                stellarType: 'dust',
+                originalPosition: particle.position.clone()
+            };
+        }
+    }, 400);
+    
+    starDust.userData = {
+        layerType: 'dust',
+        rotationSpeed: 0.000002
+    };
+    
+    stars.push(starDust);
+}
+
+// Enhanced star animation for better visibility
+function updateEnhancedStarAnimations() {
+    if (stars.length === 0) return;
+    
+    const currentTime = performance.now() * 0.001;
+    
+    stars.forEach((starField, index) => {
+        if (!starField || typeof starField !== 'object') return;
+        if (starField.isDisposed && starField.isDisposed()) return;
+        
+        try {
+            if (starField instanceof BABYLON.ParticleSystem) {
+                const userData = starField.userData;
+                const particles = starField.particles;
+                
+                if (!userData || !particles) return;
+                
+                // Different animation behaviors per layer type
+                switch (userData.layerType) {
+                    case 'main':
+                        animateMainStars(particles, currentTime, userData);
+                        break;
+                    case 'beacon':
+                        animateBeaconStars(particles, currentTime, userData);
+                        break;
+                    case 'colorful':
+                        animateColorfulStars(particles, currentTime, userData);
+                        break;
+                    case 'dust':
+                        animateDustStars(particles, currentTime, userData);
+                        break;
+                }
+                
+                // Gentle rotation
+                if (starField.emitter && userData.rotationSpeed) {
+                    starField.emitter.rotation.y += userData.rotationSpeed;
+                }
+            }
+        } catch (animationError) {
+            console.warn('Enhanced star animation error:', animationError);
+        }
+    });
+}
+
+// Main stars animation - visible and steady
+function animateMainStars(particles, currentTime, userData) {
+    particles.forEach((particle, particleIndex) => {
+        if (!particle || !particle.userData) return;
+        
+        const data = particle.userData;
+        
+        // Gentle, visible twinkling
+        const twinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.2 + 0.9;
+        particle.size = data.baseSize * twinkle;
+        particle.color.a = Math.max(data.baseAlpha * twinkle, data.baseAlpha * 0.7); // Never too dim
+    });
+}
+
+// Beacon stars animation - bright and pulsing
+function animateBeaconStars(particles, currentTime, userData) {
+    particles.forEach((particle, particleIndex) => {
+        if (!particle || !particle.userData) return;
+        
+        const data = particle.userData;
+        
+        // Strong pulsing for beacon stars
+        const pulse = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * data.pulseIntensity + 0.8;
+        const breathe = Math.sin(currentTime * userData.breathingSpeed) * 0.1 + 1;
+        
+        particle.size = data.baseSize * pulse * breathe;
+        particle.color.a = Math.max(data.baseAlpha * pulse, 0.8); // Always bright
+    });
+}
+
+// Colorful stars animation - gentle color shifting
+function animateColorfulStars(particles, currentTime, userData) {
+    particles.forEach((particle, particleIndex) => {
+        if (!particle || !particle.userData) return;
+        
+        const data = particle.userData;
+        
+        // Subtle twinkling
+        const twinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.15 + 0.85;
+        particle.size = data.baseSize * twinkle;
+        particle.color.a = Math.max(data.baseAlpha * twinkle, data.baseAlpha * 0.6);
+    });
+}
+
+// Dust stars animation - very subtle
+function animateDustStars(particles, currentTime, userData) {
+    particles.forEach((particle, particleIndex) => {
+        if (!particle || !particle.userData) return;
+        
+        const data = particle.userData;
+        
+        // Very gentle twinkling
+        const twinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.1 + 0.9;
+        particle.size = data.baseSize * twinkle;
+        particle.color.a = Math.max(data.baseAlpha * twinkle, data.baseAlpha * 0.8);
+    });
 }
 
 // Layer 1: Primary cosmic stars with dynamic colors and sizes
@@ -866,49 +1402,49 @@ function createSingleShootingStar() {
     animatemeteor();
 }
 
-// Enhanced star animation update function
-function updateEnhancedStarAnimations() {
-    if (stars.length === 0) return;
+// // Enhanced star animation update function
+// function updateEnhancedStarAnimations() {
+//     if (stars.length === 0) return;
     
-    const currentTime = performance.now() * 0.001;
+//     const currentTime = performance.now() * 0.001;
     
-    stars.forEach((starField, index) => {
-        if (!starField || typeof starField !== 'object') return;
-        if (starField.isDisposed && starField.isDisposed()) return;
+//     stars.forEach((starField, index) => {
+//         if (!starField || typeof starField !== 'object') return;
+//         if (starField.isDisposed && starField.isDisposed()) return;
         
-        try {
-            if (starField instanceof BABYLON.ParticleSystem) {
-                const userData = starField.userData;
-                const particles = starField.particles;
+//         try {
+//             if (starField instanceof BABYLON.ParticleSystem) {
+//                 const userData = starField.userData;
+//                 const particles = starField.particles;
                 
-                if (!userData || !particles) return;
+//                 if (!userData || !particles) return;
                 
-                // Different animation behaviors per layer type
-                switch (userData.layerType) {
-                    case 'primary':
-                        animatePrimaryStars(particles, currentTime, userData);
-                        break;
-                    case 'distant':
-                        animateDistantStars(particles, currentTime, userData);
-                        break;
-                    case 'bright':
-                        animateBrightStars(particles, currentTime, userData);
-                        break;
-                    case 'cluster':
-                        animateClusterStars(particles, currentTime, userData);
-                        break;
-                }
+//                 // Different animation behaviors per layer type
+//                 switch (userData.layerType) {
+//                     case 'primary':
+//                         animatePrimaryStars(particles, currentTime, userData);
+//                         break;
+//                     case 'distant':
+//                         animateDistantStars(particles, currentTime, userData);
+//                         break;
+//                     case 'bright':
+//                         animateBrightStars(particles, currentTime, userData);
+//                         break;
+//                     case 'cluster':
+//                         animateClusterStars(particles, currentTime, userData);
+//                         break;
+//                 }
                 
-                // Apply gentle rotation to star field
-                if (starField.emitter && userData.rotationSpeed) {
-                    starField.emitter.rotation.y += userData.rotationSpeed;
-                }
-            }
-        } catch (animationError) {
-            console.warn('Enhanced star animation error:', animationError);
-        }
-    });
-}
+//                 // Apply gentle rotation to star field
+//                 if (starField.emitter && userData.rotationSpeed) {
+//                     starField.emitter.rotation.y += userData.rotationSpeed;
+//                 }
+//             }
+//         } catch (animationError) {
+//             console.warn('Enhanced star animation error:', animationError);
+//         }
+//     });
+// }
 
 // Primary stars animation - main starfield with stellar evolution
 function animatePrimaryStars(particles, currentTime, userData) {
@@ -1209,3 +1745,5 @@ export function dispose() {
 
 // Make animate function available globally for cleanup system
 window.scene3dAnimate = animate;
+
+
