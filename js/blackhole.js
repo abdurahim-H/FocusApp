@@ -230,8 +230,10 @@ function createPolarJets(parent) {
     upperJet.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
     upperJet.minSize = 0.5;
     upperJet.maxSize = 2;
-    upperJet.minLifeTime = Number.MAX_VALUE;
-    upperJet.maxLifeTime = Number.MAX_VALUE;
+    // Limit lifetime so new particles constantly spawn
+    // otherwise the system stops once the max count is reached
+    upperJet.minLifeTime = 2;
+    upperJet.maxLifeTime = 4;
     upperJet.emitRate = 150;
     upperJet.minEmitPower = 5;
     upperJet.maxEmitPower = 15;
@@ -242,10 +244,11 @@ function createPolarJets(parent) {
     
     // Lower jet
     const lowerJet = upperJet.clone('lowerPolarJet');
-    // Mirror the upper jet so particles shoot downward at the opposite angle
-    // This creates a balanced dual‑pole effect
-    lowerJet.direction1 = new BABYLON.Vector3(0.1, -1, 0.1);
-    lowerJet.direction2 = new BABYLON.Vector3(-0.1, -1, -0.1);
+    // Perfectly mirror the upper jet by flipping its direction vectors
+    lowerJet.direction1 = upperJet.direction1.scale(-1);
+    lowerJet.direction2 = upperJet.direction2.scale(-1);
+    lowerJet.minLifeTime = upperJet.minLifeTime;
+    lowerJet.maxLifeTime = upperJet.maxLifeTime;
     lowerJet.start();
     
     polarJetParticles.push(upperJet, lowerJet);
