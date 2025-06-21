@@ -269,141 +269,119 @@ function createPolarJets(parent) {
     
     // Custom DNA helix motion for first strand - CONTINUOUS STREAM
     helixStrand1.updateFunction = (particles) => {
-        const t = Date.now() * 0.001;
         for (let p = 0; p < particles.length; p++) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle if new - stagger birth times for continuous emission
+            // Initialize particle if new - randomize start times to prevent batching
             if (!particle.userData) {
                 particle.userData = {
-                    birthTime: t - (p * 0.05), // Stagger birth times for continuous flow
-                    phase: Math.random() * Math.PI * 2,
-                    strand: 1
+                    age: Math.random() * 20, // Random starting position along the helix
+                    basePhase: Math.random() * Math.PI * 2
                 };
             }
             
             const data = particle.userData;
-            const particleAge = (t - data.birthTime) * 6; // Speed multiplier for stream motion
+            data.age += 0.15; // Faster, more visible motion
             
-            // Calculate height based on age only (continuous emission)
-            const height = particleAge;
-            
-            // If particle has moved too far up, recycle it with new birth time
-            if (height > 25) {
-                data.birthTime = t; // Reset birth time to current time
-                data.phase = Math.random() * Math.PI * 2;
+            // Reset when particle reaches the top
+            if (data.age > 20) {
+                data.age = 0;
+                data.basePhase = Math.random() * Math.PI * 2;
             }
             
-            const currentHeight = Math.max(0, height);
-            const radius = 0.1 + (currentHeight * 0.15);
-            const helixAngle = currentHeight * 4 + data.phase;
+            const height = data.age;
+            const radius = 1.0 + (height * 0.1); // Start at radius 1, expand to 3
+            const helixAngle = height * 0.8 + data.basePhase; // Tighter helix
             
-            // Calculate local helix position
-            const localX = Math.cos(helixAngle) * radius;
-            const localY = currentHeight;
-            const localZ = Math.sin(helixAngle) * radius;
+            // Calculate helix position
+            const x = Math.cos(helixAngle) * radius;
+            const y = height;
+            const z = Math.sin(helixAngle) * radius;
             
-            // Apply rotation transformation manually (since particle positions bypass transform hierarchy)
-            const rotX = Math.PI / 12; // 15 degrees forward tilt (reduced from 22.5°)
-            const rotZ = -Math.PI / 10; // 18 degrees left tilt (reduced and reversed direction)
+            // Apply manual tilt transformation
+            const tiltX = Math.PI / 12; // 15 degrees forward
+            const tiltZ = -Math.PI / 10; // 18 degrees left
             
-            // Apply Z rotation (right tilt)
-            const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
-            const tempY = localX * Math.sin(rotZ) + localY * Math.cos(rotZ);
+            // Apply Z rotation (left tilt)
+            const rotatedX = x * Math.cos(tiltZ) - y * Math.sin(tiltZ);
+            const rotatedY = x * Math.sin(tiltZ) + y * Math.cos(tiltZ);
             
             // Apply X rotation (forward tilt)
-            const finalX = tempX;
-            const finalY = tempY * Math.cos(rotX) - localZ * Math.sin(rotX);
-            const finalZ = tempY * Math.sin(rotX) + localZ * Math.cos(rotX);
+            const finalX = rotatedX;
+            const finalY = rotatedY * Math.cos(tiltX) - z * Math.sin(tiltX);
+            const finalZ = rotatedY * Math.sin(tiltX) + z * Math.cos(tiltX);
             
-            // Set transformed position
             particle.position.x = finalX;
             particle.position.y = finalY;
             particle.position.z = finalZ;
             
-            // Minimal jitter
-            particle.position.x += (Math.random() - 0.5) * 0.05;
-            particle.position.z += (Math.random() - 0.5) * 0.05;
-            
-            // Opacity based on height and position in stream
-            const fadeStart = 20;
-            const alpha = currentHeight > fadeStart ? 
-                Math.max(0.1, 1 - (currentHeight - fadeStart) / 5) : 
-                Math.min(0.9, currentHeight / 2);
-            particle.color.a = alpha;
+            // Opacity fade
+            const fadeStart = 15;
+            particle.color.a = height > fadeStart ? 
+                Math.max(0.1, 1 - (height - fadeStart) / 5) : 
+                Math.min(0.9, height / 3);
         }
     };
     
     // Custom DNA helix motion for second strand - CONTINUOUS STREAM
     helixStrand2.updateFunction = (particles) => {
-        const t = Date.now() * 0.001;
         for (let p = 0; p < particles.length; p++) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle if new - stagger birth times for continuous emission
+            // Initialize particle if new - randomize start times to prevent batching
             if (!particle.userData) {
                 particle.userData = {
-                    birthTime: t - (p * 0.05), // Stagger birth times for continuous flow
-                    phase: Math.random() * Math.PI * 2,
-                    strand: 2
+                    age: Math.random() * 20, // Random starting position along the helix
+                    basePhase: Math.random() * Math.PI * 2
                 };
             }
             
             const data = particle.userData;
-            const particleAge = (t - data.birthTime) * 6; // Same speed multiplier
+            data.age += 0.15; // Same motion as first strand
             
-            // Calculate height based on age only (continuous emission)
-            const height = particleAge;
-            
-            // If particle has moved too far up, recycle it with new birth time
-            if (height > 25) {
-                data.birthTime = t; // Reset birth time to current time
-                data.phase = Math.random() * Math.PI * 2;
+            // Reset when particle reaches the top
+            if (data.age > 20) {
+                data.age = 0;
+                data.basePhase = Math.random() * Math.PI * 2;
             }
             
-            const currentHeight = Math.max(0, height);
-            const radius = 0.5 + (currentHeight * 0.12); // Same reduced starting diameter for counter-rotating strand
-            const helixAngle = -currentHeight * 4 + data.phase + Math.PI; // Counter-rotating
+            const height = data.age;
+            const radius = 1.0 + (height * 0.1); // Same expansion
+            const helixAngle = -height * 0.8 + data.basePhase + Math.PI; // Counter-rotating, 180° offset
             
-            // Calculate local helix position
-            const localX = Math.cos(helixAngle) * radius;
-            const localY = currentHeight;
-            const localZ = Math.sin(helixAngle) * radius;
+            // Calculate helix position
+            const x = Math.cos(helixAngle) * radius;
+            const y = height;
+            const z = Math.sin(helixAngle) * radius;
             
-            // Apply rotation transformation manually (same as first strand)
-            const rotX = Math.PI / 12; // 15 degrees forward tilt (reduced from 22.5°)
-            const rotZ = -Math.PI / 10; // 18 degrees left tilt (reduced and reversed direction)
+            // Apply same manual tilt transformation
+            const tiltX = Math.PI / 12; // 15 degrees forward
+            const tiltZ = -Math.PI / 10; // 18 degrees left
             
-            // Apply Z rotation (right tilt)
-            const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
-            const tempY = localX * Math.sin(rotZ) + localY * Math.cos(rotZ);
+            // Apply Z rotation (left tilt)
+            const rotatedX = x * Math.cos(tiltZ) - y * Math.sin(tiltZ);
+            const rotatedY = x * Math.sin(tiltZ) + y * Math.cos(tiltZ);
             
             // Apply X rotation (forward tilt)
-            const finalX = tempX;
-            const finalY = tempY * Math.cos(rotX) - localZ * Math.sin(rotX);
-            const finalZ = tempY * Math.sin(rotX) + localZ * Math.cos(rotX);
+            const finalX = rotatedX;
+            const finalY = rotatedY * Math.cos(tiltX) - z * Math.sin(tiltX);
+            const finalZ = rotatedY * Math.sin(tiltX) + z * Math.cos(tiltX);
             
-            // Set transformed position
             particle.position.x = finalX;
             particle.position.y = finalY;
             particle.position.z = finalZ;
             
-            // Minimal jitter
-            particle.position.x += (Math.random() - 0.5) * 0.05;
-            particle.position.z += (Math.random() - 0.5) * 0.05;
-            
-            // Opacity based on height and position in stream
-            const fadeStart = 20;
-            const alpha = currentHeight > fadeStart ? 
-                Math.max(0.1, 1 - (currentHeight - fadeStart) / 5) : 
-                Math.min(0.9, currentHeight / 2);
-            particle.color.a = alpha;
+            // Same opacity fade
+            const fadeStart = 15;
+            particle.color.a = height > fadeStart ? 
+                Math.max(0.1, 1 - (height - fadeStart) / 5) : 
+                Math.min(0.9, height / 3);
         }
     };
     
-    // Create downward DNA helix strands (mirroring the upward ones)
+    // Create downward DNA helix strands
     const helixStrand3 = new BABYLON.ParticleSystem('dnaHelixDown1', 600, scene);
     helixStrand3.particleTexture = spiralTexture;
     helixStrand3.emitter = spiralGroup;
@@ -438,139 +416,117 @@ function createPolarJets(parent) {
     helixStrand4.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
     helixStrand4.renderingGroupId = 1;
     
-    // Custom DNA helix motion for third strand - DOWNWARD STREAM
+    // Downward helix motion for third strand
     helixStrand3.updateFunction = (particles) => {
-        const t = Date.now() * 0.001;
         for (let p = 0; p < particles.length; p++) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle if new - stagger birth times for continuous emission
+            // Initialize particle if new - randomize start times to prevent batching
             if (!particle.userData) {
                 particle.userData = {
-                    birthTime: t - (p * 0.05), // Stagger birth times for continuous flow
-                    phase: Math.random() * Math.PI * 2,
-                    strand: 3
+                    age: Math.random() * 20, // Random starting position along the helix
+                    basePhase: Math.random() * Math.PI * 2
                 };
             }
             
             const data = particle.userData;
-            const particleAge = (t - data.birthTime) * 6; // Speed multiplier for stream motion
+            data.age += 0.15; // Same speed as upward strands
             
-            // Calculate depth based on age only (continuous emission downward)
-            const depth = particleAge;
-            
-            // If particle has moved too far down, recycle it with new birth time
-            if (depth > 25) {
-                data.birthTime = t; // Reset birth time to current time
-                data.phase = Math.random() * Math.PI * 2;
+            // Reset when particle reaches the bottom
+            if (data.age > 20) {
+                data.age = 0;
+                data.basePhase = Math.random() * Math.PI * 2;
             }
             
-            const currentDepth = Math.max(0, depth);
-            const radius = 0.5 + (currentDepth * 0.12); // Same expansion as upward spiral
-            const helixAngle = currentDepth * 4 + data.phase;
+            const depth = data.age;
+            const radius = 1.0 + (depth * 0.1); // Same expansion
+            const helixAngle = depth * 0.8 + data.basePhase; // Same direction as first strand
             
-            // Calculate local helix position (downward)
-            const localX = Math.cos(helixAngle) * radius;
-            const localY = -currentDepth; // Negative Y for downward
-            const localZ = Math.sin(helixAngle) * radius;
+            // Calculate downward helix position
+            const x = Math.cos(helixAngle) * radius;
+            const y = -depth; // Negative for downward
+            const z = Math.sin(helixAngle) * radius;
             
-            // Apply rotation transformation manually
-            const rotX = Math.PI / 12; // 15 degrees forward tilt (reduced from 22.5°)
-            const rotZ = -Math.PI / 10; // 18 degrees left tilt (reduced and reversed direction)
+            // Apply same manual tilt transformation
+            const tiltX = Math.PI / 12; // 15 degrees forward
+            const tiltZ = -Math.PI / 10; // 18 degrees left
             
-            // Apply Z rotation (right tilt)
-            const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
-            const tempY = localX * Math.sin(rotZ) + localY * Math.cos(rotZ);
+            // Apply Z rotation (left tilt)
+            const rotatedX = x * Math.cos(tiltZ) - y * Math.sin(tiltZ);
+            const rotatedY = x * Math.sin(tiltZ) + y * Math.cos(tiltZ);
             
             // Apply X rotation (forward tilt)
-            const finalX = tempX;
-            const finalY = tempY * Math.cos(rotX) - localZ * Math.sin(rotX);
-            const finalZ = tempY * Math.sin(rotX) + localZ * Math.cos(rotX);
+            const finalX = rotatedX;
+            const finalY = rotatedY * Math.cos(tiltX) - z * Math.sin(tiltX);
+            const finalZ = rotatedY * Math.sin(tiltX) + z * Math.cos(tiltX);
             
-            // Set transformed position
             particle.position.x = finalX;
             particle.position.y = finalY;
             particle.position.z = finalZ;
             
-            // Minimal jitter
-            particle.position.x += (Math.random() - 0.5) * 0.05;
-            particle.position.z += (Math.random() - 0.5) * 0.05;
-            
-            // Opacity based on depth and position in stream
-            const fadeStart = 20;
-            const alpha = currentDepth > fadeStart ? 
-                Math.max(0.1, 1 - (currentDepth - fadeStart) / 5) : 
-                Math.min(0.9, currentDepth / 2);
-            particle.color.a = alpha;
+            // Same opacity fade
+            const fadeStart = 15;
+            particle.color.a = depth > fadeStart ? 
+                Math.max(0.1, 1 - (depth - fadeStart) / 5) : 
+                Math.min(0.9, depth / 3);
         }
     };
     
-    // Custom DNA helix motion for fourth strand - DOWNWARD COUNTER-ROTATING
+    // Downward helix motion for fourth strand (counter-rotating)
     helixStrand4.updateFunction = (particles) => {
-        const t = Date.now() * 0.001;
         for (let p = 0; p < particles.length; p++) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle if new - stagger birth times for continuous emission
+            // Initialize particle if new - randomize start times to prevent batching
             if (!particle.userData) {
                 particle.userData = {
-                    birthTime: t - (p * 0.05), // Stagger birth times for continuous flow
-                    phase: Math.random() * Math.PI * 2,
-                    strand: 4
+                    age: Math.random() * 20, // Random starting position along the helix
+                    basePhase: Math.random() * Math.PI * 2
                 };
             }
             
             const data = particle.userData;
-            const particleAge = (t - data.birthTime) * 6; // Same speed multiplier
+            data.age += 0.15; // Same speed as other strands
             
-            // Calculate depth based on age only (continuous emission downward)
-            const depth = particleAge;
-            
-            // If particle has moved too far down, recycle it with new birth time
-            if (depth > 25) {
-                data.birthTime = t; // Reset birth time to current time
-                data.phase = Math.random() * Math.PI * 2;
+            // Reset when particle reaches the bottom
+            if (data.age > 20) {
+                data.age = 0;
+                data.basePhase = Math.random() * Math.PI * 2;
             }
             
-            const currentDepth = Math.max(0, depth);
-            const radius = 0.5 + (currentDepth * 0.12); // Same expansion
-            const helixAngle = -currentDepth * 4 + data.phase + Math.PI; // Counter-rotating
+            const depth = data.age;
+            const radius = 1.0 + (depth * 0.1); // Same expansion
+            const helixAngle = -depth * 0.8 + data.basePhase + Math.PI; // Counter-rotating, 180° offset
             
-            // Calculate local helix position (downward counter-rotating)
-            const localX = Math.cos(helixAngle) * radius;
-            const localY = -currentDepth; // Negative Y for downward
-            const localZ = Math.sin(helixAngle) * radius;
+            // Calculate downward helix position
+            const x = Math.cos(helixAngle) * radius;
+            const y = -depth; // Negative for downward
+            const z = Math.sin(helixAngle) * radius;
             
-            // Apply rotation transformation manually
-            const rotX = Math.PI / 12; // 15 degrees forward tilt (reduced from 22.5°)
-            const rotZ = -Math.PI / 10; // 18 degrees left tilt (reduced and reversed direction)
+            // Apply same manual tilt transformation
+            const tiltX = Math.PI / 12; // 15 degrees forward
+            const tiltZ = -Math.PI / 10; // 18 degrees left
             
-            // Apply Z rotation (right tilt)
-            const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
-            const tempY = localX * Math.sin(rotZ) + localY * Math.cos(rotZ);
+            // Apply Z rotation (left tilt)
+            const rotatedX = x * Math.cos(tiltZ) - y * Math.sin(tiltZ);
+            const rotatedY = x * Math.sin(tiltZ) + y * Math.cos(tiltZ);
             
             // Apply X rotation (forward tilt)
-            const finalX = tempX;
-            const finalY = tempY * Math.cos(rotX) - localZ * Math.sin(rotX);
-            const finalZ = tempY * Math.sin(rotX) + localZ * Math.cos(rotX);
+            const finalX = rotatedX;
+            const finalY = rotatedY * Math.cos(tiltX) - z * Math.sin(tiltX);
+            const finalZ = rotatedY * Math.sin(tiltX) + z * Math.cos(tiltX);
             
-            // Set transformed position
             particle.position.x = finalX;
             particle.position.y = finalY;
             particle.position.z = finalZ;
             
-            // Minimal jitter
-            particle.position.x += (Math.random() - 0.5) * 0.05;
-            particle.position.z += (Math.random() - 0.5) * 0.05;
-            
-            // Opacity based on depth and position in stream
-            const fadeStart = 20;
-            const alpha = currentDepth > fadeStart ? 
-                Math.max(0.1, 1 - (currentDepth - fadeStart) / 5) : 
-                Math.min(0.9, currentDepth / 2);
-            particle.color.a = alpha;
+            // Same opacity fade
+            const fadeStart = 15;
+            particle.color.a = depth > fadeStart ? 
+                Math.max(0.1, 1 - (depth - fadeStart) / 5) : 
+                Math.min(0.9, depth / 3);
         }
     };
 
