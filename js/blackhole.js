@@ -369,10 +369,153 @@ function createPolarJets(parent) {
         }
     };
     
+    // Create downward DNA helix strands (mirroring the upward ones)
+    const helixStrand3 = new BABYLON.ParticleSystem('dnaHelixDown1', 600, scene);
+    helixStrand3.particleTexture = spiralTexture;
+    helixStrand3.emitter = spiralGroup;
+    helixStrand3.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
+    
+    helixStrand3.color1 = new BABYLON.Color4(0.8, 0.9, 1, 0.9);
+    helixStrand3.color2 = new BABYLON.Color4(0.6, 0.8, 1, 0.7);
+    helixStrand3.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
+    helixStrand3.minSize = 0.6;
+    helixStrand3.maxSize = 1.8;
+    helixStrand3.minLifeTime = Number.MAX_VALUE;
+    helixStrand3.maxLifeTime = Number.MAX_VALUE;
+    helixStrand3.emitRate = 120;
+    helixStrand3.gravity = BABYLON.Vector3.Zero();
+    helixStrand3.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    helixStrand3.renderingGroupId = 1;
+    
+    const helixStrand4 = new BABYLON.ParticleSystem('dnaHelixDown2', 600, scene);
+    helixStrand4.particleTexture = spiralTexture;
+    helixStrand4.emitter = spiralGroup;
+    helixStrand4.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
+    
+    helixStrand4.color1 = new BABYLON.Color4(0.7, 0.8, 1, 0.9);
+    helixStrand4.color2 = new BABYLON.Color4(0.5, 0.7, 1, 0.7);
+    helixStrand4.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
+    helixStrand4.minSize = 0.6;
+    helixStrand4.maxSize = 1.8;
+    helixStrand4.minLifeTime = Number.MAX_VALUE;
+    helixStrand4.maxLifeTime = Number.MAX_VALUE;
+    helixStrand4.emitRate = 120;
+    helixStrand4.gravity = BABYLON.Vector3.Zero();
+    helixStrand4.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    helixStrand4.renderingGroupId = 1;
+    
+    // Custom DNA helix motion for third strand - DOWNWARD STREAM
+    helixStrand3.updateFunction = (particles) => {
+        const t = Date.now() * 0.001;
+        for (let p = 0; p < particles.length; p++) {
+            const particle = particles[p];
+            if (!particle) continue;
+            
+            // Initialize particle if new - assign birth time and position in stream
+            if (!particle.userData) {
+                particle.userData = {
+                    birthTime: t,
+                    streamPosition: p / particles.length, // Position in the stream (0-1)
+                    phase: Math.random() * Math.PI * 2,
+                    strand: 3
+                };
+            }
+            
+            const data = particle.userData;
+            const particleAge = (t - data.birthTime) * 8; // Speed multiplier for stream motion
+            
+            // Calculate position along the continuous helix stream (downward)
+            const streamDepth = data.streamPosition * 25; // Max stream length
+            const depth = streamDepth + particleAge; // Moving depth based on age
+            
+            // If particle has moved too far down, recycle it to the center
+            if (depth > 25) {
+                data.birthTime = t;
+                data.streamPosition = 0;
+                data.phase = Math.random() * Math.PI * 2;
+            }
+            
+            const currentDepth = Math.max(0, depth);
+            const radius = 0.5 + (currentDepth * 0.12); // Same expansion as upward spiral
+            const helixAngle = currentDepth * 4 + data.phase;
+            
+            // First downward strand position
+            particle.position.x = Math.cos(helixAngle) * radius;
+            particle.position.z = Math.sin(helixAngle) * radius;
+            particle.position.y = -currentDepth; // Negative Y for downward
+            
+            // Minimal jitter
+            particle.position.x += (Math.random() - 0.5) * 0.05;
+            particle.position.z += (Math.random() - 0.5) * 0.05;
+            
+            // Opacity based on depth and position in stream
+            const fadeStart = 20;
+            const alpha = currentDepth > fadeStart ? 
+                Math.max(0.1, 1 - (currentDepth - fadeStart) / 5) : 
+                Math.min(0.9, currentDepth / 2);
+            particle.color.a = alpha;
+        }
+    };
+    
+    // Custom DNA helix motion for fourth strand - DOWNWARD COUNTER-ROTATING
+    helixStrand4.updateFunction = (particles) => {
+        const t = Date.now() * 0.001;
+        for (let p = 0; p < particles.length; p++) {
+            const particle = particles[p];
+            if (!particle) continue;
+            
+            // Initialize particle if new - assign birth time and position in stream
+            if (!particle.userData) {
+                particle.userData = {
+                    birthTime: t,
+                    streamPosition: p / particles.length, // Position in the stream (0-1)
+                    phase: Math.random() * Math.PI * 2,
+                    strand: 4
+                };
+            }
+            
+            const data = particle.userData;
+            const particleAge = (t - data.birthTime) * 8; // Same speed multiplier
+            
+            // Calculate position along the continuous helix stream (downward)
+            const streamDepth = data.streamPosition * 25; // Same max stream length
+            const depth = streamDepth + particleAge; // Moving depth based on age
+            
+            // If particle has moved too far down, recycle it to the center
+            if (depth > 25) {
+                data.birthTime = t;
+                data.streamPosition = 0;
+                data.phase = Math.random() * Math.PI * 2;
+            }
+            
+            const currentDepth = Math.max(0, depth);
+            const radius = 0.5 + (currentDepth * 0.12); // Same expansion
+            const helixAngle = -currentDepth * 4 + data.phase + Math.PI; // Counter-rotating
+            
+            // Second downward strand position
+            particle.position.x = Math.cos(helixAngle) * radius;
+            particle.position.z = Math.sin(helixAngle) * radius;
+            particle.position.y = -currentDepth; // Negative Y for downward
+            
+            // Minimal jitter
+            particle.position.x += (Math.random() - 0.5) * 0.05;
+            particle.position.z += (Math.random() - 0.5) * 0.05;
+            
+            // Opacity based on depth and position in stream
+            const fadeStart = 20;
+            const alpha = currentDepth > fadeStart ? 
+                Math.max(0.1, 1 - (currentDepth - fadeStart) / 5) : 
+                Math.min(0.9, currentDepth / 2);
+            particle.color.a = alpha;
+        }
+    };
+
     helixStrand1.start();
     helixStrand2.start();
+    helixStrand3.start();
+    helixStrand4.start();
     
-    polarJetParticles.push(helixStrand1, helixStrand2);
+    polarJetParticles.push(helixStrand1, helixStrand2, helixStrand3, helixStrand4);
 }
 
 // Create ethereal matter streams in the accretion disk
