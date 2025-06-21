@@ -19,7 +19,7 @@ async function loadModules() {
         { name: 'sounds', path: './sounds.js' },
         { name: 'settings', path: './settings.js' },
         { name: 'navigation', path: './navigation.js' },
-        { name: 'uiEffects', path: './ui-efffects.js' },
+        { name: 'uiEffects', path: './ui-effects.js' },
         { name: 'cleanup', path: './cleanup.js' },
         { name: 'notifications', path: './notifications.js' }
     ];
