@@ -274,32 +274,29 @@ function createPolarJets(parent) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle if new - assign birth time and position in stream
+            // Initialize particle if new - stagger birth times for continuous emission
             if (!particle.userData) {
                 particle.userData = {
-                    birthTime: t,
-                    streamPosition: p / particles.length, // Position in the stream (0-1)
+                    birthTime: t - (p * 0.05), // Stagger birth times for continuous flow
                     phase: Math.random() * Math.PI * 2,
                     strand: 1
                 };
             }
             
             const data = particle.userData;
-            const particleAge = (t - data.birthTime) * 8; // Speed multiplier for stream motion
+            const particleAge = (t - data.birthTime) * 6; // Speed multiplier for stream motion
             
-            // Calculate position along the continuous helix stream
-            const streamHeight = data.streamPosition * 25; // Max stream length
-            const height = streamHeight + particleAge; // Moving height based on age
+            // Calculate height based on age only (continuous emission)
+            const height = particleAge;
             
-            // If particle has moved too far up, recycle it to the bottom
+            // If particle has moved too far up, recycle it with new birth time
             if (height > 25) {
-                data.birthTime = t;
-                data.streamPosition = 0;
+                data.birthTime = t; // Reset birth time to current time
                 data.phase = Math.random() * Math.PI * 2;
             }
             
             const currentHeight = Math.max(0, height);
-            const radius = 0.1 + (currentHeight * 0.15); // Reduced starting diameter: starts at 0.5, grows by 0.12 per unit height
+            const radius = 0.1 + (currentHeight * 0.15);
             const helixAngle = currentHeight * 4 + data.phase;
             
             // Calculate local helix position
@@ -345,27 +342,24 @@ function createPolarJets(parent) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle if new - assign birth time and position in stream
+            // Initialize particle if new - stagger birth times for continuous emission
             if (!particle.userData) {
                 particle.userData = {
-                    birthTime: t,
-                    streamPosition: p / particles.length, // Position in the stream (0-1)
+                    birthTime: t - (p * 0.05), // Stagger birth times for continuous flow
                     phase: Math.random() * Math.PI * 2,
                     strand: 2
                 };
             }
             
             const data = particle.userData;
-            const particleAge = (t - data.birthTime) * 8; // Same speed multiplier
+            const particleAge = (t - data.birthTime) * 6; // Same speed multiplier
             
-            // Calculate position along the continuous helix stream
-            const streamHeight = data.streamPosition * 25; // Same max stream length
-            const height = streamHeight + particleAge; // Moving height based on age
+            // Calculate height based on age only (continuous emission)
+            const height = particleAge;
             
-            // If particle has moved too far up, recycle it to the bottom
+            // If particle has moved too far up, recycle it with new birth time
             if (height > 25) {
-                data.birthTime = t;
-                data.streamPosition = 0;
+                data.birthTime = t; // Reset birth time to current time
                 data.phase = Math.random() * Math.PI * 2;
             }
             
@@ -451,27 +445,24 @@ function createPolarJets(parent) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle if new - assign birth time and position in stream
+            // Initialize particle if new - stagger birth times for continuous emission
             if (!particle.userData) {
                 particle.userData = {
-                    birthTime: t,
-                    streamPosition: p / particles.length, // Position in the stream (0-1)
+                    birthTime: t - (p * 0.05), // Stagger birth times for continuous flow
                     phase: Math.random() * Math.PI * 2,
                     strand: 3
                 };
             }
             
             const data = particle.userData;
-            const particleAge = (t - data.birthTime) * 8; // Speed multiplier for stream motion
+            const particleAge = (t - data.birthTime) * 6; // Speed multiplier for stream motion
             
-            // Calculate position along the continuous helix stream (downward)
-            const streamDepth = data.streamPosition * 25; // Max stream length
-            const depth = streamDepth + particleAge; // Moving depth based on age
+            // Calculate depth based on age only (continuous emission downward)
+            const depth = particleAge;
             
-            // If particle has moved too far down, recycle it to the center
+            // If particle has moved too far down, recycle it with new birth time
             if (depth > 25) {
-                data.birthTime = t;
-                data.streamPosition = 0;
+                data.birthTime = t; // Reset birth time to current time
                 data.phase = Math.random() * Math.PI * 2;
             }
             
@@ -522,27 +513,24 @@ function createPolarJets(parent) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle if new - assign birth time and position in stream
+            // Initialize particle if new - stagger birth times for continuous emission
             if (!particle.userData) {
                 particle.userData = {
-                    birthTime: t,
-                    streamPosition: p / particles.length, // Position in the stream (0-1)
+                    birthTime: t - (p * 0.05), // Stagger birth times for continuous flow
                     phase: Math.random() * Math.PI * 2,
                     strand: 4
                 };
             }
             
             const data = particle.userData;
-            const particleAge = (t - data.birthTime) * 8; // Same speed multiplier
+            const particleAge = (t - data.birthTime) * 6; // Same speed multiplier
             
-            // Calculate position along the continuous helix stream (downward)
-            const streamDepth = data.streamPosition * 25; // Same max stream length
-            const depth = streamDepth + particleAge; // Moving depth based on age
+            // Calculate depth based on age only (continuous emission downward)
+            const depth = particleAge;
             
-            // If particle has moved too far down, recycle it to the center
+            // If particle has moved too far down, recycle it with new birth time
             if (depth > 25) {
-                data.birthTime = t;
-                data.streamPosition = 0;
+                data.birthTime = t; // Reset birth time to current time
                 data.phase = Math.random() * Math.PI * 2;
             }
             
