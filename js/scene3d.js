@@ -1,5 +1,5 @@
 // scene3d.js
-// 3D Scene Setup and Management - Complete Fixed Babylon.js Implementation
+// 3D Scene Setup and Management - Complete Enhanced Babylon.js Implementation with Beautiful Cosmic Stars
 import { createStarField, createGalaxyCore, createPlanets, createNebula, createComets, createSpaceObjects } from './galaxy.js';
 import { updateBlackHoleEffects, createEnhancedBlackHole } from './blackhole.js';
 import { initCameraEffects, updateCameraEffects } from './camera-effects.js';
@@ -232,27 +232,15 @@ function createGalaxyElements() {
     console.log('Creating galaxy elements...');
     
     try {
-        // Create minimalist galaxy elements
-        createMinimalistStarField();
-        console.log('Minimalist star field creation completed');
-        
-        // createNebula(); // DISABLED - This creates cosmic dust particles that spill out of black hole
-        // console.log('Nebula creation completed');
+        // Create enhanced cosmic starfield
+        createEnhancedCosmicStarField();
+        console.log('Enhanced cosmic star field creation completed');
         
         createEnhancedBlackHole();
         console.log('Black hole creation completed');
         
-        // createPlanets(); // DISABLED - Planets removed for cleaner space environment
-        // console.log('Planets creation completed');
-        
-        // createComets(); // DISABLED - Comets create trailing particle effects
-        // console.log('Comets creation completed');
-        
-        // createSpaceObjects(); // DISABLED - Space objects removed for minimalist stellar field
-        // console.log('Space objects creation completed');
-        
     } catch (error) {
-        console.error('Error creating minimalist galaxy elements:', error);
+        console.error('Error creating galaxy elements:', error);
         
         // Create minimal fallback scene - just a few tiny stars
         createFallbackTinyStars();
@@ -260,177 +248,784 @@ function createGalaxyElements() {
     }
 }
 
-// Create minimalist star field with only tiny background stars
-function createMinimalistStarField() {
+// Enhanced Cosmic Starfield - Beautiful multi-layered stars
+function createEnhancedCosmicStarField() {
     try {
         if (!scene) {
             console.warn('Scene not available for star field creation');
             return;
         }
 
-        // Create enhanced star particle system
-        const starCount = 8000; // Reduced for better performance, focused on tiny stars
+        console.log('✨ Creating enhanced cosmic starfield...');
         
-        // Create a custom star particle system
-        const starParticleSystem = new BABYLON.ParticleSystem("minimalistStars", starCount, scene);
+        // Create multiple star layers for depth and beauty
+        createPrimaryStarLayer();
+        createDistantStarLayer();
+        createBrightStarLayer();
+        createNebulaStarClusters();
+        createShootingStars();
         
-        // Create a dummy emitter (we'll position particles manually)
-        const emitter = BABYLON.MeshBuilder.CreateBox("emitter", {size: 0.01}, scene);
-        emitter.isVisible = false;
-        starParticleSystem.emitter = emitter;
-        
-        // Enhanced star texture - simplified for tiny point-like stars
-        starParticleSystem.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                <defs>
-                    <radialGradient id="starPoint" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" style="stop-color:white;stop-opacity:1" />
-                        <stop offset="40%" style="stop-color:white;stop-opacity:0.8" />
-                        <stop offset="100%" style="stop-color:white;stop-opacity:0" />
-                    </radialGradient>
-                </defs>
-                <circle cx="16" cy="16" r="16" fill="url(#starPoint)" />
-            </svg>
-        `), scene);
-        
-        // Enhanced particle properties with tiny, subtle sizing
-        starParticleSystem.minSize = 0.1;
-        starParticleSystem.maxSize = 1.0; // Much smaller stars
-        starParticleSystem.minLifeTime = Number.MAX_VALUE;
-        starParticleSystem.maxLifeTime = Number.MAX_VALUE;
-        starParticleSystem.emitRate = 0;
-        
-        // Enhanced blending for subtle cosmic glow
-        starParticleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
-        
-        // Set rendering group for background positioning
-        starParticleSystem.renderingGroupId = 0; // Background layer - renders first
-        
-        // Subtle color variations for distant stars
-        starParticleSystem.color1 = new BABYLON.Color4(1, 1, 1, 0.6);
-        starParticleSystem.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.4);
-        starParticleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
-        
-        // Start the particle system and emit all particles at once
-        starParticleSystem.start();
-        starParticleSystem.manualEmitCount = starCount;
-        
-        // Position star particles manually with distant distribution
-        setTimeout(() => {
-            const particles = starParticleSystem.particles;
-            
-            for (let i = 0; i < particles.length; i++) {
-                const particle = particles[i];
-                if (!particle) continue;
-                
-                // Create realistic distant stellar distribution
-                const distributionType = Math.random();
-                let radius, theta, phi;
-                
-                // All stars are distant background objects
-                radius = 150 + Math.pow(Math.random(), 0.2) * 400; // Much farther away
-                theta = Math.random() * Math.PI * 2;
-                phi = Math.acos(2 * Math.random() - 1); // Uniform sphere distribution
-                
-                particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
-                particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
-                particle.position.z = radius * Math.cos(phi);
-                
-                // Only tiny, point-like stars
-                particle.size = 0.1 + Math.random() * 0.4; // Very small
-                
-                // Subtle star colors - white, blue-white, slightly yellow
-                const starType = Math.random();
-                if (starType < 0.6) {
-                    // White stars
-                    particle.color = new BABYLON.Color4(
-                        0.9 + Math.random() * 0.1,
-                        0.9 + Math.random() * 0.1,
-                        1,
-                        0.4 + Math.random() * 0.3
-                    );
-                } else if (starType < 0.85) {
-                    // Blue-white stars
-                    particle.color = new BABYLON.Color4(
-                        0.7 + Math.random() * 0.2,
-                        0.8 + Math.random() * 0.2,
-                        1,
-                        0.3 + Math.random() * 0.2
-                    );
-                } else {
-                    // Slightly warm white stars
-                    particle.color = new BABYLON.Color4(
-                        1,
-                        0.9 + Math.random() * 0.1,
-                        0.8 + Math.random() * 0.2,
-                        0.3 + Math.random() * 0.2
-                    );
-                }
-                
-                // Store stellar properties for subtle animation
-                particle.userData = {
-                    baseSize: particle.size,
-                    baseAlpha: particle.color.a, // Store the initial alpha value
-                    twinkleSpeed: 0.01 + Math.random() * 0.03, // Slower, subtler twinkling
-                    twinklePhase: Math.random() * Math.PI * 2,
-                    stellarType: 'distant'
-                };
-            }
-        }, 100);
-        
-        // Store particle system with minimal animation data
-        starParticleSystem.userData = {
-            rotationSpeed: 0.000005, // Very slow rotation
-            driftSpeed: 0.000002, // Minimal drift
-            isMainStarField: true,
-            lastUpdateTime: 0
-        };
-        
-        stars.push(starParticleSystem);
-        
-        console.log('✨ Minimalist star field created with', starCount, 'tiny background stars');
+        console.log('🌌 Enhanced cosmic starfield complete with multiple layers');
         
     } catch (error) {
-        console.error('Failed to create minimalist star field:', error);
-        // Create a simple fallback
+        console.error('Failed to create enhanced starfield:', error);
         createFallbackTinyStars();
     }
 }
 
-// Fallback tiny star creation
-function createFallbackTinyStars() {
-    try {
-        // Create simple sphere-based tiny stars
-        for (let i = 0; i < 30; i++) {
-            const star = BABYLON.MeshBuilder.CreateSphere(`tinyStar${i}`, {diameter: 0.5}, scene);
+// Layer 1: Primary cosmic stars with dynamic colors and sizes
+function createPrimaryStarLayer() {
+    const starCount = 4000;
+    const primaryStars = new BABYLON.ParticleSystem("primaryCosmicStars", starCount, scene);
+    
+    // Create enhanced star texture with multiple glow layers
+    primaryStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+            <defs>
+                <radialGradient id="starCore" cx="50%" cy="50%" r="20%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="60%" style="stop-color:white;stop-opacity:0.9" />
+                    <stop offset="100%" style="stop-color:white;stop-opacity:0.7" />
+                </radialGradient>
+                <radialGradient id="starHalo" cx="50%" cy="50%" r="45%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:0.6" />
+                    <stop offset="30%" style="stop-color:cyan;stop-opacity:0.4" />
+                    <stop offset="60%" style="stop-color:blue;stop-opacity:0.2" />
+                    <stop offset="100%" style="stop-color:purple;stop-opacity:0" />
+                </radialGradient>
+                <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:0.3" />
+                    <stop offset="40%" style="stop-color:cyan;stop-opacity:0.2" />
+                    <stop offset="80%" style="stop-color:blue;stop-opacity:0.1" />
+                    <stop offset="100%" style="stop-color:transparent;stop-opacity:0" />
+                </radialGradient>
+            </defs>
+            <circle cx="32" cy="32" r="32" fill="url(#starGlow)" />
+            <circle cx="32" cy="32" r="24" fill="url(#starHalo)" />
+            <circle cx="32" cy="32" r="8" fill="url(#starCore)" />
+            <circle cx="32" cy="32" r="3" fill="white" opacity="0.95" />
+        </svg>
+    `), scene);
+    
+    const emitter = BABYLON.MeshBuilder.CreateBox("primaryEmitter", {size: 0.01}, scene);
+    emitter.isVisible = false;
+    primaryStars.emitter = emitter;
+    
+    primaryStars.minSize = 0.8;
+    primaryStars.maxSize = 3.5;
+    primaryStars.minLifeTime = Number.MAX_VALUE;
+    primaryStars.maxLifeTime = Number.MAX_VALUE;
+    primaryStars.emitRate = 0;
+    primaryStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    primaryStars.renderingGroupId = 0;
+    
+    primaryStars.color1 = new BABYLON.Color4(1, 1, 1, 0.9);
+    primaryStars.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.7);
+    primaryStars.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+    
+    primaryStars.start();
+    primaryStars.manualEmitCount = starCount;
+    
+    // Position and configure primary stars
+    setTimeout(() => {
+        const particles = primaryStars.particles;
+        
+        for (let i = 0; i < particles.length; i++) {
+            const particle = particles[i];
+            if (!particle) continue;
             
-            // Random distant position
-            const radius = 200 + Math.random() * 300;
+            // Create realistic galactic distribution
+            const distributionType = Math.random();
+            let radius, theta, phi;
+            
+            if (distributionType < 0.6) {
+                // Galactic disk (main star population)
+                radius = 200 + Math.pow(Math.random(), 0.4) * 600;
+                theta = Math.random() * Math.PI * 2;
+                phi = Math.PI / 2 + (Math.random() - 0.5) * 0.3;
+            } else if (distributionType < 0.85) {
+                // Galactic halo
+                radius = 400 + Math.random() * 400;
+                theta = Math.random() * Math.PI * 2;
+                phi = Math.acos(2 * Math.random() - 1);
+            } else {
+                // Dense core region
+                radius = 150 + Math.random() * 200;
+                theta = Math.random() * Math.PI * 2;
+                phi = Math.acos(2 * Math.random() - 1);
+            }
+            
+            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+            particle.position.z = radius * Math.cos(phi);
+            
+            // Stellar classification with realistic HR diagram distribution
+            const stellarClass = Math.random();
+            let starConfig;
+            
+            if (stellarClass < 0.1) {
+                // O-type stars (blue supergiants)
+                starConfig = {
+                    color: new BABYLON.Color4(0.6, 0.7, 1, 0.95),
+                    size: 2.5 + Math.random() * 2,
+                    twinkleSpeed: 0.02 + Math.random() * 0.04,
+                    type: 'supergiant'
+                };
+            } else if (stellarClass < 0.25) {
+                // B-type stars (blue-white)
+                starConfig = {
+                    color: new BABYLON.Color4(0.8, 0.85, 1, 0.9),
+                    size: 1.8 + Math.random() * 1.5,
+                    twinkleSpeed: 0.015 + Math.random() * 0.03,
+                    type: 'giant'
+                };
+            } else if (stellarClass < 0.45) {
+                // A-type stars (white)
+                starConfig = {
+                    color: new BABYLON.Color4(1, 1, 1, 0.85),
+                    size: 1.2 + Math.random() * 1,
+                    twinkleSpeed: 0.01 + Math.random() * 0.025,
+                    type: 'main'
+                };
+            } else if (stellarClass < 0.65) {
+                // G-type stars (yellow - like our Sun)
+                starConfig = {
+                    color: new BABYLON.Color4(1, 0.95, 0.8, 0.8),
+                    size: 0.9 + Math.random() * 0.8,
+                    twinkleSpeed: 0.008 + Math.random() * 0.02,
+                    type: 'main'
+                };
+            } else if (stellarClass < 0.85) {
+                // K-type stars (orange)
+                starConfig = {
+                    color: new BABYLON.Color4(1, 0.8, 0.6, 0.75),
+                    size: 0.7 + Math.random() * 0.6,
+                    twinkleSpeed: 0.006 + Math.random() * 0.015,
+                    type: 'main'
+                };
+            } else {
+                // M-type stars (red dwarfs)
+                starConfig = {
+                    color: new BABYLON.Color4(1, 0.6, 0.4, 0.7),
+                    size: 0.4 + Math.random() * 0.5,
+                    twinkleSpeed: 0.004 + Math.random() * 0.01,
+                    type: 'dwarf'
+                };
+            }
+            
+            particle.color = starConfig.color;
+            particle.size = starConfig.size;
+            
+            // Enhanced stellar properties
+            particle.userData = {
+                baseSize: starConfig.size,
+                baseAlpha: starConfig.color.a,
+                twinkleSpeed: starConfig.twinkleSpeed,
+                twinklePhase: Math.random() * Math.PI * 2,
+                stellarType: starConfig.type,
+                pulsePhase: Math.random() * Math.PI * 2,
+                originalPosition: particle.position.clone(),
+                colorShift: Math.random() * 0.1 - 0.05 // Color variation over time
+            };
+        }
+    }, 100);
+    
+    primaryStars.userData = {
+        layerType: 'primary',
+        rotationSpeed: 0.00001,
+        driftSpeed: 0.000005,
+        breathingSpeed: 0.002
+    };
+    
+    stars.push(primaryStars);
+}
+
+// Layer 2: Distant background stars
+function createDistantStarLayer() {
+    const starCount = 6000;
+    const distantStars = new BABYLON.ParticleSystem("distantCosmicStars", starCount, scene);
+    
+    // Simpler texture for distant stars
+    distantStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+            <defs>
+                <radialGradient id="distantStar" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:0.8" />
+                    <stop offset="40%" style="stop-color:cyan;stop-opacity:0.4" />
+                    <stop offset="80%" style="stop-color:blue;stop-opacity:0.2" />
+                    <stop offset="100%" style="stop-color:transparent;stop-opacity:0" />
+                </radialGradient>
+            </defs>
+            <circle cx="16" cy="16" r="16" fill="url(#distantStar)" />
+            <circle cx="16" cy="16" r="4" fill="white" opacity="0.7" />
+        </svg>
+    `), scene);
+    
+    const emitter = BABYLON.MeshBuilder.CreateBox("distantEmitter", {size: 0.01}, scene);
+    emitter.isVisible = false;
+    distantStars.emitter = emitter;
+    
+    distantStars.minSize = 0.3;
+    distantStars.maxSize = 1.2;
+    distantStars.minLifeTime = Number.MAX_VALUE;
+    distantStars.maxLifeTime = Number.MAX_VALUE;
+    distantStars.emitRate = 0;
+    distantStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    distantStars.renderingGroupId = 0;
+    
+    distantStars.color1 = new BABYLON.Color4(1, 1, 1, 0.5);
+    distantStars.color2 = new BABYLON.Color4(0.7, 0.8, 1, 0.3);
+    
+    distantStars.start();
+    distantStars.manualEmitCount = starCount;
+    
+    setTimeout(() => {
+        const particles = distantStars.particles;
+        
+        for (let i = 0; i < particles.length; i++) {
+            const particle = particles[i];
+            if (!particle) continue;
+            
+            // Very distant uniform distribution
+            const radius = 800 + Math.random() * 600;
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);
             
-            star.position = new BABYLON.Vector3(
-                radius * Math.sin(phi) * Math.cos(theta),
-                radius * Math.sin(phi) * Math.sin(theta),
-                radius * Math.cos(phi)
+            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+            particle.position.z = radius * Math.cos(phi);
+            
+            particle.size = 0.3 + Math.random() * 0.9;
+            particle.color = new BABYLON.Color4(
+                0.8 + Math.random() * 0.2,
+                0.8 + Math.random() * 0.2,
+                0.9 + Math.random() * 0.1,
+                0.3 + Math.random() * 0.3
             );
             
-            // Simple material
-            const starMat = new BABYLON.StandardMaterial(`tinyStarMat${i}`, scene);
-            starMat.emissiveColor = new BABYLON.Color3(0.8, 0.9, 1);
-            starMat.disableLighting = true;
-            star.material = starMat;
+            particle.userData = {
+                baseSize: particle.size,
+                baseAlpha: particle.color.a,
+                twinkleSpeed: 0.003 + Math.random() * 0.008,
+                twinklePhase: Math.random() * Math.PI * 2,
+                stellarType: 'distant',
+                originalPosition: particle.position.clone()
+            };
+        }
+    }, 200);
+    
+    distantStars.userData = {
+        layerType: 'distant',
+        rotationSpeed: 0.000005,
+        driftSpeed: 0.000002
+    };
+    
+    stars.push(distantStars);
+}
+
+// Layer 3: Bright prominent stars
+function createBrightStarLayer() {
+    const starCount = 150;
+    const brightStars = new BABYLON.ParticleSystem("brightCosmicStars", starCount, scene);
+    
+    // Enhanced bright star texture with cross pattern
+    brightStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+            <defs>
+                <radialGradient id="brightCore" cx="50%" cy="50%" r="25%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="70%" style="stop-color:white;stop-opacity:0.95" />
+                    <stop offset="100%" style="stop-color:white;stop-opacity:0.8" />
+                </radialGradient>
+                <radialGradient id="brightHalo" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:0.7" />
+                    <stop offset="30%" style="stop-color:cyan;stop-opacity:0.5" />
+                    <stop offset="60%" style="stop-color:blue;stop-opacity:0.3" />
+                    <stop offset="100%" style="stop-color:purple;stop-opacity:0" />
+                </radialGradient>
+                <linearGradient id="spike1" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" style="stop-color:transparent" />
+                    <stop offset="40%" style="stop-color:white;stop-opacity:0.6" />
+                    <stop offset="50%" style="stop-color:white;stop-opacity:0.8" />
+                    <stop offset="60%" style="stop-color:white;stop-opacity:0.6" />
+                    <stop offset="100%" style="stop-color:transparent" />
+                </linearGradient>
+                <linearGradient id="spike2" x1="50%" y1="0%" x2="50%" y2="100%">
+                    <stop offset="0%" style="stop-color:transparent" />
+                    <stop offset="40%" style="stop-color:white;stop-opacity:0.6" />
+                    <stop offset="50%" style="stop-color:white;stop-opacity:0.8" />
+                    <stop offset="60%" style="stop-color:white;stop-opacity:0.6" />
+                    <stop offset="100%" style="stop-color:transparent" />
+                </linearGradient>
+            </defs>
+            <circle cx="48" cy="48" r="48" fill="url(#brightHalo)" />
+            <rect x="0" y="46" width="96" height="4" fill="url(#spike1)" />
+            <rect x="46" y="0" width="4" height="96" fill="url(#spike2)" />
+            <circle cx="48" cy="48" r="12" fill="url(#brightCore)" />
+            <circle cx="48" cy="48" r="4" fill="white" />
+        </svg>
+    `), scene);
+    
+    const emitter = BABYLON.MeshBuilder.CreateBox("brightEmitter", {size: 0.01}, scene);
+    emitter.isVisible = false;
+    brightStars.emitter = emitter;
+    
+    brightStars.minSize = 2.5;
+    brightStars.maxSize = 6;
+    brightStars.minLifeTime = Number.MAX_VALUE;
+    brightStars.maxLifeTime = Number.MAX_VALUE;
+    brightStars.emitRate = 0;
+    brightStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    brightStars.renderingGroupId = 0;
+    
+    brightStars.color1 = new BABYLON.Color4(1, 1, 1, 1);
+    brightStars.color2 = new BABYLON.Color4(0.9, 0.95, 1, 0.9);
+    
+    brightStars.start();
+    brightStars.manualEmitCount = starCount;
+    
+    setTimeout(() => {
+        const particles = brightStars.particles;
+        
+        for (let i = 0; i < particles.length; i++) {
+            const particle = particles[i];
+            if (!particle) continue;
             
-            // Set rendering group for background
-            star.renderingGroupId = 0;
+            // Strategic placement for bright stars
+            const radius = 300 + Math.random() * 500;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.PI / 2 + (Math.random() - 0.5) * 0.8;
             
-            stars.push(star);
+            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+            particle.position.z = radius * Math.cos(phi);
+            
+            // Bright star types
+            const brightType = Math.random();
+            let starConfig;
+            
+            if (brightType < 0.3) {
+                // Blue giants
+                starConfig = {
+                    color: new BABYLON.Color4(0.7, 0.8, 1, 1),
+                    size: 4 + Math.random() * 2,
+                    pulse: 0.02
+                };
+            } else if (brightType < 0.6) {
+                // White supergiants
+                starConfig = {
+                    color: new BABYLON.Color4(1, 1, 1, 0.95),
+                    size: 3.5 + Math.random() * 2.5,
+                    pulse: 0.015
+                };
+            } else {
+                // Variable stars
+                starConfig = {
+                    color: new BABYLON.Color4(1, 0.9, 0.7, 0.9),
+                    size: 3 + Math.random() * 2,
+                    pulse: 0.025
+                };
+            }
+            
+            particle.color = starConfig.color;
+            particle.size = starConfig.size;
+            
+            particle.userData = {
+                baseSize: starConfig.size,
+                baseAlpha: starConfig.color.a,
+                twinkleSpeed: 0.01 + Math.random() * 0.02,
+                twinklePhase: Math.random() * Math.PI * 2,
+                pulseSpeed: starConfig.pulse,
+                stellarType: 'bright',
+                originalPosition: particle.position.clone()
+            };
+        }
+    }, 300);
+    
+    brightStars.userData = {
+        layerType: 'bright',
+        rotationSpeed: 0.000008,
+        driftSpeed: 0.000003
+    };
+    
+    stars.push(brightStars);
+}
+
+// Layer 4: Nebula star clusters
+function createNebulaStarClusters() {
+    const clusterCount = 8;
+    
+    for (let c = 0; c < clusterCount; c++) {
+        const clusterStars = new BABYLON.ParticleSystem(`nebulaCluster_${c}`, 200, scene);
+        
+        clusterStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+                <defs>
+                    <radialGradient id="clusterCore" cx="50%" cy="50%" r="40%">
+                        <stop offset="0%" style="stop-color:white;stop-opacity:0.9" />
+                        <stop offset="60%" style="stop-color:cyan;stop-opacity:0.6" />
+                        <stop offset="100%" style="stop-color:blue;stop-opacity:0.3" />
+                    </radialGradient>
+                    <radialGradient id="clusterGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:cyan;stop-opacity:0.4" />
+                        <stop offset="70%" style="stop-color:purple;stop-opacity:0.2" />
+                        <stop offset="100%" style="stop-color:transparent" />
+                    </radialGradient>
+                </defs>
+                <circle cx="24" cy="24" r="24" fill="url(#clusterGlow)" />
+                <circle cx="24" cy="24" r="12" fill="url(#clusterCore)" />
+                <circle cx="24" cy="24" r="3" fill="white" opacity="0.8" />
+            </svg>
+        `), scene);
+        
+        const emitter = BABYLON.MeshBuilder.CreateBox(`clusterEmitter_${c}`, {size: 0.01}, scene);
+        emitter.isVisible = false;
+        
+        // Position cluster center
+        const clusterRadius = 400 + Math.random() * 400;
+        const clusterTheta = Math.random() * Math.PI * 2;
+        const clusterPhi = Math.acos(2 * Math.random() - 1);
+        
+        emitter.position = new BABYLON.Vector3(
+            clusterRadius * Math.sin(clusterPhi) * Math.cos(clusterTheta),
+            clusterRadius * Math.sin(clusterPhi) * Math.sin(clusterTheta),
+            clusterRadius * Math.cos(clusterPhi)
+        );
+        
+        clusterStars.emitter = emitter;
+        clusterStars.createSphereEmitter(30, 0);
+        
+        // Cluster colors based on nebula type
+        const nebulaTypes = [
+            [new BABYLON.Color4(1, 0.3, 0.5, 0.8), new BABYLON.Color4(0.8, 0.2, 0.4, 0.6)], // Emission
+            [new BABYLON.Color4(0.3, 0.6, 1, 0.8), new BABYLON.Color4(0.2, 0.5, 0.9, 0.6)], // Reflection
+            [new BABYLON.Color4(0.5, 1, 0.7, 0.8), new BABYLON.Color4(0.4, 0.9, 0.6, 0.6)], // Planetary
+            [new BABYLON.Color4(0.8, 0.5, 1, 0.8), new BABYLON.Color4(0.7, 0.4, 0.9, 0.6)]  // Dark
+        ];
+        
+        const colorPair = nebulaTypes[c % nebulaTypes.length];
+        clusterStars.color1 = colorPair[0];
+        clusterStars.color2 = colorPair[1];
+        
+        clusterStars.minSize = 0.8;
+        clusterStars.maxSize = 2.5;
+        clusterStars.minLifeTime = Number.MAX_VALUE;
+        clusterStars.maxLifeTime = Number.MAX_VALUE;
+        clusterStars.emitRate = 0;
+        clusterStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+        clusterStars.renderingGroupId = 0;
+        
+        clusterStars.start();
+        clusterStars.manualEmitCount = 200;
+        
+        setTimeout(() => {
+            const particles = clusterStars.particles;
+            for (let i = 0; i < particles.length; i++) {
+                const particle = particles[i];
+                if (!particle) continue;
+                
+                particle.userData = {
+                    baseSize: particle.size,
+                    baseAlpha: particle.color.a,
+                    twinkleSpeed: 0.005 + Math.random() * 0.015,
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    stellarType: 'cluster',
+                    clusterId: c,
+                    originalPosition: particle.position.clone()
+                };
+            }
+        }, 400 + c * 100);
+        
+        clusterStars.userData = {
+            layerType: 'cluster',
+            clusterId: c,
+            rotationSpeed: 0.00001,
+            breathingSpeed: 0.003
+        };
+        
+        stars.push(clusterStars);
+    }
+}
+
+// Layer 5: Shooting stars
+function createShootingStars() {
+    const meteorCount = 3;
+    
+    for (let m = 0; m < meteorCount; m++) {
+        setTimeout(() => {
+            createSingleShootingStar();
+        }, Math.random() * 10000); // Random initial delay
+    }
+    
+    // Create new shooting stars periodically
+    setInterval(() => {
+        if (Math.random() < 0.3) { // 30% chance every interval
+            createSingleShootingStar();
+        }
+    }, 15000); // Every 15 seconds
+}
+
+function createSingleShootingStar() {
+    const shootingStar = new BABYLON.ParticleSystem("shootingStar", 100, scene);
+    
+    shootingStar.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="8" viewBox="0 0 32 8">
+            <defs>
+                <linearGradient id="meteorTrail" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" style="stop-color:transparent" />
+                    <stop offset="30%" style="stop-color:white;stop-opacity:0.3" />
+                    <stop offset="70%" style="stop-color:white;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:white;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <rect x="0" y="2" width="32" height="4" fill="url(#meteorTrail)" />
+            <circle cx="30" cy="4" r="3" fill="white" />
+        </svg>
+    `), scene);
+    
+    // Random start position at edge of view
+    const side = Math.floor(Math.random() * 4);
+    let startPos, endPos;
+    const distance = 800;
+    
+    switch(side) {
+        case 0: // Top
+            startPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, distance/2, (Math.random() - 0.5) * distance);
+            endPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, -distance/2, (Math.random() - 0.5) * distance);
+            break;
+        case 1: // Right
+            startPos = new BABYLON.Vector3(distance/2, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
+            endPos = new BABYLON.Vector3(-distance/2, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
+            break;
+        case 2: // Bottom
+            startPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, -distance/2, (Math.random() - 0.5) * distance);
+            endPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, distance/2, (Math.random() - 0.5) * distance);
+            break;
+        case 3: // Left
+            startPos = new BABYLON.Vector3(-distance/2, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
+            endPos = new BABYLON.Vector3(distance/2, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
+            break;
+    }
+    
+    const emitter = BABYLON.MeshBuilder.CreateBox("meteorEmitter", {size: 0.1}, scene);
+    emitter.position = startPos;
+    emitter.isVisible = false;
+    shootingStar.emitter = emitter;
+    
+    shootingStar.color1 = new BABYLON.Color4(1, 1, 1, 1);
+    shootingStar.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.8);
+    shootingStar.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+    
+    shootingStar.minSize = 1;
+    shootingStar.maxSize = 3;
+    shootingStar.minLifeTime = 3;
+    shootingStar.maxLifeTime = 5;
+    shootingStar.emitRate = 50;
+    shootingStar.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    shootingStar.renderingGroupId = 1;
+    
+    const direction = endPos.subtract(startPos).normalize();
+    shootingStar.direction1 = direction.scale(8);
+    shootingStar.direction2 = direction.scale(12);
+    shootingStar.minEmitPower = 5;
+    shootingStar.maxEmitPower = 10;
+    
+    shootingStar.start();
+    
+    // Animate the emitter position
+    const duration = 4000 + Math.random() * 2000; // 4-6 seconds
+    const startTime = Date.now();
+    
+    const animatemeteor = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = elapsed / duration;
+        
+        if (progress >= 1) {
+            shootingStar.stop();
+            setTimeout(() => {
+                shootingStar.dispose();
+                emitter.dispose();
+            }, 2000);
+            return;
         }
         
-        console.log('Fallback tiny stars created');
-    } catch (error) {
-        console.error('Failed to create fallback tiny stars:', error);
-    }
+        // Smooth movement from start to end
+        const currentPos = BABYLON.Vector3.Lerp(startPos, endPos, progress);
+        emitter.position = currentPos;
+        
+        // Fade out near the end
+        if (progress > 0.7) {
+            const fadeProgress = (progress - 0.7) / 0.3;
+            shootingStar.color1.a = 1 - fadeProgress;
+            shootingStar.color2.a = 0.8 - fadeProgress * 0.8;
+        }
+        
+        requestAnimationFrame(animatemeteor);
+    };
+    
+    animatemeteor();
+}
+
+// Enhanced star animation update function
+function updateEnhancedStarAnimations() {
+    if (stars.length === 0) return;
+    
+    const currentTime = performance.now() * 0.001;
+    
+    stars.forEach((starField, index) => {
+        if (!starField || typeof starField !== 'object') return;
+        if (starField.isDisposed && starField.isDisposed()) return;
+        
+        try {
+            if (starField instanceof BABYLON.ParticleSystem) {
+                const userData = starField.userData;
+                const particles = starField.particles;
+                
+                if (!userData || !particles) return;
+                
+                // Different animation behaviors per layer type
+                switch (userData.layerType) {
+                    case 'primary':
+                        animatePrimaryStars(particles, currentTime, userData);
+                        break;
+                    case 'distant':
+                        animateDistantStars(particles, currentTime, userData);
+                        break;
+                    case 'bright':
+                        animateBrightStars(particles, currentTime, userData);
+                        break;
+                    case 'cluster':
+                        animateClusterStars(particles, currentTime, userData);
+                        break;
+                }
+                
+                // Apply gentle rotation to star field
+                if (starField.emitter && userData.rotationSpeed) {
+                    starField.emitter.rotation.y += userData.rotationSpeed;
+                }
+            }
+        } catch (animationError) {
+            console.warn('Enhanced star animation error:', animationError);
+        }
+    });
+}
+
+// Primary stars animation - main starfield with stellar evolution
+function animatePrimaryStars(particles, currentTime, userData) {
+    particles.forEach((particle, particleIndex) => {
+        if (!particle || !particle.userData) return;
+        
+        const data = particle.userData;
+        
+        // Advanced twinkling based on stellar type
+        let twinkleIntensity;
+        switch (data.stellarType) {
+            case 'supergiant':
+                twinkleIntensity = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.4 + 0.8;
+                break;
+            case 'giant':
+                twinkleIntensity = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.3 + 0.8;
+                break;
+            case 'main':
+                twinkleIntensity = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.2 + 0.85;
+                break;
+            case 'dwarf':
+                twinkleIntensity = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.15 + 0.9;
+                break;
+            default:
+                twinkleIntensity = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.2 + 0.8;
+        }
+        
+        // Apply atmospheric scintillation (twinkling)
+        particle.size = data.baseSize * twinkleIntensity;
+        particle.color.a = Math.max(data.baseAlpha * twinkleIntensity, data.baseAlpha * 0.4);
+        
+        // Subtle color shifting for stellar evolution
+        if (data.colorShift && particleIndex % 50 === 0) {
+            const colorEvolution = Math.sin(currentTime * 0.001 + data.pulsePhase) * data.colorShift;
+            particle.color.r = Math.min(1, particle.color.r + colorEvolution);
+            particle.color.b = Math.max(0, particle.color.b - colorEvolution * 0.5);
+        }
+        
+        // Minimal parallax movement
+        if (particleIndex % 100 === 0) {
+            const parallax = userData.driftSpeed * 0.5;
+            const driftX = Math.sin(currentTime * 0.05 + particleIndex) * parallax;
+            const driftZ = Math.cos(currentTime * 0.05 + particleIndex) * parallax;
+            
+            particle.position.x = data.originalPosition.x + driftX;
+            particle.position.z = data.originalPosition.z + driftZ;
+        }
+    });
+}
+
+// Distant stars animation - subtle background movement
+function animateDistantStars(particles, currentTime, userData) {
+    particles.forEach((particle, particleIndex) => {
+        if (!particle || !particle.userData) return;
+        
+        const data = particle.userData;
+        
+        // Gentle twinkling for atmospheric effect
+        const twinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.25 + 0.75;
+        particle.size = data.baseSize * twinkle;
+        particle.color.a = Math.max(data.baseAlpha * twinkle, data.baseAlpha * 0.5);
+        
+        // Very subtle movement
+        if (particleIndex % 200 === 0) {
+            const microDrift = userData.driftSpeed * 0.2;
+            particle.position.x = data.originalPosition.x + Math.sin(currentTime * 0.02 + particleIndex) * microDrift;
+        }
+    });
+}
+
+// Bright stars animation - prominent stellar objects
+function animateBrightStars(particles, currentTime, userData) {
+    particles.forEach((particle, particleIndex) => {
+        if (!particle || !particle.userData) return;
+        
+        const data = particle.userData;
+        
+        // Enhanced twinkling for bright stars
+        const primaryTwinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.3 + 0.7;
+        const secondaryTwinkle = Math.sin(currentTime * data.pulseSpeed + data.twinklePhase * 1.5) * 0.2 + 0.8;
+        const combinedTwinkle = primaryTwinkle * secondaryTwinkle;
+        
+        particle.size = data.baseSize * combinedTwinkle;
+        particle.color.a = Math.max(data.baseAlpha * combinedTwinkle, data.baseAlpha * 0.6);
+        
+        // Subtle pulsing for variable stars
+        if (data.stellarType === 'bright' && particleIndex % 30 === 0) {
+            const variablePulse = Math.sin(currentTime * 0.1 + data.pulsePhase) * 0.1 + 1;
+            particle.size *= variablePulse;
+        }
+    });
+}
+
+// Cluster stars animation - nebula regions
+function animateClusterStars(particles, currentTime, userData) {
+    particles.forEach((particle, particleIndex) => {
+        if (!particle || !particle.userData) return;
+        
+        const data = particle.userData;
+        
+        // Synchronized cluster breathing
+        const clusterBreathing = Math.sin(currentTime * userData.breathingSpeed + data.clusterId) * 0.15 + 0.85;
+        const individualTwinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.2 + 0.8;
+        
+        particle.size = data.baseSize * clusterBreathing * individualTwinkle;
+        particle.color.a = Math.max(data.baseAlpha * clusterBreathing * individualTwinkle, data.baseAlpha * 0.3);
+        
+        // Gentle swirling motion within cluster
+        if (particleIndex % 20 === 0) {
+            const swirl = userData.rotationSpeed * 10;
+            const angle = currentTime * swirl + particleIndex;
+            const radius = 2;
+            
+            particle.position.x = data.originalPosition.x + Math.cos(angle) * radius;
+            particle.position.z = data.originalPosition.z + Math.sin(angle) * radius;
+        }
+    });
 }
 
 // Clean up any residual objects from previous loads
@@ -491,6 +1086,42 @@ function cleanupResidualObjects() {
         
     } catch (error) {
         console.warn('Error during residual object cleanup:', error);
+    }
+}
+
+// Fallback tiny star creation
+function createFallbackTinyStars() {
+    try {
+        // Create simple sphere-based tiny stars
+        for (let i = 0; i < 30; i++) {
+            const star = BABYLON.MeshBuilder.CreateSphere(`tinyStar${i}`, {diameter: 0.5}, scene);
+            
+            // Random distant position
+            const radius = 200 + Math.random() * 300;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            star.position = new BABYLON.Vector3(
+                radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.sin(phi) * Math.sin(theta),
+                radius * Math.cos(phi)
+            );
+            
+            // Simple material
+            const starMat = new BABYLON.StandardMaterial(`tinyStarMat${i}`, scene);
+            starMat.emissiveColor = new BABYLON.Color3(0.8, 0.9, 1);
+            starMat.disableLighting = true;
+            star.material = starMat;
+            
+            // Set rendering group for background
+            star.renderingGroupId = 0;
+            
+            stars.push(star);
+        }
+        
+        console.log('Fallback tiny stars created');
+    } catch (error) {
+        console.error('Failed to create fallback tiny stars:', error);
     }
 }
 
@@ -555,570 +1186,11 @@ export function animate() {
             const dynamicTarget = cameraTarget.add(targetDrift);
             camera.setTarget(dynamicTarget);
 
-            // Update animations
-            // updatePlanetAnimations(); // DISABLED - No planets in minimalist mode
-            updateStarAnimations();
-            // updateCometAnimations(); // DISABLED - No comets in minimalist mode
-            // updateSpaceObjectAnimations(); // DISABLED - No space objects in minimalist mode
-            
-            // Nebula animation disabled for minimalist space environment
-            // const nebulaBackground = scene.getMeshByName("nebulaBackground");
-            // ... nebula animation code removed for cleaner space
+            // Update enhanced star animations
+            updateEnhancedStarAnimations();
         });
     }
 }
-
-// Enhanced planet animations with realistic orbital mechanics
-function updatePlanetAnimations() {
-    planets.forEach((planetData, index) => {
-        if (!planetData || !planetData.mesh) return;
-        
-        const planet = planetData.mesh;
-        const config = planetData.config;
-        const time = performance.now() * 0.001;
-        
-        if (planet.userData) {
-            // Enhanced orbital mechanics with smooth motion
-            planet.userData.angle += planet.userData.speed * 0.8;  // Slightly faster motion
-            
-            // Smooth elliptical orbit calculations
-            const eccentricity = planet.userData.eccentricity;
-            const baseDistance = planet.userData.distance;
-            const meanAnomaly = planet.userData.angle;
-            
-            // Enhanced eccentric anomaly calculation for smoother orbits
-            const eccentricAnomaly = meanAnomaly + eccentricity * Math.sin(meanAnomaly) * (1 + eccentricity * Math.cos(meanAnomaly));
-            const trueAnomaly = 2 * Math.atan(Math.sqrt((1 + eccentricity) / (1 - eccentricity)) * Math.tan(eccentricAnomaly / 2));
-            
-            // Smooth orbital radius with gentle variations
-            const orbitRadius = baseDistance * (1 - eccentricity * eccentricity) / (1 + eccentricity * Math.cos(trueAnomaly));
-            const radiusVariation = 1 + Math.sin(time * 0.3 + index) * 0.02;  // Subtle breathing effect
-            
-            // Apply orbital inclination with smooth curves
-            const inclinedY = Math.sin(planet.userData.inclination) * orbitRadius * 0.4;
-            
-            // Beautiful orbital positioning with enhanced smoothness
-            const targetX = Math.cos(trueAnomaly) * orbitRadius * radiusVariation;
-            const targetZ = Math.sin(trueAnomaly) * orbitRadius * radiusVariation;
-            const targetY = inclinedY + Math.sin(time * 0.15 + index) * 0.8; // Larger, slower vertical oscillation
-            
-            // Ultra-smooth interpolation for fluid motion
-            const lerpFactor = 0.05;  // Increased smoothness
-            planet.position.x = BABYLON.Scalar.Lerp(planet.position.x, targetX, lerpFactor);
-            planet.position.z = BABYLON.Scalar.Lerp(planet.position.z, targetZ, lerpFactor);
-            planet.position.y = BABYLON.Scalar.Lerp(planet.position.y, targetY, lerpFactor * 0.5);
-            
-            // Enhanced planetary rotation with beautiful axial tilt and wobble
-            planet.rotation.y += planet.userData.rotationSpeed * 1.2;  // Slightly faster rotation
-            planet.rotation.x = planet.userData.axialTilt + Math.sin(time * 0.4 + index) * 0.08;  // More dramatic axial wobble
-            planet.rotation.z = Math.sin(time * 0.25 + index * 0.7) * 0.05;  // Enhanced Z-axis variation
-            
-            // Beautiful size pulsing for gas giants with enhanced effects
-            if (config.size > 3) {
-                const pulseFactor = 1 + Math.sin(time * 0.6 + planet.userData.pulsePhase) * 0.04;  // More pronounced pulsing
-                const secondaryPulse = 1 + Math.sin(time * 1.2 + planet.userData.pulsePhase * 1.5) * 0.02;
-                planet.scaling.setAll(pulseFactor * secondaryPulse);
-                
-                // Dynamic emission intensity for gas giants
-                if (planet.material && planet.material.emissiveColor) {
-                    const emissionPulse = 1 + Math.sin(time * 0.8 + planet.userData.pulsePhase) * 0.3;
-                    const baseEmission = config.emissive.clone();
-                    planet.material.emissiveColor.copyFrom(baseEmission.scale(emissionPulse));
-                }
-            } else {
-                // Rocky planets get subtle glow variations
-                if (planet.material && planet.material.emissiveColor) {
-                    const rockPulse = 1 + Math.sin(time * 0.3 + planet.userData.pulsePhase) * 0.15;
-                    const baseEmission = config.emissive.clone();
-                    planet.material.emissiveColor.copyFrom(baseEmission.scale(rockPulse));
-                }
-            }
-            
-            // Animate atmospheric effects
-            if (planet.getChildren) {
-                planet.getChildren().forEach((child, childIndex) => {
-                    if (child.userData && child.userData.isAtmosphere) {
-                        // Atmospheric swaying
-                        const atmosphereSpeed = child.userData.swaySpeed;
-                        child.rotation.y += atmosphereSpeed;
-                        child.rotation.z = Math.sin(time * atmosphereSpeed * 10) * 0.05;
-                        
-                        // Dynamic atmosphere opacity based on lighting
-                        if (child.material && child.material.alpha !== undefined) {
-                            const baseAlpha = 0.15;
-                            const variation = Math.sin(time * 0.5 + childIndex) * 0.05;
-                            child.material.alpha = baseAlpha + variation;
-                        }
-                    }
-                });
-            }
-            
-            // Enhanced moon animations with orbital resonance
-            if (planet.getChildren) {
-                planet.getChildren().forEach((moon, moonIndex) => {
-                    if (moon.userData && moon.userData.angle !== undefined) {
-                        // Calculate moon orbital speed with tidal effects
-                        const moonSpeed = moon.userData.speed * (1 + Math.sin(planet.userData.angle * 0.5) * 0.1);
-                        moon.userData.angle += moonSpeed;
-                        
-                        // 3D moon orbits with inclination
-                        const moonDistance = moon.userData.distance;
-                        const moonInclination = moon.userData.inclination;
-                        
-                        moon.position.x = Math.cos(moon.userData.angle) * moonDistance;
-                        moon.position.z = Math.sin(moon.userData.angle) * moonDistance;
-                        moon.position.y = Math.sin(moon.userData.angle * 3 + moonInclination) * moonDistance * 0.2;
-                        
-                        // Moon rotation and libration
-                        moon.rotation.y += moon.userData.rotationSpeed;
-                        moon.rotation.x = Math.sin(moon.userData.angle + moon.userData.phase) * 0.1;
-                        
-                        // Tidal effects - slight elongation toward planet
-                        const tidalFactor = 1 + Math.cos(moon.userData.angle) * 0.05;
-                        moon.scaling.x = tidalFactor;
-                        moon.scaling.z = 2 - tidalFactor; // Conservation of volume
-                    }
-                });
-            }
-            
-            // Animate planetary rings
-            const ringGroup = planet.getChildren().find(child => child.name && child.name.includes('ringGroup'));
-            if (ringGroup) {
-                ringGroup.getChildren().forEach((ring, ringIndex) => {
-                    if (ring.userData && ring.userData.rotationSpeed) {
-                        // Differential ring rotation (inner rings faster)
-                        const ringSpeed = ring.userData.rotationSpeed * (1 + (3 - ringIndex) * 0.2);
-                        ring.rotation.z += ringSpeed;
-                        
-                        // Ring particle dynamics
-                        const swayAmplitude = ring.userData.swayAmplitude;
-                        ring.rotation.x = ring.userData.originalRotation.x + Math.sin(time * 0.5 + ringIndex) * swayAmplitude;
-                        
-                        // Ring opacity variations
-                        if (ring.material && ring.material.alpha !== undefined) {
-                            const baseAlpha = 0.8 - ringIndex * 0.15;
-                            const variation = Math.sin(time * 0.8 + ringIndex * 0.5) * 0.1;
-                            ring.material.alpha = Math.max(0.1, baseAlpha + variation);
-                        }
-                    }
-                });
-            }
-        }
-    });
-}
-
-// Enhanced star animations with dynamic twinkling and parallax effects
-function updateStarAnimations() {
-    if (stars.length === 0) return;
-    
-    stars.forEach((starField, index) => {
-        if (!starField || typeof starField !== 'object') return;
-        if (starField.isDisposed && starField.isDisposed()) return;
-        
-        try {
-            // Handle ParticleSystem objects
-            if (starField instanceof BABYLON.ParticleSystem) {
-                const userData = starField.userData;
-                
-                if (userData && userData.isMainStarField) {
-                    // Enhanced star field animations with parallax layers
-                    const particles = starField.particles;
-                    const currentTime = performance.now() * 0.001;
-                    
-                    particles.forEach((particle, particleIndex) => {
-                        if (!particle || !particle.userData) return;
-                        
-                        const data = particle.userData;
-                        
-                        // Dynamic twinkling based on stellar type
-                        if (data.stellarType === 'variable') {
-                            const variableBrightness = 0.5 + Math.sin(currentTime * data.pulseSpeed + data.twinklePhase) * 0.3;
-                            particle.color.a = data.baseSize * variableBrightness * 0.3;
-                        } else {
-                            // Normal star twinkling
-                            const twinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.2 + 0.8;
-                            particle.size = data.baseSize * twinkle;
-                        }
-                        
-                        // Subtle parallax drift for depth
-                        if (particleIndex % 10 === 0) { // Only update subset for performance
-                            const distance = particle.position.length();
-                            const parallaxFactor = 1 - Math.min(distance / 500, 1);
-                            const drift = userData.driftSpeed * parallaxFactor;
-                            
-                            particle.position.x += Math.sin(currentTime * 0.1 + particleIndex) * drift;
-                            particle.position.z += Math.cos(currentTime * 0.1 + particleIndex) * drift;
-                        }
-                    });
-                    
-                    // Galactic rotation
-                    if (starField.emitter) {
-                        starField.emitter.rotation.y += userData.rotationSpeed;
-                    }
-                }
-                
-                // Nebula animations disabled for minimalist space environment
-                // if (userData && userData.isNebula) {
-                //     ... nebula animation code removed for cleaner space
-                // }
-                
-                // Handle sparkling stars from blackhole.js
-                if (starField.name && (starField.name.includes('SparklingStars') || starField.name.includes('microStars'))) {
-                    const particles = starField.particles;
-                    particles.forEach((particle, particleIndex) => {
-                        if (!particle || !particle.userData) return;
-                        
-                        const data = particle.userData;
-                        const currentTime = performance.now() * 0.001;
-                        
-                        // Enhanced twinkling for sparkling stars
-                        const twinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.5 + 0.5;
-                        const sparkle = Math.sin(currentTime * (data.twinkleSpeed * 1.5) + data.twinklePhase * 0.7) * 0.3 + 0.7;
-                        
-                        // Update particle size for twinkling
-                        particle.size = data.baseSize * twinkle * sparkle;
-                        
-                        // Update alpha for sparkle effect
-                        if (particle.color && data.baseAlpha) {
-                            particle.color.a = data.baseAlpha * twinkle * sparkle;
-                        }
-                        
-                        // Occasional bright flares for main sparkling stars
-                        if (starField.name.includes('mainSparklingStars')) {
-                            const flareChance = Math.random();
-                            if (flareChance < 0.0008) { // Very rare bright flares
-                                particle.size = data.baseSize * 4;
-                                if (particle.color) {
-                                    particle.color.a = Math.min(1, data.baseAlpha * 3);
-                                }
-                            }
-                        }
-                    });
-                }
-            } else {
-                // Handle mesh-based stars (fallback)
-                if (!starField.position) return;
-                
-                starField.isVisible = true;
-                
-                if (starField.material && starField.material.setFloat) {
-                    starField.material.setFloat("time", time);
-                }
-                
-                if (starField.userData && starField.userData.rotationSpeed && starField.rotation) {
-                    starField.rotation.y += starField.userData.rotationSpeed * 0.5;
-                    starField.rotation.x += starField.userData.rotationSpeed * 0.3;
-                    
-                    // Add subtle twinkling to mesh stars
-                    const twinkle = 0.8 + Math.sin(time * 3 + index) * 0.2;
-                    if (starField.material && starField.material.emissiveColor) {
-                        starField.material.emissiveColor = starField.material.emissiveColor.scale(twinkle);
-                    }
-                }
-            }
-        } catch (animationError) {
-            console.warn('Star animation error for index', index, ':', animationError);
-        }
-    });
-}
-
-// Enhanced comet animations with spectacular trails and physics
-function updateCometAnimations() {
-    comets.forEach((comet, index) => {
-        if (!comet || typeof comet !== 'object') return;
-        if (comet.isDisposed && comet.isDisposed()) return;
-        
-        // Handle both userData and metadata properties
-        const data = comet.userData || comet.metadata;
-        if (!data || !comet.position) return;
-        
-        try {
-            // Enhanced curved trajectory with gravitational influence
-            const distanceToCenter = comet.position.length();
-            const gravitationalPull = Math.max(0, 120 - distanceToCenter) * 0.00015;
-            const curve = Math.sin(time * 0.3 + index * 0.7) * 0.03;
-            
-            if (data.velocity && data.velocity.y !== undefined) {
-                // Apply gravitational acceleration toward center (black hole effect)
-                const centerDirection = comet.position.normalize().scale(-1);
-                data.velocity = data.velocity.add(centerDirection.scale(gravitationalPull));
-                
-                // Add beautiful orbital curves and wobbles
-                data.velocity.y += curve;
-                data.velocity.x += Math.sin(time * 0.2 + index) * 0.01;
-                data.velocity.z += Math.cos(time * 0.25 + index) * 0.01;
-                
-                // Enhanced velocity dampening for realistic physics
-                data.velocity = data.velocity.scale(0.9985);
-            }
-            
-            // Smooth position updates with acceleration
-            if (data.velocity) {
-                comet.position = comet.position.add(data.velocity);
-            }
-            data.life--;
-            
-            // Enhanced opacity fade with smooth transitions
-            const lifeFactor = data.life / data.maxLife;
-            const opacity = Math.pow(lifeFactor, 1.2);
-            
-            // Update comet core with enhanced pulsing effects
-            const cometCore = comet.getChildren().find(child => child.name && child.name.includes('cometCore'));
-            if (cometCore && cometCore.material && data.type) {
-                const pulsePeriod = data.pulsePeriod || 3;
-                const baseIntensity = 0.6;
-                const pulseIntensity = baseIntensity + Math.sin(time * (2 / pulsePeriod) + index) * 0.4;
-                
-                // Dynamic emission based on comet type and velocity
-                const speed = data.velocity ? data.velocity.length() : 0;
-                const heatBoost = 1 + Math.min(speed * 3, 0.5);
-                
-                cometCore.material.emissiveColor = data.type.emission.scale(pulseIntensity * opacity * heatBoost);
-                
-                // Size pulsing for dramatic effect
-                const sizePulse = 1 + Math.sin(time * (3 / pulsePeriod) + index * 1.5) * 0.1;
-                cometCore.scaling.setAll(sizePulse);
-            }
-            
-            // Enhanced coma (atmosphere) effects
-            const coma = data.coma;
-            if (coma && coma.material) {
-                const comaIntensity = 0.3 + Math.sin(time * 0.4 + index) * 0.1;
-                coma.material.alpha = comaIntensity * opacity;
-                
-                // Coma breathing effect
-                const breathe = 1 + Math.sin(time * 0.6 + index) * 0.15;
-                coma.scaling.setAll(breathe);
-            }
-            
-            // Enhanced tail particle effects with multiple layers
-            if (data.tailSystem) {
-                const speed = data.velocity ? data.velocity.length() : 0;
-                data.tailSystem.emitRate = Math.max(80, 300 * opacity * (1 + speed * 2));
-                
-                // Dynamic tail direction based on velocity
-                if (data.velocity) {
-                    const normalizedVel = data.velocity.normalize();
-                    data.tailSystem.direction1 = normalizedVel.scale(-4);
-                    data.tailSystem.direction2 = normalizedVel.scale(-7);
-                    
-                    // Enhanced tail particle speed based on comet velocity
-                    data.tailSystem.minEmitPower = Math.max(2, speed * 4);
-                    data.tailSystem.maxEmitPower = Math.max(6, speed * 8);
-                }
-                
-                // Spectacular color variations based on speed, heat, and distance
-                const heatFactor = Math.min(speed * 8, 1);
-                const distanceFactor = Math.max(0, (150 - distanceToCenter) / 150);
-                
-                data.tailSystem.color1 = new BABYLON.Color4(
-                    0.4 + heatFactor * 0.6,
-                    0.7 + distanceFactor * 0.3,
-                    1 - heatFactor * 0.2,
-                    opacity * (0.8 + distanceFactor * 0.2)
-                );
-                data.tailSystem.color2 = new BABYLON.Color4(
-                    1,
-                    0.9 - heatFactor * 0.1,
-                    0.8 - heatFactor * 0.3,
-                    opacity * 0.9
-                );
-            }
-            
-            // Enhanced dust tail effects
-            if (data.dustTail) {
-                const dustOpacity = opacity * 0.7;
-                data.dustTail.emitRate = Math.max(40, 120 * dustOpacity);
-                data.dustTail.color1.a = dustOpacity;
-                data.dustTail.color2.a = dustOpacity * 0.6;
-            }
-            
-            // Enhanced comet rotation based on velocity and internal dynamics
-            if (data.velocity && data.rotationSpeed) {
-                const rotationBoost = data.velocity.length() * 0.2;
-                comet.rotation.x += (data.rotationSpeed + rotationBoost) * 1.5;
-                comet.rotation.y += (data.rotationSpeed + rotationBoost) * 1.2;
-                comet.rotation.z += (data.rotationSpeed + rotationBoost) * 0.8;
-            }
-            
-            // Reset comet when needed with enhanced spawn logic
-            if (data.life <= 0 || comet.position.length() > 280) {
-                resetComet(comet, index);
-            }
-        } catch (animationError) {
-            console.warn('Comet animation error for index', index, ':', animationError);
-        }
-    });
-}
-
-// Space object animations
-function updateSpaceObjectAnimations() {
-    spaceObjects.forEach((spaceObject, index) => {
-        if (!spaceObject || typeof spaceObject !== 'object') return;
-        if (spaceObject.isDisposed && spaceObject.isDisposed()) return;
-        
-        // Handle both userData and metadata properties
-        const data = spaceObject.userData || spaceObject.metadata;
-        if (!data || !spaceObject.position) return;
-        
-        try {
-            const floatSpeed = 0.3;
-            const driftRadius = 2;
-            
-            // Enhanced floating motion
-            const floatX = Math.sin(time * floatSpeed + index * 0.5) * driftRadius;
-            const floatY = Math.sin(time * floatSpeed * 0.7 + index * 0.3) * driftRadius;
-            const floatZ = Math.cos(time * floatSpeed * 0.5 + index * 0.7) * driftRadius;
-            
-            spaceObject.position.x += floatX * 0.01;
-            spaceObject.position.y += floatY * 0.01;
-            spaceObject.position.z += floatZ * 0.01;
-            
-            // Enhanced rotation patterns by object type
-            switch (data.type) {
-                case 'satellite':
-                    spaceObject.rotation.y += 0.01;
-                    spaceObject.rotation.x = Math.sin(time) * 0.2;
-                    break;
-                case 'spaceStation':
-                    spaceObject.rotation.y += 0.003;
-                    spaceObject.rotation.z = Math.sin(time * 0.5) * 0.05;
-                    break;
-                case 'asteroid':
-                    spaceObject.rotation.x += 0.008;
-                    spaceObject.rotation.y += 0.006;
-                    spaceObject.rotation.z += 0.004;
-                    break;
-                case 'debris':
-                    spaceObject.rotation.x += 0.015 * Math.sin(time + index);
-                    spaceObject.rotation.y += 0.012;
-                    spaceObject.rotation.z += 0.010;
-                    break;
-            }
-            
-            // Keep objects within bounds
-            if (spaceObject.position.length() > 250) {
-                spaceObject.position = spaceObject.position.scale(0.99);
-            }
-        } catch (animationError) {
-            console.warn('Space object animation error for index', index, ':', animationError);
-        }
-    });
-}
-
-// Enhanced comet reset with spectacular spawn patterns
-function resetComet(comet, index) {
-    // Create more dynamic spawn patterns
-    const spawnPattern = Math.random();
-    let spawnPosition, targetPoint;
-    
-    if (spawnPattern < 0.4) {
-        // Distant outer rim spawn
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 200 + Math.random() * 100;
-        spawnPosition = new BABYLON.Vector3(
-            Math.cos(angle) * distance,
-            (Math.random() - 0.5) * 150,
-            Math.sin(angle) * distance
-        );
-        
-        // Target inner system
-        targetPoint = new BABYLON.Vector3(
-            (Math.random() - 0.5) * 50,
-            (Math.random() - 0.5) * 30,
-            (Math.random() - 0.5) * 50
-        );
-    } else if (spawnPattern < 0.7) {
-        // High angle approach
-        const distance = 150 + Math.random() * 50;
-        spawnPosition = new BABYLON.Vector3(
-            (Math.random() - 0.5) * distance,
-            100 + Math.random() * 100,
-            (Math.random() - 0.5) * distance
-        );
-        
-        // Target lower region
-        targetPoint = new BABYLON.Vector3(
-            (Math.random() - 0.5) * 40,
-            -50 + Math.random() * 30,
-            (Math.random() - 0.5) * 40
-        );
-    } else {
-        // Hyperbolic trajectory spawn
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 180 + Math.random() * 80;
-        spawnPosition = new BABYLON.Vector3(
-            Math.cos(angle) * distance,
-            (Math.random() - 0.5) * 80,
-            Math.sin(angle) * distance
-        );
-        
-        // Fast flyby target
-        const flybyAngle = angle + Math.PI + (Math.random() - 0.5) * 0.5;
-        targetPoint = new BABYLON.Vector3(
-            Math.cos(flybyAngle) * 100,
-            (Math.random() - 0.5) * 60,
-            Math.sin(flybyAngle) * 100
-        );
-    }
-    
-    comet.position = spawnPosition;
-    
-    const data = comet.userData || comet.metadata;
-    
-    // Calculate enhanced velocity with realistic orbital mechanics
-    const direction = targetPoint.subtract(spawnPosition).normalize();
-    const baseSpeed = 0.3 + Math.random() * 0.5;
-    const velocityVariation = new BABYLON.Vector3(
-        (Math.random() - 0.5) * 0.15,
-        (Math.random() - 0.5) * 0.15,
-        (Math.random() - 0.5) * 0.15
-    );
-    
-    data.velocity = direction.scale(baseSpeed).add(velocityVariation);
-    
-    // Enhanced life span based on trajectory and comet type
-    const trajectoryLength = spawnPosition.subtract(targetPoint).length();
-    data.life = Math.max(500, trajectoryLength * 2.5 + Math.random() * 400);
-    data.maxLife = data.life;
-    
-    // Reset enhanced tail system properties
-    if (data.tailSystem) {
-        data.tailSystem.emitRate = 150;
-        if (data.type) {
-            data.tailSystem.color1 = new BABYLON.Color4(
-                data.type.emission.r, 
-                data.type.emission.g, 
-                data.type.emission.b, 
-                1
-            );
-        } else {
-            data.tailSystem.color1 = new BABYLON.Color4(0.5, 0.8, 1, 1);
-        }
-        data.tailSystem.color2 = new BABYLON.Color4(1, 1, 1, 0.8);
-    }
-    
-    // Reset dust tail
-    if (data.dustTail) {
-        data.dustTail.emitRate = 80;
-        data.dustTail.color1.a = 0.6;
-        data.dustTail.color2.a = 0.3;
-    }
-    
-    // Reset coma properties
-    if (data.coma && data.coma.material) {
-        data.coma.material.alpha = 0.4;
-        data.coma.scaling.setAll(1);
-    }
-    
-    // Add spectacular spawn effects for comet core
-    const cometCore = comet.getChildren().find(child => child.name && child.name.includes('cometCore'));
-    if (cometCore && cometCore.material && data.type) {
-        cometCore.material.emissiveColor = data.type.emission.clone();
-        cometCore.scaling.setAll(1);
-    }
-}
-
 
 // Handle window resize
 export function onWindowResize() {
