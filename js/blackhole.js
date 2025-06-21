@@ -295,7 +295,7 @@ function createPolarJets(parent) {
             }
             
             const currentHeight = Math.max(0, height);
-            const radius = 0.8 + (currentHeight * 0.12); // Gradual expansion: starts at 0.8, grows by 0.12 per unit height
+            const radius = 0.1 + (currentHeight * 0.15); // Reduced starting diameter: starts at 0.5, grows by 0.12 per unit height
             const helixAngle = currentHeight * 4 + data.phase;
             
             // First strand position
@@ -348,7 +348,7 @@ function createPolarJets(parent) {
             }
             
             const currentHeight = Math.max(0, height);
-            const radius = 0.8 + (currentHeight * 0.12); // Same gradual expansion for counter-rotating strand
+            const radius = 0.5 + (currentHeight * 0.12); // Same reduced starting diameter for counter-rotating strand
             const helixAngle = -currentHeight * 4 + data.phase + Math.PI; // Counter-rotating
             
             // Second strand position
