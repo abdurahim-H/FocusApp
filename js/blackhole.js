@@ -1079,7 +1079,7 @@ function createCosmicEnvironment(parent) {
 }
 
 
-// Minimalist cosmic environment - only dust particles and sparkling stars
+// Minimalist cosmic environment - only ambient lighting (no stars - handled by scene3d.js)
 function createMinimalistCosmicEnvironment(parent) {
     // Ambient background for deep space
     scene.ambientColor = new BABYLON.Color3(
@@ -1088,12 +1088,9 @@ function createMinimalistCosmicEnvironment(parent) {
         COLOR_PALETTE.DARK_NAVY.b * 1.2
     );
 
-    // Enhanced sparkling star field with multiple layers (keep the dust particles)
-    createEnhancedSparklingStars(parent);
-    
-    // Additional distant micro stars for depth (keep tiny background stars)
-    createMicroStarField(parent);
-
+    // Stars are now handled by scene3d.js enhanced cosmic starfield
+    // No need to create competing star systems here
+    console.log('✨ Minimalist cosmic environment ready - stars handled by scene3d.js');
 }
 
 
@@ -1352,27 +1349,8 @@ export function updateBlackHoleEffects() {
         }
     }
 
-    // Enhanced star twinkling animation for dust particles
-    energyParticles.forEach(particleSystem => {
-        if (particleSystem && particleSystem.particles) {
-            const particles = particleSystem.particles;
-            for (let i = 0; i < particles.length; i++) {
-                const particle = particles[i];
-                if (!particle || !particle.userData) continue;
-                
-                const data = particle.userData;
-                const twinkle = Math.sin(t * data.twinkleSpeed + data.twinklePhase) * 0.4 + 0.6;
-                
-                // Update particle size for twinkling
-                particle.size = data.baseSize * twinkle;
-                
-                // Update alpha for sparkle effect
-                if (particle.color && data.baseAlpha) {
-                    particle.color.a = data.baseAlpha * twinkle;
-                }
-            }
-        }
-    });
+    // Enhanced star twinkling animation is now handled by scene3d.js
+    // No need to animate star particles here anymore
 
     // Animate DNA spiral streams
     polarJetParticles.forEach((spiral, index) => {
