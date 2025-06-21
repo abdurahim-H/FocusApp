@@ -202,7 +202,7 @@ function createPolarJets(parent) {
     const jetGroup = new BABYLON.TransformNode('polarJetsGroup', scene);
     jetGroup.parent = parent;
     
-    // Upper jet
+    // Upper jet only
     const upperJet = new BABYLON.ParticleSystem('upperPolarJet', 800, scene);
     upperJet.particleTexture = new BABYLON.Texture(
         'data:image/svg+xml;base64,'+btoa(`
@@ -240,13 +240,7 @@ function createPolarJets(parent) {
     upperJet.renderingGroupId = 1;
     upperJet.start();
     
-    // Lower jet
-    const lowerJet = upperJet.clone('lowerPolarJet');
-    lowerJet.direction1 = new BABYLON.Vector3(-0.1, -1, -0.1);
-    lowerJet.direction2 = new BABYLON.Vector3(0.1, -1, 0.1);
-    lowerJet.start();
-    
-    polarJetParticles.push(upperJet, lowerJet);
+    polarJetParticles.push(upperJet);
 }
 
 // Create ethereal matter streams in the accretion disk
@@ -998,7 +992,6 @@ function createDustPlasmaEmitters(parentGroup) {
     }
 
     makeEmitter('upperDustOutflow', new BABYLON.Vector3(0,1,0));
-    makeEmitter('lowerDustOutflow', new BABYLON.Vector3(0,-1,0));
 }
 
 
