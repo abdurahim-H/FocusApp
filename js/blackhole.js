@@ -308,8 +308,8 @@ function createPolarJets(parent) {
             const localZ = Math.sin(helixAngle) * radius;
             
             // Apply rotation transformation manually (since particle positions bypass transform hierarchy)
-            const rotX = Math.PI / 8; // 22.5 degrees forward tilt
-            const rotZ = Math.PI / 5; // 36 degrees right tilt
+            const rotX = Math.PI / 12; // 15 degrees forward tilt (reduced from 22.5°)
+            const rotZ = -Math.PI / 10; // 18 degrees left tilt (reduced and reversed direction)
             
             // Apply Z rotation (right tilt)
             const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
@@ -379,8 +379,8 @@ function createPolarJets(parent) {
             const localZ = Math.sin(helixAngle) * radius;
             
             // Apply rotation transformation manually (same as first strand)
-            const rotX = Math.PI / 8; // 22.5 degrees forward tilt
-            const rotZ = Math.PI / 5; // 36 degrees right tilt
+            const rotX = Math.PI / 12; // 15 degrees forward tilt (reduced from 22.5°)
+            const rotZ = -Math.PI / 10; // 18 degrees left tilt (reduced and reversed direction)
             
             // Apply Z rotation (right tilt)
             const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
@@ -485,8 +485,8 @@ function createPolarJets(parent) {
             const localZ = Math.sin(helixAngle) * radius;
             
             // Apply rotation transformation manually
-            const rotX = Math.PI / 8; // 22.5 degrees forward tilt
-            const rotZ = Math.PI / 5; // 36 degrees right tilt
+            const rotX = Math.PI / 12; // 15 degrees forward tilt (reduced from 22.5°)
+            const rotZ = -Math.PI / 10; // 18 degrees left tilt (reduced and reversed direction)
             
             // Apply Z rotation (right tilt)
             const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
@@ -556,8 +556,8 @@ function createPolarJets(parent) {
             const localZ = Math.sin(helixAngle) * radius;
             
             // Apply rotation transformation manually
-            const rotX = Math.PI / 8; // 22.5 degrees forward tilt
-            const rotZ = Math.PI / 5; // 36 degrees right tilt
+            const rotX = Math.PI / 12; // 15 degrees forward tilt (reduced from 22.5°)
+            const rotZ = -Math.PI / 10; // 18 degrees left tilt (reduced and reversed direction)
             
             // Apply Z rotation (right tilt)
             const tempX = localX * Math.cos(rotZ) - localY * Math.sin(rotZ);
