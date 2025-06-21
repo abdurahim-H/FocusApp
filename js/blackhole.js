@@ -206,40 +206,65 @@ function createPolarJets(parent) {
     spiralGroup.rotation.z = Math.PI / 5; // 36 degrees tilt to the right (increased from 22.5°)
     spiralGroup.rotation.x = Math.PI / 8; // 22.5 degrees forward tilt for depth (increased from 15°)
     
-    // Create particle texture with enhanced glow for helix effect
-    const spiralTexture = new BABYLON.Texture(
+    // Create particle texture with cyan glow for helix effect
+    const cyanTexture = new BABYLON.Texture(
         'data:image/svg+xml;base64,'+btoa(`
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">
               <defs>
-                <radialGradient id="helixCore" cx="50%" cy="50%" r="30%">
+                <radialGradient id="cyanCore" cx="50%" cy="50%" r="30%">
                   <stop offset="0%" stop-color="white" stop-opacity="1"/>
-                  <stop offset="50%" stop-color="cyan" stop-opacity="0.9"/>
-                  <stop offset="100%" stop-color="rgba(100,200,255,0.3)"/>
+                  <stop offset="50%" stop-color="#00ffff" stop-opacity="0.9"/>
+                  <stop offset="100%" stop-color="rgba(0,255,255,0.4)"/>
                 </radialGradient>
-                <radialGradient id="helixGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="rgba(150,220,255,0.8)"/>
-                  <stop offset="40%" stop-color="rgba(100,180,255,0.6)"/>
-                  <stop offset="80%" stop-color="rgba(80,150,255,0.3)"/>
-                  <stop offset="100%" stop-color="rgba(60,120,255,0)"/>
+                <radialGradient id="cyanGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="rgba(0,255,255,0.4)"/>
+                  <stop offset="40%" stop-color="rgba(0,200,200,0.3)"/>
+                  <stop offset="80%" stop-color="rgba(0,150,150,0.2)"/>
+                  <stop offset="100%" stop-color="rgba(0,100,100,0)"/>
                 </radialGradient>
               </defs>
-              <circle cx="10" cy="10" r="10" fill="url(#helixGlow)"/>
-              <circle cx="10" cy="10" r="6" fill="url(#helixCore)"/>
+              <circle cx="10" cy="10" r="10" fill="url(#cyanGlow)"/>
+              <circle cx="10" cy="10" r="6" fill="url(#cyanCore)"/>
               <circle cx="10" cy="10" r="2" fill="white" opacity="0.95"/>
             </svg>
         `),
         scene
     );
     
-    // Create first helix strand
+    // Create particle texture with ember orange glow
+    const orangeTexture = new BABYLON.Texture(
+        'data:image/svg+xml;base64,'+btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+              <defs>
+                <radialGradient id="orangeCore" cx="50%" cy="50%" r="30%">
+                  <stop offset="0%" stop-color="white" stop-opacity="1"/>
+                  <stop offset="50%" stop-color="#ff5e00" stop-opacity="0.9"/>
+                  <stop offset="100%" stop-color="rgba(255,94,0,0.3)"/>
+                </radialGradient>
+                <radialGradient id="orangeGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="rgba(255,94,0,0.3)"/>
+                  <stop offset="40%" stop-color="rgba(200,75,0,0.25)"/>
+                  <stop offset="80%" stop-color="rgba(150,55,0,0.2)"/>
+                  <stop offset="100%" stop-color="rgba(100,35,0,0)"/>
+                </radialGradient>
+              </defs>
+              <circle cx="10" cy="10" r="10" fill="url(#orangeGlow)"/>
+              <circle cx="10" cy="10" r="6" fill="url(#orangeCore)"/>
+              <circle cx="10" cy="10" r="2" fill="white" opacity="0.95"/>
+            </svg>
+        `),
+        scene
+    );
+    
+    // Create first helix strand (cyan)
     const helixStrand1 = new BABYLON.ParticleSystem('dnaHelix1', 600, scene);
-    helixStrand1.particleTexture = spiralTexture;
+    helixStrand1.particleTexture = cyanTexture;
     helixStrand1.emitter = spiralGroup;
     helixStrand1.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
     
-    helixStrand1.color1 = new BABYLON.Color4(0.8, 0.9, 1, 0.9);
-    helixStrand1.color2 = new BABYLON.Color4(0.6, 0.8, 1, 0.7);
-    helixStrand1.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
+    helixStrand1.color1 = new BABYLON.Color4(0, 1, 1, 0.9);        // Bright cyan (#00ffff)
+    helixStrand1.color2 = new BABYLON.Color4(0, 0.8, 0.8, 0.7);    // Darker cyan
+    helixStrand1.colorDead = new BABYLON.Color4(0, 0.4, 0.4, 0);   // Faded cyan
     helixStrand1.minSize = 0.6;
     helixStrand1.maxSize = 1.8;
     helixStrand1.minLifeTime = Number.MAX_VALUE;
@@ -249,15 +274,15 @@ function createPolarJets(parent) {
     helixStrand1.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
     helixStrand1.renderingGroupId = 1;
     
-    // Create second helix strand (counter-rotating)
+    // Create second helix strand (ember orange - counter-rotating)
     const helixStrand2 = new BABYLON.ParticleSystem('dnaHelix2', 600, scene);
-    helixStrand2.particleTexture = spiralTexture;
+    helixStrand2.particleTexture = orangeTexture;
     helixStrand2.emitter = spiralGroup;
     helixStrand2.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
     
-    helixStrand2.color1 = new BABYLON.Color4(0.7, 0.8, 1, 0.9);
-    helixStrand2.color2 = new BABYLON.Color4(0.5, 0.7, 1, 0.7);
-    helixStrand2.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
+    helixStrand2.color1 = new BABYLON.Color4(1, 0.37, 0, 0.9);     // Bright ember orange (#ff5e00)
+    helixStrand2.color2 = new BABYLON.Color4(0.8, 0.3, 0, 0.7);    // Darker ember orange
+    helixStrand2.colorDead = new BABYLON.Color4(0.4, 0.15, 0, 0);  // Faded ember orange
     helixStrand2.minSize = 0.6;
     helixStrand2.maxSize = 1.8;
     helixStrand2.minLifeTime = Number.MAX_VALUE;
@@ -383,13 +408,13 @@ function createPolarJets(parent) {
     
     // Create downward DNA helix strands
     const helixStrand3 = new BABYLON.ParticleSystem('dnaHelixDown1', 600, scene);
-    helixStrand3.particleTexture = spiralTexture;
+    helixStrand3.particleTexture = cyanTexture;
     helixStrand3.emitter = spiralGroup;
     helixStrand3.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
     
-    helixStrand3.color1 = new BABYLON.Color4(0.8, 0.9, 1, 0.9);
-    helixStrand3.color2 = new BABYLON.Color4(0.6, 0.8, 1, 0.7);
-    helixStrand3.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
+    helixStrand3.color1 = new BABYLON.Color4(0, 1, 1, 0.9);        // Bright cyan (#00ffff)
+    helixStrand3.color2 = new BABYLON.Color4(0, 0.8, 0.8, 0.7);    // Darker cyan
+    helixStrand3.colorDead = new BABYLON.Color4(0, 0.4, 0.4, 0);   // Faded cyan
     helixStrand3.minSize = 0.6;
     helixStrand3.maxSize = 1.8;
     helixStrand3.minLifeTime = Number.MAX_VALUE;
@@ -400,13 +425,13 @@ function createPolarJets(parent) {
     helixStrand3.renderingGroupId = 1;
     
     const helixStrand4 = new BABYLON.ParticleSystem('dnaHelixDown2', 600, scene);
-    helixStrand4.particleTexture = spiralTexture;
+    helixStrand4.particleTexture = orangeTexture;
     helixStrand4.emitter = spiralGroup;
     helixStrand4.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
     
-    helixStrand4.color1 = new BABYLON.Color4(0.7, 0.8, 1, 0.9);
-    helixStrand4.color2 = new BABYLON.Color4(0.5, 0.7, 1, 0.7);
-    helixStrand4.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
+    helixStrand4.color1 = new BABYLON.Color4(1, 0.37, 0, 0.9);     // Bright ember orange (#ff5e00)
+    helixStrand4.color2 = new BABYLON.Color4(0.8, 0.3, 0, 0.7);    // Darker ember orange
+    helixStrand4.colorDead = new BABYLON.Color4(0.4, 0.15, 0, 0);  // Faded ember orange
     helixStrand4.minSize = 0.6;
     helixStrand4.maxSize = 1.8;
     helixStrand4.minLifeTime = Number.MAX_VALUE;

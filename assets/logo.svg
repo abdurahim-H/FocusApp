@@ -1,0 +1,26 @@
+<!--?xml version="1.0" encoding="UTF-8"?-->
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" fill="none">
+
+  <!-- Rounded-square container -->
+  <rect width="256" height="256" rx="48" fill="#0B0B16"></rect>
+
+  <!-- Accretion-disk gradient -->
+  <defs>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6F5BFF"></stop>
+      <stop offset="50%" stop-color="#C13CFF"></stop>
+      <stop offset="100%" stop-color="#00BFFF"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- Glowing ring -->
+  <ellipse cx="128" cy="128" rx="88" ry="44" stroke="url(#ringGrad)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"></ellipse>
+
+  <!-- Hourglass outline -->
+  <path d="
+      M100 80 H156
+      L132 128
+      L156 176 H100
+      L124 128 Z" stroke="#C9C9FF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+
+</svg>
