@@ -370,6 +370,7 @@ function createMinimalistStarField() {
                 // Store stellar properties for subtle animation
                 particle.userData = {
                     baseSize: particle.size,
+                    baseAlpha: particle.color.a, // Store the initial alpha value
                     twinkleSpeed: 0.01 + Math.random() * 0.03, // Slower, subtler twinkling
                     twinklePhase: Math.random() * Math.PI * 2,
                     stellarType: 'distant'
