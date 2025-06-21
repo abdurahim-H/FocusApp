@@ -316,7 +316,7 @@ function createPolarJets(parent) {
             }
             
             const height = data.age;
-            const radius = 0.6 + (height * 0.1); // Start at radius 0.6, expand to 2.6
+            const radius = 0.3 + (height * 0.15); // Start at radius 0.3, expand to 3.3
             const helixAngle = height * 0.8 + data.basePhase; // Tighter helix
             
             // Calculate helix position
@@ -373,7 +373,7 @@ function createPolarJets(parent) {
             }
             
             const height = data.age;
-            const radius = 0.6 + (height * 0.1); // Start at radius 0.6, expand to 2.6
+            const radius = 0.3 + (height * 0.15); // Start at radius 0.3, expand to 3.3
             const helixAngle = -height * 0.8 + data.basePhase + Math.PI; // Counter-rotating, 180° offset
             
             // Calculate helix position
@@ -465,7 +465,7 @@ function createPolarJets(parent) {
             }
             
             const depth = data.age;
-            const radius = 0.6 + (depth * 0.1); // Start at radius 0.6, expand to 2.6
+            const radius = 0.3 + (depth * 0.15); // Start at radius 0.3, expand to 3.3
             const helixAngle = depth * 0.8 + data.basePhase; // Same direction as first strand
             
             // Calculate downward helix position
@@ -522,7 +522,7 @@ function createPolarJets(parent) {
             }
             
             const depth = data.age;
-            const radius = 0.6 + (depth * 0.1); // Start at radius 0.6, expand to 2.6
+            const radius = 0.3 + (depth * 0.15); // Start at radius 0.3, expand to 3.3
             const helixAngle = -depth * 0.8 + data.basePhase + Math.PI; // Counter-rotating, 180° offset
             
             // Calculate downward helix position
