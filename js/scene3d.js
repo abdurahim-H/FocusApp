@@ -1823,5 +1823,3 @@ console.log('   spawnNebula() - Spawn a colorful nebula patch');
 console.log('   spawnAsteroids() - Spawn an asteroid cluster');
 console.log('   spawnPulsar() - Spawn a pulsar with rotating beam');
 console.log('   spawnTrail() - Spawn a beautiful comet trail');
-
-
