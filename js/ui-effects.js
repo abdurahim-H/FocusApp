@@ -301,6 +301,8 @@ export function initWaterContainerEffects() {
     waterContainers.forEach(container => {
         // Add water ripple effect on click
         container.addEventListener('click', (e) => {
+            // Prevent any potential layout issues
+            e.stopPropagation();
             triggerWaterRipple(container, e);
         });
         
@@ -325,24 +327,18 @@ export function initWaterContainerEffects() {
 
 // Trigger water ripple effect
 export function triggerWaterRipple(container, event = null) {
-    // Remove any existing ripple
-    container.classList.remove('water-ripple');
-    
-    // Force reflow
-    container.offsetHeight;
-    
-    // Add ripple effect
-    container.classList.add('water-ripple');
-    
+    // Don't apply ripple class to container - only create ripple elements
     // Create ripple element at click position
     if (event) {
         createWaterRippleElement(container, event);
+    } else {
+        // If no event, create ripple at center
+        const centerEvent = {
+            clientX: container.getBoundingClientRect().left + container.offsetWidth / 2,
+            clientY: container.getBoundingClientRect().top + container.offsetHeight / 2
+        };
+        createWaterRippleElement(container, centerEvent);
     }
-    
-    // Remove ripple class after animation
-    trackSetTimeout(() => {
-        container.classList.remove('water-ripple');
-    }, 600);
 }
 
 // Create visual ripple element at click position
@@ -603,7 +599,7 @@ export function cleanupWaterEffects() {
         }
         
         // Remove all water effect classes
-        container.classList.remove('water-ripple', 'water-parallax', 'water-in-view', 'water-focus-enhanced');
+        container.classList.remove('water-parallax', 'water-in-view', 'water-focus-enhanced');
     });
     
     // Remove injected styles
