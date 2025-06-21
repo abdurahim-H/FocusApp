@@ -197,50 +197,172 @@ function createAccretionDisk(parent) {
     };
 }
 
-// Create polar jets shooting from black hole poles
+// Create DNA-shaped spiral stream emerging from black hole center
 function createPolarJets(parent) {
-    const jetGroup = new BABYLON.TransformNode('polarJetsGroup', scene);
-    jetGroup.parent = parent;
+    const spiralGroup = new BABYLON.TransformNode('dnaSpiralGroup', scene);
+    spiralGroup.parent = parent;
     
-    // Upper jet only
-    const upperJet = new BABYLON.ParticleSystem('upperPolarJet', 800, scene);
-    upperJet.particleTexture = new BABYLON.Texture(
+    // Create particle texture with enhanced glow for helix effect
+    const spiralTexture = new BABYLON.Texture(
         'data:image/svg+xml;base64,'+btoa(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">
               <defs>
-                <radialGradient id="jetGrad" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="white" stop-opacity="0.9"/>
-                  <stop offset="40%" stop-color="cyan" stop-opacity="0.7"/>
-                  <stop offset="80%" stop-color="blue" stop-opacity="0.3"/>
-                  <stop offset="100%" stop-color="rgba(0,100,255,0)"/>
+                <radialGradient id="helixCore" cx="50%" cy="50%" r="30%">
+                  <stop offset="0%" stop-color="white" stop-opacity="1"/>
+                  <stop offset="50%" stop-color="cyan" stop-opacity="0.9"/>
+                  <stop offset="100%" stop-color="rgba(100,200,255,0.3)"/>
+                </radialGradient>
+                <radialGradient id="helixGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="rgba(150,220,255,0.8)"/>
+                  <stop offset="40%" stop-color="rgba(100,180,255,0.6)"/>
+                  <stop offset="80%" stop-color="rgba(80,150,255,0.3)"/>
+                  <stop offset="100%" stop-color="rgba(60,120,255,0)"/>
                 </radialGradient>
               </defs>
-              <circle cx="8" cy="8" r="8" fill="url(#jetGrad)"/>
+              <circle cx="10" cy="10" r="10" fill="url(#helixGlow)"/>
+              <circle cx="10" cy="10" r="6" fill="url(#helixCore)"/>
+              <circle cx="10" cy="10" r="2" fill="white" opacity="0.95"/>
             </svg>
         `),
         scene
     );
     
-    upperJet.emitter = jetGroup;
-    upperJet.createConeEmitter(2, 0.3);
-    upperJet.direction1 = new BABYLON.Vector3(-0.1, 1, -0.1);
-    upperJet.direction2 = new BABYLON.Vector3(0.1, 1, 0.1);
-    upperJet.color1 = new BABYLON.Color4(0.8, 0.9, 1, 0.8);
-    upperJet.color2 = new BABYLON.Color4(0.6, 0.8, 1, 0.6);
-    upperJet.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
-    upperJet.minSize = 0.5;
-    upperJet.maxSize = 2;
-    upperJet.minLifeTime = Number.MAX_VALUE;
-    upperJet.maxLifeTime = Number.MAX_VALUE;
-    upperJet.emitRate = 150;
-    upperJet.minEmitPower = 5;
-    upperJet.maxEmitPower = 15;
-    upperJet.gravity = BABYLON.Vector3.Zero();
-    upperJet.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
-    upperJet.renderingGroupId = 1;
-    upperJet.start();
+    // Create first helix strand
+    const helixStrand1 = new BABYLON.ParticleSystem('dnaHelix1', 600, scene);
+    helixStrand1.particleTexture = spiralTexture;
+    helixStrand1.emitter = spiralGroup;
+    helixStrand1.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
     
-    polarJetParticles.push(upperJet);
+    helixStrand1.color1 = new BABYLON.Color4(0.8, 0.9, 1, 0.9);
+    helixStrand1.color2 = new BABYLON.Color4(0.6, 0.8, 1, 0.7);
+    helixStrand1.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
+    helixStrand1.minSize = 0.6;
+    helixStrand1.maxSize = 1.8;
+    helixStrand1.minLifeTime = Number.MAX_VALUE;
+    helixStrand1.maxLifeTime = Number.MAX_VALUE;
+    helixStrand1.emitRate = 120;
+    helixStrand1.gravity = BABYLON.Vector3.Zero();
+    helixStrand1.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    helixStrand1.renderingGroupId = 1;
+    
+    // Create second helix strand (counter-rotating)
+    const helixStrand2 = new BABYLON.ParticleSystem('dnaHelix2', 600, scene);
+    helixStrand2.particleTexture = spiralTexture;
+    helixStrand2.emitter = spiralGroup;
+    helixStrand2.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
+    
+    helixStrand2.color1 = new BABYLON.Color4(0.7, 0.8, 1, 0.9);
+    helixStrand2.color2 = new BABYLON.Color4(0.5, 0.7, 1, 0.7);
+    helixStrand2.colorDead = new BABYLON.Color4(0.2, 0.4, 0.8, 0);
+    helixStrand2.minSize = 0.6;
+    helixStrand2.maxSize = 1.8;
+    helixStrand2.minLifeTime = Number.MAX_VALUE;
+    helixStrand2.maxLifeTime = Number.MAX_VALUE;
+    helixStrand2.emitRate = 120;
+    helixStrand2.gravity = BABYLON.Vector3.Zero();
+    helixStrand2.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    helixStrand2.renderingGroupId = 1;
+    
+    // Custom DNA helix motion for first strand
+    helixStrand1.updateFunction = (particles) => {
+        const t = Date.now() * 0.001;
+        for (let p = 0; p < particles.length; p++) {
+            const particle = particles[p];
+            if (!particle) continue;
+            
+            // Initialize particle if new
+            if (!particle.userData) {
+                particle.userData = {
+                    age: 0,
+                    phase: Math.random() * Math.PI * 2,
+                    strand: 1
+                };
+                particle.position.set(0, 0, 0);
+            }
+            
+            const data = particle.userData;
+            data.age += 0.03; // Ascent speed
+            
+            // DNA helix mathematics
+            const height = data.age;
+            const radius = Math.min(0.5 + height * 0.15, 8); // Expanding radius
+            const helixAngle = height * 2 + data.phase; // Spiral twist
+            
+            // First strand position
+            particle.position.x = Math.cos(helixAngle) * radius;
+            particle.position.z = Math.sin(helixAngle) * radius;
+            particle.position.y = height;
+            
+            // Add subtle jitter for realism
+            particle.position.x += (Math.random() - 0.5) * 0.2;
+            particle.position.z += (Math.random() - 0.5) * 0.2;
+            
+            // Fade with distance and reset at max height
+            const fadeDistance = 30;
+            if (height > fadeDistance) {
+                data.age = 0;
+                particle.position.set(0, 0, 0);
+                data.phase = Math.random() * Math.PI * 2;
+            }
+            
+            // Dynamic opacity based on height
+            const alpha = Math.min(1, Math.max(0, 1 - height / fadeDistance));
+            particle.color.a = alpha * 0.8;
+        }
+    };
+    
+    // Custom DNA helix motion for second strand (counter-rotating)
+    helixStrand2.updateFunction = (particles) => {
+        const t = Date.now() * 0.001;
+        for (let p = 0; p < particles.length; p++) {
+            const particle = particles[p];
+            if (!particle) continue;
+            
+            // Initialize particle if new
+            if (!particle.userData) {
+                particle.userData = {
+                    age: 0,
+                    phase: Math.random() * Math.PI * 2,
+                    strand: 2
+                };
+                particle.position.set(0, 0, 0);
+            }
+            
+            const data = particle.userData;
+            data.age += 0.03; // Same ascent speed
+            
+            // DNA helix mathematics (counter-rotating)
+            const height = data.age;
+            const radius = Math.min(0.5 + height * 0.15, 8); // Same expanding radius
+            const helixAngle = -height * 2 + data.phase + Math.PI; // Counter-rotate + offset
+            
+            // Second strand position
+            particle.position.x = Math.cos(helixAngle) * radius;
+            particle.position.z = Math.sin(helixAngle) * radius;
+            particle.position.y = height;
+            
+            // Add subtle jitter for realism
+            particle.position.x += (Math.random() - 0.5) * 0.2;
+            particle.position.z += (Math.random() - 0.5) * 0.2;
+            
+            // Fade with distance and reset at max height
+            const fadeDistance = 30;
+            if (height > fadeDistance) {
+                data.age = 0;
+                particle.position.set(0, 0, 0);
+                data.phase = Math.random() * Math.PI * 2;
+            }
+            
+            // Dynamic opacity based on height
+            const alpha = Math.min(1, Math.max(0, 1 - height / fadeDistance));
+            particle.color.a = alpha * 0.8;
+        }
+    };
+    
+    helixStrand1.start();
+    helixStrand2.start();
+    
+    polarJetParticles.push(helixStrand1, helixStrand2);
 }
 
 // Create ethereal matter streams in the accretion disk
@@ -1043,12 +1165,17 @@ export function updateBlackHoleEffects() {
         }
     });
 
-    // Animate polar jets
-    polarJetParticles.forEach((jet, index) => {
-        if (jet && jet.emitRate !== undefined) {
-            // Vary jet intensity with stable oscillation
-            const jetIntensity = Math.sin(t * 2 + index * Math.PI) * 0.3 + 0.7;
-            jet.emitRate = 150 * jetIntensity;
+    // Animate DNA spiral streams
+    polarJetParticles.forEach((spiral, index) => {
+        if (spiral && spiral.emitRate !== undefined) {
+            // Gentle breathing effect for spiral intensity
+            const spiralIntensity = Math.sin(t * 1.5 + index * Math.PI * 0.5) * 0.2 + 0.9;
+            spiral.emitRate = 120 * spiralIntensity;
+            
+            // Subtle size variation for organic feel
+            const sizeVariation = Math.sin(t * 2 + index * Math.PI) * 0.1 + 1;
+            spiral.minSize = 0.6 * sizeVariation;
+            spiral.maxSize = 1.8 * sizeVariation;
         }
     });
 }
