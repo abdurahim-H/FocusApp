@@ -242,8 +242,10 @@ function createPolarJets(parent) {
     
     // Lower jet
     const lowerJet = upperJet.clone('lowerPolarJet');
-    lowerJet.direction1 = new BABYLON.Vector3(-0.1, -1, -0.1);
-    lowerJet.direction2 = new BABYLON.Vector3(0.1, -1, 0.1);
+    // Mirror the upper jet so particles shoot downward at the opposite angle
+    // This creates a balanced dual‑pole effect
+    lowerJet.direction1 = new BABYLON.Vector3(0.1, -1, 0.1);
+    lowerJet.direction2 = new BABYLON.Vector3(-0.1, -1, -0.1);
     lowerJet.start();
     
     polarJetParticles.push(upperJet, lowerJet);
