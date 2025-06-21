@@ -166,9 +166,9 @@ function createAccretionDisk(parent) {
             const distance = Math.sqrt(particle.position.x * particle.position.x + particle.position.z * particle.position.z);
             
             // Spiral outward motion
-            if (distance < 24) { // Reduced from 30 to 24
+            if (distance < 20) { // Reduced from 24 to 20
                 const angle = Math.atan2(particle.position.z, particle.position.x) + (0.03 / Math.max(1, distance * 0.1));
-                const newDistance = Math.min(24, distance + 0.1); // Reduced from 30 to 24
+                const newDistance = Math.min(20, distance + 0.1); // Reduced from 24 to 20
                 particle.position.x = Math.cos(angle) * newDistance;
                 particle.position.z = Math.sin(angle) * newDistance;
                 
@@ -176,7 +176,7 @@ function createAccretionDisk(parent) {
                 particle.position.y = Math.sin(Date.now() * 0.001 + distance) * 0.5;
                 
                 // Temperature-based color evolution
-                const temp = Math.max(0, 1 - distance / 20); // Adjusted from 25 to 20
+                const temp = Math.max(0, 1 - distance / 17); // Adjusted from 20 to 17
                 particle.color.r = 1;
                 particle.color.g = 0.8 + temp * 0.2;
                 particle.color.b = 0.2 + temp * 0.6;
