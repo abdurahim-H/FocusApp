@@ -124,6 +124,10 @@ function createAccretionDisk(parent) {
     const diskGroup = new BABYLON.TransformNode('accretionDiskGroup', scene);
     diskGroup.parent = parent;
     
+    // Tilt the accretion disk to match the DNA helix angle
+    diskGroup.rotation.z = Math.PI / 5; // 36 degrees tilt to the right (same as helix)
+    diskGroup.rotation.x = Math.PI / 8; // 22.5 degrees forward tilt for depth (same as helix)
+    
     // Create main accretion disk as swirling particles
     const mainDisk = new BABYLON.ParticleSystem('accretionDiskMain', 2500, scene);
     mainDisk.particleTexture = new BABYLON.Texture(
@@ -159,6 +163,8 @@ function createAccretionDisk(parent) {
     
     // Custom update function for realistic accretion disk motion
     mainDisk.updateFunction = (particles) => {
+        const globalTime = Date.now() * 0.001;
+        
         for (let p = 0; p < particles.length; p++) {
             const particle = particles[p];
             if (!particle) continue;
@@ -168,7 +174,7 @@ function createAccretionDisk(parent) {
                 const radius = 6 + Math.random() * 14; // Random radius between 6-20
                 particle.userData = {
                     radius: radius,
-                    angle: Math.random() * Math.PI * 2, // Random starting angle
+                    baseAngle: Math.random() * Math.PI * 2, // Random starting angle
                     // Keplerian velocity - inner particles orbit faster
                     angularSpeed: 0.02 / Math.sqrt(radius), // Realistic orbital dynamics
                     verticalOffset: (Math.random() - 0.5) * 0.5, // Subtle vertical variation
@@ -178,19 +184,36 @@ function createAccretionDisk(parent) {
             
             const data = particle.userData;
             
-            // Update orbital angle based on Keplerian motion
-            data.angle += data.angularSpeed;
+            // Calculate angle that maintains relationship with helix
+            // Use same direction and base speed as helix (0.8 factor)
+            const diskAngle = data.baseAngle + (globalTime * data.angularSpeed * 0.8);
             
             // Slight radial variation to prevent perfect circles (realistic turbulence)
-            const radiusVariation = Math.sin(data.angle * 3 + Date.now() * 0.001) * 0.5;
+            const radiusVariation = Math.sin(diskAngle * 3 + globalTime) * 0.5;
             const currentRadius = data.baseRadius + radiusVariation;
             
-            // Calculate orbital position
-            particle.position.x = Math.cos(data.angle) * currentRadius;
-            particle.position.z = Math.sin(data.angle) * currentRadius;
+            // Calculate orbital position in local disk coordinates
+            const localX = Math.cos(diskAngle) * currentRadius;
+            const localY = data.verticalOffset + Math.sin(globalTime * 0.5 + diskAngle) * 0.2;
+            const localZ = Math.sin(diskAngle) * currentRadius;
             
-            // Keep particles in disk plane with minimal variation
-            particle.position.y = data.verticalOffset + Math.sin(Date.now() * 0.0005 + data.angle) * 0.2;
+            // Apply rotation transformation to match helix tilt
+            const tiltX = Math.PI / 8; // 22.5 degrees forward tilt (same as helix)
+            const tiltZ = Math.PI / 5; // 36 degrees right tilt (same as helix)
+            
+            // Apply Z rotation (right tilt)
+            const rotatedX = localX * Math.cos(tiltZ) - localY * Math.sin(tiltZ);
+            const rotatedY = localX * Math.sin(tiltZ) + localY * Math.cos(tiltZ);
+            
+            // Apply X rotation (forward tilt)
+            const finalX = rotatedX;
+            const finalY = rotatedY * Math.cos(tiltX) - localZ * Math.sin(tiltX);
+            const finalZ = rotatedY * Math.sin(tiltX) + localZ * Math.cos(tiltX);
+            
+            // Set transformed position
+            particle.position.x = finalX;
+            particle.position.y = finalY;
+            particle.position.z = finalZ;
             
             // Temperature-based color evolution (inner = hotter)
             const temp = Math.max(0, 1 - currentRadius / 17);
