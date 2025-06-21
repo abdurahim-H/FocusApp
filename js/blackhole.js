@@ -144,7 +144,7 @@ function createAccretionDisk(parent) {
     );
     
     mainDisk.emitter = diskGroup;
-    mainDisk.createSphereEmitter(4, 0); // Smaller diameter - reduced from 6 to 4
+    mainDisk.createSphereEmitter(20, 0); // Larger emission area for better distribution
     mainDisk.color1 = new BABYLON.Color4(1, 1, 1, 1);     // White-hot inner
     mainDisk.color2 = new BABYLON.Color4(1, 0.6, 0.2, 0.8); // Orange outer
     mainDisk.colorDead = new BABYLON.Color4(0.5, 0.1, 0, 0);
@@ -157,31 +157,47 @@ function createAccretionDisk(parent) {
     mainDisk.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
     mainDisk.renderingGroupId = 1; // Behind black hole
     
-    // Custom update function for spiral motion
+    // Custom update function for realistic accretion disk motion
     mainDisk.updateFunction = (particles) => {
         for (let p = 0; p < particles.length; p++) {
             const particle = particles[p];
             if (!particle) continue;
             
-            const distance = Math.sqrt(particle.position.x * particle.position.x + particle.position.z * particle.position.z);
-            
-            // Spiral outward motion
-            if (distance < 20) { // Reduced from 24 to 20
-                const angle = Math.atan2(particle.position.z, particle.position.x) + (0.03 / Math.max(1, distance * 0.1));
-                const newDistance = Math.min(20, distance + 0.1); // Reduced from 24 to 20
-                particle.position.x = Math.cos(angle) * newDistance;
-                particle.position.z = Math.sin(angle) * newDistance;
-                
-                // Keep particles in disk plane with slight variation
-                particle.position.y = Math.sin(Date.now() * 0.001 + distance) * 0.5;
-                
-                // Temperature-based color evolution
-                const temp = Math.max(0, 1 - distance / 17); // Adjusted from 20 to 17
-                particle.color.r = 1;
-                particle.color.g = 0.8 + temp * 0.2;
-                particle.color.b = 0.2 + temp * 0.6;
-                particle.color.a = 0.7 + temp * 0.3;
+            // Initialize particle with realistic orbital characteristics
+            if (!particle.userData) {
+                const radius = 6 + Math.random() * 14; // Random radius between 6-20
+                particle.userData = {
+                    radius: radius,
+                    angle: Math.random() * Math.PI * 2, // Random starting angle
+                    // Keplerian velocity - inner particles orbit faster
+                    angularSpeed: 0.02 / Math.sqrt(radius), // Realistic orbital dynamics
+                    verticalOffset: (Math.random() - 0.5) * 0.5, // Subtle vertical variation
+                    baseRadius: radius // Keep track of original radius
+                };
             }
+            
+            const data = particle.userData;
+            
+            // Update orbital angle based on Keplerian motion
+            data.angle += data.angularSpeed;
+            
+            // Slight radial variation to prevent perfect circles (realistic turbulence)
+            const radiusVariation = Math.sin(data.angle * 3 + Date.now() * 0.001) * 0.5;
+            const currentRadius = data.baseRadius + radiusVariation;
+            
+            // Calculate orbital position
+            particle.position.x = Math.cos(data.angle) * currentRadius;
+            particle.position.z = Math.sin(data.angle) * currentRadius;
+            
+            // Keep particles in disk plane with minimal variation
+            particle.position.y = data.verticalOffset + Math.sin(Date.now() * 0.0005 + data.angle) * 0.2;
+            
+            // Temperature-based color evolution (inner = hotter)
+            const temp = Math.max(0, 1 - currentRadius / 17);
+            particle.color.r = 1;
+            particle.color.g = 0.8 + temp * 0.2;
+            particle.color.b = 0.2 + temp * 0.6;
+            particle.color.a = 0.7 + temp * 0.3;
         }
     };
     
