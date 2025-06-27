@@ -129,7 +129,7 @@ function createAccretionDisk(parent) {
     diskGroup.rotation.x = 0; // No tilt
     
     // Create main accretion disk as swirling particles
-    const mainDisk = new BABYLON.ParticleSystem('accretionDiskMain', 2500, scene);
+    const mainDisk = new BABYLON.ParticleSystem('accretionDiskMain', 3000, scene); // Increased particle count
     mainDisk.particleTexture = new BABYLON.Texture(
         'data:image/svg+xml;base64,'+btoa(`
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
@@ -148,64 +148,158 @@ function createAccretionDisk(parent) {
     );
     
     mainDisk.emitter = diskGroup;
-    mainDisk.createSphereEmitter(20, 0); // Larger emission area for better distribution
+    mainDisk.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
     mainDisk.color1 = new BABYLON.Color4(1, 1, 1, 1);     // White-hot inner
     mainDisk.color2 = new BABYLON.Color4(1, 0.6, 0.2, 0.8); // Orange outer
     mainDisk.colorDead = new BABYLON.Color4(0.5, 0.1, 0, 0);
-    mainDisk.minSize = 0.6; // Reduced from 0.8
-    mainDisk.maxSize = 2.4; // Reduced from 3.2
+    mainDisk.minSize = 0.4; // Smaller particles for smoother appearance
+    mainDisk.maxSize = 1.8; 
     mainDisk.minLifeTime = Number.MAX_VALUE;
     mainDisk.maxLifeTime = Number.MAX_VALUE;
-    mainDisk.emitRate = 400; // Increased from 200 for more particles
+    mainDisk.emitRate = 0; // We'll emit all at once
     mainDisk.gravity = BABYLON.Vector3.Zero();
     mainDisk.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
     mainDisk.renderingGroupId = 1; // Behind black hole
     
-    // Custom update function for flat spinning accretion disk
+    // Start the system and emit all particles at once
+    mainDisk.start();
+    mainDisk.manualEmitCount = 3000;
+    
+    // Custom update function for smooth flowing accretion disk
     mainDisk.updateFunction = (particles) => {
+        const time = Date.now() * 0.001;
         
         for (let p = 0; p < particles.length; p++) {
             const particle = particles[p];
             if (!particle) continue;
             
-            // Initialize particle with static position (rotation handled by group transform)
+            // Initialize particle with orbital parameters
             if (!particle.userData) {
                 const radius = 6 + Math.random() * 14; // Random radius between 6-20
                 const angle = Math.random() * Math.PI * 2; // Random starting angle
+                const orbitSpeed = 0.15 / Math.sqrt(radius); // Reduced from 0.5 to 0.15 for slower rotation
+                const verticalPhase = Math.random() * Math.PI * 2;
+                
                 particle.userData = {
                     radius: radius,
-                    angle: angle, // Fixed angle - rotation handled by group
-                    verticalOffset: (Math.random() - 0.5) * 0.5, // Subtle vertical variation
-                    baseRadius: radius // Keep track of original radius
+                    angle: angle,
+                    orbitSpeed: orbitSpeed,
+                    verticalOffset: 0,
+                    verticalPhase: verticalPhase,
+                    baseRadius: radius,
+                    spiralFactor: (Math.random() - 0.5) * 0.01, // Reduced from 0.02 for subtler spiral
+                    turbulence: Math.random() * 0.3 + 0.7
                 };
             }
             
             const data = particle.userData;
             
-            // Static position in flat disk - let group rotation handle spinning
+            // Update angle for orbital motion - slower rotation
+            data.angle += data.orbitSpeed * data.turbulence * 0.1; // Added 0.5 multiplier for even slower motion
+            
+            // Add slight spiral motion (matter falling into black hole)
+            data.radius = data.baseRadius + Math.sin(time * 0.5 + data.angle) * 0.5;
+            if (data.radius > 6) {
+                data.radius -= data.spiralFactor;
+            }
+            
+            // Calculate position with smooth orbital motion
             particle.position.x = Math.cos(data.angle) * data.radius;
-            particle.position.y = data.verticalOffset;
             particle.position.z = Math.sin(data.angle) * data.radius;
             
+            // Add subtle vertical wave for more dynamic appearance
+            data.verticalOffset = Math.sin(time * 2 + data.verticalPhase + data.angle * 2) * 0.3;
+            particle.position.y = data.verticalOffset;
+            
             // Temperature-based color evolution (inner = hotter)
-            const temp = Math.max(0, 1 - data.radius / 17);
+            const temp = Math.max(0, 1 - (data.radius - 6) / 14);
             particle.color.r = 1;
-            particle.color.g = 0.8 + temp * 0.2;
-            particle.color.b = 0.2 + temp * 0.6;
-            particle.color.a = 0.7 + temp * 0.3;
+            particle.color.g = 0.7 + temp * 0.3;
+            particle.color.b = 0.1 + temp * 0.5;
+            particle.color.a = 0.6 + temp * 0.4;
+            
+            // Size based on distance (inner particles smaller but brighter)
+            particle.size = (0.4 + (1 - temp) * 1.4) * data.turbulence;
         }
     };
     
-    mainDisk.start();
+    // Add inner hot ring for more definition
+    const innerRing = new BABYLON.ParticleSystem('innerAccretionRing', 800, scene);
+    innerRing.particleTexture = new BABYLON.Texture(
+        'data:image/svg+xml;base64,'+btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+              <defs>
+                <radialGradient id="innerGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="white" stop-opacity="1"/>
+                  <stop offset="50%" stop-color="yellow" stop-opacity="0.8"/>
+                  <stop offset="100%" stop-color="rgba(255,200,0,0)"/>
+                </radialGradient>
+              </defs>
+              <circle cx="8" cy="8" r="8" fill="url(#innerGrad)"/>
+            </svg>
+        `),
+        scene
+    );
     
-    // Add animated matter streams
-    createMatterStreams(diskGroup);
+    innerRing.emitter = diskGroup;
+    innerRing.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
+    innerRing.color1 = new BABYLON.Color4(1, 1, 0.8, 1);
+    innerRing.color2 = new BABYLON.Color4(1, 0.9, 0.6, 0.8);
+    innerRing.minSize = 0.3;
+    innerRing.maxSize = 1.0;
+    innerRing.minLifeTime = Number.MAX_VALUE;
+    innerRing.maxLifeTime = Number.MAX_VALUE;
+    innerRing.emitRate = 0;
+    innerRing.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    innerRing.renderingGroupId = 1;
     
-    // Store reference
+    innerRing.start();
+    innerRing.manualEmitCount = 800;
+    
+    // Update function for inner ring
+    innerRing.updateFunction = (particles) => {
+        const time = Date.now() * 0.001;
+        
+        for (let p = 0; p < particles.length; p++) {
+            const particle = particles[p];
+            if (!particle) continue;
+            
+            if (!particle.userData) {
+                const radius = 6 + Math.random() * 3; // Closer to event horizon
+                const angle = Math.random() * Math.PI * 2;
+                const orbitSpeed = 0.25 / Math.sqrt(radius); // Reduced from 0.8 to 0.25
+                
+                particle.userData = {
+                    radius: radius,
+                    angle: angle,
+                    orbitSpeed: orbitSpeed,
+                    baseRadius: radius
+                };
+            }
+            
+            const data = particle.userData;
+            
+            // Fast orbital motion (but still slower than before)
+            data.angle += data.orbitSpeed * 0.6; // Added 0.6 multiplier
+            
+            // Position
+            particle.position.x = Math.cos(data.angle) * data.radius;
+            particle.position.z = Math.sin(data.angle) * data.radius;
+            particle.position.y = Math.sin(time * 3 + data.angle * 3) * 0.2;
+            
+            // Bright hot colors
+            particle.color.a = 0.8 + Math.sin(time * 5 + data.angle) * 0.2;
+        }
+    };
+    
+    // Store references
     accretionDisk = {
         group: diskGroup,
-        mainDisk: mainDisk
+        mainDisk: mainDisk,
+        innerRing: innerRing
     };
+    
+    // No need to add rotation to diskGroup anymore - particles handle their own motion
 }
 
 // Create DNA-shaped spiral stream emerging from black hole center
@@ -409,7 +503,7 @@ function createPolarJets(parent) {
             particle.position.y = finalY;
             particle.position.z = finalZ;
             
-            // Same opacity fade
+            // Opacity fade
             const fadeStart = 15;
             particle.color.a = height > fadeStart ? 
                 Math.max(0.1, 1 - (height - fadeStart) / 5) : 
@@ -580,8 +674,8 @@ function createMatterStreams(parent) {
     streamGroup.parent = parent;
     
     // Create spiraling matter streams - pure particle effects
-    for (let i = 0; i < 2; i++) {
-        const stream = new BABYLON.ParticleSystem(`matterStream_${i}`, 300, scene);
+    for (let i = 0; i < 3; i++) { // Increased to 3 streams
+        const stream = new BABYLON.ParticleSystem(`matterStream_${i}`, 400, scene);
         stream.particleTexture = new BABYLON.Texture(
             'data:image/svg+xml;base64,'+btoa(`
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
@@ -600,38 +694,61 @@ function createMatterStreams(parent) {
         );
         
         stream.emitter = streamGroup;
-        stream.createSphereEmitter(12, 0.2); // Reduced from 15 to 12
+        stream.createPointEmitter(new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0));
         stream.color1 = new BABYLON.Color4(1, 0.9, 0.5, 0.8);
         stream.color2 = new BABYLON.Color4(1, 0.6, 0.2, 0.6);
         stream.colorDead = new BABYLON.Color4(0.8, 0.2, 0.1, 0);
-        stream.minSize = 0.3; // Reduced from 0.4
-        stream.maxSize = 1.4; // Reduced from 1.8
+        stream.minSize = 0.2;
+        stream.maxSize = 1.0;
         stream.minLifeTime = Number.MAX_VALUE;
         stream.maxLifeTime = Number.MAX_VALUE;
-        stream.emitRate = 50;
+        stream.emitRate = 0;
         stream.gravity = BABYLON.Vector3.Zero();
         stream.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
         stream.renderingGroupId = 1;
         
-        // Smooth spiral motion
+        stream.start();
+        stream.manualEmitCount = 400;
+        
+        // Smooth spiral motion for streams
         stream.updateFunction = (particles) => {
+            const time = Date.now() * 0.001;
+            const streamOffset = i * (Math.PI * 2 / 3); // Evenly space the 3 streams
+            
             for (let p = 0; p < particles.length; p++) {
                 const particle = particles[p];
                 if (!particle) continue;
                 
-                const distance = Math.sqrt(particle.position.x * particle.position.x + particle.position.z * particle.position.z);
-                if (distance > 5 && distance < 20) { // Reduced from 6-25 to 5-20
-                    const angle = Math.atan2(particle.position.z, particle.position.x) + (0.04 / Math.max(1, distance * 0.2));
-                    particle.position.x = Math.cos(angle) * distance;
-                    particle.position.z = Math.sin(angle) * distance;
-                    
-                    // Subtle vertical oscillation
-                    particle.position.y = Math.sin(Date.now() * 0.002 + distance) * 1.5;
+                if (!particle.userData) {
+                    const t = p / particles.length; // Parameter along the stream
+                    particle.userData = {
+                        t: t,
+                        phase: streamOffset,
+                        baseRadius: 8 + t * 12, // Spiral outward
+                        speed: 0.3 + Math.random() * 0.2
+                    };
                 }
+                
+                const data = particle.userData;
+                
+                // Update position along spiral
+                data.t += 0.002 * data.speed;
+                if (data.t > 1) data.t -= 1;
+                
+                // Calculate spiral position
+                const radius = 8 + data.t * 12;
+                const angle = data.phase + data.t * Math.PI * 4 + time * 0.5;
+                
+                particle.position.x = Math.cos(angle) * radius;
+                particle.position.z = Math.sin(angle) * radius;
+                particle.position.y = Math.sin(angle * 2 + time * 2) * 0.5 * (1 - data.t);
+                
+                // Fade based on position
+                particle.color.a = (1 - data.t * 0.7) * 0.8;
+                particle.size = (0.2 + (1 - data.t) * 0.8) * (0.8 + Math.sin(time * 3 + data.t * 10) * 0.2);
             }
         };
         
-        stream.start();
         energyParticles.push(stream);
     }
 }
@@ -1337,21 +1454,8 @@ export function updateBlackHoleEffects() {
         });
     }
 
-    // Animate accretion disk particle effects
-    if (accretionDisk && accretionDisk.group) {
-        // Rotate the entire disk group for normal circular spinning (no tilt)
-        accretionDisk.group.rotation.y += 0.01; // Increased speed for more visible spinning
-        
-        // Animate main disk particles intensity
-        if (accretionDisk.mainDisk) {
-            const intensity = Math.sin(t * 1.5) * 0.3 + 1.0;
-            accretionDisk.mainDisk.emitRate = 200 * intensity;
-        }
-    }
-
-    // Enhanced star twinkling animation is now handled by scene3d.js
-    // No need to animate star particles here anymore
-
+    // No need to rotate diskGroup anymore - particles handle their own smooth orbital motion
+    
     // Animate DNA spiral streams
     polarJetParticles.forEach((spiral, index) => {
         if (spiral && spiral.emitRate !== undefined) {
