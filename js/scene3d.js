@@ -279,6 +279,7 @@ function createGalaxyElements() {
 //     }
 // }
 
+// Enhanced Cosmic Starfield with Spiral Galaxies
 function createEnhancedCosmicStarField() {
     try {
         if (!scene) {
@@ -286,16 +287,22 @@ function createEnhancedCosmicStarField() {
             return;
         }
 
-        console.log('✨ Creating NASA-quality cosmic starfield...');
+        console.log('✨ Creating enhanced cosmic starfield with spiral galaxies...');
         
-        // Create multiple star layers for that spectacular NASA look
+        // Create multiple star layers for depth and beauty
         createMainCosmicStars();
         createBrightBeaconStars();
         createColorfulDistantStars();
         createStarDustField();
-        createShootingStars();
         
-        console.log('🌌 NASA-quality cosmic starfield complete!');
+        // Create multiple spiral galaxies
+        createBackgroundSpiralGalaxies();
+        
+        // Create meteors and comets
+        createMeteorShower();
+        createPassingComets();
+        
+        console.log('🌌 Enhanced cosmic starfield complete with spiral galaxies!');
         
     } catch (error) {
         console.error('Failed to create enhanced starfield:', error);
@@ -721,1082 +728,674 @@ function createStarDustField() {
     stars.push(starDust);
 }
 
-// Dynamic Celestial Objects System
-// Main function to create the celestial objects system
-function createDynamicCelestialObjects() {
-    console.log('🌌 Initializing dynamic celestial objects system...');
-    
-    // Start the celestial object spawning system
-    startCelestialObjectSpawner();
-    
-    // Create some initial objects
-    setTimeout(() => {
-        spawnSpectacularComet();
-    }, 5000);
-    
-    setTimeout(() => {
-        spawnDistantGalaxy();
-    }, 15000);
-    
-    setTimeout(() => {
-        spawnNebulaPatch();
-    }, 25000);
-    
-    console.log('✨ Dynamic celestial objects system active!');
-}
-
-// Spawning system for random celestial objects
-function startCelestialObjectSpawner() {
-    const spawnNewObject = () => {
-        // Don't spawn too many at once
-        if (activeCelestialObjects.length >= 4) {
-            setTimeout(spawnNewObject, 10000 + Math.random() * 20000);
-            return;
+// Create meteor shower
+function createMeteorShower() {
+    // Create meteors periodically
+    const createMeteor = () => {
+        const meteor = new BABYLON.ParticleSystem("meteor", 50, scene);
+        
+        // Meteor trail texture
+        meteor.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="8" viewBox="0 0 32 8">
+                <defs>
+                    <linearGradient id="meteorGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+                        <stop offset="0%" style="stop-color:transparent" />
+                        <stop offset="50%" style="stop-color:white;stop-opacity:0.5" />
+                        <stop offset="80%" style="stop-color:yellow;stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:white;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect x="0" y="2" width="32" height="4" fill="url(#meteorGrad)" />
+            </svg>
+        `), scene);
+        
+        // Random start position
+        const side = Math.floor(Math.random() * 4);
+        let startPos, endPos;
+        const distance = 600;
+        
+        switch(side) {
+            case 0: // Top
+                startPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, distance/2, (Math.random() - 0.5) * distance);
+                endPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, -distance/2, (Math.random() - 0.5) * distance);
+                break;
+            case 1: // Right
+                startPos = new BABYLON.Vector3(distance/2, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
+                endPos = new BABYLON.Vector3(-distance/2, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
+                break;
+            case 2: // Bottom
+                startPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, -distance/2, (Math.random() - 0.5) * distance);
+                endPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, distance/2, (Math.random() - 0.5) * distance);
+                break;
+            case 3: // Back
+                startPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance, distance/2);
+                endPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance, -distance/2);
+                break;
         }
         
-        const objectTypes = [
-            () => spawnSpectacularComet(),
-            () => spawnDistantGalaxy(),
-            () => spawnNebulaPatch(),
-            () => spawnAsteroidCluster(),
-            () => spawnPulsarBeam(),
-            () => spawnCometTail()
-        ];
+        const emitter = BABYLON.MeshBuilder.CreateBox("meteorEmitter", {size: 0.1}, scene);
+        emitter.position = startPos;
+        emitter.isVisible = false;
+        meteor.emitter = emitter;
         
-        // Random celestial object
-        const randomType = objectTypes[Math.floor(Math.random() * objectTypes.length)];
-        randomType();
+        meteor.color1 = new BABYLON.Color4(1, 1, 0.8, 1);
+        meteor.color2 = new BABYLON.Color4(1, 0.8, 0.4, 0.8);
+        meteor.colorDead = new BABYLON.Color4(1, 0.5, 0, 0);
+        meteor.minSize = 0.5;
+        meteor.maxSize = 2;
+        meteor.minLifeTime = 1;
+        meteor.maxLifeTime = 2;
+        meteor.emitRate = 100;
+        meteor.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+        meteor.renderingGroupId = 1;
         
-        // Schedule next spawn (30 seconds to 2 minutes)
-        setTimeout(spawnNewObject, 30000 + Math.random() * 90000);
+        const direction = endPos.subtract(startPos).normalize();
+        meteor.direction1 = direction.scale(20);
+        meteor.direction2 = direction.scale(30);
+        meteor.minEmitPower = 10;
+        meteor.maxEmitPower = 15;
+        
+        meteor.start();
+        
+        // Animate meteor movement
+        const duration = 2000 + Math.random() * 2000;
+        const startTime = Date.now();
+        
+        const animateMeteor = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = elapsed / duration;
+            
+            if (progress >= 1) {
+                meteor.stop();
+                setTimeout(() => {
+                    meteor.dispose();
+                    emitter.dispose();
+                }, 1000);
+                return;
+            }
+            
+            const currentPos = BABYLON.Vector3.Lerp(startPos, endPos, progress);
+            emitter.position = currentPos;
+            
+            requestAnimationFrame(animateMeteor);
+        };
+        
+        animateMeteor();
     };
     
-    // Start spawning after initial delay
-    setTimeout(spawnNewObject, 20000);
-}
-
-// 1. Spectacular Comets with Dynamic Tails
-function spawnSpectacularComet() {
-    console.log('☄️ Spawning spectacular comet...');
+    // Create meteors periodically
+    setInterval(() => {
+        if (Math.random() < 0.3) { // 30% chance
+            createMeteor();
+        }
+    }, 3000); // Every 3 seconds
     
-    const cometGroup = new BABYLON.TransformNode("spectacularComet", scene);
-    
-    // Random spawn position at edge of view
-    const spawnSide = Math.floor(Math.random() * 4);
-    const distance = 400;
-    let startPos, endPos, direction;
-    
-    switch(spawnSide) {
-        case 0: // From top-left to bottom-right
-            startPos = new BABYLON.Vector3(-distance, distance, (Math.random() - 0.5) * distance);
-            endPos = new BABYLON.Vector3(distance, -distance, (Math.random() - 0.5) * distance);
-            break;
-        case 1: // From top-right to bottom-left
-            startPos = new BABYLON.Vector3(distance, distance, (Math.random() - 0.5) * distance);
-            endPos = new BABYLON.Vector3(-distance, -distance, (Math.random() - 0.5) * distance);
-            break;
-        case 2: // From left to right
-            startPos = new BABYLON.Vector3(-distance, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
-            endPos = new BABYLON.Vector3(distance, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
-            break;
-        case 3: // From far to near
-            startPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance, distance);
-            endPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance, -distance);
-            break;
+    // Create initial meteors
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => createMeteor(), Math.random() * 5000);
     }
-    
-    cometGroup.position = startPos;
-    direction = endPos.subtract(startPos).normalize();
-    
-    // Create comet nucleus
-    const nucleus = BABYLON.MeshBuilder.CreateSphere("cometNucleus", {diameter: 2}, scene);
-    const nucleusMat = new BABYLON.StandardMaterial("nucleusMat", scene);
-    nucleusMat.emissiveColor = new BABYLON.Color3(0.9, 0.7, 0.4);
-    nucleusMat.diffuseColor = new BABYLON.Color3(0.7, 0.5, 0.3);
-    nucleus.material = nucleusMat;
-    nucleus.parent = cometGroup;
-    nucleus.renderingGroupId = 1;
-    
-    // Create spectacular tail
-    const cometTail = new BABYLON.ParticleSystem("cometTail", 800, scene);
-    cometTail.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-            <defs>
-                <radialGradient id="tailGrad" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" style="stop-color:white;stop-opacity:0.9" />
-                    <stop offset="40%" style="stop-color:cyan;stop-opacity:0.7" />
-                    <stop offset="80%" style="stop-color:blue;stop-opacity:0.4" />
-                    <stop offset="100%" style="stop-color:purple;stop-opacity:0" />
-                </radialGradient>
-            </defs>
-            <circle cx="16" cy="16" r="16" fill="url(#tailGrad)" />
-        </svg>
-    `), scene);
-    
-    cometTail.emitter = nucleus;
-    cometTail.color1 = new BABYLON.Color4(1, 0.8, 0.4, 0.9);
-    cometTail.color2 = new BABYLON.Color4(0.4, 0.7, 1, 0.7);
-    cometTail.colorDead = new BABYLON.Color4(0, 0, 0, 0);
-    cometTail.minSize = 1;
-    cometTail.maxSize = 4;
-    cometTail.minLifeTime = 3;
-    cometTail.maxLifeTime = 6;
-    cometTail.emitRate = 200;
-    cometTail.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
-    cometTail.renderingGroupId = 1;
-    
-    // Tail direction opposite to movement
-    cometTail.direction1 = direction.scale(-5);
-    cometTail.direction2 = direction.scale(-8);
-    cometTail.minEmitPower = 3;
-    cometTail.maxEmitPower = 6;
-    
-    cometTail.start();
-    
-    // Animation data
-    const cometData = {
-        group: cometGroup,
-        startPos: startPos,
-        endPos: endPos,
-        direction: direction,
-        speed: 0.8 + Math.random() * 0.4, // Variable speed
-        startTime: Date.now(),
-        duration: 15000 + Math.random() * 10000, // 15-25 seconds
-        tail: cometTail,
-        nucleus: nucleus,
-        type: 'comet'
-    };
-    
-    activeCelestialObjects.push(cometData);
 }
 
-// 2. Distant Galaxies Drifting By
-function spawnDistantGalaxy() {
-    console.log('🌌 Spawning distant galaxy...');
+// Create passing comets
+function createPassingComets() {
+    const createComet = () => {
+        const cometGroup = new BABYLON.TransformNode("passingComet", scene);
+        
+        // Random trajectory
+        const side = Math.floor(Math.random() * 4);
+        const distance = 500;
+        let startPos, endPos;
+        
+        // Create curved paths for more interesting movement
+        switch(side) {
+            case 0:
+                startPos = new BABYLON.Vector3(-distance, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
+                endPos = new BABYLON.Vector3(distance, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
+                break;
+            case 1:
+                startPos = new BABYLON.Vector3((Math.random() - 0.5) * 200, distance, (Math.random() - 0.5) * 200);
+                endPos = new BABYLON.Vector3((Math.random() - 0.5) * 200, -distance, (Math.random() - 0.5) * 200);
+                break;
+            case 2:
+                startPos = new BABYLON.Vector3((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200, -distance);
+                endPos = new BABYLON.Vector3((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200, distance);
+                break;
+            case 3:
+                startPos = new BABYLON.Vector3(distance, distance, (Math.random() - 0.5) * 200);
+                endPos = new BABYLON.Vector3(-distance, -distance, (Math.random() - 0.5) * 200);
+                break;
+        }
+        
+        cometGroup.position = startPos;
+        
+        // Comet head
+        const head = BABYLON.MeshBuilder.CreateSphere("cometHead", {diameter: 1.5}, scene);
+        const headMat = new BABYLON.StandardMaterial("cometHeadMat", scene);
+        headMat.emissiveColor = new BABYLON.Color3(0.8, 0.9, 1);
+        headMat.diffuseColor = new BABYLON.Color3(0.6, 0.7, 0.9);
+        head.material = headMat;
+        head.parent = cometGroup;
+        head.renderingGroupId = 1;
+        
+        // Comet tail
+        const tail = new BABYLON.ParticleSystem("cometTail", 500, scene);
+        tail.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                <defs>
+                    <radialGradient id="cometTailGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:white;stop-opacity:0.8" />
+                        <stop offset="40%" style="stop-color:cyan;stop-opacity:0.6" />
+                        <stop offset="80%" style="stop-color:blue;stop-opacity:0.3" />
+                        <stop offset="100%" style="stop-color:transparent" />
+                    </radialGradient>
+                </defs>
+                <circle cx="16" cy="16" r="16" fill="url(#cometTailGrad)" />
+            </svg>
+        `), scene);
+        
+        tail.emitter = head;
+        tail.color1 = new BABYLON.Color4(0.8, 0.9, 1, 0.8);
+        tail.color2 = new BABYLON.Color4(0.4, 0.6, 1, 0.6);
+        tail.colorDead = new BABYLON.Color4(0.2, 0.3, 0.6, 0);
+        tail.minSize = 0.5;
+        tail.maxSize = 3;
+        tail.minLifeTime = 2;
+        tail.maxLifeTime = 4;
+        tail.emitRate = 150;
+        tail.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+        tail.renderingGroupId = 1;
+        
+        const direction = startPos.subtract(endPos).normalize();
+        tail.direction1 = direction.scale(3);
+        tail.direction2 = direction.scale(6);
+        tail.minEmitPower = 2;
+        tail.maxEmitPower = 4;
+        
+        tail.start();
+        
+        // Animate comet
+        const duration = 15000 + Math.random() * 10000;
+        const startTime = Date.now();
+        
+        const animateComet = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = elapsed / duration;
+            
+            if (progress >= 1) {
+                tail.stop();
+                setTimeout(() => {
+                    tail.dispose();
+                    cometGroup.dispose();
+                }, 2000);
+                return;
+            }
+            
+            // Use bezier curve for smooth path
+            const midPoint = BABYLON.Vector3.Lerp(startPos, endPos, 0.5);
+            midPoint.y += 100; // Arc upward
+            
+            const p1 = BABYLON.Vector3.Lerp(startPos, midPoint, progress * 2);
+            const p2 = BABYLON.Vector3.Lerp(midPoint, endPos, (progress - 0.5) * 2);
+            const currentPos = progress < 0.5 ? p1 : p2;
+            
+            cometGroup.position = currentPos;
+            
+            // Rotate comet head
+            head.rotation.x += 0.02;
+            head.rotation.y += 0.01;
+            
+            requestAnimationFrame(animateComet);
+        };
+        
+        animateComet();
+    };
     
-    const galaxyGroup = new BABYLON.TransformNode("distantGalaxy", scene);
+    // Create comets periodically
+    setInterval(() => {
+        if (Math.random() < 0.2) { // 20% chance
+            createComet();
+        }
+    }, 10000); // Every 10 seconds
     
-    // Position at edge of view
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 500 + Math.random() * 200;
-    const startPos = new BABYLON.Vector3(
+    // Create initial comet
+    setTimeout(() => createComet(), 5000);
+}
+
+// Create background spiral galaxies
+function createBackgroundSpiralGalaxies() {
+    const galaxyCount = 5; // Create 5 spiral galaxies
+    
+    for (let g = 0; g < galaxyCount; g++) {
+        createSpiralGalaxy(g);
+    }
+}
+
+// Create a single spiral galaxy
+function createSpiralGalaxy(index) {
+    const galaxyGroup = new BABYLON.TransformNode(`spiralGalaxy_${index}`, scene);
+    
+    // Random position for each galaxy
+    const distance = 400 + Math.random() * 600;
+    const angle = (index / 5) * Math.PI * 2 + Math.random() * 0.5;
+    const height = (Math.random() - 0.5) * 300;
+    
+    galaxyGroup.position = new BABYLON.Vector3(
         Math.cos(angle) * distance,
-        (Math.random() - 0.5) * 200,
+        height,
         Math.sin(angle) * distance
     );
     
-    galaxyGroup.position = startPos;
+    // Random rotation for variety
+    galaxyGroup.rotation.x = Math.random() * Math.PI;
+    galaxyGroup.rotation.y = Math.random() * Math.PI * 2;
+    galaxyGroup.rotation.z = Math.random() * Math.PI;
     
-    // Create galaxy core
-    const galaxyCore = BABYLON.MeshBuilder.CreateSphere("galaxyCore", {diameter: 15}, scene);
-    const coreMat = new BABYLON.StandardMaterial("galaxyCoreMat", scene);
-    coreMat.emissiveColor = new BABYLON.Color3(0.8, 0.6, 1);
-    coreMat.diffuseColor = new BABYLON.Color3(0.4, 0.3, 0.6);
-    coreMat.alpha = 0.8;
-    galaxyCore.material = coreMat;
-    galaxyCore.parent = galaxyGroup;
-    galaxyCore.renderingGroupId = 1;
+    // Create spiral arms using particles
+    const armCount = 3 + Math.floor(Math.random() * 2); // 3-4 arms
+    const particlesPerArm = 800;
     
-    // Create galaxy spiral arms with particles
-    const spiralArms = new BABYLON.ParticleSystem("galaxySpiral", 1000, scene);
-    spiralArms.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+    const spiralSystem = new BABYLON.ParticleSystem(`spiral_${index}`, armCount * particlesPerArm, scene);
+    
+    // Star texture for galaxy
+    spiralSystem.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
             <defs>
-                <radialGradient id="armGrad" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" style="stop-color:white;stop-opacity:0.8" />
-                    <stop offset="60%" style="stop-color:purple;stop-opacity:0.5" />
-                    <stop offset="100%" style="stop-color:transparent" />
-                </radialGradient>
-            </defs>
-            <circle cx="8" cy="8" r="8" fill="url(#armGrad)" />
-        </svg>
-    `), scene);
-    
-    spiralArms.emitter = galaxyCore;
-    spiralArms.createSphereEmitter(25, 0);
-    spiralArms.color1 = new BABYLON.Color4(0.7, 0.5, 1, 0.7);
-    spiralArms.color2 = new BABYLON.Color4(0.5, 0.7, 1, 0.5);
-    spiralArms.minSize = 0.8;
-    spiralArms.maxSize = 2.5;
-    spiralArms.minLifeTime = Number.MAX_VALUE;
-    spiralArms.maxLifeTime = Number.MAX_VALUE;
-    spiralArms.emitRate = 0;
-    spiralArms.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
-    spiralArms.renderingGroupId = 1;
-    spiralArms.start();
-    spiralArms.manualEmitCount = 1000;
-    
-    // Create movement direction (slow drift)
-    const driftDirection = new BABYLON.Vector3(
-        (Math.random() - 0.5) * 0.2,
-        (Math.random() - 0.5) * 0.1,
-        (Math.random() - 0.5) * 0.2
-    );
-    
-    const galaxyData = {
-        group: galaxyGroup,
-        core: galaxyCore,
-        spiralArms: spiralArms,
-        driftDirection: driftDirection,
-        rotationSpeed: 0.005 + Math.random() * 0.01,
-        startTime: Date.now(),
-        duration: 60000 + Math.random() * 30000, // 1-1.5 minutes
-        type: 'galaxy'
-    };
-    
-    activeCelestialObjects.push(galaxyData);
-}
-
-// 3. Colorful Nebula Patches
-function spawnNebulaPatch() {
-    console.log('🌈 Spawning nebula patch...');
-    
-    const nebulaGroup = new BABYLON.TransformNode("nebulaPatch", scene);
-    
-    // Random position
-    const distance = 300 + Math.random() * 300;
-    const angle = Math.random() * Math.PI * 2;
-    const height = (Math.random() - 0.5) * 200;
-    
-    nebulaGroup.position = new BABYLON.Vector3(
-        Math.cos(angle) * distance,
-        height,
-        Math.sin(angle) * distance
-    );
-    
-    // Create nebula particle system
-    const nebula = new BABYLON.ParticleSystem("nebulaGas", 1500, scene);
-    nebula.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-            <defs>
-                <radialGradient id="nebulaGrad" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" style="stop-color:white;stop-opacity:0.6" />
-                    <stop offset="40%" style="stop-color:cyan;stop-opacity:0.4" />
-                    <stop offset="80%" style="stop-color:purple;stop-opacity:0.2" />
-                    <stop offset="100%" style="stop-color:transparent" />
-                </radialGradient>
-            </defs>
-            <circle cx="32" cy="32" r="32" fill="url(#nebulaGrad)" />
-        </svg>
-    `), scene);
-    
-    nebula.emitter = nebulaGroup;
-    nebula.createSphereEmitter(40, 0);
-    
-    // Random nebula colors
-    const nebulaTypes = [
-        [new BABYLON.Color4(1, 0.4, 0.6, 0.6), new BABYLON.Color4(0.8, 0.2, 0.4, 0.4)], // Red emission
-        [new BABYLON.Color4(0.4, 0.6, 1, 0.6), new BABYLON.Color4(0.2, 0.4, 0.8, 0.4)], // Blue reflection
-        [new BABYLON.Color4(0.6, 1, 0.4, 0.6), new BABYLON.Color4(0.4, 0.8, 0.2, 0.4)], // Green planetary
-        [new BABYLON.Color4(1, 0.8, 0.4, 0.6), new BABYLON.Color4(0.8, 0.6, 0.2, 0.4)], // Orange
-        [new BABYLON.Color4(0.8, 0.4, 1, 0.6), new BABYLON.Color4(0.6, 0.2, 0.8, 0.4)]  // Purple
-    ];
-    
-    const colorPair = nebulaTypes[Math.floor(Math.random() * nebulaTypes.length)];
-    nebula.color1 = colorPair[0];
-    nebula.color2 = colorPair[1];
-    nebula.colorDead = new BABYLON.Color4(0, 0, 0, 0);
-    
-    nebula.minSize = 3;
-    nebula.maxSize = 8;
-    nebula.minLifeTime = Number.MAX_VALUE;
-    nebula.maxLifeTime = Number.MAX_VALUE;
-    nebula.emitRate = 0;
-    nebula.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
-    nebula.renderingGroupId = 1;
-    nebula.start();
-    nebula.manualEmitCount = 1500;
-    
-    const nebulaData = {
-        group: nebulaGroup,
-        nebula: nebula,
-        breathingSpeed: 0.002 + Math.random() * 0.003,
-        driftSpeed: 0.1 + Math.random() * 0.2,
-        startTime: Date.now(),
-        duration: 45000 + Math.random() * 30000, // 45-75 seconds
-        type: 'nebula'
-    };
-    
-    activeCelestialObjects.push(nebulaData);
-}
-
-// 4. Asteroid Clusters
-function spawnAsteroidCluster() {
-    console.log('🪨 Spawning asteroid cluster...');
-    
-    const clusterGroup = new BABYLON.TransformNode("asteroidCluster", scene);
-    
-    // Spawn from edge, move across view
-    const side = Math.floor(Math.random() * 4);
-    const distance = 400;
-    let startPos, endPos;
-    
-    switch(side) {
-        case 0: // Left to right
-            startPos = new BABYLON.Vector3(-distance, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
-            endPos = new BABYLON.Vector3(distance, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
-            break;
-        case 1: // Right to left
-            startPos = new BABYLON.Vector3(distance, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
-            endPos = new BABYLON.Vector3(-distance, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
-            break;
-        case 2: // Top to bottom
-            startPos = new BABYLON.Vector3((Math.random() - 0.5) * 200, distance, (Math.random() - 0.5) * 200);
-            endPos = new BABYLON.Vector3((Math.random() - 0.5) * 200, -distance, (Math.random() - 0.5) * 200);
-            break;
-        case 3: // Far to near
-            startPos = new BABYLON.Vector3((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200, distance);
-            endPos = new BABYLON.Vector3((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200, -distance);
-            break;
-    }
-    
-    clusterGroup.position = startPos;
-    
-    // Create multiple asteroids
-    const asteroids = [];
-    const asteroidCount = 8 + Math.floor(Math.random() * 12);
-    
-    for (let i = 0; i < asteroidCount; i++) {
-        const asteroid = BABYLON.MeshBuilder.CreateSphere(`asteroid_${i}`, {
-            diameter: 0.5 + Math.random() * 2,
-            segments: 6 + Math.floor(Math.random() * 6)
-        }, scene);
-        
-        // Deform for irregular shape
-        const positions = asteroid.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-        for (let j = 0; j < positions.length; j += 3) {
-            positions[j] += (Math.random() - 0.5) * 0.4;
-            positions[j + 1] += (Math.random() - 0.5) * 0.4;
-            positions[j + 2] += (Math.random() - 0.5) * 0.4;
-        }
-        asteroid.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
-        asteroid.createNormals(false);
-        
-        // Material
-        const asteroidMat = new BABYLON.StandardMaterial(`asteroidMat_${i}`, scene);
-        asteroidMat.diffuseColor = new BABYLON.Color3(0.6, 0.5, 0.4);
-        asteroidMat.emissiveColor = new BABYLON.Color3(0.1, 0.08, 0.06);
-        asteroid.material = asteroidMat;
-        asteroid.parent = clusterGroup;
-        asteroid.renderingGroupId = 1;
-        
-        // Position within cluster
-        asteroid.position = new BABYLON.Vector3(
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20
-        );
-        
-        asteroids.push({
-            mesh: asteroid,
-            rotationSpeed: new BABYLON.Vector3(
-                (Math.random() - 0.5) * 0.02,
-                (Math.random() - 0.5) * 0.02,
-                (Math.random() - 0.5) * 0.02
-            )
-        });
-    }
-    
-    const clusterData = {
-        group: clusterGroup,
-        asteroids: asteroids,
-        startPos: startPos,
-        endPos: endPos,
-        direction: endPos.subtract(startPos).normalize(),
-        speed: 0.3 + Math.random() * 0.3,
-        startTime: Date.now(),
-        duration: 20000 + Math.random() * 15000, // 20-35 seconds
-        type: 'asteroids'
-    };
-    
-    activeCelestialObjects.push(clusterData);
-}
-
-// 5. Pulsar Beam Effects
-function spawnPulsarBeam() {
-    console.log('💫 Spawning pulsar beam...');
-    
-    const pulsarGroup = new BABYLON.TransformNode("pulsar", scene);
-    
-    // Position randomly in space
-    const distance = 250 + Math.random() * 200;
-    const angle = Math.random() * Math.PI * 2;
-    const height = (Math.random() - 0.5) * 150;
-    
-    pulsarGroup.position = new BABYLON.Vector3(
-        Math.cos(angle) * distance,
-        height,
-        Math.sin(angle) * distance
-    );
-    
-    // Create pulsar core
-    const pulsarCore = BABYLON.MeshBuilder.CreateSphere("pulsarCore", {diameter: 3}, scene);
-    const coreMat = new BABYLON.StandardMaterial("pulsarCoreMat", scene);
-    coreMat.emissiveColor = new BABYLON.Color3(1, 1, 1);
-    pulsarCore.material = coreMat;
-    pulsarCore.parent = pulsarGroup;
-    pulsarCore.renderingGroupId = 1;
-    
-    // Create rotating beam
-    const beam = BABYLON.MeshBuilder.CreateCylinder("pulsarBeam", {
-        height: 500,
-        diameterTop: 0.5,
-        diameterBottom: 8,
-        tessellation: 8
-    }, scene);
-    
-    const beamMat = new BABYLON.StandardMaterial("beamMat", scene);
-    beamMat.emissiveColor = new BABYLON.Color3(0.8, 0.9, 1);
-    beamMat.alpha = 0.3;
-    beamMat.backFaceCulling = false;
-    beam.material = beamMat;
-    beam.parent = pulsarGroup;
-    beam.renderingGroupId = 1;
-    beam.position.y = 250;
-    
-    const pulsarData = {
-        group: pulsarGroup,
-        core: pulsarCore,
-        beam: beam,
-        rotationSpeed: 0.05 + Math.random() * 0.1,
-        pulseSpeed: 2 + Math.random() * 3,
-        startTime: Date.now(),
-        duration: 30000 + Math.random() * 20000, // 30-50 seconds
-        type: 'pulsar'
-    };
-    
-    activeCelestialObjects.push(pulsarData);
-}
-
-// 6. Beautiful Comet Tails (just trails)
-function spawnCometTail() {
-    console.log('✨ Spawning comet tail...');
-    
-    // Create a beautiful particle trail moving across the sky
-    const cometTrail = new BABYLON.ParticleSystem("cometTrail", 600, scene);
-    
-    cometTrail.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-            <defs>
-                <radialGradient id="trailGrad" cx="50%" cy="50%" r="50%">
+                <radialGradient id="galaxyStar" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" style="stop-color:white;stop-opacity:1" />
-                    <stop offset="50%" style="stop-color:cyan;stop-opacity:0.8" />
-                    <stop offset="100%" style="stop-color:blue;stop-opacity:0" />
+                    <stop offset="60%" style="stop-color:white;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:white;stop-opacity:0" />
                 </radialGradient>
             </defs>
-            <circle cx="12" cy="12" r="12" fill="url(#trailGrad)" />
+            <circle cx="8" cy="8" r="8" fill="url(#galaxyStar)" />
         </svg>
     `), scene);
     
-    // Moving emitter
-    const emitter = BABYLON.MeshBuilder.CreateBox("trailEmitter", {size: 0.1}, scene);
-    emitter.isVisible = false;
+    spiralSystem.emitter = galaxyGroup;
+    spiralSystem.minSize = 0.5;
+    spiralSystem.maxSize = 2.5;
+    spiralSystem.minLifeTime = Number.MAX_VALUE;
+    spiralSystem.maxLifeTime = Number.MAX_VALUE;
+    spiralSystem.emitRate = 0;
+    spiralSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    spiralSystem.renderingGroupId = 0;
     
-    // Random path
-    const distance = 400;
-    const startPos = new BABYLON.Vector3(
-        (Math.random() - 0.5) * distance,
-        (Math.random() - 0.5) * distance,
-        distance
-    );
-    const endPos = new BABYLON.Vector3(
-        (Math.random() - 0.5) * distance,
-        (Math.random() - 0.5) * distance,
-        -distance
-    );
-    
-    emitter.position = startPos;
-    cometTrail.emitter = emitter;
-    
-    const trailColors = [
-        [new BABYLON.Color4(1, 0.8, 0.4, 0.9), new BABYLON.Color4(1, 0.4, 0.2, 0.7)], // Orange
-        [new BABYLON.Color4(0.4, 0.8, 1, 0.9), new BABYLON.Color4(0.2, 0.6, 1, 0.7)], // Blue
-        [new BABYLON.Color4(0.8, 0.4, 1, 0.9), new BABYLON.Color4(0.6, 0.2, 1, 0.7)], // Purple
-        [new BABYLON.Color4(0.4, 1, 0.6, 0.9), new BABYLON.Color4(0.2, 0.8, 0.4, 0.7)]  // Green
+    // Galaxy colors
+    const galaxyColors = [
+        [new BABYLON.Color4(0.8, 0.8, 1, 0.8), new BABYLON.Color4(0.6, 0.6, 1, 0.6)], // Blue-white
+        [new BABYLON.Color4(1, 0.9, 0.8, 0.8), new BABYLON.Color4(1, 0.7, 0.5, 0.6)], // Yellow-orange
+        [new BABYLON.Color4(0.9, 0.8, 1, 0.8), new BABYLON.Color4(0.7, 0.6, 0.9, 0.6)], // Purple-white
+        [new BABYLON.Color4(1, 0.8, 0.8, 0.8), new BABYLON.Color4(0.9, 0.6, 0.6, 0.6)], // Red-white
+        [new BABYLON.Color4(0.8, 1, 0.9, 0.8), new BABYLON.Color4(0.6, 0.9, 0.7, 0.6)]  // Green-white
     ];
     
-    const colorPair = trailColors[Math.floor(Math.random() * trailColors.length)];
-    cometTrail.color1 = colorPair[0];
-    cometTrail.color2 = colorPair[1];
-    cometTrail.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+    const colorPair = galaxyColors[index % galaxyColors.length];
+    spiralSystem.color1 = colorPair[0];
+    spiralSystem.color2 = colorPair[1];
     
-    cometTrail.minSize = 1;
-    cometTrail.maxSize = 3;
-    cometTrail.minLifeTime = 4;
-    cometTrail.maxLifeTime = 8;
-    cometTrail.emitRate = 150;
-    cometTrail.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
-    cometTrail.renderingGroupId = 1;
-    cometTrail.start();
-    
-    const trailData = {
-        emitter: emitter,
-        trail: cometTrail,
-        startPos: startPos,
-        endPos: endPos,
-        direction: endPos.subtract(startPos).normalize(),
-        speed: 1.2 + Math.random() * 0.8,
-        startTime: Date.now(),
-        duration: 12000 + Math.random() * 8000, // 12-20 seconds
-        type: 'trail'
+    // Custom update function to position particles in spiral pattern
+    spiralSystem.updateFunction = function(particles) {
+        for (let i = 0; i < particles.length; i++) {
+            const particle = particles[i];
+            if (!particle) continue;
+            
+            if (!particle.userData || !particle.userData.initialized) {
+                // Calculate spiral position
+                const armIndex = Math.floor(i / particlesPerArm);
+                const particleInArm = i % particlesPerArm;
+                const t = particleInArm / particlesPerArm; // 0 to 1 along the arm
+                
+                // Spiral parameters
+                const baseAngle = (armIndex / armCount) * Math.PI * 2;
+                const spiralTightness = 0.3; // How tight the spiral is
+                const maxRadius = 80; // Maximum radius of the galaxy
+                
+                // Calculate spiral position
+                const radius = t * maxRadius;
+                const angle = baseAngle + t * Math.PI * 3 * spiralTightness; // Spiral outward
+                
+                // Add some randomness for natural look
+                const randomRadius = radius + (Math.random() - 0.5) * 10;
+                const randomAngle = angle + (Math.random() - 0.5) * 0.3;
+                const height = (Math.random() - 0.5) * 5 * (1 - t); // Flatter at edges
+                
+                particle.position.x = Math.cos(randomAngle) * randomRadius;
+                particle.position.z = Math.sin(randomAngle) * randomRadius;
+                particle.position.y = height;
+                
+                // Size and brightness decrease with distance from center
+                particle.size = (1 - t * 0.7) * (0.5 + Math.random() * 2);
+                
+                // Color variation
+                const colorLerp = Math.random();
+                particle.color = BABYLON.Color4.Lerp(colorPair[0], colorPair[1], colorLerp);
+                particle.color.a *= (1 - t * 0.5); // Fade at edges
+                
+                particle.userData = {
+                    initialized: true,
+                    basePosition: particle.position.clone(),
+                    rotationSpeed: 0.0001 + Math.random() * 0.0002
+                };
+            }
+        }
     };
     
-    activeCelestialObjects.push(trailData);
+    spiralSystem.start();
+    spiralSystem.manualEmitCount = armCount * particlesPerArm;
+    
+    // Add slow rotation to the galaxy
+    scene.registerBeforeRender(() => {
+        galaxyGroup.rotation.y += 0.0002;
+    });
+    
+    // Add central bright core
+    const coreSystem = new BABYLON.ParticleSystem(`galaxyCore_${index}`, 200, scene);
+    coreSystem.particleTexture = spiralSystem.particleTexture;
+    coreSystem.emitter = galaxyGroup;
+    coreSystem.createSphereEmitter(5, 0);
+    coreSystem.minSize = 1;
+    coreSystem.maxSize = 3;
+    coreSystem.minLifeTime = Number.MAX_VALUE;
+    coreSystem.maxLifeTime = Number.MAX_VALUE;
+    coreSystem.emitRate = 0;
+    coreSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    coreSystem.renderingGroupId = 0;
+    coreSystem.color1 = new BABYLON.Color4(1, 1, 1, 1);
+    coreSystem.color2 = new BABYLON.Color4(0.9, 0.9, 1, 0.9);
+    coreSystem.start();
+    coreSystem.manualEmitCount = 200;
+    
+    stars.push(spiralSystem);
+    stars.push(coreSystem);
 }
 
-// Update function for all celestial objects
-function updateCelestialObjects() {
-    const currentTime = Date.now();
+// Dynamic Celestial Objects System
+function createDynamicCelestialObjects() {
+    console.log('Initializing dynamic celestial objects system...');
     
-    // Update each celestial object
-    for (let i = activeCelestialObjects.length - 1; i >= 0; i--) {
-        const obj = activeCelestialObjects[i];
-        const elapsed = currentTime - obj.startTime;
-        const progress = elapsed / obj.duration;
-        
-        // Remove expired objects
-        if (progress >= 1) {
-            disposeCelestialObject(obj);
-            activeCelestialObjects.splice(i, 1);
-            continue;
+    // Create initial objects
+    setTimeout(() => {
+        if (Math.random() < 0.7) {
+            // Create some initial cosmic objects
+            createRandomCelestialObject();
         }
-        
-        // Update based on type
-        switch (obj.type) {
-            case 'comet':
-                updateComet(obj, progress);
-                break;
-            case 'galaxy':
-                updateGalaxy(obj, progress);
-                break;
-            case 'nebula':
-                updateNebula(obj, progress);
-                break;
-            case 'asteroids':
-                updateAsteroids(obj, progress);
-                break;
-            case 'pulsar':
-                updatePulsar(obj, progress);
-                break;
-            case 'trail':
-                updateTrail(obj, progress);
-                break;
-        }
-    }
-}
-
-// Update functions for each object type
-function updateComet(obj, progress) {
-    // Move comet
-    const currentPos = BABYLON.Vector3.Lerp(obj.startPos, obj.endPos, progress);
-    obj.group.position = currentPos;
+    }, 2000);
     
-    // Rotate nucleus
-    obj.nucleus.rotation.x += 0.02;
-    obj.nucleus.rotation.y += 0.015;
-    
-    // Fade out near end
-    if (progress > 0.8) {
-        const fadeProgress = (progress - 0.8) / 0.2;
-        obj.tail.color1.a = (1 - fadeProgress) * 0.9;
-        obj.tail.color2.a = (1 - fadeProgress) * 0.7;
-    }
-}
-
-function updateGalaxy(obj, progress) {
-    // Slow rotation
-    obj.group.rotation.y += obj.rotationSpeed;
-    obj.group.rotation.z += obj.rotationSpeed * 0.3;
-    
-    // Gentle drift
-    obj.group.position = obj.group.position.add(obj.driftDirection);
-    
-    // Breathing effect
-    const breathe = Math.sin(Date.now() * 0.001) * 0.1 + 1;
-    obj.core.scaling.setAll(breathe);
-}
-
-function updateNebula(obj, progress) {
-    // Breathing effect
-    const breathe = Math.sin(Date.now() * obj.breathingSpeed) * 0.2 + 1;
-    obj.group.scaling.setAll(breathe);
-    
-    // Slow drift
-    obj.group.position.y += Math.sin(Date.now() * 0.001) * obj.driftSpeed;
-    obj.group.rotation.y += 0.001;
-}
-
-function updateAsteroids(obj, progress) {
-    // Move cluster
-    const currentPos = BABYLON.Vector3.Lerp(obj.startPos, obj.endPos, progress);
-    obj.group.position = currentPos;
-    
-    // Rotate individual asteroids
-    obj.asteroids.forEach(asteroid => {
-        asteroid.mesh.rotation.x += asteroid.rotationSpeed.x;
-        asteroid.mesh.rotation.y += asteroid.rotationSpeed.y;
-        asteroid.mesh.rotation.z += asteroid.rotationSpeed.z;
-    });
-    
-    // Gentle cluster rotation
-    obj.group.rotation.y += 0.005;
-}
-
-function updatePulsar(obj, progress) {
-    // Rotate beam
-    obj.beam.rotation.y += obj.rotationSpeed;
-    
-    // Pulsing core
-    const pulse = Math.sin(Date.now() * 0.001 * obj.pulseSpeed) * 0.3 + 1;
-    obj.core.scaling.setAll(pulse);
-    
-    // Beam intensity pulsing
-    const beamPulse = Math.sin(Date.now() * 0.001 * obj.pulseSpeed * 2) * 0.2 + 0.3;
-    obj.beam.material.alpha = beamPulse;
-}
-
-function updateTrail(obj, progress) {
-    // Move emitter
-    const currentPos = BABYLON.Vector3.Lerp(obj.startPos, obj.endPos, progress);
-    obj.emitter.position = currentPos;
-    
-    // Fade out near end
-    if (progress > 0.7) {
-        const fadeProgress = (progress - 0.7) / 0.3;
-        obj.trail.color1.a = (1 - fadeProgress) * 0.9;
-        obj.trail.color2.a = (1 - fadeProgress) * 0.7;
-    }
-}
-
-// Cleanup function for celestial objects
-function disposeCelestialObject(obj) {
-    try {
-        switch (obj.type) {
-            case 'comet':
-                if (obj.tail) obj.tail.dispose();
-                if (obj.group) obj.group.dispose();
-                break;
-            case 'galaxy':
-                if (obj.spiralArms) obj.spiralArms.dispose();
-                if (obj.group) obj.group.dispose();
-                break;
-            case 'nebula':
-                if (obj.nebula) obj.nebula.dispose();
-                if (obj.group) obj.group.dispose();
-                break;
-            case 'asteroids':
-                if (obj.group) obj.group.dispose();
-                break;
-            case 'pulsar':
-                if (obj.group) obj.group.dispose();
-                break;
-            case 'trail':
-                if (obj.trail) obj.trail.dispose();
-                if (obj.emitter) obj.emitter.dispose();
-                break;
-        }
-    } catch (error) {
-        console.warn('Error disposing celestial object:', error);
-    }
-}
-
-// Enhanced star animation for better visibility
-function updateEnhancedStarAnimations() {
-    if (stars.length === 0) return;
-    
-    const currentTime = performance.now() * 0.001;
-    
-    stars.forEach((starField, index) => {
-        if (!starField || typeof starField !== 'object') return;
-        if (starField.isDisposed && starField.isDisposed()) return;
-        
-        try {
-            if (starField instanceof BABYLON.ParticleSystem) {
-                const userData = starField.userData;
-                const particles = starField.particles;
-                
-                if (!userData || !particles) return;
-                
-                // Different animation behaviors per layer type
-                switch (userData.layerType) {
-                    case 'main':
-                        animateMainStars(particles, currentTime, userData);
-                        break;
-                    case 'beacon':
-                        animateBeaconStars(particles, currentTime, userData);
-                        break;
-                    case 'colorful':
-                        animateColorfulStars(particles, currentTime, userData);
-                        break;
-                    case 'dust':
-                        animateDustStars(particles, currentTime, userData);
-                        break;
-                }
-                
-                // Gentle rotation
-                if (starField.emitter && userData.rotationSpeed) {
-                    starField.emitter.rotation.y += userData.rotationSpeed;
-                }
-            }
-        } catch (animationError) {
-            console.warn('Enhanced star animation error:', animationError);
-        }
-    });
-}
-
-// Main stars animation - visible and steady
-function animateMainStars(particles, currentTime, userData) {
-    particles.forEach((particle, particleIndex) => {
-        if (!particle || !particle.userData) return;
-        
-        const data = particle.userData;
-        
-        // Gentle, visible twinkling
-        const twinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.2 + 0.9;
-        particle.size = data.baseSize * twinkle;
-        particle.color.a = Math.max(data.baseAlpha * twinkle, data.baseAlpha * 0.7); // Never too dim
-    });
-}
-
-// Beacon stars animation - bright and pulsing
-function animateBeaconStars(particles, currentTime, userData) {
-    particles.forEach((particle, particleIndex) => {
-        if (!particle || !particle.userData) return;
-        
-        const data = particle.userData;
-        
-        // Strong pulsing for beacon stars
-        const pulse = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * data.pulseIntensity + 0.8;
-        const breathe = Math.sin(currentTime * userData.breathingSpeed) * 0.1 + 1;
-        
-        particle.size = data.baseSize * pulse * breathe;
-        particle.color.a = Math.max(data.baseAlpha * pulse, 0.8); // Always bright
-    });
-}
-
-// Colorful stars animation - gentle color shifting
-function animateColorfulStars(particles, currentTime, userData) {
-    particles.forEach((particle, particleIndex) => {
-        if (!particle || !particle.userData) return;
-        
-        const data = particle.userData;
-        
-        // Subtle twinkling
-        const twinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.15 + 0.85;
-        particle.size = data.baseSize * twinkle;
-        particle.color.a = Math.max(data.baseAlpha * twinkle, data.baseAlpha * 0.6);
-    });
-}
-
-// Dust stars animation - very subtle
-function animateDustStars(particles, currentTime, userData) {
-    particles.forEach((particle, particleIndex) => {
-        if (!particle || !particle.userData) return;
-        
-        const data = particle.userData;
-        
-        // Very gentle twinkling
-        const twinkle = Math.sin(currentTime * data.twinkleSpeed + data.twinklePhase) * 0.1 + 0.9;
-        particle.size = data.baseSize * twinkle;
-        particle.color.a = Math.max(data.baseAlpha * twinkle, data.baseAlpha * 0.8);
-    });
-}
-
-
-
-// Layer 5: Shooting stars
-function createShootingStars() {
-    const meteorCount = 3;
-    
-    for (let m = 0; m < meteorCount; m++) {
-        setTimeout(() => {
-            createSingleShootingStar();
-        }, Math.random() * 10000); // Random initial delay
-    }
-    
-    // Create new shooting stars periodically
+    // Schedule periodic spawning
     setInterval(() => {
-        if (Math.random() < 0.3) { // 30% chance every interval
-            createSingleShootingStar();
+        if (activeCelestialObjects.length < 15 && Math.random() < 0.3) {
+            createRandomCelestialObject();
         }
-    }, 15000); // Every 15 seconds
+    }, 8000);
 }
 
-function createSingleShootingStar() {
-    const shootingStar = new BABYLON.ParticleSystem("shootingStar", 100, scene);
+function createRandomCelestialObject() {
+    const objectTypes = ['comet', 'asteroid', 'nebula'];
+    const type = objectTypes[Math.floor(Math.random() * objectTypes.length)];
     
-    shootingStar.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="8" viewBox="0 0 32 8">
-            <defs>
-                <linearGradient id="meteorTrail" x1="0%" y1="50%" x2="100%" y2="50%">
-                    <stop offset="0%" style="stop-color:transparent" />
-                    <stop offset="30%" style="stop-color:white;stop-opacity:0.3" />
-                    <stop offset="70%" style="stop-color:white;stop-opacity:0.8" />
-                    <stop offset="100%" style="stop-color:white;stop-opacity:1" />
-                </linearGradient>
-            </defs>
-            <rect x="0" y="2" width="32" height="4" fill="url(#meteorTrail)" />
-            <circle cx="30" cy="4" r="3" fill="white" />
-        </svg>
-    `), scene);
-    
-    // Random start position at edge of view
-    const side = Math.floor(Math.random() * 4);
-    let startPos, endPos;
-    const distance = 800;
-    
-    switch(side) {
-        case 0: // Top
-            startPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, distance/2, (Math.random() - 0.5) * distance);
-            endPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, -distance/2, (Math.random() - 0.5) * distance);
+    switch(type) {
+        case 'comet':
+            createDynamicComet();
             break;
-        case 1: // Right
-            startPos = new BABYLON.Vector3(distance/2, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
-            endPos = new BABYLON.Vector3(-distance/2, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
+        case 'asteroid':
+            createDynamicAsteroid();
             break;
-        case 2: // Bottom
-            startPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, -distance/2, (Math.random() - 0.5) * distance);
-            endPos = new BABYLON.Vector3((Math.random() - 0.5) * distance, distance/2, (Math.random() - 0.5) * distance);
-            break;
-        case 3: // Left
-            startPos = new BABYLON.Vector3(-distance/2, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
-            endPos = new BABYLON.Vector3(distance/2, (Math.random() - 0.5) * distance, (Math.random() - 0.5) * distance);
+        case 'nebula':
+            createDynamicNebula();
             break;
     }
+}
+
+function createDynamicComet() {
+    const comet = BABYLON.MeshBuilder.CreateSphere("dynamicComet", {diameter: 0.8}, scene);
+    const cometMat = new BABYLON.StandardMaterial("dynamicCometMat", scene);
+    cometMat.emissiveColor = new BABYLON.Color3(0.6, 0.7, 0.9);
+    comet.material = cometMat;
     
-    const emitter = BABYLON.MeshBuilder.CreateBox("meteorEmitter", {size: 0.1}, scene);
-    emitter.position = startPos;
-    emitter.isVisible = false;
-    shootingStar.emitter = emitter;
+    // Random spawn position
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 300 + Math.random() * 200;
+    comet.position = new BABYLON.Vector3(
+        Math.cos(angle) * distance,
+        (Math.random() - 0.5) * 100,
+        Math.sin(angle) * distance
+    );
     
-    shootingStar.color1 = new BABYLON.Color4(1, 1, 1, 1);
-    shootingStar.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.8);
-    shootingStar.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+    activeCelestialObjects.push(comet);
     
-    shootingStar.minSize = 1;
-    shootingStar.maxSize = 3;
-    shootingStar.minLifeTime = 3;
-    shootingStar.maxLifeTime = 5;
-    shootingStar.emitRate = 50;
-    shootingStar.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
-    shootingStar.renderingGroupId = 1;
-    
-    const direction = endPos.subtract(startPos).normalize();
-    shootingStar.direction1 = direction.scale(8);
-    shootingStar.direction2 = direction.scale(12);
-    shootingStar.minEmitPower = 5;
-    shootingStar.maxEmitPower = 10;
-    
-    shootingStar.start();
-    
-    // Animate the emitter position
-    const duration = 4000 + Math.random() * 2000; // 4-6 seconds
+    // Animate towards center
+    const targetPos = new BABYLON.Vector3(0, 0, 0);
+    const duration = 20000 + Math.random() * 10000;
     const startTime = Date.now();
     
-    const animatemeteor = () => {
+    const animateComet = () => {
         const elapsed = Date.now() - startTime;
         const progress = elapsed / duration;
         
         if (progress >= 1) {
-            shootingStar.stop();
-            setTimeout(() => {
-                shootingStar.dispose();
-                emitter.dispose();
-            }, 2000);
+            // Remove comet
+            const index = activeCelestialObjects.indexOf(comet);
+            if (index > -1) activeCelestialObjects.splice(index, 1);
+            comet.dispose();
             return;
         }
         
-        // Smooth movement from start to end
-        const currentPos = BABYLON.Vector3.Lerp(startPos, endPos, progress);
-        emitter.position = currentPos;
+        // Move towards center with slight curve
+        const currentPos = BABYLON.Vector3.Lerp(comet.position, targetPos, 0.001);
+        comet.position = currentPos;
         
-        // Fade out near the end
-        if (progress > 0.7) {
-            const fadeProgress = (progress - 0.7) / 0.3;
-            shootingStar.color1.a = 1 - fadeProgress;
-            shootingStar.color2.a = 0.8 - fadeProgress * 0.8;
-        }
-        
-        requestAnimationFrame(animatemeteor);
+        requestAnimationFrame(animateComet);
     };
     
-    animatemeteor();
+    animateComet();
 }
 
+function createDynamicAsteroid() {
+    const asteroid = BABYLON.MeshBuilder.CreateSphere("dynamicAsteroid", {diameter: 0.4}, scene);
+    const asteroidMat = new BABYLON.StandardMaterial("dynamicAsteroidMat", scene);
+    asteroidMat.diffuseColor = new BABYLON.Color3(0.4, 0.3, 0.2);
+    asteroid.material = asteroidMat;
+    
+    // Random orbit
+    const radius = 100 + Math.random() * 150;
+    const angle = Math.random() * Math.PI * 2;
+    asteroid.position = new BABYLON.Vector3(
+        Math.cos(angle) * radius,
+        (Math.random() - 0.5) * 50,
+        Math.sin(angle) * radius
+    );
+    
+    activeCelestialObjects.push(asteroid);
+    
+    // Remove after some time
+    setTimeout(() => {
+        const index = activeCelestialObjects.indexOf(asteroid);
+        if (index > -1) activeCelestialObjects.splice(index, 1);
+        asteroid.dispose();
+    }, 30000 + Math.random() * 20000);
+}
 
-// Clean up any residual objects from previous loads
-function cleanupResidualObjects() {
+function createDynamicNebula() {
+    const nebula = new BABYLON.ParticleSystem("dynamicNebula", 200, scene);
+    
+    const emitter = BABYLON.MeshBuilder.CreateBox("nebulaEmitter", {size: 0.1}, scene);
+    emitter.isVisible = false;
+    emitter.position = new BABYLON.Vector3(
+        (Math.random() - 0.5) * 400,
+        (Math.random() - 0.5) * 200,
+        (Math.random() - 0.5) * 400
+    );
+    
+    nebula.emitter = emitter;
+    nebula.createSphereEmitter(20, 0);
+    
+    nebula.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+            <defs>
+                <radialGradient id="nebulaGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:rgba(100,150,255,0.6)" />
+                    <stop offset="70%" style="stop-color:rgba(200,100,255,0.3)" />
+                    <stop offset="100%" style="stop-color:transparent" />
+                </radialGradient>
+            </defs>
+            <circle cx="16" cy="16" r="16" fill="url(#nebulaGrad)" />
+        </svg>
+    `), scene);
+    
+    nebula.color1 = new BABYLON.Color4(0.4, 0.6, 1, 0.6);
+    nebula.color2 = new BABYLON.Color4(0.8, 0.4, 1, 0.4);
+    nebula.minSize = 5;
+    nebula.maxSize = 15;
+    nebula.minLifeTime = 10;
+    nebula.maxLifeTime = 20;
+    nebula.emitRate = 20;
+    nebula.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    
+    nebula.start();
+    activeCelestialObjects.push(nebula);
+    
+    // Remove after some time
+    setTimeout(() => {
+        const index = activeCelestialObjects.indexOf(nebula);
+        if (index > -1) activeCelestialObjects.splice(index, 1);
+        nebula.stop();
+        setTimeout(() => {
+            nebula.dispose();
+            emitter.dispose();
+        }, 5000);
+    }, 15000 + Math.random() * 10000);
+}
+
+// Fallback tiny stars for minimal scenes
+function createFallbackTinyStars() {
     try {
-        // Remove any lingering planetary objects by name patterns
-        const objectsToRemove = [];
+        console.log('Creating fallback tiny stars...');
         
-        scene.meshes.forEach(mesh => {
-            if (mesh.name && (
-                mesh.name.includes('planet') ||
-                mesh.name.includes('Planet') ||
-                mesh.name.includes('moon') ||
-                mesh.name.includes('Moon') ||
-                mesh.name.includes('asteroid') ||
-                mesh.name.includes('Asteroid') ||
-                mesh.name.includes('satellite') ||
-                mesh.name.includes('Satellite') ||
-                mesh.name.includes('centralStar') ||
-                mesh.name.includes('secondaryStar') ||
-                mesh.name.includes('distantGalaxy') ||
-                mesh.name.includes('nebula') ||
-                mesh.name.includes('Nebula')
-            )) {
-                objectsToRemove.push(mesh);
+        const starCount = 500;
+        const fallbackStars = new BABYLON.ParticleSystem("fallbackStars", starCount, scene);
+        
+        fallbackStars.particleTexture = new BABYLON.Texture("data:image/svg+xml;base64," + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8">
+                <circle cx="4" cy="4" r="4" fill="white" opacity="0.8" />
+            </svg>
+        `), scene);
+        
+        const emitter = BABYLON.MeshBuilder.CreateBox("fallbackEmitter", {size: 0.01}, scene);
+        emitter.isVisible = false;
+        fallbackStars.emitter = emitter;
+        
+        fallbackStars.minSize = 0.5;
+        fallbackStars.maxSize = 1.5;
+        fallbackStars.minLifeTime = Number.MAX_VALUE;
+        fallbackStars.maxLifeTime = Number.MAX_VALUE;
+        fallbackStars.emitRate = 0;
+        fallbackStars.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+        fallbackStars.renderingGroupId = 0;
+        
+        fallbackStars.color1 = new BABYLON.Color4(1, 1, 1, 0.8);
+        fallbackStars.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.6);
+        
+        // Simple positioning
+        fallbackStars.updateFunction = function(particles) {
+            for (let i = 0; i < particles.length; i++) {
+                const particle = particles[i];
+                if (!particle) continue;
+                
+                if (!particle.userData || !particle.userData.initialized) {
+                    const radius = 200 + Math.random() * 300;
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    
+                    particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+                    particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+                    particle.position.z = radius * Math.cos(phi);
+                    
+                    particle.userData = { initialized: true };
+                }
             }
-        });
+        };
         
-        // Remove identified objects
-        objectsToRemove.forEach(obj => {
-            if (obj && !obj.isDisposed()) {
-                obj.dispose();
-                console.log('Removed residual object:', obj.name);
-            }
-        });
+        fallbackStars.start();
+        fallbackStars.manualEmitCount = starCount;
         
-        // Also clean up transform nodes
-        const nodesToRemove = [];
-        scene.transformNodes.forEach(node => {
-            if (node.name && (
-                node.name.includes('orbit') ||
-                node.name.includes('Orbit') || 
-                node.name.includes('solarSystem') ||
-                node.name.includes('asteroidBelts')
-            )) {
-                nodesToRemove.push(node);
-            }
-        });
-        
-        nodesToRemove.forEach(node => {
-            if (node && !node.isDisposed()) {
-                node.dispose();
-                console.log('Removed residual node:', node.name);
-            }
-        });
-        
-        console.log('✨ Residual object cleanup completed');
+        stars.push(fallbackStars);
+        console.log('Fallback stars created');
         
     } catch (error) {
-        console.warn('Error during residual object cleanup:', error);
+        console.error('Fallback star creation failed:', error);
     }
 }
 
-// Fallback tiny star creation
-function createFallbackTinyStars() {
+// Clean up residual objects from previous loads
+function cleanupResidualObjects() {
+    if (!scene) return;
+    
     try {
-        // Create simple sphere-based tiny stars
-        for (let i = 0; i < 30; i++) {
-            const star = BABYLON.MeshBuilder.CreateSphere(`tinyStar${i}`, {diameter: 0.5}, scene);
-            
-            // Random distant position
-            const radius = 200 + Math.random() * 300;
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos(2 * Math.random() - 1);
-            
-            star.position = new BABYLON.Vector3(
-                radius * Math.sin(phi) * Math.cos(theta),
-                radius * Math.sin(phi) * Math.sin(theta),
-                radius * Math.cos(phi)
-            );
-            
-            // Simple material
-            const starMat = new BABYLON.StandardMaterial(`tinyStarMat${i}`, scene);
-            starMat.emissiveColor = new BABYLON.Color3(0.8, 0.9, 1);
-            starMat.disableLighting = true;
-            star.material = starMat;
-            
-            // Set rendering group for background
-            star.renderingGroupId = 0;
-            
-            stars.push(star);
-        }
+        // Dispose of any existing meshes
+        const meshes = scene.meshes.slice();
+        meshes.forEach(mesh => {
+            if (mesh.name !== 'camera' && mesh.name !== 'canvas') {
+                mesh.dispose();
+            }
+        });
         
-        console.log('Fallback tiny stars created');
+        // Clear particle systems
+        scene.particleSystems.forEach(ps => ps.dispose());
+        
+        // Clear arrays
+        stars.length = 0;
+        focusOrbs.length = 0;
+        planets.length = 0;
+        comets.length = 0;
+        spaceObjects.length = 0;
+        activeCelestialObjects.length = 0;
+        pointLights.length = 0;
+        
+        console.log('Residual objects cleaned up');
     } catch (error) {
-        console.error('Failed to create fallback tiny stars:', error);
+        console.warn('Cleanup warning:', error);
     }
 }
 
 // Animation loop
-export function animate() {
-    if (!animationRunning) {
+function animate() {
+    if (!engine || !scene) return;
+    
+    try {
         animationRunning = true;
-        console.log('Animation loop starting...');
+        time += 0.016;
         
-        // Start the render loop (only once!)
-        engine.runRenderLoop(() => {
-            if (!engine || engine.isDisposed) return;
-            if (scene && scene.activeCamera) {
-                scene.render();
-            }
-        });
-        console.log('Engine render loop started');
-        
-        // Register before render animations
-        scene.registerBeforeRender(() => {
-            if (!engine || engine.isDisposed) return;
-            
-            time += 0.016; // ~60fps timing
-
-            // Debug logging every 60 frames (once per second at 60fps)
-            if (Math.floor(time * 60) % 60 === 0) {
-                console.log('📊 Scene is rendering, Active meshes:', scene.meshes.length);
-            }
-
-            // Update enhanced black hole effects
-            updateBlackHoleEffects();
-
-            // Update camera effects (without FOV changes)
+        // Update camera effects
+        if (typeof updateCameraEffects === 'function') {
             updateCameraEffects();
-
-            // Enhanced camera orbital motion with dynamic patterns
-            cameraRotation += 0.001;
-            
-            const cameraRadius = 50 + Math.sin(time * 0.05) * 8; // Dynamic radius
-            const cameraHeight = 20 + Math.sin(time * 0.1) * 5 + Math.cos(time * 0.03) * 3; // Multi-layered height
-            const heightVariation = Math.sin(time * 0.07) * 2; // Additional height complexity
-            
-            // Create figure-8 like motion with orbital decay/expansion
-            const orbitExpansion = 1 + Math.sin(time * 0.02) * 0.15;
-            const figure8Factor = Math.sin(time * 0.08) * 0.3;
-            
-            const targetPosition = new BABYLON.Vector3(
-                Math.sin(cameraRotation) * cameraRadius * orbitExpansion + Math.cos(cameraRotation * 2) * figure8Factor,
-                cameraHeight + heightVariation,
-                Math.cos(cameraRotation) * cameraRadius * orbitExpansion + Math.sin(cameraRotation * 2) * figure8Factor
-            );
-            
-            // Enhanced smooth camera positioning with inertia
-            camera.position = BABYLON.Vector3.Lerp(camera.position, targetPosition, 0.015);
-            
-            // Dynamic camera target with subtle drift
-            const targetDrift = new BABYLON.Vector3(
-                Math.sin(time * 0.03) * 2,
-                Math.cos(time * 0.05) * 1,
-                Math.sin(time * 0.04) * 1.5
-            );
-            const dynamicTarget = cameraTarget.add(targetDrift);
-            camera.setTarget(dynamicTarget);
-
-            // Update enhanced star animations
-            updateEnhancedStarAnimations();
-            
-            // Update dynamic celestial objects
-            updateCelestialObjects();
-            
-            // Update dynamic celestial objects
-            updateCelestialObjects();
-        });
+        }
+        
+        // Update black hole effects
+        if (typeof updateBlackHoleEffects === 'function') {
+            updateBlackHoleEffects();
+        }
+        
+        // Camera orbit animation
+        cameraRotation += 0.002;
+        const radius = 45;
+        camera.position.x = Math.cos(cameraRotation) * radius;
+        camera.position.z = Math.sin(cameraRotation) * radius;
+        camera.setTarget(cameraTarget);
+        
+        // Render the scene
+        scene.render();
+        
+        if (animationRunning) {
+            requestAnimationFrame(animate);
+        }
+    } catch (error) {
+        console.error('Animation error:', error);
+        animationRunning = false;
     }
 }
 
 // Handle window resize
-export function onWindowResize() {
-    if (engine) {
+function onWindowResize() {
+    if (engine && canvas) {
         engine.resize();
     }
 }
@@ -1814,20 +1413,5 @@ window.scene3dAnimate = animate;
 
 // Export functions for use in external modules
 window.createDynamicCelestialObjects = createDynamicCelestialObjects;
-window.updateCelestialObjects = updateCelestialObjects;
 
-// Manual spawn functions (you can call these from console for testing)
-window.spawnComet = spawnSpectacularComet;
-window.spawnGalaxy = spawnDistantGalaxy;
-window.spawnNebula = spawnNebulaPatch;
-window.spawnAsteroids = spawnAsteroidCluster;
-window.spawnPulsar = spawnPulsarBeam;
-window.spawnTrail = spawnCometTail;
-
-console.log('🌌 Celestial objects system ready! Available manual spawn functions:');
-console.log('   spawnComet() - Spawn a spectacular comet');
-console.log('   spawnGalaxy() - Spawn a distant galaxy');
-console.log('   spawnNebula() - Spawn a colorful nebula patch');
-console.log('   spawnAsteroids() - Spawn an asteroid cluster');
-console.log('   spawnPulsar() - Spawn a pulsar with rotating beam');
-console.log('   spawnTrail() - Spawn a beautiful comet trail');
+console.log('🌌 Scene3D module loaded with enhanced cosmic features!');
