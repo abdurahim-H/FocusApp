@@ -347,103 +347,105 @@ function createMainCosmicStars() {
     mainStars.color2 = new BABYLON.Color4(0.9, 0.95, 1, 0.9); // Bright blue-white
     mainStars.colorDead = new BABYLON.Color4(0, 0, 0, 0);
     
-    mainStars.start();
-    mainStars.manualEmitCount = starCount;
-    
-    // Position stars closer and more visible
-    setTimeout(() => {
-        const particles = mainStars.particles;
-        
+    // Custom update function to position particles immediately
+    mainStars.updateFunction = function(particles) {
         for (let i = 0; i < particles.length; i++) {
             const particle = particles[i];
             if (!particle) continue;
             
-            // Better distribution for visibility
-            const distributionType = Math.random();
-            let radius, theta, phi;
-            
-            if (distributionType < 0.7) {
-                // Main visible starfield (closer to camera)
-                radius = 120 + Math.random() * 300; // Much closer
-                theta = Math.random() * Math.PI * 2;
-                phi = Math.acos(2 * Math.random() - 1);
-            } else {
-                // Background stars
-                radius = 400 + Math.random() * 200;
-                theta = Math.random() * Math.PI * 2;
-                phi = Math.acos(2 * Math.random() - 1);
+            // Only position particles that haven't been positioned yet
+            if (!particle.userData || !particle.userData.initialized) {
+                // Better distribution for visibility
+                const distributionType = Math.random();
+                let radius, theta, phi;
+                
+                if (distributionType < 0.7) {
+                    // Main visible starfield (closer to camera)
+                    radius = 120 + Math.random() * 300; // Much closer
+                    theta = Math.random() * Math.PI * 2;
+                    phi = Math.acos(2 * Math.random() - 1);
+                } else {
+                    // Background stars
+                    radius = 400 + Math.random() * 200;
+                    theta = Math.random() * Math.PI * 2;
+                    phi = Math.acos(2 * Math.random() - 1);
+                }
+                
+                particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+                particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+                particle.position.z = radius * Math.cos(phi);
+                
+                // NASA-like star classification with visible colors
+                const stellarClass = Math.random();
+                let starConfig;
+                
+                if (stellarClass < 0.15) {
+                    // Blue giants (very visible)
+                    starConfig = {
+                        color: new BABYLON.Color4(0.7, 0.8, 1, 1),
+                        size: 3 + Math.random() * 2,
+                        twinkleSpeed: 0.02,
+                        type: 'blue_giant'
+                    };
+                } else if (stellarClass < 0.35) {
+                    // White stars (bright)
+                    starConfig = {
+                        color: new BABYLON.Color4(1, 1, 1, 0.95),
+                        size: 2.5 + Math.random() * 1.5,
+                        twinkleSpeed: 0.015,
+                        type: 'white_star'
+                    };
+                } else if (stellarClass < 0.55) {
+                    // Yellow stars (like our Sun)
+                    starConfig = {
+                        color: new BABYLON.Color4(1, 0.95, 0.7, 0.9),
+                        size: 2 + Math.random() * 1.2,
+                        twinkleSpeed: 0.012,
+                        type: 'yellow_star'
+                    };
+                } else if (stellarClass < 0.75) {
+                    // Orange stars
+                    starConfig = {
+                        color: new BABYLON.Color4(1, 0.8, 0.5, 0.85),
+                        size: 1.8 + Math.random() * 1,
+                        twinkleSpeed: 0.01,
+                        type: 'orange_star'
+                    };
+                } else {
+                    // Red stars (still visible)
+                    starConfig = {
+                        color: new BABYLON.Color4(1, 0.6, 0.4, 0.8),
+                        size: 1.5 + Math.random() * 0.8,
+                        twinkleSpeed: 0.008,
+                        type: 'red_star'
+                    };
+                }
+                
+                particle.color = starConfig.color;
+                particle.size = starConfig.size;
+                
+                particle.userData = {
+                    baseSize: starConfig.size,
+                    baseAlpha: starConfig.color.a,
+                    twinkleSpeed: starConfig.twinkleSpeed,
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    stellarType: starConfig.type,
+                    originalPosition: particle.position.clone(),
+                    brightness: 0.8 + Math.random() * 0.4,
+                    initialized: true // Mark as initialized
+                };
             }
-            
-            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
-            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
-            particle.position.z = radius * Math.cos(phi);
-            
-            // NASA-like star classification with visible colors
-            const stellarClass = Math.random();
-            let starConfig;
-            
-            if (stellarClass < 0.15) {
-                // Blue giants (very visible)
-                starConfig = {
-                    color: new BABYLON.Color4(0.7, 0.8, 1, 1),
-                    size: 3 + Math.random() * 2,
-                    twinkleSpeed: 0.02,
-                    type: 'blue_giant'
-                };
-            } else if (stellarClass < 0.35) {
-                // White stars (bright)
-                starConfig = {
-                    color: new BABYLON.Color4(1, 1, 1, 0.95),
-                    size: 2.5 + Math.random() * 1.5,
-                    twinkleSpeed: 0.015,
-                    type: 'white_star'
-                };
-            } else if (stellarClass < 0.55) {
-                // Yellow stars (like our Sun)
-                starConfig = {
-                    color: new BABYLON.Color4(1, 0.95, 0.7, 0.9),
-                    size: 2 + Math.random() * 1.2,
-                    twinkleSpeed: 0.012,
-                    type: 'yellow_star'
-                };
-            } else if (stellarClass < 0.75) {
-                // Orange stars
-                starConfig = {
-                    color: new BABYLON.Color4(1, 0.8, 0.5, 0.85),
-                    size: 1.8 + Math.random() * 1,
-                    twinkleSpeed: 0.01,
-                    type: 'orange_star'
-                };
-            } else {
-                // Red stars (still visible)
-                starConfig = {
-                    color: new BABYLON.Color4(1, 0.6, 0.4, 0.8),
-                    size: 1.5 + Math.random() * 0.8,
-                    twinkleSpeed: 0.008,
-                    type: 'red_star'
-                };
-            }
-            
-            particle.color = starConfig.color;
-            particle.size = starConfig.size;
-            
-            particle.userData = {
-                baseSize: starConfig.size,
-                baseAlpha: starConfig.color.a,
-                twinkleSpeed: starConfig.twinkleSpeed,
-                twinklePhase: Math.random() * Math.PI * 2,
-                stellarType: starConfig.type,
-                originalPosition: particle.position.clone(),
-                brightness: 0.8 + Math.random() * 0.4 // Consistent brightness
-            };
         }
-    }, 100);
+    };
     
     mainStars.userData = {
         layerType: 'main',
         rotationSpeed: 0.00002,
         driftSpeed: 0.00001
     };
+    
+    mainStars.start();
+    mainStars.manualEmitCount = starCount;
     
     stars.push(mainStars);
 }
@@ -500,54 +502,56 @@ function createBrightBeaconStars() {
     beaconStars.color1 = new BABYLON.Color4(1, 1, 1, 1);
     beaconStars.color2 = new BABYLON.Color4(0.9, 0.95, 1, 1);
     
-    beaconStars.start();
-    beaconStars.manualEmitCount = starCount;
-    
-    setTimeout(() => {
-        const particles = beaconStars.particles;
-        
+    // Custom update function for immediate positioning
+    beaconStars.updateFunction = function(particles) {
         for (let i = 0; i < particles.length; i++) {
             const particle = particles[i];
             if (!particle) continue;
             
-            // Strategic placement for maximum visibility
-            const radius = 150 + Math.random() * 350;
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos(2 * Math.random() - 1);
-            
-            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
-            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
-            particle.position.z = radius * Math.cos(phi);
-            
-            // Bright star colors
-            const brightColors = [
-                new BABYLON.Color4(1, 1, 1, 1),         // Pure white
-                new BABYLON.Color4(0.8, 0.9, 1, 1),     // Blue-white
-                new BABYLON.Color4(1, 0.95, 0.8, 1),    // Warm white
-                new BABYLON.Color4(0.9, 0.85, 1, 1),    // Purple-white
-                new BABYLON.Color4(1, 0.9, 0.7, 1)      // Golden white
-            ];
-            
-            particle.color = brightColors[Math.floor(Math.random() * brightColors.length)];
-            particle.size = 4 + Math.random() * 4;
-            
-            particle.userData = {
-                baseSize: particle.size,
-                baseAlpha: 1,
-                twinkleSpeed: 0.015 + Math.random() * 0.02,
-                twinklePhase: Math.random() * Math.PI * 2,
-                stellarType: 'beacon',
-                originalPosition: particle.position.clone(),
-                pulseIntensity: 0.3 + Math.random() * 0.4
-            };
+            if (!particle.userData || !particle.userData.initialized) {
+                // Strategic placement for maximum visibility
+                const radius = 150 + Math.random() * 350;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+                particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+                particle.position.z = radius * Math.cos(phi);
+                
+                // Bright star colors
+                const brightColors = [
+                    new BABYLON.Color4(1, 1, 1, 1),         // Pure white
+                    new BABYLON.Color4(0.8, 0.9, 1, 1),     // Blue-white
+                    new BABYLON.Color4(1, 0.95, 0.8, 1),    // Warm white
+                    new BABYLON.Color4(0.9, 0.85, 1, 1),    // Purple-white
+                    new BABYLON.Color4(1, 0.9, 0.7, 1)      // Golden white
+                ];
+                
+                particle.color = brightColors[Math.floor(Math.random() * brightColors.length)];
+                particle.size = 4 + Math.random() * 4;
+                
+                particle.userData = {
+                    baseSize: particle.size,
+                    baseAlpha: 1,
+                    twinkleSpeed: 0.015 + Math.random() * 0.02,
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    stellarType: 'beacon',
+                    originalPosition: particle.position.clone(),
+                    pulseIntensity: 0.3 + Math.random() * 0.4,
+                    initialized: true
+                };
+            }
         }
-    }, 200);
+    };
     
     beaconStars.userData = {
         layerType: 'beacon',
         rotationSpeed: 0.00001,
         breathingSpeed: 0.005
     };
+    
+    beaconStars.start();
+    beaconStars.manualEmitCount = starCount;
     
     stars.push(beaconStars);
 }
@@ -586,55 +590,57 @@ function createColorfulDistantStars() {
     colorStars.color1 = new BABYLON.Color4(1, 1, 1, 0.8);
     colorStars.color2 = new BABYLON.Color4(0.8, 0.9, 1, 0.6);
     
-    colorStars.start();
-    colorStars.manualEmitCount = starCount;
-    
-    setTimeout(() => {
-        const particles = colorStars.particles;
-        
+    // Custom update function
+    colorStars.updateFunction = function(particles) {
         for (let i = 0; i < particles.length; i++) {
             const particle = particles[i];
             if (!particle) continue;
             
-            // Distributed across larger area for depth
-            const radius = 300 + Math.random() * 500;
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos(2 * Math.random() - 1);
-            
-            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
-            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
-            particle.position.z = radius * Math.cos(phi);
-            
-            // Beautiful cosmic colors
-            const cosmicColors = [
-                new BABYLON.Color4(1, 0.9, 0.9, 0.8),    // Soft pink
-                new BABYLON.Color4(0.9, 0.9, 1, 0.8),    // Soft blue
-                new BABYLON.Color4(0.9, 1, 0.9, 0.8),    // Soft green
-                new BABYLON.Color4(1, 1, 0.9, 0.8),      // Soft yellow
-                new BABYLON.Color4(1, 0.95, 0.9, 0.8),   // Soft orange
-                new BABYLON.Color4(0.95, 0.9, 1, 0.8),   // Soft purple
-                new BABYLON.Color4(1, 1, 1, 0.8)         // Pure white
-            ];
-            
-            particle.color = cosmicColors[Math.floor(Math.random() * cosmicColors.length)];
-            particle.size = 0.8 + Math.random() * 1.7;
-            
-            particle.userData = {
-                baseSize: particle.size,
-                baseAlpha: particle.color.a,
-                twinkleSpeed: 0.005 + Math.random() * 0.01,
-                twinklePhase: Math.random() * Math.PI * 2,
-                stellarType: 'colorful',
-                originalPosition: particle.position.clone()
-            };
+            if (!particle.userData || !particle.userData.initialized) {
+                // Distributed across larger area for depth
+                const radius = 300 + Math.random() * 500;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+                particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+                particle.position.z = radius * Math.cos(phi);
+                
+                // Beautiful cosmic colors
+                const cosmicColors = [
+                    new BABYLON.Color4(1, 0.9, 0.9, 0.8),    // Soft pink
+                    new BABYLON.Color4(0.9, 0.9, 1, 0.8),    // Soft blue
+                    new BABYLON.Color4(0.9, 1, 0.9, 0.8),    // Soft green
+                    new BABYLON.Color4(1, 1, 0.9, 0.8),      // Soft yellow
+                    new BABYLON.Color4(1, 0.95, 0.9, 0.8),   // Soft orange
+                    new BABYLON.Color4(0.95, 0.9, 1, 0.8),   // Soft purple
+                    new BABYLON.Color4(1, 1, 1, 0.8)         // Pure white
+                ];
+                
+                particle.color = cosmicColors[Math.floor(Math.random() * cosmicColors.length)];
+                particle.size = 0.8 + Math.random() * 1.7;
+                
+                particle.userData = {
+                    baseSize: particle.size,
+                    baseAlpha: particle.color.a,
+                    twinkleSpeed: 0.005 + Math.random() * 0.01,
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    stellarType: 'colorful',
+                    originalPosition: particle.position.clone(),
+                    initialized: true
+                };
+            }
         }
-    }, 300);
+    };
     
     colorStars.userData = {
         layerType: 'colorful',
         rotationSpeed: 0.000005,
         driftSpeed: 0.000002
     };
+    
+    colorStars.start();
+    colorStars.manualEmitCount = starCount;
     
     stars.push(colorStars);
 }
@@ -667,48 +673,50 @@ function createStarDustField() {
     starDust.color1 = new BABYLON.Color4(1, 1, 1, 0.6);
     starDust.color2 = new BABYLON.Color4(0.9, 0.9, 1, 0.4);
     
-    starDust.start();
-    starDust.manualEmitCount = dustCount;
-    
-    setTimeout(() => {
-        const particles = starDust.particles;
-        
+    // Custom update function
+    starDust.updateFunction = function(particles) {
         for (let i = 0; i < particles.length; i++) {
             const particle = particles[i];
             if (!particle) continue;
             
-            // Very distant uniform distribution
-            const radius = 600 + Math.random() * 800;
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos(2 * Math.random() - 1);
-            
-            particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
-            particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
-            particle.position.z = radius * Math.cos(phi);
-            
-            particle.size = 0.3 + Math.random() * 0.7;
-            particle.color = new BABYLON.Color4(
-                0.9 + Math.random() * 0.1,
-                0.9 + Math.random() * 0.1,
-                1,
-                0.4 + Math.random() * 0.3
-            );
-            
-            particle.userData = {
-                baseSize: particle.size,
-                baseAlpha: particle.color.a,
-                twinkleSpeed: 0.002 + Math.random() * 0.005,
-                twinklePhase: Math.random() * Math.PI * 2,
-                stellarType: 'dust',
-                originalPosition: particle.position.clone()
-            };
+            if (!particle.userData || !particle.userData.initialized) {
+                // Very distant uniform distribution
+                const radius = 600 + Math.random() * 800;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+                particle.position.y = radius * Math.sin(phi) * Math.sin(theta);
+                particle.position.z = radius * Math.cos(phi);
+                
+                particle.size = 0.3 + Math.random() * 0.7;
+                particle.color = new BABYLON.Color4(
+                    0.9 + Math.random() * 0.1,
+                    0.9 + Math.random() * 0.1,
+                    1,
+                    0.4 + Math.random() * 0.3
+                );
+                
+                particle.userData = {
+                    baseSize: particle.size,
+                    baseAlpha: particle.color.a,
+                    twinkleSpeed: 0.002 + Math.random() * 0.005,
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    stellarType: 'dust',
+                    originalPosition: particle.position.clone(),
+                    initialized: true
+                };
+            }
         }
-    }, 400);
+    };
     
     starDust.userData = {
         layerType: 'dust',
         rotationSpeed: 0.000002
     };
+    
+    starDust.start();
+    starDust.manualEmitCount = dustCount;
     
     stars.push(starDust);
 }
@@ -1655,7 +1663,7 @@ function cleanupResidualObjects() {
         scene.transformNodes.forEach(node => {
             if (node.name && (
                 node.name.includes('orbit') ||
-                node.name.includes('Orbit') ||
+                node.name.includes('Orbit') || 
                 node.name.includes('solarSystem') ||
                 node.name.includes('asteroidBelts')
             )) {
