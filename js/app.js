@@ -67,37 +67,20 @@ export async function initApp() {
     }
     
     function doInit() {
-        // Faster loading screen progression
+        // Initialize 3D scene after a slight delay to ensure layout stability
         setTimeout(() => {
-            const loadingProgress = document.getElementById('loadingProgress');
-            const loadingScreen = document.getElementById('loadingScreen');
-            
-            if (loadingProgress) {
-                loadingProgress.style.width = '100%';
-            }
-            
-            setTimeout(() => {
-                if (loadingScreen) {
-                    loadingScreen.classList.add('hide');
-                    setTimeout(() => {
-                        loadingScreen.style.display = 'none';
-                    }, 300); // Reduced from 500ms
+            try {
+                if (loadedModules.scene3d?.init3D) {
+                    console.log('Initializing 3D scene...');
+                    loadedModules.scene3d.init3D();
+                    console.log('3D scene initialized successfully');
+                } else {
+                    console.error('scene3d module or init3D function not found');
                 }
-            }, 200); // Reduced from 500ms
-        }, 400); // Reduced from 1000ms
-
-        // Initialize 3D scene
-        try {
-            if (loadedModules.scene3d?.init3D) {
-                console.log('Initializing 3D scene...');
-                loadedModules.scene3d.init3D();
-                console.log('3D scene initialized successfully');
-            } else {
-                console.error('scene3d module or init3D function not found');
+            } catch (error) {
+                console.error('3D initialization error:', error);
             }
-        } catch (error) {
-            console.error('3D initialization error:', error);
-        }
+        }, 100); // Small delay to ensure layout is stable
 
         // Setup all modules
         console.log('Setting up navigation module...');
@@ -243,9 +226,48 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
+// Pre-stabilize container positions before any dynamic loading
+function stabilizeContainerLayout() {
+    const containers = document.querySelectorAll('.water-cosmic-container');
+    containers.forEach(container => {
+        // Force layout calculation and lock position
+        const rect = container.getBoundingClientRect();
+        container.style.willChange = 'auto'; // Reduce reflow triggers
+        container.style.transform = 'translateZ(0)'; // Hardware acceleration
+    });
+    
+    // Pre-populate dynamic content placeholders to prevent layout shifts
+    const dateTimeEl = document.getElementById('dateTime');
+    if (dateTimeEl && !dateTimeEl.textContent.trim()) {
+        // Set temporary placeholder to maintain layout
+        dateTimeEl.textContent = new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    
+    const breathingGuide = document.getElementById('breathingGuide');
+    if (breathingGuide && !breathingGuide.textContent.trim()) {
+        breathingGuide.textContent = 'Breathe In...';
+    }
+    
+    console.log('Container layout stabilized');
+}
+
 // Initialize the app with performance optimizations
 (async function() {
-    // Show faster loading progression
+    // Immediately stabilize layout on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', stabilizeContainerLayout);
+    } else {
+        stabilizeContainerLayout();
+    }
+    
+    // Show faster loading progression - SINGLE loading screen hide sequence
     setTimeout(() => {
         const loadingScreen = document.getElementById('loadingScreen');
         const loadingProgress = document.getElementById('loadingProgress');
@@ -258,9 +280,9 @@ document.addEventListener('keydown', (event) => {
             loadingScreen.style.opacity = '0';
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
-            }, 200); // Much faster fade out
+            }, 300); // Allow for fade transition
         }
-    }, 200); // Much faster initial load
+    }, 1200); // Increased time to ensure layout is stable first
     
     try {
         await initApp();

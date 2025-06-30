@@ -66,18 +66,26 @@ export function init3D() {
     console.log('Container dimensions:', container.offsetWidth, 'x', container.offsetHeight);
 
     try {
-        // Create canvas element
+        // Create canvas element with layout-safe approach
         canvas = document.createElement('canvas');
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        canvas.style.display = 'block';
-        canvas.style.position = 'absolute';
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-        canvas.style.zIndex = '1';
-        container.appendChild(canvas);
+        canvas.style.cssText = `
+            width: 100%;
+            height: 100%;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            contain: strict;
+        `;
         
-        console.log('Canvas created and appended to container');
+        // Use requestAnimationFrame to ensure DOM is ready and avoid layout shifts
+        requestAnimationFrame(() => {
+            container.appendChild(canvas);
+            console.log('Canvas safely appended to container');
+        });
+        
+        console.log('Canvas created and will be appended safely');
 
         // Initialize Babylon.js engine with proper settings
         console.log('Creating Babylon.js engine...');

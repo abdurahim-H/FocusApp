@@ -60,6 +60,8 @@ body {
     pointer-events: none;
     background: #000; /* Fallback background */
     transition: opacity 0.3s ease, filter 0.3s ease; /* Add smooth transitions */
+    contain: layout style paint; /* Prevent layout shifts */
+    will-change: auto; /* Optimize for changes */
 }
 
 #scene-container canvas {
@@ -71,6 +73,7 @@ body {
     left: 0 !important;
     z-index: 1 !important;
     pointer-events: auto !important; /* Canvas needs pointer events for Babylon.js */
+    contain: strict; /* Strict containment to prevent any layout impact */
 }
 
 /* Main Content Container */
@@ -87,6 +90,15 @@ body {
     overflow: hidden;
     contain: layout style paint;
     box-sizing: border-box;
+    /* Ensure consistent positioning from start - fix position jumping */
+    transform: translateZ(0);
+    will-change: auto;
+    /* Prevent initial layout shifts and height recalculation */
+    visibility: visible;
+    opacity: 1;
+    /* Lock the height to prevent changes */
+    min-height: 100vh;
+    max-height: 100vh;
 }
 
 /* Enable pointer events only for interactive elements */
@@ -116,6 +128,9 @@ a {
     position: relative;
     z-index: 15;
     pointer-events: auto; /* Mode content needs pointer events */
+    /* Ensure stable positioning */
+    transform: translateZ(0);
+    will-change: auto;
 }
 
 /* Ensure task list doesn't cause overflow */
@@ -199,8 +214,8 @@ a {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* Loading Screen */
@@ -515,13 +530,19 @@ body[style*="--redshift-intensity"] {
 }
 
 /* iOS Safari and Mobile Viewport Fixes */
+/* Use consistent viewport height calculation that doesn't change after load */
 @supports (-webkit-touch-callout: none) {
     html, body {
+        height: 100vh;
         height: -webkit-fill-available;
     }
     
     .container {
+        height: 100vh;
         height: -webkit-fill-available;
+        /* Prevent height recalculation after load */
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
     }
 }
 

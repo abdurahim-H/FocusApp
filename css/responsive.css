@@ -9,16 +9,7 @@
         -webkit-overflow-scrolling: touch;
     }
 
-    /* iOS Safari specific fix */
-    @supports (-webkit-touch-callout: none) {
-        html, body {
-            height: -webkit-fill-available;
-        }
-        
-        .container {
-            height: -webkit-fill-available;
-        }
-    }
+    /* Prevent iOS Safari viewport height changes - handled in main CSS */
 
     .nav {
         top: 20px;

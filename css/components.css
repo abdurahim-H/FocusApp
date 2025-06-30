@@ -155,6 +155,18 @@
 }
 */
 
+/* Fix for initial positioning jump issue */
+.home-content,
+.focus-content,
+.ambient-content {
+    /* Prevent initial position shifts by ensuring stable transform baseline */
+    transform: translateZ(0) translateY(0);
+    will-change: auto;
+    /* Ensure immediate visibility and positioning */
+    visibility: visible;
+    opacity: 1;
+}
+
 /* Content Mode Layouts */
 .home-content {
     position: relative;
