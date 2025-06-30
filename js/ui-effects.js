@@ -50,8 +50,8 @@ export function triggerTaskCompletionUI(taskElement) {
 
 // Apply focus mode intensity
 export function triggerFocusIntensity() {
-    const timerContainer = document.querySelector('#timer-mode');
-    const buttons = document.querySelectorAll('.btn');
+    const timerContainer = document.querySelector('#focus');
+    const buttons = document.querySelectorAll('.liquid-glass-btn:not(.nav-btn), .nav-btn');
     
     timerContainer?.classList.add('focus-intense');
     buttons.forEach(btn => btn.classList.add('btn-particle'));
@@ -61,8 +61,8 @@ export function triggerFocusIntensity() {
 }
 
 export function removeFocusIntensity() {
-    const timerContainer = document.querySelector('#timer-mode');
-    const buttons = document.querySelectorAll('.btn');
+    const timerContainer = document.querySelector('#focus');
+    const buttons = document.querySelectorAll('.liquid-glass-btn:not(.nav-btn), .nav-btn');
     
     timerContainer?.classList.remove('focus-intense');
     buttons.forEach(btn => btn.classList.remove('btn-particle'));
@@ -233,7 +233,7 @@ export function enhanceAchievement(achievementElement, type = 'task') {
 
 // Productivity wave effect across the UI
 export function triggerProductivityWave() {
-    const elements = document.querySelectorAll('.glass-card, .btn, .task-item');
+    const elements = document.querySelectorAll('.water-cosmic-container, .liquid-glass-btn, .task-item');
     
     elements.forEach((el, index) => {
         setTimeout(() => {
@@ -271,8 +271,8 @@ export function initUIEffects() {
     // Set up periodic checks
     setInterval(updateUIBasedOnProductivity, 1000);
     
-    // Add particle effects to buttons
-    const buttons = document.querySelectorAll('.btn');
+    // Add particle effects to buttons (exclude navigation buttons)
+    const buttons = document.querySelectorAll('.liquid-glass-btn:not(.nav-btn)');
     buttons.forEach(btn => {
         btn.addEventListener('mouseenter', () => {
             btn.classList.add('btn-particle');
@@ -561,7 +561,7 @@ export function cleanupUIEffects() {
     const effectClasses = [
         'productivity-glow', 'task-celebration', 'focus-intense',
         'session-complete', 'gravitational-pull', 'cosmic-flow',
-        'btn-particle'
+        'btn-particle', 'water-parallax', 'water-in-view', 'water-focus-enhanced'
     ];
     
     allElements.forEach(el => {
@@ -578,9 +578,6 @@ export function cleanupUIEffects() {
     cleanupWaterEffects();
     
     activeEffects.clear();
-    
-    // Cleanup water effects
-    cleanupWaterEffects();
 }
 
 // Cleanup water effects

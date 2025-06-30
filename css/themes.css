@@ -107,16 +107,18 @@ body {
 .focus-content,
 .task-section,
 .settings-modal,
-.btn,
-.task-input {
+.liquid-glass-btn,
+.task-input,
+.water-cosmic-container {
     transition: background-color 0.3s ease, 
                 border-color 0.3s ease, 
                 box-shadow 0.3s ease,
-                color 0.3s ease;
+                color 0.3s ease,
+                backdrop-filter 0.3s ease;
 }
 
 /* Theme-specific button states */
-body[data-theme="light"] .btn:hover {
+body[data-theme="light"] .liquid-glass-btn:hover {
     background: rgba(0, 0, 0, 0.05);
 }
 
@@ -197,20 +199,21 @@ body[data-theme="dark"] .date-time {
     font-weight: 400;
 }
 
-/* Theme-specific input styles */
-body[data-theme="light"] .task-input,
+/* Theme-specific input styles - moved to liquid-glass-buttons.css for consistency */
+/* Keeping only theme-specific overrides */
+body[data-theme="light"] .liquid-glass-btn .task-input,
 body[data-theme="light"] .text-input {
     background: rgba(0, 0, 0, 0.05);
     border-color: rgba(0, 0, 0, 0.1);
     color: var(--text-primary);
 }
 
-body[data-theme="light"] .task-input::placeholder,
+body[data-theme="light"] .liquid-glass-btn .task-input::placeholder,
 body[data-theme="light"] .text-input::placeholder {
     color: rgba(31, 41, 55, 0.5);
 }
 
-body[data-theme="cosmos"] .task-input,
+body[data-theme="cosmos"] .liquid-glass-btn .task-input,
 body[data-theme="cosmos"] .text-input {
     background: rgba(139, 92, 246, 0.1);
     border-color: rgba(168, 85, 247, 0.3);
@@ -273,4 +276,42 @@ body[data-theme="cosmos"] .text-input {
     transform: translateY(-50%);
     font-size: 0.8em;
     color: var(--accent);
+}
+
+/* ===== NAVIGATION ULTRA-TRANSPARENT OVERRIDES ===== */
+/* Override all theme-specific water-cosmic-container styles for navigation */
+[data-theme="dark"] .nav.water-cosmic-container,
+[data-theme="light"] .nav.water-cosmic-container,
+[data-theme="cosmos"] .nav.water-cosmic-container,
+[data-theme="auto"] .nav.water-cosmic-container,
+.nav.water-cosmic-container {
+    background: rgba(255, 255, 255, 0.005) !important; /* Ultra transparent */
+    backdrop-filter: none !important; /* NO BLUR for navigation */
+    -webkit-backdrop-filter: none !important; /* NO BLUR for navigation */
+    border: 1px solid rgba(255, 255, 255, 0.02) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Override all theme-specific button styles for navigation */
+[data-theme="dark"] .nav .liquid-glass-btn.nav-btn,
+[data-theme="light"] .nav .liquid-glass-btn.nav-btn,
+[data-theme="cosmos"] .nav .liquid-glass-btn.nav-btn,
+[data-theme="auto"] .nav .liquid-glass-btn.nav-btn,
+.nav .liquid-glass-btn.nav-btn {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .nav .liquid-glass-btn.nav-btn:hover,
+[data-theme="light"] .nav .liquid-glass-btn.nav-btn:hover,
+[data-theme="cosmos"] .nav .liquid-glass-btn.nav-btn:hover,
+[data-theme="auto"] .nav .liquid-glass-btn.nav-btn:hover,
+.nav .liquid-glass-btn.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
 }

@@ -14,12 +14,12 @@
     display: flex;
     gap: 10px;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.005); /* Ultra transparent */
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.02); /* Barely visible */
+    background: rgba(255, 255, 255, 0.005) !important; /* Ultra transparent - prevent overrides */
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.02) !important; /* Barely visible */
     border-radius: 50px;
     padding: 10px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); /* Lighter shadow */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05) !important; /* Lighter shadow */
     
     /* Ensure proper floating capsule sizing */
     width: fit-content;
@@ -60,7 +60,68 @@
     border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Button Components */
+/* Navigation Button Overrides - Restore Ultra-Transparent Design */
+/* High specificity selectors to override cosmic-glass-btn and starfield styles */
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn {
+    /* Override liquid-glass-btn styles for navigation */
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 12px 20px !important;
+    border-radius: 25px !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.9em !important;
+    font-weight: 500 !important;
+    min-width: 70px !important;
+    min-height: auto !important;
+    text-shadow: none !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn::before,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn::before {
+    display: none !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn:hover,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--text-primary) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    text-shadow: none !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn.active,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active {
+    background: rgba(176, 224, 230, 0.15) !important;
+    color: rgba(255, 255, 255, 1) !important;
+    box-shadow: 
+        0 6px 20px rgba(255, 255, 255, 0.12),
+        0 2px 8px rgba(176, 224, 230, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+    text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Override water-cosmic-container styles for navigation to maintain ultra-transparency */
+.nav.water-cosmic-container {
+    background: rgba(255, 255, 255, 0.005) !important; /* Ultra transparent */
+    backdrop-filter: none !important; /* NO BLUR for navigation container */
+    -webkit-backdrop-filter: none !important; /* NO BLUR for navigation container */
+    border: 1px solid rgba(255, 255, 255, 0.02) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Legacy Button Components - DEPRECATED, using liquid-glass-btn instead */
+/*
 .btn {
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
@@ -92,6 +153,7 @@
 .btn-primary:hover {
     background: #5855eb;
 }
+*/
 
 /* Content Mode Layouts */
 .home-content {
@@ -205,35 +267,10 @@
     z-index: 30;
 }
 
-.task-input-group {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    position: relative;
-    z-index: 31;
-}
+/* Task input styles moved to liquid-glass-buttons.css for consistency */
+/* Keeping only the legacy z-index overrides if needed */
 
-.task-input {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--border-glass);
-    border-radius: 10px;
-    padding: 12px 16px;
-    color: var(--text-primary);
-    font-size: 1em;
-    position: relative;
-    z-index: 32;
-}
-
-.task-input::placeholder {
-    color: var(--text-secondary);
-}
-
-#addTaskBtn {
-    position: relative;
-    z-index: 33;
-    isolation: isolate;
-}
+/* #addTaskBtn styles moved to liquid-glass-buttons.css */
 
 .task-list {
     list-style: none;
@@ -661,6 +698,7 @@
 }
 
 .theme-buttons .btn,
+.theme-buttons .liquid-glass-btn,
 .theme-buttons button {
     all: unset;
     cursor: pointer;
@@ -690,8 +728,9 @@
     flex-grow: 0;
 }
 
-.theme-buttons .btn:hover:not(.active):not(.btn-primary),
-.theme-buttons button:hover:not(.active):not(.btn-primary) {
+.theme-buttons .btn:hover:not(.active):not(.btn-primary):not(.liquid-glass-btn--primary),
+.theme-buttons .liquid-glass-btn:hover:not(.active):not(.btn-primary):not(.liquid-glass-btn--primary),
+.theme-buttons button:hover:not(.active):not(.btn-primary):not(.liquid-glass-btn--primary) {
     background: rgba(176, 224, 230, 0.08);
     border-color: rgba(255, 255, 255, 0.2);
     height: 45px;
@@ -701,6 +740,8 @@
 
 .theme-buttons .btn.active,
 .theme-buttons .btn.btn-primary,
+.theme-buttons .liquid-glass-btn.active,
+.theme-buttons .liquid-glass-btn.liquid-glass-btn--primary,
 .theme-buttons button.active,
 .theme-buttons button.btn-primary {
     background: rgba(176, 224, 230, 0.15) !important;
@@ -724,6 +765,8 @@
 
 .theme-buttons .btn.active::after,
 .theme-buttons .btn.btn-primary::after,
+.theme-buttons .liquid-glass-btn.active::after,
+.theme-buttons .liquid-glass-btn.liquid-glass-btn--primary::after,
 .theme-buttons button.active::after,
 .theme-buttons button.btn-primary::after {
     content: '';
@@ -885,8 +928,9 @@
     isolation: isolate;
 }
 
-/* Ambient Sound Button Active States */
-.btn.active {
+/* Ambient Sound Button Active States - Updated for liquid-glass-btn compatibility */
+.btn.active,
+.liquid-glass-btn.active {
     background: rgba(176, 224, 230, 0.15) !important;
     border-color: rgba(255, 255, 255, 0.25) !important;
     box-shadow: 
@@ -900,7 +944,8 @@
     text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
 }
 
-.btn.active:hover {
+.btn.active:hover,
+.liquid-glass-btn.active:hover {
     background: rgba(176, 224, 230, 0.18) !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
     box-shadow: 
@@ -912,7 +957,8 @@
     text-shadow: 0 0 12px rgba(176, 224, 230, 0.5) !important;
 }
 
-.btn.active::after {
+.btn.active::after,
+.liquid-glass-btn.active::after {
     content: '●';
     position: absolute;
     top: 5px;

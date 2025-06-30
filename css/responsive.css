@@ -119,3 +119,72 @@
         scroll-behavior: smooth;
     }
 }
+
+/* Navigation Button Overrides - FINAL CASCADE PRIORITY */
+/* These rules must override cosmic-glass-btn and starfield styles */
+
+/* CRITICAL: Override the navigation container itself */
+.nav.water-cosmic-container {
+    background: rgba(255, 255, 255, 0.005) !important; /* Ultra transparent */
+    backdrop-filter: none !important; /* NO BLUR for navigation container */
+    -webkit-backdrop-filter: none !important; /* NO BLUR for navigation container */
+    border: 1px solid rgba(255, 255, 255, 0.02) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05) !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn,
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn {
+    /* Override all liquid-glass-btn styles for navigation */
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 12px 20px !important;
+    border-radius: 25px !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.9em !important;
+    font-weight: 500 !important;
+    min-width: 70px !important;
+    min-height: auto !important;
+    text-shadow: none !important;
+    position: relative !important;
+    overflow: visible !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn::before,
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn::before,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn::before {
+    display: none !important;
+    content: none !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn:hover,
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn:hover,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--text-primary) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    text-shadow: none !important;
+    border: none !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn.active,
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn.active,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active {
+    background: rgba(176, 224, 230, 0.15) !important;
+    color: rgba(255, 255, 255, 1) !important;
+    box-shadow: 
+        0 6px 20px rgba(255, 255, 255, 0.12),
+        0 2px 8px rgba(176, 224, 230, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+    text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}

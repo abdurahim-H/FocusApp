@@ -4,6 +4,13 @@
  * Cosmic Focus - Enhanced Liquid Glass Button Design System
  * Apple-inspired translucent glass buttons with cosmic theming
  * Version 2.0 - Enhanced with better visual hierarchy and effects
+ * 
+ * CONSOLIDATION NOTES:
+ * - This file now contains ALL button and input styling for consistency
+ * - Task input styles moved here from components.css and themes.css
+ * - Button group layouts consolidated from components.css
+ * - Z-index management centralized here
+ * - All button variants (.liquid-glass-btn--*) defined here
  */
 
 /* ===== BASE LIQUID GLASS BUTTON ===== */
@@ -45,8 +52,16 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.18);
     
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 12px rgba(176, 224, 230, 0.4);
+    
+    /* Core interaction states */
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
 }
 
+.liquid-glass-btn:hover,
 .cosmic-glass-btn:hover {
     background: rgba(176, 224, 230, 0.2);
     border-color: rgba(255, 255, 255, 0.3);
@@ -99,8 +114,14 @@
 
 /* ===== TASK SYSTEM ENHANCEMENTS ===== */
 
-/* Task Input Enhancement */
+/* Task Input Enhancement - CONSOLIDATED STYLES */
 .task-input {
+    /* Core structure from components.css */
+    flex: 1;
+    position: relative;
+    z-index: 32;
+    
+    /* Enhanced glass styling */
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(24px) saturate(120%);
     -webkit-backdrop-filter: blur(24px) saturate(120%);
@@ -143,12 +164,14 @@
     font-weight: 300;
 }
 
-/* Task Input Group Layout */
+/* Task Input Group Layout - CONSOLIDATED FROM COMPONENTS.CSS */
 .task-input-group {
     display: flex;
     gap: 12px;
     align-items: stretch;
     margin-bottom: 24px;
+    position: relative;
+    z-index: 31;
 }
 
 .task-input-group .task-input {
@@ -162,6 +185,9 @@
     border-radius: 0 16px 16px 0;
     min-width: 80px;
     min-height: 48px;
+    position: relative;
+    z-index: 33;
+    isolation: isolate;
 }
 
 /* Enhanced Task Section */
