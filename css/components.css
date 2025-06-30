@@ -159,6 +159,7 @@
 .home-content {
     position: relative;
     z-index: 20;
+    border-radius: 40px; /* Rounded corners for glass container */
 }
 
 .home-content h1 {
@@ -227,7 +228,7 @@
     background: rgba(255, 255, 255, 0.005);  /* Nearly invisible */
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.02);  /* Barely visible border */
-    border-radius: 30px;
+    border-radius: 40px; /* Increased rounded corners for glass container */
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.01);  /* Minimal shadow */
     position: relative;
     z-index: 20;
@@ -259,7 +260,7 @@
     background: rgba(255, 255, 255, 0.005);  /* Nearly invisible */
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.02);  /* Barely visible border */
-    border-radius: 20px;
+    border-radius: 40px; /* Increased rounded corners to match other containers */
     padding: 25px;
     margin-top: 30px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.01);  /* Minimal shadow */
@@ -314,6 +315,7 @@
     position: relative;
     z-index: 20;
     overflow: hidden;
+    border-radius: 40px; /* Rounded corners for glass container */
 }
 
 .breathing-circle {

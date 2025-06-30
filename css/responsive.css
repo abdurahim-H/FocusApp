@@ -48,6 +48,19 @@
 
     .focus-content {
         padding: 25px;
+        border-radius: 25px; /* Slightly smaller radius on mobile */
+    }
+
+    .home-content {
+        border-radius: 25px; /* Slightly smaller radius on mobile */
+    }
+
+    .ambient-content {
+        border-radius: 25px; /* Slightly smaller radius on mobile */
+    }
+
+    .task-section {
+        border-radius: 25px; /* Slightly smaller radius on mobile */
     }
 
     .timer-display {
