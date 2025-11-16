@@ -147,22 +147,25 @@
 /* Individual Segments/Buttons */
 .nav-buttons .liquid-glass-btn,
 .nav-buttons .nav-btn {
-    /* Reset all styles */
-    all: unset;
-    box-sizing: border-box;
+    /* Force equal width distribution */
+    flex: 1 1 0 !important; /* Equal width for all buttons - use flex-basis 0 */
+    min-width: 0 !important; /* Allow flex to shrink below content width */
+    max-width: none !important; /* No max-width constraints */
     
-    /* Compact layout - equal width segments */
-    flex: 1 !important; /* Equal width for all buttons */
+    /* Layout */
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box !important;
+    
+    /* Spacing */
     padding: 4px 10px !important; /* Even smaller for minimal look */
-    min-width: 0; /* Allow flex to control width */
+    margin: 0 !important;
     
     /* Remove any borders */
-    border: none;
-    background: transparent;
-    outline: none;
+    border: none !important;
+    background: transparent !important;
+    outline: none !important;
     
     /* Typography */
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
