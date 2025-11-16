@@ -136,8 +136,8 @@ a {
     text-align: center;
     max-width: 600px;
     width: 100%;
-    max-height: calc(100vh - 200px); /* Account for nav and padding */
-    overflow-y: auto;
+    max-height: none; /* Remove height restriction */
+    overflow-y: hidden; /* Force hidden, no scrollbar ever */
     overflow-x: hidden;
     animation: none; /* Disable animation on initial load */
     position: relative;
@@ -160,13 +160,13 @@ a {
 }
 
 .task-list {
-    max-height: 180px; /* Shows ~2 tasks before scrolling on all screens */
-    overflow-y: auto;
+    max-height: none; /* Remove height restriction */
+    overflow-y: hidden; /* Force hidden, no scrollbar */
     overflow-x: hidden;
     
-    /* Apple-style minimal scrollbar - only shows when needed */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(176, 224, 230, 0.08) transparent;
+    /* Scrollbar disabled */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 /* Apple-style scrollbar for webkit browsers - ultra minimal */
