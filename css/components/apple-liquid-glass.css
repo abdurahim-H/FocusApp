@@ -9,6 +9,24 @@
 
 /* ===== APPLE LIQUID GLASS BASE SYSTEM ===== */
 
+/* Base button reset and structure */
+.liquid-glass-btn {
+    /* Reset */
+    all: unset;
+    box-sizing: border-box;
+    
+    /* Structure */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
 :root {
     /* Liquid Glass Color Palette */
     --apple-glass-bg: rgba(255, 255, 255, 0.12);
