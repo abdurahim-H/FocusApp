@@ -5,7 +5,8 @@
  * Navigation, buttons, modals, forms, and interactive elements
  */
 
-/* Navigation Components */
+/* Navigation Components - DISABLED - Using apple-liquid-glass.css instead */
+/*
 .nav {
     position: fixed;
     top: 30px;
@@ -14,14 +15,13 @@
     display: flex;
     gap: 10px;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.005) !important; /* Ultra transparent - prevent overrides */
+    background: rgba(255, 255, 255, 0.005) !important;
     backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.02) !important; /* Barely visible */
+    border: 1px solid rgba(255, 255, 255, 0.02) !important;
     border-radius: 50px;
     padding: 10px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05) !important; /* Lighter shadow */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05) !important;
     
-    /* Ensure proper floating capsule sizing */
     width: fit-content;
     align-items: center;
     justify-content: center;
@@ -47,7 +47,6 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
-.nav-btn.active {
     background: rgba(176, 224, 230, 0.15);
     color: rgba(255, 255, 255, 1);
     box-shadow: 
@@ -59,12 +58,12 @@
     text-shadow: 0 0 10px rgba(176, 224, 230, 0.4);
     border-color: rgba(255, 255, 255, 0.25);
 }
+*/
 
-/* Navigation Button Overrides - Restore Ultra-Transparent Design */
-/* High specificity selectors to override cosmic-glass-btn and starfield styles */
+/* ALL NAV OVERRIDES DISABLED - Using apple-liquid-glass.css */
+/*
 .nav .liquid-glass-btn.cosmic-glass-btn.nav-btn,
 .nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn {
-    /* Override liquid-glass-btn styles for navigation */
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -111,14 +110,14 @@
     -webkit-backdrop-filter: none !important;
 }
 
-/* Override water-cosmic-container styles for navigation to maintain ultra-transparency */
 .nav.water-cosmic-container {
-    background: rgba(255, 255, 255, 0.005) !important; /* Ultra transparent */
-    backdrop-filter: none !important; /* NO BLUR for navigation container */
-    -webkit-backdrop-filter: none !important; /* NO BLUR for navigation container */
+    background: rgba(255, 255, 255, 0.005) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     border: 1px solid rgba(255, 255, 255, 0.02) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05) !important;
 }
+*/
 
 /* Legacy Button Components - DEPRECATED, using liquid-glass-btn instead */
 /*
