@@ -439,14 +439,17 @@ body[style*="--redshift-intensity"] {
 }
 
 /* Prevent horizontal overflow */
-*[position="fixed"],
+*[position="fixed"], 
 .achievement,
+.nav-buttons,
 .settings-btn,
 .progress-3d,
 .settings-modal-overlay {
     contain: layout style paint;
     will-change: auto;
-}*[style*="transform"] {
+}
+
+*[style*="transform"] {
     contain: layout;
 }
 
@@ -698,6 +701,6 @@ body::-webkit-scrollbar {
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 2px;
+    gap: 10px;
     z-index: 1000;
 }

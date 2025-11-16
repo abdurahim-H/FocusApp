@@ -48,7 +48,7 @@
 
 
 
-/* Navigation Buttons - Compact Liquid Glass Style */
+/* Navigation Buttons - Text Only */
 .nav-buttons .liquid-glass-btn,
 .nav-buttons .nav-btn {
     all: unset;
@@ -60,36 +60,30 @@
     user-select: none;
     -webkit-user-select: none;
     
-    /* Compact transparent style */
-    background: transparent !important;
+    /* Text only - no containers */
+    background: none !important;
     border: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     box-shadow: none !important;
-    padding: 8px 18px !important;
-    border-radius: 26px !important;
-    min-width: 70px !important;
+    padding: 0 !important;
     
     /* Typography */
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
     font-size: 14px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
     text-align: center;
     white-space: nowrap;
     text-shadow: none !important;
     
-    position: relative;
-    z-index: 1;
     transition: color 0.3s ease;
 }
 
-/* Active - red text (white background slides behind via ::before) */
+/* Active - just brighter text */
 .nav-buttons .nav-btn.active {
-    background: transparent !important;
-    color: rgba(255, 85, 100, 1) !important;
-    font-weight: 600 !important;
-    box-shadow: none !important;
+    color: rgba(255, 255, 255, 1) !important;
+    font-weight: 500 !important;
 }
 
 /* ===== AMBIENT SOUND BUTTONS - APPLE STYLE ===== */
