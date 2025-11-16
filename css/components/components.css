@@ -341,18 +341,22 @@
     position: fixed !important;
     top: 30px !important;
     right: 30px !important;
-    background: rgba(255, 255, 255, 0.12) !important;
-    backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(40px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
     color: var(--text-primary) !important;
     width: 50px !important;
     height: 50px !important;
     border-radius: 50% !important;
     cursor: pointer !important;
     font-size: 1.2em !important;
-    transition: all 0.3s ease !important;
+    transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
     z-index: 1000 !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 0 60px rgba(255, 255, 255, 0.05) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -361,9 +365,20 @@
 }
 
 .settings-btn:hover {
-    background: rgba(99, 102, 241, 0.8) !important;
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4) !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    backdrop-filter: blur(50px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(50px) saturate(200%) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        0 0 80px rgba(176, 224, 230, 0.2) !important;
     transform: scale(1.05) !important;
+}
+
+.settings-btn:active {
+    transform: scale(0.98) !important;
+    background: rgba(255, 255, 255, 0.25) !important;
 }
 
 /* Reset Session Button */
