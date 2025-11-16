@@ -165,14 +165,6 @@ a {
     background: rgba(255, 255, 255, 0.12); /* Slightly more visible on hover */
 }
 
-/* Remove duplicate rule below */
-    max-height: 200px;
-    overflow-y: auto;
-    /* Enhanced scrollbar for Firefox */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(176, 224, 230, 0.4) transparent;
-}
-
 .mode.active {
     display: block;
 }
