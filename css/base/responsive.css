@@ -119,7 +119,7 @@
     
     /* Compact size - small and centered */
     width: auto;
-    max-width: 400px;
+    max-width: 410px; /* Increased slightly to right */
     
     /* Pill shape */
     display: inline-flex;
