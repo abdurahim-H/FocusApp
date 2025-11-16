@@ -20,13 +20,11 @@
         }
     }
 
-    .nav {
         top: 12px;
         gap: 5px;
         padding: 3px;
     }
 
-    .nav-btn {
         padding: 7px 14px;
         font-size: 0.75em;
     }
@@ -121,16 +119,12 @@
 /* These rules must override cosmic-glass-btn and starfield styles */
 
 /* CRITICAL: Override the navigation container itself */
-.nav.water-cosmic-container {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.02);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
 }
 
-.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn,
-.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn,
-.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn {
     /* Override all liquid-glass-btn styles for navigation */
     background: transparent !important;
     backdrop-filter: none !important;
@@ -149,16 +143,10 @@
     overflow: visible !important;
 }
 
-.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn::before,
-.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn::before,
-.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn::before {
     display: none !important;
     content: none !important;
 }
 
-.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn:hover,
-.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn:hover,
-.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn:hover {
     background: rgba(255, 255, 255, 0.1) !important;
     color: var(--text-primary) !important;
     box-shadow: none !important;
@@ -168,9 +156,6 @@
     border: none !important;
 }
 
-.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn.active,
-.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn.active,
-.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active {
     /* iOS glass morphism - matching settings button */
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(60px) saturate(200%) !important;
@@ -210,12 +195,6 @@
 
 /* ===== ABSOLUTE FINAL NAV ACTIVE BUTTON OVERRIDE ===== */
 /* MUST be at the very end of responsive.css since it loads last */
-.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield.nav-btn.active,
-.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active,
-.nav .liquid-glass-btn.liquid-glass-btn--small.nav-btn.active,
-.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn.active,
-.nav .liquid-glass-btn.nav-btn.active,
-.nav .nav-btn.active {
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(60px) saturate(200%) !important;
     -webkit-backdrop-filter: blur(60px) saturate(200%) !important;

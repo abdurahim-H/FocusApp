@@ -43,7 +43,6 @@ body[data-theme="cosmos"] #scene-container {
     filter: hue-rotate(30deg) saturate(1.2);
 }
 
-body[data-theme="cosmos"] .nav,
 body[data-theme="cosmos"] .settings-btn,
 body[data-theme="cosmos"] .focus-content,
 body[data-theme="cosmos"] .task-section {
@@ -102,7 +101,6 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.nav,
 .settings-btn,
 .focus-content,
 .task-section,
@@ -280,11 +278,6 @@ body[data-theme="cosmos"] .text-input {
 
 /* ===== NAVIGATION ULTRA-TRANSPARENT OVERRIDES ===== */
 /* Override all theme-specific water-cosmic-container styles for navigation */
-[data-theme="dark"] .nav.water-cosmic-container,
-[data-theme="light"] .nav.water-cosmic-container,
-[data-theme="cosmos"] .nav.water-cosmic-container,
-[data-theme="auto"] .nav.water-cosmic-container,
-.nav.water-cosmic-container {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.02);
@@ -292,11 +285,6 @@ body[data-theme="cosmos"] .text-input {
 }
 
 /* Override all theme-specific button styles for navigation */
-[data-theme="dark"] .nav .liquid-glass-btn.nav-btn,
-[data-theme="light"] .nav .liquid-glass-btn.nav-btn,
-[data-theme="cosmos"] .nav .liquid-glass-btn.nav-btn,
-[data-theme="auto"] .nav .liquid-glass-btn.nav-btn,
-.nav .liquid-glass-btn.nav-btn {
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -304,11 +292,6 @@ body[data-theme="cosmos"] .text-input {
     box-shadow: none !important;
 }
 
-[data-theme="dark"] .nav .liquid-glass-btn.nav-btn:hover,
-[data-theme="light"] .nav .liquid-glass-btn.nav-btn:hover,
-[data-theme="cosmos"] .nav .liquid-glass-btn.nav-btn:hover,
-[data-theme="auto"] .nav .liquid-glass-btn.nav-btn:hover,
-.nav .liquid-glass-btn.nav-btn:hover {
     background: rgba(255, 255, 255, 0.1) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
