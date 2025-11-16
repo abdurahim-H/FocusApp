@@ -112,7 +112,7 @@
 /* Container - Horizontal pill with frosted glass */
 .nav-buttons {
     position: fixed;
-    top: 20px;
+    top: 12px; /* Moved closer to top */
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
@@ -195,7 +195,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 5px 12px; /* Smaller to match tighter container */
+    padding: 4px 10px; /* Even smaller for minimal look */
     min-width: 0; /* Allow flex to control width */
     
     /* Remove any borders */
