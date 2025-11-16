@@ -439,17 +439,14 @@ body[style*="--redshift-intensity"] {
 }
 
 /* Prevent horizontal overflow */
-*[position="fixed"], 
+*[position="fixed"],
 .achievement,
-.nav-buttons,
 .settings-btn,
 .progress-3d,
 .settings-modal-overlay {
     contain: layout style paint;
     will-change: auto;
-}
-
-*[style*="transform"] {
+}*[style*="transform"] {
     contain: layout;
 }
 
