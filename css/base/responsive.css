@@ -1,0 +1,203 @@
+/* responsive.css */
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    html, body {
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* iOS Safari specific fix */
+    @supports (-webkit-touch-callout: none) {
+        html, body {
+            height: -webkit-fill-available;
+        }
+        
+        .container {
+            height: -webkit-fill-available;
+        }
+    }
+
+    .nav {
+        top: 20px;
+        gap: 5px;
+        padding: 8px;
+    }
+
+    .nav-btn {
+        padding: 10px 16px;
+        font-size: 0.8em;
+    }
+
+    .container {
+        height: 100vh;
+        padding: 100px 15px 30px;
+        overflow: hidden;
+    }
+
+    /* Mobile-specific task section adjustment */
+    .task-section {
+        max-height: calc(100vh - 500px); /* More space needed on mobile */
+    }
+
+    .task-list {
+        max-height: 150px; /* Smaller on mobile */
+    }
+
+    .focus-content {
+        padding: 25px;
+        border-radius: 25px; /* Slightly smaller radius on mobile */
+    }
+
+    .home-content {
+        border-radius: 25px; /* Slightly smaller radius on mobile */
+    }
+
+    .ambient-content {
+        border-radius: 25px; /* Slightly smaller radius on mobile */
+    }
+
+    .task-section {
+        border-radius: 25px; /* Slightly smaller radius on mobile */
+    }
+
+    .timer-display {
+        font-size: 4em;
+    }
+
+    .home-content h1 {
+        font-size: 2.5em;
+        animation-duration: 6s; /* Slightly faster on mobile for better performance */
+        text-shadow: 0 0 20px rgba(139, 92, 246, 0.4); /* Reduced glow for mobile */
+        filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.3));
+    }
+
+    .greeting {
+        font-size: 1.2em;
+        text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        filter: drop-shadow(0 0 8px rgba(6, 214, 160, 0.3));
+    }
+
+    .date-time {
+        font-size: 1em;
+        text-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
+    }
+
+    .settings-btn {
+        top: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+    }
+
+    .progress-3d {
+        bottom: 20px;
+        left: 20px;
+    }
+
+    /* ===== MOBILE SCROLLBAR ADJUSTMENTS ===== */
+    
+    /* Smaller scrollbars for mobile */
+    .task-list::-webkit-scrollbar,
+    .settings-modal::-webkit-scrollbar,
+    .mode::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .task-list::-webkit-scrollbar-thumb,
+    .settings-modal::-webkit-scrollbar-thumb,
+    .mode::-webkit-scrollbar-thumb {
+        border-radius: 8px;
+        min-height: 20px;
+        /* Slightly more visible on mobile for easier touch interaction */
+        background: rgba(176, 224, 230, 0.15);
+        border: 0.5px solid rgba(255, 255, 255, 0.25);
+    }
+    
+    /* Enhanced touch interaction */
+    .task-list::-webkit-scrollbar-thumb:active,
+    .settings-modal::-webkit-scrollbar-thumb:active,
+    .mode::-webkit-scrollbar-thumb:active {
+        background: rgba(176, 224, 230, 0.3);
+        transform: scale(1.1);
+    }
+    
+    /* Ensure smooth scrolling on mobile */
+    .task-list,
+    .settings-modal,
+    .mode {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+}
+
+/* Navigation Button Overrides - FINAL CASCADE PRIORITY */
+/* These rules must override cosmic-glass-btn and starfield styles */
+
+/* CRITICAL: Override the navigation container itself */
+.nav.water-cosmic-container {
+    background: rgba(255, 255, 255, 0.005) !important; /* Ultra transparent */
+    backdrop-filter: none !important; /* NO BLUR for navigation container */
+    -webkit-backdrop-filter: none !important; /* NO BLUR for navigation container */
+    border: 1px solid rgba(255, 255, 255, 0.02) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05) !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn,
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn {
+    /* Override all liquid-glass-btn styles for navigation */
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 12px 20px !important;
+    border-radius: 25px !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.9em !important;
+    font-weight: 500 !important;
+    min-width: 70px !important;
+    min-height: auto !important;
+    text-shadow: none !important;
+    position: relative !important;
+    overflow: visible !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn::before,
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn::before,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn::before {
+    display: none !important;
+    content: none !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn:hover,
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn:hover,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--text-primary) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    text-shadow: none !important;
+    border: none !important;
+}
+
+.nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn.active,
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn.active,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active {
+    background: rgba(176, 224, 230, 0.15) !important;
+    color: rgba(255, 255, 255, 1) !important;
+    box-shadow: 
+        0 6px 20px rgba(255, 255, 255, 0.12),
+        0 2px 8px rgba(176, 224, 230, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+    text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}

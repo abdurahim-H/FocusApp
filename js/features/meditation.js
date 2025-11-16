@@ -1,10 +1,8 @@
-// cosmic-settings.js
-
 // Cosmic Meditation Chamber Module
 // Enhanced ambient mode with interactive meditation features
 
-import { state } from './state.js';
-import { trackSetInterval, trackRequestAnimationFrame } from './cleanup.js';
+import { state } from '../core/state.js';
+import { trackSetInterval, trackRequestAnimationFrame } from '../utils/cleanup.js';
 import { toggleAmbientSound, setVolume, setSoundVolume, stopAmbientSound } from './sounds.js';
 // Temporarily disabled for debugging
 // import { notifyMeditationMilestone } from './notifications.js';
