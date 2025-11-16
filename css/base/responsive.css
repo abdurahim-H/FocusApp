@@ -145,8 +145,6 @@
 }
 
 /* Individual Segments/Buttons */
-.nav-buttons .liquid-glass-btn.nav-btn,
-.nav-buttons .nav-btn.liquid-glass-btn,
 .nav-buttons .nav-btn {
     /* Force equal width distribution */
     flex: 1 1 0% !important; /* Equal width for all buttons - use flex-basis 0% */
@@ -194,15 +192,13 @@
 }
 
 /* Selected state - Coral/Salmon Red */
-.nav-buttons .nav-btn.active,
-.nav-buttons .liquid-glass-btn.active {
+.nav-buttons .nav-btn.active {
     color: #FF6B6B !important; /* Coral/salmon red */
     font-weight: 600 !important;
 }
 
 /* Hover state - subtle color shift */
-.nav-buttons .nav-btn:not(.active):hover,
-.nav-buttons .liquid-glass-btn:not(.active):hover {
+.nav-buttons .nav-btn:not(.active):hover {
     color: rgba(255, 255, 255, 0.85);
 }
 
@@ -220,8 +216,7 @@
         width: calc(33.333% - 1.333px);
     }
     
-    .nav-buttons .nav-btn,
-    .nav-buttons .liquid-glass-btn {
+    .nav-buttons .nav-btn {
         padding: 4px 10px !important; /* Match desktop */
         font-size: 12px;
         min-width: 0;
