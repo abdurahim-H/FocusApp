@@ -455,9 +455,13 @@ body[style*="--redshift-intensity"] {
 
 /* Force hardware acceleration */
 .achievement,
-.nav-buttons,
 .settings-btn {
     transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Nav buttons - hardware acceleration handled in positioning rule below */
+.nav-buttons {
     backface-visibility: hidden;
 }
 
@@ -699,7 +703,7 @@ body::-webkit-scrollbar {
     position: fixed;
     top: 12px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateZ(0); /* Combine centering + hardware acceleration */
     display: flex;
     gap: 0; /* No gap - buttons touch each other */
     z-index: 1000;
