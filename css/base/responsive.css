@@ -115,17 +115,17 @@
     padding: 2px;
     border-radius: 50px;
     
-    /* CLEAR glass - no blur, just pure transparency */
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    /* Clean, polished glass container */
+    background: rgba(255, 255, 255, 0.12);
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
     
-    /* Subtle shadow only */
+    /* Crisp, clean shadow */
     box-shadow: 
-        0 2px 8px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 4px 16px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-/* Animated white pill indicator */
+/* Animated white pill indicator - polished and clean */
 .nav-buttons::before {
     content: '';
     position: absolute;
@@ -134,12 +134,17 @@
     height: calc(100% - 4px);
     width: calc(33.333% - 1.333px);
     
-    /* Pure white, slightly transparent */
-    background: rgba(255, 255, 255, 0.25);
+    /* Clean white pill like iOS */
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 50px;
     
-    /* Smooth iOS-style animation */
-    transition: left 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+    /* Polished shadow for depth */
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.12),
+        0 1px 2px rgba(0, 0, 0, 0.08);
+    
+    /* Smooth, polished iOS animation */
+    transition: left 0.3s cubic-bezier(0.32, 0.72, 0, 1);
     
     z-index: 0;
 }
@@ -168,29 +173,30 @@
     /* Remove default styles */
     background: none;
     border: none;
-    padding: 6px 16px;
+    padding: 7px 18px;
     margin: 0;
     
-    /* Text */
-    color: rgba(255, 255, 255, 0.6);
+    /* Clean, polished text */
+    color: rgba(255, 255, 255, 0.55);
     font-size: 13px;
     font-weight: 500;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
     text-align: center;
     white-space: nowrap;
+    letter-spacing: -0.01em;
     
     /* Interactive */
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color 0.25s ease;
 }
 
 .nav-buttons .nav-btn.active {
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(0, 0, 0, 0.85);
     font-weight: 600;
 }
 
 .nav-buttons .nav-btn:hover:not(.active) {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.75);
 }
 
 /* Mobile adjustments */
