@@ -511,8 +511,8 @@
         border-radius: 40px;
     }
     
-    .nav .liquid-glass-btn,
-    .nav .nav-btn {
+    .nav .liquid-glass-btn:not(.active),
+    .nav .nav-btn:not(.active) {
         padding: 7px 14px;
         font-size: 12px;
         border-radius: 32px;
@@ -561,8 +561,8 @@
         border-radius: 35px;
     }
     
-    .nav .liquid-glass-btn,
-    .nav .nav-btn {
+    .nav .liquid-glass-btn:not(.active),
+    .nav .nav-btn:not(.active) {
         padding: 6px 12px;
         font-size: 13px;
         border-radius: 28px;
