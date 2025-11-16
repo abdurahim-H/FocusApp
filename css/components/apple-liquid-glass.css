@@ -75,8 +75,8 @@
 }
 
 /* Navigation Button - Apple Pillowy Design */
-.nav .liquid-glass-btn,
-.nav .nav-btn {
+.nav .liquid-glass-btn:not(.active),
+.nav .nav-btn:not(.active) {
     /* Reset all previous styles */
     all: unset;
     box-sizing: border-box;
