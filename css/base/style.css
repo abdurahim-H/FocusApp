@@ -701,6 +701,6 @@ body::-webkit-scrollbar {
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 10px;
+    gap: 0; /* No gap - buttons touch each other */
     z-index: 1000;
 }
