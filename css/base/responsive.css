@@ -20,13 +20,6 @@
         }
     }
 
-
-
-    .nav-btn {
-        padding: 7px 14px;
-        font-size: 0.75em;
-    }
-
     .container {
         height: 100vh;
         padding: 100px 15px 30px;
@@ -113,15 +106,218 @@
     }
 }
 
-/* Navigation Button Overrides - FINAL CASCADE PRIORITY */
-/* These rules must override cosmic-glass-btn and starfield styles */
+/* ===== LIQUID GLASS SEGMENTED CONTROL ===== */
+/* Morphing pill selector with glassmorphic floating indicator */
 
-/* CRITICAL: Override the navigation container itself */
-.nav-buttons.water-cosmic-container {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border: 1px solid rgba(255, 255, 255, 0.02);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+/* Container - Horizontal pill with frosted glass */
+.nav-buttons {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    
+    /* Compact size - small and centered */
+    width: auto;
+    max-width: 400px;
+    
+    /* Pill shape */
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    padding: 4px;
+    border-radius: 50px; /* Fully rounded pill */
+    
+    /* Frosted glass effect - barely visible */
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(120%);
+    -webkit-backdrop-filter: blur(20px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    
+    /* Subtle shadow */
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    
+    /* Container for the floating indicator */
+    position: relative;
+    isolation: isolate;
+}
+
+/* The Floating White Pill Indicator - "Liquid Glass" Effect */
+.nav-buttons::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    
+    /* Calculate width to match flex:1 button width exactly */
+    width: calc(33.333% - 2.666px); /* 1/3 of width minus proportional padding */
+    height: calc(100% - 8px);
+    
+    /* Liquid glass pill - semi-transparent white with blur */
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    
+    /* Floating shadow - key to the effect */
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        0 1px 3px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 0 20px rgba(255, 255, 255, 0.15);
+    
+    /* Smooth liquid morphing animation */
+    transition: 
+        left 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), /* Spring/elastic easing */
+        width 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+        background 0.4s ease,
+        backdrop-filter 0.4s ease;
+    
+    /* Place behind text */
+    z-index: 0;
+    
+    /* GPU acceleration for smooth animation */
+    will-change: left, width;
+}
+
+/* Individual Segments/Buttons */
+.nav-buttons .liquid-glass-btn,
+.nav-buttons .nav-btn {
+    /* Reset all styles */
+    all: unset;
+    box-sizing: border-box;
+    
+    /* Compact layout - equal width segments */
+    flex: 1; /* Equal width for all buttons */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 18px;
+    min-width: 0; /* Allow flex to control width */
+    
+    /* Remove any borders */
+    border: none;
+    background: transparent;
+    outline: none;
+    
+    /* Typography */
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    text-align: center;
+    
+    /* Unselected state - light gray */
+    color: rgba(255, 255, 255, 0.6);
+    
+    /* Smooth color transition */
+    transition: color 0.3s ease;
+    
+    /* Above the floating indicator */
+    position: relative;
+    z-index: 1;
+    
+    /* Clickable */
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Selected state - Coral/Salmon Red */
+.nav-buttons .nav-btn.active,
+.nav-buttons .liquid-glass-btn.active {
+    color: #FF6B6B !important; /* Coral/salmon red */
+    font-weight: 600 !important;
+}
+
+/* Hover state - subtle color shift */
+.nav-buttons .nav-btn:not(.active):hover,
+.nav-buttons .liquid-glass-btn:not(.active):hover {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Position the floating indicator based on active button */
+/* Using CSS calc to dynamically position based on button widths */
+
+/* First button (Home) - default position */
+.nav-buttons:has(.nav-btn:nth-child(1).active)::before,
+.nav-buttons:has([data-mode="home"].active)::before {
+    left: 4px;
+}
+
+/* Second button (Focus) */
+.nav-buttons:has(.nav-btn:nth-child(2).active)::before,
+.nav-buttons:has([data-mode="focus"].active)::before {
+    left: calc(33.333% + 1.333px);
+}
+
+/* Third button (Ambient) */
+.nav-buttons:has(.nav-btn:nth-child(3).active)::before,
+.nav-buttons:has([data-mode="ambient"].active)::before {
+    left: calc(66.666% - 1.333px);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .nav-buttons {
+        top: 16px;
+        padding: 3px;
+        max-width: 320px;
+    }
+    
+    .nav-buttons::before {
+        top: 3px;
+        height: calc(100% - 6px);
+        width: calc((100% - 6px) / 3);
+    }
+    
+    .nav-buttons .nav-btn,
+    .nav-buttons .liquid-glass-btn {
+        padding: 7px 14px;
+        font-size: 12px;
+        min-width: 60px;
+    }
+    
+    /* Adjust indicator positions for mobile */
+    .nav-buttons:has(.nav-btn:nth-child(1).active)::before,
+    .nav-buttons:has([data-mode="home"].active)::before {
+        left: 3px;
+    }
+    
+    .nav-buttons:has(.nav-btn:nth-child(2).active)::before,
+    .nav-buttons:has([data-mode="focus"].active)::before {
+        left: calc(33.333% + 3px);
+    }
+    
+    .nav-buttons:has(.nav-btn:nth-child(3).active)::before,
+    .nav-buttons:has([data-mode="ambient"].active)::before {
+        left: calc(66.666% + 3px);
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-buttons {
+        top: 14px;
+        padding: 3px;
+        max-width: 280px;
+    }
+    
+    .nav-buttons::before {
+        top: 3px;
+        height: calc(100% - 6px);
+        width: calc((100% - 6px) / 3);
+    }
+    
+    .nav-buttons .nav-btn,
+    .nav-buttons .liquid-glass-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+        min-width: 55px;
+    }
 }
 
 /* ===== UNIVERSAL SCROLLBAR STYLES (ALL SCREEN SIZES) - FORCE HIDDEN ===== */
@@ -140,25 +336,29 @@
     -ms-overflow-style: none !important;
 }
 
-/* ===== FINAL AUTHORITATIVE NAV BUTTON STYLES ===== */
-/* These rules load LAST and override everything else */
+/* ===== LIQUID GLASS ENHANCEMENTS ===== */
 
-/* ALL NAV BUTTONS - TEXT ONLY, NO CONTAINERS */
-.nav-buttons .liquid-glass-btn,
-.nav-buttons .nav-btn {
-    background: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    font-weight: 400 !important;
-    text-shadow: none !important;
+/* Reduced motion support - disable spring animation */
+@media (prefers-reduced-motion: reduce) {
+    .nav-buttons::before {
+        transition: transform 0.2s ease, width 0.2s ease;
+    }
 }
 
-/* ACTIVE - just brighter text */
-.nav-buttons .nav-btn.active {
-    color: rgba(255, 255, 255, 1) !important;
-    font-weight: 500 !important;
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+    .nav-buttons {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .nav-buttons::before {
+        background: rgba(255, 255, 255, 1);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .nav-buttons .nav-btn.active,
+    .nav-buttons .liquid-glass-btn.active {
+        color: #FF4444 !important;
+    }
 }

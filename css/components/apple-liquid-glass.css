@@ -45,46 +45,8 @@
 }
 
 /* ===== NAVIGATION BUTTONS - APPLE STYLE ===== */
-
-
-
-/* Navigation Buttons - Text Only */
-.nav-buttons .liquid-glass-btn,
-.nav-buttons .nav-btn {
-    all: unset;
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-    
-    /* Text only - no containers */
-    background: none !important;
-    border: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    
-    /* Typography */
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    color: rgba(255, 255, 255, 0.7);
-    text-align: center;
-    white-space: nowrap;
-    text-shadow: none !important;
-    
-    transition: color 0.3s ease;
-}
-
-/* Active - just brighter text */
-.nav-buttons .nav-btn.active {
-    color: rgba(255, 255, 255, 1) !important;
-    font-weight: 500 !important;
-}
+/* All navigation button styling handled in responsive.css */
+/* This prevents duplication and ensures single source of truth */
 
 /* ===== AMBIENT SOUND BUTTONS - APPLE STYLE ===== */
 
@@ -369,8 +331,7 @@
     }
 }
 
-.nav-buttons .liquid-glass-btn.morphing,
-.nav-buttons .nav-btn.morphing,
+/* Morphing animation for ambient and timer controls only */
 .ambient-controls .liquid-glass-btn.morphing,
 .timer-controls .liquid-glass-btn.morphing {
     animation: appleMorph 0.6s var(--apple-ease);
@@ -396,9 +357,7 @@
     }
 }
 
-/* Apply pulse to active elements */
-.nav-buttons .liquid-glass-btn.active.pulsing,
-.nav-buttons .nav-btn.active.pulsing,
+/* Apply pulse to active elements (ambient and timer only) */
 .ambient-controls .liquid-glass-btn.active.pulsing,
 .timer-controls .liquid-glass-btn--primary.pulsing {
     animation: appleGlowPulse 2s var(--apple-ease) infinite;
@@ -407,8 +366,6 @@
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
 
 @media (max-width: 768px) {
-
-    
     .ambient-controls {
         gap: 10px;
         padding: 0 15px;
@@ -445,8 +402,6 @@
 }
 
 @media (max-width: 480px) {
-
-    
     .ambient-controls {
         grid-template-columns: 1fr;
         gap: 8px;
@@ -490,8 +445,6 @@
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-    .nav-buttons .liquid-glass-btn,
-    .nav-buttons .nav-btn,
     .ambient-controls .liquid-glass-btn,
     .timer-controls .liquid-glass-btn {
         transition: none;
@@ -504,8 +457,6 @@
 }
 
 /* Focus visible for keyboard navigation */
-.nav-buttons .liquid-glass-btn:focus-visible,
-.nav-buttons .nav-btn:focus-visible,
 .ambient-controls .liquid-glass-btn:focus-visible,
 .timer-controls .liquid-glass-btn:focus-visible {
     outline: 3px solid rgba(176, 224, 230, 0.8);
@@ -514,8 +465,6 @@
 
 /* High contrast mode */
 @media (prefers-contrast: high) {
-    .nav-buttons .liquid-glass-btn,
-    .nav-buttons .nav-btn,
     .ambient-controls .liquid-glass-btn,
     .timer-controls .liquid-glass-btn {
         border-width: 2px;
@@ -523,19 +472,9 @@
     }
 }
 
-/* ===== OVERRIDE ALL PREVIOUS BUTTON STYLES ===== */
-
-/* Force override for navigation */
-/* Force override pseudo-elements */
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield::before,
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield::after,
-.nav-buttons .liquid-glass-btn.cosmic-glass-btn::before,
-.nav-buttons .liquid-glass-btn.cosmic-glass-btn::after,
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--starfield::before,
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--starfield::after {
-    display: none !important;
-    content: none !important;
-}
+/* ===== REMOVED DUPLICATE NAV BUTTON OVERRIDES ===== */
+/* Navigation buttons are now exclusively handled in responsive.css */
+/* This section previously contained duplicate rules that competed with responsive.css */
 
 /* Force override for ambient controls */
 .ambient-controls .liquid-glass-btn {
@@ -604,8 +543,6 @@
 }
 
 /* Force text visibility */
-.nav-buttons .liquid-glass-btn .btn-text,
-.nav-buttons .nav-btn .btn-text,
 .ambient-controls .liquid-glass-btn .btn-text,
 .timer-controls .liquid-glass-btn .btn-text {
     position: relative;
