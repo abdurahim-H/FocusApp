@@ -141,7 +141,7 @@ a {
     
     /* Apple-style minimal scrollbar - only shows when needed */
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.03) transparent;
 }
 
 /* Apple-style scrollbar for webkit browsers - ultra minimal */
@@ -156,13 +156,13 @@ a {
 }
 
 .task-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.06); /* Very transparent */
+    background: rgba(255, 255, 255, 0.03); /* Barely visible */
     border-radius: 4px;
     transition: background 0.2s ease;
 }
 
 .task-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.12); /* Slightly more visible on hover */
+    background: rgba(255, 255, 255, 0.06); /* Still very subtle on hover */
 }
 
 .mode.active {
@@ -564,7 +564,7 @@ body[data-theme="cosmos"] .productivity-glow {
 
 /* Container hover state - makes scrollbar slightly more visible */
 .task-list:hover::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.10); /* Still very subtle */
+    background: rgba(255, 255, 255, 0.06); /* Still very subtle */
 }
 
 /* Cosmic corner styling for scrollbar track area */
@@ -588,13 +588,13 @@ body[data-theme="cosmos"] .productivity-glow {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
     border-radius: 6px;
     transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 ::-webkit-scrollbar-corner {
