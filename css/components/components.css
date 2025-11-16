@@ -78,29 +78,6 @@
     text-shadow: none !important;
 }
 
-.nav-buttons .liquid-glass-btn.cosmic-glass-btn.nav-btn.active,
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active {
-    /* iOS glass morphism - matching settings button */
-    background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(60px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
-    border-top-color: rgba(255, 255, 255, 0.4) !important;
-    border-left-color: rgba(255, 255, 255, 0.35) !important;
-    
-    color: rgba(255, 255, 255, 1) !important;
-    font-weight: 600 !important;
-    
-    /* iOS multi-layer shadow system */
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        inset 0 1px 1px rgba(255, 255, 255, 0.2),
-        0 1px 0 rgba(255, 255, 255, 0.1),
-        0 0 60px rgba(176, 224, 230, 0.1) !important;
-    
-    text-shadow: 0 0 12px rgba(255, 255, 255, 0.2) !important;
-}
-
 .nav-buttons.water-cosmic-container {
     background: rgba(255, 255, 255, 0.005) !important;
     backdrop-filter: none !important;
@@ -945,9 +922,9 @@
     isolation: isolate;
 }
 
-/* Ambient Sound Button Active States - Updated for liquid-glass-btn compatibility */
-.btn.active,
-.liquid-glass-btn.active {
+/* Ambient Sound Button Active States - NOT nav buttons */
+.btn.active:not(.nav-btn),
+.liquid-glass-btn.active:not(.nav-btn) {
     background: rgba(176, 224, 230, 0.15) !important;
     border-color: rgba(255, 255, 255, 0.25) !important;
     box-shadow: 
@@ -961,8 +938,8 @@
     text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
 }
 
-.btn.active:hover,
-.liquid-glass-btn.active:hover {
+.btn.active:hover:not(.nav-btn),
+.liquid-glass-btn.active:hover:not(.nav-btn) {
     background: rgba(176, 224, 230, 0.18) !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
     box-shadow: 
@@ -974,8 +951,8 @@
     text-shadow: 0 0 12px rgba(176, 224, 230, 0.5) !important;
 }
 
-.btn.active::after,
-.liquid-glass-btn.active::after {
+.btn.active::after:not(.nav-btn),
+.liquid-glass-btn.active::after:not(.nav-btn) {
     content: '●';
     position: absolute;
     top: 5px;
