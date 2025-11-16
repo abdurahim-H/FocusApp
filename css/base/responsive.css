@@ -112,12 +112,12 @@
 .nav-buttons {
     position: relative;
     display: inline-flex;
-    padding: 2px;
-    border-radius: 50px;
+    padding: 2px !important;
+    border-radius: 50px !important;
     
     /* Clean glass container like iOS */
-    background: rgba(255, 255, 255, 0.08);
-    border: 0.5px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.18) !important;
     
     /* Subtle polished shadow */
     box-shadow: 
@@ -176,10 +176,10 @@
     min-width: 0;
     
     /* Clean glass for inactive buttons */
-    background: rgba(255, 255, 255, 0.05);
-    border: none;
-    border-radius: 50px;
-    padding: 7px 18px;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: none !important;
+    border-radius: 50px !important;
+    padding: 7px 18px !important;
     margin: 0;
     
     /* Text styling */
@@ -201,9 +201,9 @@
 
 /* Active button - dark text on white pill */
 .nav-buttons .nav-btn.active {
-    color: rgba(0, 0, 0, 0.88);
-    font-weight: 600;
-    background: transparent;
+    color: rgba(0, 0, 0, 0.88) !important;
+    font-weight: 600 !important;
+    background: transparent !important;
 }
 
 /* Hover effect - glass becomes more visible */
@@ -213,11 +213,9 @@
 }
 
 /* Press effect - subtle scale */
-.nav-buttons .nav-btn:active {
-    transform: scale(0.98);
-}
-
-/* Mobile adjustments */
+    .nav-buttons .nav-btn:active {
+        transform: scale(0.98) !important;
+    }/* Mobile adjustments */
 @media (max-width: 768px) {
     .nav-buttons .nav-btn {
         padding: 6px 12px;
