@@ -146,11 +146,11 @@
 
 /* Individual Segments/Buttons */
 .nav-buttons .nav-btn {
-    /* Force equal width distribution */
-    flex: 1 1 0% !important; /* Equal width for all buttons - use flex-basis 0% */
-    min-width: 0 !important; /* Allow flex to shrink below content width */
-    max-width: none !important; /* No max-width constraints */
-    width: auto !important; /* Override any fixed widths */
+    /* Force EXACT equal width - each button gets exactly 33.333% */
+    flex: 1 1 33.333% !important;
+    min-width: 33.333% !important;
+    max-width: 33.333% !important;
+    width: 33.333% !important;
     
     /* Layout */
     display: flex !important;
