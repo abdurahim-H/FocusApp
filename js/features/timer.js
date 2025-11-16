@@ -13,7 +13,7 @@ import {
     areNotificationsEnabled,
     requestNotificationPermission,
     checkNotificationPermission
-} from './notifications.js';
+} from '../utils/notifications.js';
 
 // Debug flag for notification testing
 const DEBUG_NOTIFICATIONS = true;
