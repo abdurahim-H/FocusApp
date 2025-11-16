@@ -81,7 +81,7 @@
     
     /* Ultra-transparent - inactive state */
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.02);
     
     /* Apple's smooth morphing */
     transition: 
@@ -101,8 +101,8 @@
 /* Hover State - Subtle glow */
 .nav .liquid-glass-btn:hover,
 .nav .nav-btn:hover {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.015);
+    border-color: rgba(255, 255, 255, 0.04);
     color: rgba(255, 255, 255, 0.85);
     transform: scale(1.02);
     
@@ -115,10 +115,10 @@
 .nav .liquid-glass-btn.active,
 .nav .nav-btn.active {
     /* Apple's ultra-transparent frosted glass active state */
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(30px) saturate(150%);
     -webkit-backdrop-filter: blur(30px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     
     color: rgba(255, 255, 255, 0.95);
     font-weight: 600;
@@ -137,8 +137,8 @@
 /* Active Hover - Enhanced glow */
 .nav .liquid-glass-btn.active:hover,
 .nav .nav-btn.active:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
     transform: scale(1.03);
     
     box-shadow: 
@@ -173,10 +173,10 @@
     border-radius: 28px;
     
     /* Apple's ultra-transparent material */
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.015);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.04);
     
     /* Apple's minimal shadow system */
     box-shadow: 
@@ -217,8 +217,8 @@
 
 /* Hover state */
 .ambient-controls .liquid-glass-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.025);
+    border-color: rgba(255, 255, 255, 0.06);
     color: rgba(255, 255, 255, 0.95);
     transform: translateY(-4px) scale(1.02);
     
@@ -237,8 +237,8 @@
 /* Active state */
 .ambient-controls .liquid-glass-btn.active,
 .ambient-controls .liquid-glass-btn[data-playing="true"] {
-    background: rgba(176, 224, 230, 0.08);
-    border-color: rgba(176, 224, 230, 0.18);
+    background: rgba(176, 224, 230, 0.04);
+    border-color: rgba(176, 224, 230, 0.1);
     
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.3),
@@ -277,10 +277,10 @@
     border-radius: 30px;
     
     /* Apple's ultra-transparent material */
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     
     /* Apple's minimal shadows */
     box-shadow: 
@@ -307,8 +307,8 @@
 
 /* Primary button (Start Focus) */
 .timer-controls .liquid-glass-btn--primary {
-    background: rgba(176, 224, 230, 0.08);
-    border-color: rgba(176, 224, 230, 0.18);
+    background: rgba(176, 224, 230, 0.04);
+    border-color: rgba(176, 224, 230, 0.1);
     
     box-shadow: 
         0 4px 16px rgba(0, 0, 0, 0.2),
@@ -323,8 +323,8 @@
 }
 
 .timer-controls .liquid-glass-btn--primary:hover {
-    background: rgba(176, 224, 230, 0.1);
-    border-color: rgba(176, 224, 230, 0.22);
+    background: rgba(176, 224, 230, 0.06);
+    border-color: rgba(176, 224, 230, 0.12);
     color: rgba(255, 255, 255, 1);
     transform: translateY(-2px) scale(1.03);
     
@@ -340,8 +340,8 @@
 
 /* Warning button (Pause) */
 .timer-controls .liquid-glass-btn--warning {
-    background: rgba(255, 149, 0, 0.05);
-    border-color: rgba(255, 149, 0, 0.15);
+    background: rgba(255, 149, 0, 0.025);
+    border-color: rgba(255, 149, 0, 0.08);
     
     box-shadow: 
         0 4px 16px rgba(0, 0, 0, 0.2),
@@ -352,8 +352,8 @@
 }
 
 .timer-controls .liquid-glass-btn--warning:hover {
-    background: rgba(255, 149, 0, 0.08);
-    border-color: rgba(255, 149, 0, 0.2);
+    background: rgba(255, 149, 0, 0.04);
+    border-color: rgba(255, 149, 0, 0.12);
     color: rgba(255, 255, 255, 0.95);
     transform: translateY(-2px) scale(1.03);
     
@@ -367,8 +367,8 @@
 
 /* Success button (Skip) */
 .timer-controls .liquid-glass-btn--success {
-    background: rgba(52, 199, 89, 0.05);
-    border-color: rgba(52, 199, 89, 0.15);
+    background: rgba(52, 199, 89, 0.025);
+    border-color: rgba(52, 199, 89, 0.08);
     
     box-shadow: 
         0 4px 16px rgba(0, 0, 0, 0.2),
@@ -379,8 +379,8 @@
 }
 
 .timer-controls .liquid-glass-btn--success:hover {
-    background: rgba(52, 199, 89, 0.08);
-    border-color: rgba(52, 199, 89, 0.2);
+    background: rgba(52, 199, 89, 0.04);
+    border-color: rgba(52, 199, 89, 0.12);
     color: rgba(255, 255, 255, 0.95);
     transform: translateY(-2px) scale(1.03);
     
@@ -402,8 +402,8 @@
 
 /* Hover state for all timer buttons */
 .timer-controls .liquid-glass-btn:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.95);
     transform: translateY(-2px) scale(1.02);
     
