@@ -108,21 +108,19 @@
 
 /* ===== NAVIGATION BUTTONS - IOS CLEAR GLASS STYLE ===== */
 
-/* Container - Clear glass pill with animated indicator */
+/* Container - Minimal clean glass pill */
 .nav-buttons {
     position: relative;
     display: inline-flex;
     padding: 2px;
     border-radius: 50px;
     
-    /* Clean, polished glass container */
-    background: rgba(255, 255, 255, 0.12);
-    border: 0.5px solid rgba(255, 255, 255, 0.2);
+    /* Pure transparent container - no frosted look */
+    background: transparent;
+    border: 0.5px solid rgba(255, 255, 255, 0.15);
     
-    /* Crisp, clean shadow */
-    box-shadow: 
-        0 4px 16px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    /* Minimal shadow only */
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 /* Animated white pill indicator - polished and clean */
@@ -135,7 +133,7 @@
     width: calc(33.333% - 1.333px);
     
     /* Clean white pill like iOS */
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 50px;
     
     /* Polished shadow for depth */
@@ -162,7 +160,7 @@
     left: calc(66.666% + 2px);
 }
 
-/* Button styling */
+/* Button styling - each button has glass effect */
 .nav-buttons .nav-btn {
     /* Layout */
     position: relative;
@@ -170,14 +168,15 @@
     flex: 1 1 0%;
     min-width: 0;
     
-    /* Remove default styles */
-    background: none;
+    /* Clean glass background for each button */
+    background: rgba(255, 255, 255, 0.08);
     border: none;
+    border-radius: 50px;
     padding: 7px 18px;
     margin: 0;
     
     /* Clean, polished text */
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.6);
     font-size: 13px;
     font-weight: 500;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
@@ -187,16 +186,19 @@
     
     /* Interactive */
     cursor: pointer;
-    transition: color 0.25s ease;
+    transition: all 0.25s ease;
 }
 
+/* Active button - text becomes dark on white pill */
 .nav-buttons .nav-btn.active {
     color: rgba(0, 0, 0, 0.85);
     font-weight: 600;
+    background: transparent; /* Let the ::before pill show through */
 }
 
 .nav-buttons .nav-btn:hover:not(.active) {
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.12);
 }
 
 /* Mobile adjustments */
