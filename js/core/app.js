@@ -67,24 +67,33 @@ export async function initApp() {
     }
     
     function doInit() {
-        // Faster loading screen progression
+        // Faster loading screen progression with proper sequencing to prevent layout shift
         setTimeout(() => {
             const loadingProgress = document.getElementById('loadingProgress');
             const loadingScreen = document.getElementById('loadingScreen');
+            const container = document.querySelector('.container');
             
             if (loadingProgress) {
                 loadingProgress.style.width = '100%';
             }
             
-            setTimeout(() => {
-                if (loadingScreen) {
-                    loadingScreen.classList.add('hide');
-                    setTimeout(() => {
-                        loadingScreen.style.display = 'none';
-                    }, 300); // Reduced from 500ms
-                }
-            }, 200); // Reduced from 500ms
-        }, 400); // Reduced from 1000ms
+            // First show the container (but under loading screen)
+            if (container) {
+                container.classList.add('loaded');
+            }
+            
+            // Then wait a frame to let layout settle, then hide loading screen
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    if (loadingScreen) {
+                        loadingScreen.classList.add('hide');
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                        }, 300);
+                    }
+                }, 100);
+            });
+        }, 400);
 
         // Initialize 3D scene
         try {
@@ -245,27 +254,30 @@ document.addEventListener('keydown', (event) => {
 
 // Initialize the app with performance optimizations
 (async function() {
-    // Show faster loading progression
-    setTimeout(() => {
-        const loadingScreen = document.getElementById('loadingScreen');
-        const loadingProgress = document.getElementById('loadingProgress');
-        
-        if (loadingProgress) {
-            loadingProgress.style.width = '100%';
-        }
-        
-        if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 200); // Much faster fade out
-        }
-    }, 200); // Much faster initial load
-    
     try {
+        // Wait for fonts to load before showing content to prevent layout shift
+        if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+        }
+        
         await initApp();
     } catch (error) {
         console.error('App initialization failed:', error);
+        
+        // Show container even on error
+        const container = document.querySelector('.container');
+        if (container) {
+            container.classList.add('loaded');
+        }
+        
+        // Hide loading screen on error
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.classList.add('hide');
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 300);
+        }
         
         // Basic date/time update fallback
         function updateDateTime() {
