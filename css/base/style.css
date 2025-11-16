@@ -521,7 +521,7 @@ body[style*="--redshift-intensity"] {
 }
 
 /* Make all glass backgrounds extremely transparent */
-.focus-content,
+/* Background colors now controlled in components.css */
 .ambient-content,
 .task-section,
 .settings-section {
