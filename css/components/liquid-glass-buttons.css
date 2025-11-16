@@ -789,10 +789,10 @@
 
 /* ===== SIZE VARIANTS ===== */
 .liquid-glass-btn--small {
-    padding: 10px 20px;
-    min-height: 40px;
-    font-size: 14px;
-    border-radius: 22px;
+    padding: 8px 18px;
+    min-height: 36px;
+    font-size: 13px;
+    border-radius: 20px;
     
     box-shadow: 
         0 4px 16px rgba(0, 0, 0, 0.15),
