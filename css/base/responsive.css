@@ -206,3 +206,39 @@
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
+
+/* ===== UNIVERSAL SCROLLBAR STYLES (ALL SCREEN SIZES) ===== */
+/* Liquid glass scrollbar for task list */
+.task-list::-webkit-scrollbar,
+.settings-modal::-webkit-scrollbar,
+.mode::-webkit-scrollbar {
+    width: 4px !important;
+    background: transparent !important;
+}
+
+.task-list::-webkit-scrollbar-thumb,
+.settings-modal::-webkit-scrollbar-thumb,
+.mode::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+    border-radius: 4px !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.2s ease !important;
+}
+
+.task-list::-webkit-scrollbar-thumb:hover,
+.settings-modal::-webkit-scrollbar-thumb:hover,
+.mode::-webkit-scrollbar-thumb:hover {
+    background: rgba(176, 224, 230, 0.12) !important;
+    backdrop-filter: blur(12px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(200%) !important;
+    border-color: rgba(176, 224, 230, 0.3) !important;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 4px 12px rgba(176, 224, 230, 0.15),
+        0 0 16px rgba(176, 224, 230, 0.2) !important;
+}
