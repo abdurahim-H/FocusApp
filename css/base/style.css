@@ -664,12 +664,6 @@ body[data-theme="cosmos"] .productivity-glow {
     to { opacity: 1; }
 }
 
-.task-list::-webkit-scrollbar-thumb,
-.settings-modal::-webkit-scrollbar-thumb,
-.mode::-webkit-scrollbar-thumb {
-    animation: scrollbar-appear 0.3s ease-out;
-}
-
 /* Ensure scrollbar doesn't interfere with content layout */
 .task-list,
 .settings-modal,
