@@ -30,13 +30,13 @@
 
 .nav {
     position: fixed;
-    top: 30px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px;
+    gap: 6px;
+    padding: 4px;
     z-index: 1000;
     
     /* Apple's fluid container */
@@ -67,12 +67,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: 40px;
     
     /* Typography */
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 500;
     letter-spacing: -0.02em;
     color: rgba(255, 255, 255, 0.7);
@@ -111,14 +111,14 @@
         inset 0 0 10px rgba(255, 255, 255, 0.03);
 }
 
-/* Active State - Apple's fluid selection */
+/* Active State - Apple's fluid selection with color morphing */
 .nav .liquid-glass-btn.active,
 .nav .nav-btn.active {
-    /* Apple's ultra-transparent frosted glass active state */
-    background: rgba(255, 255, 255, 0.04);
+    /* Apple's translucent color fill that shifts through background */
+    background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(30px) saturate(150%);
     -webkit-backdrop-filter: blur(30px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     
     color: rgba(255, 255, 255, 0.95);
     font-weight: 600;
@@ -173,10 +173,10 @@
     border-radius: 28px;
     
     /* Apple's ultra-transparent material */
-    background: rgba(255, 255, 255, 0.015);
+    background: rgba(255, 255, 255, 0.01);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     
     /* Apple's minimal shadow system */
     box-shadow: 
@@ -234,11 +234,11 @@
     transform: scale(1.15) rotate(5deg);
 }
 
-/* Active state */
+/* Active state - with translucent color fill */
 .ambient-controls .liquid-glass-btn.active,
 .ambient-controls .liquid-glass-btn[data-playing="true"] {
-    background: rgba(176, 224, 230, 0.04);
-    border-color: rgba(176, 224, 230, 0.1);
+    background: rgba(176, 224, 230, 0.12);
+    border-color: rgba(176, 224, 230, 0.2);
     
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.3),
@@ -271,16 +271,16 @@
 
 /* Base timer button style */
 .timer-controls .liquid-glass-btn {
-    /* Apple's pill shape */
-    min-height: 54px;
-    padding: 16px 32px;
-    border-radius: 30px;
+    /* Apple's pill shape - smaller size */
+    min-height: 44px;
+    padding: 12px 24px;
+    border-radius: 26px;
     
-    /* Apple's ultra-transparent material */
-    background: rgba(255, 255, 255, 0.02);
+    /* Apple's ultra-transparent material - barely visible */
+    background: rgba(255, 255, 255, 0.01);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     
     /* Apple's minimal shadows */
     box-shadow: 
@@ -290,7 +290,7 @@
         inset 0 0 15px rgba(255, 255, 255, 0.04);
     
     /* Typography */
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     letter-spacing: -0.01em;
     color: rgba(255, 255, 255, 0.85);
@@ -305,10 +305,10 @@
     overflow: hidden;
 }
 
-/* Primary button (Start Focus) */
+/* Primary button (Start Focus) - with translucent color fill */
 .timer-controls .liquid-glass-btn--primary {
-    background: rgba(176, 224, 230, 0.04);
-    border-color: rgba(176, 224, 230, 0.1);
+    background: rgba(176, 224, 230, 0.12);
+    border-color: rgba(176, 224, 230, 0.2);
     
     box-shadow: 
         0 4px 16px rgba(0, 0, 0, 0.2),
@@ -323,8 +323,8 @@
 }
 
 .timer-controls .liquid-glass-btn--primary:hover {
-    background: rgba(176, 224, 230, 0.06);
-    border-color: rgba(176, 224, 230, 0.12);
+    background: rgba(176, 224, 230, 0.18);
+    border-color: rgba(176, 224, 230, 0.3);
     color: rgba(255, 255, 255, 1);
     transform: translateY(-2px) scale(1.03);
     
@@ -338,10 +338,10 @@
     text-shadow: 0 0 18px rgba(176, 224, 230, 0.35);
 }
 
-/* Warning button (Pause) */
+/* Warning button (Pause) - with translucent color fill */
 .timer-controls .liquid-glass-btn--warning {
-    background: rgba(255, 149, 0, 0.025);
-    border-color: rgba(255, 149, 0, 0.08);
+    background: rgba(255, 149, 0, 0.1);
+    border-color: rgba(255, 149, 0, 0.18);
     
     box-shadow: 
         0 4px 16px rgba(0, 0, 0, 0.2),
@@ -352,8 +352,8 @@
 }
 
 .timer-controls .liquid-glass-btn--warning:hover {
-    background: rgba(255, 149, 0, 0.04);
-    border-color: rgba(255, 149, 0, 0.12);
+    background: rgba(255, 149, 0, 0.15);
+    border-color: rgba(255, 149, 0, 0.25);
     color: rgba(255, 255, 255, 0.95);
     transform: translateY(-2px) scale(1.03);
     
@@ -365,10 +365,10 @@
         0 0 30px rgba(255, 149, 0, 0.25);
 }
 
-/* Success button (Skip) */
+/* Success button (Skip) - with translucent color fill */
 .timer-controls .liquid-glass-btn--success {
-    background: rgba(52, 199, 89, 0.025);
-    border-color: rgba(52, 199, 89, 0.08);
+    background: rgba(52, 199, 89, 0.1);
+    border-color: rgba(52, 199, 89, 0.18);
     
     box-shadow: 
         0 4px 16px rgba(0, 0, 0, 0.2),
@@ -379,8 +379,8 @@
 }
 
 .timer-controls .liquid-glass-btn--success:hover {
-    background: rgba(52, 199, 89, 0.04);
-    border-color: rgba(52, 199, 89, 0.12);
+    background: rgba(52, 199, 89, 0.15);
+    border-color: rgba(52, 199, 89, 0.25);
     color: rgba(255, 255, 255, 0.95);
     transform: translateY(-2px) scale(1.03);
     
@@ -394,16 +394,16 @@
 
 /* Small button (Reset Session) */
 .timer-controls .liquid-glass-btn--small {
-    min-height: 44px;
-    padding: 12px 16px;
-    border-radius: 24px;
-    font-size: 14px;
+    min-height: 38px;
+    padding: 10px 20px;
+    border-radius: 22px;
+    font-size: 13px;
 }
 
 /* Hover state for all timer buttons */
 .timer-controls .liquid-glass-btn:hover {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
     color: rgba(255, 255, 255, 0.95);
     transform: translateY(-2px) scale(1.02);
     
