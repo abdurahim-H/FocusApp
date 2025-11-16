@@ -100,6 +100,8 @@
     /* Ultra-transparent - inactive state */
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.02);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     
     /* Apple's smooth morphing */
     transition: 
@@ -130,6 +132,10 @@
 }
 
 /* Active State - iOS-style glass morphism matching settings button */
+.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield.nav-btn.active,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active,
+.nav .liquid-glass-btn.liquid-glass-btn--small.nav-btn.active,
+.nav .liquid-glass-btn.nav-btn.active,
 .nav .liquid-glass-btn.active,
 .nav .nav-btn.active {
     /* iOS glass morphism - same as settings button */
@@ -141,7 +147,7 @@
     border-left-color: rgba(255, 255, 255, 0.35) !important;
     
     color: rgba(255, 255, 255, 1) !important;
-    font-weight: 600;
+    font-weight: 600 !important;
     
     /* iOS multi-layer shadow system */
     box-shadow: 
@@ -150,7 +156,7 @@
         0 1px 0 rgba(255, 255, 255, 0.1),
         0 0 60px rgba(176, 224, 230, 0.1) !important;
     
-    text-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Active Hover - Enhanced glass effect */
