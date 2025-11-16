@@ -161,6 +161,7 @@
 /* Sliding white pill background indicator */
 .nav-buttons::before {
     content: '' !important;
+    display: block !important;
     position: absolute !important;
     top: 4px !important;
     left: 4px !important;
@@ -174,6 +175,7 @@
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
     z-index: 0 !important;
     pointer-events: none !important;
+    opacity: 1 !important;
 }
 
 /* Sliding animation based on active button */
