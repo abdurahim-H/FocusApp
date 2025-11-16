@@ -77,7 +77,10 @@ body {
 /* Main Content Container */
 .container {
     height: 100vh;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 20px 40px;
     position: relative;
     z-index: 10;
     width: 100%;
@@ -118,11 +121,8 @@ a {
     width: 100%;
     max-height: calc(100vh - 200px); /* Account for nav and padding */
     overflow-y: auto;
-    animation: fadeIn 0.6s ease;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    animation: none; /* Disable animation on initial load */
+    position: relative;
     z-index: 15;
     pointer-events: auto; /* Mode content needs pointer events */
 }
@@ -205,11 +205,6 @@ a {
 
 .mode.active {
     display: block;
-}
-
-/* Prevent animation on first load to avoid layout shift */
-.preload .mode {
-    animation: none !important;
 }
 
 @keyframes fadeIn {

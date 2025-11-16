@@ -82,9 +82,6 @@ export async function initApp() {
                 container.classList.add('loaded');
             }
             
-            // Remove preload class to enable animations after layout is set
-            document.body.classList.remove('preload');
-            
             // Then wait a frame to let layout settle, then hide loading screen
             requestAnimationFrame(() => {
                 setTimeout(() => {
