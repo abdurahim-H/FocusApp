@@ -86,13 +86,6 @@
     font-weight: 500 !important;
 }
 
-/* Press effect */
-.nav-buttons .liquid-glass-btn:active,
-.nav-buttons .nav-btn:active {
-    transform: scale(0.97);
-    transition: transform 0.1s var(--apple-ease);
-}
-
 /* ===== AMBIENT SOUND BUTTONS - APPLE STYLE ===== */
 
 .ambient-controls {
@@ -416,13 +409,6 @@
 @media (max-width: 768px) {
 
     
-    .nav-buttons .liquid-glass-btn:not(.active),
-    .nav-buttons .nav-btn:not(.active) {
-        padding: 7px 14px;
-        font-size: 12px;
-        border-radius: 32px;
-    }
-    
     .ambient-controls {
         gap: 10px;
         padding: 0 15px;
@@ -460,13 +446,6 @@
 
 @media (max-width: 480px) {
 
-    
-    .nav-buttons .liquid-glass-btn:not(.active),
-    .nav-buttons .nav-btn:not(.active) {
-        padding: 6px 12px;
-        font-size: 13px;
-        border-radius: 28px;
-    }
     
     .ambient-controls {
         grid-template-columns: 1fr;
@@ -547,32 +526,6 @@
 /* ===== OVERRIDE ALL PREVIOUS BUTTON STYLES ===== */
 
 /* Force override for navigation */
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield:not(.active),
-.nav-buttons .liquid-glass-btn.cosmic-glass-btn:not(.active),
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--starfield:not(.active) {
-    all: unset;
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-    border-radius: 40px;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    color: rgba(255, 255, 255, 0.75);
-    background: transparent;
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-    transition: 
-        background var(--apple-morph-duration) var(--apple-ease),
-        color var(--apple-morph-duration) var(--apple-ease),
-        transform 0.2s var(--apple-ease),
-        box-shadow var(--apple-morph-duration) var(--apple-ease);
-}
-
 /* Force override pseudo-elements */
 .nav-buttons .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield::before,
 .nav-buttons .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield::after,
