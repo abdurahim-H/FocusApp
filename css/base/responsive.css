@@ -122,11 +122,10 @@
 
 /* CRITICAL: Override the navigation container itself */
 .nav.water-cosmic-container {
-    background: rgba(255, 255, 255, 0.005) !important; /* Ultra transparent */
-    backdrop-filter: none !important; /* NO BLUR for navigation container */
-    -webkit-backdrop-filter: none !important; /* NO BLUR for navigation container */
-    border: 1px solid rgba(255, 255, 255, 0.02) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05) !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
 }
 
 .nav .liquid-glass-btn.cosmic-glass-btn.liquid-glass-btn--starfield.nav-btn,
