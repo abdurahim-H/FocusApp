@@ -132,8 +132,8 @@
 /* Active State - iOS-style glass morphism matching settings button */
 .nav .liquid-glass-btn.active,
 .nav .nav-btn.active {
-    /* TEST: Very obvious red background to verify CSS is loading */
-    background: red !important;
+    /* iOS glass morphism - same as settings button */
+    background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(60px) saturate(200%) !important;
     -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
     border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
