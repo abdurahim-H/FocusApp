@@ -204,13 +204,35 @@
     -ms-overflow-style: none !important;
 }
 
-/* ===== ABSOLUTE FINAL NAV ACTIVE BUTTON OVERRIDE ===== */
-/* MUST be at the very end of responsive.css since it loads last */
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield.nav-btn.active,
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active,
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--small.nav-btn.active,
-.nav-buttons .liquid-glass-btn.cosmic-glass-btn.nav-btn.active,
-.nav-buttons .liquid-glass-btn.nav-btn.active,
+/* ===== FINAL AUTHORITATIVE NAV BUTTON STYLES ===== */
+/* These rules load LAST and override everything else */
+
+/* INACTIVE buttons - completely transparent */
+.nav-buttons .liquid-glass-btn:not(.active),
+.nav-buttons .liquid-glass-btn.liquid-glass-btn--small:not(.active),
+.nav-buttons .liquid-glass-btn.liquid-glass-btn--starfield:not(.active),
+.nav-buttons .nav-btn:not(.active) {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-weight: 500 !important;
+    text-shadow: none !important;
+}
+
+/* INACTIVE hover - subtle effect only */
+.nav-buttons .liquid-glass-btn:not(.active):hover,
+.nav-buttons .nav-btn:not(.active):hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* ACTIVE buttons - iOS glass morphism */
+.nav-buttons .liquid-glass-btn.active,
+.nav-buttons .liquid-glass-btn.liquid-glass-btn--small.active,
+.nav-buttons .liquid-glass-btn.liquid-glass-btn--starfield.active,
 .nav-buttons .nav-btn.active {
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(60px) saturate(200%) !important;
