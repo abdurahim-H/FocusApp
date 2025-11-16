@@ -103,21 +103,16 @@
     .task-list::-webkit-scrollbar,
     .settings-modal::-webkit-scrollbar,
     .mode::-webkit-scrollbar {
-        width: 4px; /* Thin like desktop */
+        width: 20px !important; /* TESTING - Making it VERY WIDE to confirm this CSS is loading */
+        background: red !important; /* TESTING - Red background to see if it works */
     }
     
     .task-list::-webkit-scrollbar-thumb,
     .settings-modal::-webkit-scrollbar-thumb,
     .mode::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.05) !important; /* Very transparent glass */
-        backdrop-filter: blur(10px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
-        border-radius: 4px !important;
-        border: 0.5px solid rgba(255, 255, 255, 0.1) !important;
-        box-shadow: 
-            inset 0 1px 0 rgba(255, 255, 255, 0.2),
-            0 2px 8px rgba(0, 0, 0, 0.1) !important;
-        min-height: 20px !important;
+        background: lime !important; /* TESTING - Bright green to see if this works */
+        border-radius: 20px !important;
+        min-height: 40px !important;
     }
     
     /* Enhanced touch interaction */
