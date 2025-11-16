@@ -694,3 +694,13 @@ body::-webkit-scrollbar {
     /* Preserve space for scrollbar */
     scrollbar-gutter: stable;
 }
+/* Navigation buttons wrapper - minimal positioning only */
+.nav-buttons {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
