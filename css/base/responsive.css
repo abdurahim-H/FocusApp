@@ -106,20 +106,78 @@
     }
 }
 
-/* ===== NAVIGATION BUTTONS - CLEAN SLATE ===== */
+/* ===== NAVIGATION BUTTONS - IOS CLEAR GLASS STYLE ===== */
 
-/* Just basic buttons, no container styling for now */
+/* Container - Clear glass pill with animated indicator */
+.nav-buttons {
+    position: relative;
+    display: inline-flex;
+    padding: 2px;
+    border-radius: 50px;
+    
+    /* CLEAR glass - no blur, just pure transparency */
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    
+    /* Subtle shadow only */
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Animated white pill indicator */
+.nav-buttons::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    height: calc(100% - 4px);
+    width: calc(33.333% - 1.333px);
+    
+    /* Pure white, slightly transparent */
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 50px;
+    
+    /* Smooth iOS-style animation */
+    transition: left 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+    
+    z-index: 0;
+}
+
+/* Position indicator based on active button */
+.nav-buttons:has([data-mode="home"].active)::before {
+    left: 2px;
+}
+
+.nav-buttons:has([data-mode="focus"].active)::before {
+    left: calc(33.333% + 2px);
+}
+
+.nav-buttons:has([data-mode="ambient"].active)::before {
+    left: calc(66.666% + 2px);
+}
+
+/* Button styling */
 .nav-buttons .nav-btn {
-    /* Remove default button styles */
+    /* Layout */
+    position: relative;
+    z-index: 1;
+    flex: 1 1 0%;
+    min-width: 0;
+    
+    /* Remove default styles */
     background: none;
     border: none;
-    padding: 8px 16px;
+    padding: 6px 16px;
     margin: 0;
     
-    /* Text styling */
+    /* Text */
     color: rgba(255, 255, 255, 0.6);
     font-size: 13px;
+    font-weight: 500;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    text-align: center;
+    white-space: nowrap;
     
     /* Interactive */
     cursor: pointer;
@@ -127,12 +185,12 @@
 }
 
 .nav-buttons .nav-btn.active {
-    color: #FF6B6B;
+    color: rgba(255, 255, 255, 0.95);
     font-weight: 600;
 }
 
 .nav-buttons .nav-btn:hover:not(.active) {
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* Mobile adjustments */

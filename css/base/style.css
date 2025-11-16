@@ -698,13 +698,14 @@ body::-webkit-scrollbar {
     /* Preserve space for scrollbar */
     scrollbar-gutter: stable;
 }
-/* Navigation buttons wrapper - minimal positioning only */
+/* Navigation buttons wrapper - iOS clear glass container */
 .nav-buttons {
     position: fixed;
     top: 12px;
     left: 50%;
-    transform: translateX(-50%) translateZ(0); /* Combine centering + hardware acceleration */
-    display: flex;
-    gap: 0; /* No gap - buttons touch each other */
+    transform: translateX(-50%) translateZ(0);
+    display: inline-flex; /* Changed from flex to inline-flex for proper centering */
+    gap: 0;
     z-index: 1000;
+    width: auto; /* Let content determine width */
 }
