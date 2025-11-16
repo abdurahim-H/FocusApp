@@ -121,6 +121,7 @@ a {
     width: 100%;
     max-height: calc(100vh - 200px); /* Account for nav and padding */
     overflow-y: auto;
+    overflow-x: hidden;
     animation: none; /* Disable animation on initial load */
     position: relative;
     z-index: 15;
@@ -129,8 +130,13 @@ a {
 
 /* Ensure task list doesn't cause overflow */
 .task-section {
-    max-height: calc(100vh - 450px); /* Account for timer, controls, and padding */
-    overflow-y: hidden;
+    max-height: none; /* Remove height restriction */
+    overflow-y: visible; /* Only show scrollbar when needed */
+}
+
+.task-list {
+    max-height: 300px; /* Limit task list height */
+    overflow-y: auto; /* Scrollbar only on task list when needed */
 }
 
 .task-list {
