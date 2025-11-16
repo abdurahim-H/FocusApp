@@ -647,9 +647,9 @@
 /* ===== OVERRIDE ALL PREVIOUS BUTTON STYLES ===== */
 
 /* Force override for navigation */
-.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield,
-.nav .liquid-glass-btn.cosmic-glass-btn,
-.nav .liquid-glass-btn.liquid-glass-btn--starfield {
+.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield:not(.active),
+.nav .liquid-glass-btn.cosmic-glass-btn:not(.active),
+.nav .liquid-glass-btn.liquid-glass-btn--starfield:not(.active) {
     all: unset;
     box-sizing: border-box;
     display: inline-flex;
