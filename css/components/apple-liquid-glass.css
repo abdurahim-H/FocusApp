@@ -1,0 +1,726 @@
+/* apple-liquid-glass.css */
+
+/**
+ * Cosmic Focus - Apple Liquid Glass Design System
+ * Inspired by Apple's new fluid, morphing button design
+ * Features: Organic shapes, rich depth, layered shadows, context-aware appearance
+ * Version: 1.0
+ */
+
+/* ===== APPLE LIQUID GLASS BASE SYSTEM ===== */
+
+:root {
+    /* Liquid Glass Color Palette */
+    --apple-glass-bg: rgba(255, 255, 255, 0.12);
+    --apple-glass-bg-hover: rgba(255, 255, 255, 0.18);
+    --apple-glass-bg-active: rgba(255, 255, 255, 0.22);
+    --apple-glass-border: rgba(255, 255, 255, 0.25);
+    --apple-glass-border-hover: rgba(255, 255, 255, 0.35);
+    --apple-glass-shadow: rgba(0, 0, 0, 0.3);
+    --apple-glass-inner-glow: rgba(255, 255, 255, 0.2);
+    --apple-glass-outer-glow: rgba(176, 224, 230, 0.4);
+    
+    /* Animation Timing */
+    --apple-morph-duration: 0.4s;
+    --apple-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+    --apple-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ===== NAVIGATION BUTTONS - APPLE STYLE ===== */
+
+.nav {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    z-index: 1000;
+    
+    /* Apple's fluid container */
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    
+    /* Apple's layered shadow system */
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        0 2px 8px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 0 20px rgba(255, 255, 255, 0.05);
+    
+    transition: all var(--apple-morph-duration) var(--apple-ease);
+}
+
+/* Navigation Button - Apple Pillowy Design */
+.nav .liquid-glass-btn,
+.nav .nav-btn {
+    /* Reset all previous styles */
+    all: unset;
+    box-sizing: border-box;
+    
+    /* Apple's pill shape */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 40px;
+    
+    /* Typography */
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.75);
+    text-align: center;
+    white-space: nowrap;
+    
+    /* Subtle background - inactive state */
+    background: transparent;
+    border: none;
+    
+    /* Apple's smooth morphing */
+    transition: 
+        background var(--apple-morph-duration) var(--apple-ease),
+        color var(--apple-morph-duration) var(--apple-ease),
+        transform 0.2s var(--apple-ease),
+        box-shadow var(--apple-morph-duration) var(--apple-ease);
+    
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover State - Subtle glow */
+.nav .liquid-glass-btn:hover,
+.nav .nav-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.9);
+    transform: scale(1.02);
+    
+    box-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.1),
+        inset 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+/* Active State - Apple's fluid selection */
+.nav .liquid-glass-btn.active,
+.nav .nav-btn.active {
+    /* Apple's frosted glass active state */
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    
+    color: rgba(255, 255, 255, 1);
+    font-weight: 600;
+    
+    /* Apple's rich shadow depth */
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.3),
+        0 1px 4px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 0 15px rgba(255, 255, 255, 0.1),
+        0 0 30px rgba(176, 224, 230, 0.25);
+    
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+/* Active Hover - Enhanced glow */
+.nav .liquid-glass-btn.active:hover,
+.nav .nav-btn.active:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: scale(1.03);
+    
+    box-shadow: 
+        0 6px 24px rgba(0, 0, 0, 0.35),
+        0 2px 8px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 0 20px rgba(255, 255, 255, 0.12),
+        0 0 40px rgba(176, 224, 230, 0.35);
+}
+
+/* Press effect */
+.nav .liquid-glass-btn:active,
+.nav .nav-btn:active {
+    transform: scale(0.97);
+    transition: transform 0.1s var(--apple-ease);
+}
+
+/* ===== AMBIENT SOUND BUTTONS - APPLE STYLE ===== */
+
+.ambient-controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 30px;
+    padding: 0 20px;
+}
+
+.ambient-controls .liquid-glass-btn {
+    /* Apple's larger pill buttons */
+    min-height: 100px;
+    padding: 20px;
+    border-radius: 28px;
+    
+    /* Apple's translucent material */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    /* Apple's shadow system */
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 20px rgba(255, 255, 255, 0.08);
+    
+    /* Layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    
+    /* Typography */
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    
+    /* Apple's morphing animation */
+    transition: 
+        all var(--apple-morph-duration) var(--apple-ease),
+        transform 0.2s var(--apple-ease);
+    
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Icon styling */
+.ambient-controls .liquid-glass-btn .btn-icon {
+    font-size: 36px;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s var(--apple-ease-bounce);
+}
+
+/* Hover state */
+.ambient-controls .liquid-glass-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-4px) scale(1.02);
+    
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.5),
+        0 4px 16px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 0 30px rgba(255, 255, 255, 0.12),
+        0 0 40px rgba(176, 224, 230, 0.3);
+}
+
+.ambient-controls .liquid-glass-btn:hover .btn-icon {
+    transform: scale(1.15) rotate(5deg);
+}
+
+/* Active state */
+.ambient-controls .liquid-glass-btn.active,
+.ambient-controls .liquid-glass-btn[data-playing="true"] {
+    background: rgba(176, 224, 230, 0.18);
+    border-color: rgba(176, 224, 230, 0.4);
+    
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.5),
+        0 4px 16px rgba(176, 224, 230, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 0 30px rgba(176, 224, 230, 0.15),
+        0 0 50px rgba(176, 224, 230, 0.5);
+    
+    color: rgba(255, 255, 255, 1);
+    text-shadow: 0 0 20px rgba(176, 224, 230, 0.6);
+}
+
+/* Press effect */
+.ambient-controls .liquid-glass-btn:active {
+    transform: translateY(-2px) scale(0.98);
+    transition: transform 0.1s var(--apple-ease);
+}
+
+/* ===== TIMER CONTROLS - APPLE STYLE ===== */
+
+.timer-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 30px 0;
+    padding: 0 20px;
+}
+
+/* Base timer button style */
+.timer-controls .liquid-glass-btn {
+    /* Apple's pill shape */
+    min-height: 54px;
+    padding: 16px 32px;
+    border-radius: 30px;
+    
+    /* Apple's translucent material */
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    
+    /* Apple's layered shadows */
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 20px rgba(255, 255, 255, 0.08);
+    
+    /* Typography */
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.95);
+    
+    /* Apple's smooth morphing */
+    transition: 
+        all var(--apple-morph-duration) var(--apple-ease),
+        transform 0.2s var(--apple-ease);
+    
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Primary button (Start Focus) */
+.timer-controls .liquid-glass-btn--primary {
+    background: rgba(176, 224, 230, 0.2);
+    border-color: rgba(176, 224, 230, 0.35);
+    
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(176, 224, 230, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 0 20px rgba(176, 224, 230, 0.12),
+        0 0 30px rgba(176, 224, 230, 0.3);
+    
+    color: rgba(255, 255, 255, 1);
+    font-weight: 600;
+    text-shadow: 0 0 15px rgba(176, 224, 230, 0.4);
+}
+
+.timer-controls .liquid-glass-btn--primary:hover {
+    background: rgba(176, 224, 230, 0.25);
+    border-color: rgba(176, 224, 230, 0.45);
+    transform: translateY(-2px) scale(1.03);
+    
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.5),
+        0 4px 16px rgba(176, 224, 230, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 0 30px rgba(176, 224, 230, 0.15),
+        0 0 50px rgba(176, 224, 230, 0.5);
+    
+    text-shadow: 0 0 25px rgba(176, 224, 230, 0.6);
+}
+
+/* Warning button (Pause) */
+.timer-controls .liquid-glass-btn--warning {
+    background: rgba(255, 149, 0, 0.15);
+    border-color: rgba(255, 149, 0, 0.3);
+    
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(255, 149, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 20px rgba(255, 149, 0, 0.1),
+        0 0 25px rgba(255, 149, 0, 0.25);
+}
+
+.timer-controls .liquid-glass-btn--warning:hover {
+    background: rgba(255, 149, 0, 0.2);
+    border-color: rgba(255, 149, 0, 0.4);
+    transform: translateY(-2px) scale(1.03);
+    
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.5),
+        0 4px 16px rgba(255, 149, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 0 30px rgba(255, 149, 0, 0.15),
+        0 0 45px rgba(255, 149, 0, 0.4);
+}
+
+/* Success button (Skip) */
+.timer-controls .liquid-glass-btn--success {
+    background: rgba(52, 199, 89, 0.15);
+    border-color: rgba(52, 199, 89, 0.3);
+    
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(52, 199, 89, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 20px rgba(52, 199, 89, 0.1),
+        0 0 25px rgba(52, 199, 89, 0.25);
+}
+
+.timer-controls .liquid-glass-btn--success:hover {
+    background: rgba(52, 199, 89, 0.2);
+    border-color: rgba(52, 199, 89, 0.4);
+    transform: translateY(-2px) scale(1.03);
+    
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.5),
+        0 4px 16px rgba(52, 199, 89, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 0 30px rgba(52, 199, 89, 0.15),
+        0 0 45px rgba(52, 199, 89, 0.4);
+}
+
+/* Small button (Reset Session) */
+.timer-controls .liquid-glass-btn--small {
+    min-height: 44px;
+    padding: 12px 16px;
+    border-radius: 24px;
+    font-size: 14px;
+}
+
+/* Hover state for all timer buttons */
+.timer-controls .liquid-glass-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px) scale(1.02);
+    
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.5),
+        0 4px 16px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 0 30px rgba(255, 255, 255, 0.12),
+        0 0 40px rgba(255, 255, 255, 0.2);
+}
+
+/* Press effect */
+.timer-controls .liquid-glass-btn:active {
+    transform: translateY(0) scale(0.98);
+    transition: transform 0.1s var(--apple-ease);
+}
+
+/* ===== APPLE MORPHING ANIMATIONS ===== */
+
+/* Fluid morph on state change */
+@keyframes appleMorph {
+    0% {
+        transform: scale(1);
+        border-radius: 40px;
+    }
+    50% {
+        transform: scale(1.05);
+        border-radius: 50%;
+    }
+    100% {
+        transform: scale(1);
+        border-radius: 40px;
+    }
+}
+
+.nav .liquid-glass-btn.morphing,
+.nav .nav-btn.morphing,
+.ambient-controls .liquid-glass-btn.morphing,
+.timer-controls .liquid-glass-btn.morphing {
+    animation: appleMorph 0.6s var(--apple-ease);
+}
+
+/* Subtle glow pulse */
+@keyframes appleGlowPulse {
+    0%, 100% {
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            0 2px 8px rgba(176, 224, 230, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25),
+            inset 0 0 20px rgba(176, 224, 230, 0.08),
+            0 0 30px rgba(176, 224, 230, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            0 2px 8px rgba(176, 224, 230, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            inset 0 0 20px rgba(176, 224, 230, 0.12),
+            0 0 50px rgba(176, 224, 230, 0.5);
+    }
+}
+
+/* Apply pulse to active elements */
+.nav .liquid-glass-btn.active.pulsing,
+.nav .nav-btn.active.pulsing,
+.ambient-controls .liquid-glass-btn.active.pulsing,
+.timer-controls .liquid-glass-btn--primary.pulsing {
+    animation: appleGlowPulse 2s var(--apple-ease) infinite;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+@media (max-width: 768px) {
+    .nav {
+        top: 20px;
+        padding: 5px;
+        gap: 6px;
+        border-radius: 40px;
+    }
+    
+    .nav .liquid-glass-btn,
+    .nav .nav-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+        border-radius: 32px;
+    }
+    
+    .ambient-controls {
+        gap: 10px;
+        padding: 0 15px;
+    }
+    
+    .ambient-controls .liquid-glass-btn {
+        min-height: 90px;
+        padding: 16px;
+        border-radius: 24px;
+    }
+    
+    .ambient-controls .liquid-glass-btn .btn-icon {
+        font-size: 32px;
+    }
+    
+    .timer-controls {
+        gap: 10px;
+        padding: 0 15px;
+    }
+    
+    .timer-controls .liquid-glass-btn {
+        min-height: 48px;
+        padding: 14px 24px;
+        border-radius: 26px;
+        font-size: 15px;
+    }
+    
+    .timer-controls .liquid-glass-btn--small {
+        min-height: 40px;
+        padding: 10px 14px;
+        border-radius: 22px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav {
+        top: 15px;
+        padding: 4px;
+        gap: 4px;
+        border-radius: 35px;
+    }
+    
+    .nav .liquid-glass-btn,
+    .nav .nav-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+        border-radius: 28px;
+    }
+    
+    .ambient-controls {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 0 10px;
+    }
+    
+    .ambient-controls .liquid-glass-btn {
+        min-height: 80px;
+        padding: 14px;
+        border-radius: 20px;
+    }
+    
+    .ambient-controls .liquid-glass-btn .btn-icon {
+        font-size: 28px;
+    }
+    
+    .timer-controls {
+        gap: 8px;
+        padding: 0 10px;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .timer-controls .liquid-glass-btn {
+        width: 100%;
+        min-height: 44px;
+        padding: 12px 20px;
+        border-radius: 24px;
+        font-size: 14px;
+    }
+    
+    .timer-controls .liquid-glass-btn--small {
+        min-height: 38px;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .nav .liquid-glass-btn,
+    .nav .nav-btn,
+    .ambient-controls .liquid-glass-btn,
+    .timer-controls .liquid-glass-btn {
+        transition: none;
+        animation: none;
+    }
+    
+    .ambient-controls .liquid-glass-btn .btn-icon {
+        transition: none;
+    }
+}
+
+/* Focus visible for keyboard navigation */
+.nav .liquid-glass-btn:focus-visible,
+.nav .nav-btn:focus-visible,
+.ambient-controls .liquid-glass-btn:focus-visible,
+.timer-controls .liquid-glass-btn:focus-visible {
+    outline: 3px solid rgba(176, 224, 230, 0.8);
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .nav .liquid-glass-btn,
+    .nav .nav-btn,
+    .ambient-controls .liquid-glass-btn,
+    .timer-controls .liquid-glass-btn {
+        border-width: 2px;
+        font-weight: 600;
+    }
+}
+
+/* ===== OVERRIDE ALL PREVIOUS BUTTON STYLES ===== */
+
+/* Force override for navigation */
+.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield,
+.nav .liquid-glass-btn.cosmic-glass-btn,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.75);
+    background: transparent;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: 
+        background var(--apple-morph-duration) var(--apple-ease),
+        color var(--apple-morph-duration) var(--apple-ease),
+        transform 0.2s var(--apple-ease),
+        box-shadow var(--apple-morph-duration) var(--apple-ease);
+}
+
+/* Force override pseudo-elements */
+.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield::before,
+.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield::after,
+.nav .liquid-glass-btn.cosmic-glass-btn::before,
+.nav .liquid-glass-btn.cosmic-glass-btn::after,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield::before,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Force override for ambient controls */
+.ambient-controls .liquid-glass-btn {
+    all: unset;
+    box-sizing: border-box;
+    min-height: 100px;
+    padding: 20px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 20px rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: rgba(255, 255, 255, 0.95);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: 
+        all var(--apple-morph-duration) var(--apple-ease),
+        transform 0.2s var(--apple-ease);
+}
+
+/* Force override for timer controls */
+.timer-controls .liquid-glass-btn {
+    all: unset;
+    box-sizing: border-box;
+    min-height: 54px;
+    padding: 16px 32px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 20px rgba(255, 255, 255, 0.08);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.95);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: 
+        all var(--apple-morph-duration) var(--apple-ease),
+        transform 0.2s var(--apple-ease);
+}
+
+/* Force text visibility */
+.nav .liquid-glass-btn .btn-text,
+.nav .nav-btn .btn-text,
+.ambient-controls .liquid-glass-btn .btn-text,
+.timer-controls .liquid-glass-btn .btn-text {
+    position: relative;
+    z-index: 2;
+    font-weight: inherit;
+}
