@@ -108,22 +108,24 @@
 
 /* ===== NAVIGATION BUTTONS - IOS CLEAR GLASS STYLE ===== */
 
-/* Container - Minimal clean glass pill */
+/* Container - Clean glass pill with subtle border */
 .nav-buttons {
     position: relative;
     display: inline-flex;
     padding: 2px;
     border-radius: 50px;
     
-    /* Pure transparent container - no frosted look */
-    background: transparent;
-    border: 0.5px solid rgba(255, 255, 255, 0.15);
+    /* Clean glass container like iOS */
+    background: rgba(255, 255, 255, 0.08);
+    border: 0.5px solid rgba(255, 255, 255, 0.18);
     
-    /* Minimal shadow only */
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    /* Subtle polished shadow */
+    box-shadow: 
+        0 2px 12px rgba(0, 0, 0, 0.08),
+        inset 0 0.5px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Animated white pill indicator - polished and clean */
+/* Animated white glass pill indicator */
 .nav-buttons::before {
     content: '';
     position: absolute;
@@ -132,17 +134,22 @@
     height: calc(100% - 4px);
     width: calc(33.333% - 1.333px);
     
-    /* Clean white pill like iOS */
-    background: rgba(255, 255, 255, 0.95);
+    /* Polished white glass pill */
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.88) 100%
+    );
     border-radius: 50px;
     
-    /* Polished shadow for depth */
+    /* Clean iOS shadow */
     box-shadow: 
-        0 2px 8px rgba(0, 0, 0, 0.12),
-        0 1px 2px rgba(0, 0, 0, 0.08);
+        0 3px 8px rgba(0, 0, 0, 0.12),
+        0 1px 2px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
     
-    /* Smooth, polished iOS animation */
-    transition: left 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    /* Smooth spring animation like iOS */
+    transition: left 0.35s cubic-bezier(0.32, 0.72, 0, 1);
     
     z-index: 0;
 }
@@ -160,7 +167,7 @@
     left: calc(66.666% + 2px);
 }
 
-/* Button styling - each button has glass effect */
+/* Button styling - polished glass effect on each */
 .nav-buttons .nav-btn {
     /* Layout */
     position: relative;
@@ -168,14 +175,14 @@
     flex: 1 1 0%;
     min-width: 0;
     
-    /* Clean glass background for each button */
-    background: rgba(255, 255, 255, 0.08);
+    /* Clean glass for inactive buttons */
+    background: rgba(255, 255, 255, 0.05);
     border: none;
     border-radius: 50px;
     padding: 7px 18px;
     margin: 0;
     
-    /* Clean, polished text */
+    /* Text styling */
     color: rgba(255, 255, 255, 0.6);
     font-size: 13px;
     font-weight: 500;
@@ -184,21 +191,30 @@
     white-space: nowrap;
     letter-spacing: -0.01em;
     
-    /* Interactive */
+    /* Smooth transitions */
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: 
+        color 0.25s cubic-bezier(0.32, 0.72, 0, 1),
+        background 0.25s cubic-bezier(0.32, 0.72, 0, 1),
+        transform 0.15s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Active button - text becomes dark on white pill */
+/* Active button - dark text on white pill */
 .nav-buttons .nav-btn.active {
-    color: rgba(0, 0, 0, 0.85);
+    color: rgba(0, 0, 0, 0.88);
     font-weight: 600;
-    background: transparent; /* Let the ::before pill show through */
+    background: transparent;
 }
 
-.nav-buttons .nav-btn:hover:not(.active) {
-    color: rgba(255, 255, 255, 0.8);
-    background: rgba(255, 255, 255, 0.12);
+/* Hover effect - glass becomes more visible */
+.nav-buttons .nav-btn:not(.active):hover {
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Press effect - subtle scale */
+.nav-buttons .nav-btn:active {
+    transform: scale(0.98);
 }
 
 /* Mobile adjustments */
