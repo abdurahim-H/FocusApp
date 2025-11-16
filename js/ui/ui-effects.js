@@ -30,22 +30,15 @@ export function updateProductivityGlow() {
 
 // Trigger task completion celebration
 export function triggerTaskCompletionUI(taskElement) {
-    if (taskElement) {
-        taskElement.classList.add('task-celebration');
-        
-        // Remove after animation
-        setTimeout(() => {
-            taskElement.classList.remove('task-celebration');
-        }, 800);
-    }
+    // Disabled: This was causing unwanted green veil and transparency effects
+    // Only applying celebration to individual elements, not the whole container
     
-    // Also trigger on the main container for global effect
-    const container = document.querySelector('.container');
-    container.classList.add('task-celebration');
-    
-    setTimeout(() => {
-        container.classList.remove('task-celebration');
-    }, 800);
+    // Removed container celebration effect to prevent green veil overlay
+    // const container = document.querySelector('.container');
+    // container.classList.add('task-celebration');
+    // setTimeout(() => {
+    //     container.classList.remove('task-celebration');
+    // }, 800);
 }
 
 // Apply focus mode intensity

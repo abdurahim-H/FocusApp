@@ -295,9 +295,7 @@
 }
 
 /* Legacy support - these will be overridden by liquid-glass-task styles */
-.task-item.completed {
-    opacity: 0.6;
-}
+/* Removed duplicate opacity rule - handled in liquid-glass-buttons.css */
 
 .task-item.completed span {
     text-decoration: line-through;
