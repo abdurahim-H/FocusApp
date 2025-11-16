@@ -137,59 +137,16 @@
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
-    .nav-buttons {
-        top: 16px;
-        padding: 2px; /* Match new padding */
-        max-width: 320px;
-    }
-    
-    .nav-buttons::before {
-        top: 2px;
-        height: calc(100% - 4px);
-        width: calc(33.333% - 1.333px);
-    }
-    
     .nav-buttons .nav-btn {
-        padding: 4px 10px !important; /* Match desktop */
+        padding: 6px 12px;
         font-size: 12px;
-        min-width: 0;
-    }
-    
-    /* Adjust indicator positions for mobile */
-    .nav-buttons:has(.nav-btn:nth-child(1).active)::before,
-    .nav-buttons:has([data-mode="home"].active)::before {
-        left: 3px;
-    }
-    
-    .nav-buttons:has(.nav-btn:nth-child(2).active)::before,
-    .nav-buttons:has([data-mode="focus"].active)::before {
-        left: calc(33.333% + 3px);
-    }
-    
-    .nav-buttons:has(.nav-btn:nth-child(3).active)::before,
-    .nav-buttons:has([data-mode="ambient"].active)::before {
-        left: calc(66.666% + 3px);
     }
 }
 
 @media (max-width: 480px) {
-    .nav-buttons {
-        top: 14px;
-        padding: 3px;
-        max-width: 280px;
-    }
-    
-    .nav-buttons::before {
-        top: 3px;
-        height: calc(100% - 6px);
-        width: calc((100% - 6px) / 3);
-    }
-    
-    .nav-buttons .nav-btn,
-    .nav-buttons .liquid-glass-btn {
-        padding: 4px 10px !important; /* Match desktop */
+    .nav-buttons .nav-btn {
+        padding: 6px 10px;
         font-size: 11px;
-        min-width: 0;
     }
 }
 
@@ -209,29 +166,4 @@
     -ms-overflow-style: none !important;
 }
 
-/* ===== LIQUID GLASS ENHANCEMENTS ===== */
-
-/* Reduced motion support - disable spring animation */
-@media (prefers-reduced-motion: reduce) {
-    .nav-buttons::before {
-        transition: transform 0.2s ease, width 0.2s ease;
-    }
-}
-
-/* High contrast mode adjustments */
-@media (prefers-contrast: high) {
-    .nav-buttons {
-        background: rgba(255, 255, 255, 0.15);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-    
-    .nav-buttons::before {
-        background: rgba(255, 255, 255, 1);
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    .nav-buttons .nav-btn.active,
-    .nav-buttons .liquid-glass-btn.active {
-        color: #FF4444 !important;
-    }
-}
+/* End of responsive.css */
