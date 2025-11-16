@@ -160,19 +160,20 @@ a {
 }
 
 .task-list {
-    max-height: none; /* Remove height restriction */
-    overflow-y: hidden; /* Force hidden, no scrollbar */
+    max-height: 200px; /* Shows ~2-3 tasks before scrolling */
+    overflow-y: auto; /* Enable scrollbar for task list only */
     overflow-x: hidden;
     
-    /* Scrollbar disabled */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    /* Apple-style minimal scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(176, 224, 230, 0.08) transparent;
 }
 
 /* Apple-style scrollbar for webkit browsers - ultra minimal */
 .task-list::-webkit-scrollbar {
     width: 12px; /* Wide enough to see glass effect */
     background: transparent;
+    display: block; /* Ensure scrollbar is visible */
 }
 
 .task-list::-webkit-scrollbar-track {
