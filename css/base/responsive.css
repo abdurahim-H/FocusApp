@@ -21,14 +21,14 @@
     }
 
     .nav {
-        top: 20px;
+        top: 12px;
         gap: 5px;
-        padding: 8px;
+        padding: 3px;
     }
 
     .nav-btn {
-        padding: 10px 16px;
-        font-size: 0.8em;
+        padding: 7px 14px;
+        font-size: 0.75em;
     }
 
     .container {
@@ -87,10 +87,10 @@
     }
 
     .settings-btn {
-        top: 20px;
+        top: 12px;
         right: 20px;
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
     }
 
     .progress-3d {
