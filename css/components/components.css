@@ -10,23 +10,25 @@
 
 
 .nav-btn {
-    background: transparent;
+    background: none;
     border: none;
-    color: var(--text-secondary);
-    padding: 8px 16px;
-    border-radius: 25px;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    font-size: 0.85em;
+    font-weight: 400;
+    transition: color 0.3s ease;
+    font-size: 14px;
     white-space: nowrap;
-    min-width: 65px;
     text-align: center;
 }
 
 .nav-btn:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.nav-btn.active {
+    color: rgba(255, 255, 255, 1);
+    font-weight: 500;
 }
 
     background: rgba(176, 224, 230, 0.15);

@@ -207,45 +207,22 @@
 /* ===== FINAL AUTHORITATIVE NAV BUTTON STYLES ===== */
 /* These rules load LAST and override everything else */
 
-/* INACTIVE buttons - completely transparent */
-.nav-buttons .liquid-glass-btn:not(.active),
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--small:not(.active),
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--starfield:not(.active),
-.nav-buttons .nav-btn:not(.active) {
-    background: transparent !important;
+/* ALL NAV BUTTONS - TEXT ONLY, NO CONTAINERS */
+.nav-buttons .liquid-glass-btn,
+.nav-buttons .nav-btn {
+    background: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border: none !important;
     box-shadow: none !important;
+    padding: 0 !important;
     color: rgba(255, 255, 255, 0.7) !important;
-    font-weight: 500 !important;
+    font-weight: 400 !important;
     text-shadow: none !important;
 }
 
-/* INACTIVE hover - subtle effect only */
-.nav-buttons .liquid-glass-btn:not(.active):hover,
-.nav-buttons .nav-btn:not(.active):hover {
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-}
-
-/* ACTIVE buttons - iOS glass morphism */
-.nav-buttons .liquid-glass-btn.active,
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--small.active,
-.nav-buttons .liquid-glass-btn.liquid-glass-btn--starfield.active,
+/* ACTIVE - just brighter text */
 .nav-buttons .nav-btn.active {
-    background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(60px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
-    border-top-color: rgba(255, 255, 255, 0.4) !important;
-    border-left-color: rgba(255, 255, 255, 0.35) !important;
     color: rgba(255, 255, 255, 1) !important;
-    font-weight: 600 !important;
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        inset 0 1px 1px rgba(255, 255, 255, 0.2),
-        0 1px 0 rgba(255, 255, 255, 0.1),
-        0 0 60px rgba(176, 224, 230, 0.1) !important;
-    text-shadow: 0 0 12px rgba(255, 255, 255, 0.2) !important;
+    font-weight: 500 !important;
 }
