@@ -750,3 +750,88 @@
     z-index: 2;
     font-weight: inherit;
 }
+
+/* ===== TASK INPUT - APPLE STYLE ===== */
+
+.task-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.task-input {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 24px;
+    
+    /* Apple's translucent input */
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    
+    /* Typography */
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+    
+    /* Shadow */
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        0 1px 4px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    
+    transition: all var(--apple-morph-duration) var(--apple-ease);
+    outline: none;
+}
+
+.task-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.task-input:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(176, 224, 230, 0.3);
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.25),
+        0 1px 4px rgba(176, 224, 230, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 0 25px rgba(176, 224, 230, 0.2);
+}
+
+/* Task list styling */
+.task-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.task-item {
+    padding: 12px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s var(--apple-ease);
+}
+
+.task-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.task-item.completed {
+    opacity: 0.6;
+    text-decoration: line-through;
+}
