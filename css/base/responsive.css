@@ -110,14 +110,29 @@
 
 /* Just basic buttons, no container styling for now */
 .nav-buttons .nav-btn {
+    /* Remove default button styles */
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    margin: 0;
+    
+    /* Text styling */
     color: rgba(255, 255, 255, 0.6);
     font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    
+    /* Interactive */
     cursor: pointer;
+    transition: color 0.3s ease;
 }
 
 .nav-buttons .nav-btn.active {
     color: #FF6B6B;
     font-weight: 600;
+}
+
+.nav-buttons .nav-btn:hover:not(.active) {
+    color: rgba(255, 255, 255, 0.85);
 }
 
 /* Mobile adjustments */
