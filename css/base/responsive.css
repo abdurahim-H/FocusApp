@@ -145,17 +145,19 @@
 }
 
 /* Individual Segments/Buttons */
-.nav-buttons .liquid-glass-btn,
+.nav-buttons .liquid-glass-btn.nav-btn,
+.nav-buttons .nav-btn.liquid-glass-btn,
 .nav-buttons .nav-btn {
     /* Force equal width distribution */
-    flex: 1 1 0 !important; /* Equal width for all buttons - use flex-basis 0 */
+    flex: 1 1 0% !important; /* Equal width for all buttons - use flex-basis 0% */
     min-width: 0 !important; /* Allow flex to shrink below content width */
     max-width: none !important; /* No max-width constraints */
+    width: auto !important; /* Override any fixed widths */
     
     /* Layout */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     box-sizing: border-box !important;
     
     /* Spacing */
