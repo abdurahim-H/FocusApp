@@ -152,7 +152,7 @@
     left: 2px; /* Match new padding */
     
     /* Calculate width to match flex:1 button width exactly */
-    width: calc(33.333% - 1.333px); /* Adjusted for 2px padding */
+    width: calc(33.333%); /* Each button is 1/3 of container */
     height: calc(100% - 4px); /* Adjusted for 2px padding */
     
     /* Liquid glass pill - semi-transparent white with blur */
@@ -246,19 +246,19 @@
 /* First button (Home) - default position */
 .nav-buttons:has(.nav-btn:nth-child(1).active)::before,
 .nav-buttons:has([data-mode="home"].active)::before {
-    left: 2px; /* Match new padding */
+    left: 2px;
 }
 
 /* Second button (Focus) */
 .nav-buttons:has(.nav-btn:nth-child(2).active)::before,
 .nav-buttons:has([data-mode="focus"].active)::before {
-    left: calc(33.333% + 0.666px); /* Adjusted for 2px padding */
+    left: calc(33.333% + 2px);
 }
 
 /* Third button (Ambient) */
 .nav-buttons:has(.nav-btn:nth-child(3).active)::before,
 .nav-buttons:has([data-mode="ambient"].active)::before {
-    left: calc(66.666% - 0.666px); /* Adjusted for 2px padding */
+    left: calc(66.666% + 2px);
 }
 
 /* Mobile adjustments */
