@@ -336,30 +336,34 @@
 
 /* Settings Button */
 .settings-btn {
-    position: fixed;
-    top: 30px;
-    right: 30px;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-primary);
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 1.2em;
-    transition: all 0.3s ease;
-    z-index: 1000;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    /* Override liquid-glass-btn reset */
+    all: revert !important;
+    position: fixed !important;
+    top: 30px !important;
+    right: 30px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: var(--text-primary) !important;
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    font-size: 1.2em !important;
+    transition: all 0.3s ease !important;
+    z-index: 1000 !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .settings-btn:hover {
-    background: rgba(99, 102, 241, 0.8);
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-    transform: scale(1.05);
+    background: rgba(99, 102, 241, 0.8) !important;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4) !important;
+    transform: scale(1.05) !important;
 }
 
 /* Reset Session Button */
