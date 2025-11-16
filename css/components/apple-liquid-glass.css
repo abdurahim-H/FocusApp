@@ -75,20 +75,21 @@
     font-size: 15px;
     font-weight: 500;
     letter-spacing: -0.02em;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.7);
     text-align: center;
     white-space: nowrap;
     
-    /* Subtle background - inactive state */
+    /* Ultra-transparent - inactive state */
     background: transparent;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     
     /* Apple's smooth morphing */
     transition: 
         background var(--apple-morph-duration) var(--apple-ease),
         color var(--apple-morph-duration) var(--apple-ease),
         transform 0.2s var(--apple-ease),
-        box-shadow var(--apple-morph-duration) var(--apple-ease);
+        box-shadow var(--apple-morph-duration) var(--apple-ease),
+        border-color var(--apple-morph-duration) var(--apple-ease);
     
     cursor: pointer;
     user-select: none;
@@ -100,50 +101,52 @@
 /* Hover State - Subtle glow */
 .nav .liquid-glass-btn:hover,
 .nav .nav-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
     transform: scale(1.02);
     
     box-shadow: 
-        0 0 20px rgba(255, 255, 255, 0.1),
-        inset 0 0 10px rgba(255, 255, 255, 0.05);
+        0 0 15px rgba(255, 255, 255, 0.08),
+        inset 0 0 10px rgba(255, 255, 255, 0.03);
 }
 
 /* Active State - Apple's fluid selection */
 .nav .liquid-glass-btn.active,
 .nav .nav-btn.active {
-    /* Apple's frosted glass active state */
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    /* Apple's ultra-transparent frosted glass active state */
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     
-    color: rgba(255, 255, 255, 1);
+    color: rgba(255, 255, 255, 0.95);
     font-weight: 600;
     
-    /* Apple's rich shadow depth */
+    /* Apple's subtle shadow depth */
     box-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.3),
-        0 1px 4px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        inset 0 0 15px rgba(255, 255, 255, 0.1),
-        0 0 30px rgba(176, 224, 230, 0.25);
+        0 2px 12px rgba(0, 0, 0, 0.15),
+        0 1px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 20px rgba(255, 255, 255, 0.08),
+        0 0 25px rgba(255, 255, 255, 0.15);
     
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
 }
 
 /* Active Hover - Enhanced glow */
 .nav .liquid-glass-btn.active:hover,
 .nav .nav-btn.active:hover {
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
     transform: scale(1.03);
     
     box-shadow: 
-        0 6px 24px rgba(0, 0, 0, 0.35),
-        0 2px 8px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.35),
-        inset 0 0 20px rgba(255, 255, 255, 0.12),
-        0 0 40px rgba(176, 224, 230, 0.35);
+        0 4px 20px rgba(0, 0, 0, 0.2),
+        0 2px 8px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 0 25px rgba(255, 255, 255, 0.1),
+        0 0 30px rgba(255, 255, 255, 0.2);
 }
 
 /* Press effect */
@@ -169,18 +172,18 @@
     padding: 20px;
     border-radius: 28px;
     
-    /* Apple's translucent material */
-    background: rgba(255, 255, 255, 0.1);
+    /* Apple's ultra-transparent material */
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     
-    /* Apple's shadow system */
+    /* Apple's minimal shadow system */
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 2px 8px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        inset 0 0 20px rgba(255, 255, 255, 0.08);
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        0 1px 4px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 0 15px rgba(255, 255, 255, 0.04);
     
     /* Layout */
     display: flex;
@@ -190,7 +193,7 @@
     gap: 12px;
     
     /* Typography */
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 0.85);
     font-size: 16px;
     font-weight: 500;
     letter-spacing: -0.01em;
@@ -214,16 +217,17 @@
 
 /* Hover state */
 .ambient-controls .liquid-glass-btn:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.95);
     transform: translateY(-4px) scale(1.02);
     
     box-shadow: 
-        0 12px 48px rgba(0, 0, 0, 0.5),
-        0 4px 16px rgba(0, 0, 0, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        inset 0 0 30px rgba(255, 255, 255, 0.12),
-        0 0 40px rgba(176, 224, 230, 0.3);
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 12px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 20px rgba(255, 255, 255, 0.06),
+        0 0 30px rgba(255, 255, 255, 0.15);
 }
 
 .ambient-controls .liquid-glass-btn:hover .btn-icon {
@@ -233,18 +237,18 @@
 /* Active state */
 .ambient-controls .liquid-glass-btn.active,
 .ambient-controls .liquid-glass-btn[data-playing="true"] {
-    background: rgba(176, 224, 230, 0.18);
-    border-color: rgba(176, 224, 230, 0.4);
+    background: rgba(176, 224, 230, 0.12);
+    border-color: rgba(176, 224, 230, 0.25);
     
     box-shadow: 
-        0 12px 48px rgba(0, 0, 0, 0.5),
-        0 4px 16px rgba(176, 224, 230, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.35),
-        inset 0 0 30px rgba(176, 224, 230, 0.15),
-        0 0 50px rgba(176, 224, 230, 0.5);
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 12px rgba(176, 224, 230, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 25px rgba(176, 224, 230, 0.08),
+        0 0 35px rgba(176, 224, 230, 0.3);
     
-    color: rgba(255, 255, 255, 1);
-    text-shadow: 0 0 20px rgba(176, 224, 230, 0.6);
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 0 15px rgba(176, 224, 230, 0.4);
 }
 
 /* Press effect */
@@ -272,24 +276,24 @@
     padding: 16px 32px;
     border-radius: 30px;
     
-    /* Apple's translucent material */
-    background: rgba(255, 255, 255, 0.12);
+    /* Apple's ultra-transparent material */
+    background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     
-    /* Apple's layered shadows */
+    /* Apple's minimal shadows */
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 2px 8px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        inset 0 0 20px rgba(255, 255, 255, 0.08);
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        0 1px 4px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 0 15px rgba(255, 255, 255, 0.04);
     
     /* Typography */
     font-size: 16px;
     font-weight: 500;
     letter-spacing: -0.01em;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 0.85);
     
     /* Apple's smooth morphing */
     transition: 
@@ -303,86 +307,89 @@
 
 /* Primary button (Start Focus) */
 .timer-controls .liquid-glass-btn--primary {
-    background: rgba(176, 224, 230, 0.2);
-    border-color: rgba(176, 224, 230, 0.35);
+    background: rgba(176, 224, 230, 0.12);
+    border-color: rgba(176, 224, 230, 0.25);
     
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 2px 8px rgba(176, 224, 230, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        inset 0 0 20px rgba(176, 224, 230, 0.12),
-        0 0 30px rgba(176, 224, 230, 0.3);
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        0 1px 4px rgba(176, 224, 230, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 20px rgba(176, 224, 230, 0.06),
+        0 0 25px rgba(176, 224, 230, 0.2);
     
-    color: rgba(255, 255, 255, 1);
+    color: rgba(255, 255, 255, 0.95);
     font-weight: 600;
-    text-shadow: 0 0 15px rgba(176, 224, 230, 0.4);
+    text-shadow: 0 0 12px rgba(176, 224, 230, 0.25);
 }
 
 .timer-controls .liquid-glass-btn--primary:hover {
-    background: rgba(176, 224, 230, 0.25);
-    border-color: rgba(176, 224, 230, 0.45);
+    background: rgba(176, 224, 230, 0.15);
+    border-color: rgba(176, 224, 230, 0.3);
+    color: rgba(255, 255, 255, 1);
     transform: translateY(-2px) scale(1.03);
     
     box-shadow: 
-        0 12px 48px rgba(0, 0, 0, 0.5),
-        0 4px 16px rgba(176, 224, 230, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.35),
-        inset 0 0 30px rgba(176, 224, 230, 0.15),
-        0 0 50px rgba(176, 224, 230, 0.5);
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 12px rgba(176, 224, 230, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 25px rgba(176, 224, 230, 0.08),
+        0 0 35px rgba(176, 224, 230, 0.3);
     
-    text-shadow: 0 0 25px rgba(176, 224, 230, 0.6);
+    text-shadow: 0 0 18px rgba(176, 224, 230, 0.35);
 }
 
 /* Warning button (Pause) */
 .timer-controls .liquid-glass-btn--warning {
-    background: rgba(255, 149, 0, 0.15);
-    border-color: rgba(255, 149, 0, 0.3);
+    background: rgba(255, 149, 0, 0.08);
+    border-color: rgba(255, 149, 0, 0.2);
     
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 2px 8px rgba(255, 149, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        inset 0 0 20px rgba(255, 149, 0, 0.1),
-        0 0 25px rgba(255, 149, 0, 0.25);
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        0 1px 4px rgba(255, 149, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 0 15px rgba(255, 149, 0, 0.04),
+        0 0 20px rgba(255, 149, 0, 0.15);
 }
 
 .timer-controls .liquid-glass-btn--warning:hover {
-    background: rgba(255, 149, 0, 0.2);
-    border-color: rgba(255, 149, 0, 0.4);
+    background: rgba(255, 149, 0, 0.12);
+    border-color: rgba(255, 149, 0, 0.28);
+    color: rgba(255, 255, 255, 0.95);
     transform: translateY(-2px) scale(1.03);
     
     box-shadow: 
-        0 12px 48px rgba(0, 0, 0, 0.5),
-        0 4px 16px rgba(255, 149, 0, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        inset 0 0 30px rgba(255, 149, 0, 0.15),
-        0 0 45px rgba(255, 149, 0, 0.4);
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 12px rgba(255, 149, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 20px rgba(255, 149, 0, 0.06),
+        0 0 30px rgba(255, 149, 0, 0.25);
 }
 
 /* Success button (Skip) */
 .timer-controls .liquid-glass-btn--success {
-    background: rgba(52, 199, 89, 0.15);
-    border-color: rgba(52, 199, 89, 0.3);
+    background: rgba(52, 199, 89, 0.08);
+    border-color: rgba(52, 199, 89, 0.2);
     
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 2px 8px rgba(52, 199, 89, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        inset 0 0 20px rgba(52, 199, 89, 0.1),
-        0 0 25px rgba(52, 199, 89, 0.25);
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        0 1px 4px rgba(52, 199, 89, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 0 15px rgba(52, 199, 89, 0.04),
+        0 0 20px rgba(52, 199, 89, 0.15);
 }
 
 .timer-controls .liquid-glass-btn--success:hover {
-    background: rgba(52, 199, 89, 0.2);
-    border-color: rgba(52, 199, 89, 0.4);
+    background: rgba(52, 199, 89, 0.12);
+    border-color: rgba(52, 199, 89, 0.28);
+    color: rgba(255, 255, 255, 0.95);
     transform: translateY(-2px) scale(1.03);
     
     box-shadow: 
-        0 12px 48px rgba(0, 0, 0, 0.5),
-        0 4px 16px rgba(52, 199, 89, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        inset 0 0 30px rgba(52, 199, 89, 0.15),
-        0 0 45px rgba(52, 199, 89, 0.4);
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 12px rgba(52, 199, 89, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 20px rgba(52, 199, 89, 0.06),
+        0 0 30px rgba(52, 199, 89, 0.25);
 }
 
 /* Small button (Reset Session) */
@@ -395,16 +402,17 @@
 
 /* Hover state for all timer buttons */
 .timer-controls .liquid-glass-btn:hover {
-    background: rgba(255, 255, 255, 0.16);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.95);
     transform: translateY(-2px) scale(1.02);
     
     box-shadow: 
-        0 12px 48px rgba(0, 0, 0, 0.5),
-        0 4px 16px rgba(0, 0, 0, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        inset 0 0 30px rgba(255, 255, 255, 0.12),
-        0 0 40px rgba(255, 255, 255, 0.2);
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 12px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 20px rgba(255, 255, 255, 0.06),
+        0 0 30px rgba(255, 255, 255, 0.12);
 }
 
 /* Press effect */
