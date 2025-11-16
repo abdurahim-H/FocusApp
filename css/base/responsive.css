@@ -277,7 +277,7 @@
     
     .nav-buttons .nav-btn,
     .nav-buttons .liquid-glass-btn {
-        padding: 5px 12px; /* Reduced for mobile */
+        padding: 4px 10px !important; /* Match desktop */
         font-size: 12px;
         min-width: 0;
     }
@@ -314,9 +314,9 @@
     
     .nav-buttons .nav-btn,
     .nav-buttons .liquid-glass-btn {
-        padding: 6px 12px;
+        padding: 4px 10px !important; /* Match desktop */
         font-size: 11px;
-        min-width: 55px;
+        min-width: 0;
     }
 }
 
