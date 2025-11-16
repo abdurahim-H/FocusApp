@@ -106,100 +106,18 @@
     }
 }
 
-/* ===== LIQUID GLASS SEGMENTED CONTROL ===== */
-/* Morphing pill selector with glassmorphic floating indicator */
+/* ===== NAVIGATION BUTTONS - CLEAN SLATE ===== */
 
-/* Container - Horizontal pill with frosted glass */
-.nav-buttons {
-    position: fixed;
-    top: 12px; /* Moved closer to top */
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    
-    /* Compact size - small and centered */
-    width: auto;
-    max-width: 410px; /* Increased slightly to right */
-    
-    /* Pill shape */
-    display: inline-flex;
-    align-items: center;
-    gap: 0;
-    padding: 2px; /* Reduced from 4px for tighter fit */
-    border-radius: 50px; /* Fully rounded pill */
-    
-    /* Frosted glass effect - more transparent and watery */
-    background: rgba(255, 255, 255, 0.04); /* More transparent */
-    backdrop-filter: blur(20px) saturate(120%);
-    -webkit-backdrop-filter: blur(20px) saturate(120%);
-    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtler border */
-    
-    /* Subtle shadow */
-    box-shadow: 
-        0 2px 8px rgba(0, 0, 0, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    
-    /* Container for the floating indicator */
-    position: relative;
-    isolation: isolate;
-}
-
-/* Individual Segments/Buttons */
+/* Just basic buttons, no container styling for now */
 .nav-buttons .nav-btn {
-    /* Force EXACT equal width - each button gets exactly 33.333% */
-    flex: 1 1 33.333% !important;
-    min-width: 33.333% !important;
-    max-width: 33.333% !important;
-    width: 33.333% !important;
-    
-    /* Layout */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    box-sizing: border-box !important;
-    
-    /* Spacing */
-    padding: 4px 10px !important; /* Even smaller for minimal look */
-    margin: 0 !important;
-    
-    /* Remove any borders */
-    border: none !important;
-    background: transparent !important;
-    outline: none !important;
-    
-    /* Typography */
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    white-space: nowrap;
-    text-align: center;
-    
-    /* Unselected state - light gray */
     color: rgba(255, 255, 255, 0.6);
-    
-    /* Smooth color transition */
-    transition: color 0.3s ease;
-    
-    /* Above the floating indicator */
-    position: relative;
-    z-index: 1;
-    
-    /* Clickable */
+    font-size: 13px;
     cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
 }
 
-/* Selected state - Coral/Salmon Red */
 .nav-buttons .nav-btn.active {
-    color: #FF6B6B !important; /* Coral/salmon red */
-    font-weight: 600 !important;
-}
-
-/* Hover state - subtle color shift */
-.nav-buttons .nav-btn:not(.active):hover {
-    color: rgba(255, 255, 255, 0.85);
+    color: #FF6B6B;
+    font-weight: 600;
 }
 
 /* Mobile adjustments */
