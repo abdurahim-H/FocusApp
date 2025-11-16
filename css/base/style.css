@@ -135,50 +135,43 @@ a {
 }
 
 .task-list {
-    max-height: 200px; /* Show scrollbar only after ~2 tasks */
-    overflow-y: auto; /* Scrollbar only when needed */
+    max-height: 250px; /* Shows ~2.5-3 tasks before scrolling */
+    overflow-y: auto;
     overflow-x: hidden;
     
-    /* Apple-style scrollbar */
+    /* Apple-style minimal scrollbar - only shows when needed */
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
 }
 
-/* Apple-style scrollbar for webkit browsers */
+/* Apple-style scrollbar for webkit browsers - ultra minimal */
 .task-list::-webkit-scrollbar {
-    width: 8px;
+    width: 4px; /* Very thin like macOS */
     background: transparent;
 }
 
 .task-list::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 10px;
+    margin: 4px 0; /* Add margin to not touch edges */
 }
 
 .task-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.06); /* Very transparent */
+    border-radius: 4px;
+    transition: background 0.2s ease;
 }
 
 .task-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    background: rgba(255, 255, 255, 0.12); /* Slightly more visible on hover */
 }
 
-.task-list {
+/* Remove duplicate rule below */
     max-height: 200px;
     overflow-y: auto;
     /* Enhanced scrollbar for Firefox */
     scrollbar-width: thin;
     scrollbar-color: rgba(176, 224, 230, 0.4) transparent;
 }
-
-/* ===== REMOVED DUPLICATE SCROLLBAR STYLES - Now using Apple-style above ===== */
 
 .mode.active {
     display: block;
@@ -577,16 +570,9 @@ body[data-theme="cosmos"] .productivity-glow {
 
 /* ===== ENHANCED SCROLLBAR ANIMATIONS ===== */
 
-/* Container hover state - makes scrollbar more visible */
+/* Container hover state - makes scrollbar slightly more visible */
 .task-list:hover::-webkit-scrollbar-thumb {
-    background: rgba(176, 224, 230, 0.18);
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 
-        0 4px 16px rgba(176, 224, 230, 0.2),
-        0 2px 8px rgba(255, 255, 255, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        inset 0 0 0 0.5px rgba(176, 224, 230, 0.15),
-        0 0 12px rgba(176, 224, 230, 0.3);
+    background: rgba(255, 255, 255, 0.10); /* Still very subtle */
 }
 
 /* Cosmic corner styling for scrollbar track area */
@@ -599,81 +585,48 @@ body[data-theme="cosmos"] .productivity-glow {
     padding-right: 4px; /* Add slight padding to separate scrollbar from content */
 }
 
-/* Global scrollbar styling for consistency across the app */
+/* Global scrollbar styling - Apple-style minimal */
 ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 12px;
 }
 
 ::-webkit-scrollbar-thumb {
-    /* Liquid Glass Material */
-    background: rgba(176, 224, 230, 0.08);
-    backdrop-filter: blur(12px) saturate(100%);
-    -webkit-backdrop-filter: blur(12px) saturate(100%);
-    
-    border-radius: 12px;
-    border: 0.5px solid rgba(255, 255, 255, 0.15);
-    
-    box-shadow: 
-        0 2px 8px rgba(176, 224, 230, 0.1),
-        0 1px 4px rgba(255, 255, 255, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    
-    transition: all 0.25s ease;
-    min-height: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(176, 224, 230, 0.15);
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 
-        0 4px 12px rgba(176, 224, 230, 0.2),
-        0 2px 6px rgba(255, 255, 255, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        0 0 10px rgba(176, 224, 230, 0.25);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 ::-webkit-scrollbar-corner {
     background: transparent;
 }
 
-/* Enhanced scrollbar for mode containers */
+/* Enhanced scrollbar for mode containers - also minimal */
 .mode::-webkit-scrollbar {
-    width: 10px;
+    width: 6px;
     background: transparent;
 }
 
 .mode::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 10px;
-    margin: 6px 0;
 }
 
 .mode::-webkit-scrollbar-thumb {
-    /* Liquid Glass Material - slightly more subtle for content areas */
-    background: rgba(176, 224, 230, 0.08);
-    backdrop-filter: blur(12px) saturate(100%);
-    -webkit-backdrop-filter: blur(12px) saturate(100%);
-    
-    border-radius: 10px;
-    border: 0.5px solid rgba(255, 255, 255, 0.15);
-    
-    box-shadow: 
-        0 2px 8px rgba(176, 224, 230, 0.1),
-        0 1px 4px rgba(255, 255, 255, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    
-    transition: all 0.25s ease;
-    min-height: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    transition: background 0.2s ease;
 }
 
 .mode::-webkit-scrollbar-thumb:hover {
-    background: rgba(176, 224, 230, 0.15);
+    background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.25);
     box-shadow: 
         0 4px 12px rgba(176, 224, 230, 0.2),
