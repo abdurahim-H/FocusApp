@@ -223,14 +223,11 @@
 /* Focus Mode Components */
 .focus-content {
     padding: 40px;
-    background: rgba(255, 255, 255, 0.01);  /* More transparent */
-    backdrop-filter: blur(40px) saturate(200%);  /* Stronger blur */
-    border: 1px solid rgba(255, 255, 255, 0.08);  /* Lighter border */
-    border-radius: 40px;
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15),
-        0 0 80px rgba(176, 224, 230, 0.08);  /* Subtle glow */
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     position: relative;
     z-index: 20;
 }
