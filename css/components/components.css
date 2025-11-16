@@ -7,6 +7,7 @@
 
 /* Navigation Components - DISABLED - Using apple-liquid-glass.css instead */
 /*
+.nav {
     position: fixed;
     top: 12px;
     left: 50%;
@@ -25,6 +26,7 @@
     justify-content: center;
 }
 
+.nav-btn {
     background: transparent;
     border: none;
     color: var(--text-secondary);
@@ -39,6 +41,7 @@
     text-align: center;
 }
 
+.nav-btn:hover {
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.1);
 }
@@ -58,6 +61,8 @@
 
 /* ALL NAV OVERRIDES DISABLED - Using apple-liquid-glass.css */
 /*
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn {
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -73,9 +78,13 @@
     text-shadow: none !important;
 }
 
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn::before,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn::before {
     display: none !important;
 }
 
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn:hover,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn:hover {
     background: rgba(255, 255, 255, 0.1) !important;
     color: var(--text-primary) !important;
     box-shadow: none !important;
@@ -84,6 +93,8 @@
     text-shadow: none !important;
 }
 
+.nav .liquid-glass-btn.cosmic-glass-btn.nav-btn.active,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active {
     /* iOS glass morphism - matching settings button */
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(60px) saturate(200%) !important;
@@ -105,6 +116,7 @@
     text-shadow: 0 0 12px rgba(255, 255, 255, 0.2) !important;
 }
 
+.nav.water-cosmic-container {
     background: rgba(255, 255, 255, 0.005) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -998,6 +1010,11 @@
 
 /* ===== FINAL NAV BUTTON ACTIVE STATE - HIGHEST SPECIFICITY ===== */
 /* This MUST come last to override all other rules */
+.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield.nav-btn.active,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active,
+.nav .liquid-glass-btn.liquid-glass-btn--small.nav-btn.active,
+.nav .liquid-glass-btn.nav-btn.active,
+.nav .nav-btn.active {
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(60px) saturate(200%) !important;
     -webkit-backdrop-filter: blur(60px) saturate(200%) !important;

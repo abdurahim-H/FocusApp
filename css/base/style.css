@@ -117,6 +117,7 @@ body {
 
 /* Enable pointer events only for interactive elements */
 .container > *,
+.nav,
 .settings-btn,
 .progress-3d,
 .achievement,
@@ -440,6 +441,7 @@ body[style*="--redshift-intensity"] {
 /* Prevent horizontal overflow */
 *[position="fixed"], 
 .achievement,
+.nav,
 .settings-btn,
 .progress-3d,
 .settings-modal-overlay {
@@ -453,12 +455,14 @@ body[style*="--redshift-intensity"] {
 
 /* Force hardware acceleration */
 .achievement,
+.nav,
 .settings-btn {
     transform: translateZ(0);
     backface-visibility: hidden;
 }
 
 /* Ensure UI elements are above the 3D scene */
+.nav {
     z-index: 1000 !important;
 }
 
@@ -489,6 +493,7 @@ body[style*="--redshift-intensity"] {
  * 15: .mode
  * 20-30: Content sections (.home-content, .focus-content, .task-section)
  * 100-101: Task components
+ * 1000: Navigation (.nav, .settings-btn, .progress-3d)
  * 1500: .achievement
  * 2000-2001: Settings modal
  * 2100: .close-btn (sticky)
@@ -550,6 +555,7 @@ input, textarea, select {
 }
 
 /* Prevent text selection on UI elements */
+.nav, .timer-display, .breathing-circle, .progress-3d {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;

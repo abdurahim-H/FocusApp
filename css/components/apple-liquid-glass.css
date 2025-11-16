@@ -46,6 +46,7 @@
 
 /* ===== NAVIGATION BUTTONS - APPLE STYLE ===== */
 
+.nav {
     position: fixed;
     top: 12px;
     left: 50%;
@@ -74,6 +75,8 @@
 }
 
 /* Navigation Button - Apple Pillowy Design */
+.nav .liquid-glass-btn:not(.active),
+.nav .nav-btn:not(.active) {
     /* Reset all previous styles */
     all: unset;
     box-sizing: border-box;
@@ -116,6 +119,8 @@
 }
 
 /* Hover State - Subtle glow */
+.nav .liquid-glass-btn:hover,
+.nav .nav-btn:hover {
     background: rgba(255, 255, 255, 0.015);
     border-color: rgba(255, 255, 255, 0.04);
     color: rgba(255, 255, 255, 0.85);
@@ -127,6 +132,12 @@
 }
 
 /* Active State - iOS-style glass morphism matching settings button */
+.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield.nav-btn.active,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield.nav-btn.active,
+.nav .liquid-glass-btn.liquid-glass-btn--small.nav-btn.active,
+.nav .liquid-glass-btn.nav-btn.active,
+.nav .liquid-glass-btn.active,
+.nav .nav-btn.active {
     /* iOS glass morphism - same as settings button */
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(60px) saturate(200%) !important;
@@ -149,6 +160,8 @@
 }
 
 /* Active Hover - Enhanced glass effect */
+.nav .liquid-glass-btn.active:hover,
+.nav .nav-btn.active:hover {
     background: rgba(255, 255, 255, 0.12) !important;
     backdrop-filter: blur(80px) saturate(220%) !important;
     -webkit-backdrop-filter: blur(80px) saturate(220%) !important;
@@ -164,6 +177,8 @@
 }
 
 /* Press effect */
+.nav .liquid-glass-btn:active,
+.nav .nav-btn:active {
     transform: scale(0.97);
     transition: transform 0.1s var(--apple-ease);
 }
@@ -451,6 +466,8 @@
     }
 }
 
+.nav .liquid-glass-btn.morphing,
+.nav .nav-btn.morphing,
 .ambient-controls .liquid-glass-btn.morphing,
 .timer-controls .liquid-glass-btn.morphing {
     animation: appleMorph 0.6s var(--apple-ease);
@@ -477,6 +494,8 @@
 }
 
 /* Apply pulse to active elements */
+.nav .liquid-glass-btn.active.pulsing,
+.nav .nav-btn.active.pulsing,
 .ambient-controls .liquid-glass-btn.active.pulsing,
 .timer-controls .liquid-glass-btn--primary.pulsing {
     animation: appleGlowPulse 2s var(--apple-ease) infinite;
@@ -485,12 +504,15 @@
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
 
 @media (max-width: 768px) {
+    .nav {
         top: 12px;
         padding: 3px;
         gap: 5px;
         border-radius: 40px;
     }
     
+    .nav .liquid-glass-btn:not(.active),
+    .nav .nav-btn:not(.active) {
         padding: 7px 14px;
         font-size: 12px;
         border-radius: 32px;
@@ -532,12 +554,15 @@
 }
 
 @media (max-width: 480px) {
+    .nav {
         top: 15px;
         padding: 4px;
         gap: 4px;
         border-radius: 35px;
     }
     
+    .nav .liquid-glass-btn:not(.active),
+    .nav .nav-btn:not(.active) {
         padding: 6px 12px;
         font-size: 13px;
         border-radius: 28px;
@@ -586,6 +611,8 @@
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
+    .nav .liquid-glass-btn,
+    .nav .nav-btn,
     .ambient-controls .liquid-glass-btn,
     .timer-controls .liquid-glass-btn {
         transition: none;
@@ -598,6 +625,8 @@
 }
 
 /* Focus visible for keyboard navigation */
+.nav .liquid-glass-btn:focus-visible,
+.nav .nav-btn:focus-visible,
 .ambient-controls .liquid-glass-btn:focus-visible,
 .timer-controls .liquid-glass-btn:focus-visible {
     outline: 3px solid rgba(176, 224, 230, 0.8);
@@ -606,6 +635,8 @@
 
 /* High contrast mode */
 @media (prefers-contrast: high) {
+    .nav .liquid-glass-btn,
+    .nav .nav-btn,
     .ambient-controls .liquid-glass-btn,
     .timer-controls .liquid-glass-btn {
         border-width: 2px;
@@ -616,6 +647,9 @@
 /* ===== OVERRIDE ALL PREVIOUS BUTTON STYLES ===== */
 
 /* Force override for navigation */
+.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield:not(.active),
+.nav .liquid-glass-btn.cosmic-glass-btn:not(.active),
+.nav .liquid-glass-btn.liquid-glass-btn--starfield:not(.active) {
     all: unset;
     box-sizing: border-box;
     display: inline-flex;
@@ -640,6 +674,12 @@
 }
 
 /* Force override pseudo-elements */
+.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield::before,
+.nav .liquid-glass-btn.liquid-glass-btn--small.liquid-glass-btn--starfield::after,
+.nav .liquid-glass-btn.cosmic-glass-btn::before,
+.nav .liquid-glass-btn.cosmic-glass-btn::after,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield::before,
+.nav .liquid-glass-btn.liquid-glass-btn--starfield::after {
     display: none !important;
     content: none !important;
 }
@@ -711,6 +751,8 @@
 }
 
 /* Force text visibility */
+.nav .liquid-glass-btn .btn-text,
+.nav .nav-btn .btn-text,
 .ambient-controls .liquid-glass-btn .btn-text,
 .timer-controls .liquid-glass-btn .btn-text {
     position: relative;
