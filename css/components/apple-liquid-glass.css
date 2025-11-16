@@ -48,7 +48,7 @@
 
 
 
-/* Navigation Buttons - Text Only */
+/* Navigation Buttons - Pill Style */
 .nav-buttons .liquid-glass-btn,
 .nav-buttons .nav-btn {
     all: unset;
@@ -60,30 +60,33 @@
     user-select: none;
     -webkit-user-select: none;
     
-    /* Text only - no containers */
-    background: none !important;
+    /* Pill style - inactive */
+    background: transparent !important;
     border: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     box-shadow: none !important;
-    padding: 0 !important;
+    padding: 10px 24px !important;
+    border-radius: 40px !important;
     
     /* Typography */
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(120, 120, 120, 0.8);
     text-align: center;
     white-space: nowrap;
     text-shadow: none !important;
     
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
-/* Active - just brighter text */
+/* Active - white pill with red text */
 .nav-buttons .nav-btn.active {
-    color: rgba(255, 255, 255, 1) !important;
-    font-weight: 500 !important;
+    background: rgba(255, 255, 255, 1) !important;
+    color: rgba(255, 85, 100, 1) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* ===== AMBIENT SOUND BUTTONS - APPLE STYLE ===== */

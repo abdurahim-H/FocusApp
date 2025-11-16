@@ -143,22 +143,36 @@
 /* ===== FINAL AUTHORITATIVE NAV BUTTON STYLES ===== */
 /* These rules load LAST and override everything else */
 
-/* ALL NAV BUTTONS - TEXT ONLY, NO CONTAINERS */
+/* Container with white background */
+.nav-buttons {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-radius: 50px !important;
+    padding: 8px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ALL NAV BUTTONS - Pill style */
 .nav-buttons .liquid-glass-btn,
 .nav-buttons .nav-btn {
-    background: none !important;
+    background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 0 !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    font-weight: 400 !important;
+    padding: 10px 24px !important;
+    border-radius: 40px !important;
+    color: rgba(120, 120, 120, 0.8) !important;
+    font-weight: 500 !important;
     text-shadow: none !important;
+    transition: all 0.3s ease !important;
 }
 
-/* ACTIVE - just brighter text */
+/* ACTIVE - white pill with red text */
 .nav-buttons .nav-btn.active {
-    color: rgba(255, 255, 255, 1) !important;
-    font-weight: 500 !important;
+    background: rgba(255, 255, 255, 1) !important;
+    color: rgba(255, 85, 100, 1) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
 }
