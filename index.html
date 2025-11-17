@@ -113,7 +113,16 @@
             <div class="ambient-content">
                 <div class="ambient-section">
                     <h3 class="ambient-title">Ambient Sounds</h3>
-                    <div class="ambient-controls">
+                    <div class="sound-search-container">
+                        <input type="text" 
+                               class="sound-search-input" 
+                               id="soundSearch" 
+                               placeholder="Search sounds..." 
+                               autocomplete="off"
+                               spellcheck="false">
+                        <span class="sound-search-icon">🔍</span>
+                    </div>
+                    <div class="ambient-controls" id="ambientControls">
                         <button class="liquid-glass-btn" id="rainBtn">
                             <span class="btn-icon">🌧️</span>
                             <span class="btn-text">Rain</span>

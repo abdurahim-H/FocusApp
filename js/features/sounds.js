@@ -229,12 +229,57 @@ export function setSoundVolume(type, volumePercent) {
     }
 }
 
+// Filter sound cards based on search query
+function filterSoundCards(query) {
+    const searchTerm = query.toLowerCase().trim();
+    const soundCards = document.querySelectorAll('.sound-card');
+    
+    soundCards.forEach((card, index) => {
+        const soundName = card.getAttribute('data-sound-name') || '';
+        const soundTags = card.getAttribute('data-sound-tags') || '';
+        const searchText = `${soundName} ${soundTags}`.toLowerCase();
+        
+        const matches = !searchTerm || searchText.includes(searchTerm);
+        
+        if (matches) {
+            // Stagger animation - show card
+            setTimeout(() => {
+                card.style.display = 'flex';
+                card.style.animation = 'soundCardFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+            }, index * 50); // 50ms stagger delay per card
+        } else {
+            // Hide card
+            card.style.animation = 'soundCardFadeOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            setTimeout(() => {
+                card.style.display = 'none';
+            }, 300);
+        }
+    });
+}
+
 // Setup ambient sound controls
 export function setupAmbientControls() {
     console.log('🎵 Setting up ambient controls...');
     
     // Initialize audio elements
     initAudioElements();
+    
+    // Setup search functionality
+    const searchInput = document.getElementById('soundSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            filterSoundCards(e.target.value);
+        });
+        
+        // Add spring animation on focus
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('focused');
+        });
+        
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('focused');
+        });
+    }
     
     // Rain button
     const rainBtn = document.getElementById('rainBtn');
