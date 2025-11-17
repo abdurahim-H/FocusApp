@@ -147,13 +147,6 @@
     border-bottom: none;
 }
 
-/* Legacy support - these will be overridden by liquid-glass-task styles */
-/* Removed duplicate opacity rule - handled in liquid-glass-buttons.css */
-
-.task-item.completed span {
-    text-decoration: line-through;
-}
-
 /* Ambient Mode */
 .ambient-content {
     display: flex;

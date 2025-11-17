@@ -228,39 +228,6 @@
     z-index: 2;
 }
 
-/* Task Completion Animation */
-@keyframes taskComplete {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
-}
-
-.liquid-glass-task.completing {
-    animation: taskComplete 0.6s ease-out;
-}
-
-.liquid-glass-task.completing .liquid-glass-checkbox .checkmark {
-    animation: checkboxPulse 0.6s ease-out;
-}
-
-@keyframes checkboxPulse {
-    0% { 
-        box-shadow: 
-            0 4px 16px rgba(0, 0, 0, 0.1),
-            0 0 0 0 rgba(52, 199, 89, 0.6);
-    }
-    50% { 
-        box-shadow: 
-            0 6px 20px rgba(52, 199, 89, 0.2),
-            0 0 0 8px rgba(52, 199, 89, 0.3);
-    }
-    100% { 
-        box-shadow: 
-            0 6px 20px rgba(52, 199, 89, 0.15),
-            0 0 0 0 rgba(52, 199, 89, 0);
-    }
-}
-
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
     .liquid-glass-btn {
@@ -1107,53 +1074,7 @@
         0 0 8px rgba(0, 0, 0, 0.8);
 }
 
-/* ===== COMPLETED TASK STATE ===== */
-.liquid-glass-task.completed {
-    /* No opacity reduction - use color to indicate completion */
-    background: rgba(52, 199, 89, 0.15);
-    border-color: rgba(52, 199, 89, 0.3);
-}
-
-.liquid-glass-task.completed .task-text {
-    text-decoration: line-through;
-    color: rgba(255, 255, 255, 0.85);  /* Increased from 0.6 for better visibility */
-    text-shadow: 
-        0 2px 4px rgba(0, 0, 0, 0.8),
-        0 1px 2px rgba(0, 0, 0, 0.9);
-}
-
-.liquid-glass-task.completed .liquid-glass-checkbox .checkmark {
-    background: rgba(52, 199, 89, 0.3);
-    border-color: rgba(52, 199, 89, 0.5);
-    
-    box-shadow: 
-        0 6px 20px rgba(52, 199, 89, 0.2),
-        0 3px 12px rgba(52, 199, 89, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        0 0 16px rgba(52, 199, 89, 0.4);
-}
-
-.liquid-glass-task.completed .liquid-glass-checkbox .checkmark::after {
-    opacity: 1;
-    transform: rotate(45deg) scale(1);
-}
-
 /* ===== CHECKMARK SYMBOL ===== */
-.liquid-glass-checkbox .checkmark::after {
-    content: '';
-    position: absolute;
-    left: 8px;
-    top: 4px;
-    width: 6px;
-    height: 12px;
-    border: solid rgba(255, 255, 255, 0.95);
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg) scale(0);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
-}
-
 /* ===== TASK INPUT GROUP FIXES ===== */
 .task-input-group {
     display: flex;
@@ -1348,28 +1269,6 @@
 
 .liquid-glass-task.completing {
     animation: taskComplete 0.6s ease-out;
-}
-
-@keyframes checkboxPulse {
-    0% { 
-        box-shadow: 
-            0 4px 16px rgba(0, 0, 0, 0.3),
-            0 0 0 0 rgba(52, 199, 89, 0.6);
-    }
-    50% { 
-        box-shadow: 
-            0 6px 20px rgba(52, 199, 89, 0.3),
-            0 0 0 8px rgba(52, 199, 89, 0.3);
-    }
-    100% { 
-        box-shadow: 
-            0 6px 20px rgba(52, 199, 89, 0.2),
-            0 0 0 0 rgba(52, 199, 89, 0);
-    }
-}
-
-.liquid-glass-task.completing .liquid-glass-checkbox .checkmark {
-    animation: checkboxPulse 0.6s ease-out;
 }
 
 /* ===== DARK BACKGROUND OVERLAY FOR EXTREME CASES ===== */
