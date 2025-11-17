@@ -188,32 +188,45 @@
     text-align: center;
 }
 
-/* Settings Button */
+/* Settings Button - Premium iOS Glass Design */
 .settings-btn {
     /* Override liquid-glass-btn reset */
     all: revert !important;
     position: fixed !important;
     top: 12px !important;
     right: 24px !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(60px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
-    border-top-color: rgba(255, 255, 255, 0.4) !important;
-    border-left-color: rgba(255, 255, 255, 0.35) !important;
+
+    /* Premium glass matching nav buttons */
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.18) 0%,
+        rgba(240, 248, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.12) 100%
+    ) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+
+    /* Reduced saturation to prevent green veil */
+    backdrop-filter: blur(20px) saturate(140%) brightness(1.05) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(140%) brightness(1.05) !important;
+
     color: var(--text-primary) !important;
     width: 40px !important;
     height: 40px !important;
     border-radius: 50% !important;
     cursor: pointer !important;
     font-size: 1.1em !important;
-    transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+
+    /* Smooth transitions matching nav buttons */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     z-index: 1000 !important;
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        inset 0 1px 1px rgba(255, 255, 255, 0.2),
-        0 1px 0 rgba(255, 255, 255, 0.1),
-        0 0 60px rgba(176, 224, 230, 0.1) !important;
+
+    /* Premium layered shadows */
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.12),
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.06) !important;
+
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -222,17 +235,29 @@
 }
 
 .settings-btn:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
-    backdrop-filter: blur(80px) saturate(220%) !important;
-    -webkit-backdrop-filter: blur(80px) saturate(220%) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    border-top-color: rgba(255, 255, 255, 0.5) !important;
-    box-shadow: 
-        0 12px 48px rgba(0, 0, 0, 0.4),
-        inset 0 1px 2px rgba(255, 255, 255, 0.25),
-        0 1px 0 rgba(255, 255, 255, 0.15),
-        0 0 80px rgba(176, 224, 230, 0.25) !important;
-    transform: scale(1.05) !important;
+    /* Clear glass with subtle cyan tint */
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.25) 0%,
+        rgba(240, 250, 255, 0.22) 50%,
+        rgba(255, 255, 255, 0.18) 100%
+    ) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+
+    /* NO excessive saturation - prevents green veil */
+    backdrop-filter: blur(24px) saturate(150%) brightness(1.08) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(150%) brightness(1.08) !important;
+
+    /* Subtle glow without color bleeding */
+    box-shadow:
+        0 0 24px rgba(255, 255, 255, 0.12),
+        0 6px 20px rgba(0, 0, 0, 0.15),
+        0 10px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.5),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.08) !important;
+
+    /* Rotation animation with scale */
+    transform: scale(1.08) rotate(90deg) !important;
 }
 
 .settings-btn:active {
