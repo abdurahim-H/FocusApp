@@ -152,13 +152,30 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 50vh;
-    max-height: calc(100vh - 200px); /* Respect viewport bounds */
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 900px;
+    height: 100%;
+    max-height: calc(100vh - 200px);
     position: relative;
     z-index: 20;
     overflow: hidden;
-    border-radius: 40px; /* Rounded corners for glass container */
+    padding: 40px 20px;
+}
+
+.ambient-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ambient-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    text-align: center;
 }
 
 @keyframes breathe {

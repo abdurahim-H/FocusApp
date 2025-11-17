@@ -52,19 +52,51 @@
 
 .ambient-controls {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;
-    margin-top: 20px;
-    padding: 0;
-    max-width: 800px;
     width: 100%;
+    max-width: 100%;
+    padding: 0 4px;
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+    
+    /* Custom scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(176, 224, 230, 0.3) transparent;
+}
+
+/* Webkit scrollbar styling */
+.ambient-controls::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ambient-controls::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 8px 0;
+}
+
+.ambient-controls::-webkit-scrollbar-thumb {
+    background: rgba(176, 224, 230, 0.25);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.3s ease;
+}
+
+.ambient-controls::-webkit-scrollbar-thumb:hover {
+    background: rgba(176, 224, 230, 0.4);
+    background-clip: padding-box;
 }
 
 .ambient-controls .liquid-glass-btn {
-    /* Apple's larger pill buttons */
-    min-height: 100px;
-    padding: 20px;
-    border-radius: 28px;
+    /* Apple's compact pill buttons */
+    min-height: 90px;
+    padding: 16px;
+    border-radius: 24px;
     
     /* Apple's ultra-transparent material */
     background: rgba(255, 255, 255, 0.01);
@@ -369,18 +401,20 @@
 
 @media (max-width: 768px) {
     .ambient-controls {
-        gap: 10px;
-        padding: 0 15px;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+        max-height: 400px;
+        padding: 0 4px;
     }
     
     .ambient-controls .liquid-glass-btn {
-        min-height: 90px;
-        padding: 16px;
-        border-radius: 24px;
+        min-height: 85px;
+        padding: 14px;
+        border-radius: 22px;
     }
     
     .ambient-controls .liquid-glass-btn .btn-icon {
-        font-size: 32px;
+        font-size: 30px;
     }
     
     .timer-controls {
@@ -405,9 +439,10 @@
 
 @media (max-width: 480px) {
     .ambient-controls {
-        grid-template-columns: 1fr;
-        gap: 8px;
-        padding: 0 10px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        max-height: 350px;
+        padding: 0 4px;
     }
     
     .ambient-controls .liquid-glass-btn {
