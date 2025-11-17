@@ -495,7 +495,7 @@ body[style*="--redshift-intensity"] {
 /* Background colors now controlled in components.css */
 .ambient-content,
 .task-section {
-    background-color: rgba(255, 255, 255, 0.005) !important;
+    background-color: transparent !important;
 }
 
 /* iOS Safari and Mobile Viewport Fixes */

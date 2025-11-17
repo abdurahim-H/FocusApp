@@ -161,6 +161,7 @@
     z-index: 20;
     overflow: hidden;
     padding: 40px 20px;
+    background: transparent !important;
 }
 
 .ambient-section {
