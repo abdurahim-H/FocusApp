@@ -87,14 +87,12 @@
         left: 20px;
     }
 
-    /* ===== MOBILE SCROLLBAR - FORCE HIDDEN ===== */
-    
+    /* Mobile: hide all scrollbars */
     .task-list::-webkit-scrollbar,
     .settings-modal::-webkit-scrollbar,
     .mode::-webkit-scrollbar {
         display: none !important;
         width: 0 !important;
-        height: 0 !important;
     }
     
     .task-list,
@@ -102,7 +100,6 @@
     .mode {
         scrollbar-width: none !important;
         -ms-overflow-style: none !important;
-        overflow-y: hidden !important;
     }
 }
 
@@ -253,9 +250,11 @@
 }
 
 /* Press effect - subtle scale */
-    .nav-buttons .nav-btn:active {
-        transform: scale(0.98) !important;
-    }/* Mobile adjustments */
+.nav-buttons .nav-btn:active {
+    transform: scale(0.98) !important;
+}
+
+/* Mobile adjustments */
 @media (max-width: 768px) {
     .nav-buttons .nav-btn {
         padding: 6px 12px;
@@ -268,22 +267,6 @@
         padding: 6px 10px;
         font-size: 11px;
     }
-}
-
-/* ===== UNIVERSAL SCROLLBAR STYLES (ALL SCREEN SIZES) - FORCE HIDDEN ===== */
-.task-list::-webkit-scrollbar,
-.settings-modal::-webkit-scrollbar,
-.mode::-webkit-scrollbar {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-}
-
-.task-list,
-.settings-modal,
-.mode {
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
 }
 
 /* End of responsive.css */

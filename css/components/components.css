@@ -522,40 +522,6 @@
     color: var(--accent);
 }
 
-/* Achievement Popup */
-.achievement {
-    position: fixed;
-    top: 100px;
-    right: 30px;
-    background: var(--bg-glass);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--border-glass);
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 8px 32px var(--shadow);
-    z-index: 1500;
-    max-width: 300px;
-    transform: translateX(calc(100% + 30px + 20px));
-    transition: transform 0.5s ease;
-    will-change: transform;
-    contain: layout style paint;
-}
-
-.achievement.show {
-    transform: translateX(0);
-}
-
-.achievement-title {
-    font-weight: 600;
-    color: var(--accent);
-    margin-bottom: 5px;
-}
-
-.achievement-desc {
-    font-size: 0.9em;
-    opacity: 0.8;
-}
-
 /* Session Info */
 .session-info {
     text-align: center;

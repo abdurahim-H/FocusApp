@@ -930,7 +930,7 @@
     
     /* Enhanced background for better text readability */
     background: rgba(0, 0, 0, 0.3);
-    /* Removed backdrop-filter to prevent stacking with parent .task-section */
+    /* No backdrop-filter - parent .task-section handles blur */
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -1088,7 +1088,7 @@
 /* ===== ENHANCED HOVER STATE ===== */
 .liquid-glass-task:hover {
     background: rgba(0, 0, 0, 0.5);
-    /* Removed backdrop-filter to prevent stacking with parent .task-section */
+    /* No backdrop-filter - parent handles blur */
     border-color: rgba(176, 224, 230, 0.2);
     transform: translateX(4px);
     
@@ -1109,7 +1109,7 @@
 
 /* ===== COMPLETED TASK STATE ===== */
 .liquid-glass-task.completed {
-    /* Removed opacity to prevent transparency - using only background/border to indicate completion */
+    /* No opacity reduction - use color to indicate completion */
     background: rgba(52, 199, 89, 0.15);
     border-color: rgba(52, 199, 89, 0.3);
 }

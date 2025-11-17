@@ -1,5 +1,5 @@
 import { state } from '../core/state.js';
-import { updateUniverseStats, showAchievement } from './timer.js';
+import { updateUniverseStats } from './timer.js';
 import { triggerTaskCompletionShake, triggerTimeDilationEffect } from '../graphics/camera-effects.js';
 import { triggerTaskCompletionUI, triggerTimeDilationUI } from '../ui/ui-effects.js';
 
@@ -37,7 +37,6 @@ export function toggleTask(id) {
             }
             
             updateUniverseStats();
-            showAchievement('Task Complete!', 'Great job!');
             
             triggerTaskCompletionUI(taskElement);
             
