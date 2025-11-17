@@ -464,25 +464,6 @@ export function updateDateTime() {
     }
 }
 
-// Breathing animation
-export function startBreathing() {
-    const guide = document.getElementById('breathingGuide');
-    if (!guide) return;
-    
-    let breathIn = true;
-
-    setInterval(() => {
-        if (breathIn) {
-            guide.textContent = 'Breathe In...';
-            guide.style.transform = 'scale(1.2)';
-        } else {
-            guide.textContent = 'Breathe Out...';
-            guide.style.transform = 'scale(1)';
-        }
-        breathIn = !breathIn;
-    }, 4000);
-}
-
 // Complete reset of Pomodoro cycle
 export function resetSession() {
     state.timer.isRunning = false;

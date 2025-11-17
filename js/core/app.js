@@ -153,10 +153,6 @@ export async function initApp() {
         }
 
         // Start core timers and displays
-        if (loadedModules.timer?.startBreathing) {
-            loadedModules.timer.startBreathing();
-        }
-
         if (loadedModules.timer?.updateUniverseStats) {
             loadedModules.timer.updateUniverseStats();
         }

@@ -525,7 +525,7 @@ input, textarea, select {
 }
 
 /* Prevent text selection on UI elements */
-.nav-buttons, .timer-display, .breathing-circle, .progress-3d {
+.nav-buttons, .timer-display, .progress-3d {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
