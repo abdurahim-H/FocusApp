@@ -30,6 +30,7 @@ export function updateProductivityGlow() {
 
 // Trigger task completion celebration
 export function triggerTaskCompletionUI(taskElement) {
+    console.log('🎨 triggerTaskCompletionUI called with element:', !!taskElement);
     // Disabled: This was causing unwanted green veil and transparency effects
     // Only applying celebration to individual elements, not the whole container
     
@@ -39,6 +40,7 @@ export function triggerTaskCompletionUI(taskElement) {
     // setTimeout(() => {
     //     container.classList.remove('task-celebration');
     // }, 800);
+    console.log('  ℹ️  No visual effects applied (disabled to prevent green veil)');
 }
 
 // Apply focus mode intensity
