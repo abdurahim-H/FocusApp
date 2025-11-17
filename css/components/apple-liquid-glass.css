@@ -488,7 +488,7 @@
 
 /* ===== SOUND LIBRARY MODAL SYSTEM ===== */
 
-/* Browse button - prominent call to action */
+/* Browse button - semi-transparent minimal */
 .browse-sounds-btn {
     width: 100%;
     max-width: 400px;
@@ -496,39 +496,39 @@
     padding: 18px 28px;
     margin-top: 16px;
     
-    background: rgba(138, 43, 226, 0.15);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(138, 43, 226, 0.3);
+    background: rgba(138, 43, 226, 0.05);
+    backdrop-filter: blur(40px) saturate(140%);
+    -webkit-backdrop-filter: blur(40px) saturate(140%);
+    border: 1px solid rgba(138, 43, 226, 0.15);
     border-radius: 30px;
     
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        0 2px 12px rgba(138, 43, 226, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        inset 0 0 25px rgba(138, 43, 226, 0.1),
-        0 0 40px rgba(138, 43, 226, 0.2);
+        0 6px 24px rgba(0, 0, 0, 0.15),
+        0 1px 6px rgba(138, 43, 226, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 0 20px rgba(138, 43, 226, 0.04),
+        0 0 30px rgba(138, 43, 226, 0.1);
     
     font-size: 17px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.95);
-    text-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 0 15px rgba(138, 43, 226, 0.25);
     
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
 }
 
 .browse-sounds-btn:hover {
-    background: rgba(138, 43, 226, 0.22);
-    border-color: rgba(138, 43, 226, 0.4);
+    background: rgba(138, 43, 226, 0.12);
+    border-color: rgba(138, 43, 226, 0.25);
     transform: translateY(-3px) scale(1.02);
     
     box-shadow: 
-        0 12px 48px rgba(0, 0, 0, 0.4),
-        0 4px 20px rgba(138, 43, 226, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        inset 0 0 30px rgba(138, 43, 226, 0.15),
-        0 0 60px rgba(138, 43, 226, 0.35);
+        0 10px 40px rgba(0, 0, 0, 0.25),
+        0 3px 16px rgba(138, 43, 226, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 0 25px rgba(138, 43, 226, 0.08),
+        0 0 50px rgba(138, 43, 226, 0.25);
 }
 
 .browse-sounds-btn .btn-icon {
