@@ -108,48 +108,59 @@
 
 /* ===== NAVIGATION BUTTONS - IOS CLEAR GLASS STYLE ===== */
 
-/* Container - Clean glass pill with subtle border */
+/* Container - Modern iOS glass style */
 .nav-buttons {
     position: relative;
     display: inline-flex;
-    padding: 3px !important;
+    padding: 4px !important;
     border-radius: 50px !important;
 
-    /* Clean glass container like iOS - more visible */
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    /* Vibrant glass container like latest iOS */
+    background: rgba(255, 255, 255, 0.18) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
 
-    /* Subtle polished shadow with depth */
+    /* iOS-style backdrop blur */
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+
+    /* Rich layered shadows for depth */
     box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.08),
-        0 8px 24px rgba(0, 0, 0, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        0 4px 16px rgba(0, 0, 0, 0.12),
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Animated glass pill indicator - THE ONLY VISUAL ELEMENT */
+/* Animated glass pill indicator - Prominent iOS glass */
 .nav-buttons::before {
     content: '';
     position: absolute;
-    top: 3px;
-    left: 3px;
-    height: calc(100% - 6px);
-    width: calc(33.333% - 2px);
+    top: 4px;
+    left: 4px;
+    height: calc(100% - 8px);
+    width: calc(33.333% - 2.666px);
 
-    /* Clean glass pill - visible but not too bright */
+    /* Vibrant white glass pill like iOS */
     background: linear-gradient(
         180deg,
-        rgba(255, 255, 255, 0.22) 0%,
-        rgba(255, 255, 255, 0.16) 100%
+        rgba(255, 255, 255, 0.85) 0%,
+        rgba(255, 255, 255, 0.75) 50%,
+        rgba(255, 255, 255, 0.7) 100%
     );
-    border: 0.5px solid rgba(255, 255, 255, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 50px;
 
-    /* Glass depth with layered shadows */
+    /* Frosted glass blur */
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+
+    /* Rich iOS-style shadows */
     box-shadow:
-        0 2px 6px rgba(0, 0, 0, 0.08),
-        0 4px 12px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+        0 2px 8px rgba(0, 0, 0, 0.12),
+        0 4px 16px rgba(0, 0, 0, 0.08),
+        0 8px 24px rgba(0, 0, 0, 0.04),
+        inset 0 1px 1px rgba(255, 255, 255, 0.9),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.1);
 
     /* Smooth spring animation like iOS */
     transition: left 0.35s cubic-bezier(0.32, 0.72, 0, 1);
@@ -159,15 +170,15 @@
 
 /* Position indicator based on active button */
 .nav-buttons:has([data-mode="home"].active)::before {
-    left: 3px;
+    left: 4px;
 }
 
 .nav-buttons:has([data-mode="focus"].active)::before {
-    left: calc(33.333% + 1px);
+    left: calc(33.333% + 1.333px);
 }
 
 .nav-buttons:has([data-mode="ambient"].active)::before {
-    left: calc(66.666% - 1px);
+    left: calc(66.666% - 1.333px);
 }
 
 /* Button styling - text only, NO background */
@@ -202,14 +213,14 @@
         transform 0.15s cubic-bezier(0.32, 0.72, 0, 1) !important;
 }
 
-/* Active button - just different text color, pill shows behind */
+/* Active button - dark text on bright glass pill */
 .nav-buttons .nav-btn.active {
     /* NO BACKGROUND - only text changes */
     background: transparent !important;
     border: none !important;
 
-    /* Bright text when active - pill is behind */
-    color: rgba(255, 255, 255, 0.95) !important;
+    /* Dark text on bright pill - iOS style */
+    color: rgba(0, 0, 0, 0.85) !important;
     font-weight: 600 !important;
 }
 
