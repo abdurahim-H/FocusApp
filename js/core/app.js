@@ -17,7 +17,6 @@ async function loadModules() {
         { name: 'timer', path: '../features/timer.js' },
         { name: 'tasks', path: '../features/tasks.js' },
         { name: 'sounds', path: '../features/sounds.js' },
-        { name: 'settings', path: '../ui/settings.js' },
         { name: 'navigation', path: '../ui/navigation.js' },
         { name: 'uiEffects', path: '../ui/ui-effects.js' },
         { name: 'cleanup', path: '../utils/cleanup.js' },
@@ -130,21 +129,6 @@ export async function initApp() {
         
         if (loadedModules.sounds?.setupAmbientControls) {
             loadedModules.sounds.setupAmbientControls();
-        }
-        
-		if (loadedModules.settings?.setupSettingsModal) {
-			loadedModules.settings.setupSettingsModal();
-			loadedModules.settings.setupSettingsControls();
-			
-			// Initialize iOS water enhancements
-			setTimeout(() => {
-				console.log('🚀 Initializing iOS water settings...');
-				// The iOS enhancements will auto-initialize when settings modal opens
-			}, 500);
-		}
-        
-        if (loadedModules.settings?.loadSettings) {
-            loadedModules.settings.loadSettings();
         }
         
         // Initialize notifications system

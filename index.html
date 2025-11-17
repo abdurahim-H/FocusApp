@@ -13,7 +13,6 @@
     <!-- <link rel="stylesheet" href="css/components/liquid-glass-buttons.css"> -->
     <link rel="stylesheet" href="css/components/apple-liquid-glass.css?v=1763330417270.d90cfd8d09f3">
     <link rel="stylesheet" href="css/base/responsive.css?v=1763375311264">
-    <link rel="stylesheet" href="css/components/ios-settings.css?v=1763330417270.d90cfd8d09f3">
     
     <!-- Theme Initialization Script -->
     <script>
@@ -144,105 +143,6 @@
             <span class="progress-label">Universe Energy:</span>
             <span class="progress-value" id="progressValue">0%</span>
         </div>
-
-        <!-- Settings Button -->
-        <button class="liquid-glass-btn liquid-glass-btn--small settings-btn" id="settingsBtn">
-            <span class="btn-icon">⚙️</span>
-        </button>
-
-        <!-- Settings Modal -->
-        <div class="settings-modal-overlay" id="settingsModalOverlay">
-            <div class="settings-modal">
-                <button class="liquid-glass-btn liquid-glass-btn--small close-btn" id="closeSettingsBtn" title="Close">
-                    <span class="btn-text">✕</span>
-                </button>
-                <h2>Settings</h2>
-                <div class="settings-content">
-                    
-                    <!-- Theme Selection -->
-                    <div class="settings-section">
-                        <h4>Theme</h4>
-                        <div class="theme-buttons">
-                            <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--primary" id="themeDarkBtn" data-theme="dark">
-                                <span class="btn-text">Dark</span>
-                            </button>
-                            <button class="liquid-glass-btn liquid-glass-btn--small" id="themeCosmosBtn" data-theme="cosmos">
-                                <span class="btn-text">Cosmos</span>
-                            </button>
-                            <button class="liquid-glass-btn liquid-glass-btn--small" id="themeAutoBtn" data-theme="auto">
-                                <span class="btn-text">Auto</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Focus Session Length -->
-                    <div class="settings-section">
-                        <label for="focusLengthRange" class="settings-label">Focus Duration: <span id="focusLengthValue">25</span> min</label>
-                        <div class="range-container">
-                            <input type="range" min="1" max="60" value="25" id="focusLengthRange" class="range-input">
-                        </div>
-                    </div>
-                    
-                    <!-- Short Break Duration -->
-                    <div class="settings-section">
-                        <label for="shortBreakRange" class="settings-label">Short Break Duration: <span id="shortBreakValue">5</span> min</label>
-                        <div class="range-container">
-                            <input type="range" min="1" max="30" value="5" id="shortBreakRange" class="range-input">
-                        </div>
-                    </div>
-                    
-                    <!-- Long Break Duration -->
-                    <div class="settings-section">
-                        <label for="longBreakRange" class="settings-label">Long Break Duration: <span id="longBreakValue">15</span> min</label>
-                        <div class="range-container">
-                            <input type="range" min="5" max="60" value="15" id="longBreakRange" class="range-input">
-                        </div>
-                    </div>
-                    
-                    <!-- Ambient Sound Volume -->
-                    <div class="settings-section">
-                        <label for="soundVolumeRange" class="settings-label">Ambient Sound Volume: <span id="soundVolumeValue">30</span>%</label>
-                        <div class="range-container">
-                            <input type="range" min="0" max="100" value="30" id="soundVolumeRange" class="range-input">
-                        </div>
-                    </div>
-                    
-                    <!-- Custom Greeting -->
-                    <div class="settings-section">
-                        <label for="greetingInput" class="settings-label">Greeting Message</label>
-                        <input type="text" id="greetingInput" class="text-input" maxlength="40" placeholder="Welcome to Your Universe!">
-                    </div>
-                    
-                    <!-- Desktop Notifications -->
-                    <div class="settings-section">
-                        <label class="settings-label">Desktop Notifications</label>
-                        <div class="notification-controls">
-                            <button class="liquid-glass-btn liquid-glass-btn--small" id="enableNotificationsBtn">
-                                <span class="btn-text">Enable Notifications</span>
-                            </button>
-                            <span class="notification-status" id="notificationStatus">Click to enable</span>
-                        </div>
-                        <p class="settings-description">Get notified when focus sessions and breaks complete, even when this tab is not active.</p>
-                    </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="settings-section">
-                        <div class="settings-buttons">
-                            <button class="liquid-glass-btn liquid-glass-btn--primary" id="saveSettingsBtn">
-                                <span class="btn-text">Save Settings</span>
-                            </button>
-                            <button class="liquid-glass-btn" id="resetSettingsBtn">
-                                <span class="btn-text">Reset to Default</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Save Confirmation Message -->
-                    <div id="settingsSavedMsg" class="settings-saved-msg">Settings Saved!</div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- External Dependencies -->
     <script src="https://cdn.babylonjs.com/babylon.js"></script>

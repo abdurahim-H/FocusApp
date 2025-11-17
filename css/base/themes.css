@@ -45,7 +45,6 @@ body[data-theme="cosmos"] #scene-container {
 
 /* Navigation buttons styling removed - handled in responsive.css */
 
-body[data-theme="cosmos"] .settings-btn,
 body[data-theme="cosmos"] .focus-content,
 body[data-theme="cosmos"] .task-section {
     background: linear-gradient(135deg, 
@@ -104,10 +103,8 @@ body {
 }
 
 /* Navigation buttons excluded - plain text only (responsive.css) */
-.settings-btn,
 .focus-content,
 .task-section,
-.settings-modal,
 .liquid-glass-btn,
 .task-input,
 .water-cosmic-container {

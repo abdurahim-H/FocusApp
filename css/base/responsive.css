@@ -75,13 +75,6 @@
         text-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
     }
 
-    .settings-btn {
-        top: 12px;
-        right: 20px;
-        width: 40px;
-        height: 40px;
-    }
-
     .progress-3d {
         bottom: 20px;
         left: 20px;
@@ -89,14 +82,12 @@
 
     /* Mobile: hide all scrollbars */
     .task-list::-webkit-scrollbar,
-    .settings-modal::-webkit-scrollbar,
     .mode::-webkit-scrollbar {
         display: none !important;
         width: 0 !important;
     }
     
     .task-list,
-    .settings-modal,
     .mode {
         scrollbar-width: none !important;
         -ms-overflow-style: none !important;
