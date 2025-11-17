@@ -1,14 +1,69 @@
-// Ambient Sounds Module - Optimized for large files with HTML5 Audio streaming
-// Uses HTML5 Audio elements instead of Web Audio API for better performance with large files
+// Ambient Sounds Module - Modal Library System
+// Handles modal UI, active sound chips, and audio playback for 25+ sounds
 
 import { state } from '../core/state.js';
 
-// Ambient sounds configuration
+// Comprehensive sound library with audio file mappings
 const ambientSounds = {
+    // Nature sounds
     rain: './sounds/rain_00.wav',
     ocean: './sounds/ocean_04.wav',
     forest: './sounds/forest_00.wav',
-    cafe: './sounds/crowd_0.wav'
+    thunder: './sounds/rain_00.wav', // Placeholder
+    wind: './sounds/ocean_04.wav', // Placeholder
+    stream: './sounds/rain_00.wav', // Placeholder
+    birds: './sounds/forest_00.wav', // Placeholder
+    cricket: './sounds/forest_00.wav', // Placeholder
+    
+    // Indoor sounds
+    fireplace: './sounds/rain_00.wav', // Placeholder
+    cafe: './sounds/crowd_0.wav',
+    library: './sounds/crowd_0.wav', // Placeholder
+    fan: './sounds/ocean_04.wav', // Placeholder
+    clock: './sounds/ocean_04.wav', // Placeholder
+    
+    // Urban sounds
+    city: './sounds/crowd_0.wav', // Placeholder
+    train: './sounds/ocean_04.wav', // Placeholder
+    subway: './sounds/crowd_0.wav', // Placeholder
+    construction: './sounds/crowd_0.wav', // Placeholder
+    
+    // White noise
+    whitenoise: './sounds/ocean_04.wav', // Placeholder
+    pinknoise: './sounds/ocean_04.wav', // Placeholder
+    brownnoise: './sounds/ocean_04.wav', // Placeholder
+    
+    // Musical
+    piano: './sounds/forest_00.wav', // Placeholder
+    guitar: './sounds/forest_00.wav', // Placeholder
+    chimes: './sounds/rain_00.wav', // Placeholder
+};
+
+// Sound metadata for display
+const soundMetadata = {
+    rain: { icon: '🌧️', name: 'Rain' },
+    ocean: { icon: '🌊', name: 'Ocean Waves' },
+    forest: { icon: '🌲', name: 'Forest' },
+    thunder: { icon: '⚡', name: 'Thunder' },
+    wind: { icon: '💨', name: 'Wind' },
+    stream: { icon: '💧', name: 'Stream' },
+    birds: { icon: '🐦', name: 'Birds' },
+    cricket: { icon: '🦗', name: 'Crickets' },
+    fireplace: { icon: '🔥', name: 'Fireplace' },
+    cafe: { icon: '☕', name: 'Cafe' },
+    library: { icon: '📚', name: 'Library' },
+    fan: { icon: '🌀', name: 'Fan' },
+    clock: { icon: '⏰', name: 'Clock' },
+    city: { icon: '🚗', name: 'City Traffic' },
+    train: { icon: '🚂', name: 'Train' },
+    subway: { icon: '🚇', name: 'Subway' },
+    construction: { icon: '🏗️', name: 'Construction' },
+    whitenoise: { icon: '📻', name: 'White Noise' },
+    pinknoise: { icon: '🎙️', name: 'Pink Noise' },
+    brownnoise: { icon: '🎚️', name: 'Brown Noise' },
+    piano: { icon: '🎹', name: 'Piano' },
+    guitar: { icon: '🎸', name: 'Guitar' },
+    chimes: { icon: '🎐', name: 'Wind Chimes' },
 };
 
 // HTML5 Audio elements for streaming
@@ -173,11 +228,12 @@ export async function toggleAmbientSound(type) {
         await startSound(type);
     }
     
-    // Update UI
-    updateSoundButtonState(type, !isActive);
+    // Update all UI
+    updateSoundCardState(type, !isActive);
+    updateActiveSoundsDisplay();
 }
 
-// Update button visual state
+// Update button visual state (legacy support)
 function updateSoundButtonState(type, isActive) {
     const buttonMap = {
         rain: 'rainBtn',
@@ -192,10 +248,8 @@ function updateSoundButtonState(type, isActive) {
     if (button) {
         if (isActive) {
             button.classList.add('active');
-            button.style.background = '#28a745';
         } else {
-            button.classList.remove('active'); 
-            button.style.background = '';
+            button.classList.remove('active');
         }
     }
 }
@@ -233,6 +287,7 @@ export function setSoundVolume(type, volumePercent) {
 function filterSoundCards(query) {
     const searchTerm = query.toLowerCase().trim();
     const soundCards = document.querySelectorAll('.sound-card');
+    let visibleCount = 0;
     
     soundCards.forEach((card, index) => {
         const soundName = card.getAttribute('data-sound-name') || '';
@@ -246,13 +301,133 @@ function filterSoundCards(query) {
             setTimeout(() => {
                 card.style.display = 'flex';
                 card.style.animation = 'soundCardFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
-            }, index * 50); // 50ms stagger delay per card
+            }, visibleCount * 40); // 40ms stagger delay per visible card
+            visibleCount++;
         } else {
             // Hide card
             card.style.animation = 'soundCardFadeOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards';
             setTimeout(() => {
                 card.style.display = 'none';
             }, 300);
+        }
+    });
+    
+    // Hide empty categories
+    const categories = document.querySelectorAll('.sound-category');
+    categories.forEach(category => {
+        const visibleCards = Array.from(category.querySelectorAll('.sound-card'))
+            .filter(card => card.style.display !== 'none');
+        category.style.display = visibleCards.length > 0 ? 'block' : 'none';
+    });
+}
+
+// Update active sounds chip display
+function updateActiveSoundsDisplay() {
+    const container = document.getElementById('activeSounds');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (state.sounds.active.length === 0) {
+        container.style.minHeight = '0';
+        return;
+    }
+    
+    container.style.minHeight = '40px';
+    
+    state.sounds.active.forEach(soundType => {
+        const metadata = soundMetadata[soundType];
+        if (!metadata) return;
+        
+        const chip = document.createElement('div');
+        chip.className = 'active-sound-chip';
+        chip.innerHTML = `
+            <span class="chip-icon">${metadata.icon}</span>
+            <span class="chip-name">${metadata.name}</span>
+            <span class="chip-close" data-sound="${soundType}">×</span>
+        `;
+        
+        // Add click handler to close button
+        const closeBtn = chip.querySelector('.chip-close');
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleAmbientSound(soundType);
+        });
+        
+        container.appendChild(chip);
+    });
+}
+
+// Update sound card active state
+function updateSoundCardState(soundType, isActive) {
+    const soundCards = document.querySelectorAll(`[data-sound="${soundType}"]`);
+    soundCards.forEach(card => {
+        if (isActive) {
+            card.classList.add('active');
+        } else {
+            card.classList.remove('active');
+        }
+    });
+}
+
+// Setup modal controls
+function setupModalControls() {
+    const modal = document.getElementById('soundLibraryModal');
+    const browseBtn = document.getElementById('browseSoundsBtn');
+    const closeBtn = document.getElementById('closeModalBtn');
+    const backdrop = modal?.querySelector('.modal-backdrop');
+    const searchInput = document.getElementById('modalSoundSearch');
+    
+    if (!modal || !browseBtn) return;
+    
+    // Open modal
+    browseBtn.addEventListener('click', () => {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Focus search after animation
+        setTimeout(() => {
+            searchInput?.focus();
+        }, 300);
+    });
+    
+    // Close modal
+    const closeModal = () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        // Clear search
+        if (searchInput) {
+            searchInput.value = '';
+            filterSoundCards('');
+        }
+    };
+    
+    closeBtn?.addEventListener('click', closeModal);
+    backdrop?.addEventListener('click', closeModal);
+    
+    // ESC key to close
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+    
+    // Setup search
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            filterSoundCards(e.target.value);
+        });
+    }
+    
+    // Setup sound card clicks
+    const soundCards = document.querySelectorAll('.sound-card');
+    soundCards.forEach(card => {
+        const soundType = card.getAttribute('data-sound');
+        if (soundType) {
+            card.addEventListener('click', () => {
+                toggleAmbientSound(soundType);
+            });
         }
     });
 }
@@ -264,46 +439,11 @@ export function setupAmbientControls() {
     // Initialize audio elements
     initAudioElements();
     
-    // Setup search functionality
-    const searchInput = document.getElementById('soundSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            filterSoundCards(e.target.value);
-        });
-        
-        // Add spring animation on focus
-        searchInput.addEventListener('focus', () => {
-            searchInput.parentElement.classList.add('focused');
-        });
-        
-        searchInput.addEventListener('blur', () => {
-            searchInput.parentElement.classList.remove('focused');
-        });
-    }
+    // Setup modal
+    setupModalControls();
     
-    // Rain button
-    const rainBtn = document.getElementById('rainBtn');
-    if (rainBtn) {
-        rainBtn.addEventListener('click', () => toggleAmbientSound('rain'));
-    }
-    
-    // Ocean button
-    const oceanBtn = document.getElementById('oceanBtn');
-    if (oceanBtn) {
-        oceanBtn.addEventListener('click', () => toggleAmbientSound('ocean'));
-    }
-    
-    // Forest button
-    const forestBtn = document.getElementById('forestBtn');
-    if (forestBtn) {
-        forestBtn.addEventListener('click', () => toggleAmbientSound('forest'));
-    }
-    
-    // Cafe button
-    const cafeBtn = document.getElementById('cafeBtn');
-    if (cafeBtn) {
-        cafeBtn.addEventListener('click', () => toggleAmbientSound('cafe'));
-    }
+    // Initialize active sounds display
+    updateActiveSoundsDisplay();
     
     console.log('🎵 Ambient controls ready');
 }
@@ -314,7 +454,15 @@ export function stopAllAmbientSounds() {
     
     Object.keys(audioElements).forEach(type => {
         stopSound(type);
-        updateSoundButtonState(type, false);
+    });
+    
+    // Update all UI
+    updateActiveSoundsDisplay();
+    
+    // Update all sound cards
+    const soundCards = document.querySelectorAll('.sound-card');
+    soundCards.forEach(card => {
+        card.classList.remove('active');
     });
 }
 

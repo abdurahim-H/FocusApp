@@ -486,6 +486,526 @@
     }
 }
 
+/* ===== SOUND LIBRARY MODAL SYSTEM ===== */
+
+/* Browse button - prominent call to action */
+.browse-sounds-btn {
+    width: 100%;
+    max-width: 400px;
+    min-height: 60px;
+    padding: 18px 28px;
+    margin-top: 16px;
+    
+    background: rgba(138, 43, 226, 0.15);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    border-radius: 30px;
+    
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 12px rgba(138, 43, 226, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 25px rgba(138, 43, 226, 0.1),
+        0 0 40px rgba(138, 43, 226, 0.2);
+    
+    font-size: 17px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+    
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+}
+
+.browse-sounds-btn:hover {
+    background: rgba(138, 43, 226, 0.22);
+    border-color: rgba(138, 43, 226, 0.4);
+    transform: translateY(-3px) scale(1.02);
+    
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.4),
+        0 4px 20px rgba(138, 43, 226, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 30px rgba(138, 43, 226, 0.15),
+        0 0 60px rgba(138, 43, 226, 0.35);
+}
+
+.browse-sounds-btn .btn-icon {
+    font-size: 24px;
+    filter: drop-shadow(0 2px 8px rgba(138, 43, 226, 0.6));
+}
+
+/* Active sounds display */
+.active-sounds-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    min-height: 40px;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+.active-sound-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    
+    background: rgba(138, 43, 226, 0.12);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(138, 43, 226, 0.25);
+    
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        inset 0 0 15px rgba(138, 43, 226, 0.08);
+    
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    
+    animation: chipSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.active-sound-chip .chip-icon {
+    font-size: 18px;
+}
+
+.active-sound-chip .chip-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-left: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+}
+
+.active-sound-chip .chip-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.1);
+}
+
+@keyframes chipSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Modal overlay */
+.sound-library-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.sound-library-modal.active {
+    display: flex;
+    pointer-events: auto;
+}
+
+/* Backdrop blur */
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sound-library-modal.active .modal-backdrop {
+    opacity: 1;
+}
+
+/* Modal container */
+.modal-container {
+    position: relative;
+    width: 90vw;
+    max-width: 1200px;
+    height: 85vh;
+    max-height: 900px;
+    
+    background: rgba(20, 20, 30, 0.95);
+    backdrop-filter: blur(60px) saturate(180%);
+    -webkit-backdrop-filter: blur(60px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 32px;
+    
+    box-shadow: 
+        0 25px 100px rgba(0, 0, 0, 0.6),
+        0 10px 40px rgba(138, 43, 226, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 60px rgba(138, 43, 226, 0.05);
+    
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    
+    transform: scale(0.9) translateY(30px);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sound-library-modal.active .modal-container {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Modal header */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 36px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.modal-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 0 30px rgba(138, 43, 226, 0.4);
+    margin: 0;
+}
+
+.modal-close-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 1);
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* Modal search */
+.modal-search-container {
+    position: relative;
+    padding: 24px 36px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-search-input {
+    width: 100%;
+    height: 52px;
+    padding: 14px 54px 14px 20px;
+    border-radius: 26px;
+    
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.95);
+    
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.modal-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.modal-search-input:focus {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(138, 43, 226, 0.4);
+    box-shadow: 
+        0 6px 28px rgba(0, 0, 0, 0.25),
+        0 0 40px rgba(138, 43, 226, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.modal-search-icon {
+    position: absolute;
+    right: 56px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 22px;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Modal content - scrollable */
+.modal-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 32px 36px;
+    
+    /* Custom scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(138, 43, 226, 0.3) transparent;
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: rgba(138, 43, 226, 0.3);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(138, 43, 226, 0.5);
+}
+
+/* Sound categories */
+.sound-category {
+    margin-bottom: 40px;
+}
+
+.sound-category:last-child {
+    margin-bottom: 0;
+}
+
+.category-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Sound grid */
+.sound-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+/* Sound card */
+.sound-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px 16px;
+    min-height: 140px;
+    
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    
+    box-shadow: 
+        0 6px 24px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* Typography */
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    text-align: center;
+}
+
+.sound-card .sound-icon {
+    font-size: 48px;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.sound-card .sound-name {
+    font-size: 14px;
+    letter-spacing: -0.01em;
+}
+
+/* Sound card hover */
+.sound-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-4px) scale(1.03);
+    color: rgba(255, 255, 255, 1);
+    
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.35),
+        0 4px 16px rgba(138, 43, 226, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 35px rgba(138, 43, 226, 0.3);
+}
+
+.sound-card:hover .sound-icon {
+    transform: scale(1.15) rotate(5deg);
+    filter: drop-shadow(0 6px 18px rgba(138, 43, 226, 0.5));
+}
+
+/* Sound card active state */
+.sound-card.active {
+    background: rgba(138, 43, 226, 0.18);
+    border-color: rgba(138, 43, 226, 0.35);
+    color: rgba(255, 255, 255, 0.98);
+    
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 12px rgba(138, 43, 226, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 30px rgba(138, 43, 226, 0.15),
+        0 0 50px rgba(138, 43, 226, 0.4);
+    
+    animation: cosmicSoundPulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.sound-card.active:hover {
+    background: rgba(138, 43, 226, 0.25);
+    transform: translateY(-6px) scale(1.05);
+}
+
+/* Sound card press */
+.sound-card:active {
+    transform: translateY(-2px) scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+/* Responsive modal */
+@media (max-width: 768px) {
+    .modal-container {
+        width: 95vw;
+        height: 90vh;
+        border-radius: 24px;
+    }
+    
+    .modal-header {
+        padding: 20px 24px;
+    }
+    
+    .modal-title {
+        font-size: 24px;
+    }
+    
+    .modal-close-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+    
+    .modal-search-container {
+        padding: 20px 24px;
+    }
+    
+    .modal-content {
+        padding: 24px;
+    }
+    
+    .sound-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+    
+    .sound-card {
+        min-height: 120px;
+        padding: 20px 12px;
+    }
+    
+    .sound-card .sound-icon {
+        font-size: 42px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-container {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        max-height: none;
+    }
+    
+    .modal-header {
+        padding: 16px 20px;
+    }
+    
+    .modal-title {
+        font-size: 22px;
+    }
+    
+    .modal-search-container {
+        padding: 16px 20px;
+    }
+    
+    .modal-search-input {
+        height: 48px;
+        font-size: 16px;
+    }
+    
+    .modal-content {
+        padding: 20px;
+    }
+    
+    .sound-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .sound-card {
+        min-height: 110px;
+        padding: 16px 10px;
+    }
+    
+    .sound-card .sound-icon {
+        font-size: 38px;
+    }
+    
+    .sound-card .sound-name {
+        font-size: 13px;
+    }
+}
+
 /* Active sound pulse with cosmic colors */
 @keyframes cosmicSoundPulse {
     0%, 100% {

@@ -113,52 +113,171 @@
             <div class="ambient-content">
                 <div class="ambient-section">
                     <h3 class="ambient-title">Ambient Sounds</h3>
-                    <div class="sound-search-container">
-                        <input type="text" 
-                               class="sound-search-input" 
-                               id="soundSearch" 
-                               placeholder="Search sounds..." 
-                               autocomplete="off"
-                               spellcheck="false">
-                        <span class="sound-search-icon">🔍</span>
+                    
+                    <!-- Active Sounds Display -->
+                    <div class="active-sounds-container" id="activeSounds">
+                        <!-- Active sound chips will be inserted here dynamically -->
                     </div>
-                    <div class="ambient-controls" id="ambientControls">
-                        <button class="liquid-glass-btn" id="rainBtn">
-                            <span class="btn-icon">🌧️</span>
-                            <span class="btn-text">Rain</span>
-                        </button>
-                        <button class="liquid-glass-btn" id="oceanBtn">
-                            <span class="btn-icon">🌊</span>
-                            <span class="btn-text">Ocean</span>
-                        </button>
-                        <button class="liquid-glass-btn" id="forestBtn">
-                            <span class="btn-icon">🌲</span>
-                            <span class="btn-text">Forest</span>
-                        </button>
-                        <button class="liquid-glass-btn" id="cafeBtn">
-                            <span class="btn-icon">☕</span>
-                            <span class="btn-text">Cafe</span>
-                        </button>
-                        <button class="liquid-glass-btn" id="fireBtn">
-                            <span class="btn-icon">🔥</span>
-                            <span class="btn-text">Fireplace</span>
-                        </button>
-                        <button class="liquid-glass-btn" id="windBtn">
-                            <span class="btn-icon">💨</span>
-                            <span class="btn-text">Wind</span>
-                        </button>
-                        <button class="liquid-glass-btn" id="thunderBtn">
-                            <span class="btn-icon">⚡</span>
-                            <span class="btn-text">Thunder</span>
-                        </button>
-                        <button class="liquid-glass-btn" id="birdsBtn">
-                            <span class="btn-icon">🐦</span>
-                            <span class="btn-text">Birds</span>
-                        </button>
-                        <button class="liquid-glass-btn" id="streamBtn">
-                            <span class="btn-icon">🌊</span>
-                            <span class="btn-text">Stream</span>
-                        </button>
+                    
+                    <!-- Browse Library Button -->
+                    <button class="liquid-glass-btn browse-sounds-btn" id="browseSoundsBtn">
+                        <span class="btn-icon">🎵</span>
+                        <span class="btn-text">Browse Sound Library</span>
+                    </button>
+                </div>
+                
+                <!-- Sound Library Modal -->
+                <div class="sound-library-modal" id="soundLibraryModal">
+                    <div class="modal-backdrop"></div>
+                    <div class="modal-container">
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h2 class="modal-title">Sound Library</h2>
+                            <button class="modal-close-btn" id="closeModalBtn">
+                                <span>✕</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Search Bar -->
+                        <div class="modal-search-container">
+                            <input type="text" 
+                                   class="modal-search-input" 
+                                   id="modalSoundSearch" 
+                                   placeholder="Search sounds..." 
+                                   autocomplete="off"
+                                   spellcheck="false">
+                            <span class="modal-search-icon">🔍</span>
+                        </div>
+                        
+                        <!-- Sound Grid -->
+                        <div class="modal-content">
+                            <!-- Nature Category -->
+                            <div class="sound-category">
+                                <h3 class="category-title">Nature</h3>
+                                <div class="sound-grid">
+                                    <button class="sound-card" data-sound="rain" data-sound-name="Rain" data-sound-tags="nature water weather">
+                                        <span class="sound-icon">🌧️</span>
+                                        <span class="sound-name">Rain</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="ocean" data-sound-name="Ocean Waves" data-sound-tags="nature water sea beach">
+                                        <span class="sound-icon">🌊</span>
+                                        <span class="sound-name">Ocean Waves</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="forest" data-sound-name="Forest" data-sound-tags="nature trees birds">
+                                        <span class="sound-icon">🌲</span>
+                                        <span class="sound-name">Forest</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="thunder" data-sound-name="Thunder" data-sound-tags="nature storm weather">
+                                        <span class="sound-icon">⚡</span>
+                                        <span class="sound-name">Thunder</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="wind" data-sound-name="Wind" data-sound-tags="nature weather breeze">
+                                        <span class="sound-icon">💨</span>
+                                        <span class="sound-name">Wind</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="stream" data-sound-name="Stream" data-sound-tags="nature water river">
+                                        <span class="sound-icon">💧</span>
+                                        <span class="sound-name">Stream</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="birds" data-sound-name="Birds" data-sound-tags="nature animals chirping">
+                                        <span class="sound-icon">🐦</span>
+                                        <span class="sound-name">Birds</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="cricket" data-sound-name="Crickets" data-sound-tags="nature insects night">
+                                        <span class="sound-icon">🦗</span>
+                                        <span class="sound-name">Crickets</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Indoor Category -->
+                            <div class="sound-category">
+                                <h3 class="category-title">Indoor</h3>
+                                <div class="sound-grid">
+                                    <button class="sound-card" data-sound="fireplace" data-sound-name="Fireplace" data-sound-tags="indoor fire cozy warm">
+                                        <span class="sound-icon">🔥</span>
+                                        <span class="sound-name">Fireplace</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="cafe" data-sound-name="Cafe" data-sound-tags="indoor people coffee social">
+                                        <span class="sound-icon">☕</span>
+                                        <span class="sound-name">Cafe</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="library" data-sound-name="Library" data-sound-tags="indoor quiet study">
+                                        <span class="sound-icon">📚</span>
+                                        <span class="sound-name">Library</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="fan" data-sound-name="Fan" data-sound-tags="indoor white noise">
+                                        <span class="sound-icon">🌀</span>
+                                        <span class="sound-name">Fan</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="clock" data-sound-name="Clock Ticking" data-sound-tags="indoor time rhythmic">
+                                        <span class="sound-icon">⏰</span>
+                                        <span class="sound-name">Clock</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Urban Category -->
+                            <div class="sound-category">
+                                <h3 class="category-title">Urban</h3>
+                                <div class="sound-grid">
+                                    <button class="sound-card" data-sound="city" data-sound-name="City Traffic" data-sound-tags="urban cars street">
+                                        <span class="sound-icon">🚗</span>
+                                        <span class="sound-name">City Traffic</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="train" data-sound-name="Train" data-sound-tags="urban travel transport">
+                                        <span class="sound-icon">🚂</span>
+                                        <span class="sound-name">Train</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="subway" data-sound-name="Subway" data-sound-tags="urban metro underground">
+                                        <span class="sound-icon">🚇</span>
+                                        <span class="sound-name">Subway</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="construction" data-sound-name="Construction" data-sound-tags="urban work building">
+                                        <span class="sound-icon">🏗️</span>
+                                        <span class="sound-name">Construction</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- White Noise Category -->
+                            <div class="sound-category">
+                                <h3 class="category-title">White Noise</h3>
+                                <div class="sound-grid">
+                                    <button class="sound-card" data-sound="whitenoise" data-sound-name="White Noise" data-sound-tags="noise sleep focus">
+                                        <span class="sound-icon">📻</span>
+                                        <span class="sound-name">White Noise</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="pinknoise" data-sound-name="Pink Noise" data-sound-tags="noise sleep calm">
+                                        <span class="sound-icon">🎙️</span>
+                                        <span class="sound-name">Pink Noise</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="brownnoise" data-sound-name="Brown Noise" data-sound-tags="noise deep focus">
+                                        <span class="sound-icon">🎚️</span>
+                                        <span class="sound-name">Brown Noise</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Musical Category -->
+                            <div class="sound-category">
+                                <h3 class="category-title">Musical</h3>
+                                <div class="sound-grid">
+                                    <button class="sound-card" data-sound="piano" data-sound-name="Piano" data-sound-tags="music instrument calm">
+                                        <span class="sound-icon">🎹</span>
+                                        <span class="sound-name">Piano</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="guitar" data-sound-name="Guitar" data-sound-tags="music instrument acoustic">
+                                        <span class="sound-icon">🎸</span>
+                                        <span class="sound-name">Guitar</span>
+                                    </button>
+                                    <button class="sound-card" data-sound="chimes" data-sound-name="Wind Chimes" data-sound-tags="music meditation peaceful">
+                                        <span class="sound-icon">🎐</span>
+                                        <span class="sound-name">Wind Chimes</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
