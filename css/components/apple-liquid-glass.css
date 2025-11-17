@@ -516,6 +516,13 @@
     
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
+    
+    /* Override btn-particle effect */
+    overflow: visible !important;
+}
+
+.browse-sounds-btn::before {
+    display: none !important;
 }
 
 .browse-sounds-btn:hover {
