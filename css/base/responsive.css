@@ -108,79 +108,94 @@
 
 /* ===== NAVIGATION BUTTONS - IOS CLEAR GLASS STYLE ===== */
 
-/* Container - Modern iOS glass style */
+/* Container - Premium iOS glass style */
 .nav-buttons {
     position: relative;
     display: inline-flex;
-    padding: 4px !important;
+    padding: 5px !important;
     border-radius: 50px !important;
+    gap: 2px !important;
 
-    /* Vibrant glass container like latest iOS */
-    background: rgba(255, 255, 255, 0.18) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+    /* Premium glass with subtle blue tint */
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(240, 248, 255, 0.18) 50%,
+        rgba(255, 255, 255, 0.16) 100%
+    ) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
 
-    /* iOS-style backdrop blur */
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    /* Enhanced backdrop blur */
+    backdrop-filter: blur(24px) saturate(200%) brightness(1.1) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) brightness(1.1) !important;
 
-    /* Rich layered shadows for depth */
+    /* Premium layered shadows */
     box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.12),
-        0 8px 32px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.08) !important;
+        0 2px 8px rgba(0, 0, 0, 0.06),
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        0 16px 48px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.06) !important;
+
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Animated glass pill indicator - Clear glass/water style */
+/* Animated glass pill indicator - Premium clear glass with glow */
 .nav-buttons::before {
     content: '';
     position: absolute;
-    top: 4px;
-    left: 4px;
-    height: calc(100% - 8px);
-    width: calc(33.333% - 2.666px);
+    top: 5px;
+    left: 5px;
+    height: calc(100% - 10px);
+    width: calc(33.333% - 3.333px);
 
-    /* Clear glass - very transparent with subtle white tint */
+    /* Premium clear glass with subtle cyan tint */
     background: linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.25) 0%,
-        rgba(255, 255, 255, 0.18) 50%,
-        rgba(255, 255, 255, 0.15) 100%
+        135deg,
+        rgba(255, 255, 255, 0.32) 0%,
+        rgba(240, 250, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.2) 100%
     );
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.45);
     border-radius: 50px;
 
-    /* Clear glass blur - see-through effect */
-    backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    /* Enhanced glass blur */
+    backdrop-filter: blur(12px) saturate(140%) brightness(1.05);
+    -webkit-backdrop-filter: blur(12px) saturate(140%) brightness(1.05);
 
-    /* Subtle glass shadows for depth without heaviness */
+    /* Premium shadows with subtle glow */
     box-shadow:
+        0 0 20px rgba(255, 255, 255, 0.1),
         0 2px 8px rgba(0, 0, 0, 0.08),
-        0 4px 16px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0.5px rgba(255, 255, 255, 0.5),
-        inset 0 -1px 0.5px rgba(0, 0, 0, 0.08);
+        0 4px 16px rgba(0, 0, 0, 0.06),
+        0 8px 32px rgba(0, 0, 0, 0.04),
+        inset 0 1px 1px rgba(255, 255, 255, 0.6),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.08);
 
-    /* Smooth spring animation like iOS */
-    transition: left 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    /* Smooth spring animation with all properties */
+    transition:
+        left 0.35s cubic-bezier(0.32, 0.72, 0, 1),
+        background 0.3s ease,
+        box-shadow 0.3s ease,
+        transform 0.2s ease;
 
     z-index: 0;
 }
 
 /* Position indicator based on active button */
 .nav-buttons:has([data-mode="home"].active)::before {
-    left: 4px;
+    left: 5px;
 }
 
 .nav-buttons:has([data-mode="focus"].active)::before {
-    left: calc(33.333% + 1.333px);
+    left: calc(33.333% + 2px);
 }
 
 .nav-buttons:has([data-mode="ambient"].active)::before {
-    left: calc(66.666% - 1.333px);
+    left: calc(66.666% - 1px);
 }
 
-/* Button styling - text only, NO background */
+/* Button styling - refined typography, text only */
 .nav-buttons .nav-btn {
     /* Layout */
     position: relative;
@@ -192,42 +207,49 @@
     background: transparent !important;
     border: none !important;
     border-radius: 50px !important;
-    padding: 7px 18px !important;
+    padding: 8px 20px !important;
     margin: 0 !important;
 
-    /* Text styling - light text for inactive */
-    color: rgba(255, 255, 255, 0.6) !important;
+    /* Refined typography - more elegant */
+    color: rgba(255, 255, 255, 0.55) !important;
     font-size: 13px !important;
     font-weight: 500 !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', sans-serif !important;
     text-align: center !important;
     white-space: nowrap !important;
-    letter-spacing: -0.01em !important;
+    letter-spacing: 0.01em !important;
 
-    /* Smooth transitions */
+    /* Smooth transitions for all interactions */
     cursor: pointer !important;
     transition:
-        color 0.25s cubic-bezier(0.32, 0.72, 0, 1),
-        background 0.25s cubic-bezier(0.32, 0.72, 0, 1),
-        transform 0.15s cubic-bezier(0.32, 0.72, 0, 1) !important;
+        color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        text-shadow 0.3s ease !important;
 }
 
-/* Active button - bright text on clear glass pill */
+/* Active button - enhanced with subtle scale */
 .nav-buttons .nav-btn.active {
     /* NO BACKGROUND - only text changes */
     background: transparent !important;
     border: none !important;
 
-    /* Bright white text on clear glass - more visible */
-    color: rgba(255, 255, 255, 0.95) !important;
+    /* Bright white text with subtle glow */
+    color: rgba(255, 255, 255, 0.98) !important;
     font-weight: 600 !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    text-shadow:
+        0 0 8px rgba(255, 255, 255, 0.15),
+        0 1px 2px rgba(0, 0, 0, 0.2);
+
+    /* Subtle scale for prominence */
+    transform: scale(1.02);
 }
 
-/* Hover effect - just text brightens */
+/* Hover effect - smooth text brighten with glow */
 .nav-buttons .nav-btn:not(.active):hover {
     background: transparent !important;
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+    transform: scale(1.01);
 }
 
 /* Press effect - subtle scale */
