@@ -177,6 +177,8 @@
     color: var(--text-primary);
     margin-bottom: 24px;
     text-align: center;
+    text-shadow: none;
+    background: transparent;
 }
 
 @keyframes breathe {
