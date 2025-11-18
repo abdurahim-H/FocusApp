@@ -103,6 +103,8 @@ function createAccretionDisk() {
     geometry.setAttribute('phase', new THREE.BufferAttribute(phases, 1));
     geometry.setAttribute('radius', new THREE.BufferAttribute(radii, 1));
     
+    console.log(`✨ Created ${totalParticles.toLocaleString()} accretion disk particles in ${ringLayers} layers`);
+    
     // Custom accretion disk shader with Doppler shift
     const diskMaterial = new THREE.ShaderMaterial({
         uniforms: {
@@ -149,6 +151,7 @@ function createAccretionDisk() {
         fragmentShader: `
             varying vec3 vColor;
             varying float vIntensity;
+            varying float vRadius;
             
             void main() {
                 vec2 center = gl_PointCoord - vec2(0.5);
@@ -156,13 +159,17 @@ function createAccretionDisk() {
                 
                 if (dist > 0.5) discard;
                 
-                // Soft particle effect
+                // Soft, glowing particle with dense core
                 float intensity = 1.0 - smoothstep(0.0, 0.5, dist);
-                intensity = pow(intensity, 2.0);
+                intensity = pow(intensity, 1.5);
                 
-                // Bright emission for visible disk
-                vec3 finalColor = vColor * (2.0 + vIntensity * 1.5);
-                float alpha = intensity * vIntensity * 1.2;
+                // Brighter inner regions (inverse square law approximation)
+                float radialBrightness = 1.0 - (vRadius / 72.0); // DISK_OUTER_RADIUS
+                radialBrightness = pow(radialBrightness, 0.5);
+                
+                // Intense emission with bloom
+                vec3 finalColor = vColor * (3.0 + vIntensity * 2.0) * radialBrightness;
+                float alpha = intensity * vIntensity * 1.5 * radialBrightness;
                 
                 gl_FragColor = vec4(finalColor, alpha);
             }
@@ -175,8 +182,6 @@ function createAccretionDisk() {
     
     accretionDiskSystem = new THREE.Points(geometry, diskMaterial);
     scene.add(accretionDiskSystem);
-    
-    console.log(`✨ Created ${PARTICLE_COUNT.toLocaleString()} accretion disk particles`);
 }
 
 // Create relativistic jets with synchrotron radiation
