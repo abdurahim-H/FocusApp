@@ -62,19 +62,19 @@ function createAccretionDisk() {
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 1.0;
                 colors[i3 + 2] = 0.98;
-                sizes[idx] = 3.0 + Math.random() * 2.0;
+                sizes[idx] = 1.5 + Math.random() * 1.0;
             } else if (temperature > 0.65) {
                 // Signature golden-yellow
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 0.9;
                 colors[i3 + 2] = 0.5;
-                sizes[idx] = 2.5 + Math.random() * 1.5;
+                sizes[idx] = 1.2 + Math.random() * 0.8;
             } else if (temperature > 0.45) {
                 // Deep amber
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 0.75;
                 colors[i3 + 2] = 0.3;
-                sizes[idx] = 2.0 + Math.random() * 1.0;
+                sizes[idx] = 1.0 + Math.random() * 0.6;
             } else if (temperature > 0.25) {
                 // Burnt orange
                 colors[i3] = 1.0;
@@ -196,15 +196,15 @@ function createAccretionDisk() {
                 intensity = pow(intensity, 1.3);
                 
                 // Brighter inner regions (realistic luminosity)
-                float radialBrightness = 1.0 - (vRadius / ${DISK_OUTER_RADIUS.toFixed(1)});
+                float radialBrightness = 1.0 - (vRadius / 72.0);
                 radialBrightness = pow(radialBrightness, 0.6);
                 
                 // Boost from gravitational lensing
-                float lensingBoost = 1.0 + vLensStrength * 0.5;
+                float lensingBoost = 1.0 + vLensStrength * 0.3;
                 
-                // High emission for bloom effect
-                vec3 finalColor = vColor * (3.5 + vIntensity * 2.5) * radialBrightness * lensingBoost;
-                float alpha = intensity * vIntensity * 1.8 * radialBrightness;
+                // Moderate emission to prevent overexposure
+                vec3 finalColor = vColor * (1.5 + vIntensity * 1.0) * radialBrightness * lensingBoost;
+                float alpha = intensity * vIntensity * 0.9 * radialBrightness;
                 
                 gl_FragColor = vec4(finalColor, alpha);
             }

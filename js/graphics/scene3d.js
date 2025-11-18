@@ -55,7 +55,7 @@ export function init3D() {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap for performance
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.8; // Reduced from 1.2 to prevent overexposure
+        renderer.toneMappingExposure = 0.5; // Further reduced to prevent white glow
         container.appendChild(renderer.domElement);
 
         // Create scene (assign to exported variable)
