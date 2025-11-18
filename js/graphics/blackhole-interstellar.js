@@ -7,9 +7,9 @@ let accretionDiskSystem = null;
 let polarJets = null;
 let sceneRef = null;
 
-const SCHWARZSCHILD_RADIUS = 4.0;
-const INNER_STABLE_ORBIT = SCHWARZSCHILD_RADIUS * 3;
-const DISK_OUTER_RADIUS = SCHWARZSCHILD_RADIUS * 10;
+const SCHWARZSCHILD_RADIUS = 10.0;  // Match event horizon size
+const INNER_STABLE_ORBIT = SCHWARZSCHILD_RADIUS * 1.8;  // Proper inner orbit
+const DISK_OUTER_RADIUS = SCHWARZSCHILD_RADIUS * 6.0;  // Larger, more visible disk
 
 export function createEnhancedBlackHole(scene) {
     console.log('🕳️ Creating Interstellar black hole with gravitational lensing...');
@@ -22,11 +22,11 @@ export function createEnhancedBlackHole(scene) {
 }
 
 function createAccretionDisk() {
-    console.log('💫 Creating accretion disk with 8 density layers...');
+    console.log('💫 Creating ultra-dense accretion disk...');
     
-    // Multiple layers for continuous, dense appearance
-    const ringLayers = 8;
-    const particlesPerLayer = 12000;
+    // Optimized particle system - dense but not overwhelming
+    const ringLayers = 15;
+    const particlesPerLayer = 8000;
     const totalParticles = ringLayers * particlesPerLayer;
     
     const geometry = new THREE.BufferGeometry();
@@ -39,54 +39,53 @@ function createAccretionDisk() {
     
     let idx = 0;
     for (let layer = 0; layer < ringLayers; layer++) {
-        const layerOffset = (layer - ringLayers / 2) * 0.12;
+        const layerOffset = (layer - ringLayers / 2) * 0.25;  // Proper disk thickness
         
         for (let i = 0; i < particlesPerLayer; i++) {
             const i3 = idx * 3;
-            
-            // Very dense, continuous spiral distribution
-            const spiralTurns = 8;
-            const u = i / particlesPerLayer;
-            const radius = INNER_STABLE_ORBIT + (DISK_OUTER_RADIUS - INNER_STABLE_ORBIT) * Math.pow(u, 0.25);
-            const angle = u * Math.PI * 2 * spiralTurns + layer * 0.8;
+
+            // Random distribution with radial density falloff (no spiral banding)
+            const u = Math.random();
+            const radius = INNER_STABLE_ORBIT + (DISK_OUTER_RADIUS - INNER_STABLE_ORBIT) * Math.pow(u, 0.5);
+            const angle = Math.random() * Math.PI * 2;
             
             positions[i3] = Math.cos(angle) * radius;
             positions[i3 + 1] = layerOffset * (1 - Math.pow(u, 0.5));
             positions[i3 + 2] = Math.sin(angle) * radius;
             
-            // Temperature gradient (Interstellar golden palette)
+            // Temperature gradient (Orange/Red palette like reference images)
             const temperature = 1.0 - (radius - INNER_STABLE_ORBIT) / (DISK_OUTER_RADIUS - INNER_STABLE_ORBIT);
-            
+
             if (temperature > 0.85) {
-                // Brilliant white core
+                // Bright orange inner core (less yellow)
                 colors[i3] = 1.0;
-                colors[i3 + 1] = 1.0;
-                colors[i3 + 2] = 0.95;
-                sizes[idx] = 1.2 + Math.random() * 0.8;
+                colors[i3 + 1] = 0.6;
+                colors[i3 + 2] = 0.15;
+                sizes[idx] = 0.6 + Math.random() * 0.3;
             } else if (temperature > 0.65) {
-                // Signature golden-yellow
+                // Deep orange
                 colors[i3] = 1.0;
-                colors[i3 + 1] = 0.88;
-                colors[i3 + 2] = 0.4;
-                sizes[idx] = 1.0 + Math.random() * 0.6;
+                colors[i3 + 1] = 0.5;
+                colors[i3 + 2] = 0.1;
+                sizes[idx] = 0.5 + Math.random() * 0.25;
             } else if (temperature > 0.45) {
-                // Deep amber/orange
-                colors[i3] = 1.0;
-                colors[i3 + 1] = 0.65;
-                colors[i3 + 2] = 0.2;
-                sizes[idx] = 0.9 + Math.random() * 0.5;
-            } else if (temperature > 0.25) {
                 // Burnt orange
                 colors[i3] = 1.0;
-                colors[i3 + 1] = 0.45;
-                colors[i3 + 2] = 0.1;
-                sizes[idx] = 1.2 + Math.random() * 0.8;
-            } else {
-                // Dark red edge
-                colors[i3] = 0.9;
+                colors[i3 + 1] = 0.35;
+                colors[i3 + 2] = 0.08;
+                sizes[idx] = 0.45 + Math.random() * 0.2;
+            } else if (temperature > 0.25) {
+                // Red-orange
+                colors[i3] = 0.95;
                 colors[i3 + 1] = 0.25;
                 colors[i3 + 2] = 0.05;
-                sizes[idx] = 1.0 + Math.random() * 0.6;
+                sizes[idx] = 0.4 + Math.random() * 0.2;
+            } else {
+                // Deep red edge
+                colors[i3] = 0.8;
+                colors[i3 + 1] = 0.15;
+                colors[i3 + 2] = 0.02;
+                sizes[idx] = 0.35 + Math.random() * 0.15;
             }
             
             // Keplerian orbital velocity
@@ -140,7 +139,7 @@ function createAccretionDisk() {
                 vec3 toCamera = normalize(camPos - pos);
                 
                 // Schwarzschild light deflection
-                float rs = 6.0; // Schwarzschild radius
+                float rs = 10.0; // Schwarzschild radius (matches event horizon)
                 float deflectionAngle = 4.0 * rs / dist;
                 
                 // Apply bending perpendicular to line of sight
@@ -158,7 +157,7 @@ function createAccretionDisk() {
                 vRadius = radius;
                 
                 // Orbital motion
-                float orbitalSpeed = sqrt(6.0 / radius);
+                float orbitalSpeed = sqrt(10.0 / radius);
                 float currentAngle = atan(position.z, position.x) + time * orbitalSpeed * 0.25;
                 
                 vec3 orbitPos;
@@ -196,15 +195,15 @@ function createAccretionDisk() {
                 intensity = pow(intensity, 1.3);
                 
                 // Brighter inner regions (realistic luminosity)
-                float radialBrightness = 1.0 - (vRadius / 40.0);
+                float radialBrightness = 1.0 - (vRadius / 60.0);
                 radialBrightness = pow(radialBrightness, 0.5);
                 
                 // Boost from gravitational lensing
                 float lensingBoost = 1.0 + vLensStrength * 0.4;
                 
-                // Controlled emission - visible but not blinding
-                vec3 finalColor = vColor * (0.8 + vIntensity * 0.6) * radialBrightness * lensingBoost;
-                float alpha = intensity * vIntensity * 0.7 * radialBrightness;
+                // Balanced emission - visible but controlled
+                vec3 finalColor = vColor * (0.5 + vIntensity * 0.3) * radialBrightness * lensingBoost;
+                float alpha = intensity * vIntensity * 0.6 * radialBrightness;
                 
                 gl_FragColor = vec4(finalColor, alpha);
             }
@@ -317,8 +316,8 @@ function createPolarJets() {
                     
                     float intensity = 1.0 - smoothstep(0.0, 0.5, dist);
                     intensity = pow(intensity, 2.0);
-                    
-                    gl_FragColor = vec4(vColor * 1.5, intensity * vAlpha);
+
+                    gl_FragColor = vec4(vColor * 0.8, intensity * vAlpha * 0.6);
                 }
             `,
             transparent: true,

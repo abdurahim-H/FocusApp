@@ -55,7 +55,7 @@ export function init3D() {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap for performance
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.5; // Further reduced to prevent white glow
+        renderer.toneMappingExposure = 0.4; // Balanced exposure
         container.appendChild(renderer.domElement);
 
         // Create scene (assign to exported variable)
@@ -106,12 +106,12 @@ function setupPostProcessing() {
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
 
-    // Unreal Bloom for cosmic glow - reduced strength to prevent white glow
+    // Unreal Bloom - balanced for visible disk
     const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(window.innerWidth, window.innerHeight),
-        0.8,  // strength (reduced from 1.5)
-        0.5,  // radius
-        0.95  // threshold (increased to only bloom bright objects)
+        0.6,  // moderate strength
+        0.5,  // medium radius
+        0.88  // threshold
     );
     composer.addPass(bloomPass);
 
@@ -283,8 +283,8 @@ function createBlackHoleSystem() {
 
     blackHoleSystem = new THREE.Group();
     
-    // Event horizon with custom shader
-    const horizonGeometry = new THREE.SphereGeometry(4, 64, 64);
+    // Event horizon with custom shader - larger for prominent dark center
+    const horizonGeometry = new THREE.SphereGeometry(10, 64, 64);
     const horizonMaterial = new THREE.ShaderMaterial({
         uniforms: {
             time: { value: 0 }
@@ -319,39 +319,7 @@ function createBlackHoleSystem() {
     const eventHorizon = new THREE.Mesh(horizonGeometry, horizonMaterial);
     blackHoleSystem.add(eventHorizon);
 
-    // Photon sphere (gravitational lensing ring)
-    const photonGeometry = new THREE.TorusGeometry(6, 0.2, 16, 100);
-    const photonMaterial = new THREE.ShaderMaterial({
-        uniforms: {
-            time: { value: 0 }
-        },
-        vertexShader: `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform float time;
-            varying vec2 vUv;
-            
-            void main() {
-                float intensity = sin(vUv.x * 20.0 + time * 3.0) * 0.5 + 0.5;
-                intensity *= sin(vUv.y * 5.0) * 0.5 + 0.5;
-                
-                // Much dimmer photon sphere
-                vec3 color = vec3(1.0, 0.7, 0.3) * intensity * 0.3;
-                gl_FragColor = vec4(color, intensity * 0.2);
-            }
-        `,
-        transparent: true,
-        blending: THREE.AdditiveBlending
-    });
-    
-    const photonSphere = new THREE.Mesh(photonGeometry, photonMaterial);
-    photonSphere.rotation.x = Math.PI / 2;
-    blackHoleSystem.add(photonSphere);
+    // Photon sphere removed - accretion disk provides the glow
 
     scene.add(blackHoleSystem);
     console.log('✅ Black hole created');
@@ -478,9 +446,9 @@ function animate() {
     // Update Interstellar black hole with lensing
     updateBlackHoleSystems(elapsed, delta, camera);
     
-    // Cinematic camera motion
-    const radius = 80 + Math.sin(elapsed * 0.05) * 12;
-    const height = 30 + Math.sin(elapsed * 0.1) * 8;
+    // Cinematic camera motion - side angle to show disk properly
+    const radius = 60 + Math.sin(elapsed * 0.05) * 10;
+    const height = 25 + Math.sin(elapsed * 0.1) * 8;
     camera.position.x = Math.sin(elapsed * 0.03) * radius;
     camera.position.y = height;
     camera.position.z = Math.cos(elapsed * 0.03) * radius;
