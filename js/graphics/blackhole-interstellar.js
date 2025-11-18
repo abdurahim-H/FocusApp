@@ -116,8 +116,7 @@ function createAccretionDisk() {
         uniforms: {
             time: { value: 0 },
             pixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
-            blackHolePos: { value: new THREE.Vector3(0, 0, 0) },
-            cameraPosition: { value: new THREE.Vector3() }
+            blackHolePos: { value: new THREE.Vector3(0, 0, 0) }
         },
         vertexShader: `
             attribute float size;
@@ -128,7 +127,6 @@ function createAccretionDisk() {
             uniform float time;
             uniform float pixelRatio;
             uniform vec3 blackHolePos;
-            uniform vec3 cameraPosition;
             
             varying vec3 vColor;
             varying float vIntensity;
@@ -338,9 +336,6 @@ function createPolarJets() {
 export function updateBlackHoleSystems(time, deltaTime, camera) {
     if (accretionDiskSystem) {
         accretionDiskSystem.material.uniforms.time.value = time;
-        if (camera) {
-            accretionDiskSystem.material.uniforms.cameraPosition.value.copy(camera.position);
-        }
     }
     
     if (polarJets) {
