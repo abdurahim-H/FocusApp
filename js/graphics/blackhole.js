@@ -11,7 +11,7 @@ let polarJets = null;
 const SCHWARZSCHILD_RADIUS = 6.0;
 const INNER_STABLE_ORBIT = SCHWARZSCHILD_RADIUS * 3; // ISCO at 3Rs
 const DISK_OUTER_RADIUS = SCHWARZSCHILD_RADIUS * 12;
-const PARTICLE_COUNT = 50000;
+const PARTICLE_COUNT = 80000;
 
 // Create complete black hole system
 export function createEnhancedBlackHole() {
@@ -48,7 +48,7 @@ function createAccretionDisk() {
         const orbitalVelocity = Math.sqrt(SCHWARZSCHILD_RADIUS / radius);
         
         positions[i3] = Math.cos(angle) * radius;
-        positions[i3 + 1] = (Math.random() - 0.5) * 0.3 * (1 - (radius / DISK_OUTER_RADIUS)); // Thinner at outer edge
+        positions[i3 + 1] = (Math.random() - 0.5) * 0.8 * (1 - (radius / DISK_OUTER_RADIUS)); // Thicker disk
         positions[i3 + 2] = Math.sin(angle) * radius;
         
         // Velocity perpendicular to radius
@@ -64,32 +64,32 @@ function createAccretionDisk() {
             // White-hot inner region
             colors[i3] = 1.0;
             colors[i3 + 1] = 1.0;
-            colors[i3 + 2] = 1.0;
-            sizes[i] = 0.8 + Math.random() * 0.4;
+            colors[i3 + 2] = 0.95;
+            sizes[i] = 1.5 + Math.random() * 1.0;
         } else if (temperature > 0.6) {
-            // Blue-white
-            colors[i3] = 0.9;
+            // Yellow-white (Interstellar look)
+            colors[i3] = 1.0;
             colors[i3 + 1] = 0.95;
-            colors[i3 + 2] = 1.0;
-            sizes[i] = 0.6 + Math.random() * 0.4;
+            colors[i3 + 2] = 0.7;
+            sizes[i] = 1.2 + Math.random() * 0.8;
         } else if (temperature > 0.4) {
-            // Yellow-orange
+            // Deep yellow-orange
             colors[i3] = 1.0;
-            colors[i3 + 1] = 0.9;
-            colors[i3 + 2] = 0.6;
-            sizes[i] = 0.5 + Math.random() * 0.3;
+            colors[i3 + 1] = 0.85;
+            colors[i3 + 2] = 0.4;
+            sizes[i] = 1.0 + Math.random() * 0.6;
         } else if (temperature > 0.2) {
-            // Orange
+            // Orange glow
             colors[i3] = 1.0;
-            colors[i3 + 1] = 0.7;
-            colors[i3 + 2] = 0.3;
-            sizes[i] = 0.4 + Math.random() * 0.3;
+            colors[i3 + 1] = 0.6;
+            colors[i3 + 2] = 0.2;
+            sizes[i] = 0.8 + Math.random() * 0.5;
         } else {
             // Red outer edge
             colors[i3] = 1.0;
-            colors[i3 + 1] = 0.4;
-            colors[i3 + 2] = 0.2;
-            sizes[i] = 0.3 + Math.random() * 0.2;
+            colors[i3 + 1] = 0.3;
+            colors[i3 + 2] = 0.1;
+            sizes[i] = 0.6 + Math.random() * 0.4;
         }
         
         phases[i] = Math.random() * Math.PI * 2;
@@ -142,7 +142,7 @@ function createAccretionDisk() {
                 vIntensity = (1.0 - radius / 72.0) * turbulence;
                 
                 vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
-                gl_PointSize = size * pixelRatio * (300.0 / -mvPosition.z) * turbulence;
+                gl_PointSize = size * pixelRatio * (400.0 / -mvPosition.z) * turbulence;
                 gl_Position = projectionMatrix * mvPosition;
             }
         `,
@@ -160,9 +160,9 @@ function createAccretionDisk() {
                 float intensity = 1.0 - smoothstep(0.0, 0.5, dist);
                 intensity = pow(intensity, 2.0);
                 
-                // Emission with bloom - reduced to prevent white glow
-                vec3 finalColor = vColor * (0.8 + vIntensity * 0.5);
-                float alpha = intensity * vIntensity * 0.7;
+                // Bright emission for visible disk
+                vec3 finalColor = vColor * (2.0 + vIntensity * 1.5);
+                float alpha = intensity * vIntensity * 1.2;
                 
                 gl_FragColor = vec4(finalColor, alpha);
             }
