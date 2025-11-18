@@ -62,19 +62,19 @@ function createAccretionDisk() {
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 1.0;
                 colors[i3 + 2] = 0.95;
-                sizes[idx] = 2.0 + Math.random() * 1.5;
+                sizes[idx] = 1.2 + Math.random() * 0.8;
             } else if (temperature > 0.65) {
                 // Signature golden-yellow
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 0.88;
                 colors[i3 + 2] = 0.4;
-                sizes[idx] = 1.8 + Math.random() * 1.2;
+                sizes[idx] = 1.0 + Math.random() * 0.6;
             } else if (temperature > 0.45) {
                 // Deep amber/orange
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 0.65;
                 colors[i3 + 2] = 0.2;
-                sizes[idx] = 1.5 + Math.random() * 1.0;
+                sizes[idx] = 0.9 + Math.random() * 0.5;
             } else if (temperature > 0.25) {
                 // Burnt orange
                 colors[i3] = 1.0;
@@ -202,9 +202,9 @@ function createAccretionDisk() {
                 // Boost from gravitational lensing
                 float lensingBoost = 1.0 + vLensStrength * 0.4;
                 
-                // Bright glowing emission like Interstellar
-                vec3 finalColor = vColor * (2.5 + vIntensity * 1.5) * radialBrightness * lensingBoost;
-                float alpha = intensity * vIntensity * 1.2 * radialBrightness;
+                // Controlled emission - visible but not blinding
+                vec3 finalColor = vColor * (0.8 + vIntensity * 0.6) * radialBrightness * lensingBoost;
+                float alpha = intensity * vIntensity * 0.7 * radialBrightness;
                 
                 gl_FragColor = vec4(finalColor, alpha);
             }
