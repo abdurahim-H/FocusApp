@@ -305,11 +305,11 @@ function createBlackHoleSystem() {
             varying vec3 vNormal;
             
             void main() {
-                // Pure black with subtle edge glow
+                // Pure black event horizon with subtle edge
                 float rim = 1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0)));
-                rim = pow(rim, 3.0) * 0.15;
+                rim = pow(rim, 4.0) * 0.05;
                 
-                vec3 color = vec3(0.05, 0.03, 0.02) * rim;
+                vec3 color = vec3(0.0, 0.0, 0.0) + vec3(rim);
                 gl_FragColor = vec4(color, 1.0);
             }
         `,

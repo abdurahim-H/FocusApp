@@ -61,32 +61,32 @@ function createAccretionDisk() {
                 // Brilliant white core
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 1.0;
-                colors[i3 + 2] = 0.98;
-                sizes[idx] = 0.8 + Math.random() * 0.4;
+                colors[i3 + 2] = 0.95;
+                sizes[idx] = 2.0 + Math.random() * 1.5;
             } else if (temperature > 0.65) {
                 // Signature golden-yellow
                 colors[i3] = 1.0;
-                colors[i3 + 1] = 0.9;
-                colors[i3 + 2] = 0.5;
-                sizes[idx] = 0.7 + Math.random() * 0.3;
+                colors[i3 + 1] = 0.88;
+                colors[i3 + 2] = 0.4;
+                sizes[idx] = 1.8 + Math.random() * 1.2;
             } else if (temperature > 0.45) {
-                // Deep amber
+                // Deep amber/orange
                 colors[i3] = 1.0;
-                colors[i3 + 1] = 0.75;
-                colors[i3 + 2] = 0.3;
-                sizes[idx] = 0.6 + Math.random() * 0.3;
+                colors[i3 + 1] = 0.65;
+                colors[i3 + 2] = 0.2;
+                sizes[idx] = 1.5 + Math.random() * 1.0;
             } else if (temperature > 0.25) {
                 // Burnt orange
                 colors[i3] = 1.0;
-                colors[i3 + 1] = 0.55;
-                colors[i3 + 2] = 0.15;
-                sizes[idx] = 0.5 + Math.random() * 0.25;
+                colors[i3 + 1] = 0.45;
+                colors[i3 + 2] = 0.1;
+                sizes[idx] = 1.2 + Math.random() * 0.8;
             } else {
                 // Dark red edge
-                colors[i3] = 0.85;
-                colors[i3 + 1] = 0.3;
-                colors[i3 + 2] = 0.08;
-                sizes[idx] = 0.4 + Math.random() * 0.2;
+                colors[i3] = 0.9;
+                colors[i3 + 1] = 0.25;
+                colors[i3 + 2] = 0.05;
+                sizes[idx] = 1.0 + Math.random() * 0.6;
             }
             
             // Keplerian orbital velocity
@@ -197,14 +197,14 @@ function createAccretionDisk() {
                 
                 // Brighter inner regions (realistic luminosity)
                 float radialBrightness = 1.0 - (vRadius / 40.0);
-                radialBrightness = pow(radialBrightness, 0.8);
+                radialBrightness = pow(radialBrightness, 0.5);
                 
                 // Boost from gravitational lensing
-                float lensingBoost = 1.0 + vLensStrength * 0.2;
+                float lensingBoost = 1.0 + vLensStrength * 0.4;
                 
-                // Much lower emission to prevent white blob
-                vec3 finalColor = vColor * (0.6 + vIntensity * 0.4) * radialBrightness * lensingBoost;
-                float alpha = intensity * vIntensity * 0.4 * radialBrightness;
+                // Bright glowing emission like Interstellar
+                vec3 finalColor = vColor * (2.5 + vIntensity * 1.5) * radialBrightness * lensingBoost;
+                float alpha = intensity * vIntensity * 1.2 * radialBrightness;
                 
                 gl_FragColor = vec4(finalColor, alpha);
             }
@@ -290,11 +290,13 @@ function createPolarJets() {
                     vColor = color;
                     
                     vec3 pos = position;
+                    // Move particles outward continuously
                     pos.y += time * 15.0 * sign(height);
                     
-                    float modHeight = mod(abs(pos.y), 160.0);
-                    if (modHeight > 80.0) modHeight = 160.0 - modHeight;
-                    pos.y = modHeight * sign(height);
+                    // Reset far particles to base instead of cycling
+                    if (abs(pos.y) > 80.0) {
+                        pos.y = sign(height) * 5.0;
+                    }
                     
                     float fade = 1.0 - abs(pos.y) / 80.0;
                     vAlpha = fade * (0.8 + sin(time * 3.0 + phase) * 0.2);
