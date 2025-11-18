@@ -19,8 +19,7 @@ async function loadModules() {
         { name: 'sounds', path: '../features/sounds.js' },
         { name: 'navigation', path: '../ui/navigation.js' },
         { name: 'uiEffects', path: '../ui/ui-effects.js' },
-        { name: 'cleanup', path: '../utils/cleanup.js' },
-        { name: 'notifications', path: '../utils/notifications.js' }
+        { name: 'cleanup', path: '../utils/cleanup.js' }
     ];
 
     for (const module of moduleList) {
@@ -42,18 +41,6 @@ async function loadModules() {
  */
 export async function initApp() {
     const loadedModules = await loadModules();
-    
-    // Initialize performance monitor first and make it globally available
-    if (loadedModules.performanceMonitor?.performanceMonitor) {
-        window.performanceMonitor = loadedModules.performanceMonitor.performanceMonitor;
-        console.log('✓ Performance monitor initialized and available globally');
-    }
-    
-    // Initialize adaptive quality system
-    if (loadedModules.adaptiveQuality?.adaptiveQuality) {
-        window.adaptiveQuality = loadedModules.adaptiveQuality.adaptiveQuality;
-        console.log('✓ Adaptive quality system initialized');
-    }
     
     // Initialize cleanup system first
     if (loadedModules.cleanup?.initCleanupSystem) {
@@ -129,18 +116,6 @@ export async function initApp() {
         
         if (loadedModules.sounds?.setupAmbientControls) {
             loadedModules.sounds.setupAmbientControls();
-        }
-        
-        // Initialize notifications system
-        if (loadedModules.notifications?.initNotifications) {
-            loadedModules.notifications.initNotifications();
-            
-            // Show notification prompt after a delay (for better UX)
-            setTimeout(() => {
-                if (loadedModules.notifications?.showNotificationPrompt) {
-                    loadedModules.notifications.showNotificationPrompt();
-                }
-            }, 5000); // 5 seconds after app load
         }
         
         if (loadedModules.uiEffects?.initUIEffects) {
