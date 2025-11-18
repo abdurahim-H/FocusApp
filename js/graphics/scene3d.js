@@ -49,7 +49,7 @@ export function init3D() {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap for performance
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2;
+        renderer.toneMappingExposure = 0.8; // Reduced from 1.2 to prevent overexposure
         container.appendChild(renderer.domElement);
 
         // Create scene
@@ -102,12 +102,12 @@ function setupPostProcessing() {
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
 
-    // Unreal Bloom for cosmic glow
+    // Unreal Bloom for cosmic glow - reduced strength to prevent white glow
     const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(window.innerWidth, window.innerHeight),
-        1.5,  // strength
-        0.4,  // radius
-        0.85  // threshold
+        0.8,  // strength (reduced from 1.5)
+        0.5,  // radius
+        0.95  // threshold (increased to only bloom bright objects)
     );
     composer.addPass(bloomPass);
 
@@ -336,8 +336,9 @@ function createBlackHoleSystem() {
                 float intensity = sin(vUv.x * 20.0 + time * 3.0) * 0.5 + 0.5;
                 intensity *= sin(vUv.y * 5.0) * 0.5 + 0.5;
                 
-                vec3 color = vec3(1.0, 0.7, 0.3) * intensity;
-                gl_FragColor = vec4(color, intensity * 0.6);
+                // Much dimmer photon sphere
+                vec3 color = vec3(1.0, 0.7, 0.3) * intensity * 0.3;
+                gl_FragColor = vec4(color, intensity * 0.2);
             }
         `,
         transparent: true,

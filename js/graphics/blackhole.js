@@ -160,9 +160,9 @@ function createAccretionDisk() {
                 float intensity = 1.0 - smoothstep(0.0, 0.5, dist);
                 intensity = pow(intensity, 2.0);
                 
-                // Emission with bloom
-                vec3 finalColor = vColor * (1.0 + vIntensity * 2.0);
-                float alpha = intensity * vIntensity;
+                // Emission with bloom - reduced to prevent white glow
+                vec3 finalColor = vColor * (0.8 + vIntensity * 0.5);
+                float alpha = intensity * vIntensity * 0.7;
                 
                 gl_FragColor = vec4(finalColor, alpha);
             }
