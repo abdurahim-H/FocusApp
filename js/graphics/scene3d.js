@@ -359,11 +359,11 @@ function createCosmicEnvironment() {
     
     cosmicEnvironment = new THREE.Group();
     
-    // Add nebula clouds with procedural noise
-    createNebulaClouds();
+    // Nebula clouds disabled - they were causing massive glows
+    // createNebulaClouds();
     
     scene.add(cosmicEnvironment);
-    console.log('✅ Cosmic environment ready');
+    console.log('✅ Cosmic environment ready (nebulas disabled)');
 }
 
 // Create volumetric nebula clouds
@@ -437,14 +437,14 @@ function createNebulaClouds() {
 
 // Setup lighting
 function setupLighting() {
-    const ambientLight = new THREE.AmbientLight(0x0a0a15, 0.3);
+    const ambientLight = new THREE.AmbientLight(0x0a0a15, 0.15);
     scene.add(ambientLight);
 
-    const pointLight1 = new THREE.PointLight(0x4040ff, 1.5, 200);
+    const pointLight1 = new THREE.PointLight(0x4040ff, 0.3, 200);
     pointLight1.position.set(20, 10, 20);
     scene.add(pointLight1);
 
-    const pointLight2 = new THREE.PointLight(0xff4040, 1.0, 150);
+    const pointLight2 = new THREE.PointLight(0xff4040, 0.2, 150);
     pointLight2.position.set(-20, 5, -20);
     scene.add(pointLight2);
 }
