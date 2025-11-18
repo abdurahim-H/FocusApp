@@ -6,6 +6,8 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { createEnhancedBlackHole, updateBlackHoleSystems, cleanupBlackHole } from './blackhole-interstellar.js';
+import { initializeCameraEffects, updateCameraEffects } from './camera-effects.js';
 
 // Scene globals
 let renderer, scene, camera, composer;
@@ -74,10 +76,8 @@ export function init3D() {
         createBlackHoleSystem();
         createCosmicEnvironment();
         
-        // Import and create black hole accretion disk
-        import('./blackhole.js').then(module => {
-            module.createEnhancedBlackHole();
-        });
+        // Create Interstellar-style black hole with lensing
+        createEnhancedBlackHole();
 
         // Setup lighting
         setupLighting();
@@ -471,12 +471,8 @@ function animate() {
         });
     }
     
-    // Update black hole effects
-    import('./blackhole.js').then(module => {
-        if (module.updateBlackHoleEffects) {
-            module.updateBlackHoleEffects();
-        }
-    });
+    // Update Interstellar black hole with lensing
+    updateBlackHoleSystems(elapsed, delta, camera);
     
     // Cinematic camera motion
     const radius = 50 + Math.sin(elapsed * 0.05) * 8;
