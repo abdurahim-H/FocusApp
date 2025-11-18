@@ -7,7 +7,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { createEnhancedBlackHole, updateBlackHoleSystems, cleanupBlackHole } from './blackhole-interstellar.js';
-import { initializeCameraEffects, updateCameraEffects } from './camera-effects.js';
+import { initCameraEffects, updateCameraEffects } from './camera-effects.js';
 
 // Scene globals
 let renderer, composer;
