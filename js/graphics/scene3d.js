@@ -284,7 +284,7 @@ function createBlackHoleSystem() {
     blackHoleSystem = new THREE.Group();
     
     // Event horizon with custom shader
-    const horizonGeometry = new THREE.SphereGeometry(6, 64, 64);
+    const horizonGeometry = new THREE.SphereGeometry(4, 64, 64);
     const horizonMaterial = new THREE.ShaderMaterial({
         uniforms: {
             time: { value: 0 }
@@ -320,7 +320,7 @@ function createBlackHoleSystem() {
     blackHoleSystem.add(eventHorizon);
 
     // Photon sphere (gravitational lensing ring)
-    const photonGeometry = new THREE.TorusGeometry(9, 0.3, 16, 100);
+    const photonGeometry = new THREE.TorusGeometry(6, 0.2, 16, 100);
     const photonMaterial = new THREE.ShaderMaterial({
         uniforms: {
             time: { value: 0 }
@@ -479,8 +479,8 @@ function animate() {
     updateBlackHoleSystems(elapsed, delta, camera);
     
     // Cinematic camera motion
-    const radius = 50 + Math.sin(elapsed * 0.05) * 8;
-    const height = 20 + Math.sin(elapsed * 0.1) * 5;
+    const radius = 80 + Math.sin(elapsed * 0.05) * 12;
+    const height = 30 + Math.sin(elapsed * 0.1) * 8;
     camera.position.x = Math.sin(elapsed * 0.03) * radius;
     camera.position.y = height;
     camera.position.z = Math.cos(elapsed * 0.03) * radius;

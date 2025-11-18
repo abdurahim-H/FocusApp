@@ -7,9 +7,9 @@ let accretionDiskSystem = null;
 let polarJets = null;
 let sceneRef = null;
 
-const SCHWARZSCHILD_RADIUS = 6.0;
+const SCHWARZSCHILD_RADIUS = 4.0;
 const INNER_STABLE_ORBIT = SCHWARZSCHILD_RADIUS * 3;
-const DISK_OUTER_RADIUS = SCHWARZSCHILD_RADIUS * 12;
+const DISK_OUTER_RADIUS = SCHWARZSCHILD_RADIUS * 10;
 
 export function createEnhancedBlackHole(scene) {
     console.log('🕳️ Creating Interstellar black hole with gravitational lensing...');
