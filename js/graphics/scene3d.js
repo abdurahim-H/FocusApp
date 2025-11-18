@@ -10,9 +10,13 @@ import { createEnhancedBlackHole, updateBlackHoleSystems, cleanupBlackHole } fro
 import { initializeCameraEffects, updateCameraEffects } from './camera-effects.js';
 
 // Scene globals
-let renderer, scene, camera, composer;
+let renderer, composer;
 let animationId;
 let clock = new THREE.Clock();
+
+// Export scene and camera immediately for imports
+export let scene = null;
+export let camera = null;
 
 // Scene objects
 export let blackHoleSystem = null;
@@ -54,11 +58,11 @@ export function init3D() {
         renderer.toneMappingExposure = 0.8; // Reduced from 1.2 to prevent overexposure
         container.appendChild(renderer.domElement);
 
-        // Create scene
+        // Create scene (assign to exported variable)
         scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x000005, 0.00015);
 
-        // Setup camera with cinematic FOV
+        // Setup camera with cinematic FOV (assign to exported variable)
         camera = new THREE.PerspectiveCamera(
             75,
             window.innerWidth / window.innerHeight,
@@ -524,4 +528,4 @@ function randomGaussian() {
 }
 
 // Export for external access
-export { scene, camera, renderer, stats };
+export { renderer, stats };
