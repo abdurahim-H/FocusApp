@@ -80,8 +80,8 @@ export function init3D() {
         createBlackHoleSystem();
         createCosmicEnvironment();
         
-        // Create Interstellar-style black hole with lensing
-        createEnhancedBlackHole();
+        // Create Interstellar-style black hole with lensing (pass scene)
+        createEnhancedBlackHole(scene);
 
         // Setup lighting
         setupLighting();

@@ -2,17 +2,18 @@
 // Recreates the iconic accretion disk with proper light bending
 
 import * as THREE from 'three';
-import { scene } from './scene3d.js';
 
 let accretionDiskSystem = null;
 let polarJets = null;
+let sceneRef = null;
 
 const SCHWARZSCHILD_RADIUS = 6.0;
 const INNER_STABLE_ORBIT = SCHWARZSCHILD_RADIUS * 3;
 const DISK_OUTER_RADIUS = SCHWARZSCHILD_RADIUS * 12;
 
-export function createEnhancedBlackHole() {
+export function createEnhancedBlackHole(scene) {
     console.log('🕳️ Creating Interstellar black hole with gravitational lensing...');
+    sceneRef = scene;
     
     createAccretionDisk();
     createPolarJets();
@@ -217,7 +218,7 @@ function createAccretionDisk() {
     });
     
     accretionDiskSystem = new THREE.Points(geometry, diskMaterial);
-    scene.add(accretionDiskSystem);
+    sceneRef.add(accretionDiskSystem);
 }
 
 function createPolarJets() {
@@ -330,7 +331,7 @@ function createPolarJets() {
         polarJets.add(jet);
     }
     
-    scene.add(polarJets);
+    sceneRef.add(polarJets);
     console.log('✨ Polar jets created with magnetic field structure');
 }
 
@@ -353,7 +354,7 @@ export function cleanupBlackHole() {
     if (accretionDiskSystem) {
         accretionDiskSystem.geometry.dispose();
         accretionDiskSystem.material.dispose();
-        scene.remove(accretionDiskSystem);
+        if (sceneRef) sceneRef.remove(accretionDiskSystem);
         accretionDiskSystem = null;
     }
     
@@ -362,7 +363,7 @@ export function cleanupBlackHole() {
             jet.geometry.dispose();
             jet.material.dispose();
         });
-        scene.remove(polarJets);
+        if (sceneRef) sceneRef.remove(polarJets);
         polarJets = null;
     }
 }
