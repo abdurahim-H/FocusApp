@@ -3,7 +3,6 @@
  * Enhanced with better notification handling and debugging
  */
 import { state } from '../core/state.js';
-import { triggerFocusIntensification } from '../graphics/blackhole.js';
 import { triggerFocusIntensity, triggerSessionCompleteUI, triggerBlackHoleApproachUI } from '../ui/ui-effects.js';
 import { trackSetInterval } from '../utils/cleanup.js';
 import { 
@@ -70,7 +69,7 @@ export function startTimer() {
     if (pauseBtn) pauseBtn.classList.remove('hidden');
 
     if (!state.timer.isBreak) {
-        triggerFocusIntensification();
+        // triggerFocusIntensification(); // Disabled for Three.js migration
         triggerFocusIntensity();
     } else {
         triggerBlackHoleApproachUI();
