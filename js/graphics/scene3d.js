@@ -6,11 +6,13 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
 import { createEnhancedBlackHole, updateBlackHoleSystems, cleanupBlackHole } from './blackhole-interstellar.js';
 import { initCameraEffects, updateCameraEffects } from './camera-effects.js';
 
 // Scene globals
 let renderer, composer;
+let fxaaPass = null;  // Store FXAA pass for resize updates
 let animationId;
 let clock = new THREE.Clock();
 
@@ -55,7 +57,7 @@ export function init3D() {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap for performance
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.4; // Balanced exposure
+        renderer.toneMappingExposure = 0.38; // Moderate
         container.appendChild(renderer.domElement);
 
         // Create scene (assign to exported variable)
@@ -106,14 +108,60 @@ function setupPostProcessing() {
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
 
-    // Unreal Bloom - balanced for visible disk
+    // Unreal Bloom - moderate
     const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(window.innerWidth, window.innerHeight),
-        0.6,  // moderate strength
-        0.5,  // medium radius
-        0.88  // threshold
+        0.7,  // moderate bloom
+        0.6,  // medium radius
+        0.87  // medium threshold
     );
     composer.addPass(bloomPass);
+
+    // Radial Blur - creates silky motion trails around black hole
+    const radialBlurShader = {
+        uniforms: {
+            'tDiffuse': { value: null },
+            'center': { value: new THREE.Vector2(0.5, 0.5) },
+            'strength': { value: 0.3 },
+            'samples': { value: 16 }
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            uniform sampler2D tDiffuse;
+            uniform vec2 center;
+            uniform float strength;
+            uniform int samples;
+            varying vec2 vUv;
+
+            void main() {
+                vec4 color = vec4(0.0);
+                vec2 toCenter = center - vUv;
+                float distanceFromCenter = length(toCenter);
+
+                // Blur more near the edges, less at center
+                float blur = strength * smoothstep(0.0, 0.7, distanceFromCenter);
+
+                // Sample along radial direction
+                for (int i = 0; i < 16; i++) {
+                    float t = float(i) / float(16 - 1);
+                    vec2 offset = toCenter * blur * (t - 0.5);
+                    color += texture2D(tDiffuse, vUv + offset);
+                }
+
+                color /= float(16);
+                gl_FragColor = color;
+            }
+        `
+    };
+
+    const radialBlurPass = new ShaderPass(radialBlurShader);
+    composer.addPass(radialBlurPass);
 
     // Chromatic Aberration shader
     const chromaticAberrationShader = {
@@ -146,7 +194,14 @@ function setupPostProcessing() {
     const chromaticPass = new ShaderPass(chromaticAberrationShader);
     composer.addPass(chromaticPass);
 
-    console.log('📸 Post-processing pipeline ready');
+    // FXAA Anti-Aliasing - smooth all particle edges
+    fxaaPass = new ShaderPass(FXAAShader);
+    const pixelRatio = renderer.getPixelRatio();
+    fxaaPass.material.uniforms['resolution'].value.x = 1 / (window.innerWidth * pixelRatio);
+    fxaaPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * pixelRatio);
+    composer.addPass(fxaaPass);
+
+    console.log('📸 Post-processing pipeline ready (with FXAA anti-aliasing)');
 }
 
 // Create GPU-accelerated starfield with 100,000+ stars
@@ -283,8 +338,8 @@ function createBlackHoleSystem() {
 
     blackHoleSystem = new THREE.Group();
     
-    // Event horizon with custom shader - larger for prominent dark center
-    const horizonGeometry = new THREE.SphereGeometry(10, 64, 64);
+    // Event horizon with custom shader - sized to match black hole
+    const horizonGeometry = new THREE.SphereGeometry(6, 64, 64);
     const horizonMaterial = new THREE.ShaderMaterial({
         uniforms: {
             time: { value: 0 }
@@ -446,9 +501,9 @@ function animate() {
     // Update Interstellar black hole with lensing
     updateBlackHoleSystems(elapsed, delta, camera);
     
-    // Cinematic camera motion - side angle to show disk properly
-    const radius = 60 + Math.sin(elapsed * 0.05) * 10;
-    const height = 25 + Math.sin(elapsed * 0.1) * 8;
+    // Cinematic camera motion - side angle to show disk properly (closer for better proportions)
+    const radius = 45 + Math.sin(elapsed * 0.05) * 8;
+    const height = 20 + Math.sin(elapsed * 0.1) * 6;
     camera.position.x = Math.sin(elapsed * 0.03) * radius;
     camera.position.y = height;
     camera.position.z = Math.cos(elapsed * 0.03) * radius;
@@ -475,6 +530,13 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     composer.setSize(window.innerWidth, window.innerHeight);
+
+    // Update FXAA resolution
+    if (fxaaPass) {
+        const pixelRatio = renderer.getPixelRatio();
+        fxaaPass.material.uniforms['resolution'].value.x = 1 / (window.innerWidth * pixelRatio);
+        fxaaPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * pixelRatio);
+    }
 }
 
 // Cleanup

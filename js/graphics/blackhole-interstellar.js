@@ -5,28 +5,111 @@ import * as THREE from 'three';
 
 let accretionDiskSystem = null;
 let polarJets = null;
+let volumetricGlowMesh = null;
 let sceneRef = null;
 
-const SCHWARZSCHILD_RADIUS = 10.0;  // Match event horizon size
-const INNER_STABLE_ORBIT = SCHWARZSCHILD_RADIUS * 1.8;  // Proper inner orbit
-const DISK_OUTER_RADIUS = SCHWARZSCHILD_RADIUS * 6.0;  // Larger, more visible disk
+const SCHWARZSCHILD_RADIUS = 6.0;  // Smaller black hole size
+const INNER_STABLE_ORBIT = SCHWARZSCHILD_RADIUS * 1.5;  // Much closer to event horizon
+const DISK_OUTER_RADIUS = SCHWARZSCHILD_RADIUS * 3.5;  // Compact, proportional disk
 
 export function createEnhancedBlackHole(scene) {
     console.log('🕳️ Creating Interstellar black hole with gravitational lensing...');
     sceneRef = scene;
-    
+
+    // Volumetric glow layer removed - accretion disk particles provide the glow
     createAccretionDisk();
     createPolarJets();
-    
+
     console.log('✅ Black hole system complete');
+}
+
+function createVolumetricGlowLayer() {
+    console.log('🌟 Creating smooth volumetric glow layer...');
+
+    // Create a smooth torus mesh for continuous glow
+    const innerRadius = INNER_STABLE_ORBIT * 1.2;
+    const outerRadius = DISK_OUTER_RADIUS * 0.9;
+    const avgRadius = (innerRadius + outerRadius) / 2;
+    const tubeRadius = (outerRadius - innerRadius) / 2;
+
+    const geometry = new THREE.TorusGeometry(avgRadius, tubeRadius, 64, 128);
+
+    const material = new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 },
+            innerRadius: { value: INNER_STABLE_ORBIT },
+            outerRadius: { value: DISK_OUTER_RADIUS },
+            glowColor: { value: new THREE.Color(1.0, 0.35, 0.08) }
+        },
+        vertexShader: `
+            varying vec3 vPosition;
+            varying vec3 vNormal;
+            varying float vDistanceFromCenter;
+            uniform float innerRadius;
+            uniform float outerRadius;
+
+            void main() {
+                vPosition = position;
+                vNormal = normal;
+
+                // Calculate distance from black hole center
+                vec3 worldPos = (modelMatrix * vec4(position, 1.0)).xyz;
+                float distFromCenter = length(worldPos.xz);
+                vDistanceFromCenter = distFromCenter;
+
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            varying vec3 vPosition;
+            varying vec3 vNormal;
+            varying float vDistanceFromCenter;
+            uniform float time;
+            uniform float innerRadius;
+            uniform float outerRadius;
+            uniform vec3 glowColor;
+
+            void main() {
+                // Radial gradient from inner to outer edge
+                float normalizedDist = (vDistanceFromCenter - innerRadius) / (outerRadius - innerRadius);
+                normalizedDist = clamp(normalizedDist, 0.0, 1.0);
+
+                // Brighter at inner edge, fade to outer
+                float radialIntensity = 1.0 - normalizedDist;
+                radialIntensity = pow(radialIntensity, 0.8);
+
+                // Vertical falloff for disk thickness
+                float verticalFalloff = 1.0 - abs(vNormal.y);
+                verticalFalloff = pow(verticalFalloff, 1.5);
+
+                // Subtle animation
+                float pulse = 0.9 + sin(time * 1.5 + vDistanceFromCenter * 0.1) * 0.1;
+
+                // Combine effects
+                float alpha = radialIntensity * verticalFalloff * pulse * 0.4;
+                vec3 finalColor = glowColor * (1.2 + radialIntensity * 0.5);
+
+                gl_FragColor = vec4(finalColor, alpha);
+            }
+        `,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+    });
+
+    volumetricGlowMesh = new THREE.Mesh(geometry, material);
+    sceneRef.add(volumetricGlowMesh);
+
+    console.log('✨ Volumetric glow layer created (smooth base for particles)');
 }
 
 function createAccretionDisk() {
     console.log('💫 Creating ultra-dense accretion disk...');
     
-    // Optimized particle system - dense but not overwhelming
-    const ringLayers = 15;
-    const particlesPerLayer = 8000;
+    // Medium particle count - goldilocks zone
+    const ringLayers = 20;
+    const particlesPerLayer = 13000;
     const totalParticles = ringLayers * particlesPerLayer;
     
     const geometry = new THREE.BufferGeometry();
@@ -39,7 +122,7 @@ function createAccretionDisk() {
     
     let idx = 0;
     for (let layer = 0; layer < ringLayers; layer++) {
-        const layerOffset = (layer - ringLayers / 2) * 0.25;  // Proper disk thickness
+        const layerOffset = (layer - ringLayers / 2) * 0.15;  // Thinner for smoother look
         
         for (let i = 0; i < particlesPerLayer; i++) {
             const i3 = idx * 3;
@@ -57,35 +140,30 @@ function createAccretionDisk() {
             const temperature = 1.0 - (radius - INNER_STABLE_ORBIT) / (DISK_OUTER_RADIUS - INNER_STABLE_ORBIT);
 
             if (temperature > 0.85) {
-                // Bright orange inner core (less yellow)
-                colors[i3] = 1.0;
-                colors[i3 + 1] = 0.6;
-                colors[i3 + 2] = 0.15;
-                sizes[idx] = 0.6 + Math.random() * 0.3;
-            } else if (temperature > 0.65) {
-                // Deep orange
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 0.5;
                 colors[i3 + 2] = 0.1;
-                sizes[idx] = 0.5 + Math.random() * 0.25;
-            } else if (temperature > 0.45) {
-                // Burnt orange
+                sizes[idx] = 0.35 + Math.random() * 0.2;
+            } else if (temperature > 0.65) {
                 colors[i3] = 1.0;
-                colors[i3 + 1] = 0.35;
+                colors[i3 + 1] = 0.4;
                 colors[i3 + 2] = 0.08;
-                sizes[idx] = 0.45 + Math.random() * 0.2;
+                sizes[idx] = 0.3 + Math.random() * 0.2;
+            } else if (temperature > 0.45) {
+                colors[i3] = 1.0;
+                colors[i3 + 1] = 0.32;
+                colors[i3 + 2] = 0.06;
+                sizes[idx] = 0.28 + Math.random() * 0.15;
             } else if (temperature > 0.25) {
-                // Red-orange
                 colors[i3] = 0.95;
-                colors[i3 + 1] = 0.25;
-                colors[i3 + 2] = 0.05;
-                sizes[idx] = 0.4 + Math.random() * 0.2;
+                colors[i3 + 1] = 0.22;
+                colors[i3 + 2] = 0.04;
+                sizes[idx] = 0.25 + Math.random() * 0.12;
             } else {
-                // Deep red edge
-                colors[i3] = 0.8;
+                colors[i3] = 0.9;
                 colors[i3 + 1] = 0.15;
                 colors[i3 + 2] = 0.02;
-                sizes[idx] = 0.35 + Math.random() * 0.15;
+                sizes[idx] = 0.22 + Math.random() * 0.1;
             }
             
             // Keplerian orbital velocity
@@ -131,7 +209,8 @@ function createAccretionDisk() {
             varying float vIntensity;
             varying float vRadius;
             varying float vLensStrength;
-            
+            varying float vCameraDistance;
+
             // Gravitational lensing approximation
             vec3 applyGravitationalLensing(vec3 pos, vec3 camPos) {
                 vec3 toBH = pos - blackHolePos;
@@ -139,16 +218,16 @@ function createAccretionDisk() {
                 vec3 toCamera = normalize(camPos - pos);
                 
                 // Schwarzschild light deflection
-                float rs = 10.0; // Schwarzschild radius (matches event horizon)
+                float rs = 6.0; // Schwarzschild radius (matches event horizon)
                 float deflectionAngle = 4.0 * rs / dist;
                 
                 // Apply bending perpendicular to line of sight
                 vec3 perpendicular = cross(normalize(toBH), toCamera);
                 vec3 deflectionDir = normalize(cross(perpendicular, toBH));
-                
+
                 // Stronger effect closer to event horizon
-                float strength = smoothstep(40.0, 10.0, dist);
-                
+                float strength = smoothstep(24.0, 6.0, dist);
+
                 return pos + deflectionDir * deflectionAngle * strength;
             }
             
@@ -157,7 +236,7 @@ function createAccretionDisk() {
                 vRadius = radius;
                 
                 // Orbital motion
-                float orbitalSpeed = sqrt(10.0 / radius);
+                float orbitalSpeed = sqrt(6.0 / radius);
                 float currentAngle = atan(position.z, position.x) + time * orbitalSpeed * 0.25;
                 
                 vec3 orbitPos;
@@ -172,9 +251,14 @@ function createAccretionDisk() {
                 // Dynamic intensity
                 float turbulence = 1.0 + sin(time * 3.0 + phase) * 0.15;
                 vIntensity = 0.85 + sin(time * 2.5 + phase * 2.0) * 0.15;
-                
+
+                // Calculate camera distance for soft particle blending
                 vec4 mvPosition = modelViewMatrix * vec4(lensedPos, 1.0);
-                gl_PointSize = size * pixelRatio * (600.0 / -mvPosition.z) * turbulence;
+                vCameraDistance = -mvPosition.z;
+
+                // Adaptive point size based on distance
+                float distanceFactor = 750.0 / max(vCameraDistance, 1.0);
+                gl_PointSize = size * pixelRatio * distanceFactor * turbulence;
                 gl_Position = projectionMatrix * mvPosition;
             }
         `,
@@ -183,28 +267,45 @@ function createAccretionDisk() {
             varying float vIntensity;
             varying float vRadius;
             varying float vLensStrength;
-            
+            varying float vCameraDistance;
+
             void main() {
                 vec2 center = gl_PointCoord - vec2(0.5);
-                float dist = length(center);
-                
-                if (dist > 0.5) discard;
-                
-                // Soft, volumetric glow
-                float intensity = 1.0 - smoothstep(0.0, 0.5, dist);
-                intensity = pow(intensity, 1.3);
-                
-                // Brighter inner regions (realistic luminosity)
-                float radialBrightness = 1.0 - (vRadius / 60.0);
-                radialBrightness = pow(radialBrightness, 0.5);
-                
+                float dist = length(center) * 2.0;
+
+                // Smooth Gaussian falloff for soft, blended particles
+                float gaussianFalloff = exp(-dist * dist * 3.5);
+
+                // Additional soft edge with cubic smoothstep
+                float edgeSoftness = 1.0 - smoothstep(0.0, 1.0, dist);
+                edgeSoftness = edgeSoftness * edgeSoftness * (3.0 - 2.0 * edgeSoftness);
+
+                // Combine Gaussian core with soft edges
+                float intensity = gaussianFalloff * edgeSoftness;
+
+                // Brighter inner regions with smooth gradient
+                float radialBrightness = 1.0 - (vRadius / 21.0);
+                radialBrightness = pow(radialBrightness, 0.6);
+
                 // Boost from gravitational lensing
-                float lensingBoost = 1.0 + vLensStrength * 0.4;
-                
-                // Balanced emission - visible but controlled
-                vec3 finalColor = vColor * (0.5 + vIntensity * 0.3) * radialBrightness * lensingBoost;
-                float alpha = intensity * vIntensity * 0.6 * radialBrightness;
-                
+                float lensingBoost = 1.0 + vLensStrength * 0.5;
+
+                // HDR-aware color blending - prevents oversaturation
+                vec3 baseColor = vColor * radialBrightness;
+                vec3 glowColor = baseColor * (1.0 + vIntensity * 0.4);
+
+                // Distance-based soft particle blending
+                // Closer particles are softer, distant particles sharper
+                float distanceSoftness = smoothstep(30.0, 90.0, vCameraDistance);
+                float softBlend = mix(0.95, 0.75, distanceSoftness);
+
+                // Smooth alpha with distance-based falloff
+                float alpha = intensity * vIntensity * softBlend * radialBrightness * lensingBoost;
+                alpha = pow(alpha, 0.85 + distanceSoftness * 0.15); // Adaptive alpha curve
+
+                // Apply soft color with smooth blending
+                vec3 finalColor = mix(baseColor, glowColor, intensity * 0.7);
+
                 gl_FragColor = vec4(finalColor, alpha);
             }
         `,
@@ -237,18 +338,18 @@ function createPolarJets() {
         for (let i = 0; i < jetParticleCount; i++) {
             const i3 = i * 3;
             
-            const height = Math.pow(Math.random(), 0.7) * 80 * direction;
+            const height = Math.pow(Math.random(), 0.7) * 24 * direction;
             const radius = Math.abs(height) * 0.08 * (0.3 + Math.random() * 0.7);
             const angle = Math.random() * Math.PI * 2;
-            
+
             const helixAngle = height * 0.15;
             const helixRadius = radius * (1.0 + Math.sin(helixAngle) * 0.3);
-            
+
             positions[i3] = Math.cos(angle + helixAngle) * helixRadius;
             positions[i3 + 1] = height;
             positions[i3 + 2] = Math.sin(angle + helixAngle) * helixRadius;
-            
-            const intensity = 1.0 - Math.abs(height) / 80.0;
+
+            const intensity = 1.0 - Math.abs(height) / 24.0;
             
             if (Math.sin(height * 0.3 + angle) > 0) {
                 colors[i3] = 0.2 * intensity;
@@ -293,11 +394,11 @@ function createPolarJets() {
                     pos.y += time * 15.0 * sign(height);
                     
                     // Reset far particles to base instead of cycling
-                    if (abs(pos.y) > 80.0) {
-                        pos.y = sign(height) * 5.0;
+                    if (abs(pos.y) > 24.0) {
+                        pos.y = sign(height) * 3.0;
                     }
-                    
-                    float fade = 1.0 - abs(pos.y) / 80.0;
+
+                    float fade = 1.0 - abs(pos.y) / 24.0;
                     vAlpha = fade * (0.8 + sin(time * 3.0 + phase) * 0.2);
                     
                     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
@@ -338,7 +439,7 @@ export function updateBlackHoleSystems(time, deltaTime, camera) {
     if (accretionDiskSystem) {
         accretionDiskSystem.material.uniforms.time.value = time;
     }
-    
+
     if (polarJets) {
         polarJets.children.forEach(jet => {
             jet.material.uniforms.time.value = time;
@@ -353,7 +454,7 @@ export function cleanupBlackHole() {
         if (sceneRef) sceneRef.remove(accretionDiskSystem);
         accretionDiskSystem = null;
     }
-    
+
     if (polarJets) {
         polarJets.children.forEach(jet => {
             jet.geometry.dispose();
