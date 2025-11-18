@@ -62,31 +62,31 @@ function createAccretionDisk() {
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 1.0;
                 colors[i3 + 2] = 0.98;
-                sizes[idx] = 1.5 + Math.random() * 1.0;
+                sizes[idx] = 0.8 + Math.random() * 0.4;
             } else if (temperature > 0.65) {
                 // Signature golden-yellow
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 0.9;
                 colors[i3 + 2] = 0.5;
-                sizes[idx] = 1.2 + Math.random() * 0.8;
+                sizes[idx] = 0.7 + Math.random() * 0.3;
             } else if (temperature > 0.45) {
                 // Deep amber
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 0.75;
                 colors[i3 + 2] = 0.3;
-                sizes[idx] = 1.0 + Math.random() * 0.6;
+                sizes[idx] = 0.6 + Math.random() * 0.3;
             } else if (temperature > 0.25) {
                 // Burnt orange
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 0.55;
                 colors[i3 + 2] = 0.15;
-                sizes[idx] = 1.5 + Math.random() * 0.8;
+                sizes[idx] = 0.5 + Math.random() * 0.25;
             } else {
                 // Dark red edge
                 colors[i3] = 0.85;
                 colors[i3 + 1] = 0.3;
                 colors[i3 + 2] = 0.08;
-                sizes[idx] = 1.2 + Math.random() * 0.5;
+                sizes[idx] = 0.4 + Math.random() * 0.2;
             }
             
             // Keplerian orbital velocity
@@ -196,15 +196,15 @@ function createAccretionDisk() {
                 intensity = pow(intensity, 1.3);
                 
                 // Brighter inner regions (realistic luminosity)
-                float radialBrightness = 1.0 - (vRadius / 72.0);
-                radialBrightness = pow(radialBrightness, 0.6);
+                float radialBrightness = 1.0 - (vRadius / 40.0);
+                radialBrightness = pow(radialBrightness, 0.8);
                 
                 // Boost from gravitational lensing
-                float lensingBoost = 1.0 + vLensStrength * 0.3;
+                float lensingBoost = 1.0 + vLensStrength * 0.2;
                 
-                // Moderate emission to prevent overexposure
-                vec3 finalColor = vColor * (1.5 + vIntensity * 1.0) * radialBrightness * lensingBoost;
-                float alpha = intensity * vIntensity * 0.9 * radialBrightness;
+                // Much lower emission to prevent white blob
+                vec3 finalColor = vColor * (0.6 + vIntensity * 0.4) * radialBrightness * lensingBoost;
+                float alpha = intensity * vIntensity * 0.4 * radialBrightness;
                 
                 gl_FragColor = vec4(finalColor, alpha);
             }
