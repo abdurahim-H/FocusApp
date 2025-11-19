@@ -117,51 +117,7 @@ function setupPostProcessing() {
     );
     composer.addPass(bloomPass);
 
-    // Radial Blur - creates silky motion trails around black hole
-    const radialBlurShader = {
-        uniforms: {
-            'tDiffuse': { value: null },
-            'center': { value: new THREE.Vector2(0.5, 0.5) },
-            'strength': { value: 0.3 },
-            'samples': { value: 16 }
-        },
-        vertexShader: `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform sampler2D tDiffuse;
-            uniform vec2 center;
-            uniform float strength;
-            uniform int samples;
-            varying vec2 vUv;
-
-            void main() {
-                vec4 color = vec4(0.0);
-                vec2 toCenter = center - vUv;
-                float distanceFromCenter = length(toCenter);
-
-                // Blur more near the edges, less at center
-                float blur = strength * smoothstep(0.0, 0.7, distanceFromCenter);
-
-                // Sample along radial direction
-                for (int i = 0; i < 16; i++) {
-                    float t = float(i) / float(16 - 1);
-                    vec2 offset = toCenter * blur * (t - 0.5);
-                    color += texture2D(tDiffuse, vUv + offset);
-                }
-
-                color /= float(16);
-                gl_FragColor = color;
-            }
-        `
-    };
-
-    const radialBlurPass = new ShaderPass(radialBlurShader);
-    composer.addPass(radialBlurPass);
+    // Radial blur removed - was creating visible radial line artifacts
 
     // Chromatic Aberration shader
     const chromaticAberrationShader = {
