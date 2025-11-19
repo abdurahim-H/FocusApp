@@ -57,7 +57,7 @@ export function init3D() {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap for performance
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.38; // Moderate
+        renderer.toneMappingExposure = 0.27; // Further reduced for smaller screens
         container.appendChild(renderer.domElement);
 
         // Create scene (assign to exported variable)
@@ -108,10 +108,10 @@ function setupPostProcessing() {
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
 
-    // Unreal Bloom - moderate
+    // Unreal Bloom - reduced for better visibility on small screens
     const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(window.innerWidth, window.innerHeight),
-        0.7,  // moderate bloom
+        0.5,  // reduced bloom strength
         0.6,  // medium radius
         0.87  // medium threshold
     );
