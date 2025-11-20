@@ -18,7 +18,7 @@ export function createEnhancedBlackHole(scene) {
 
     // Volumetric glow layer removed - accretion disk particles provide the glow
     createAccretionDisk();
-    createPolarJets();
+    createAccretionStreams();
 
     console.log('✅ Black hole system complete');
 }
@@ -319,106 +319,179 @@ function createAccretionDisk() {
     sceneRef.add(accretionDiskSystem);
 }
 
-function createPolarJets() {
-    console.log('🌊 Creating relativistic polar jets...');
-    
+function createAccretionStreams() {
+    console.log('⚡ Creating high-energy plasma jets...');
+
     polarJets = new THREE.Group();
-    
+
+    // Create TWO jets (bipolar - up and down)
     for (let jetIndex = 0; jetIndex < 2; jetIndex++) {
-        const direction = jetIndex === 0 ? 1 : -1;
-        const jetParticleCount = 12000;
-        
+        const direction = jetIndex === 0 ? 1 : -1; // One up, one down
+        const particleCount = 40000; // High density for plasma look
+
         const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(jetParticleCount * 3);
-        const colors = new Float32Array(jetParticleCount * 3);
-        const sizes = new Float32Array(jetParticleCount);
-        const phases = new Float32Array(jetParticleCount);
-        const heights = new Float32Array(jetParticleCount);
-        
-        for (let i = 0; i < jetParticleCount; i++) {
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const sizes = new Float32Array(particleCount);
+        const phases = new Float32Array(particleCount);
+        const strands = new Float32Array(particleCount);
+        const radialOffsets = new Float32Array(particleCount);
+        const angleOffsets = new Float32Array(particleCount);
+        const speeds = new Float32Array(particleCount);
+
+        // Create 12 distinct plasma filaments
+        const numStrands = 12;
+
+        for (let i = 0; i < particleCount; i++) {
             const i3 = i * 3;
-            
-            const height = Math.pow(Math.random(), 0.7) * 24 * direction;
-            const radius = Math.abs(height) * 0.08 * (0.3 + Math.random() * 0.7);
-            const angle = Math.random() * Math.PI * 2;
 
-            const helixAngle = height * 0.15;
-            const helixRadius = radius * (1.0 + Math.sin(helixAngle) * 0.3);
+            // Initial random height
+            positions[i3] = 0; 
+            positions[i3 + 1] = Math.random() * 100.0 * direction; // Longer jets
+            positions[i3 + 2] = 0; 
 
-            positions[i3] = Math.cos(angle + helixAngle) * helixRadius;
-            positions[i3 + 1] = height;
-            positions[i3 + 2] = Math.sin(angle + helixAngle) * helixRadius;
+            // Assign to a specific filament strand
+            strands[i] = Math.floor(Math.random() * numStrands);
 
-            const intensity = 1.0 - Math.abs(height) / 24.0;
-            
-            if (Math.sin(height * 0.3 + angle) > 0) {
-                colors[i3] = 0.2 * intensity;
-                colors[i3 + 1] = 0.8 * intensity;
-                colors[i3 + 2] = 1.0 * intensity;
+            // Tighter radial distribution for collimated beam look
+            // Gaussian distribution
+            const r = Math.sqrt(-2.0 * Math.log(Math.random()));
+            radialOffsets[i] = r * 0.5; // Slightly tighter core (was 0.6)
+            angleOffsets[i] = Math.random() * Math.PI * 2;
+
+            // High speed plasma
+            speeds[i] = 25.0 + Math.random() * 15.0;
+
+            // Richer Color Palette (Blue, Cyan, Purple, Magenta, White)
+            const colorMix = Math.random();
+            if (colorMix < 0.3) {
+                // Electric Blue
+                colors[i3] = 0.1;
+                colors[i3 + 1] = 0.5;
+                colors[i3 + 2] = 1.0;
+            } else if (colorMix < 0.5) {
+                // Cyan
+                colors[i3] = 0.0;
+                colors[i3 + 1] = 0.9;
+                colors[i3 + 2] = 1.0;
+            } else if (colorMix < 0.7) {
+                // Deep Purple
+                colors[i3] = 0.6;
+                colors[i3 + 1] = 0.0;
+                colors[i3 + 2] = 1.0;
+            } else if (colorMix < 0.85) {
+                // Magenta/Pink
+                colors[i3] = 1.0;
+                colors[i3 + 1] = 0.2;
+                colors[i3 + 2] = 0.8;
             } else {
-                colors[i3] = 1.0 * intensity;
-                colors[i3 + 1] = 0.5 * intensity;
-                colors[i3 + 2] = 0.1 * intensity;
+                // White hot core
+                colors[i3] = 1.0;
+                colors[i3 + 1] = 1.0;
+                colors[i3 + 2] = 1.0;
             }
-            
-            sizes[i] = (0.4 + Math.random() * 0.6) * intensity;
+
+            // Varied sizes for depth
+            sizes[i] = (0.5 + Math.random() * 1.5);
             phases[i] = Math.random() * Math.PI * 2;
-            heights[i] = height;
         }
-        
+
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
         geometry.setAttribute('phase', new THREE.BufferAttribute(phases, 1));
-        geometry.setAttribute('height', new THREE.BufferAttribute(heights, 1));
-        
-        const jetMaterial = new THREE.ShaderMaterial({
+        geometry.setAttribute('strand', new THREE.BufferAttribute(strands, 1));
+        geometry.setAttribute('radialOffset', new THREE.BufferAttribute(radialOffsets, 1));
+        geometry.setAttribute('angleOffset', new THREE.BufferAttribute(angleOffsets, 1));
+        geometry.setAttribute('speed', new THREE.BufferAttribute(speeds, 1));
+
+        const streamMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: { value: 0 },
-                pixelRatio: { value: Math.min(window.devicePixelRatio, 2) }
+                pixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+                direction: { value: direction }
             },
             vertexShader: `
                 attribute float size;
                 attribute float phase;
-                attribute float height;
+                attribute float strand;
+                attribute float radialOffset;
+                attribute float angleOffset;
+                attribute float speed;
+                
                 uniform float time;
                 uniform float pixelRatio;
+                uniform float direction;
+                
                 varying vec3 vColor;
                 varying float vAlpha;
-                
+
                 void main() {
                     vColor = color;
-                    
-                    vec3 pos = position;
-                    // Move particles outward continuously
-                    pos.y += time * 15.0 * sign(height);
-                    
-                    // Reset far particles to base instead of cycling
-                    if (abs(pos.y) > 24.0) {
-                        pos.y = sign(height) * 3.0;
-                    }
 
-                    float fade = 1.0 - abs(pos.y) / 24.0;
-                    vAlpha = fade * (0.8 + sin(time * 3.0 + phase) * 0.2);
+                    // Animate height
+                    float maxH = 100.0;
+                    float currentH = position.y + time * speed * direction;
                     
-                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                    gl_PointSize = size * pixelRatio * (300.0 / -mvPosition.z);
+                    // Wrap around
+                    float h = mod(abs(currentH), maxH);
+                    float signedH = h * direction;
+
+                    // Plasma Filament Logic
+                    // Each strand follows a slightly different path
+                    float strandAngle = (strand / 12.0) * 6.28318;
+                    
+                    // Clean Spiral Twist
+                    // Removed the wobbly noise, added smooth rotation
+                    float spiralSpeed = 2.0;
+                    float twistAmount = h * 0.15; // Tighter spiral
+                    float currentAngle = strandAngle + twistAmount + time * spiralSpeed * direction;
+                    
+                    // Filament radius expands slightly with height (slightly tighter now)
+                    float filamentRadius = 1.2 + h * 0.06; // Reduced from 1.5 + h * 0.08
+                    
+                    // Calculate filament center
+                    float centerX = cos(currentAngle) * filamentRadius;
+                    float centerZ = sin(currentAngle) * filamentRadius;
+                    
+                    // Add volume offset (particle distance from filament center)
+                    float cloudX = cos(angleOffset) * radialOffset;
+                    float cloudZ = sin(angleOffset) * radialOffset;
+                    
+                    vec3 newPos = vec3(centerX + cloudX, signedH, centerZ + cloudZ);
+
+                    // Fade in/out
+                    float fadeIn = smoothstep(0.0, 5.0, h);
+                    float fadeOut = 1.0 - smoothstep(80.0, 100.0, h);
+                    
+                    // High frequency flicker for plasma effect
+                    float flicker = 0.8 + sin(time * 20.0 + phase * 10.0) * 0.2;
+                    
+                    vAlpha = fadeIn * fadeOut * 0.15; // Slightly higher opacity for plasma
+
+                    vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
+                    float distanceScale = 500.0 / -mvPosition.z;
+                    gl_PointSize = size * pixelRatio * distanceScale * flicker;
                     gl_Position = projectionMatrix * mvPosition;
                 }
             `,
             fragmentShader: `
                 varying vec3 vColor;
                 varying float vAlpha;
-                
+
                 void main() {
                     vec2 center = gl_PointCoord - vec2(0.5);
-                    float dist = length(center);
-                    if (dist > 0.5) discard;
-                    
-                    float intensity = 1.0 - smoothstep(0.0, 0.5, dist);
-                    intensity = pow(intensity, 2.0);
+                    float dist = length(center) * 2.0;
 
-                    gl_FragColor = vec4(vColor * 0.8, intensity * vAlpha * 0.6);
+                    // Electric glow falloff
+                    float intensity = pow(1.0 - dist, 3.0);
+                    
+                    if (intensity < 0.01) discard;
+
+                    // Add a hot white core to particles
+                    vec3 finalColor = mix(vColor, vec3(1.0), intensity * 0.5);
+
+                    gl_FragColor = vec4(finalColor, intensity * vAlpha);
                 }
             `,
             transparent: true,
@@ -426,13 +499,13 @@ function createPolarJets() {
             vertexColors: true,
             blending: THREE.AdditiveBlending
         });
-        
-        const jet = new THREE.Points(geometry, jetMaterial);
+
+        const jet = new THREE.Points(geometry, streamMaterial);
         polarJets.add(jet);
     }
-    
+
     sceneRef.add(polarJets);
-    console.log('✨ Polar jets created with magnetic field structure');
+    console.log('✨ Plasma jets created');
 }
 
 export function updateBlackHoleSystems(time, deltaTime, camera) {
