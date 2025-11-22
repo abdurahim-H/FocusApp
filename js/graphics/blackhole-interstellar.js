@@ -324,193 +324,162 @@ function createAccretionDisk() {
 }
 
 function createAccretionStreams() {
-    console.log('⚡ Creating high-energy plasma jets...');
+    console.log('⚡ Creating ethereal energy streams...');
 
     polarJets = new THREE.Group();
 
     // Create TWO jets (bipolar - up and down)
     for (let jetIndex = 0; jetIndex < 2; jetIndex++) {
-        const direction = jetIndex === 0 ? 1 : -1; // One up, one down
-        const particleCount = 40000; // High density for plasma look
+        const direction = jetIndex === 0 ? 1 : -1;
+        const particleCount = 55000; // Balanced density
 
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
-        const colors = new Float32Array(particleCount * 3);
+        const randomness = new Float32Array(particleCount * 3); // x: radius, y: angle, z: speed
         const sizes = new Float32Array(particleCount);
         const phases = new Float32Array(particleCount);
-        const strands = new Float32Array(particleCount);
-        const radialOffsets = new Float32Array(particleCount);
-        const angleOffsets = new Float32Array(particleCount);
-        const speeds = new Float32Array(particleCount);
-
-        // Create 12 distinct plasma filaments
-        const numStrands = 12;
-
+        
         for (let i = 0; i < particleCount; i++) {
             const i3 = i * 3;
 
-            // Initial random height
-            positions[i3] = 0; 
-            positions[i3 + 1] = Math.random() * 100.0 * direction; // Longer jets
-            positions[i3 + 2] = 0; 
+            positions[i3] = 0;
+            positions[i3 + 1] = 0;
+            positions[i3 + 2] = 0;
 
-            // Assign to a specific filament strand
-            strands[i] = Math.floor(Math.random() * numStrands);
-
-            // Tighter radial distribution for collimated beam look
-            // Gaussian distribution
+            // Create a "Braided" structure
+            // 3 main intertwining energy streams
+            const strandCount = 3;
+            const strandId = Math.floor(Math.random() * strandCount);
+            const baseAngle = (strandId / strandCount) * Math.PI * 2;
+            
+            // Gaussian scatter for soft volume
             const r = Math.sqrt(-2.0 * Math.log(Math.random()));
-            radialOffsets[i] = r * 0.5; // Slightly tighter core (was 0.6)
-            angleOffsets[i] = Math.random() * Math.PI * 2;
+            const radius = r * 0.8; // Tighter core
 
-            // High speed plasma
-            speeds[i] = 25.0 + Math.random() * 15.0;
+            randomness[i3] = radius;           
+            randomness[i3 + 1] = baseAngle + (Math.random() - 0.5) * 1.0; // Angle with spread
+            randomness[i3 + 2] = 15.0 + Math.random() * 20.0; // Varied speed
 
-            // Richer Color Palette (Cosmic Spectrum)
-            const colorMix = Math.random();
-            if (colorMix < 0.15) {
-                // Electric Blue
-                colors[i3] = 0.1;
-                colors[i3 + 1] = 0.5;
-                colors[i3 + 2] = 1.0;
-            } else if (colorMix < 0.3) {
-                // Cyan
-                colors[i3] = 0.0;
-                colors[i3 + 1] = 0.9;
-                colors[i3 + 2] = 1.0;
-            } else if (colorMix < 0.45) {
-                // Deep Purple
-                colors[i3] = 0.6;
-                colors[i3 + 1] = 0.0;
-                colors[i3 + 2] = 1.0;
-            } else if (colorMix < 0.6) {
-                // Magenta/Pink
-                colors[i3] = 1.0;
-                colors[i3 + 1] = 0.2;
-                colors[i3 + 2] = 0.8;
-            } else if (colorMix < 0.75) {
-                // Golden/Amber
-                colors[i3] = 1.0;
-                colors[i3 + 1] = 0.7;
-                colors[i3 + 2] = 0.2;
-            } else if (colorMix < 0.9) {
-                // Emerald Green (Exotic Matter)
-                colors[i3] = 0.2;
-                colors[i3 + 1] = 1.0;
-                colors[i3 + 2] = 0.5;
-            } else {
-                // White hot core
-                colors[i3] = 1.0;
-                colors[i3 + 1] = 1.0;
-                colors[i3 + 2] = 1.0;
-            }
-
-            // Varied sizes for depth
-            sizes[i] = (0.5 + Math.random() * 1.5);
+            // Mix of tiny dust and larger energy globs
+            sizes[i] = Math.random() * Math.random(); // Bias towards smaller
             phases[i] = Math.random() * Math.PI * 2;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('aRandom', new THREE.BufferAttribute(randomness, 3));
         geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
         geometry.setAttribute('phase', new THREE.BufferAttribute(phases, 1));
-        geometry.setAttribute('strand', new THREE.BufferAttribute(strands, 1));
-        geometry.setAttribute('radialOffset', new THREE.BufferAttribute(radialOffsets, 1));
-        geometry.setAttribute('angleOffset', new THREE.BufferAttribute(angleOffsets, 1));
-        geometry.setAttribute('speed', new THREE.BufferAttribute(speeds, 1));
 
         const streamMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: { value: 0 },
                 pixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
-                direction: { value: direction }
+                direction: { value: direction },
+                // Elegant Gradient: Gold (Base) -> Cyan (Mid) -> Violet (Tip)
+                // This connects the orange disk to the blue cosmos
+                colorBase: { value: new THREE.Color(1.0, 0.7, 0.3) }, // Warm Gold
+                colorMid: { value: new THREE.Color(0.0, 0.8, 1.0) },  // Electric Cyan
+                colorTip: { value: new THREE.Color(0.5, 0.0, 1.0) }   // Deep Violet
             },
             vertexShader: `
+                attribute vec3 aRandom;
                 attribute float size;
                 attribute float phase;
-                attribute float strand;
-                attribute float radialOffset;
-                attribute float angleOffset;
-                attribute float speed;
                 
                 uniform float time;
                 uniform float pixelRatio;
                 uniform float direction;
                 
-                varying vec3 vColor;
                 varying float vAlpha;
+                varying float vRelHeight;
+                varying float vRadialRatio;
 
                 void main() {
-                    vColor = color;
+                    float maxH = 160.0;
+                    float speed = aRandom.z;
+                    
+                    float currentH = mod(time * speed + phase * 50.0, maxH);
+                    float h = currentH;
+                    vRelHeight = h / maxH;
+                    
+                    // BRAIDED MOTION
+                    // Particles rotate as they rise, creating a DNA-like structure
+                    float rotationSpeed = 2.0;
+                    float currentAngle = aRandom.y + (h * 0.05) + time * 0.5;
+                    
+                    // Collimation: Starts tight, expands, then stays focused
+                    float beamWidth = 1.0 + smoothstep(0.0, 30.0, h) * 1.5;
+                    float r = aRandom.x * beamWidth;
+                    
+                    // Add organic turbulence
+                    float noise = sin(h * 0.1 - time * 2.0) * sin(currentAngle * 2.0);
+                    r += noise * 0.5 * (h / 100.0);
+                    
+                    float x = cos(currentAngle) * r;
+                    float z = sin(currentAngle) * r;
+                    float y = h * direction;
+                    
+                    vec3 newPos = vec3(x, y, z);
+                    
+                    vRadialRatio = clamp(aRandom.x / 2.0, 0.0, 1.0);
 
-                    // Animate height
-                    float maxH = 100.0;
-                    float currentH = position.y + time * speed * direction;
-                    
-                    // Wrap around
-                    float h = mod(abs(currentH), maxH);
-                    float signedH = h * direction;
-
-                    // Plasma Filament Logic
-                    // Each strand follows a slightly different path
-                    float strandAngle = (strand / 12.0) * 6.28318;
-                    
-                    // Clean Spiral Twist
-                    // Removed the wobbly noise, added smooth rotation
-                    float spiralSpeed = 2.0;
-                    float twistAmount = h * 0.15; // Tighter spiral
-                    float currentAngle = strandAngle + twistAmount + time * spiralSpeed * direction;
-                    
-                    // Filament radius expands slightly with height (slightly tighter now)
-                    float filamentRadius = 1.2 + h * 0.06; // Reduced from 1.5 + h * 0.08
-                    
-                    // Calculate filament center
-                    float centerX = cos(currentAngle) * filamentRadius;
-                    float centerZ = sin(currentAngle) * filamentRadius;
-                    
-                    // Add volume offset (particle distance from filament center)
-                    float cloudX = cos(angleOffset) * radialOffset;
-                    float cloudZ = sin(angleOffset) * radialOffset;
-                    
-                    vec3 newPos = vec3(centerX + cloudX, signedH, centerZ + cloudZ);
-
-                    // Fade in/out
-                    float fadeIn = smoothstep(0.0, 5.0, h);
-                    float fadeOut = 1.0 - smoothstep(80.0, 100.0, h);
-                    
-                    // High frequency flicker for plasma effect
-                    float flicker = 0.8 + sin(time * 20.0 + phase * 10.0) * 0.2;
-                    
-                    vAlpha = fadeIn * fadeOut * 0.15; // Slightly higher opacity for plasma
+                    // Soft fade in/out
+                    float fadeIn = smoothstep(0.0, 20.0, h);
+                    float fadeOut = 1.0 - smoothstep(maxH * 0.6, maxH, h);
+                    vAlpha = fadeIn * fadeOut;
 
                     vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
-                    float distanceScale = 500.0 / -mvPosition.z;
-                    gl_PointSize = size * pixelRatio * distanceScale * flicker;
+                    
+                    // Distance attenuation
+                    float pointSize = size * (500.0 / -mvPosition.z);
+                    gl_PointSize = pointSize * pixelRatio;
                     gl_Position = projectionMatrix * mvPosition;
                 }
             `,
             fragmentShader: `
-                varying vec3 vColor;
+                uniform vec3 colorBase;
+                uniform vec3 colorMid;
+                uniform vec3 colorTip;
+                
                 varying float vAlpha;
+                varying float vRelHeight;
+                varying float vRadialRatio;
 
                 void main() {
                     vec2 center = gl_PointCoord - vec2(0.5);
                     float dist = length(center) * 2.0;
-
-                    // Electric glow falloff
-                    float intensity = pow(1.0 - dist, 3.0);
                     
-                    if (intensity < 0.01) discard;
+                    // Soft particle shape
+                    float shape = exp(-dist * dist * 4.0);
+                    if (shape < 0.01) discard;
+                    
+                    // ELEGANT GRADIENT MAPPING
+                    vec3 finalColor;
+                    
+                    // Smooth transition based on height
+                    // Base (0.0) -> Mid (0.4) -> Tip (1.0)
+                    float midPoint = 0.4;
+                    
+                    if (vRelHeight < midPoint) {
+                        float t = vRelHeight / midPoint;
+                        finalColor = mix(colorBase, colorMid, t);
+                    } else {
+                        float t = (vRelHeight - midPoint) / (1.0 - midPoint);
+                        finalColor = mix(colorMid, colorTip, t);
+                    }
+                    
+                    // Core is always whiter/hotter
+                    finalColor = mix(finalColor, vec3(1.0), (1.0 - vRadialRatio) * 0.5);
+                    
+                    // Subtle glow boost
+                    finalColor *= 1.1;
 
-                    // Add a hot white core to particles
-                    vec3 finalColor = mix(vColor, vec3(1.0), intensity * 0.5);
-
-                    gl_FragColor = vec4(finalColor, intensity * vAlpha);
+                    // Balanced opacity for "ethereal" look
+                    gl_FragColor = vec4(finalColor, shape * vAlpha * 0.4);
                 }
             `,
             transparent: true,
             depthWrite: false,
-            vertexColors: true,
             blending: THREE.AdditiveBlending
         });
 
@@ -519,7 +488,7 @@ function createAccretionStreams() {
     }
 
     sceneRef.add(polarJets);
-    console.log('✨ Plasma jets created');
+    console.log('✨ Ethereal energy streams created');
 }
 
 export function updateBlackHoleSystems(time, deltaTime, camera) {
