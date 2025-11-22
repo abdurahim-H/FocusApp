@@ -79,11 +79,19 @@ export function init3D() {
 
         // Create scene elements
         createStarField();
-        createBlackHoleSystem();
+
+        // Create master group for tilted black hole
+        const masterBlackHoleGroup = new THREE.Group();
+        // Tilt the black hole to face the camera better
+        masterBlackHoleGroup.rotation.x = THREE.MathUtils.degToRad(20); 
+        masterBlackHoleGroup.rotation.z = THREE.MathUtils.degToRad(10);
+        scene.add(masterBlackHoleGroup);
+
+        createBlackHoleSystem(masterBlackHoleGroup);
         createCosmicEnvironment();
         
-        // Create Interstellar-style black hole with lensing (pass scene)
-        createEnhancedBlackHole(scene);
+        // Create Interstellar-style black hole with lensing (pass group)
+        createEnhancedBlackHole(masterBlackHoleGroup);
 
         // Setup lighting
         setupLighting();
@@ -289,7 +297,7 @@ function createStarField() {
 }
 
 // Create black hole with gravitational lensing
-function createBlackHoleSystem() {
+function createBlackHoleSystem(parent) {
     console.log('🕳️ Creating black hole with gravitational lensing...');
 
     blackHoleSystem = new THREE.Group();
@@ -332,7 +340,11 @@ function createBlackHoleSystem() {
 
     // Photon sphere removed - accretion disk provides the glow
 
-    scene.add(blackHoleSystem);
+    if (parent) {
+        parent.add(blackHoleSystem);
+    } else {
+        scene.add(blackHoleSystem);
+    }
     console.log('✅ Black hole created');
 }
 

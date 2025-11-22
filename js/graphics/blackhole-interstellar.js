@@ -212,8 +212,8 @@ function createAccretionDisk() {
             varying float vCameraDistance;
 
             // Gravitational lensing approximation
-            vec3 applyGravitationalLensing(vec3 pos, vec3 camPos) {
-                vec3 toBH = pos - blackHolePos;
+            vec3 applyGravitationalLensing(vec3 pos, vec3 camPos, vec3 bhPos) {
+                vec3 toBH = pos - bhPos;
                 float dist = length(toBH);
                 vec3 toCamera = normalize(camPos - pos);
                 
@@ -244,16 +244,20 @@ function createAccretionDisk() {
                 orbitPos.z = sin(currentAngle) * radius;
                 orbitPos.y = position.y;
                 
-                // Apply gravitational lensing for double-ring effect
-                vec3 lensedPos = applyGravitationalLensing(orbitPos, cameraPosition);
-                vLensStrength = length(lensedPos - orbitPos) * 2.0;
+                // Transform to World Space for correct lensing
+                vec3 worldPos = (modelMatrix * vec4(orbitPos, 1.0)).xyz;
+                vec3 worldBlackHolePos = (modelMatrix * vec4(blackHolePos, 1.0)).xyz;
+
+                // Apply gravitational lensing in World Space
+                vec3 lensedWorldPos = applyGravitationalLensing(worldPos, cameraPosition, worldBlackHolePos);
+                vLensStrength = length(lensedWorldPos - worldPos) * 2.0;
                 
                 // Dynamic intensity
                 float turbulence = 1.0 + sin(time * 3.0 + phase) * 0.15;
                 vIntensity = 0.85 + sin(time * 2.5 + phase * 2.0) * 0.15;
 
                 // Calculate camera distance for soft particle blending
-                vec4 mvPosition = modelViewMatrix * vec4(lensedPos, 1.0);
+                vec4 mvPosition = viewMatrix * vec4(lensedWorldPos, 1.0);
                 vCameraDistance = -mvPosition.z;
 
                 // Adaptive point size based on distance
