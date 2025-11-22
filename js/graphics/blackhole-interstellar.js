@@ -366,28 +366,38 @@ function createAccretionStreams() {
             // High speed plasma
             speeds[i] = 25.0 + Math.random() * 15.0;
 
-            // Richer Color Palette (Blue, Cyan, Purple, Magenta, White)
+            // Richer Color Palette (Cosmic Spectrum)
             const colorMix = Math.random();
-            if (colorMix < 0.3) {
+            if (colorMix < 0.15) {
                 // Electric Blue
                 colors[i3] = 0.1;
                 colors[i3 + 1] = 0.5;
                 colors[i3 + 2] = 1.0;
-            } else if (colorMix < 0.5) {
+            } else if (colorMix < 0.3) {
                 // Cyan
                 colors[i3] = 0.0;
                 colors[i3 + 1] = 0.9;
                 colors[i3 + 2] = 1.0;
-            } else if (colorMix < 0.7) {
+            } else if (colorMix < 0.45) {
                 // Deep Purple
                 colors[i3] = 0.6;
                 colors[i3 + 1] = 0.0;
                 colors[i3 + 2] = 1.0;
-            } else if (colorMix < 0.85) {
+            } else if (colorMix < 0.6) {
                 // Magenta/Pink
                 colors[i3] = 1.0;
                 colors[i3 + 1] = 0.2;
                 colors[i3 + 2] = 0.8;
+            } else if (colorMix < 0.75) {
+                // Golden/Amber
+                colors[i3] = 1.0;
+                colors[i3 + 1] = 0.7;
+                colors[i3 + 2] = 0.2;
+            } else if (colorMix < 0.9) {
+                // Emerald Green (Exotic Matter)
+                colors[i3] = 0.2;
+                colors[i3 + 1] = 1.0;
+                colors[i3 + 2] = 0.5;
             } else {
                 // White hot core
                 colors[i3] = 1.0;
