@@ -13,7 +13,7 @@ let modules = {};
  */
 async function loadModules() {
     const moduleList = [
-        { name: 'scene3d', path: '../graphics/scene3d.js' },
+        { name: 'scene3d', path: '../graphics/scene3d-babylon.js' },
         { name: 'timer', path: '../features/timer.js' },
         { name: 'tasks', path: '../features/tasks.js' },
         { name: 'sounds', path: '../features/sounds.js' },
@@ -81,12 +81,20 @@ export async function initApp() {
             });
         }, 400);
 
-        // Initialize 3D scene
+        // Initialize 3D scene (async for Babylon.js WebGPU)
         try {
             if (loadedModules.scene3d?.init3D) {
                 console.log('Initializing 3D scene...');
-                loadedModules.scene3d.init3D();
-                console.log('3D scene initialized successfully');
+                // init3D is async for Babylon.js
+                loadedModules.scene3d.init3D().then(success => {
+                    if (success) {
+                        console.log('3D scene initialized successfully');
+                    } else {
+                        console.error('3D scene initialization returned false');
+                    }
+                }).catch(err => {
+                    console.error('3D initialization error:', err);
+                });
             } else {
                 console.error('scene3d module or init3D function not found');
             }

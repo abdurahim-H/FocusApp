@@ -188,14 +188,37 @@ export function cleanupApplication() {
     console.log('🧹 Application cleanup complete');
 }
 
-// Three.js resource cleanup
+// 3D resource cleanup (supports both Three.js and Babylon.js)
 function cleanup3DResources() {
-    if (typeof THREE === 'undefined') return;
-    
+    // Try Babylon.js cleanup first
+    if (typeof BABYLON !== 'undefined') {
+        cleanupBabylonResources();
+        return;
+    }
+
+    // Fall back to Three.js cleanup
+    if (typeof THREE !== 'undefined') {
+        cleanupThreeResources();
+    }
+}
+
+// Babylon.js resource cleanup
+function cleanupBabylonResources() {
+    console.log('🧹 Cleaning up Babylon.js resources...');
+
+    // Dispose engine (handles scene, meshes, materials, textures)
+    if (window.babylonEngine) {
+        window.babylonEngine.dispose();
+        console.log('🧹 Babylon.js engine disposed');
+    }
+}
+
+// Three.js resource cleanup
+function cleanupThreeResources() {
     let geometryCount = 0;
     let materialCount = 0;
     let textureCount = 0;
-    
+
     // Find and dispose of all Three.js resources in the scene
     if (window.scene) {
         window.scene.traverse((object) => {
@@ -203,7 +226,7 @@ function cleanup3DResources() {
                 object.geometry.dispose();
                 geometryCount++;
             }
-            
+
             if (object.material) {
                 if (Array.isArray(object.material)) {
                     object.material.forEach(material => {
@@ -217,15 +240,15 @@ function cleanup3DResources() {
             }
         });
     }
-    
+
     // Cleanup renderer
     if (window.renderer) {
         window.renderer.dispose();
         window.renderer.forceContextLoss();
     }
-    
+
     console.log(`🧹 Disposed ${geometryCount} geometries, ${materialCount} materials, ${textureCount} textures`);
-    
+
     function disposeMaterial(material) {
         if (material.map) {
             material.map.dispose();
