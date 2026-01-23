@@ -13,7 +13,7 @@ let modules = {};
  */
 async function loadModules() {
     const moduleList = [
-        { name: 'scene3d', path: '../graphics/scene3d-babylon.js' },
+        { name: 'scene3d', path: '../graphics/scene/scene-manager.js' },
         { name: 'timer', path: '../features/timer.js' },
         { name: 'tasks', path: '../features/tasks.js' },
         { name: 'sounds', path: '../features/sounds.js' },
@@ -41,33 +41,33 @@ async function loadModules() {
  */
 export async function initApp() {
     const loadedModules = await loadModules();
-    
+
     // Initialize cleanup system first
     if (loadedModules.cleanup?.initCleanupSystem) {
         loadedModules.cleanup.initCleanupSystem();
     }
-    
+
     // Initialize audio system early for better performance
     if (loadedModules.sounds?.initAudioSystem) {
         loadedModules.sounds.initAudioSystem();
     }
-    
+
     function doInit() {
         // Faster loading screen progression with proper sequencing to prevent layout shift
         setTimeout(() => {
             const loadingProgress = document.getElementById('loadingProgress');
             const loadingScreen = document.getElementById('loadingScreen');
             const container = document.querySelector('.container');
-            
+
             if (loadingProgress) {
                 loadingProgress.style.width = '100%';
             }
-            
+
             // First show the container (but under loading screen)
             if (container) {
                 container.classList.add('loaded');
             }
-            
+
             // Then wait a frame to let layout settle, then hide loading screen
             requestAnimationFrame(() => {
                 setTimeout(() => {
@@ -118,14 +118,14 @@ export async function initApp() {
         } else {
             console.error('Navigation module or setupNavigation function not found');
         }
-        
+
         setupTimerControls(loadedModules);
         setupTaskControls(loadedModules);
-        
+
         if (loadedModules.sounds?.setupAmbientControls) {
             loadedModules.sounds.setupAmbientControls();
         }
-        
+
         if (loadedModules.uiEffects?.initUIEffects) {
             loadedModules.uiEffects.initUIEffects();
         }
@@ -139,11 +139,11 @@ export async function initApp() {
         if (loadedModules.timer?.updateUniverseStats) {
             loadedModules.timer.updateUniverseStats();
         }
-        
+
         if (loadedModules.timer?.updateDateTime) {
             loadedModules.timer.updateDateTime();
         }
-        
+
         if (loadedModules.timer?.updateTimerDisplay) {
             loadedModules.timer.updateTimerDisplay();
         }
@@ -163,7 +163,7 @@ export async function initApp() {
             window.addTask = loadedModules.tasks.addTask;
         }
     }
-    
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', doInit);
     } else {
@@ -179,13 +179,13 @@ function setupTimerControls(loadedModules) {
         document.getElementById('resetBtn').addEventListener('click', loadedModules.timer.resetTimer);
         document.getElementById('skipBreakBtn').addEventListener('click', loadedModules.timer.skipBreak);
         document.getElementById('skipFocusBtn').addEventListener('click', loadedModules.timer.skipFocus);
-        
+
         // Enhanced reset session button with click animation
-        document.getElementById('resetSessionBtn').addEventListener('click', function() {
+        document.getElementById('resetSessionBtn').addEventListener('click', function () {
             const btn = this;
             btn.classList.add('clicked');
             loadedModules.timer.resetSession();
-            
+
             // Remove animation class after animation completes
             setTimeout(() => {
                 btn.classList.remove('clicked');
@@ -216,23 +216,23 @@ document.addEventListener('keydown', (event) => {
 });
 
 // Initialize the app with performance optimizations
-(async function() {
+(async function () {
     try {
         // Wait for fonts to load before showing content to prevent layout shift
         if (document.fonts && document.fonts.ready) {
             await document.fonts.ready;
         }
-        
+
         await initApp();
     } catch (error) {
         console.error('App initialization failed:', error);
-        
+
         // Show container even on error
         const container = document.querySelector('.container');
         if (container) {
             container.classList.add('loaded');
         }
-        
+
         // Hide loading screen on error
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen) {
@@ -241,7 +241,7 @@ document.addEventListener('keydown', (event) => {
                 loadingScreen.style.display = 'none';
             }, 300);
         }
-        
+
         // Basic date/time update fallback
         function updateDateTime() {
             const now = new Date();
@@ -250,7 +250,7 @@ document.addEventListener('keydown', (event) => {
                 dateTimeEl.textContent = now.toLocaleString();
             }
         }
-        
+
         setInterval(updateDateTime, 1000);
         updateDateTime();
     }

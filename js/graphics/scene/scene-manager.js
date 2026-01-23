@@ -1,10 +1,11 @@
-// scene3d-babylon.js - Cinematic Scene Orchestrator for Babylon.js
+// scene-manager.js - Cinematic Scene Orchestrator for Babylon.js
 // Coordinates all graphics modules: black hole, starfield, post-processing
 
-import { initEngine, getEngine, disposeEngine, isUsingWebGPU } from './babylon-engine.js';
-import { createStarField, updateStarField, disposeStarField } from './starfield-babylon.js';
-import { createBlackHole, updateBlackHole, disposeBlackHole, getLensingPostProcess } from './blackhole-babylon.js';
-import { setupPostProcessing, disposePostProcessing, setExposure } from './postprocessing-babylon.js';
+import { initEngine, getEngine, disposeEngine, isUsingWebGPU } from '../../engine/babylon-engine.js';
+import { createStarField, updateStarField, disposeStarField } from '../environment/starfield.js';
+import { createBlackHole, updateBlackHole, disposeBlackHole, getLensingPostProcess } from '../blackhole/index.js';
+import { setupPostProcessing, disposePostProcessing, setExposure } from '../postprocessing/pipeline.js';
+
 
 // Scene globals
 let scene = null;

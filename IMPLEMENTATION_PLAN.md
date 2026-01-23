@@ -1,499 +1,218 @@
-# 🎬 CINEMATIC BLACK HOLE IMPLEMENTATION PLAN
+# 🎬 CINEMATIC BLACK HOLE - PREMIUM VISUAL IMPLEMENTATION
 
-## The Vision
-Transform our app into a **film-quality VFX shot** that looks like it belongs in Interstellar or a high-budget sci-fi trailer.
-
----
-
-## 🎯 THE THREE NORTH STARS (Priority Focus)
-1. **Lensing** that bends the starfield convincingly
-2. **Accretion disk** with evolving filament detail and asymmetry
-3. **HDR + filmic post** that makes highlights bloom beautifully while space stays deep
+## The North Star
+> **Every frame should look like a movie poster.** Beautiful, expensive, immersive - the kind of visuals that make users say "wow" and keep them coming back.
 
 ---
 
-# 📋 MASTER IMPLEMENTATION CHECKLIST
+## 🏆 THE "WOW FACTOR" PRIORITIES
 
-## PHASE 0: FOUNDATION SETUP
-*Must complete before any cinematic features*
+These 15 features will deliver 80% of the visual impact. **Focus here first.**
 
-### 0.1 Babylon.js + WebGPU Engine Setup
-| Task | Migration Ref | Status |
-|------|---------------|--------|
-| [ ] Replace Three.js import map in `index.html` with Babylon.js CDN | A1 | ⬜ |
-| [ ] Create `js/graphics/babylon-engine.js` - WebGPU engine initialization | NEW | ⬜ |
-| [ ] Add WebGL2 fallback for unsupported browsers | NEW | ⬜ |
-| [ ] Update `js/core/app.js` module loader to use new graphics modules | A2 | ⬜ |
-| [ ] Create basic scene with camera and render loop | B1 | ⬜ |
-| [ ] Verify WebGPU compute shaders are available | NEW | ⬜ |
+| Priority | Feature | Wow Factor | Status |
+|----------|---------|------------|--------|
+| 🥇 1 | **Gravitational Lensing** - spacetime bending | Makes it look *real* | ✅ Implemented |
+| 🥇 2 | **Photon Ring** - razor-thin bright ring | Signature black hole look | ✅ Implemented |
+| 🥇 3 | **Accretion Disk Turbulence** - swirling chaos | Living, dangerous energy | ⬜ Next Up |
+| 🥇 4 | **HDR Bloom** - selective glow on bright areas | Premium lighting | ✅ Implemented |
+| 🥇 5 | **Cinematic Camera Motion** - slow, weighty orbits | Film-quality feel | ✅ Implemented |
+| 🥈 6 | **Doppler Beaming** - one side brighter | Physics realism | ✅ Basic |
+| 🥈 7 | **Hot Spots** - bright knots that orbit & stretch | Drama & life | ⬜ High Impact |
+| 🥈 8 | **Layered Starfield** - parallax depth | Infinite space feeling | ✅ Implemented |
+| 🥈 9 | **Film Grain** - subtle texture | Cinema quality | ✅ Implemented |
+| 🥈 10 | **ACES Tone Mapping** - Hollywood color science | Premium finish | ✅ Implemented |
+| 🥉 11 | **Near-Camera Dust** - particles catching light | Expensive depth trick | ✅ Basic |
+| 🥉 12 | **Micro Camera Shake** - subtle handheld feel | Film realism | ✅ Implemented |
+| 🥉 13 | **Disk Color Gradient** - blue-white → orange → red | Temperature physics | ✅ Basic |
+| 🥉 14 | **Camera Breathing** - subtle zoom in/out | Life & scale | ✅ Implemented |
+| 🥉 15 | **Vignette** - subtle edge darkening | Focus composition | ✅ Implemented |
 
-### 0.2 Remove Old Three.js Code
-| Task | Migration Ref | Status |
-|------|---------------|--------|
-| [ ] Archive `js/graphics/cosmic-scene-v2.js` (backup) | A4 | ⬜ |
-| [ ] Archive `js/graphics/blackhole-interstellar.js` (backup) | A5 | ⬜ |
-| [ ] Archive `js/graphics/cosmic-effects.js` (backup) | A6 | ⬜ |
-| [ ] Update `js/utils/cleanup.js` for Babylon.js disposal | A12 | ⬜ |
-
----
-
-## PHASE 1: CAMERA & FILM LANGUAGE 🎥
-*"If the camera feels like a real lens, the whole thing looks premium"*
-
-### 1.1 Cinematic Camera System
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create `js/graphics/cinematic-camera.js` | Camera foundation | ⬜ |
-| [ ] Implement slow orbital motion (0.02-0.05 rad/sec) | Deliberate motion | ⬜ |
-| [ ] Add subtle forward/backward drift animation | Depth feeling | ⬜ |
-| [ ] Implement micro-motion (tiny handheld shake, <0.5px) | Film realism | ⬜ |
-| [ ] Add occasional subtle reframing (every 10-20 sec) | Director feel | ⬜ |
-
-### 1.2 Depth of Field System
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Implement DOF post-process for near particles | Cinema depth | ⬜ |
-| [ ] Create focus distance animation system | Dynamic focus | ⬜ |
-| [ ] Add bokeh quality settings (hexagonal aperture) | Premium look | ⬜ |
-
-### 1.3 Exposure & Motion Blur
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Implement auto-exposure adaptation system | Hollywood feel | ⬜ |
-| [ ] Add "protect highlights" curve (disk brightness response) | Film response | ⬜ |
-| [ ] Implement tasteful motion blur (velocity-based) | Scale & speed | ⬜ |
-| [ ] Add exposure animation on scene transitions | Drama | ⬜ |
-
-**Phase 1 Deliverable:** Camera that makes any paused frame look like a movie still
+**Current Score: 12/15 features implemented** ✨
 
 ---
 
-## PHASE 2: LAYERED SPACE BACKGROUND 🌌
-*"Most cheap space scenes are flat skyboxes with dots"*
+## 🎯 NEXT SPRINT: "Make It Alive"
 
-### 2.1 Far Starfield Layer (Depth Layer 1)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create `js/graphics/starfield-system.js` | Star foundation | ⬜ |
-| [ ] Generate 50,000+ stars with proper magnitude distribution | Density | ⬜ |
-| [ ] Most stars near-black, only few bright (realistic) | Realism | ⬜ |
-| [ ] Implement GPU compute shader for star positions | Performance | ⬜ |
-| [ ] Add parallax movement (slowest layer) | Depth | ⬜ |
+The difference between "nice" and "jaw-dropping" is **life and motion**. These 5 tasks will transform static beauty into living cinema:
 
-### 2.2 Mid Star Layer (Depth Layer 2)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create mid-distance star layer (5,000 stars) | Parallax | ⬜ |
-| [ ] Implement subtle twinkle variance (not uniform) | Life | ⬜ |
-| [ ] Add faint color variety (cool whites, warm whites) | Richness | ⬜ |
-| [ ] Slightly larger than far stars | Scale cue | ⬜ |
+### 1. 🌀 Accretion Disk Turbulence (HIGH IMPACT)
+**Goal:** Disk that looks like violent, swirling plasma - not a static donut
 
-### 2.3 Near Dust Layer (Depth Layer 3)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create near-camera dust particle system | Scale feeling | ⬜ |
-| [ ] Tiny particles with strong parallax | Immediate depth | ⬜ |
-| [ ] Occasional light catch (sparkle) | Premium detail | ⬜ |
-| [ ] Subtle blur on near particles | DOF integration | ⬜ |
+| Task | Visual Effect |
+|------|---------------|
+| Animated multi-octave noise in disk shader | Organic, flowing motion |
+| Spiral streak patterns | Visible rotation & shear |
+| Velocity-based intensity variation | Speed = brightness |
+| Turbulent eddies at different scales | Layered complexity |
 
-### 2.4 Subtle Nebula Wisps (Depth Layer 4)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create volumetric nebula shader (raymarched noise) | Atmosphere | ⬜ |
-| [ ] Keep mostly monochrome with tiny color hints | Restraint | ⬜ |
-| [ ] Barely-there wisps, not colorful clouds | Realism | ⬜ |
-| [ ] Very slow animation (cosmic timescale) | Scale | ⬜ |
+### 2. 🔥 Hot Spots System (HIGH IMPACT)
+**Goal:** Bright knots that form, orbit, stretch, and fade like real accretion events
 
-**Phase 2 Deliverable:** Space that feels infinite and layered, not like a wallpaper
+| Task | Visual Effect |
+|------|---------------|
+| Spawn bright knots at random positions | Unexpected drama |
+| Keplerian orbit with differential stretch | Physics-based deformation |
+| Intensity pulse as they form | "Event" feeling |
+| Fade over 5-15 seconds | Natural lifecycle |
 
----
+### 3. ✨ Enhanced Dust & Debris (DEPTH)
+**Goal:** The "expensive Hollywood trick" - near-camera particles that sell scale
 
-## PHASE 3: GRAVITATIONAL LENSING ⚫
-*"The signature effect - should bend the entire universe around it"*
+| Task | Visual Effect |
+|------|---------------|
+| Occasional bright sparkle/light catch | Premium detail |
+| Slight motion blur on particles | Cinema quality |
+| Variable sizing (tiny to very tiny) | Depth variety |
+| Very sparse distribution | Space feels empty |
 
-### 3.1 Lensing Math Foundation
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create `js/graphics/gravitational-lensing.js` | Lensing core | ⬜ |
-| [ ] Implement Schwarzschild metric calculations | Physics base | ⬜ |
-| [ ] Create impact parameter → deflection angle function | Accuracy | ⬜ |
-| [ ] Build UV distortion map for background warping | Efficiency | ⬜ |
+### 4. 🌈 Improved Disk Asymmetry (REALISM)
+**Goal:** One side of the disk clearly brighter (approaching side)
 
-### 3.2 Background Warping Shader
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create WGSL compute shader for lensing distortion | WebGPU power | ⬜ |
-| [ ] Stars arc smoothly near the hole (not swirl) | Spacetime feel | ⬜ |
-| [ ] Implement multiple image hints (warped duplicate arcs) | Strong lensing | ⬜ |
-| [ ] Distortion intensity based on distance from center | Realism | ⬜ |
+| Task | Visual Effect |
+|------|---------------|
+| Relativistic beaming calculation | One side 2-3x brighter |
+| Subtle blue-shift on approaching side | Color physics |
+| Subtle red-shift on receding side | Doppler effect |
 
-### 3.3 Photon Ring (The Jewelry)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create razor-thin bright ring at photon sphere | Signature look | ⬜ |
-| [ ] Extremely high contrast and crisp edge | Premium | ⬜ |
-| [ ] Slight Doppler asymmetry (one side brighter) | Physics hint | ⬜ |
-| [ ] Ring should be the brightest element | Focal point | ⬜ |
+### 5. 🎥 Dramatic Moments (ENGAGEMENT)
+**Goal:** Occasional "hero shots" that surprise and delight
 
-### 3.4 Event Horizon
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Perfect black sphere at Schwarzschild radius | The void | ⬜ |
-| [ ] Sharp edge transition to photon ring | Contrast | ⬜ |
-| [ ] No light escapes - true black | Physics | ⬜ |
-
-**Phase 3 Deliverable:** Lensing that makes viewers say "whoa, that's bending space"
+| Task | Visual Effect |
+|------|---------------|
+| Slow dramatic zoom on timer events | Focus intensifies |
+| Subtle exposure pulse on hot spot formation | Energy release |
+| Very rare "flare" event (1 per 5 min) | Unexpected wow |
 
 ---
 
-## PHASE 4: ACCRETION DISK 🔥
-*"The disk is where most of your detail porn comes from"*
+## ✅ COMPLETED FOUNDATION
 
-### 4.1 Disk Geometry Foundation
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create `js/graphics/accretion-disk.js` | Disk core | ⬜ |
-| [ ] Implement disk with actual thickness (not flat donut) | Volume | ⬜ |
-| [ ] Self-occlusion when viewed edge-on | Realism | ⬜ |
-| [ ] Inner edge at ISCO (3x Schwarzschild radius) | Physics | ⬜ |
+These are **done** based on current codebase analysis:
 
-### 4.2 Temperature-Driven Coloring
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Inner disk: white/blue-white (hottest) | Temperature | ⬜ |
-| [ ] Mid disk: yellow-orange | Gradient | ⬜ |
-| [ ] Outer disk: deep red/orange (coolest) | Controlled palette | ⬜ |
-| [ ] NO rainbow colors - keep it physically motivated | Restraint | ⬜ |
+### Phase 0: Engine Foundation ✅
+- [x] Babylon.js + WebGPU engine setup
+- [x] WebGL2 fallback for unsupported browsers
+- [x] Canvas and container setup
+- [x] Resize handler
+- [x] Render loop
 
-### 4.3 Relativistic Beaming (Asymmetry)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] One side of disk brighter due to rotation | Realism | ⬜ |
-| [ ] Approaching side blue-shifted (slightly) | Physics hint | ⬜ |
-| [ ] Receding side red-shifted (slightly) | Doppler | ⬜ |
-| [ ] Asymmetry sells realism without perfect physics | Premium | ⬜ |
+### Phase 1: Cinematic Camera ✅
+- [x] Slow orbital motion (0.02 rad/sec)
+- [x] Subtle breathing (zoom in/out)
+- [x] Micro-shake (handheld feel, <0.5px)
+- [x] Periodic reframing (every 12-20 sec)
+- [x] Vertical drift
+- [x] Dramatic zoom trigger function
 
-### 4.4 Turbulence & Fluid Motion
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Implement evolving spiral streaks | Life | ⬜ |
-| [ ] Animated noise that looks like fluid, not static Perlin | Quality | ⬜ |
-| [ ] Shear flows visible in the disk | Dynamics | ⬜ |
-| [ ] Clumps that form, stretch, and dissolve | Evolution | ⬜ |
+### Phase 2: Starfield ✅
+- [x] Far layer (10,000+ stars)
+- [x] Mid layer (5,000 stars)
+- [x] Near dust layer
+- [x] Debris particles
+- [x] Stellar classification coloring
+- [x] Parallax movement
 
-### 4.5 Hot Spots & Magnetic Events
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Occasional bright knots that orbit | Drama | ⬜ |
-| [ ] Hot spots stretch due to differential rotation | Physics | ⬜ |
-| [ ] Magnetic reconnection-like flare events | Energy | ⬜ |
-| [ ] Brightness variations over time | Life | ⬜ |
+### Phase 3: Black Hole Core ✅
+- [x] Event horizon (pure black sphere)
+- [x] Photon ring (bright thin ring)
+- [x] Basic accretion disk geometry
+- [x] Gravitational lensing post-process
+- [x] Temperature-based disk coloring
+- [x] Basic Doppler asymmetry
 
-### 4.6 Disk Detail Layers (Stacked)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Layer 1: Disk base emission (smooth gradient) | Foundation | ⬜ |
-| [ ] Layer 2: Fine filament detail (high frequency) | Detail | ⬜ |
-| [ ] Layer 3: Occasional sparks and micro debris | Life | ⬜ |
-| [ ] Layer 4: Corona haze above/below disk (soft, not foggy) | Atmosphere | ⬜ |
-
-**Phase 4 Deliverable:** Disk that feels hot, violent, and alive
+### Phase 7-8: Post-Processing ✅
+- [x] HDR rendering pipeline
+- [x] ACES filmic tone mapping
+- [x] Selective bloom
+- [x] Chromatic aberration
+- [x] Depth of field setup
+- [x] Film grain (animated)
+- [x] Vignette
+- [x] FXAA anti-aliasing
 
 ---
 
-## PHASE 5: JETS & HIGH-ENERGY FEATURES ⚡
-*"Gives the scene drama and vertical scale"*
+## 🔄 OPTIONAL ENHANCEMENTS (Later)
 
-### 5.1 Jet Geometry
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create `js/graphics/polar-jets.js` | Jet system | ⬜ |
-| [ ] Narrow base at poles, widening outward | Shape | ⬜ |
-| [ ] Bipolar symmetry (top and bottom) | Physics | ⬜ |
-| [ ] Length extends well beyond disk | Scale | ⬜ |
+Only after core "wow" is achieved:
 
-### 5.2 Jet Internal Structure
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Layered noise for structure inside jet | Volume | ⬜ |
-| [ ] Internal helical patterns (magnetic field hint) | Detail | ⬜ |
-| [ ] Small intermittent pulses traveling outward | Animation | ⬜ |
-| [ ] Brightness variation along length | Depth | ⬜ |
+### Polar Jets (Medium Priority)
+- Bipolar jets from poles
+- Internal helical structure
+- Subtle blue-white glow
+- Small traveling pulses
+> ⚠️ Risk of looking "video game-y" if not subtle enough
 
-### 5.3 Jet Visual Style
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Very faint bloom, NOT a neon beam | Restraint | ⬜ |
-| [ ] Color: blue-white core, fading to cyan | Energy | ⬜ |
-| [ ] Subtle, adds drama without dominating | Balance | ⬜ |
+### Nebula Wisps (Low Priority)
+- Barely-there volumetric wisps
+- Very slow cosmic-scale movement
+- Monochrome with tiny color hints
+> ⚠️ Can muddy the composition if overdone
 
-**Phase 5 Deliverable:** Jets that add drama without looking like a video game
+### Advanced Lensing (Low Priority)
+- Einstein ring / multiple image effects
+- More accurate Schwarzschild metric
+> ⚠️ Current lensing already looks great
 
 ---
 
-## PHASE 6: VOLUMETRICS & NEAR-CAMERA PARTICLES 🌫️
-*"The expensive depth trick"*
+## 🚫 ANTI-PATTERNS TO AVOID
 
-### 6.1 Near-Camera Drifting Dust
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create `js/graphics/volumetric-particles.js` | System | ⬜ |
-| [ ] Tiny particles very close to camera | Depth | ⬜ |
-| [ ] Occasional light catch (sparkle briefly) | Premium | ⬜ |
-| [ ] Slight motion blur on movement | Cinema | ⬜ |
-| [ ] Sparse - space is mostly empty | Restraint | ⬜ |
-
-### 6.2 Mid-Distance Debris
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Small rocks/ice specks at mid distance | Scale | ⬜ |
-| [ ] Slow parallax movement | Depth cue | ⬜ |
-| [ ] Very sparse distribution | Realism | ⬜ |
-| [ ] Occasional tumbling rotation | Life | ⬜ |
-
-### 6.3 Volumetric Haze Near Disk
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Very light volumetric around disk | Atmosphere | ⬜ |
-| [ ] Raymarched noise or layered shells | Technique | ⬜ |
-| [ ] NOT foggy soup - subtle only | Restraint | ⬜ |
-| [ ] Catches disk light for glow | Integration | ⬜ |
-
-**Phase 6 Deliverable:** The "holy crap" depth that separates amateur from pro
+| Don't Do This | It Looks | Instead |
+|---------------|----------|---------|
+| Rainbow colors on disk | Cheap, video game | Controlled orange-white-blue gradient |
+| Everything glowing | Muddy, no hierarchy | Only disk & photon ring bloom |
+| Fast camera movement | Screensaver, not cinema | Slow, deliberate, weighty |
+| Foggy volumetrics | Cheap atmosphere | Sparse, almost-invisible |
+| Bright colorful jets | Neon video game | Subtle, faint, barely-there |
+| Uniform star brightness | Flat, fake | Realistic magnitude distribution |
+| Static disk | Dead, boring | Evolving turbulence & events |
 
 ---
 
-## PHASE 7: HDR LIGHTING & EXPOSURE 💡
-*"HDR or it will never feel premium"*
+## 📊 QUALITY CHECKLIST
 
-### 7.1 HDR Pipeline Setup
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Enable HDR rendering in Babylon.js | Foundation | ⬜ |
-| [ ] Set up floating-point render targets | Precision | ⬜ |
-| [ ] Implement proper HDR workflow | Pipeline | ⬜ |
+Before calling it "done," every frame should pass these tests:
 
-### 7.2 Light Hierarchy
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Space: dark but not crushed (preserve shadow detail) | Balance | ⬜ |
-| [ ] Disk: primary light source, clips in highlights | Brightness | ⬜ |
-| [ ] Photon ring: extremely high contrast | Accent | ⬜ |
-| [ ] Jets: secondary glow, subtle | Hierarchy | ⬜ |
+### The Screenshot Test
+- [ ] Any random paused frame could be a movie poster
+- [ ] Black levels are truly black (0,0,0)
+- [ ] Highlights roll off smoothly (no harsh clipping)
+- [ ] Composition draws eye to black hole center
 
-### 7.3 Filmic Tone Mapping
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Implement ACES filmic tone mapper | Hollywood standard | ⬜ |
-| [ ] Highlights roll off smoothly (no harsh clip) | Quality | ⬜ |
-| [ ] Preserve shadow detail in dark regions | Balance | ⬜ |
-| [ ] Test multiple exposure levels | Flexibility | ⬜ |
+### The Motion Test
+- [ ] Disk appears to rotate with visible turbulence
+- [ ] Stars twinkle subtly (not uniformly)
+- [ ] Camera never feels "locked off"
+- [ ] Near particles create depth parallax
 
-**Phase 7 Deliverable:** "Nice" becomes "cinematic" through proper HDR
+### The Emotion Test
+- [ ] Scene feels dangerous and powerful
+- [ ] Scale feels cosmic (massive)
+- [ ] Lighting feels natural (not artificial)
+- [ ] User wants to keep watching
 
 ---
 
-## PHASE 8: POST-PROCESSING PIPELINE 🎨
-*"Post is not decoration - it's final polish"*
+## 📍 CURRENT STATUS
 
-### 8.1 Anti-Aliasing (TAA)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Implement Temporal Anti-Aliasing | Stability | ⬜ |
-| [ ] Reduce shimmer on stars | Clean | ⬜ |
-| [ ] Reduce shimmer on disk filaments | Quality | ⬜ |
-| [ ] Tune for motion (avoid ghosting) | Balance | ⬜ |
-
-### 8.2 Bloom (Tuned)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] High-quality bloom pass | Glow | ⬜ |
-| [ ] Bloom threshold: only disk and photon ring | Selectivity | ⬜ |
-| [ ] NOT everything glowing | Restraint | ⬜ |
-| [ ] Subtle lens scattering on bright highlights | Premium | ⬜ |
-
-### 8.3 Chromatic Aberration
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Implement subtle CA | Lens feel | ⬜ |
-| [ ] Only near screen edges | Realism | ⬜ |
-| [ ] Very tiny amount (0.001-0.002) | Restraint | ⬜ |
-
-### 8.4 Film Grain
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Very light film grain overlay | Texture | ⬜ |
-| [ ] Breaks color banding | Technical | ⬜ |
-| [ ] Adds analog film texture | Cinema | ⬜ |
-| [ ] Animated (not static) | Quality | ⬜ |
-
-### 8.5 Color Grading
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Create cinematic color grading LUT | Look | ⬜ |
-| [ ] Blacks: slightly cool/blue | Style | ⬜ |
-| [ ] Highlights near disk: warm | Contrast | ⬜ |
-| [ ] Maintain cinematic contrast curve | Premium | ⬜ |
-
-### 8.6 Vignette
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Extremely subtle vignette | Focus | ⬜ |
-| [ ] Barely noticeable | Restraint | ⬜ |
-| [ ] Draws eye to center | Composition | ⬜ |
-
-### 8.7 Lens Flares (Optional, Careful)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] If used: minimal and motivated by disk only | Restraint | ⬜ |
-| [ ] NO cheesy generic flares | Quality | ⬜ |
-| [ ] Anamorphic streak style if any | Premium | ⬜ |
-
-**Phase 8 Deliverable:** Post-processing that feels like a movie, not a game
+| Metric | Value |
+|--------|-------|
+| **Foundation** | 100% Complete |
+| **Core Visuals** | 80% Complete |
+| **"Wow Factor"** | 12/15 features |
+| **Next Focus** | Disk Turbulence & Hot Spots |
 
 ---
 
-## PHASE 9: MOTION DESIGN & TIMING ⏱️
-*"Animation should feel like cosmic forces, not a screensaver"*
+## 🚦 RECOMMENDED NEXT STEPS
 
-### 9.1 Disk Rotation
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Disk rotation speed: energetic but massive | Scale | ⬜ |
-| [ ] Inner disk faster than outer (Keplerian) | Physics | ⬜ |
-| [ ] Visible differential rotation | Realism | ⬜ |
-
-### 9.2 Dust & Particle Motion
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Dust drifts slowly with parallax | Depth | ⬜ |
-| [ ] Different layers move at different speeds | Separation | ⬜ |
-| [ ] Near particles faster, far particles slower | Parallax | ⬜ |
-
-### 9.3 Micro Events (Drama)
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Occasional hot knot formation | Interest | ⬜ |
-| [ ] Brightening, stretching, fading sequence | Storytelling | ⬜ |
-| [ ] Random timing (not predictable) | Organic | ⬜ |
-| [ ] Jet pulses traveling outward | Energy | ⬜ |
-
-### 9.4 Camera Never Stops
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Continuous slow movement | Life | ⬜ |
-| [ ] No "locked off" static shots | Premium | ⬜ |
-| [ ] Movement speed implies scale | Scale | ⬜ |
-
-**Phase 9 Deliverable:** Scene feels huge, dangerous, and alive
+1. **Accretion Disk Turbulence** - Add animated noise to disk shader
+2. **Hot Spots System** - Implement orbiting bright knots
+3. **Polish Pass** - Tune bloom, exposure, grain levels
+4. **Test on Multiple Devices** - Ensure WebGL2 fallback looks good
 
 ---
 
-## PHASE 10: PROCEDURAL DETAIL STRATEGY 🔍
-*"Infinite detail without assets"*
-
-### 10.1 Detail Layer Stack
-| Layer | Scale | Speed | Purpose |
-|-------|-------|-------|---------|
-| [ ] Large-scale gradients (nebula wisps) | Huge | Slowest | Atmosphere |
-| [ ] Mid-scale dust clouds | Large | Slow | Depth |
-| [ ] Fine-scale star sparkle | Medium | Medium | Life |
-| [ ] Ultra-fine disk filaments | Small | Fast | Detail |
-| [ ] Micro particles near camera | Tiny | Fastest | Scale |
-
-### 10.2 Parallax Separation
-| Task | Cinematic Goal | Status |
-|------|----------------|--------|
-| [ ] Each layer at different depth | Separation | ⬜ |
-| [ ] Each layer moves at different speed | Parallax | ⬜ |
-| [ ] Speed proportional to distance | Physics | ⬜ |
-| [ ] Creates depth and richness | Premium | ⬜ |
-
-**Phase 10 Deliverable:** Detail that feels infinite, all from code
-
----
-
-## PHASE 11: INTEGRATION & POLISH 🔧
-*Connect to app functionality*
-
-### 11.1 App Integration
-| Task | Migration Ref | Status |
-|------|---------------|--------|
-| [ ] Update `ui-effects.js` to trigger new effects | A11 | ⬜ |
-| [ ] Connect timer states to visual intensity | Integration | ⬜ |
-| [ ] Focus mode increases disk brightness | Feature | ⬜ |
-| [ ] Break mode softens the scene | Feature | ⬜ |
-
-### 11.2 Performance Optimization
-| Task | Goal | Status |
-|------|------|--------|
-| [ ] Profile WebGPU compute shader performance | Baseline | ⬜ |
-| [ ] Implement LOD for particle systems | Scalability | ⬜ |
-| [ ] Add quality presets (Low/Medium/High/Ultra) | Accessibility | ⬜ |
-| [ ] Test on various GPUs | Compatibility | ⬜ |
-
-### 11.3 Fallback for Non-WebGPU
-| Task | Goal | Status |
-|------|------|--------|
-| [ ] WebGL2 fallback path | Compatibility | ⬜ |
-| [ ] Reduced particle counts for fallback | Performance | ⬜ |
-| [ ] Graceful degradation of effects | UX | ⬜ |
-
----
-
-# 📊 IMPLEMENTATION SUMMARY
-
-## By Priority (What to Perfect First)
-1. **Gravitational Lensing** (Phase 3) - The signature effect
-2. **Accretion Disk** (Phase 4) - The detail showcase  
-3. **HDR + Post-Processing** (Phase 7 & 8) - The premium finish
-
-## By Dependency Order
-```
-Phase 0 (Foundation)
-    ↓
-Phase 1 (Camera) + Phase 2 (Background)
-    ↓
-Phase 3 (Lensing) ← Needs background to warp
-    ↓
-Phase 4 (Disk) + Phase 5 (Jets)
-    ↓
-Phase 6 (Volumetrics) ← Needs disk light to catch
-    ↓
-Phase 7 (HDR) + Phase 8 (Post)
-    ↓
-Phase 9 (Motion) + Phase 10 (Detail)
-    ↓
-Phase 11 (Integration)
-```
-
-## Task Counts
-| Phase | Tasks | Priority |
-|-------|-------|----------|
-| Phase 0: Foundation | 10 | 🔴 CRITICAL |
-| Phase 1: Camera | 13 | 🔴 HIGH |
-| Phase 2: Background | 16 | 🔴 HIGH |
-| Phase 3: Lensing | 12 | 🔴 CRITICAL |
-| Phase 4: Disk | 24 | 🔴 CRITICAL |
-| Phase 5: Jets | 10 | 🟡 MEDIUM |
-| Phase 6: Volumetrics | 12 | 🟡 MEDIUM |
-| Phase 7: HDR | 10 | 🔴 HIGH |
-| Phase 8: Post | 18 | 🔴 HIGH |
-| Phase 9: Motion | 11 | 🟡 MEDIUM |
-| Phase 10: Detail | 6 | 🟡 MEDIUM |
-| Phase 11: Integration | 10 | 🟢 FINAL |
-| **TOTAL** | **152 tasks** | |
-
----
-
-## 🚦 READY TO START
-
-**Next Step:** Begin with **Phase 0: Foundation Setup**
-
-Say **"Start Phase 0"** to begin the Babylon.js + WebGPU setup.
-
----
-
-*This plan maps to MIGRATION_CHECKLIST.md - both files should be updated together*
-
-*Last Updated: January 12, 2026*
+*This plan focuses on maximum visual impact with minimum complexity.*
+*Last Updated: January 23, 2026*
