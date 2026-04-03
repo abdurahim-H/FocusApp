@@ -24,9 +24,7 @@ async function loadModules() {
 
     for (const module of moduleList) {
         try {
-            console.log(`Loading module: ${module.name} from ${module.path}`);
             modules[module.name] = await import(module.path);
-            console.log(`✓ Successfully loaded module: ${module.name}`);
         } catch (error) {
             console.error(`✗ Failed to load module ${module.name}:`, error);
         }
@@ -66,8 +64,6 @@ export async function initApp() {
         // Initialize 3D scene — progress bar tracks actual initialization
         try {
             if (loadedModules.scene3d?.init3D) {
-                console.log('Initializing 3D scene...');
-
                 // Animate progress during init
                 if (loadingProgress) {
                     setTimeout(() => { loadingProgress.style.width = '50%'; }, 200);
@@ -75,9 +71,7 @@ export async function initApp() {
                 }
 
                 loadedModules.scene3d.init3D().then(success => {
-                    if (success) {
-                        console.log('3D scene initialized successfully');
-                    } else {
+                    if (!success) {
                         console.error('3D scene initialization returned false');
                     }
 
@@ -115,16 +109,13 @@ export async function initApp() {
         }
 
         // Setup all modules
-        console.log('Setting up navigation module...');
         if (loadedModules.navigation?.setupNavigation) {
             // Ensure DOM is ready before setting up navigation
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', () => {
-                    console.log('DOM ready, setting up navigation');
                     loadedModules.navigation.setupNavigation();
                 });
             } else {
-                console.log('DOM already ready, setting up navigation immediately');
                 loadedModules.navigation.setupNavigation();
             }
         } else {

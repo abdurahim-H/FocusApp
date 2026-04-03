@@ -26,7 +26,6 @@ export async function initEngine() {
         return { engine, canvas, isWebGPU };
     }
 
-    console.log('🚀 Initializing Babylon.js Engine...');
 
     // Get or create canvas
     const container = document.getElementById('scene-container');
@@ -55,7 +54,6 @@ export async function initEngine() {
 
     container.appendChild(canvas);
 
-    console.log(`📐 Canvas created: ${canvas.width}x${canvas.height}`);
 
     // NOTE: WebGPU is disabled because Babylon.js DefaultRenderingPipeline 
     // has compatibility issues with WebGPU's rgba16float texture format.
@@ -66,7 +64,6 @@ export async function initEngine() {
 
     if (useWebGPU && await checkWebGPUSupport()) {
         try {
-            console.log('⚡ WebGPU supported, initializing WebGPU engine...');
             engine = new BABYLON.WebGPUEngine(canvas, {
                 antialias: CONFIG.antialias,
                 stencil: CONFIG.stencil,
@@ -76,7 +73,6 @@ export async function initEngine() {
 
             await engine.initAsync();
             isWebGPU = true;
-            console.log('✅ WebGPU Engine initialized successfully!');
         } catch (error) {
             console.warn('⚠️ WebGPU initialization failed, falling back to WebGL2:', error);
             engine = null;
@@ -85,13 +81,11 @@ export async function initEngine() {
 
     // Fall back to WebGL2 if WebGPU failed or unavailable
     if (!engine) {
-        console.log('🔄 Initializing WebGL2 engine...');
 
         // Ensure canvas has valid dimensions
         if (canvas.width === 0 || canvas.height === 0) {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            console.log(`📐 Resized canvas to: ${canvas.width}x${canvas.height}`);
         }
 
         try {
@@ -104,7 +98,6 @@ export async function initEngine() {
                 doNotHandleContextLost: false
             });
             isWebGPU = false;
-            console.log('✅ WebGL2 Engine initialized successfully!');
         } catch (webglError) {
             console.error('❌ WebGL2 failed, trying WebGL1...', webglError);
 
@@ -117,7 +110,6 @@ export async function initEngine() {
                     failIfMajorPerformanceCaveat: false
                 });
                 isWebGPU = false;
-                console.log('✅ WebGL1 Engine initialized successfully!');
             } catch (webgl1Error) {
                 console.error('❌ All WebGL initialization failed:', webgl1Error);
                 throw new Error('WebGL initialization failed. Please enable hardware acceleration in your browser settings.');
@@ -153,25 +145,21 @@ export async function initEngine() {
 async function checkWebGPUSupport() {
     // Check if BABYLON.WebGPUEngine exists
     if (typeof BABYLON === 'undefined' || !BABYLON.WebGPUEngine) {
-        console.log('ℹ️ Babylon.js WebGPU module not available');
         return false;
     }
 
     // Check navigator.gpu
     if (!navigator.gpu) {
-        console.log('ℹ️ WebGPU not supported by browser');
         return false;
     }
 
     try {
         const adapter = await navigator.gpu.requestAdapter();
         if (!adapter) {
-            console.log('ℹ️ No WebGPU adapter found');
             return false;
         }
         return true;
     } catch (error) {
-        console.log('ℹ️ WebGPU check failed:', error);
         return false;
     }
 }
@@ -180,18 +168,7 @@ async function checkWebGPUSupport() {
  * Log engine capabilities for debugging
  */
 function logEngineCapabilities() {
-    if (!engine) return;
-
-    console.log('📊 Engine Capabilities:');
-    console.log(`   - Renderer: ${isWebGPU ? 'WebGPU' : 'WebGL2'}`);
-    console.log(`   - Hardware Scaling: ${engine.getHardwareScalingLevel()}`);
-
-    if (!isWebGPU && engine.getCaps) {
-        const caps = engine.getCaps();
-        console.log(`   - Max Texture Size: ${caps.maxTextureSize}`);
-        console.log(`   - Max Vertex Attribs: ${caps.maxVertexAttribs}`);
-        console.log(`   - Float Textures: ${caps.textureFloatLinearFiltering}`);
-    }
+    // Silent in production
 }
 
 /**
@@ -232,7 +209,6 @@ export function disposeEngine() {
     }
     isInitialized = false;
     isWebGPU = false;
-    console.log('🧹 Engine disposed');
 }
 
 // Export for external access

@@ -74,7 +74,6 @@ const FRAGMENT = `
  * Create the cosmic pulse overlay
  */
 export function createCosmicPulse(sceneRef, camera) {
-    console.log('💫 Creating cosmic pulse...');
 
     BABYLON.Effect.ShadersStore['cosmicPulseVertexShader'] = VERTEX;
     BABYLON.Effect.ShadersStore['cosmicPulseFragmentShader'] = FRAGMENT;
@@ -105,7 +104,6 @@ export function createCosmicPulse(sceneRef, camera) {
 
     mesh.material = material;
 
-    console.log('   ✓ Cosmic pulse created');
 }
 
 /**

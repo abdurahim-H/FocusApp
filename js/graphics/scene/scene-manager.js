@@ -56,18 +56,12 @@ const stats = {
  * @returns {Promise<boolean>} Success status
  */
 export async function init3D() {
-    const t0 = performance.now();
-    const elapsed = () => Math.round(performance.now() - t0);
-    console.log(`⏱️ [${elapsed()}ms] 🎬 Initializing Scene...`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     try {
         // Initialize engine (handles WebGPU/WebGL2)
         const engineResult = await initEngine();
         engine = engineResult.engine;
         canvas = engineResult.canvas;
-        console.log(`⏱️ [${elapsed()}ms] Engine initialized`);
-
         // Detect device capability
         deviceProfile = detectDeviceProfile();
 
@@ -82,45 +76,23 @@ export async function init3D() {
 
         // Setup cinematic camera first
         setupCinematicCamera();
-        console.log(`⏱️ [${elapsed()}ms] Camera configured`);
 
         // Create scene elements
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         createCosmicSkybox(scene);
-        console.log(`⏱️ [${elapsed()}ms] Skybox done`);
-
         createStarField(scene, camera, deviceProfile.starMultiplier);
-        console.log(`⏱️ [${elapsed()}ms] Starfield done`);
-
         createNebula(scene, camera, deviceProfile.shaderOctaves);
-        console.log(`⏱️ [${elapsed()}ms] Nebula done`);
-
         createShootingStars(scene);
-        console.log(`⏱️ [${elapsed()}ms] Shooting stars done`);
-
         createStarGlows(scene, camera);
-        console.log(`⏱️ [${elapsed()}ms] Star glows done`);
-
         createBlackHole(scene, camera);
-        console.log(`⏱️ [${elapsed()}ms] Black hole done`);
-
         createCosmicMotes(scene);
-        console.log(`⏱️ [${elapsed()}ms] Cosmic motes done`);
-
         createEtherealPetals(scene);
-        console.log(`⏱️ [${elapsed()}ms] Ethereal petals done`);
-
         createCosmicPulse(scene, camera);
-        console.log(`⏱️ [${elapsed()}ms] Cosmic pulse done`);
 
         // Setup ambient lighting
         setupLighting();
-        console.log(`⏱️ [${elapsed()}ms] Lighting done`);
 
         // Setup post-processing pipeline
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         setupPostProcessing(scene, camera);
-        console.log(`⏱️ [${elapsed()}ms] Post-processing done`);
 
         // Setup FPS watchdog for adaptive quality
         fpsWatchdog = createFPSWatchdog(stats, () => {
@@ -146,10 +118,7 @@ export async function init3D() {
             });
         }
 
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('🎬 Cinematic scene ready!');
-        console.log(`   Total stars: ~50,000`);
-        console.log(`   Effects: Nebula, HDR, Bloom, Film grain`);
 
         return true;
 
@@ -163,7 +132,6 @@ export async function init3D() {
  * Setup the cinematic camera with slow orbital motion
  */
 function setupCinematicCamera() {
-    console.log('📷 Setting up cinematic camera...');
 
     // ArcRotateCamera for smooth orbital movement
     camera = new BABYLON.ArcRotateCamera(
@@ -194,14 +162,12 @@ function setupCinematicCamera() {
     camera.minZ = 0.1;
     camera.maxZ = 2000;
 
-    console.log('   ✓ Cinematic camera configured');
 }
 
 /**
  * Setup subtle ambient lighting
  */
 function setupLighting() {
-    console.log('💡 Setting up lighting...');
 
     // Very dim ambient - space is dark
     const ambient = new BABYLON.HemisphericLight(
@@ -233,7 +199,6 @@ function setupLighting() {
     fillLight.intensity = 0.15;
     fillLight.range = 200;
 
-    console.log('   ✓ Lighting configured');
 }
 
 /**
@@ -377,7 +342,6 @@ export function getCamera() {
  * Dispose all resources and clean up
  */
 export function dispose() {
-    console.log('🧹 Disposing scene resources...');
 
     window.removeEventListener('resize', handleResize);
 
@@ -403,7 +367,6 @@ export function dispose() {
     engine = null;
     canvas = null;
 
-    console.log('✓ Scene disposed');
 }
 
 // Export for external access

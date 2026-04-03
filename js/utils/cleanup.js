@@ -22,7 +22,6 @@ export function initCleanupSystem() {
     if (cleanupInitialized) return;
     cleanupInitialized = true;
     
-    console.log('🧹 Cleanup system initializing...');
     
     // Store original functions
     originalRequestAnimationFrame = window.requestAnimationFrame;
@@ -44,15 +43,12 @@ export function initCleanupSystem() {
     // Setup tab visibility handling for animation pause/resume
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            console.log('🔄 Tab hidden - pausing animations');
             pauseAnimations();
         } else {
-            console.log('🔄 Tab visible - resuming animations');
             resumeAnimations();
         }
     });
     
-    console.log('🧹 Cleanup system initialized - tracking functions ready');
 }
 
 // Pause all animations when tab is hidden
@@ -93,7 +89,6 @@ export function enableAggressiveTracking() {
         return;
     }
     
-    console.log('🧹 Enabling aggressive tracking...');
     setupTrackingWrappers();
 }
 
@@ -150,7 +145,6 @@ function setupTrackingWrappers() {
 
 // Global cleanup function
 export function cleanupApplication() {
-    console.log('🧹 Starting application cleanup...');
     
     // Cancel all active animation frames
     let frameCount = 0;
@@ -159,7 +153,6 @@ export function cleanupApplication() {
         frameCount++;
     }
     activeAnimationFrames.clear();
-    console.log(`🧹 Cancelled ${frameCount} animation frames`);
     
     // Clear all active intervals
     let intervalCount = 0;
@@ -168,7 +161,6 @@ export function cleanupApplication() {
         intervalCount++;
     }
     activeIntervals.clear();
-    console.log(`🧹 Cleared ${intervalCount} intervals`);
     
     // Clear all active timeouts
     let timeoutCount = 0;
@@ -177,7 +169,6 @@ export function cleanupApplication() {
         timeoutCount++;
     }
     activeTimeouts.clear();
-    console.log(`🧹 Cleared ${timeoutCount} timeouts`);
     
     // Cleanup Three.js resources
     cleanup3DResources();
@@ -185,7 +176,6 @@ export function cleanupApplication() {
     // Cleanup UI effects
     cleanupUIEffects();
     
-    console.log('🧹 Application cleanup complete');
 }
 
 // 3D resource cleanup (supports both Three.js and Babylon.js)
@@ -204,12 +194,10 @@ function cleanup3DResources() {
 
 // Babylon.js resource cleanup
 function cleanupBabylonResources() {
-    console.log('🧹 Cleaning up Babylon.js resources...');
 
     // Dispose engine (handles scene, meshes, materials, textures)
     if (window.babylonEngine) {
         window.babylonEngine.dispose();
-        console.log('🧹 Babylon.js engine disposed');
     }
 }
 
@@ -247,7 +235,6 @@ function cleanupThreeResources() {
         window.renderer.forceContextLoss();
     }
 
-    console.log(`🧹 Disposed ${geometryCount} geometries, ${materialCount} materials, ${textureCount} textures`);
 
     function disposeMaterial(material) {
         if (material.map) {
@@ -279,7 +266,6 @@ function cleanupUIEffects() {
         });
     });
     
-    console.log('🧹 Cleaned up UI effects');
 }
 
 // Export tracking functions for use by other modules

@@ -69,7 +69,6 @@ export function detectDeviceProfile() {
     }
     // else: high defaults apply
 
-    console.log(`📊 Device profile: ${profile.tier} (GPU: ${gpuTier}, mobile: ${isMobile}, cores: ${cores}, DPR: ${pixelRatio})`);
     return profile;
 }
 

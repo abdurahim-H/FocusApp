@@ -79,7 +79,6 @@ const GLOW_FRAGMENT = `
  */
 export function createStarGlows(sceneRef, camera) {
     scene = sceneRef;
-    console.log('✨ Creating hero star glow halos...');
 
     // Register shaders
     BABYLON.Effect.ShadersStore['starGlowVertexShader'] = GLOW_VERTEX;
@@ -159,7 +158,6 @@ export function createStarGlows(sceneRef, camera) {
         glowMeshes.push({ mesh: plane, material: mat });
     }
 
-    console.log(`   ✓ ${HERO_STAR_COUNT} hero star glows created`);
 }
 
 /**

@@ -87,20 +87,10 @@ function initAudioElements() {
             console.error(`🎵 Error loading ${type} audio:`, e);
         });
         
-        // Add audio state event listeners
-        audio.addEventListener('loadstart', () => {
-            console.log(`🎵 Started loading ${type}`);
-        });
-        
-        audio.addEventListener('canplay', () => {
-            console.log(`🎵 ${type} ready to play`);
-        });
-        
         audioElements[type] = audio;
     });
     
     isInitialized = true;
-    console.log('🎵 Audio elements initialized for streaming');
 }
 
 // Start playing a sound
@@ -114,7 +104,6 @@ async function startSound(type) {
 
         // Ensure audio is ready before playing
         if (audio.readyState < 2) {
-            console.log(`🎵 Waiting for ${type} to load...`);
             await new Promise((resolve, reject) => {
                 const timeoutId = setTimeout(() => {
                     reject(new Error(`Timeout loading ${type}`));
@@ -160,7 +149,6 @@ async function startSound(type) {
             }
         }
         
-        console.log(`🎵 Started playing ${type} at volume ${Math.round(volumeToSet * 100)}%`);
 
         // Add to active sounds
         if (!state.sounds.active.includes(type)) {
@@ -184,7 +172,6 @@ function stopSound(type) {
         if (audio) {
             audio.pause();
             audio.currentTime = 0;
-            console.log(`🎵 Stopped ${type}`);
         }
 
         // Remove from active sounds
@@ -200,7 +187,6 @@ function stopSound(type) {
 
 // Toggle ambient sound on/off
 export async function toggleAmbientSound(type) {
-    console.log(`🎵 Toggling ${type}...`);
     
     // Initialize audio elements if needed
     if (!isInitialized) {
@@ -218,7 +204,6 @@ export async function toggleAmbientSound(type) {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioContext.state === 'suspended') {
                     await audioContext.resume();
-                    console.log('🎵 Audio context resumed');
                 }
             }
         } catch (e) {
@@ -263,7 +248,6 @@ export function setAmbientVolume(volumeLevel) {
         audio.volume = masterVolume;
     });
     
-    console.log(`🎵 Master volume set to ${Math.round(masterVolume * 100)}%`);
 }
 
 // Legacy function for backward compatibility with meditation.js
@@ -279,7 +263,6 @@ export function setSoundVolume(type, volumePercent) {
     
     if (audio) {
         audio.volume = volumeLevel;
-        console.log(`🎵 Set ${type} volume to ${Math.round(volumeLevel * 100)}%`);
     }
 }
 
@@ -434,7 +417,6 @@ function setupModalControls() {
 
 // Setup ambient sound controls
 export function setupAmbientControls() {
-    console.log('🎵 Setting up ambient controls...');
     
     // Initialize audio elements
     initAudioElements();
@@ -445,12 +427,10 @@ export function setupAmbientControls() {
     // Initialize active sounds display
     updateActiveSoundsDisplay();
     
-    console.log('🎵 Ambient controls ready');
 }
 
 // Stop all ambient sounds
 export function stopAllAmbientSounds() {
-    console.log('🎵 Stopping all ambient sounds...');
     
     Object.keys(audioElements).forEach(type => {
         stopSound(type);
@@ -468,7 +448,6 @@ export function stopAllAmbientSounds() {
 
 // Initialize audio system (lightweight)
 export function initAudioSystem() {
-    console.log('🎵 Initializing audio system...');
     initAudioElements();
     return true;
 }

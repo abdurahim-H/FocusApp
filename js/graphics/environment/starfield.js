@@ -84,7 +84,6 @@ function registerStarShaders() {
  * @returns {Object} References to all starfield layers
  */
 export function createStarField(sceneRef, cameraRef, starMultiplier = 1.0) {
-    console.log(`⭐ Creating cinematic starfield (quality: ${Math.round(starMultiplier * 100)}%)...`);
     scene = sceneRef;
     camera = cameraRef;
 
@@ -103,7 +102,6 @@ export function createStarField(sceneRef, cameraRef, starMultiplier = 1.0) {
     createDustParticles();
     createDebrisParticles();
 
-    console.log('✨ Cinematic starfield system created');
     return starLayers;
 }
 
@@ -160,7 +158,6 @@ function createStarLayer(name, config, brightnessScale) {
     SPS.mesh._layerConfig = config;
     starMaterials.push(mat);
 
-    console.log(`   ✓ ${name}: ${config.count.toLocaleString()} stars`);
     return SPS;
 }
 
@@ -264,7 +261,6 @@ function getStellarClassification(type) {
  * Tiny particles that catch light and create depth
  */
 function createDustParticles() {
-    console.log('   Creating near-camera dust...');
 
     dustParticles = new BABYLON.ParticleSystem('dust', 2000, scene);
 
@@ -307,7 +303,6 @@ function createDustParticles() {
     dustParticles.emitter = new BABYLON.Vector3(0, 0, 0);
 
     dustParticles.start();
-    console.log('   ✓ Dust particles created');
 }
 
 /**
@@ -315,7 +310,6 @@ function createDustParticles() {
  * Small rocks/ice specks at mid-distance
  */
 function createDebrisParticles() {
-    console.log('   Creating space debris...');
 
     debrisParticles = new BABYLON.ParticleSystem('debris', 300, scene);
 
@@ -361,7 +355,6 @@ function createDebrisParticles() {
     debrisParticles.emitter = new BABYLON.Vector3(0, 0, 0);
 
     debrisParticles.start();
-    console.log('   ✓ Debris particles created');
 }
 
 /**

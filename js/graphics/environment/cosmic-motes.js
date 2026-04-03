@@ -84,7 +84,6 @@ function createMotePath(seed) {
  */
 export function createCosmicMotes(sceneRef) {
     scene = sceneRef;
-    console.log('🌟 Creating cosmic motes...');
 
     BABYLON.Effect.ShadersStore['cosmicMoteVertexShader'] = MOTE_VERTEX;
     BABYLON.Effect.ShadersStore['cosmicMoteFragmentShader'] = MOTE_FRAGMENT;
@@ -158,7 +157,6 @@ export function createCosmicMotes(sceneRef) {
         });
     }
 
-    console.log(`   ✓ ${MOTE_COUNT} cosmic motes created`);
 }
 
 /**

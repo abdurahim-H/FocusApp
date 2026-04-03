@@ -47,6 +47,12 @@ const FRAGMENT = `
         return v;
     }
 
+    float starHash(vec2 p) {
+        vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.x + p3.y) * p3.z);
+    }
+
     void main() {
         vec3 dir = normalize(vPosition);
         float t = time * 0.015;
@@ -76,52 +82,35 @@ const FRAGMENT = `
         float brightRegion = exp(-pow(dir.x - 0.1, 2.0) * 3.0 - pow(dir.y - 0.6, 2.0) * 5.0);
         sky += vec3(0.04, 0.06, 0.1) * brightRegion * 0.6;
 
-        // === EMBEDDED BACKGROUND STARS — thousands of static pinpoints ===
-        // Zero geometry cost — pure shader. These are the dense "wallpaper" of tiny stars
-        // that fill the sky behind the 3D SPS stars.
+        // === EMBEDDED BACKGROUND STARS — sub-pixel grid, no visible rectangles ===
 
-        // Hash function for star placement
-        float starHash(vec2 p) {
-            vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
-            p3 += dot(p3, p3.yzx + 33.33);
-            return fract((p3.x + p3.y) * p3.z);
-        }
-
-        // Layer 0 — ultra-dense dust of stars, barely visible (~12000)
-        vec2 grid0 = floor(uv * 800.0);
+        // Layer 0 — dense faint dust
+        vec2 grid0 = floor(uv * 2000.0);
         float s0 = starHash(grid0 + vec2(73.1, 419.3));
-        float star0 = step(0.981, s0);
-        float bright0 = (s0 - 0.981) / 0.019;
-        sky += vec3(0.35, 0.38, 0.48) * star0 * bright0 * 0.2;
+        sky += vec3(0.3, 0.33, 0.42) * step(0.997, s0) * 0.3;
 
-        // Layer 1 — dense faint pinpoints (~8000)
-        vec2 grid1 = floor(uv * 550.0);
+        // Layer 1 — medium pinpoints
+        vec2 grid1 = floor(uv * 1400.0);
         float s1 = starHash(grid1);
-        float star1 = step(0.984, s1);
-        float bright1 = (s1 - 0.984) / 0.016;
-        sky += vec3(0.5, 0.55, 0.65) * star1 * bright1 * 0.35;
+        sky += vec3(0.5, 0.55, 0.65) * step(0.9975, s1) * 0.45;
 
-        // Layer 2 — medium density, brighter (~3000)
-        vec2 grid2 = floor(uv * 350.0);
+        // Layer 2 — brighter scattered
+        vec2 grid2 = floor(uv * 900.0);
         float s2 = starHash(grid2 + vec2(127.1, 311.7));
-        float star2 = step(0.990, s2);
-        float bright2 = (s2 - 0.990) / 0.010;
-        sky += vec3(0.7, 0.75, 0.85) * star2 * bright2 * 0.55;
+        sky += vec3(0.7, 0.75, 0.85) * step(0.998, s2) * 0.6;
 
-        // Layer 3 — sparse, brightest background stars (~800)
-        vec2 grid3 = floor(uv * 180.0);
+        // Layer 3 — sparse bright with color variety
+        vec2 grid3 = floor(uv * 500.0);
         float s3 = starHash(grid3 + vec2(269.5, 183.3));
-        float star3 = step(0.994, s3);
-        float bright3 = (s3 - 0.994) / 0.006;
+        float star3 = step(0.9985, s3);
         vec3 starCol3 = mix(vec3(0.8, 0.85, 1.0), vec3(1.0, 0.9, 0.75), starHash(grid3 + vec2(50.0)));
-        sky += starCol3 * star3 * bright3 * 0.75;
+        sky += starCol3 * star3 * 0.75;
 
         gl_FragColor = vec4(sky, 1.0);
     }
 `;
 
 export function createCosmicSkybox(scene) {
-    console.log('🌌 Creating cosmic skybox...');
 
     BABYLON.Effect.ShadersStore['cosmicSkyVertexShader'] = VERTEX;
     BABYLON.Effect.ShadersStore['cosmicSkyFragmentShader'] = FRAGMENT;
@@ -151,7 +140,6 @@ export function createCosmicSkybox(scene) {
 
     skyMesh.material = skyMaterial;
 
-    console.log('   ✓ Cosmic skybox created');
     return skyMesh;
 }
 

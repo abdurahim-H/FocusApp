@@ -10,7 +10,6 @@ let scene = null;
  */
 export function createEtherealPetals(sceneRef) {
     scene = sceneRef;
-    console.log('🌸 Creating ethereal petals...');
 
     particleSystem = new BABYLON.ParticleSystem('etherealPetals', 200, scene);
 
@@ -74,7 +73,6 @@ export function createEtherealPetals(sceneRef) {
     particleSystem.emitter = new BABYLON.Vector3(0, 0, 0);
 
     particleSystem.start();
-    console.log('   ✓ Ethereal petals created');
 }
 
 /**

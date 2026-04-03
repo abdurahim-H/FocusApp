@@ -14,15 +14,12 @@ let isWebGPU = false;
  * @returns {BABYLON.DefaultRenderingPipeline} The pipeline
  */
 export function setupPostProcessing(sceneRef, cameraRef) {
-    console.log('📸 Setting up cinematic post-processing pipeline...');
     scene = sceneRef;
     camera = cameraRef;
 
     // Detect if using WebGPU engine
     const engine = scene.getEngine();
     isWebGPU = engine.isWebGPU || (engine.name && engine.name.includes('WebGPU'));
-    console.log(`   Engine type: ${isWebGPU ? 'WebGPU' : 'WebGL2'}`);
-
     // Enable HDR rendering on the scene
     scene.imageProcessingConfiguration.toneMappingEnabled = true;
     scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
@@ -47,7 +44,6 @@ export function setupPostProcessing(sceneRef, cameraRef) {
     // Add custom film grain effect
     createFilmGrainEffect();
 
-    console.log('✅ Cinematic post-processing pipeline ready');
     return pipeline;
 }
 
@@ -66,7 +62,6 @@ function configureHDR(pipeline) {
     // Contrast — crisp, vibrant
     pipeline.imageProcessing.contrast = 1.25;
 
-    console.log('   ✓ HDR with ACES tone mapping configured');
 }
 
 /**
@@ -80,7 +75,6 @@ function configureBloom(pipeline) {
     pipeline.bloomKernel = 64;       // Quality kernel
     pipeline.bloomScale = 0.55;      // Slightly wider for star halos
 
-    console.log('   ✓ Selective bloom configured');
 }
 
 /**
@@ -92,7 +86,6 @@ function configureDepthOfField(pipeline) {
     // WebGPU has issues with DOF's circleOfConfusion pass (rgba16float format)
     if (isWebGPU) {
         pipeline.depthOfFieldEnabled = false;
-        console.log('   ⚠️ Depth of field disabled (WebGPU compatibility)');
         return;
     }
 
@@ -104,7 +97,6 @@ function configureDepthOfField(pipeline) {
     pipeline.depthOfField.fStop = 4.0;       // Smaller aperture = more in focus
     pipeline.depthOfField.focusDistance = 65; // Match camera distance
 
-    console.log('   ✓ Depth of field configured (disabled by default)');
 }
 
 /**
@@ -116,7 +108,6 @@ function configureChromaticAberration(pipeline) {
     pipeline.chromaticAberration.aberrationAmount = 2;     // Barely perceptible
     pipeline.chromaticAberration.radialIntensity = 0.8;    // Edges only
 
-    console.log('   ✓ Chromatic aberration configured (subtle)');
 }
 
 /**
@@ -129,7 +120,6 @@ function configureAntiAliasing(pipeline) {
     // Reduce MSAA samples on WebGPU to avoid texture format issues
     pipeline.samples = isWebGPU ? 1 : 4;
 
-    console.log(`   ✓ Anti-aliasing configured (FXAA + ${pipeline.samples}x MSAA)`);
 }
 
 /**
@@ -144,7 +134,6 @@ function configureVignette(pipeline) {
     pipeline.imageProcessing.vignetteCameraFov = 0.6;
     pipeline.imageProcessing.vignetteBlendMode = BABYLON.ImageProcessingConfiguration.VIGNETTEMODE_MULTIPLY;
 
-    console.log('   ✓ Vignette configured');
 }
 
 /**
@@ -173,7 +162,6 @@ function configureColorGrading(pipeline) {
     pipeline.imageProcessing.colorCurvesEnabled = true;
     pipeline.imageProcessing.colorCurves = curves;
 
-    console.log('   ✓ Cinematic color grading configured');
 }
 
 /**
@@ -267,7 +255,6 @@ function createFilmGrainEffect() {
         );
     };
 
-    console.log('   ✓ Film grain effect created');
 }
 
 /**

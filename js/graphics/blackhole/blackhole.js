@@ -226,7 +226,6 @@ const FRAGMENT = `
 `;
 
 export function createBlackHole(sceneRef, camera) {
-    console.log('🕳️ Creating black hole with accretion disk...');
 
     BABYLON.Effect.ShadersStore['blackholeVertexShader'] = VERTEX;
     BABYLON.Effect.ShadersStore['blackholeFragmentShader'] = FRAGMENT;
@@ -255,7 +254,6 @@ export function createBlackHole(sceneRef, camera) {
     material.forceDepthWrite = false;
     mesh.material = material;
 
-    console.log('   ✓ Black hole created');
     return mesh;
 }
 

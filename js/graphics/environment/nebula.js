@@ -199,7 +199,6 @@ const FRAGMENT = `
 `;
 
 export function createNebula(sceneRef, camera, octaves = 5) {
-    console.log('✨ Creating golden flowing shawl...');
 
     BABYLON.Effect.ShadersStore['nebulaVertexShader'] = VERTEX;
     BABYLON.Effect.ShadersStore['nebulaFragmentShader'] = FRAGMENT;
@@ -227,7 +226,6 @@ export function createNebula(sceneRef, camera, octaves = 5) {
     material.forceDepthWrite = false;
     mesh.material = material;
 
-    console.log('   ✓ Golden flowing shawl created');
     return mesh;
 }
 
