@@ -3,9 +3,9 @@
 
 // Layer configuration
 const LAYERS = {
-    FAR_STARS: { count: 100000, minRadius: 400, maxRadius: 1200, speedMultiplier: 0.2 },
-    MID_STARS: { count: 18000, minRadius: 150, maxRadius: 400, speedMultiplier: 0.5 },
-    NEAR_STARS: { count: 4000, minRadius: 80, maxRadius: 150, speedMultiplier: 1.0 },
+    FAR_STARS: { count: 40000, minRadius: 400, maxRadius: 1200, speedMultiplier: 0.2 },
+    MID_STARS: { count: 8000, minRadius: 150, maxRadius: 400, speedMultiplier: 0.5 },
+    NEAR_STARS: { count: 2000, minRadius: 80, maxRadius: 150, speedMultiplier: 1.0 },
     DUST: { count: 2000, minRadius: 20, maxRadius: 100, speedMultiplier: 2.0 },
     DEBRIS: { count: 500, minRadius: 15, maxRadius: 60, speedMultiplier: 3.0 }
 };
@@ -120,10 +120,10 @@ function createStarLayer(name, config, brightnessScale) {
         isPickable: false
     });
 
-    // Star sphere — enough segments to look round, not like a cube
+    // Minimal geometry — stars are tiny points, 2 segments = 8 triangles per star
     const starModel = BABYLON.MeshBuilder.CreateSphere('starModel', {
         diameter: 1,
-        segments: 6
+        segments: 2
     }, scene);
 
     // Add particles

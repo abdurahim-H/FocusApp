@@ -32,7 +32,7 @@ const FRAGMENT = `
         // Pulse wave — expands outward from center
         // Active only during first ~4 seconds of each cycle
         float pulsePhase = cycleTime / 4.0;  // 0 to 1 over 4 seconds
-        float active = step(0.0, pulsePhase) * step(pulsePhase, 1.0);
+        float isActive = step(0.0, pulsePhase) * step(pulsePhase, 1.0);
 
         // Ring shape — expanding outward
         float ringRadius = pulsePhase * 0.55;
@@ -44,7 +44,7 @@ const FRAGMENT = `
         fadeOut = fadeOut * fadeOut; // Quadratic — faster fade
 
         // Very subtle — barely perceptible warmth
-        float intensity = ring * fadeOut * active * 0.06;
+        float intensity = ring * fadeOut * isActive * 0.06;
 
         // Warm golden-white tint
         vec3 color = vec3(1.0, 0.92, 0.75) * intensity;
@@ -52,13 +52,13 @@ const FRAGMENT = `
         // Second pulse — offset by half cycle, even subtler
         float cycleTime2 = mod(time + 6.0, 12.0);
         float pulsePhase2 = cycleTime2 / 5.0;
-        float active2 = step(0.0, pulsePhase2) * step(pulsePhase2, 1.0);
+        float isActive2 = step(0.0, pulsePhase2) * step(pulsePhase2, 1.0);
         float ringRadius2 = pulsePhase2 * 0.5;
         float ringWidth2 = 0.1 + pulsePhase2 * 0.15;
         float ring2 = exp(-pow(dist - ringRadius2, 2.0) / (ringWidth2 * ringWidth2 * 0.5));
         float fadeOut2 = (1.0 - pulsePhase2);
         fadeOut2 = fadeOut2 * fadeOut2;
-        float intensity2 = ring2 * fadeOut2 * active2 * 0.03;
+        float intensity2 = ring2 * fadeOut2 * isActive2 * 0.03;
 
         // Cool blue tint for the second pulse — variety
         color += vec3(0.7, 0.8, 1.0) * intensity2;

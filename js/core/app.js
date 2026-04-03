@@ -53,47 +53,59 @@ export async function initApp() {
     }
 
     function doInit() {
-        // Faster loading screen progression with proper sequencing to prevent layout shift
-        setTimeout(() => {
-            const loadingProgress = document.getElementById('loadingProgress');
-            const loadingScreen = document.getElementById('loadingScreen');
-            const container = document.querySelector('.container');
+        const loadingProgress = document.getElementById('loadingProgress');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const container = document.querySelector('.container');
 
-            if (loadingProgress) {
-                loadingProgress.style.width = '100%';
-            }
+        // Start progress bar animation immediately
+        if (loadingProgress) {
+            loadingProgress.style.transition = 'width 0.3s ease';
+            loadingProgress.style.width = '20%';
+        }
 
-            // First show the container (but under loading screen)
-            if (container) {
-                container.classList.add('loaded');
-            }
-
-            // Then wait a frame to let layout settle, then hide loading screen
-            requestAnimationFrame(() => {
-                setTimeout(() => {
-                    if (loadingScreen) {
-                        loadingScreen.classList.add('hide');
-                        setTimeout(() => {
-                            loadingScreen.style.display = 'none';
-                        }, 300);
-                    }
-                }, 100);
-            });
-        }, 400);
-
-        // Initialize 3D scene (async for Babylon.js WebGPU)
+        // Initialize 3D scene — progress bar tracks actual initialization
         try {
             if (loadedModules.scene3d?.init3D) {
                 console.log('Initializing 3D scene...');
-                // init3D is async for Babylon.js
+
+                // Animate progress during init
+                if (loadingProgress) {
+                    setTimeout(() => { loadingProgress.style.width = '50%'; }, 200);
+                    setTimeout(() => { loadingProgress.style.width = '75%'; }, 600);
+                }
+
                 loadedModules.scene3d.init3D().then(success => {
                     if (success) {
                         console.log('3D scene initialized successfully');
                     } else {
                         console.error('3D scene initialization returned false');
                     }
+
+                    // Scene is ready — complete the loading bar and hide screen
+                    if (loadingProgress) {
+                        loadingProgress.style.width = '100%';
+                    }
+                    if (container) {
+                        container.classList.add('loaded');
+                    }
+
+                    requestAnimationFrame(() => {
+                        setTimeout(() => {
+                            if (loadingScreen) {
+                                loadingScreen.classList.add('hide');
+                                setTimeout(() => {
+                                    loadingScreen.style.display = 'none';
+                                }, 300);
+                            }
+                        }, 200);
+                    });
                 }).catch(err => {
                     console.error('3D initialization error:', err);
+                    // Still hide loading screen on error
+                    if (loadingScreen) {
+                        loadingScreen.classList.add('hide');
+                        setTimeout(() => { loadingScreen.style.display = 'none'; }, 300);
+                    }
                 });
             } else {
                 console.error('scene3d module or init3D function not found');

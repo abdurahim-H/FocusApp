@@ -56,7 +56,9 @@ const stats = {
  * @returns {Promise<boolean>} Success status
  */
 export async function init3D() {
-    console.log('🎬 Initializing Scene...');
+    const t0 = performance.now();
+    const elapsed = () => Math.round(performance.now() - t0);
+    console.log(`⏱️ [${elapsed()}ms] 🎬 Initializing Scene...`);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     try {
@@ -64,43 +66,61 @@ export async function init3D() {
         const engineResult = await initEngine();
         engine = engineResult.engine;
         canvas = engineResult.canvas;
-
-        const rendererType = engineResult.isWebGPU ? '⚡ WebGPU' : '🔷 WebGL2';
-        console.log(`${rendererType} renderer initialized`);
+        console.log(`⏱️ [${elapsed()}ms] Engine initialized`);
 
         // Detect device capability
         deviceProfile = detectDeviceProfile();
 
         // Create scene with HDR support
         scene = new BABYLON.Scene(engine);
-        scene.clearColor = new BABYLON.Color4(0.005, 0.007, 0.015, 1.0); // Deep dark blue
+        scene.clearColor = new BABYLON.Color4(0.005, 0.007, 0.015, 1.0);
 
         // Enable rendering groups for proper layering
-        scene.setRenderingAutoClearDepthStencil(0, true, true, true);  // Background (stars)
-        scene.setRenderingAutoClearDepthStencil(1, false, false, false); // Event horizon
-        scene.setRenderingAutoClearDepthStencil(2, false, false, false); // Disk, rings
+        scene.setRenderingAutoClearDepthStencil(0, true, true, true);
+        scene.setRenderingAutoClearDepthStencil(1, false, false, false);
+        scene.setRenderingAutoClearDepthStencil(2, false, false, false);
 
         // Setup cinematic camera first
         setupCinematicCamera();
+        console.log(`⏱️ [${elapsed()}ms] Camera configured`);
 
-        // Create scene elements (pass camera reference)
+        // Create scene elements
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         createCosmicSkybox(scene);
+        console.log(`⏱️ [${elapsed()}ms] Skybox done`);
+
         createStarField(scene, camera, deviceProfile.starMultiplier);
+        console.log(`⏱️ [${elapsed()}ms] Starfield done`);
+
         createNebula(scene, camera, deviceProfile.shaderOctaves);
+        console.log(`⏱️ [${elapsed()}ms] Nebula done`);
+
         createShootingStars(scene);
+        console.log(`⏱️ [${elapsed()}ms] Shooting stars done`);
+
         createStarGlows(scene, camera);
+        console.log(`⏱️ [${elapsed()}ms] Star glows done`);
+
         createBlackHole(scene, camera);
+        console.log(`⏱️ [${elapsed()}ms] Black hole done`);
+
         createCosmicMotes(scene);
+        console.log(`⏱️ [${elapsed()}ms] Cosmic motes done`);
+
         createEtherealPetals(scene);
+        console.log(`⏱️ [${elapsed()}ms] Ethereal petals done`);
+
         createCosmicPulse(scene, camera);
+        console.log(`⏱️ [${elapsed()}ms] Cosmic pulse done`);
 
         // Setup ambient lighting
         setupLighting();
+        console.log(`⏱️ [${elapsed()}ms] Lighting done`);
 
-        // Setup post-processing pipeline (pass camera)
+        // Setup post-processing pipeline
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         setupPostProcessing(scene, camera);
+        console.log(`⏱️ [${elapsed()}ms] Post-processing done`);
 
         // Setup FPS watchdog for adaptive quality
         fpsWatchdog = createFPSWatchdog(stats, () => {
@@ -128,7 +148,7 @@ export async function init3D() {
 
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('🎬 Cinematic scene ready!');
-        console.log(`   Total stars: ~100,000`);
+        console.log(`   Total stars: ~50,000`);
         console.log(`   Effects: Nebula, HDR, Bloom, Film grain`);
 
         return true;

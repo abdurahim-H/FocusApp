@@ -6,7 +6,7 @@ let motes = [];
 let scene = null;
 let moteMaterial = null;
 
-const MOTE_COUNT = 50;
+const MOTE_COUNT = 30;
 
 const MOTE_VERTEX = `
     precision highp float;

@@ -132,6 +132,12 @@ export async function initEngine() {
         }
     });
 
+    // Set hardware scaling to 1.0 — render at CSS resolution, not retina
+    // This is 4x fewer pixels on retina displays, huge performance gain
+    if (engine) {
+        engine.setHardwareScalingLevel(1.0);
+    }
+
     isInitialized = true;
 
     // Log capabilities

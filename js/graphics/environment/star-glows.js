@@ -6,7 +6,7 @@ let glowMeshes = [];
 let glowMaterial = null;
 let scene = null;
 
-const HERO_STAR_COUNT = 70;
+const HERO_STAR_COUNT = 40;
 
 const GLOW_VERTEX = `
     precision highp float;

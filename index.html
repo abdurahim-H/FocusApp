@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cosmic Focus - 3D Productivity Universe</title>
 	<link rel="icon" type="image/svg+xml" href="assets/file_03.svg" />
-    
+    <link rel="preconnect" href="https://cdn.babylonjs.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.babylonjs.com">
+
     <!-- Core Styles -->
     <link rel="stylesheet" href="css/base/style.css?v=1763330417270.d90cfd8d09f3">
     <link rel="stylesheet" href="css/base/themes.css?v=1763330417270.d90cfd8d09f3">
@@ -33,6 +35,9 @@
     </script>
 </head>
 <body data-theme="dark">
+    <!-- Page start timer -->
+    <script>window.__pageStart = performance.now(); console.log('⏱️ [0ms] Page body start');</script>
+
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-text">Initializing Universe...</div>
@@ -289,19 +294,12 @@
             <span class="progress-value" id="progressValue">0%</span>
         </div>
 
-    <!-- External Dependencies - Babylon.js with WebGPU Support -->
-    <!-- Load Babylon.js core first (global BABYLON object) -->
+    <!-- Babylon.js Core — the only required dependency -->
+    <script>console.log('⏱️ [' + Math.round(performance.now() - window.__pageStart) + 'ms] Starting Babylon.js download...');</script>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <!-- WebGPU engine support -->
-    <script src="https://cdn.babylonjs.com/babylon.webgpu.js"></script>
-    <!-- GUI module for future UI needs -->
-    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
-    <!-- Post-processing and effects -->
-    <script src="https://cdn.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
-    <!-- Materials library for advanced materials -->
-    <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script>console.log('⏱️ [' + Math.round(performance.now() - window.__pageStart) + 'ms] Babylon.js loaded');</script>
 
-    <script type="module" src="js/core/app.js"></script>
+    <script type="module" src="js/core/app.js?v=20260403b"></script>
 </body>
 </html>
 
