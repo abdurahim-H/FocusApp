@@ -10,6 +10,7 @@ import { createStarGlows, updateStarGlows, disposeStarGlows } from '../environme
 import { createCosmicMotes, updateCosmicMotes, disposeCosmicMotes } from '../environment/cosmic-motes.js';
 import { createEtherealPetals, updateEtherealPetals, disposeEtherealPetals } from '../environment/ethereal-petals.js';
 import { createCosmicPulse, updateCosmicPulse, disposeCosmicPulse } from '../environment/cosmic-pulse.js';
+import { createBlackHole, updateBlackHole, disposeBlackHole } from '../blackhole/blackhole.js';
 import { setupPostProcessing, disposePostProcessing, setExposure } from '../postprocessing/pipeline.js';
 import { detectDeviceProfile, createFPSWatchdog } from '../../utils/performance-profile.js';
 
@@ -89,6 +90,7 @@ export async function init3D() {
         createNebula(scene, camera, deviceProfile.shaderOctaves);
         createShootingStars(scene);
         createStarGlows(scene, camera);
+        createBlackHole(scene, camera);
         createCosmicMotes(scene);
         createEtherealPetals(scene);
         createCosmicPulse(scene, camera);
@@ -227,6 +229,7 @@ function renderLoop() {
     updateStarField(elapsed);
     updateNebula(elapsed);
     updateShootingStars(elapsed);
+    updateBlackHole(elapsed);
     updateStarGlows(elapsed);
     updateCosmicMotes(elapsed);
     updateEtherealPetals(elapsed, camera);
@@ -364,6 +367,7 @@ export function dispose() {
     disposeCosmicMotes();
     disposeStarGlows();
     disposeShootingStars();
+    disposeBlackHole();
     disposeNebula();
     disposeStarField();
     disposeCosmicSkybox();
