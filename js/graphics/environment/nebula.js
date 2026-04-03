@@ -49,15 +49,15 @@ const FRAGMENT = `
         return v;
     }
 
-    // Rich vibrant gold palette
+    // Saturated vibrant gold — warm amber, not pale/white
     vec3 gold(float t) {
-        vec3 white  = vec3(1.0, 0.95, 0.82);
-        vec3 bright = vec3(1.0, 0.78, 0.28);
-        vec3 rich   = vec3(0.92, 0.50, 0.06);
-        vec3 deep   = vec3(0.55, 0.25, 0.02);
-        vec3 dark   = vec3(0.25, 0.10, 0.01);
+        vec3 hot    = vec3(1.0, 0.85, 0.45);     // Hottest — warm gold, NOT white
+        vec3 bright = vec3(1.0, 0.70, 0.18);      // Bright saturated gold
+        vec3 rich   = vec3(0.95, 0.48, 0.04);     // Rich deep amber
+        vec3 deep   = vec3(0.65, 0.28, 0.02);     // Deep warm amber
+        vec3 dark   = vec3(0.35, 0.14, 0.01);     // Dark bronze
         t = clamp(t, 0.0, 1.0);
-        if (t > 0.85) return mix(bright, white, (t - 0.85) / 0.15);
+        if (t > 0.85) return mix(bright, hot, (t - 0.85) / 0.15);
         if (t > 0.55) return mix(rich, bright, (t - 0.55) / 0.3);
         if (t > 0.25) return mix(deep, rich, (t - 0.25) / 0.3);
         return mix(dark, deep, t / 0.25);
@@ -65,7 +65,7 @@ const FRAGMENT = `
 
     // Dramatic S-curve path — MORE CURVED: higher amplitude, more harmonics
     float curvePath(float x, float timeOff, float amp) {
-        float t = time * 0.03 + timeOff;
+        float t = time * 0.018 + timeOff;
         return amp * sin(x * 1.8 + t)
              + amp * 0.6 * sin(x * 3.2 + t * 1.3 + 1.8)
              + amp * 0.3 * sin(x * 5.5 + t * 0.7 + 3.5)
@@ -84,9 +84,7 @@ const FRAGMENT = `
         float edgeFade = smoothstep(0.5, 0.35, max(abs(uv.x), abs(uv.y)));
         if (edgeFade < 0.001) discard;
 
-        // Center clearance for future blackhole
-        float centerDist = length(uv);
-        float centerClear = smoothstep(0.03, 0.10, centerDist);
+        // No center clearance — blackhole will be handled separately
 
         // Diagonal rotation — sweeps from lower-left to upper-right
         float angle = 0.4;
@@ -94,7 +92,7 @@ const FRAGMENT = `
         vec2 ruv = rotM * uv;
 
         vec3 color = vec3(0.0);
-        float flow = time * 0.04;
+        float flow = time * 0.025;
 
         // ============================================
         // MAIN GOLDEN SHAWL — wide flowing band
@@ -192,9 +190,9 @@ const FRAGMENT = `
         float blueGlow = exp(-pow(uv.x + 0.05, 2.0) * 6.0 - pow(uv.y - 0.18, 2.0) * 10.0);
         color += vec3(0.06, 0.09, 0.16) * blueGlow * 0.35;
 
-        // Apply center clearance + edge fade + TRANSPARENCY REDUCTION
-        color *= edgeFade * centerClear * 0.75;
-        float alpha = edgeFade * centerClear * clamp(length(color) * 3.0, 0.0, 1.0);
+        // Apply edge fade + transparency
+        color *= edgeFade * 0.6;
+        float alpha = edgeFade * clamp(length(color) * 3.0, 0.0, 1.0);
 
         gl_FragColor = vec4(color, alpha);
     }
