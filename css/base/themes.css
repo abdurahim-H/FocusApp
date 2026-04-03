@@ -142,31 +142,31 @@ body[data-theme="light"] h3 {
 
 body[data-theme="cosmos"] h1 {
     background: none;
-    -webkit-text-fill-color: rgba(255, 255, 255, 0.95);
+    -webkit-text-fill-color: #C8922A;
     animation: none;
-    text-shadow: 0 0 40px rgba(255, 200, 100, 0.2), 0 0 80px rgba(255, 170, 50, 0.08);
+    text-shadow: 0 0 25px rgba(200, 146, 42, 0.2), 0 0 50px rgba(122, 92, 30, 0.08);
     filter: none;
 }
 
-/* Dark theme — clean white text, no gradients */
+/* Dark theme — gold hierarchy */
 body[data-theme="dark"] h1 {
     background: none;
-    -webkit-text-fill-color: rgba(255, 255, 255, 0.95);
+    -webkit-text-fill-color: #C8922A;
     animation: none;
-    text-shadow: 0 0 40px rgba(255, 200, 100, 0.2), 0 0 80px rgba(255, 170, 50, 0.08);
+    text-shadow: 0 0 25px rgba(200, 146, 42, 0.2), 0 0 50px rgba(122, 92, 30, 0.08);
     filter: none;
 }
 
 body[data-theme="dark"] .greeting {
     background: none;
-    -webkit-text-fill-color: rgba(255, 255, 255, 0.65);
+    -webkit-text-fill-color: #9B7320;
     text-shadow: none;
     filter: none;
 }
 
 body[data-theme="dark"] .date-time {
     background: none;
-    -webkit-text-fill-color: rgba(255, 255, 255, 0.4);
+    -webkit-text-fill-color: #7A5C1E;
     text-shadow: none;
 }
 
