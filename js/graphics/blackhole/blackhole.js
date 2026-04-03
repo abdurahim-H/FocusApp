@@ -66,16 +66,18 @@ const FRAGMENT = `
 
         // Keplerian spin — inner faster
         float kepler = pow(DISK_INNER / max(diskR, DISK_INNER), 0.65);
-        float spin = diskAngle + time * 0.35 * kepler;
 
-        // Use cos/sin of spin angle as noise coordinates
-        // This is CONTINUOUS everywhere — no atan ±PI discontinuity
-        float cx = cos(spin * 3.0);
-        float cy = sin(spin * 3.0);
+        // Use cos/sin of diskAngle for SPATIAL continuity (no atan discontinuity)
+        float cx = cos(diskAngle * 3.0);
+        float cy = sin(diskAngle * 3.0);
         float rad = rNorm * 8.0;
 
-        float s1 = fbm(vec2(cx * 4.0 + cy * 2.0 + time * 0.1, rad + cx));
-        float s2 = fbm(vec2(cy * 3.0 - cx * 1.5 - time * 0.07, rad + 30.0 + cy));
+        // LINEAR time flow offset — this is what makes it visibly spin
+        // Kepler makes inner parts flow faster
+        float flowOffset = time * 0.35 * kepler;
+
+        float s1 = fbm(vec2(cx * 4.0 + cy * 2.0 + flowOffset, rad + cx));
+        float s2 = fbm(vec2(cy * 3.0 - cx * 1.5 + flowOffset * 0.7, rad + 30.0 + cy));
         float streaks = s1 * 0.6 + s2 * 0.4;
 
         // Smooth continuous brightness — no ring modulation
@@ -124,6 +126,13 @@ const FRAGMENT = `
         // This naturally creates the wide disk + dome + lower ring
         // ==========================================
 
+        // Rotate the disk around the black hole — whole structure orbits
+        float diskSpin = time * 0.08; // Slow full rotation
+        float cds = cos(diskSpin);
+        float sds = sin(diskSpin);
+        // Only rotate the disk sampling coordinates, not the shadow/lensing
+        // We'll apply this rotation when computing disk coordinates below
+
         // Lensing strength — based on distance from BH center
         float lensR = length(uv);
         float lensStrength = (SHADOW_R * SHADOW_R) / max(lensR * lensR - SHADOW_R * SHADOW_R * 0.8, 0.0001);
@@ -160,6 +169,8 @@ const FRAGMENT = `
 
             float wy = uv.y / (1.0 + lensStrength * warpMult);
             vec2 dc = vec2(uv.x, wy / TILT);
+            // Apply disk rotation — whole structure orbits
+            dc = vec2(dc.x * cds - dc.y * sds, dc.x * sds + dc.y * cds);
             float dr = length(dc);
             float da = atan(dc.y, dc.x);
 
