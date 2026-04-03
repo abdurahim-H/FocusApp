@@ -202,47 +202,41 @@ function setStarParticleProperties(particle, config, brightnessScale) {
  * @returns {{scale: number, color: BABYLON.Color4}}
  */
 function getStellarClassification(type) {
-    if (type < 0.01) {
-        // Rare bright blue — small but HDR bright for bloom
+    if (type < 0.02) {
+        // Brilliant white-blue — prominent with bloom halo
         return {
-            scale: 0.7 + Math.random() * 0.4,
-            color: new BABYLON.Color4(0.7, 0.85, 1.8, 1.0)
+            scale: 0.8 + Math.random() * 0.5,
+            color: new BABYLON.Color4(0.8, 0.9, 2.0, 1.0)
         };
-    } else if (type < 0.04) {
-        // Blue-white bright
+    } else if (type < 0.07) {
+        // Bright white — crisp and clean
         return {
-            scale: 0.5 + Math.random() * 0.3,
-            color: new BABYLON.Color4(0.9, 0.95, 1.5, 1.0)
+            scale: 0.5 + Math.random() * 0.35,
+            color: new BABYLON.Color4(1.6, 1.6, 1.7, 1.0)
         };
-    } else if (type < 0.12) {
-        // White — crisp
+    } else if (type < 0.18) {
+        // Medium white — the bulk of visible stars
         return {
-            scale: 0.35 + Math.random() * 0.25,
-            color: new BABYLON.Color4(1.3, 1.3, 1.3, 1.0)
+            scale: 0.3 + Math.random() * 0.25,
+            color: new BABYLON.Color4(1.2, 1.2, 1.3, 1.0)
         };
-    } else if (type < 0.28) {
-        // Yellow-white
+    } else if (type < 0.35) {
+        // Warm white
         return {
-            scale: 0.25 + Math.random() * 0.2,
-            color: new BABYLON.Color4(1.2, 1.1, 0.85, 0.95)
+            scale: 0.22 + Math.random() * 0.18,
+            color: new BABYLON.Color4(1.1, 1.0, 0.85, 0.95)
         };
-    } else if (type < 0.50) {
-        // Orange
+    } else if (type < 0.55) {
+        // Subtle gold tint
         return {
-            scale: 0.18 + Math.random() * 0.15,
-            color: new BABYLON.Color4(1.0, 0.7, 0.4, 0.85)
-        };
-    } else if (type < 0.75) {
-        // Dim reddish
-        return {
-            scale: 0.12 + Math.random() * 0.12,
-            color: new BABYLON.Color4(0.8, 0.4, 0.25, 0.6)
+            scale: 0.15 + Math.random() * 0.15,
+            color: new BABYLON.Color4(1.0, 0.8, 0.5, 0.85)
         };
     } else {
-        // Faint blue-white fill
+        // Faint blue-white fill — most numerous
         return {
             scale: 0.08 + Math.random() * 0.1,
-            color: new BABYLON.Color4(0.5, 0.55, 0.7, 0.4)
+            color: new BABYLON.Color4(0.55, 0.6, 0.75, 0.5)
         };
     }
 }

@@ -60,10 +60,10 @@ const FRAGMENT = `
         float horizon = 1.0 - abs(dir.y);
         horizon = pow(horizon, 4.0);
 
-        // Very dark — black velvet feel
-        vec3 zenith = vec3(0.005, 0.004, 0.012);   // Near black, hint of navy
-        vec3 mid = vec3(0.008, 0.006, 0.018);       // Very dark blue
-        vec3 horizonCol = vec3(0.015, 0.01, 0.025); // Faintest purple at horizon
+        // Deep dark blue-teal — like the reference starfield
+        vec3 zenith = vec3(0.008, 0.01, 0.02);      // Deep navy
+        vec3 mid = vec3(0.012, 0.015, 0.028);        // Dark blue-teal
+        vec3 horizonCol = vec3(0.02, 0.022, 0.04);   // Slightly lighter at horizon
 
         vec3 sky = mix(zenith, mid, smoothstep(0.0, 0.5, horizon));
         sky = mix(sky, horizonCol, smoothstep(0.5, 1.0, horizon));
