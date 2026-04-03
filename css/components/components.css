@@ -61,7 +61,7 @@
 
 /* Focus Mode Components */
 .focus-content {
-    padding: 40px;
+    padding: 20px;
     background: transparent;
     backdrop-filter: none;
     border: none;
@@ -71,53 +71,60 @@
     z-index: 20;
 }
 
+/* Focus mode — centered */
+#focus {
+    max-width: 500px;
+    width: 100%;
+    margin: 0 auto;
+}
+
 .timer-display {
-    font-size: 6em;
+    font-size: clamp(4em, 12vw, 7em);
     font-weight: 200;
+    color: rgba(255, 255, 255, 0.95);
     letter-spacing: -3px;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     text-shadow:
-        0 0 30px rgba(139, 92, 246, 0.4),
-        0 0 60px rgba(99, 102, 241, 0.15);
-    animation: timerPulse 5s ease-in-out infinite;
+        0 0 30px rgba(200, 146, 42, 0.25),
+        0 0 60px rgba(200, 146, 42, 0.08);
+    animation: timerGlow 6s ease-in-out infinite;
     position: relative;
     z-index: 21;
 }
 
-@keyframes timerPulse {
+@keyframes timerGlow {
     0%, 100% {
         text-shadow:
-            0 0 30px rgba(139, 92, 246, 0.4),
-            0 0 60px rgba(99, 102, 241, 0.15);
+            0 0 30px rgba(200, 146, 42, 0.25),
+            0 0 60px rgba(200, 146, 42, 0.08);
     }
     50% {
         text-shadow:
-            0 0 40px rgba(139, 92, 246, 0.55),
-            0 0 80px rgba(99, 102, 241, 0.25),
-            0 0 120px rgba(6, 214, 160, 0.1);
+            0 0 40px rgba(200, 146, 42, 0.35),
+            0 0 80px rgba(200, 146, 42, 0.12);
     }
 }
 
 .timer-controls {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     justify-content: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     flex-wrap: wrap;
     position: relative;
     z-index: 22;
     align-items: center;
 }
 
-/* Task Management Section */
+/* Task Management Section — minimal, gold-tinted */
 .task-section {
-    background: rgba(255, 255, 255, 0.005);  /* Nearly invisible */
+    background: rgba(200, 146, 42, 0.03);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.02);  /* Barely visible border */
-    border-radius: 40px; /* Increased rounded corners to match other containers */
-    padding: 25px;
-    margin-top: 30px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.01);  /* Minimal shadow */
+    border: 1px solid rgba(200, 146, 42, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     position: relative;
     z-index: 30;
 }
@@ -139,8 +146,8 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(200, 146, 42, 0.08);
     position: relative;
     z-index: 26;
 }
@@ -181,6 +188,41 @@
     text-align: center;
     text-shadow: none;
     background: transparent;
+}
+
+/* Gold-tinted timer buttons — override teal/green accents */
+.timer-controls .liquid-glass-btn {
+    background: rgba(200, 146, 42, 0.04) !important;
+    border: 1px solid rgba(200, 146, 42, 0.15) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.15),
+        0 1px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(200, 146, 42, 0.12) !important;
+    text-shadow: none !important;
+}
+
+.timer-controls .liquid-glass-btn:hover {
+    background: rgba(200, 146, 42, 0.08) !important;
+    border-color: rgba(200, 146, 42, 0.25) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Gold task input */
+.task-input {
+    background: rgba(200, 146, 42, 0.04) !important;
+    border: 1px solid rgba(200, 146, 42, 0.12) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.task-input:focus {
+    background: rgba(200, 146, 42, 0.06) !important;
+    border-color: rgba(200, 146, 42, 0.25) !important;
+    box-shadow: 0 0 0 2px rgba(200, 146, 42, 0.15) !important;
+}
+
+.task-input::placeholder {
+    color: #7A5C1E !important;
 }
 
 @keyframes breathe {
@@ -307,41 +349,28 @@
     color: var(--accent);
 }
 
-/* Session Info */
+/* Session Info — gold hierarchy */
 .session-info {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .session-type {
-    color: var(--accent);
-    margin-bottom: 10px;
+    color: #C8922A;
+    font-weight: 400;
+    font-size: 1.1em;
+    letter-spacing: 0.03em;
+    margin-bottom: 6px;
 }
 
 .session-progress {
-    font-size: 0.9em;
-    opacity: 0.7;
+    font-size: 0.85em;
+    color: #7A5C1E;
 }
 
 /* Hidden elements */
 .hidden {
     display: none !important;
-}
-
-/* Session Info */
-.session-info {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.session-type {
-    color: var(--accent);
-    margin-bottom: 10px;
-}
-
-.session-progress {
-    font-size: 0.9em;
-    opacity: 0.7;
 }
 
 /* Hidden Elements */
