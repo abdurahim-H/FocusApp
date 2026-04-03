@@ -63,12 +63,13 @@ const FRAGMENT = `
         return mix(dark, deep, t / 0.25);
     }
 
-    // Dramatic S-curve path — like calligraphy
+    // Dramatic S-curve path — MORE CURVED: higher amplitude, more harmonics
     float curvePath(float x, float timeOff, float amp) {
         float t = time * 0.03 + timeOff;
         return amp * sin(x * 1.8 + t)
              + amp * 0.6 * sin(x * 3.2 + t * 1.3 + 1.8)
-             + amp * 0.25 * sin(x * 5.5 + t * 0.7 + 3.5);
+             + amp * 0.3 * sin(x * 5.5 + t * 0.7 + 3.5)
+             + amp * 0.15 * sin(x * 8.0 + t * 0.5 + 5.0);
     }
 
     // Get distance to the wide band path
@@ -83,6 +84,10 @@ const FRAGMENT = `
         float edgeFade = smoothstep(0.5, 0.35, max(abs(uv.x), abs(uv.y)));
         if (edgeFade < 0.001) discard;
 
+        // Center clearance for future blackhole
+        float centerDist = length(uv);
+        float centerClear = smoothstep(0.03, 0.10, centerDist);
+
         // Diagonal rotation — sweeps from lower-left to upper-right
         float angle = 0.4;
         mat2 rotM = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
@@ -93,12 +98,13 @@ const FRAGMENT = `
 
         // ============================================
         // MAIN GOLDEN SHAWL — wide flowing band
+        // SMALLER: bandWidth 0.07 -> 0.05, amp 0.13 -> 0.17 (more curved)
         // ============================================
-        float mainD = bandDist(ruv, 0.0, 0.0, 0.13);
+        float mainD = bandDist(ruv, 0.0, 0.0, 0.17);
 
-        // Wide band shape — variable width via noise
-        float widthNoise = fbm(vec2(ruv.x * 3.0 - flow * 1.5, 0.5)) * 0.03;
-        float bandWidth = 0.07 + widthNoise;
+        // Wide band shape — variable width via noise (SMALLER)
+        float widthNoise = fbm(vec2(ruv.x * 3.0 - flow * 1.5, 0.5)) * 0.02;
+        float bandWidth = 0.05 + widthNoise;
 
         // Normalized position within band: 0 = center, 1 = edge
         float bandPos = abs(mainD) / bandWidth;
@@ -127,22 +133,23 @@ const FRAGMENT = `
             // Bright center core
             float coreIntensity = smoothstep(0.4, 0.0, bandPos);
 
-            // Build color
-            float brightness = filaments * bandMask * 0.7 + coreIntensity * 0.5;
+            // Build color — MORE TRANSPARENT: reduced multipliers
+            float brightness = filaments * bandMask * 0.55 + coreIntensity * 0.4;
 
             // Hotter where brighter
-            color += gold(brightness * 1.2 + 0.15) * brightness * 1.8;
+            color += gold(brightness * 1.2 + 0.15) * brightness * 1.3;
 
             // Extra bright core filaments
             float hotFilament = pow(filamentNoise, 4.0) * coreIntensity;
-            color += gold(0.95) * hotFilament * 1.2;
+            color += gold(0.95) * hotFilament * 0.8;
         }
 
         // ============================================
         // SECOND SHAWL — smaller, different path
+        // SMALLER: width 0.045 -> 0.035, amp 0.10 -> 0.14 (more curved)
         // ============================================
-        float secD = bandDist(ruv, -0.18, 0.8, 0.10);
-        float secWidth = 0.045 + fbm(vec2(ruv.x * 3.5 - flow * 1.2, 1.5)) * 0.02;
+        float secD = bandDist(ruv, -0.18, 0.8, 0.14);
+        float secWidth = 0.035 + fbm(vec2(ruv.x * 3.5 - flow * 1.2, 1.5)) * 0.015;
         float secPos = abs(secD) / secWidth;
         float secMask = smoothstep(1.0, 0.5, secPos);
 
@@ -157,15 +164,16 @@ const FRAGMENT = `
             secFilaments = pow(smoothstep(0.3, 0.7, secFilaments), 1.5);
 
             float secCore = smoothstep(0.4, 0.0, secPos);
-            float secBright = secFilaments * secMask * 0.55 + secCore * 0.4;
+            // MORE TRANSPARENT: reduced multipliers
+            float secBright = secFilaments * secMask * 0.45 + secCore * 0.3;
 
-            color += gold(secBright * 1.1 + 0.1) * secBright * 1.4;
+            color += gold(secBright * 1.1 + 0.1) * secBright * 1.0;
         }
 
         // ============================================
-        // THIN ACCENT STRAND — delicate single line
+        // THIN ACCENT STRAND — delicate single line (more curved)
         // ============================================
-        float accD = abs(bandDist(ruv, 0.2, 1.5, 0.08));
+        float accD = abs(bandDist(ruv, 0.2, 1.5, 0.12));
         float accLine = smoothstep(0.004, 0.0, accD);
         float accGlow = smoothstep(0.015, 0.0, accD);
         color += gold(0.9) * accLine * 0.7;
@@ -184,8 +192,9 @@ const FRAGMENT = `
         float blueGlow = exp(-pow(uv.x + 0.05, 2.0) * 6.0 - pow(uv.y - 0.18, 2.0) * 10.0);
         color += vec3(0.06, 0.09, 0.16) * blueGlow * 0.35;
 
-        color *= edgeFade;
-        float alpha = edgeFade * clamp(length(color) * 3.0, 0.0, 1.0);
+        // Apply center clearance + edge fade + TRANSPARENCY REDUCTION
+        color *= edgeFade * centerClear * 0.75;
+        float alpha = edgeFade * centerClear * clamp(length(color) * 3.0, 0.0, 1.0);
 
         gl_FragColor = vec4(color, alpha);
     }
@@ -203,7 +212,7 @@ export function createNebula(sceneRef, camera, octaves = 5) {
 
     mesh.position = BABYLON.Vector3.Zero();
     mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-    mesh.scaling = new BABYLON.Vector3(130, 130, 130);
+    mesh.scaling = new BABYLON.Vector3(120, 120, 120);
     mesh.renderingGroupId = 1;
 
     material = new BABYLON.ShaderMaterial('nebulaMat', sceneRef, {
