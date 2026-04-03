@@ -41,8 +41,8 @@ export function setupPostProcessing(sceneRef, cameraRef) {
     configureVignette(pipeline);
     configureColorGrading(pipeline);
 
-    // Add custom film grain effect
-    createFilmGrainEffect();
+    // NOTE: Film grain is created separately via createFilmGrain() for post-process ordering control
+    // New effects (anamorphic streak, god rays) are inserted between pipeline and film grain
 
     return pipeline;
 }
@@ -178,10 +178,17 @@ export function enableCinematicDOF(focusDistance = 65) {
 }
 
 /**
- * Create custom film grain effect
- * Animated grain for filmic texture
+ * Get the camera reference (for attaching post-processes in correct order)
  */
-function createFilmGrainEffect() {
+export function getCamera() {
+    return camera;
+}
+
+/**
+ * Create custom film grain effect
+ * Exported so scene-manager can control post-process ordering
+ */
+export function createFilmGrainEffect() {
     // Film grain shader
     BABYLON.Effect.ShadersStore["filmGrainFragmentShader"] = `
         precision highp float;

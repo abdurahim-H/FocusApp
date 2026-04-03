@@ -53,6 +53,22 @@ const FRAGMENT = `
         return fract((p3.x + p3.y) * p3.z);
     }
 
+    // Circular star pinpoint — distance from jittered cell center with exp falloff
+    float starLayer(vec2 uv, float gridScale, vec2 offset, float threshold, float sharpness) {
+        vec2 scaledUV = uv * gridScale;
+        vec2 cellId = floor(scaledUV);
+        vec2 cellUV = fract(scaledUV);
+        float h = starHash(cellId + offset);
+        if (h < threshold) return 0.0;
+        vec2 starPos = vec2(
+            fract(sin(dot(cellId + offset, vec2(41.1, 73.7))) * 4758.5),
+            fract(sin(dot(cellId + offset, vec2(57.3, 113.1))) * 3758.1)
+        );
+        starPos = clamp(starPos, 0.15, 0.85);
+        float d = length(cellUV - starPos);
+        return exp(-d * d * sharpness);
+    }
+
     void main() {
         vec3 dir = normalize(vPosition);
         float t = time * 0.015;
@@ -82,29 +98,19 @@ const FRAGMENT = `
         float brightRegion = exp(-pow(dir.x - 0.1, 2.0) * 3.0 - pow(dir.y - 0.6, 2.0) * 5.0);
         sky += vec3(0.04, 0.06, 0.1) * brightRegion * 0.6;
 
-        // === EMBEDDED BACKGROUND STARS — sub-pixel grid, no visible rectangles ===
+        // === BACKGROUND STARS — circular pinpoints via cell-center distance ===
+        sky += vec3(0.3, 0.33, 0.42) * starLayer(uv, 2000.0, vec2(73.1, 419.3), 0.997, 800.0) * 0.3;
+        sky += vec3(0.5, 0.55, 0.65) * starLayer(uv, 1400.0, vec2(0.0, 0.0), 0.9975, 500.0) * 0.45;
+        sky += vec3(0.7, 0.75, 0.85) * starLayer(uv, 900.0, vec2(127.1, 311.7), 0.998, 350.0) * 0.6;
 
-        // Layer 0 — dense faint dust
-        vec2 grid0 = floor(uv * 2000.0);
-        float s0 = starHash(grid0 + vec2(73.1, 419.3));
-        sky += vec3(0.3, 0.33, 0.42) * step(0.997, s0) * 0.3;
+        float s3val = starLayer(uv, 500.0, vec2(269.5, 183.3), 0.9985, 200.0);
+        vec2 grid3id = floor(uv * 500.0);
+        vec3 starCol3 = mix(vec3(0.8, 0.85, 1.0), vec3(1.0, 0.9, 0.75), starHash(grid3id + vec2(50.0)));
+        sky += starCol3 * s3val * 0.75;
 
-        // Layer 1 — medium pinpoints
-        vec2 grid1 = floor(uv * 1400.0);
-        float s1 = starHash(grid1);
-        sky += vec3(0.5, 0.55, 0.65) * step(0.9975, s1) * 0.45;
-
-        // Layer 2 — brighter scattered
-        vec2 grid2 = floor(uv * 900.0);
-        float s2 = starHash(grid2 + vec2(127.1, 311.7));
-        sky += vec3(0.7, 0.75, 0.85) * step(0.998, s2) * 0.6;
-
-        // Layer 3 — sparse bright with color variety
-        vec2 grid3 = floor(uv * 500.0);
-        float s3 = starHash(grid3 + vec2(269.5, 183.3));
-        float star3 = step(0.9985, s3);
-        vec3 starCol3 = mix(vec3(0.8, 0.85, 1.0), vec3(1.0, 0.9, 0.75), starHash(grid3 + vec2(50.0)));
-        sky += starCol3 * star3 * 0.75;
+        // Atmospheric depth haze — subtle blue at horizon
+        float hazeAmount = pow(horizon, 2.0) * 0.04;
+        sky += vec3(0.03, 0.04, 0.08) * hazeAmount;
 
         gl_FragColor = vec4(sky, 1.0);
     }

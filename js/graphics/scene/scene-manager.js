@@ -11,7 +11,9 @@ import { createCosmicMotes, updateCosmicMotes, disposeCosmicMotes } from '../env
 import { createEtherealPetals, updateEtherealPetals, disposeEtherealPetals } from '../environment/ethereal-petals.js';
 import { createCosmicPulse, updateCosmicPulse, disposeCosmicPulse } from '../environment/cosmic-pulse.js';
 import { createBlackHole, updateBlackHole, disposeBlackHole } from '../blackhole/blackhole.js';
-import { setupPostProcessing, disposePostProcessing, setExposure } from '../postprocessing/pipeline.js';
+import { setupPostProcessing, disposePostProcessing, setExposure, createFilmGrainEffect } from '../postprocessing/pipeline.js';
+import { createAnamorphicStreak, disposeAnamorphicStreak } from '../postprocessing/anamorphic-streak.js';
+import { createGodRays, updateGodRays, disposeGodRays } from '../postprocessing/god-rays.js';
 import { detectDeviceProfile, createFPSWatchdog } from '../../utils/performance-profile.js';
 
 
@@ -91,8 +93,13 @@ export async function init3D() {
         // Setup ambient lighting
         setupLighting();
 
-        // Setup post-processing pipeline
+        // Setup post-processing pipeline (bloom, ACES, vignette, color grading)
         setupPostProcessing(scene, camera);
+
+        // Cinematic post-process chain (order matters — film grain must be last)
+        createAnamorphicStreak(scene, camera);
+        createGodRays(scene, camera);
+        createFilmGrainEffect();
 
         // Setup FPS watchdog for adaptive quality
         fpsWatchdog = createFPSWatchdog(stats, () => {
@@ -219,6 +226,7 @@ function renderLoop() {
     updateCosmicMotes(elapsed);
     updateEtherealPetals(elapsed, camera);
     updateCosmicPulse(elapsed);
+    updateGodRays(scene, camera);
 
     // Update exposure based on camera position (auto-exposure simulation)
     updateAutoExposure(elapsed);
@@ -345,6 +353,8 @@ export function dispose() {
 
     window.removeEventListener('resize', handleResize);
 
+    disposeGodRays();
+    disposeAnamorphicStreak();
     disposePostProcessing();
     disposeCosmicPulse();
     disposeEtherealPetals();

@@ -32,9 +32,10 @@ const GLOW_FRAGMENT = `
         vec2 uv = vUV - 0.5;
         float dist = length(uv);
 
-        // Circular mask — kills the square edges completely
-        float circleMask = smoothstep(0.5, 0.35, dist);
-        if (circleMask < 0.001) discard;
+        // Tight circular mask — squared for aggressive edge kill
+        float circleMask = smoothstep(0.48, 0.25, dist);
+        circleMask *= circleMask;
+        if (circleMask < 0.01) discard;
 
         // === BREATHING PULSE — slow, organic ===
         float seed = starSeed;
@@ -44,16 +45,14 @@ const GLOW_FRAGMENT = `
         // === SOFT RADIAL GLOW — the halo ===
         float glow = exp(-dist * dist * 22.0);           // Tight bright core
         float halo = exp(-dist * dist * 6.0) * 0.35;     // Soft halo
-        float outerHaze = exp(-dist * dist * 2.5) * 0.08; // Faint outer
+        float outerHaze = exp(-dist * dist * 8.0) * 0.06; // Pulled inward from quad edges
 
         float totalGlow = (glow + halo + outerHaze) * circleMask;
 
-        // === DIFFRACTION SPIKES — subtle cross pattern on brightest stars ===
-        float spikeAngle1 = abs(uv.x * 0.7 + uv.y * 0.7);
-        float spikeAngle2 = abs(uv.x * 0.7 - uv.y * 0.7);
-        float spike1 = exp(-spikeAngle1 * spikeAngle1 * 800.0) * exp(-dist * 4.0);
-        float spike2 = exp(-spikeAngle2 * spikeAngle2 * 800.0) * exp(-dist * 4.0);
-        float spikes = (spike1 + spike2) * 0.2 * step(0.7, starBrightness) * circleMask;
+        // === ANAMORPHIC SPIKES — horizontal streak + faint vertical (cinema lens) ===
+        float spikeH = exp(-uv.y * uv.y * 2000.0) * exp(-dist * 3.0);
+        float spikeV = exp(-uv.x * uv.x * 8000.0) * exp(-dist * 5.0);
+        float spikes = (spikeH * 0.25 + spikeV * 0.06) * step(0.5, starBrightness) * circleMask;
 
         totalGlow += spikes;
 
