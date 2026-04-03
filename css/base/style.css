@@ -213,10 +213,13 @@ a {
     overflow: visible;
 }
 
-/* Override transform for positioned home mode */
+/* Override transforms for absolutely positioned modes */
 #home.active {
     transform: translateX(-50%);
 }
+
+#focus.active {
+    transform: translate(-50%, -50%);
 }
 
 @keyframes fadeIn {

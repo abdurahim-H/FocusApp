@@ -71,22 +71,26 @@
     z-index: 20;
 }
 
-/* Focus mode — centered */
+/* Focus mode — positioned slightly below center, out of flex flow */
 #focus {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     max-width: 500px;
     width: 100%;
-    margin: 0 auto;
 }
 
 .timer-display {
     font-size: clamp(3.5em, 10vw, 5.5em);
     font-weight: 200;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 0.97);
     letter-spacing: -3px;
     margin-bottom: 15px;
     text-shadow:
-        0 0 30px rgba(200, 146, 42, 0.25),
-        0 0 60px rgba(200, 146, 42, 0.08);
+        0 2px 8px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(240, 200, 140, 0.3),
+        0 0 60px rgba(240, 200, 140, 0.1);
     animation: timerGlow 6s ease-in-out infinite;
     position: relative;
     z-index: 21;
@@ -95,13 +99,15 @@
 @keyframes timerGlow {
     0%, 100% {
         text-shadow:
-            0 0 30px rgba(200, 146, 42, 0.25),
-            0 0 60px rgba(200, 146, 42, 0.08);
+            0 2px 8px rgba(0, 0, 0, 0.5),
+            0 0 30px rgba(240, 200, 140, 0.3),
+            0 0 60px rgba(240, 200, 140, 0.1);
     }
     50% {
         text-shadow:
-            0 0 40px rgba(200, 146, 42, 0.35),
-            0 0 80px rgba(200, 146, 42, 0.12);
+            0 2px 8px rgba(0, 0, 0, 0.5),
+            0 0 40px rgba(240, 200, 140, 0.4),
+            0 0 80px rgba(240, 200, 140, 0.15);
     }
 }
 
@@ -292,7 +298,8 @@
 .timer-controls .liquid-glass-btn {
     background: rgba(200, 146, 42, 0.05) !important;
     border: 1px solid rgba(200, 146, 42, 0.15) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
     backdrop-filter: blur(30px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(30px) saturate(160%) !important;
     border-radius: 24px !important;
@@ -534,16 +541,19 @@
 }
 
 .session-type {
-    color: #F0DFC0;
-    font-weight: 400;
+    color: #F5E8D0;
+    font-weight: 500;
     font-size: 1em;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     margin-bottom: 2px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6),
+                 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .session-progress {
     font-size: 0.8em;
-    color: #B8B0A8;
+    color: #D0C8BC;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 /* Hidden elements */
