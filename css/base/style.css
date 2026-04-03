@@ -138,7 +138,7 @@ a {
     margin-left: auto;
     margin-right: auto;
     max-height: none; /* Remove height restriction */
-    overflow-y: hidden; /* Force hidden, no scrollbar ever */
+    overflow-y: hidden;
     overflow-x: hidden;
     animation: none; /* Disable animation on initial load */
     position: relative;
@@ -161,13 +161,13 @@ a {
 }
 
 .task-list {
-    max-height: 200px; /* Shows ~2-3 tasks before scrolling */
-    overflow-y: auto; /* Enable scrollbar for task list only */
+    max-height: 120px;
+    overflow-y: auto;
     overflow-x: hidden;
     
     /* Apple-style minimal scrollbar */
     scrollbar-width: thin;
-    scrollbar-color: rgba(176, 224, 230, 0.08) transparent;
+    scrollbar-color: rgba(200, 146, 42, 0.15) transparent;
 }
 
 /* Apple-style scrollbar for webkit browsers - minimal glass */

@@ -167,16 +167,16 @@
 /* Task Input Group Layout - CONSOLIDATED FROM COMPONENTS.CSS */
 .task-input-group {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     align-items: stretch;
-    margin-bottom: 24px;
+    margin-bottom: 8px;
     position: relative;
     z-index: 31;
 }
 
 .task-input-group .task-input {
     flex: 1;
-    min-height: 48px;
+    min-height: 40px;
     border-radius: 16px 0 0 16px;
     border-right: none;
 }
