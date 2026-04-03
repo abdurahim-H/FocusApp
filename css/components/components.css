@@ -26,13 +26,13 @@
 .home-content h1 {
     font-size: clamp(2.5em, 8vw, 5em);
     font-weight: 400;
-    color: #C8922A;
-    -webkit-text-fill-color: #C8922A;
+    color: #F0DFC0;
+    -webkit-text-fill-color: #F0DFC0;
     margin-bottom: 20px;
     line-height: 1.1;
     letter-spacing: 0.04em;
-    text-shadow: 0 0 25px rgba(200, 146, 42, 0.2),
-                 0 0 50px rgba(122, 92, 30, 0.08);
+    text-shadow: 0 0 30px rgba(240, 200, 140, 0.2),
+                 0 0 60px rgba(240, 200, 140, 0.08);
     filter: none;
     animation: none;
 }
@@ -40,8 +40,8 @@
 .greeting {
     font-size: 1.3em;
     font-weight: 300;
-    color: #9B7320;
-    -webkit-text-fill-color: #9B7320;
+    color: #B8B0A8;
+    -webkit-text-fill-color: #B8B0A8;
     margin-bottom: 30px;
     letter-spacing: 0.02em;
     text-shadow: none;
@@ -51,8 +51,8 @@
 
 .date-time {
     font-size: 1em;
-    color: #7A5C1E;
-    -webkit-text-fill-color: #7A5C1E;
+    color: #8A8478;
+    -webkit-text-fill-color: #8A8478;
     margin-bottom: 40px;
     text-shadow: none;
     font-weight: 400;
@@ -218,9 +218,9 @@
     box-shadow: none !important;
 }
 
-/* Task text */
+/* Task text — warm silver */
 .task-item .task-text {
-    color: rgba(255, 255, 255, 0.75) !important;
+    color: #B8B0A8 !important;
     font-size: 14px !important;
     text-shadow: none !important;
 }
@@ -372,7 +372,7 @@
 }
 
 .task-input::placeholder {
-    color: rgba(122, 92, 30, 0.7) !important;
+    color: rgba(255, 255, 255, 0.3) !important;
 }
 
 /* Task Add button — connected to input */
@@ -380,7 +380,7 @@
     background: rgba(200, 146, 42, 0.06) !important;
     border: 1px solid rgba(200, 146, 42, 0.15) !important;
     border-left: none !important;
-    color: #C8922A !important;
+    color: #F0DFC0 !important;
     border-radius: 0 12px 12px 0 !important;
     box-shadow: none !important;
     text-shadow: none !important;
@@ -534,7 +534,7 @@
 }
 
 .session-type {
-    color: #C8922A;
+    color: #F0DFC0;
     font-weight: 400;
     font-size: 1em;
     letter-spacing: 0.03em;
@@ -543,7 +543,7 @@
 
 .session-progress {
     font-size: 0.8em;
-    color: #7A5C1E;
+    color: #B8B0A8;
 }
 
 /* Hidden elements */
