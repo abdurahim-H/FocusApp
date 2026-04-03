@@ -254,33 +254,33 @@ function createDustParticles() {
     const dustTexture = createDustTexture();
     dustParticles.particleTexture = dustTexture;
 
-    // Emit from a box around the camera
+    // Emit from box — particles FLOW in a direction (diagonal drift)
     dustParticles.createBoxEmitter(
-        new BABYLON.Vector3(-1, -1, -1),
-        new BABYLON.Vector3(1, 1, 1),
-        new BABYLON.Vector3(-50, -50, -50),
-        new BABYLON.Vector3(50, 50, 50)
+        new BABYLON.Vector3(0.5, 0.2, 0.1),   // Direction 1 — diagonal flow
+        new BABYLON.Vector3(1.0, 0.4, 0.3),   // Direction 2
+        new BABYLON.Vector3(-60, -40, -60),
+        new BABYLON.Vector3(60, 40, 60)
     );
 
-    // Tiny — barely visible specks
-    dustParticles.minSize = 0.01;
-    dustParticles.maxSize = 0.04;
+    // Mix of tiny specks and slightly larger sparkles
+    dustParticles.minSize = 0.02;
+    dustParticles.maxSize = 0.08;
 
-    // Long lifetime for slow drift
-    dustParticles.minLifeTime = 8;
-    dustParticles.maxLifeTime = 15;
+    // Medium lifetime
+    dustParticles.minLifeTime = 5;
+    dustParticles.maxLifeTime = 12;
 
-    // Sparse emission
-    dustParticles.emitRate = 40;
+    // More particles for visible golden dust
+    dustParticles.emitRate = 80;
 
-    // Subtle movement
-    dustParticles.minEmitPower = 0.1;
-    dustParticles.maxEmitPower = 0.3;
+    // Noticeable flow speed
+    dustParticles.minEmitPower = 0.5;
+    dustParticles.maxEmitPower = 1.5;
 
-    // Golden dust — warm sparkle
-    dustParticles.color1 = new BABYLON.Color4(1.0, 0.85, 0.4, 0.2);
-    dustParticles.color2 = new BABYLON.Color4(1.0, 0.7, 0.3, 0.1);
-    dustParticles.colorDead = new BABYLON.Color4(0.5, 0.3, 0.1, 0);
+    // Vibrant golden dust
+    dustParticles.color1 = new BABYLON.Color4(1.0, 0.85, 0.35, 0.35);
+    dustParticles.color2 = new BABYLON.Color4(1.0, 0.65, 0.2, 0.2);
+    dustParticles.colorDead = new BABYLON.Color4(0.6, 0.3, 0.05, 0);
 
     // Additive blending for glow
     dustParticles.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;

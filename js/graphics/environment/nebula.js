@@ -1,5 +1,5 @@
-// nebula.js - Golden ribbon streams spanning the full viewport
-// Elegant bundled golden silk threads sweeping edge-to-edge
+// nebula.js - Flowing golden ribbon streams
+// Ribbons that FLOW like rivers of gold, not just oscillate
 
 let mesh = null;
 let material = null;
@@ -49,108 +49,113 @@ const FRAGMENT = `
         return v;
     }
 
-    // Rich vibrant gold
+    // Vibrant saturated gold
     vec3 gold(float t) {
-        vec3 bright = vec3(1.0, 0.9, 0.55);
-        vec3 rich   = vec3(0.95, 0.65, 0.1);
-        vec3 deep   = vec3(0.6, 0.32, 0.03);
-        vec3 dark   = vec3(0.3, 0.14, 0.01);
+        vec3 white  = vec3(1.0, 0.97, 0.85);    // White-hot core
+        vec3 bright = vec3(1.0, 0.82, 0.35);     // Bright gold
+        vec3 rich   = vec3(0.95, 0.55, 0.08);    // Rich saturated gold
+        vec3 deep   = vec3(0.6, 0.28, 0.02);     // Deep amber
+        vec3 dark   = vec3(0.3, 0.12, 0.01);     // Dark bronze
         t = clamp(t, 0.0, 1.0);
-        if (t > 0.7) return mix(rich, bright, (t - 0.7) / 0.3);
-        if (t > 0.3) return mix(deep, rich, (t - 0.3) / 0.4);
-        return mix(dark, deep, t / 0.3);
+        if (t > 0.85) return mix(bright, white, (t - 0.85) / 0.15);
+        if (t > 0.55) return mix(rich, bright, (t - 0.55) / 0.3);
+        if (t > 0.25) return mix(deep, rich, (t - 0.25) / 0.3);
+        return mix(dark, deep, t / 0.25);
     }
 
-    // Smooth S-curve ribbon — graceful arc spanning full UV
-    float ribbon(vec2 p, float yOff, float speed, float bend) {
-        float t = time * 0.02 + speed;
-        float wave = bend * sin(p.x * 2.5 + t)
-                   + bend * 0.5 * sin(p.x * 4.0 + t * 1.3 + 1.0)
-                   + bend * 0.2 * sin(p.x * 6.5 + t * 0.8 + 2.0);
-        return abs(p.y - yOff - wave);
+    // Flowing S-curve ribbon — wave travels ALONG the path
+    float ribbon(vec2 p, float yOff, float flowSpeed, float bend, float freq) {
+        // Key: (p.x - time*speed) makes the wave pattern FLOW along the ribbon
+        float flow = p.x - time * flowSpeed;
+        float curve = bend * sin(flow * freq)
+                    + bend * 0.45 * sin(flow * freq * 1.6 + 1.5)
+                    + bend * 0.2 * sin(flow * freq * 2.8 + 3.0);
+        return abs(p.y - yOff - curve);
     }
 
     void main() {
-        // Full UV — NO radial mask, ribbons span edge to edge
         vec2 uv = vUV - 0.5;
 
-        // Soft edge vignette — just prevents hard cutoff at plane edges
-        float edgeFade = smoothstep(0.5, 0.4, max(abs(uv.x), abs(uv.y)));
+        // Soft edge fade
+        float edgeFade = smoothstep(0.5, 0.38, max(abs(uv.x), abs(uv.y)));
 
-        float t = time * 0.03;
-
-        // Diagonal rotation — ribbons sweep from bottom-left to top-right
-        float angle = 0.38;
+        // Diagonal rotation — sweeping curves
+        float angle = 0.35;
         mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
         vec2 ruv = rot * uv;
 
-        // Subtle organic warp
-        float warp = fbm(ruv * 1.8 + t * 0.2) * 0.03;
+        // Organic warp — also flows
+        float warp = fbm(ruv * 2.0 + vec2(-time * 0.04, time * 0.02)) * 0.035;
         ruv.y += warp;
 
         vec3 color = vec3(0.0);
 
-        // === MAIN RIBBON BUNDLE — 4 parallel strands ===
-        float spacing = 0.012;
+        // === MAIN RIBBON BUNDLE — 4 parallel flowing strands ===
+        float spacing = 0.013;
         for (int i = 0; i < 4; i++) {
             float off = float(i) * spacing - spacing * 1.5;
-            float width = 0.003 + float(i) * 0.001;
-            float d = ribbon(ruv, off + 0.02, 0.0, 0.09);
+            float w = 0.003 + float(i) * 0.001;
+            float d = ribbon(ruv, off + 0.04, 0.06, 0.11, 2.8);
 
-            float core = smoothstep(width, 0.0, d);
-            float glow = smoothstep(width * 5.0, 0.0, d);
-            float haze = smoothstep(width * 14.0, 0.0, d);
+            float core = smoothstep(w, 0.0, d);
+            float glow = smoothstep(w * 6.0, 0.0, d);
+            float haze = smoothstep(w * 16.0, 0.0, d);
 
-            float intensity = 1.0 - float(i) * 0.15;
-            color += gold(0.2) * haze * 0.04 * intensity;
-            color += gold(0.55) * glow * 0.25 * intensity;
+            float intensity = 1.0 - float(i) * 0.12;
+            color += gold(0.18) * haze * 0.05 * intensity;
+            color += gold(0.6) * glow * 0.35 * intensity;
+            color += gold(1.0) * core * 1.8 * intensity;
+        }
+
+        // === SECOND BUNDLE — flows the other direction for visual interest ===
+        for (int i = 0; i < 3; i++) {
+            float off = float(i) * 0.011 - 0.011;
+            float w = 0.0025 + float(i) * 0.0007;
+            float d = ribbon(ruv, off - 0.12, 0.045, 0.09, 3.2);
+
+            float core = smoothstep(w, 0.0, d);
+            float glow = smoothstep(w * 5.5, 0.0, d);
+            float haze = smoothstep(w * 14.0, 0.0, d);
+
+            float intensity = 0.85 - float(i) * 0.1;
+            color += gold(0.15) * haze * 0.04 * intensity;
+            color += gold(0.55) * glow * 0.28 * intensity;
             color += gold(0.95) * core * 1.4 * intensity;
         }
 
-        // === SECOND RIBBON BUNDLE — offset, thinner ===
-        for (int i = 0; i < 3; i++) {
-            float off = float(i) * 0.01 - 0.01;
-            float width = 0.002 + float(i) * 0.0008;
-            float d = ribbon(ruv, off - 0.1, 0.5, 0.07);
+        // === THIN ACCENT RIBBONS ===
+        float da = ribbon(ruv, 0.17, 0.08, 0.07, 3.5);
+        color += gold(0.5) * smoothstep(0.01, 0.0, da) * 0.2;
+        color += gold(0.92) * smoothstep(0.0025, 0.0, da) * 0.9;
 
-            float core = smoothstep(width, 0.0, d);
-            float glow = smoothstep(width * 5.0, 0.0, d);
-            float haze = smoothstep(width * 12.0, 0.0, d);
+        float db = ribbon(ruv, -0.22, 0.035, 0.08, 2.5);
+        color += gold(0.45) * smoothstep(0.008, 0.0, db) * 0.15;
+        color += gold(0.88) * smoothstep(0.002, 0.0, db) * 0.7;
 
-            float intensity = 0.85 - float(i) * 0.12;
-            color += gold(0.15) * haze * 0.03 * intensity;
-            color += gold(0.5) * glow * 0.2 * intensity;
-            color += gold(0.9) * core * 1.1 * intensity;
-        }
+        // === FLOWING GOLDEN DUST along ribbons ===
+        float minD = 1.0;
+        minD = min(minD, ribbon(ruv, 0.04, 0.06, 0.11, 2.8));
+        minD = min(minD, ribbon(ruv, -0.12, 0.045, 0.09, 3.2));
 
-        // === THIRD — thin accent ribbon ===
-        float d3 = ribbon(ruv, 0.14, 1.2, 0.06);
-        float core3 = smoothstep(0.002, 0.0, d3);
-        float glow3 = smoothstep(0.012, 0.0, d3);
-        color += gold(0.45) * glow3 * 0.15;
-        color += gold(0.88) * core3 * 0.7;
+        float dustZone = smoothstep(0.1, 0.0, minD);
+        // Dust FLOWS with the ribbon — note the time offset in x
+        float dustFlow = fbm(vec2(ruv.x * 20.0 - time * 1.2, ruv.y * 20.0));
+        float dust = pow(dustFlow, 4.5) * dustZone;
+        color += gold(0.75) * dust * 0.8;
 
-        // === GOLDEN DUST — smooth continuous noise along ribbons ===
-        float minDist = 1.0;
-        minDist = min(minDist, ribbon(ruv, 0.02, 0.0, 0.09));
-        minDist = min(minDist, ribbon(ruv, -0.1, 0.5, 0.07));
-        minDist = min(minDist, ribbon(ruv, 0.14, 1.2, 0.06));
+        // Fine sparkle dust — also flowing
+        float fineFlow = fbm(vec2(ruv.x * 40.0 - time * 2.0, ruv.y * 40.0 + time * 0.3));
+        float sparkle = pow(fineFlow, 7.0) * dustZone;
+        color += gold(0.95) * sparkle * 0.6;
 
-        // Dust concentrated near ribbons, fading with distance
-        float dustZone = smoothstep(0.12, 0.0, minDist);
-        float dustNoise = fbm(ruv * 25.0 + t * 1.5);
-        float dust = pow(dustNoise, 4.0) * dustZone;
-        color += gold(0.7) * dust * 0.6;
+        // === AMBIENT scattered gold — fills empty areas ===
+        float ambient = fbm(uv * 6.0 + vec2(-time * 0.05, time * 0.03));
+        ambient = pow(ambient, 6.0);
+        color += gold(0.35) * ambient * 0.06;
 
-        // Fine sparkle dust — very high frequency smooth noise
-        float fineDust = fbm(ruv * 50.0 + t * 0.8);
-        float fineSparkle = pow(fineDust, 6.0) * dustZone;
-        color += gold(0.9) * fineSparkle * 0.4;
-
-        // === SCATTERED AMBIENT GOLD DUST — fills empty areas subtly ===
-        float ambientDust = fbm(uv * 8.0 + t * 0.3);
-        ambientDust = pow(ambientDust, 5.0);
-        color += gold(0.4) * ambientDust * 0.05;
+        // === SUBTLE BLUE-WHITE GLOW in upper area ===
+        float blueGlow = exp(-pow(uv.x + 0.05, 2.0) * 8.0 - pow(uv.y - 0.2, 2.0) * 12.0);
+        color += vec3(0.08, 0.12, 0.2) * blueGlow * 0.4;
 
         color *= edgeFade;
         float alpha = edgeFade * clamp(length(color) * 3.0, 0.0, 1.0);
@@ -160,7 +165,7 @@ const FRAGMENT = `
 `;
 
 export function createNebula(sceneRef, camera, octaves = 5) {
-    console.log('✨ Creating golden ribbon streams...');
+    console.log('✨ Creating flowing golden streams...');
 
     BABYLON.Effect.ShadersStore['nebulaVertexShader'] = VERTEX;
     BABYLON.Effect.ShadersStore['nebulaFragmentShader'] = FRAGMENT;
@@ -171,7 +176,7 @@ export function createNebula(sceneRef, camera, octaves = 5) {
 
     mesh.position = BABYLON.Vector3.Zero();
     mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-    mesh.scaling = new BABYLON.Vector3(120, 120, 120); // Large — fills viewport
+    mesh.scaling = new BABYLON.Vector3(120, 120, 120);
     mesh.renderingGroupId = 1;
 
     material = new BABYLON.ShaderMaterial('nebulaMat', sceneRef, {
@@ -188,7 +193,7 @@ export function createNebula(sceneRef, camera, octaves = 5) {
     material.forceDepthWrite = false;
     mesh.material = material;
 
-    console.log('   ✓ Golden ribbons created');
+    console.log('   ✓ Flowing golden ribbons created');
     return mesh;
 }
 

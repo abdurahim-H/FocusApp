@@ -68,9 +68,13 @@ const FRAGMENT = `
         vec3 sky = mix(zenith, mid, smoothstep(0.0, 0.5, horizon));
         sky = mix(sky, horizonCol, smoothstep(0.5, 1.0, horizon));
 
-        // === VERY SUBTLE dark cloud variation — breaks up flat black ===
+        // Subtle cloud variation — breaks up flat sky
         float cloudNoise = fbm(vec2(phi * 2.0 + t, theta * 1.5) * 1.5);
-        sky += vec3(0.008, 0.005, 0.015) * smoothstep(0.3, 0.7, cloudNoise) * 0.5;
+        sky += vec3(0.01, 0.012, 0.025) * smoothstep(0.3, 0.7, cloudNoise) * 0.5;
+
+        // Bright blue-white region — upper area, contrasts with gold
+        float brightRegion = exp(-pow(dir.x - 0.1, 2.0) * 3.0 - pow(dir.y - 0.6, 2.0) * 5.0);
+        sky += vec3(0.04, 0.06, 0.1) * brightRegion * 0.6;
 
         // No embedded stars — the 3D SPS stars handle all star rendering
         // This keeps the skybox clean and smooth
