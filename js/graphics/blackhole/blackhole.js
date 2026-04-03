@@ -108,7 +108,7 @@ const FRAGMENT = `
         vec2 uv = vUV - 0.5;
 
         // Tilt the entire black hole + accretion disk
-        float tiltAngle = -0.12; // ~7 degrees clockwise
+        float tiltAngle = 0.12; // ~7 degrees counter-clockwise
         mat2 tiltRot = mat2(cos(tiltAngle), -sin(tiltAngle), sin(tiltAngle), cos(tiltAngle));
         uv = tiltRot * uv;
 
