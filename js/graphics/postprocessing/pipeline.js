@@ -56,11 +56,11 @@ function configureHDR(pipeline) {
     pipeline.imageProcessing.toneMappingEnabled = true;
     pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
 
-    // Exposure — balanced
-    pipeline.imageProcessing.exposure = 1.1;
+    // Exposure — slightly brighter for vibrancy
+    pipeline.imageProcessing.exposure = 1.2;
 
-    // Contrast — crisp, vibrant
-    pipeline.imageProcessing.contrast = 1.25;
+    // Contrast — punchy, vibrant colors
+    pipeline.imageProcessing.contrast = 1.4;
 
 }
 

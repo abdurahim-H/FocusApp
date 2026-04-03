@@ -82,21 +82,21 @@ const FRAGMENT = `
         float horizon = 1.0 - abs(dir.y);
         horizon = pow(horizon, 4.0);
 
-        // Deep dark blue-teal — like the reference starfield
-        vec3 zenith = vec3(0.008, 0.01, 0.02);      // Deep navy
-        vec3 mid = vec3(0.012, 0.015, 0.028);        // Dark blue-teal
-        vec3 horizonCol = vec3(0.02, 0.022, 0.04);   // Slightly lighter at horizon
+        // Near-black space
+        vec3 zenith = vec3(0.002, 0.002, 0.004);
+        vec3 mid = vec3(0.003, 0.004, 0.007);
+        vec3 horizonCol = vec3(0.005, 0.005, 0.01);
 
         vec3 sky = mix(zenith, mid, smoothstep(0.0, 0.5, horizon));
         sky = mix(sky, horizonCol, smoothstep(0.5, 1.0, horizon));
 
-        // Subtle cloud variation — breaks up flat sky
+        // Very subtle cloud variation
         float cloudNoise = fbm(vec2(phi * 2.0 + t, theta * 1.5) * 1.5);
-        sky += vec3(0.01, 0.012, 0.025) * smoothstep(0.3, 0.7, cloudNoise) * 0.5;
+        sky += vec3(0.003, 0.004, 0.008) * smoothstep(0.3, 0.7, cloudNoise) * 0.3;
 
-        // Bright blue-white region — upper area, contrasts with gold
+        // Very faint blue-white region
         float brightRegion = exp(-pow(dir.x - 0.1, 2.0) * 3.0 - pow(dir.y - 0.6, 2.0) * 5.0);
-        sky += vec3(0.04, 0.06, 0.1) * brightRegion * 0.6;
+        sky += vec3(0.01, 0.015, 0.025) * brightRegion * 0.3;
 
         // === BACKGROUND STARS — circular pinpoints via cell-center distance ===
         sky += vec3(0.3, 0.33, 0.42) * starLayer(uv, 2000.0, vec2(73.1, 419.3), 0.997, 800.0) * 0.3;
@@ -108,9 +108,9 @@ const FRAGMENT = `
         vec3 starCol3 = mix(vec3(0.8, 0.85, 1.0), vec3(1.0, 0.9, 0.75), starHash(grid3id + vec2(50.0)));
         sky += starCol3 * s3val * 0.75;
 
-        // Atmospheric depth haze — subtle blue at horizon
-        float hazeAmount = pow(horizon, 2.0) * 0.04;
-        sky += vec3(0.03, 0.04, 0.08) * hazeAmount;
+        // Very subtle depth haze at horizon
+        float hazeAmount = pow(horizon, 3.0) * 0.02;
+        sky += vec3(0.008, 0.01, 0.02) * hazeAmount;
 
         gl_FragColor = vec4(sky, 1.0);
     }

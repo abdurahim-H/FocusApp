@@ -69,7 +69,7 @@ export async function init3D() {
 
         // Create scene with HDR support
         scene = new BABYLON.Scene(engine);
-        scene.clearColor = new BABYLON.Color4(0.005, 0.007, 0.015, 1.0);
+        scene.clearColor = new BABYLON.Color4(0.001, 0.001, 0.003, 1.0);
 
         // Enable rendering groups for proper layering
         scene.setRenderingAutoClearDepthStencil(0, true, true, true);

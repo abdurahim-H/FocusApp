@@ -76,9 +76,9 @@ export function createAnamorphicStreak(scene, camera) {
             1.0 / engine.getRenderWidth(),
             1.0 / engine.getRenderHeight()
         );
-        effect.setFloat('threshold', 0.7);
-        effect.setFloat('intensity', 0.2);
-        effect.setFloat('streakSpread', 0.004); // UV-space spread per tap
+        effect.setFloat('threshold', 1.2);       // Only very bright elements (accretion disk core, star glows)
+        effect.setFloat('intensity', 0.15);
+        effect.setFloat('streakSpread', 0.003);
     };
 
     return streakPostProcess;

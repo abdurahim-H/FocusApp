@@ -30,7 +30,7 @@ const GODRAY_FRAGMENT = `
             vec3 s = texture2D(textureSampler, clamped).rgb;
             // Only bright areas contribute
             float lum = dot(s, vec3(0.2126, 0.7152, 0.0722));
-            s *= max(lum - 0.5, 0.0);
+            s *= max(lum - 0.9, 0.0);
             rays += s * illuminationDecay;
             illuminationDecay *= decay;
         }
