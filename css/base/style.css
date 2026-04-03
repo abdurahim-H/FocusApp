@@ -128,9 +128,9 @@ a {
 }/* Mode Display System — smooth transitions */
 .mode {
     position: absolute;
-    opacity: 0;
+    visibility: hidden;
     transform: translateY(10px);
-    transition: opacity 0.45s ease, transform 0.45s ease;
+    transition: visibility 0s linear 0.35s, transform 0.35s ease;
     pointer-events: none;
     text-align: center;
     max-width: 600px;
@@ -205,8 +205,9 @@ a {
 }
 
 .mode.active {
-    opacity: 1;
+    visibility: visible;
     transform: translateY(0);
+    transition: visibility 0s linear 0s, transform 0.35s ease;
     pointer-events: auto;
 }
 
