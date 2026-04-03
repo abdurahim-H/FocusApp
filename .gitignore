@@ -1,6 +1,14 @@
 # Progress tracking (not committed)
 progress.md
 
+# Quarantined files (moved from repo, not for tracking)
+_quarantine/
+
+# Screenshots and temp photos
+*.png
+!assets/*.png
+temp- photos/
+
 # Dependencies
 node_modules/
 npm-debug.log*
@@ -19,7 +27,7 @@ build/
 .env.production.local
 
 # IDE files
-.vscode/settings.json
+.vscode/
 .idea/
 *.swp
 *.swo
@@ -71,3 +79,8 @@ extract-*.txt
 # Audio processing temp files
 *.tmp.wav
 *.tmp.mp3
+
+# Backup and archive files
+_archive/
+*-backup.*
+*.backup.*
