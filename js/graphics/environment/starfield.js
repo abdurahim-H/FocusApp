@@ -208,53 +208,53 @@ function setStarParticleProperties(particle, config, brightnessScale) {
  * @returns {{scale: number, color: BABYLON.Color4}}
  */
 function getStellarClassification(type) {
-    if (type < 0.015) {
+    if (type < 0.02) {
         // Bright blue — rare, prominent, triggers bloom
         return {
-            scale: 0.6 + Math.random() * 0.4,
-            color: new BABYLON.Color4(0.75, 0.88, 1.8, 1.0)
+            scale: 0.7 + Math.random() * 0.5,
+            color: new BABYLON.Color4(0.9, 1.0, 2.2, 1.0)
         };
-    } else if (type < 0.05) {
-        // Bright crisp white
+    } else if (type < 0.06) {
+        // Bright crisp white — visible bloom
         return {
-            scale: 0.4 + Math.random() * 0.3,
-            color: new BABYLON.Color4(1.5, 1.5, 1.6, 1.0)
+            scale: 0.45 + Math.random() * 0.35,
+            color: new BABYLON.Color4(1.8, 1.8, 1.9, 1.0)
         };
-    } else if (type < 0.13) {
-        // Medium white — clean points
+    } else if (type < 0.15) {
+        // Medium white — clean bright points
         return {
-            scale: 0.25 + Math.random() * 0.2,
-            color: new BABYLON.Color4(1.2, 1.2, 1.25, 1.0)
+            scale: 0.3 + Math.random() * 0.2,
+            color: new BABYLON.Color4(1.4, 1.4, 1.5, 1.0)
         };
-    } else if (type < 0.22) {
-        // Cool blue-white — adds variety
+    } else if (type < 0.24) {
+        // Cool blue-white
         return {
-            scale: 0.2 + Math.random() * 0.15,
-            color: new BABYLON.Color4(0.9, 1.0, 1.3, 0.95)
+            scale: 0.22 + Math.random() * 0.15,
+            color: new BABYLON.Color4(1.1, 1.2, 1.5, 0.95)
         };
-    } else if (type < 0.35) {
+    } else if (type < 0.37) {
         // Warm white — slight golden tint
         return {
             scale: 0.18 + Math.random() * 0.15,
-            color: new BABYLON.Color4(1.15, 1.0, 0.8, 0.9)
+            color: new BABYLON.Color4(1.3, 1.15, 0.9, 0.95)
         };
-    } else if (type < 0.48) {
-        // Golden — complements the golden ribbons
+    } else if (type < 0.50) {
+        // Golden — complements the ribbons
         return {
-            scale: 0.12 + Math.random() * 0.12,
-            color: new BABYLON.Color4(1.0, 0.78, 0.45, 0.8)
+            scale: 0.14 + Math.random() * 0.12,
+            color: new BABYLON.Color4(1.15, 0.9, 0.55, 0.85)
         };
-    } else if (type < 0.60) {
+    } else if (type < 0.63) {
         // Subtle warm amber
         return {
             scale: 0.1 + Math.random() * 0.1,
-            color: new BABYLON.Color4(0.9, 0.65, 0.35, 0.65)
+            color: new BABYLON.Color4(1.0, 0.75, 0.4, 0.7)
         };
     } else {
-        // Faint blue-white fill — dense background texture
+        // Faint blue-white fill — background texture
         return {
-            scale: 0.06 + Math.random() * 0.08,
-            color: new BABYLON.Color4(0.5, 0.55, 0.7, 0.4)
+            scale: 0.07 + Math.random() * 0.08,
+            color: new BABYLON.Color4(0.6, 0.65, 0.8, 0.5)
         };
     }
 }
