@@ -25,7 +25,7 @@ const FRAGMENT = `
     #define PI 3.14159265
     #define SHADOW_R 0.085
     #define PHOTON_R 0.128
-    #define DISK_INNER 0.10
+    #define DISK_INNER 0.09
     #define DISK_OUTER 0.44
     #define TILT 0.20
 
@@ -192,8 +192,9 @@ const FRAGMENT = `
         float innerGlow = smoothstep(SHADOW_R + 0.018, SHADOW_R + 0.001, dist) * (1.0 - shadowMask);
         color += vec3(0.6, 0.2, 0.03) * innerGlow * 0.1;
 
+        // Black hole is FULLY opaque black — not transparent at all
         color *= (1.0 - shadowMask);
-        alpha = mix(alpha, 0.97, shadowMask);
+        alpha = mix(alpha, 1.0, shadowMask);
 
         float edge = smoothstep(SHADOW_R + 0.002, SHADOW_R, dist)
                    * smoothstep(SHADOW_R - 0.002, SHADOW_R, dist);
