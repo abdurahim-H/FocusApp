@@ -60,6 +60,7 @@ const FRAGMENT = `
     // tempColor removed — smooth gradient is now inline in sampleDisk
 
     // Sample disk — continuous smooth flowing plasma, NO concentric rings
+    // Uses cos/sin of angle for noise coords to avoid atan discontinuity
     vec3 sampleDisk(float diskR, float diskAngle) {
         float rNorm = clamp((diskR - DISK_INNER) / (DISK_OUTER - DISK_INNER), 0.0, 1.0);
 
@@ -67,18 +68,20 @@ const FRAGMENT = `
         float kepler = pow(DISK_INNER / max(diskR, DISK_INNER), 0.65);
         float spin = diskAngle + time * 0.35 * kepler;
 
-        // Flowing plasma streaks — primarily ANGULAR (along orbit direction)
-        // Use spin angle as primary coordinate, radius as secondary
-        float ang = spin * 6.0 / PI;
-        float rad = rNorm * 8.0; // LOW radial frequency — no banding
+        // Use cos/sin of spin angle as noise coordinates
+        // This is CONTINUOUS everywhere — no atan ±PI discontinuity
+        float cx = cos(spin * 3.0);
+        float cy = sin(spin * 3.0);
+        float rad = rNorm * 8.0;
 
-        float s1 = fbm(vec2(ang + time * 0.1, rad));
-        float s2 = fbm(vec2(ang * 0.7 - time * 0.07, rad + 30.0));
+        float s1 = fbm(vec2(cx * 4.0 + cy * 2.0 + time * 0.1, rad + cx));
+        float s2 = fbm(vec2(cy * 3.0 - cx * 1.5 - time * 0.07, rad + 30.0 + cy));
         float streaks = s1 * 0.6 + s2 * 0.4;
 
         // Smooth continuous brightness — no ring modulation
         float brightness = 0.3 + streaks * 0.7;
-        brightness *= 1.0 + 0.3 * sin(diskAngle + 0.7); // Doppler
+        // Doppler using cos (continuous, no atan discontinuity)
+        brightness *= 1.0 + 0.3 * cos(diskAngle + 0.7);
 
         // Smooth radial temperature gradient (no sharp steps)
         // Inner = hot bright, outer = cool dark
@@ -122,63 +125,50 @@ const FRAGMENT = `
         float lensStrength = (SHADOW_R * SHADOW_R) / max(lensR * lensR - SHADOW_R * SHADOW_R * 0.8, 0.0001);
         lensStrength = min(lensStrength, 6.0);
 
-        // Warp Y toward zero (the disk plane)
-        float warpedY = uv.y / (1.0 + lensStrength * 1.8);
+        // ==========================================
+        // ACCUMULATE MULTIPLE WARP LEVELS smoothly
+        // Instead of 3 discrete jumps, sample 8 warp levels
+        // with decreasing weight — eliminates the hard boundary
+        // ==========================================
+        float warpLevels[8];
+        warpLevels[0] = 1.2;
+        warpLevels[1] = 2.0;
+        warpLevels[2] = 3.0;
+        warpLevels[3] = 4.5;
+        warpLevels[4] = 6.5;
+        warpLevels[5] = 9.0;
+        warpLevels[6] = 13.0;
+        warpLevels[7] = 18.0;
 
-        // The warped position represents where the ray hits the disk
-        vec2 warpedUV = vec2(uv.x, warpedY);
+        float warpWeights[8];
+        warpWeights[0] = 1.0;
+        warpWeights[1] = 0.7;
+        warpWeights[2] = 0.45;
+        warpWeights[3] = 0.3;
+        warpWeights[4] = 0.2;
+        warpWeights[5] = 0.13;
+        warpWeights[6] = 0.08;
+        warpWeights[7] = 0.05;
 
-        // Map to tilted disk coordinates
-        vec2 diskCoord = vec2(warpedUV.x, warpedUV.y / TILT);
-        float diskR = length(diskCoord);
-        float diskAngle = atan(diskCoord.y, diskCoord.x);
+        for (int i = 0; i < 8; i++) {
+            float warpMult = warpLevels[i];
+            float weight = warpWeights[i];
 
-        // PRIMARY disk image
-        if (diskR > DISK_INNER && diskR < DISK_OUTER) {
-            vec3 dCol = sampleDisk(diskR, diskAngle);
+            float wy = uv.y / (1.0 + lensStrength * warpMult);
+            vec2 dc = vec2(uv.x, wy / TILT);
+            float dr = length(dc);
+            float da = atan(dc.y, dc.x);
 
-            float innerF = smoothstep(DISK_INNER, DISK_INNER + 0.02, diskR);
-            float outerF = smoothstep(DISK_OUTER, DISK_OUTER - 0.05, diskR);
-            float mask = innerF * outerF;
+            if (dr > DISK_INNER && dr < DISK_OUTER) {
+                vec3 dCol = sampleDisk(dr, da);
 
-            color += dCol * mask * 1.4;
-            alpha = max(alpha, length(dCol) * mask * 1.4);
-        }
+                float innerF = smoothstep(DISK_INNER, DISK_INNER + 0.02, dr);
+                float outerF = smoothstep(DISK_OUTER, DISK_OUTER - 0.08, dr);
+                float mask = innerF * outerF * weight;
 
-        // SECONDARY image (stronger warp — light wrapping further around)
-        float warpedY2 = uv.y / (1.0 + lensStrength * 5.0);
-        vec2 warpedUV2 = vec2(uv.x, warpedY2);
-        vec2 diskCoord2 = vec2(warpedUV2.x, warpedUV2.y / TILT);
-        float diskR2 = length(diskCoord2);
-        float diskAngle2 = atan(diskCoord2.y, diskCoord2.x);
-
-        if (diskR2 > DISK_INNER && diskR2 < DISK_OUTER) {
-            vec3 dCol2 = sampleDisk(diskR2, diskAngle2);
-
-            float innerF = smoothstep(DISK_INNER, DISK_INNER + 0.015, diskR2);
-            float outerF = smoothstep(DISK_OUTER, DISK_OUTER - 0.04, diskR2);
-            float mask = innerF * outerF * 0.35;
-
-            color += dCol2 * mask;
-            alpha = max(alpha, length(dCol2) * mask);
-        }
-
-        // TERTIARY — even tighter winding
-        float warpedY3 = uv.y / (1.0 + lensStrength * 12.0);
-        vec2 warpedUV3 = vec2(uv.x, warpedY3);
-        vec2 diskCoord3 = vec2(warpedUV3.x, warpedUV3.y / TILT);
-        float diskR3 = length(diskCoord3);
-        float diskAngle3 = atan(diskCoord3.y, diskCoord3.x);
-
-        if (diskR3 > DISK_INNER && diskR3 < DISK_OUTER) {
-            vec3 dCol3 = sampleDisk(diskR3, diskAngle3);
-
-            float innerF = smoothstep(DISK_INNER, DISK_INNER + 0.01, diskR3);
-            float outerF = smoothstep(DISK_OUTER, DISK_OUTER - 0.03, diskR3);
-            float mask = innerF * outerF * 0.15;
-
-            color += dCol3 * mask;
-            alpha = max(alpha, length(dCol3) * mask);
+                color += dCol * mask * 1.3;
+                alpha = max(alpha, length(dCol) * mask * 1.3);
+            }
         }
 
         // ==========================================
