@@ -83,24 +83,22 @@ const FRAGMENT = `
         // Doppler using cos (continuous, no atan discontinuity)
         brightness *= 1.0 + 0.3 * cos(diskAngle + 0.7);
 
-        // Smooth radial temperature gradient (no sharp steps)
-        // Inner = hot bright, outer = cool dark
+        // Smooth radial temperature gradient
+        // Inner = hot bright, outer = deep blood red
         float temp = 1.0 - rNorm;
-        // Smooth cubic falloff
         temp = temp * temp * (3.0 - 2.0 * temp);
 
-        // Blend colors smoothly using temp as a continuous gradient
-        vec3 hot    = vec3(1.0, 0.93, 0.8);
-        vec3 bright = vec3(1.0, 0.68, 0.18);
-        vec3 orange = vec3(0.95, 0.38, 0.03);
-        vec3 red    = vec3(0.5, 0.1, 0.015);
-        vec3 dark   = vec3(0.12, 0.02, 0.003);
+        // Darker palette: deep blood red outer → bright orange-red inner
+        vec3 hot       = vec3(1.0, 0.85, 0.55);       // Hot gold-white core
+        vec3 brightOrg = vec3(0.85, 0.35, 0.02);       // Bright orange-red (#CC3300 ≈)
+        vec3 medRed    = vec3(0.65, 0.18, 0.01);       // Medium red
+        vec3 bloodRed  = vec3(0.545, 0.0, 0.0);        // Deep blood red (#8B0000)
+        vec3 darkEdge  = vec3(0.25, 0.0, 0.0);         // Near-black red
 
-        // Continuous smooth gradient using mix chain
-        vec3 col = mix(dark, red, smoothstep(0.0, 0.25, temp));
-        col = mix(col, orange, smoothstep(0.2, 0.5, temp));
-        col = mix(col, bright, smoothstep(0.45, 0.75, temp));
-        col = mix(col, hot, smoothstep(0.8, 1.0, temp));
+        vec3 col = mix(darkEdge, bloodRed, smoothstep(0.0, 0.2, temp));
+        col = mix(col, medRed, smoothstep(0.15, 0.4, temp));
+        col = mix(col, brightOrg, smoothstep(0.35, 0.65, temp));
+        col = mix(col, hot, smoothstep(0.75, 1.0, temp));
 
         // Streaks modulate brightness, not color banding
         return col * brightness;
