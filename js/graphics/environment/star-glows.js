@@ -32,25 +32,28 @@ const GLOW_FRAGMENT = `
         vec2 uv = vUV - 0.5;
         float dist = length(uv);
 
+        // Circular mask — kills the square edges completely
+        float circleMask = smoothstep(0.5, 0.35, dist);
+        if (circleMask < 0.001) discard;
+
         // === BREATHING PULSE — slow, organic ===
         float seed = starSeed;
         float pulse = 0.7 + 0.3 * sin(time * (0.3 + seed * 0.4) + seed * 6.283);
-        // Secondary slow modulation
         pulse *= 0.85 + 0.15 * sin(time * (0.15 + seed * 0.2) + seed * 3.14);
 
         // === SOFT RADIAL GLOW — the halo ===
-        float glow = exp(-dist * dist * 18.0);          // Tight bright core
-        float halo = exp(-dist * dist * 4.0) * 0.4;     // Wide soft halo
-        float outerHaze = exp(-dist * dist * 1.5) * 0.1; // Very wide faint haze
+        float glow = exp(-dist * dist * 22.0);           // Tight bright core
+        float halo = exp(-dist * dist * 6.0) * 0.35;     // Soft halo
+        float outerHaze = exp(-dist * dist * 2.5) * 0.08; // Faint outer
 
-        float totalGlow = glow + halo + outerHaze;
+        float totalGlow = (glow + halo + outerHaze) * circleMask;
 
         // === DIFFRACTION SPIKES — subtle cross pattern on brightest stars ===
-        float spikeAngle1 = abs(uv.x * 0.7 + uv.y * 0.7);  // 45 degree
-        float spikeAngle2 = abs(uv.x * 0.7 - uv.y * 0.7);  // -45 degree
-        float spike1 = exp(-spikeAngle1 * spikeAngle1 * 800.0) * exp(-dist * 3.0);
-        float spike2 = exp(-spikeAngle2 * spikeAngle2 * 800.0) * exp(-dist * 3.0);
-        float spikes = (spike1 + spike2) * 0.25 * step(0.7, starBrightness);
+        float spikeAngle1 = abs(uv.x * 0.7 + uv.y * 0.7);
+        float spikeAngle2 = abs(uv.x * 0.7 - uv.y * 0.7);
+        float spike1 = exp(-spikeAngle1 * spikeAngle1 * 800.0) * exp(-dist * 4.0);
+        float spike2 = exp(-spikeAngle2 * spikeAngle2 * 800.0) * exp(-dist * 4.0);
+        float spikes = (spike1 + spike2) * 0.2 * step(0.7, starBrightness) * circleMask;
 
         totalGlow += spikes;
 
@@ -58,13 +61,11 @@ const GLOW_FRAGMENT = `
         totalGlow *= pulse * starBrightness;
 
         // Color — white-hot core fading to star color in halo
-        vec3 coreColor = vec3(1.0, 0.98, 0.95); // Near white
+        vec3 coreColor = vec3(1.0, 0.98, 0.95);
         vec3 color = mix(starColor, coreColor, glow);
         color *= totalGlow;
 
         float alpha = clamp(totalGlow * 1.5, 0.0, 1.0);
-
-        // Discard near-invisible pixels
         if (alpha < 0.003) discard;
 
         gl_FragColor = vec4(color, alpha);
