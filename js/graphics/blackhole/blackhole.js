@@ -106,6 +106,12 @@ const FRAGMENT = `
 
     void main() {
         vec2 uv = vUV - 0.5;
+
+        // Tilt the entire black hole + accretion disk
+        float tiltAngle = -0.12; // ~7 degrees clockwise
+        mat2 tiltRot = mat2(cos(tiltAngle), -sin(tiltAngle), sin(tiltAngle), cos(tiltAngle));
+        uv = tiltRot * uv;
+
         float dist = length(uv);
         if (dist > 0.5) discard;
 
