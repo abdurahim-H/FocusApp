@@ -46,25 +46,26 @@ export function createShootingStars(sceneRef) {
         new BABYLON.Vector3(-0.8, -0.4, -0.2)
     );
 
-    // Particle properties
-    particleSystem.minSize = 0.3;
-    particleSystem.maxSize = 0.8;
-    particleSystem.minLifeTime = 0.2;
-    particleSystem.maxLifeTime = 0.5;
+    // Particle properties — longer, more elegant trails
+    particleSystem.minSize = 0.2;
+    particleSystem.maxSize = 0.6;
+    particleSystem.minLifeTime = 0.4;
+    particleSystem.maxLifeTime = 0.9;
     particleSystem.emitRate = 0; // Manual bursts only
-    particleSystem.minEmitPower = 80;
-    particleSystem.maxEmitPower = 150;
-    particleSystem.updateSpeed = 0.02;
+    particleSystem.minEmitPower = 60;
+    particleSystem.maxEmitPower = 120;
+    particleSystem.updateSpeed = 0.016;
 
-    // Colors — golden-white streak
-    particleSystem.color1 = new BABYLON.Color4(1.0, 0.95, 0.8, 1.0);
-    particleSystem.color2 = new BABYLON.Color4(1.0, 0.8, 0.4, 0.9);
-    particleSystem.colorDead = new BABYLON.Color4(0.5, 0.3, 0.1, 0);
+    // Colors — warm golden-white, elegant fade
+    particleSystem.color1 = new BABYLON.Color4(1.0, 0.95, 0.85, 1.0);
+    particleSystem.color2 = new BABYLON.Color4(1.0, 0.82, 0.45, 0.9);
+    particleSystem.colorDead = new BABYLON.Color4(0.6, 0.35, 0.08, 0);
 
-    // Size over life — shrinks to create tail
-    particleSystem.addSizeGradient(0, 0.6, 0.8);
-    particleSystem.addSizeGradient(0.3, 0.4, 0.6);
-    particleSystem.addSizeGradient(1.0, 0.0, 0.05);
+    // Size over life — graceful taper to fine point
+    particleSystem.addSizeGradient(0, 0.5, 0.6);
+    particleSystem.addSizeGradient(0.15, 0.4, 0.5);
+    particleSystem.addSizeGradient(0.5, 0.2, 0.3);
+    particleSystem.addSizeGradient(1.0, 0.0, 0.02);
 
     // Additive blending for glow
     particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
@@ -75,8 +76,8 @@ export function createShootingStars(sceneRef) {
     particleSystem.renderingGroupId = 0;
     particleSystem.start();
 
-    // Schedule first shooting star
-    nextSpawnTime = 3 + Math.random() * 5; // First one within 3-8 seconds
+    // Schedule first shooting star — rarer for elegance
+    nextSpawnTime = 5 + Math.random() * 8;
 
     console.log('   ✓ Shooting star system ready');
 }
@@ -90,8 +91,8 @@ export function updateShootingStars(elapsed) {
 
     if (elapsed >= nextSpawnTime && !isActive) {
         spawnShootingStar();
-        // Next spawn in 8-20 seconds
-        nextSpawnTime = elapsed + 8 + Math.random() * 12;
+        // Next spawn in 15-35 seconds — rarer = more special
+        nextSpawnTime = elapsed + 15 + Math.random() * 20;
     }
 }
 

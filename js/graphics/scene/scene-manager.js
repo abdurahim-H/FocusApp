@@ -6,6 +6,10 @@ import { createCosmicSkybox, updateCosmicSkybox, disposeCosmicSkybox } from '../
 import { createStarField, updateStarField, disposeStarField } from '../environment/starfield.js';
 import { createNebula, updateNebula, disposeNebula } from '../environment/nebula.js';
 import { createShootingStars, updateShootingStars, disposeShootingStars } from '../environment/shooting-stars.js';
+import { createStarGlows, updateStarGlows, disposeStarGlows } from '../environment/star-glows.js';
+import { createCosmicMotes, updateCosmicMotes, disposeCosmicMotes } from '../environment/cosmic-motes.js';
+import { createEtherealPetals, updateEtherealPetals, disposeEtherealPetals } from '../environment/ethereal-petals.js';
+import { createCosmicPulse, updateCosmicPulse, disposeCosmicPulse } from '../environment/cosmic-pulse.js';
 import { setupPostProcessing, disposePostProcessing, setExposure } from '../postprocessing/pipeline.js';
 import { detectDeviceProfile, createFPSWatchdog } from '../../utils/performance-profile.js';
 
@@ -84,6 +88,10 @@ export async function init3D() {
         createStarField(scene, camera, deviceProfile.starMultiplier);
         createNebula(scene, camera, deviceProfile.shaderOctaves);
         createShootingStars(scene);
+        createStarGlows(scene, camera);
+        createCosmicMotes(scene);
+        createEtherealPetals(scene);
+        createCosmicPulse(scene, camera);
 
         // Setup ambient lighting
         setupLighting();
@@ -219,6 +227,10 @@ function renderLoop() {
     updateStarField(elapsed);
     updateNebula(elapsed);
     updateShootingStars(elapsed);
+    updateStarGlows(elapsed);
+    updateCosmicMotes(elapsed);
+    updateEtherealPetals(elapsed, camera);
+    updateCosmicPulse(elapsed);
 
     // Update exposure based on camera position (auto-exposure simulation)
     updateAutoExposure(elapsed);
@@ -347,6 +359,10 @@ export function dispose() {
     window.removeEventListener('resize', handleResize);
 
     disposePostProcessing();
+    disposeCosmicPulse();
+    disposeEtherealPetals();
+    disposeCosmicMotes();
+    disposeStarGlows();
     disposeShootingStars();
     disposeNebula();
     disposeStarField();

@@ -3,9 +3,9 @@
 
 // Layer configuration
 const LAYERS = {
-    FAR_STARS: { count: 80000, minRadius: 400, maxRadius: 1200, speedMultiplier: 0.2 },
-    MID_STARS: { count: 15000, minRadius: 150, maxRadius: 400, speedMultiplier: 0.5 },
-    NEAR_STARS: { count: 3000, minRadius: 80, maxRadius: 150, speedMultiplier: 1.0 },
+    FAR_STARS: { count: 100000, minRadius: 400, maxRadius: 1200, speedMultiplier: 0.2 },
+    MID_STARS: { count: 18000, minRadius: 150, maxRadius: 400, speedMultiplier: 0.5 },
+    NEAR_STARS: { count: 4000, minRadius: 80, maxRadius: 150, speedMultiplier: 1.0 },
     DUST: { count: 2000, minRadius: 20, maxRadius: 100, speedMultiplier: 2.0 },
     DEBRIS: { count: 500, minRadius: 15, maxRadius: 60, speedMultiplier: 3.0 }
 };
@@ -19,7 +19,7 @@ let scene = null;
 let camera = null;
 let shadersRegistered = false;
 
-// Star twinkling shaders — dramatic, visible twinkling
+// Star twinkling shaders — smooth, organic breathing animation
 const STAR_VERTEX_SHADER = `
     precision highp float;
 
@@ -36,16 +36,22 @@ const STAR_VERTEX_SHADER = `
     void main() {
         float starId = fract(sin(dot(position.xyz, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
 
-        // Layered twinkle — visible, dramatic variation
-        float twinkle = 0.5 + 0.5 * sin(time * (1.0 + starId * 3.0) + starId * 6.283);
-        twinkle *= 0.6 + 0.4 * sin(time * (0.5 + starId * 1.5) + starId * 3.14);
+        // Slow breathing pulse — organic, not mechanical
+        float breathRate = 0.4 + starId * 0.6;  // Each star breathes at its own rate
+        float breath = sin(time * breathRate + starId * 6.283);
+        // Asymmetric — holds longer at peak brightness
+        breath = 0.65 + 0.35 * breath * breath * sign(breath);
 
-        // Bright flare moments for ~15% of stars
-        float flare = step(0.85, starId) * pow(max(0.0, sin(time * 0.8 + starId * 50.0)), 8.0);
-        twinkle += flare * 1.5;
+        // Secondary very slow modulation — changes which stars are bright over time
+        float slowMod = 0.8 + 0.2 * sin(time * 0.12 + starId * 50.0);
+        float twinkle = breath * slowMod;
+
+        // Occasional gentle brightening for ~8% of stars (not jarring flare)
+        float gentleBright = step(0.92, starId) * 0.4 * pow(max(0.0, sin(time * 0.3 + starId * 30.0)), 4.0);
+        twinkle += gentleBright;
 
         vColor = color;
-        vTwinkle = clamp(twinkle, 0.1, 2.5);
+        vTwinkle = clamp(twinkle, 0.15, 1.8);
 
         gl_Position = worldViewProjection * vec4(position, 1.0);
     }
@@ -202,41 +208,53 @@ function setStarParticleProperties(particle, config, brightnessScale) {
  * @returns {{scale: number, color: BABYLON.Color4}}
  */
 function getStellarClassification(type) {
-    if (type < 0.02) {
-        // Brilliant white-blue — prominent with bloom halo
+    if (type < 0.015) {
+        // Bright blue — rare, prominent, triggers bloom
         return {
-            scale: 0.8 + Math.random() * 0.5,
-            color: new BABYLON.Color4(0.8, 0.9, 2.0, 1.0)
+            scale: 0.6 + Math.random() * 0.4,
+            color: new BABYLON.Color4(0.75, 0.88, 1.8, 1.0)
         };
-    } else if (type < 0.07) {
-        // Bright white — crisp and clean
+    } else if (type < 0.05) {
+        // Bright crisp white
         return {
-            scale: 0.5 + Math.random() * 0.35,
-            color: new BABYLON.Color4(1.6, 1.6, 1.7, 1.0)
+            scale: 0.4 + Math.random() * 0.3,
+            color: new BABYLON.Color4(1.5, 1.5, 1.6, 1.0)
         };
-    } else if (type < 0.18) {
-        // Medium white — the bulk of visible stars
+    } else if (type < 0.13) {
+        // Medium white — clean points
         return {
-            scale: 0.3 + Math.random() * 0.25,
-            color: new BABYLON.Color4(1.2, 1.2, 1.3, 1.0)
+            scale: 0.25 + Math.random() * 0.2,
+            color: new BABYLON.Color4(1.2, 1.2, 1.25, 1.0)
+        };
+    } else if (type < 0.22) {
+        // Cool blue-white — adds variety
+        return {
+            scale: 0.2 + Math.random() * 0.15,
+            color: new BABYLON.Color4(0.9, 1.0, 1.3, 0.95)
         };
     } else if (type < 0.35) {
-        // Warm white
+        // Warm white — slight golden tint
         return {
-            scale: 0.22 + Math.random() * 0.18,
-            color: new BABYLON.Color4(1.1, 1.0, 0.85, 0.95)
+            scale: 0.18 + Math.random() * 0.15,
+            color: new BABYLON.Color4(1.15, 1.0, 0.8, 0.9)
         };
-    } else if (type < 0.55) {
-        // Subtle gold tint
+    } else if (type < 0.48) {
+        // Golden — complements the golden ribbons
         return {
-            scale: 0.15 + Math.random() * 0.15,
-            color: new BABYLON.Color4(1.0, 0.8, 0.5, 0.85)
+            scale: 0.12 + Math.random() * 0.12,
+            color: new BABYLON.Color4(1.0, 0.78, 0.45, 0.8)
+        };
+    } else if (type < 0.60) {
+        // Subtle warm amber
+        return {
+            scale: 0.1 + Math.random() * 0.1,
+            color: new BABYLON.Color4(0.9, 0.65, 0.35, 0.65)
         };
     } else {
-        // Faint blue-white fill — most numerous
+        // Faint blue-white fill — dense background texture
         return {
-            scale: 0.08 + Math.random() * 0.1,
-            color: new BABYLON.Color4(0.55, 0.6, 0.75, 0.5)
+            scale: 0.06 + Math.random() * 0.08,
+            color: new BABYLON.Color4(0.5, 0.55, 0.7, 0.4)
         };
     }
 }

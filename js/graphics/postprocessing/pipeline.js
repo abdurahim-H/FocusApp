@@ -75,10 +75,10 @@ function configureHDR(pipeline) {
  */
 function configureBloom(pipeline) {
     pipeline.bloomEnabled = true;
-    pipeline.bloomThreshold = 0.7;   // Catches HDR stars and bright nebula spots
-    pipeline.bloomWeight = 0.5;      // Visible but controlled glow
+    pipeline.bloomThreshold = 0.65;   // Catches hero star glows + bright nebula
+    pipeline.bloomWeight = 0.55;     // Visible glow on bright stars
     pipeline.bloomKernel = 64;       // Quality kernel
-    pipeline.bloomScale = 0.5;       // Tight, controlled spread
+    pipeline.bloomScale = 0.55;      // Slightly wider for star halos
 
     console.log('   ✓ Selective bloom configured');
 }
