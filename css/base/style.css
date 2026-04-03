@@ -127,22 +127,22 @@ a {
     pointer-events: auto !important;
 }/* Mode Display System — smooth transitions */
 .mode {
-    position: absolute;
+    position: relative;
     visibility: hidden;
+    opacity: 0;
     transform: translateY(10px);
-    transition: visibility 0s linear 0.35s, transform 0.35s ease;
+    transition: visibility 0s linear 0.25s, opacity 0.25s ease, transform 0.25s ease;
     pointer-events: none;
     text-align: center;
     max-width: 600px;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    max-height: none; /* Remove height restriction */
-    overflow: visible;
-    animation: none; /* Disable animation on initial load */
-    position: relative;
+    max-height: none;
+    overflow: hidden;
+    animation: none;
     z-index: 15;
-    pointer-events: auto; /* Mode content needs pointer events */
+    isolation: isolate;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -206,9 +206,11 @@ a {
 
 .mode.active {
     visibility: visible;
+    opacity: 1;
     transform: translateY(0);
-    transition: visibility 0s linear 0s, transform 0.35s ease;
+    transition: visibility 0s linear 0s, opacity 0.25s ease, transform 0.25s ease;
     pointer-events: auto;
+    overflow: visible;
 }
 
 /* Override transform for positioned home mode */
