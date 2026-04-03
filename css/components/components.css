@@ -11,67 +11,52 @@
 .home-content {
     position: relative;
     z-index: 20;
-    border-radius: 40px; /* Rounded corners for glass container */
+    text-align: center;
+}
+
+#home {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 600px;
+    width: 100%;
 }
 
 .home-content h1 {
     font-size: clamp(2.5em, 8vw, 5em);
-    font-weight: 300;
-    background: linear-gradient(135deg, 
-        #8B5CF6 0%, 
-        #A855F7 25%, 
-        #06D6A0 50%, 
-        #60A5FA 75%, 
-        #F59E0B 100%);
-    background-size: 200% 200%;
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.95);
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.95);
     margin-bottom: 20px;
-    line-height: 1.2;
-    animation: cosmicTextFlow 8s ease-in-out infinite;
-    text-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
-    filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.4));
-}
-
-@keyframes cosmicTextFlow {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 40px rgba(255, 200, 100, 0.2),
+                 0 0 80px rgba(255, 170, 50, 0.08);
+    filter: none;
+    animation: none;
 }
 
 .greeting {
-    font-size: 1.4em;
+    font-size: 1.3em;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.65);
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.65);
     margin-bottom: 30px;
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.95) 0%, 
-        rgba(139, 92, 246, 0.9) 50%, 
-        rgba(6, 214, 160, 0.85) 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-    filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3));
-    animation: gentleGlow 4s ease-in-out infinite alternate;
-}
-
-@keyframes gentleGlow {
-    0% { filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3)); }
-    100% { filter: drop-shadow(0 0 15px rgba(6, 214, 160, 0.4)); }
+    letter-spacing: 0.02em;
+    text-shadow: none;
+    filter: none;
+    animation: none;
 }
 
 .date-time {
-    font-size: 1.1em;
-    color: rgba(255, 255, 255, 0.85);
+    font-size: 1em;
+    color: rgba(255, 255, 255, 0.4);
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.4);
     margin-bottom: 40px;
-    text-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.8) 0%, 
-        rgba(96, 165, 250, 0.7) 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    text-shadow: none;
     font-weight: 400;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.03em;
 }
 
 /* Focus Mode Components */
