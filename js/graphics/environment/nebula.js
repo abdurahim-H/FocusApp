@@ -1,5 +1,5 @@
-// nebula.js - Vibrant central nebula — the visual anchor
-// Rich, flowing, colorful cosmic cloud that dominates the center
+// nebula.js - Elegant golden ribbon streams
+// Thin, sparse, flowing golden curves across deep black space
 
 let mesh = null;
 let material = null;
@@ -41,7 +41,7 @@ const FRAGMENT = `
     float fbm(vec2 p) {
         float v = 0.0, a = 0.5;
         mat2 rot = mat2(0.87, 0.48, -0.48, 0.87);
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 5; i++) {
             v += a * noise(p);
             p = rot * p * 2.0 + vec2(100.0);
             a *= 0.5;
@@ -49,91 +49,103 @@ const FRAGMENT = `
         return v;
     }
 
+    // Gold palette
+    vec3 gold(float t) {
+        vec3 bright = vec3(1.0, 0.88, 0.5);
+        vec3 mid    = vec3(0.8, 0.55, 0.12);
+        vec3 deep   = vec3(0.4, 0.22, 0.04);
+        t = clamp(t, 0.0, 1.0);
+        if (t > 0.6) return mix(mid, bright, (t - 0.6) / 0.4);
+        return mix(deep, mid, t / 0.6);
+    }
+
+    // Single smooth ribbon curve
+    float ribbon(vec2 uv, float offset, float freq, float amp, float phase) {
+        float t = time * 0.025 + phase;
+        float curve = amp * sin(uv.x * freq + t + offset)
+                    + amp * 0.4 * sin(uv.x * freq * 1.8 + t * 1.4 + offset * 2.5);
+        return abs(uv.y - curve);
+    }
+
     void main() {
         vec2 uv = vUV - 0.5;
         float dist = length(uv);
-        float t = time * 0.05;
 
-        // Smooth radial mask
-        float mask = 1.0 - smoothstep(0.0, 0.48, dist);
-        mask = pow(mask, 1.5);
-        if (mask < 0.001) discard;
+        // Radial mask — tighter to keep edges dark
+        float fade = 1.0 - smoothstep(0.05, 0.42, dist);
+        if (fade < 0.001) discard;
 
-        // === DOMAIN WARPING for organic flow ===
-        vec2 q = vec2(
-            fbm(uv * 3.0 + vec2(t * 0.4, t * 0.3)),
-            fbm(uv * 3.0 + vec2(t * 0.3, -t * 0.2))
-        );
-        vec2 r = vec2(
-            fbm(uv * 3.0 + q * 2.0 + vec2(1.7, 9.2) + t * 0.2),
-            fbm(uv * 3.0 + q * 2.0 + vec2(8.3, 2.8) + t * 0.15)
-        );
-        float f = fbm(uv * 3.0 + r * 2.0);
+        // Rotate for diagonal sweep
+        float angle = 0.45;
+        mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+        vec2 ruv = rot * uv;
 
-        // === VIBRANT COLOR MIXING ===
-        // Rich violet/purple
-        vec3 violet = vec3(0.35, 0.08, 0.55);
-        // Electric blue
-        vec3 blue = vec3(0.08, 0.20, 0.65);
-        // Hot magenta/pink
-        vec3 magenta = vec3(0.55, 0.05, 0.35);
-        // Cyan accent
-        vec3 cyan = vec3(0.05, 0.45, 0.55);
-        // Warm gold for hot spots
-        vec3 gold = vec3(0.70, 0.45, 0.10);
-        // Deep core
-        vec3 deep = vec3(0.05, 0.02, 0.12);
+        // Subtle warp for organic feel
+        float warp = fbm(ruv * 2.0 + time * 0.015) * 0.04;
+        ruv.y += warp;
 
-        // Build color from noise layers
-        vec3 color = deep;
-        color = mix(color, violet, smoothstep(0.2, 0.6, f) * 0.8);
-        color = mix(color, blue, smoothstep(0.3, 0.7, q.x) * 0.6);
-        color = mix(color, magenta, smoothstep(0.5, 0.8, r.y) * 0.5);
-        color = mix(color, cyan, smoothstep(0.4, 0.75, r.x * q.y) * 0.4);
+        vec3 color = vec3(0.0);
 
-        // Hot spots — bright concentrated areas
-        float hotspot = pow(f, 3.0) * smoothstep(0.6, 0.9, r.x);
-        color = mix(color, gold, hotspot * 0.3);
+        // === THREE elegant ribbons — thin, spaced apart ===
 
-        // Bright core emission
-        float coreLight = exp(-dist * dist * 12.0);
-        color += vec3(0.15, 0.08, 0.25) * coreLight;
+        // Main ribbon
+        float d1 = ribbon(ruv, 0.0, 3.5, 0.08, 0.0);
+        float core1  = smoothstep(0.008, 0.0, d1);   // Very thin bright core
+        float glow1  = smoothstep(0.035, 0.0, d1);   // Soft glow
+        float haze1  = smoothstep(0.08, 0.0, d1);    // Wide faint haze
 
-        // Internal bright filaments — smooth, no grid
-        float filament = pow(smoothstep(0.4, 0.6, fbm(uv * 8.0 + r * 3.0 + t * 0.3)), 3.0);
-        color += vec3(0.25, 0.15, 0.4) * filament * mask * 0.25;
+        // Second ribbon — offset, slightly thinner
+        float d2 = ribbon(ruv, 1.8, 3.8, 0.065, 0.7);
+        float core2  = smoothstep(0.006, 0.0, d2);
+        float glow2  = smoothstep(0.025, 0.0, d2);
+        float haze2  = smoothstep(0.06, 0.0, d2);
 
-        // Apply mask and intensity
-        color *= mask;
+        // Third — thinnest accent
+        float d3 = ribbon(ruv, -1.2, 4.2, 0.05, 1.5);
+        float core3  = smoothstep(0.004, 0.0, d3);
+        float glow3  = smoothstep(0.018, 0.0, d3);
 
-        // Boost for vibrancy — this should GLOW through bloom
-        color *= 2.0;
+        // === Layer colors — dark to bright ===
+        // Wide haze — barely visible warmth
+        color += gold(0.15) * haze1 * 0.08;
+        color += gold(0.12) * haze2 * 0.06;
 
-        float alpha = mask * smoothstep(0.01, 0.15, length(color));
+        // Glow — rich gold
+        color += gold(0.5) * glow1 * 0.35;
+        color += gold(0.45) * glow2 * 0.25;
+        color += gold(0.4) * glow3 * 0.18;
+
+        // Bright cores — hot gold-white
+        color += gold(0.95) * core1 * 1.2;
+        color += gold(0.9) * core2 * 0.9;
+        color += gold(0.85) * core3 * 0.6;
+
+        // Apply fade
+        color *= fade;
+
+        float alpha = fade * clamp(length(color) * 3.0, 0.0, 1.0);
 
         gl_FragColor = vec4(color, alpha);
     }
 `;
 
 export function createNebula(sceneRef, camera, octaves = 5) {
-    console.log('🌌 Creating vibrant nebula...');
+    console.log('✨ Creating golden ribbon streams...');
 
     BABYLON.Effect.ShadersStore['nebulaVertexShader'] = VERTEX;
     BABYLON.Effect.ShadersStore['nebulaFragmentShader'] = FRAGMENT;
 
     mesh = BABYLON.MeshBuilder.CreatePlane('nebula', {
-        width: 2,
-        height: 2
+        width: 2, height: 2
     }, sceneRef);
 
     mesh.position = BABYLON.Vector3.Zero();
     mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-    mesh.scaling = new BABYLON.Vector3(70, 70, 70);
+    mesh.scaling = new BABYLON.Vector3(65, 65, 65);
     mesh.renderingGroupId = 1;
 
     material = new BABYLON.ShaderMaterial('nebulaMat', sceneRef, {
-        vertex: 'nebula',
-        fragment: 'nebula'
+        vertex: 'nebula', fragment: 'nebula'
     }, {
         attributes: ['position', 'uv'],
         uniforms: ['worldViewProjection', 'time'],
@@ -144,10 +156,9 @@ export function createNebula(sceneRef, camera, octaves = 5) {
     material.backFaceCulling = false;
     material.alphaMode = BABYLON.Engine.ALPHA_ADD;
     material.forceDepthWrite = false;
-
     mesh.material = material;
 
-    console.log('   ✓ Vibrant nebula created');
+    console.log('   ✓ Golden ribbons created');
     return mesh;
 }
 

@@ -283,10 +283,10 @@ function createDustParticles() {
     dustParticles.minEmitPower = 0.1;
     dustParticles.maxEmitPower = 0.3;
 
-    // Very subtle colors - just light catch
-    dustParticles.color1 = new BABYLON.Color4(1.0, 1.0, 1.0, 0.15);
-    dustParticles.color2 = new BABYLON.Color4(0.8, 0.85, 1.0, 0.08);
-    dustParticles.colorDead = new BABYLON.Color4(0.5, 0.5, 0.6, 0);
+    // Golden dust — warm sparkle
+    dustParticles.color1 = new BABYLON.Color4(1.0, 0.85, 0.4, 0.2);
+    dustParticles.color2 = new BABYLON.Color4(1.0, 0.7, 0.3, 0.1);
+    dustParticles.colorDead = new BABYLON.Color4(0.5, 0.3, 0.1, 0);
 
     // Additive blending for glow
     dustParticles.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
@@ -338,10 +338,10 @@ function createDebrisParticles() {
     debrisParticles.minAngularSpeed = 0.1;
     debrisParticles.maxAngularSpeed = 0.5;
 
-    // Subtle, faint colors
-    debrisParticles.color1 = new BABYLON.Color4(0.3, 0.3, 0.35, 0.3);
-    debrisParticles.color2 = new BABYLON.Color4(0.25, 0.25, 0.3, 0.2);
-    debrisParticles.colorDead = new BABYLON.Color4(0.15, 0.15, 0.2, 0);
+    // Warm golden-amber tones
+    debrisParticles.color1 = new BABYLON.Color4(0.6, 0.45, 0.2, 0.25);
+    debrisParticles.color2 = new BABYLON.Color4(0.4, 0.3, 0.15, 0.15);
+    debrisParticles.colorDead = new BABYLON.Color4(0.2, 0.15, 0.05, 0);
 
     // Standard blending
     debrisParticles.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;

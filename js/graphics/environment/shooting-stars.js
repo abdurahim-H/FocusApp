@@ -56,10 +56,10 @@ export function createShootingStars(sceneRef) {
     particleSystem.maxEmitPower = 150;
     particleSystem.updateSpeed = 0.02;
 
-    // Colors — white-blue streak
-    particleSystem.color1 = new BABYLON.Color4(1.0, 1.0, 1.0, 1.0);
-    particleSystem.color2 = new BABYLON.Color4(0.7, 0.85, 1.0, 0.9);
-    particleSystem.colorDead = new BABYLON.Color4(0.4, 0.5, 0.8, 0);
+    // Colors — golden-white streak
+    particleSystem.color1 = new BABYLON.Color4(1.0, 0.95, 0.8, 1.0);
+    particleSystem.color2 = new BABYLON.Color4(1.0, 0.8, 0.4, 0.9);
+    particleSystem.colorDead = new BABYLON.Color4(0.5, 0.3, 0.1, 0);
 
     // Size over life — shrinks to create tail
     particleSystem.addSizeGradient(0, 0.6, 0.8);

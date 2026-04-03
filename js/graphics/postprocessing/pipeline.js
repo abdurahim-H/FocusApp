@@ -155,20 +155,20 @@ function configureColorGrading(pipeline) {
     // Color curves for cinematic look
     const curves = new BABYLON.ColorCurves();
 
-    // Shadows: subtle cool blue — gives depth
-    curves.shadowsHue = 220;
-    curves.shadowsSaturation = 15;
-    curves.shadowsDensity = 20;
+    // Shadows: cool deep blue-black
+    curves.shadowsHue = 230;
+    curves.shadowsSaturation = 12;
+    curves.shadowsDensity = 15;
 
-    // Midtones: neutral, clean
-    curves.midtonesHue = 30;
-    curves.midtonesSaturation = 5;
-    curves.midtonesDensity = 0;
+    // Midtones: warm golden push
+    curves.midtonesHue = 35;
+    curves.midtonesSaturation = 10;
+    curves.midtonesDensity = 5;
 
-    // Highlights: very subtle warmth — keeps stars clean white
-    curves.highlightsHue = 40;
-    curves.highlightsSaturation = 15;
-    curves.highlightsDensity = 20;
+    // Highlights: golden warmth
+    curves.highlightsHue = 38;
+    curves.highlightsSaturation = 20;
+    curves.highlightsDensity = 25;
 
     pipeline.imageProcessing.colorCurvesEnabled = true;
     pipeline.imageProcessing.colorCurves = curves;
