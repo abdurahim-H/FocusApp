@@ -15,8 +15,6 @@
 }
 
 :root {
-    --time-scale: 1;
-    --redshift-intensity: 0;
     --animation-speed: 1;
     --particle-density: 1;
     --performance-level: 1; /* 1 = high, 0.75 = medium, 0.5 = low */
@@ -126,9 +124,13 @@ textarea,
 select, 
 a {
     pointer-events: auto !important;
-}/* Mode Display System */
+}/* Mode Display System — smooth transitions */
 .mode {
-    display: none;
+    position: absolute;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events: none;
     text-align: center;
     max-width: 600px;
     width: 100%;
@@ -201,7 +203,9 @@ a {
 }
 
 .mode.active {
-    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
 @keyframes fadeIn {
@@ -209,12 +213,13 @@ a {
     to { opacity: 1; }
 }
 
-/* Loading Screen */
+/* Loading Screen — cosmic gradient */
 .loading-screen {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
+    background: radial-gradient(ellipse at center, rgba(25, 8, 50, 1) 0%, rgba(5, 5, 15, 1) 70%) !important;
     height: 100%;
     background: var(--bg-dark);
     display: flex;
@@ -237,7 +242,12 @@ a {
 .loading-text {
     font-size: 1.5em;
     margin-bottom: 20px;
-    opacity: 0.8;
+    background: linear-gradient(135deg, #8B5CF6 0%, #06D6A0 50%, #60A5FA 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 300;
+    letter-spacing: 2px;
 }
 
 .loading-bar {
@@ -256,24 +266,6 @@ a {
     transition: width 0.3s ease;
 }
 
-/* Enhanced Visual Effects - Performance Optimized */
-body {
-    transition: filter 0.3s ease;
-    will-change: auto; /* Remove will-change when not animating */
-}
-
-/* Red-shift effect for black hole approach */
-body[style*="--redshift-intensity"] {
-    filter: hue-rotate(calc(var(--redshift-intensity, 0) * 30deg)) 
-            sepia(calc(var(--redshift-intensity, 0) * 0.3));
-    will-change: filter; /* Only when actively animating */
-}
-
-/* Time dilation effect */
-*[style*="--time-scale"] {
-    animation-duration: calc(1s / var(--time-scale, 1)) !important;
-    transition-duration: calc(0.3s / var(--time-scale, 1)) !important;
-}
 
 /* Productivity glow effect */
 .productivity-glow {
@@ -291,97 +283,9 @@ body[style*="--redshift-intensity"] {
     }
 }
 
-/* Task completion celebration */
-.task-celebration {
-    border-color: var(--accent);
-    box-shadow: 0 0 30px rgba(6, 214, 160, 0.5);
-    filter: brightness(1.1);
-}
 
-/* Focus mode intensity */
-.focus-intense {
-    border-color: var(--accent);
-    box-shadow: 0 0 30px rgba(6, 214, 160, 0.4);
-}
 
-/* Session completion effect */
-.session-complete {
-    filter: brightness(1.2) contrast(1.1);
-    border-color: var(--accent);
-    box-shadow: 0 0 40px rgba(6, 214, 160, 0.3);
-}
 
-/* Black hole gravitational effect */
-.gravitational-pull {
-    filter: blur(0.5px) brightness(0.95);
-    animation: gravitationalFilter 5s ease-in-out infinite;
-}
-
-@keyframes gravitationalFilter {
-    0%, 100% {
-        filter: blur(0px) brightness(1) hue-rotate(0deg);
-    }
-    25% {
-        filter: blur(0.3px) brightness(0.98) hue-rotate(1deg);
-    }
-    50% {
-        filter: blur(0.5px) brightness(0.95) hue-rotate(2deg);
-    }
-    75% {
-        filter: blur(0.2px) brightness(0.97) hue-rotate(-1deg);
-    }
-}
-
-/* Particle trail effect for buttons */
-.btn-particle {
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-}
-
-.btn-particle::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: radial-gradient(circle, #06d6a0 0%, transparent 70%);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: all 0.6s ease;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.btn-particle:hover::before {
-    width: 300px;
-    height: 300px;
-    opacity: 0.1;
-}
-
-/* Cosmic energy flow */
-.cosmic-flow {
-    position: relative;
-    overflow: hidden;
-}
-
-.cosmic-flow::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(from 0deg, transparent, var(--accent), transparent);
-    animation: cosmicRotate 8s linear infinite;
-    z-index: -1;
-    opacity: 0.1;
-}
-
-@keyframes cosmicRotate {
-    to { transform: rotate(360deg); }
-}
 
 /* Performance optimization for reduced motion users */
 @media (prefers-reduced-motion: reduce) {
@@ -392,16 +296,8 @@ body[style*="--redshift-intensity"] {
         scroll-behavior: auto !important;
     }
     
-    .cosmic-flow::after {
-        animation: none;
-    }
-    
     .productivity-glow {
         animation: none;
-    }
-    
-    .btn-particle::before {
-        transition: none;
     }
 }
 
@@ -471,25 +367,6 @@ body[style*="--redshift-intensity"] {
  * 9999: .loading-screen
  */
 
-/* WATER COSMIC CONTAINER SYSTEM - CONSOLIDATED STYLING */
-.water-cosmic-container {
-    --container-opacity: 0.1; /* Extremely low opacity multiplier */
-    
-    /* Unified background for all water cosmic containers */
-    background: linear-gradient(135deg, 
-        rgba(100, 150, 255, 0.003) 0%,
-        rgba(176, 224, 230, 0.005) 30%,
-        rgba(144, 238, 144, 0.002) 60%,
-        rgba(100, 150, 255, 0.003) 100%
-    ) !important;
-    
-    /* Unified backdrop filter */
-    backdrop-filter: blur(10px) saturate(1.02) !important;
-    -webkit-backdrop-filter: blur(10px) saturate(1.02) !important;
-    
-    /* Unified border */
-    border-color: rgba(255, 255, 255, 0.02) !important;
-}
 
 /* Make all glass backgrounds extremely transparent */
 /* Background colors now controlled in components.css */
@@ -532,11 +409,6 @@ input, textarea, select {
     user-select: none;
 }
 
-/* Theme-specific visual enhancements */
-body.theme-cosmos {
-    --animation-speed: 1.2; /* Faster animations for cosmos theme */
-    --particle-density: 1.5; /* More particles in cosmos theme */
-}
 
 /* Enhanced theme-specific glow effects */
 body[data-theme="dark"] .productivity-glow {

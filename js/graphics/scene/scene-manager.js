@@ -1,10 +1,13 @@
 // scene-manager.js - Cinematic Scene Orchestrator for Babylon.js
-// Coordinates all graphics modules: black hole, starfield, post-processing
+// Coordinates all graphics modules: starfield, camera, post-processing
 
 import { initEngine, getEngine, disposeEngine, isUsingWebGPU } from '../../engine/babylon-engine.js';
+import { createCosmicSkybox, updateCosmicSkybox, disposeCosmicSkybox } from '../environment/cosmic-skybox.js';
 import { createStarField, updateStarField, disposeStarField } from '../environment/starfield.js';
-import { createBlackHole, updateBlackHole, disposeBlackHole, getLensingPostProcess } from '../blackhole/index.js';
+import { createNebula, updateNebula, disposeNebula } from '../environment/nebula.js';
+import { createShootingStars, updateShootingStars, disposeShootingStars } from '../environment/shooting-stars.js';
 import { setupPostProcessing, disposePostProcessing, setExposure } from '../postprocessing/pipeline.js';
+import { detectDeviceProfile, createFPSWatchdog } from '../../utils/performance-profile.js';
 
 
 // Scene globals
@@ -12,6 +15,12 @@ let scene = null;
 let camera = null;
 let engine = null;
 let canvas = null;
+
+// Mouse parallax state (desktop only)
+const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+let parallaxEnabled = false;
+let deviceProfile = null;
+let fpsWatchdog = null;
 
 // Animation timing
 const clock = {
@@ -42,7 +51,7 @@ const stats = {
  * @returns {Promise<boolean>} Success status
  */
 export async function init3D() {
-    console.log('🎬 Initializing Cinematic Black Hole Scene...');
+    console.log('🎬 Initializing Scene...');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     try {
@@ -54,9 +63,12 @@ export async function init3D() {
         const rendererType = engineResult.isWebGPU ? '⚡ WebGPU' : '🔷 WebGL2';
         console.log(`${rendererType} renderer initialized`);
 
+        // Detect device capability
+        deviceProfile = detectDeviceProfile();
+
         // Create scene with HDR support
         scene = new BABYLON.Scene(engine);
-        scene.clearColor = new BABYLON.Color4(0.0, 0.0, 0.02, 1.0); // Deep space blue-black
+        scene.clearColor = new BABYLON.Color4(0.005, 0.003, 0.015, 1.0); // Deep space with purple tint
 
         // Enable rendering groups for proper layering
         scene.setRenderingAutoClearDepthStencil(0, true, true, true);  // Background (stars)
@@ -68,8 +80,10 @@ export async function init3D() {
 
         // Create scene elements (pass camera reference)
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        createStarField(scene, camera);
-        createBlackHole(scene, camera);
+        createCosmicSkybox(scene);
+        createStarField(scene, camera, deviceProfile.starMultiplier);
+        createNebula(scene, camera, deviceProfile.shaderOctaves);
+        createShootingStars(scene);
 
         // Setup ambient lighting
         setupLighting();
@@ -78,16 +92,34 @@ export async function init3D() {
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         setupPostProcessing(scene, camera);
 
+        // Setup FPS watchdog for adaptive quality
+        fpsWatchdog = createFPSWatchdog(stats, () => {
+            // Reduce bloom quality on sustained low FPS
+            const pipeline = scene?.postProcessRenderPipelineManager?.supportedPipelines;
+            if (engine) {
+                engine.setHardwareScalingLevel(1.5); // Render at lower resolution
+            }
+        });
+
         // Start render loop
         engine.runRenderLoop(renderLoop);
 
         // Handle window resize
         window.addEventListener('resize', handleResize);
 
+        // Mouse parallax (desktop only)
+        if (!('ontouchstart' in window)) {
+            parallaxEnabled = true;
+            window.addEventListener('mousemove', (e) => {
+                mouse.targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+                mouse.targetY = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+        }
+
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('🎬 Cinematic scene ready!');
         console.log(`   Total stars: ~100,000`);
-        console.log(`   Effects: Gravitational lensing, HDR, Bloom, Film grain`);
+        console.log(`   Effects: Nebula, HDR, Bloom, Film grain`);
 
         return true;
 
@@ -183,8 +215,10 @@ function renderLoop() {
 
     // Update all systems
     updateCinematicCamera(elapsed);
+    updateCosmicSkybox(elapsed);
     updateStarField(elapsed);
-    updateBlackHole(elapsed, delta);
+    updateNebula(elapsed);
+    updateShootingStars(elapsed);
 
     // Update exposure based on camera position (auto-exposure simulation)
     updateAutoExposure(elapsed);
@@ -194,34 +228,55 @@ function renderLoop() {
 
     // Update performance stats
     updateStats();
+
+    // Check FPS watchdog
+    if (fpsWatchdog) fpsWatchdog();
 }
 
 /**
  * Update camera for cinematic orbital motion
+ * Layered sine waves for organic Perlin-like drift
  * @param {number} elapsed - Elapsed time in seconds
  */
 function updateCinematicCamera(elapsed) {
-    // Slow orbital rotation
+    // --- Orbital rotation: 3 layered sine waves for organic drift ---
     const baseAlpha = Math.PI * 0.25;
-    const orbitSpeed = 0.02; // Very slow
-    camera.alpha = baseAlpha + elapsed * orbitSpeed;
+    const orbitDrift = elapsed * 0.015
+        + Math.sin(elapsed * 0.023) * 0.04
+        + Math.sin(elapsed * 0.011) * 0.025
+        + Math.sin(elapsed * 0.037) * 0.015;
+    camera.alpha = baseAlpha + orbitDrift;
 
-    // Subtle vertical oscillation
+    // --- Vertical drift: layered for smooth organic motion ---
     const baseBeta = Math.PI * 0.4;
-    const verticalOscillation = Math.sin(elapsed * 0.015) * 0.08;
-    camera.beta = baseBeta + verticalOscillation;
+    const verticalDrift = Math.sin(elapsed * 0.013) * 0.06
+        + Math.sin(elapsed * 0.029) * 0.03
+        + Math.sin(elapsed * 0.007) * 0.02;
+    camera.beta = Math.max(0.3, Math.min(Math.PI - 0.3, baseBeta + verticalDrift));
 
-    // Gentle distance breathing
+    // --- Asymmetric breathing: cube creates longer hold at extremes ---
     const baseRadius = 65;
-    const breathingAmplitude = 8;
-    const breathingSpeed = 0.03;
-    camera.radius = baseRadius + Math.sin(elapsed * breathingSpeed) * breathingAmplitude;
+    const breathSin = Math.sin(elapsed * 0.02);
+    const breathing = Math.pow(Math.abs(breathSin), 0.6) * Math.sign(breathSin) * 10;
+    camera.radius = baseRadius + breathing;
 
-    // Micro-motion (subtle camera shake for film feel)
-    const microShakeX = Math.sin(elapsed * 2.3) * 0.003;
-    const microShakeY = Math.sin(elapsed * 1.7) * 0.002;
-    camera.target.x = microShakeX;
-    camera.target.y = microShakeY;
+    // --- Micro-motion: subtle film shake ---
+    let targetX = Math.sin(elapsed * 2.3) * 0.003
+        + Math.sin(elapsed * 5.7) * 0.001;
+    let targetY = Math.sin(elapsed * 1.7) * 0.002
+        + Math.sin(elapsed * 4.1) * 0.001;
+
+    // --- Mouse parallax (desktop only) ---
+    if (parallaxEnabled) {
+        // Smooth lerp toward mouse position
+        mouse.x += (mouse.targetX - mouse.x) * 0.02;
+        mouse.y += (mouse.targetY - mouse.y) * 0.02;
+        targetX += mouse.x * 1.5;
+        targetY += -mouse.y * 1.0;
+    }
+
+    camera.target.x = targetX;
+    camera.target.y = targetY;
 }
 
 /**
@@ -292,8 +347,10 @@ export function dispose() {
     window.removeEventListener('resize', handleResize);
 
     disposePostProcessing();
-    disposeBlackHole();
+    disposeShootingStars();
+    disposeNebula();
     disposeStarField();
+    disposeCosmicSkybox();
 
     if (scene) {
         scene.dispose();

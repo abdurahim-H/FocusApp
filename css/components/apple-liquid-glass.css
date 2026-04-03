@@ -488,18 +488,6 @@
 
 /* ===== SOUND LIBRARY MODAL SYSTEM ===== */
 
-/* Override btn-particle for browse button */
-.browse-sounds-btn.btn-particle {
-    overflow: visible !important;
-    position: relative !important;
-    z-index: 1 !important;
-}
-
-.browse-sounds-btn.btn-particle::before {
-    display: none !important;
-    content: none !important;
-}
-
 /* Browse button - semi-transparent minimal */
 .browse-sounds-btn {
     width: 100%;
@@ -529,12 +517,7 @@
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
     cursor: pointer;
     
-    /* Override btn-particle effect */
     overflow: visible !important;
-}
-
-.browse-sounds-btn::before {
-    display: none !important;
 }
 
 .browse-sounds-btn:hover {

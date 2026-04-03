@@ -130,11 +130,6 @@ export async function initApp() {
             loadedModules.uiEffects.initUIEffects();
         }
 
-        // Initialize water container effects
-        if (loadedModules.uiEffects?.initWaterContainerEffects) {
-            loadedModules.uiEffects.initWaterContainerEffects();
-        }
-
         // Start core timers and displays
         if (loadedModules.timer?.updateUniverseStats) {
             loadedModules.timer.updateUniverseStats();

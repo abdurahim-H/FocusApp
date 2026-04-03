@@ -12,10 +12,64 @@ const LAYERS = {
 
 // Scene references
 let starLayers = {};
+let starMaterials = [];
 let dustParticles = null;
 let debrisParticles = null;
 let scene = null;
 let camera = null;
+let shadersRegistered = false;
+
+// Star twinkling shaders — dramatic, visible twinkling
+const STAR_VERTEX_SHADER = `
+    precision highp float;
+
+    attribute vec3 position;
+    attribute vec3 normal;
+    attribute vec4 color;
+
+    uniform mat4 worldViewProjection;
+    uniform float time;
+
+    varying vec4 vColor;
+    varying float vTwinkle;
+
+    void main() {
+        float starId = fract(sin(dot(position.xyz, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
+
+        // Layered twinkle — visible, dramatic variation
+        float twinkle = 0.5 + 0.5 * sin(time * (1.0 + starId * 3.0) + starId * 6.283);
+        twinkle *= 0.6 + 0.4 * sin(time * (0.5 + starId * 1.5) + starId * 3.14);
+
+        // Bright flare moments for ~15% of stars
+        float flare = step(0.85, starId) * pow(max(0.0, sin(time * 0.8 + starId * 50.0)), 8.0);
+        twinkle += flare * 1.5;
+
+        vColor = color;
+        vTwinkle = clamp(twinkle, 0.1, 2.5);
+
+        gl_Position = worldViewProjection * vec4(position, 1.0);
+    }
+`;
+
+const STAR_FRAGMENT_SHADER = `
+    precision highp float;
+
+    varying vec4 vColor;
+    varying float vTwinkle;
+
+    void main() {
+        vec3 col = vColor.rgb * vTwinkle;
+        float alpha = vColor.a * clamp(vTwinkle, 0.0, 1.0);
+        gl_FragColor = vec4(col, alpha);
+    }
+`;
+
+function registerStarShaders() {
+    if (shadersRegistered) return;
+    BABYLON.Effect.ShadersStore['starTwinkleVertexShader'] = STAR_VERTEX_SHADER;
+    BABYLON.Effect.ShadersStore['starTwinkleFragmentShader'] = STAR_FRAGMENT_SHADER;
+    shadersRegistered = true;
+}
 
 /**
  * Create the complete layered starfield system
@@ -23,15 +77,21 @@ let camera = null;
  * @param {BABYLON.Camera} cameraRef - The main camera
  * @returns {Object} References to all starfield layers
  */
-export function createStarField(sceneRef, cameraRef) {
-    console.log('⭐ Creating cinematic multi-layered starfield...');
+export function createStarField(sceneRef, cameraRef, starMultiplier = 1.0) {
+    console.log(`⭐ Creating cinematic starfield (quality: ${Math.round(starMultiplier * 100)}%)...`);
     scene = sceneRef;
     camera = cameraRef;
 
+    // Scale star counts based on device capability
+    const scale = (config) => ({
+        ...config,
+        count: Math.round(config.count * starMultiplier)
+    });
+
     // Create each star layer
-    starLayers.far = createStarLayer('farStars', LAYERS.FAR_STARS, 0.3);
-    starLayers.mid = createStarLayer('midStars', LAYERS.MID_STARS, 0.5);
-    starLayers.near = createStarLayer('nearStars', LAYERS.NEAR_STARS, 0.8);
+    starLayers.far = createStarLayer('farStars', scale(LAYERS.FAR_STARS), 0.3);
+    starLayers.mid = createStarLayer('midStars', scale(LAYERS.MID_STARS), 0.5);
+    starLayers.near = createStarLayer('nearStars', scale(LAYERS.NEAR_STARS), 0.8);
 
     // Create dust and debris particle systems
     createDustParticles();
@@ -54,10 +114,10 @@ function createStarLayer(name, config, brightnessScale) {
         isPickable: false
     });
 
-    // Simple sphere for stars
+    // Star sphere — enough segments to look round, not like a cube
     const starModel = BABYLON.MeshBuilder.CreateSphere('starModel', {
         diameter: 1,
-        segments: 4
+        segments: 6
     }, scene);
 
     // Add particles
@@ -70,18 +130,29 @@ function createStarLayer(name, config, brightnessScale) {
     SPS.buildMesh();
     starModel.dispose();
 
-    // Emissive material
-    const material = new BABYLON.StandardMaterial(name + 'Mat', scene);
-    material.emissiveColor = new BABYLON.Color3(1, 1, 1);
-    material.disableLighting = true;
-    material.backFaceCulling = false;
+    // Register twinkling shaders
+    registerStarShaders();
 
-    SPS.mesh.material = material;
+    // GPU-based twinkling via ShaderMaterial
+    const mat = new BABYLON.ShaderMaterial(name + 'Mat', scene, {
+        vertex: 'starTwinkle',
+        fragment: 'starTwinkle'
+    }, {
+        attributes: ['position', 'normal', 'color'],
+        uniforms: ['worldViewProjection', 'time'],
+        needAlphaBlending: true
+    });
+
+    mat.setFloat('time', 0);
+    mat.backFaceCulling = false;
+
+    SPS.mesh.material = mat;
     SPS.mesh.hasVertexAlpha = true;
     SPS.mesh.renderingGroupId = 0; // Render first (background)
 
-    // Store config for animation
+    // Store config and material reference for animation
     SPS.mesh._layerConfig = config;
+    starMaterials.push(mat);
 
     console.log(`   ✓ ${name}: ${config.count.toLocaleString()} stars`);
     return SPS;
@@ -131,42 +202,47 @@ function setStarParticleProperties(particle, config, brightnessScale) {
  * @returns {{scale: number, color: BABYLON.Color4}}
  */
 function getStellarClassification(type) {
-    // Majority of stars are dim
-    if (type < 0.03) {
-        // O-type blue giants (very rare, very bright)
+    if (type < 0.01) {
+        // Rare bright blue — small but HDR bright for bloom
         return {
-            scale: 1.5 + Math.random() * 1.0,
-            color: new BABYLON.Color4(0.7, 0.8, 1.0, 1.0)
+            scale: 0.7 + Math.random() * 0.4,
+            color: new BABYLON.Color4(0.7, 0.85, 1.8, 1.0)
         };
-    } else if (type < 0.08) {
-        // B-type blue-white
+    } else if (type < 0.04) {
+        // Blue-white bright
         return {
-            scale: 1.0 + Math.random() * 0.5,
-            color: new BABYLON.Color4(0.85, 0.9, 1.0, 1.0)
+            scale: 0.5 + Math.random() * 0.3,
+            color: new BABYLON.Color4(0.9, 0.95, 1.5, 1.0)
         };
-    } else if (type < 0.18) {
-        // A-type white
+    } else if (type < 0.12) {
+        // White — crisp
         return {
-            scale: 0.6 + Math.random() * 0.4,
-            color: new BABYLON.Color4(1.0, 1.0, 1.0, 0.95)
+            scale: 0.35 + Math.random() * 0.25,
+            color: new BABYLON.Color4(1.3, 1.3, 1.3, 1.0)
         };
-    } else if (type < 0.35) {
-        // F-G type (Sun-like, yellow-white)
+    } else if (type < 0.28) {
+        // Yellow-white
         return {
-            scale: 0.4 + Math.random() * 0.3,
-            color: new BABYLON.Color4(1.0, 0.95, 0.85, 0.9)
+            scale: 0.25 + Math.random() * 0.2,
+            color: new BABYLON.Color4(1.2, 1.1, 0.85, 0.95)
         };
-    } else if (type < 0.55) {
-        // K-type orange
+    } else if (type < 0.50) {
+        // Orange
         return {
-            scale: 0.3 + Math.random() * 0.2,
-            color: new BABYLON.Color4(1.0, 0.75, 0.5, 0.85)
+            scale: 0.18 + Math.random() * 0.15,
+            color: new BABYLON.Color4(1.0, 0.7, 0.4, 0.85)
+        };
+    } else if (type < 0.75) {
+        // Dim reddish
+        return {
+            scale: 0.12 + Math.random() * 0.12,
+            color: new BABYLON.Color4(0.8, 0.4, 0.25, 0.6)
         };
     } else {
-        // M-type red dwarfs (most common, dimmest)
+        // Faint blue-white fill
         return {
-            scale: 0.15 + Math.random() * 0.2,
-            color: new BABYLON.Color4(1.0, 0.5, 0.3, 0.6)
+            scale: 0.08 + Math.random() * 0.1,
+            color: new BABYLON.Color4(0.5, 0.55, 0.7, 0.4)
         };
     }
 }
@@ -192,16 +268,16 @@ function createDustParticles() {
         new BABYLON.Vector3(50, 50, 50)
     );
 
-    // Very small particles
-    dustParticles.minSize = 0.02;
-    dustParticles.maxSize = 0.08;
+    // Tiny — barely visible specks
+    dustParticles.minSize = 0.01;
+    dustParticles.maxSize = 0.04;
 
     // Long lifetime for slow drift
     dustParticles.minLifeTime = 8;
     dustParticles.maxLifeTime = 15;
 
-    // Slow emission
-    dustParticles.emitRate = 100;
+    // Sparse emission
+    dustParticles.emitRate = 40;
 
     // Subtle movement
     dustParticles.minEmitPower = 0.1;
@@ -243,16 +319,16 @@ function createDebrisParticles() {
         new BABYLON.Vector3(100, 100, 100)
     );
 
-    // Larger than dust
-    debrisParticles.minSize = 0.1;
-    debrisParticles.maxSize = 0.4;
+    // Small — subtle specks, not rocks
+    debrisParticles.minSize = 0.02;
+    debrisParticles.maxSize = 0.08;
 
     // Long lifetime
     debrisParticles.minLifeTime = 15;
     debrisParticles.maxLifeTime = 30;
 
     // Slow emission
-    debrisParticles.emitRate = 10;
+    debrisParticles.emitRate = 5;
 
     // Very slow drift
     debrisParticles.minEmitPower = 0.05;
@@ -262,10 +338,10 @@ function createDebrisParticles() {
     debrisParticles.minAngularSpeed = 0.1;
     debrisParticles.maxAngularSpeed = 0.5;
 
-    // Rocky colors
-    debrisParticles.color1 = new BABYLON.Color4(0.4, 0.35, 0.3, 0.8);
-    debrisParticles.color2 = new BABYLON.Color4(0.3, 0.3, 0.35, 0.6);
-    debrisParticles.colorDead = new BABYLON.Color4(0.2, 0.2, 0.2, 0);
+    // Subtle, faint colors
+    debrisParticles.color1 = new BABYLON.Color4(0.3, 0.3, 0.35, 0.3);
+    debrisParticles.color2 = new BABYLON.Color4(0.25, 0.25, 0.3, 0.2);
+    debrisParticles.colorDead = new BABYLON.Color4(0.15, 0.15, 0.2, 0);
 
     // Standard blending
     debrisParticles.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
@@ -330,6 +406,9 @@ function createDebrisTexture() {
  * @param {number} elapsed - Elapsed time in seconds
  */
 export function updateStarField(elapsed) {
+    // Update twinkling time uniform on all star materials
+    starMaterials.forEach(mat => mat.setFloat('time', elapsed));
+
     // Rotate each layer at different speeds for parallax
     if (starLayers.far && starLayers.far.mesh) {
         starLayers.far.mesh.rotation.y = elapsed * 0.003;
@@ -375,6 +454,7 @@ export function disposeStarField() {
         }
     });
     starLayers = {};
+    starMaterials = [];
 
     if (dustParticles) {
         dustParticles.dispose();

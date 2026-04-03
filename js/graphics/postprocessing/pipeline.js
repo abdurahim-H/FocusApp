@@ -1,10 +1,11 @@
-// postprocessing-babylon.js - Cinematic Post-Processing Pipeline
+// pipeline.js - Cinematic Post-Processing Pipeline
 // HDR rendering, ACES tone mapping, bloom, film grain, and cinematic effects
 
 let pipeline = null;
 let filmGrainPostProcess = null;
 let scene = null;
 let camera = null;
+let isWebGPU = false;
 
 /**
  * Setup the complete cinematic post-processing pipeline
@@ -16,6 +17,11 @@ export function setupPostProcessing(sceneRef, cameraRef) {
     console.log('📸 Setting up cinematic post-processing pipeline...');
     scene = sceneRef;
     camera = cameraRef;
+
+    // Detect if using WebGPU engine
+    const engine = scene.getEngine();
+    isWebGPU = engine.isWebGPU || (engine.name && engine.name.includes('WebGPU'));
+    console.log(`   Engine type: ${isWebGPU ? 'WebGPU' : 'WebGL2'}`);
 
     // Enable HDR rendering on the scene
     scene.imageProcessingConfiguration.toneMappingEnabled = true;
@@ -54,11 +60,11 @@ function configureHDR(pipeline) {
     pipeline.imageProcessing.toneMappingEnabled = true;
     pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
 
-    // Exposure - slightly under for drama
-    pipeline.imageProcessing.exposure = 1.0;
+    // Exposure — balanced
+    pipeline.imageProcessing.exposure = 1.1;
 
-    // Contrast - enhanced for cinematic punch
-    pipeline.imageProcessing.contrast = 1.15;
+    // Contrast — crisp, vibrant
+    pipeline.imageProcessing.contrast = 1.25;
 
     console.log('   ✓ HDR with ACES tone mapping configured');
 }
@@ -69,10 +75,10 @@ function configureHDR(pipeline) {
  */
 function configureBloom(pipeline) {
     pipeline.bloomEnabled = true;
-    pipeline.bloomThreshold = 0.8;   // High threshold - only very bright areas
-    pipeline.bloomWeight = 0.6;      // Medium intensity
-    pipeline.bloomKernel = 64;       // Quality kernel size
-    pipeline.bloomScale = 0.6;       // Spread
+    pipeline.bloomThreshold = 0.7;   // Catches HDR stars and bright nebula spots
+    pipeline.bloomWeight = 0.5;      // Visible but controlled glow
+    pipeline.bloomKernel = 64;       // Quality kernel
+    pipeline.bloomScale = 0.5;       // Tight, controlled spread
 
     console.log('   ✓ Selective bloom configured');
 }
@@ -80,27 +86,37 @@ function configureBloom(pipeline) {
 /**
  * Configure depth of field
  * Creates cinematic focus effect
+ * NOTE: Disabled on WebGPU due to rgba16float texture format compatibility issues
  */
 function configureDepthOfField(pipeline) {
-    pipeline.depthOfFieldEnabled = true;
-    pipeline.depthOfFieldBlurLevel = BABYLON.DepthOfFieldEffectBlurLevel.Medium;
-    pipeline.depthOfField.focalLength = 150;
-    pipeline.depthOfField.fStop = 2.8;       // Wide aperture for shallow DOF
-    pipeline.depthOfField.focusDistance = 5000; // Focus on the black hole area
+    // WebGPU has issues with DOF's circleOfConfusion pass (rgba16float format)
+    if (isWebGPU) {
+        pipeline.depthOfFieldEnabled = false;
+        console.log('   ⚠️ Depth of field disabled (WebGPU compatibility)');
+        return;
+    }
 
-    console.log('   ✓ Depth of field configured');
+    pipeline.depthOfFieldEnabled = true;
+    // DOF is disabled by default - it can make the scene blurry if misconfigured
+    pipeline.depthOfFieldEnabled = false;
+    pipeline.depthOfFieldBlurLevel = BABYLON.DepthOfFieldEffectBlurLevel.Low;
+    pipeline.depthOfField.focalLength = 50;
+    pipeline.depthOfField.fStop = 4.0;       // Smaller aperture = more in focus
+    pipeline.depthOfField.focusDistance = 65; // Match camera distance
+
+    console.log('   ✓ Depth of field configured (disabled by default)');
 }
 
 /**
  * Configure chromatic aberration
- * Subtle lens distortion at edges
+ * Very subtle lens distortion at edges only
  */
 function configureChromaticAberration(pipeline) {
     pipeline.chromaticAberrationEnabled = true;
-    pipeline.chromaticAberration.aberrationAmount = 30;    // Subtle
-    pipeline.chromaticAberration.radialIntensity = 0.8;   // Stronger at edges
+    pipeline.chromaticAberration.aberrationAmount = 2;     // Barely perceptible
+    pipeline.chromaticAberration.radialIntensity = 0.8;    // Edges only
 
-    console.log('   ✓ Chromatic aberration configured');
+    console.log('   ✓ Chromatic aberration configured (subtle)');
 }
 
 /**
@@ -109,9 +125,11 @@ function configureChromaticAberration(pipeline) {
  */
 function configureAntiAliasing(pipeline) {
     pipeline.fxaaEnabled = true;
-    pipeline.samples = 4; // MSAA samples
 
-    console.log('   ✓ Anti-aliasing (FXAA + MSAA) configured');
+    // Reduce MSAA samples on WebGPU to avoid texture format issues
+    pipeline.samples = isWebGPU ? 1 : 4;
+
+    console.log(`   ✓ Anti-aliasing configured (FXAA + ${pipeline.samples}x MSAA)`);
 }
 
 /**
@@ -120,7 +138,7 @@ function configureAntiAliasing(pipeline) {
  */
 function configureVignette(pipeline) {
     pipeline.imageProcessing.vignetteEnabled = true;
-    pipeline.imageProcessing.vignetteWeight = 2.0;
+    pipeline.imageProcessing.vignetteWeight = 1.5;
     pipeline.imageProcessing.vignetteStretch = 0.5;
     pipeline.imageProcessing.vignetteColor = new BABYLON.Color4(0, 0, 0.02, 0);
     pipeline.imageProcessing.vignetteCameraFov = 0.6;
@@ -137,25 +155,38 @@ function configureColorGrading(pipeline) {
     // Color curves for cinematic look
     const curves = new BABYLON.ColorCurves();
 
-    // Shadows: cool blue tint
-    curves.shadowsHue = 220;          // Blue
-    curves.shadowsSaturation = 20;    // Subtle saturation
-    curves.shadowsDensity = 30;       // Intensity
+    // Shadows: subtle cool blue — gives depth
+    curves.shadowsHue = 220;
+    curves.shadowsSaturation = 15;
+    curves.shadowsDensity = 20;
 
-    // Midtones: neutral with slight warmth
-    curves.midtonesHue = 30;          // Warm orange
-    curves.midtonesSaturation = 5;    // Very subtle
+    // Midtones: neutral, clean
+    curves.midtonesHue = 30;
+    curves.midtonesSaturation = 5;
     curves.midtonesDensity = 0;
 
-    // Highlights: warm golden
-    curves.highlightsHue = 40;        // Golden
-    curves.highlightsSaturation = 25; // Noticeable warmth
-    curves.highlightsDensity = 40;    // Strong in bright areas
+    // Highlights: very subtle warmth — keeps stars clean white
+    curves.highlightsHue = 40;
+    curves.highlightsSaturation = 15;
+    curves.highlightsDensity = 20;
 
     pipeline.imageProcessing.colorCurvesEnabled = true;
     pipeline.imageProcessing.colorCurves = curves;
 
     console.log('   ✓ Cinematic color grading configured');
+}
+
+/**
+ * Enable cinematic depth of field (WebGL2 only)
+ * @param {number} focusDistance
+ */
+export function enableCinematicDOF(focusDistance = 65) {
+    if (pipeline && !isWebGPU) {
+        pipeline.depthOfFieldEnabled = true;
+        pipeline.depthOfField.focusDistance = focusDistance;
+        pipeline.depthOfField.fStop = 2.8;
+        pipeline.depthOfFieldBlurLevel = BABYLON.DepthOfFieldEffectBlurLevel.Medium;
+    }
 }
 
 /**
@@ -226,10 +257,10 @@ function createFilmGrainEffect() {
 
     let grainTime = 0;
 
-    filmGrainPostProcess.onApply = function(effect) {
+    filmGrainPostProcess.onApply = function (effect) {
         grainTime += 0.016; // Approximate frame time
         effect.setFloat('time', grainTime);
-        effect.setFloat('grainIntensity', 0.08); // Subtle grain
+        effect.setFloat('grainIntensity', 0.03); // Barely visible grain
         effect.setFloat2('screenSize',
             scene.getEngine().getRenderWidth(),
             scene.getEngine().getRenderHeight()

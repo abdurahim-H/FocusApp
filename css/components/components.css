@@ -88,12 +88,29 @@
 
 .timer-display {
     font-size: 6em;
-    font-weight: 300;
+    font-weight: 200;
     letter-spacing: -3px;
     margin-bottom: 30px;
-    text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+    text-shadow:
+        0 0 30px rgba(139, 92, 246, 0.4),
+        0 0 60px rgba(99, 102, 241, 0.15);
+    animation: timerPulse 5s ease-in-out infinite;
     position: relative;
     z-index: 21;
+}
+
+@keyframes timerPulse {
+    0%, 100% {
+        text-shadow:
+            0 0 30px rgba(139, 92, 246, 0.4),
+            0 0 60px rgba(99, 102, 241, 0.15);
+    }
+    50% {
+        text-shadow:
+            0 0 40px rgba(139, 92, 246, 0.55),
+            0 0 80px rgba(99, 102, 241, 0.25),
+            0 0 120px rgba(6, 214, 160, 0.1);
+    }
 }
 
 .timer-controls {

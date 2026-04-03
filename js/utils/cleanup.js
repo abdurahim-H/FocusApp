@@ -269,22 +269,15 @@ function cleanupUIEffects() {
     
     // Remove all effect classes
     const effectClasses = [
-        'productivity-glow', 'task-celebration', 'focus-intense',
-        'session-complete', 'gravitational-pull', 'cosmic-flow',
-        'btn-particle', 'cosmic-entrance-active', 'cosmic-exit-active'
+        'productivity-glow', 'focus-intense', 'session-complete'
     ];
-    
-    allElements.forEach(el => {
+
+    [container, body].forEach(el => {
+        if (!el) return;
         effectClasses.forEach(className => {
             el.classList.remove(className);
         });
     });
-    
-    // Remove CSS custom properties
-    body.style.removeProperty('--time-scale');
-    body.style.removeProperty('--redshift-intensity');
-    document.documentElement.style.removeProperty('--time-scale');
-    document.documentElement.style.removeProperty('--redshift-intensity');
     
     console.log('🧹 Cleaned up UI effects');
 }

@@ -394,33 +394,6 @@
     }
 }
 
-/* ===== WATER CONTAINER INTEGRATION ===== */
-
-/* Enhanced integration with water-cosmic-container */
-.water-cosmic-container .liquid-glass-btn {
-    background: rgba(176, 224, 230, 0.08);
-    backdrop-filter: blur(28px) saturate(110%);
-    -webkit-backdrop-filter: blur(28px) saturate(110%);
-}
-
-.water-cosmic-container .liquid-glass-btn:hover {
-    background: rgba(176, 224, 230, 0.15);
-    backdrop-filter: blur(32px) saturate(120%);
-    -webkit-backdrop-filter: blur(32px) saturate(120%);
-}
-
-.water-cosmic-container .task-input {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px) saturate(110%);
-    -webkit-backdrop-filter: blur(20px) saturate(110%);
-}
-
-.water-cosmic-container .task-input:focus {
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(24px) saturate(120%);
-    -webkit-backdrop-filter: blur(24px) saturate(120%);
-}
-
 /* ===== PERFORMANCE OPTIMIZATIONS ===== */
 
 /* GPU acceleration for smooth animations */

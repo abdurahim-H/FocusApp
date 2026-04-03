@@ -57,8 +57,14 @@ export async function initEngine() {
 
     console.log(`📐 Canvas created: ${canvas.width}x${canvas.height}`);
 
-    // Try WebGPU first
-    if (await checkWebGPUSupport()) {
+    // NOTE: WebGPU is disabled because Babylon.js DefaultRenderingPipeline 
+    // has compatibility issues with WebGPU's rgba16float texture format.
+    // This causes black screen when bloom/DOF are enabled.
+    // WebGL2 provides reliable post-processing and is still high performance.
+    // TODO: Re-enable WebGPU once Babylon.js fixes pipeline compatibility
+    const useWebGPU = false; // Disabled for now
+
+    if (useWebGPU && await checkWebGPUSupport()) {
         try {
             console.log('⚡ WebGPU supported, initializing WebGPU engine...');
             engine = new BABYLON.WebGPUEngine(canvas, {
