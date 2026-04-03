@@ -116,17 +116,25 @@
     align-items: center;
 }
 
-/* Task Management Section — minimal, gold-tinted */
+/* Task Management Section — nearly invisible, just a hairline separator */
 .task-section {
-    background: rgba(200, 146, 42, 0.03);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(200, 146, 42, 0.1);
-    border-radius: 20px;
-    padding: 20px;
-    margin-top: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    border-top: 1px solid rgba(200, 146, 42, 0.08) !important;
+    border-radius: 0 !important;
+    padding: 20px 0 0 0 !important;
+    margin-top: 25px;
+    box-shadow: none !important;
     position: relative;
     z-index: 30;
+    overflow: visible !important;
+}
+
+/* Kill the gradient pseudo-element overlay */
+.task-section::before {
+    display: none !important;
 }
 
 /* Task input styles moved to liquid-glass-buttons.css for consistency */
@@ -146,10 +154,16 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(200, 146, 42, 0.08);
+    padding: 10px 12px !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(200, 146, 42, 0.06) !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border-radius: 0 !important;
     position: relative;
     z-index: 26;
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 14px;
 }
 
 .task-item:last-child {
@@ -190,39 +204,113 @@
     background: transparent;
 }
 
-/* Gold-tinted timer buttons — override teal/green accents */
+/* ===== FOCUS TAB — GOLD LIQUID GLASS REDESIGN ===== */
+
+/* All timer buttons — kill variant colors, kill pseudo-element effects, gold liquid glass only */
 .timer-controls .liquid-glass-btn {
-    background: rgba(200, 146, 42, 0.04) !important;
+    background: rgba(200, 146, 42, 0.05) !important;
     border: 1px solid rgba(200, 146, 42, 0.15) !important;
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(30px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(160%) !important;
+    border-radius: 24px !important;
+    padding: 12px 24px !important;
+    min-height: 44px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    letter-spacing: 0.01em !important;
     box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.15),
-        0 1px 4px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(200, 146, 42, 0.12) !important;
+        0 2px 12px rgba(0, 0, 0, 0.12),
+        0 1px 3px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(200, 146, 42, 0.1) !important;
     text-shadow: none !important;
+    transform: none !important;
 }
 
-.timer-controls .liquid-glass-btn:hover {
-    background: rgba(200, 146, 42, 0.08) !important;
-    border-color: rgba(200, 146, 42, 0.25) !important;
-    color: rgba(255, 255, 255, 0.95) !important;
+/* Kill ALL pseudo-element effects (lens-flare, starfield, micro-reflect) */
+.timer-controls .liquid-glass-btn::before,
+.timer-controls .liquid-glass-btn::after {
+    display: none !important;
 }
+
+/* Primary action (Start Focus) — slightly brighter gold border */
+.timer-controls .liquid-glass-btn--primary {
+    background: rgba(200, 146, 42, 0.08) !important;
+    border: 1px solid rgba(200, 146, 42, 0.25) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-weight: 600 !important;
+}
+
+/* Icon button (⟳) — same pill shape, just smaller */
+.timer-controls .liquid-glass-btn--small {
+    padding: 10px 16px !important;
+    min-height: 40px !important;
+    min-width: 40px !important;
+    font-size: 16px !important;
+    border-radius: 20px !important;
+}
+
+/* Hover — subtle brighten, no scale/transform gimmicks */
+.timer-controls .liquid-glass-btn:hover {
+    background: rgba(200, 146, 42, 0.1) !important;
+    border-color: rgba(200, 146, 42, 0.3) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    transform: none !important;
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.15),
+        0 1px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(200, 146, 42, 0.15) !important;
+}
+
+/* Active press — subtle inset */
+.timer-controls .liquid-glass-btn:active {
+    transform: scale(0.97) !important;
+    background: rgba(200, 146, 42, 0.06) !important;
+}
+
+/* ===== TASK SECTION — near-invisible, minimal ===== */
 
 /* Gold task input */
 .task-input {
-    background: rgba(200, 146, 42, 0.04) !important;
-    border: 1px solid rgba(200, 146, 42, 0.12) !important;
+    background: rgba(200, 146, 42, 0.03) !important;
+    border: 1px solid rgba(200, 146, 42, 0.1) !important;
     color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(20px) !important;
+    font-size: 14px !important;
+    padding: 12px 18px !important;
+    box-shadow: none !important;
 }
 
 .task-input:focus {
-    background: rgba(200, 146, 42, 0.06) !important;
-    border-color: rgba(200, 146, 42, 0.25) !important;
-    box-shadow: 0 0 0 2px rgba(200, 146, 42, 0.15) !important;
+    background: rgba(200, 146, 42, 0.05) !important;
+    border-color: rgba(200, 146, 42, 0.22) !important;
+    box-shadow: 0 0 0 2px rgba(200, 146, 42, 0.1) !important;
 }
 
 .task-input::placeholder {
-    color: #7A5C1E !important;
+    color: rgba(122, 92, 30, 0.7) !important;
+}
+
+/* Task Add button — match other buttons */
+.task-input-group .liquid-glass-btn {
+    background: rgba(200, 146, 42, 0.05) !important;
+    border: 1px solid rgba(200, 146, 42, 0.15) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 0 16px 16px 0 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+.task-input-group .liquid-glass-btn::before,
+.task-input-group .liquid-glass-btn::after {
+    display: none !important;
+}
+
+.task-input-group .liquid-glass-btn:hover {
+    background: rgba(200, 146, 42, 0.1) !important;
+    border-color: rgba(200, 146, 42, 0.25) !important;
+    transform: none !important;
 }
 
 @keyframes breathe {

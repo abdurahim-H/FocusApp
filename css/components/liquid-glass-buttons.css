@@ -218,12 +218,13 @@
 
 .tasks-title {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    color: #9B7320;
-    margin-bottom: 15px;
+    font-size: 13px;
+    font-weight: 400;
+    color: #7A5C1E;
+    margin-bottom: 12px;
     text-shadow: none;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
     position: relative;
     z-index: 2;
 }
@@ -1160,12 +1161,13 @@
 
 /* ===== TASKS TITLE ===== */
 .tasks-title {
-    font-size: 16px;
-    font-weight: 500;
-    color: #9B7320;
-    margin-bottom: 15px;
+    font-size: 13px;
+    font-weight: 400;
+    color: #7A5C1E;
+    margin-bottom: 12px;
     text-shadow: none;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
 }
 
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
