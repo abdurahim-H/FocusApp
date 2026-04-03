@@ -57,44 +57,50 @@ const FRAGMENT = `
         return v;
     }
 
-    vec3 tempColor(float t) {
-        t = clamp(t, 0.0, 1.0);
-        vec3 hot    = vec3(1.0, 0.93, 0.8);
-        vec3 bright = vec3(1.0, 0.68, 0.18);
-        vec3 orange = vec3(0.95, 0.38, 0.03);
-        vec3 red    = vec3(0.55, 0.1, 0.015);
-        vec3 dark   = vec3(0.15, 0.025, 0.004);
-        if (t > 0.85) return mix(bright, hot, (t - 0.85) / 0.15);
-        if (t > 0.6)  return mix(orange, bright, (t - 0.6) / 0.25);
-        if (t > 0.3)  return mix(red, orange, (t - 0.3) / 0.3);
-        return mix(dark, red, t / 0.3);
-    }
+    // tempColor removed — smooth gradient is now inline in sampleDisk
 
-    // Sample disk — continuous flowing plasma
+    // Sample disk — continuous smooth flowing plasma, NO concentric rings
     vec3 sampleDisk(float diskR, float diskAngle) {
-        float t = 1.0 - smoothstep(DISK_INNER, DISK_OUTER, diskR);
-        float rNorm = (diskR - DISK_INNER) / (DISK_OUTER - DISK_INNER);
+        float rNorm = clamp((diskR - DISK_INNER) / (DISK_OUTER - DISK_INNER), 0.0, 1.0);
 
-        // Keplerian spin
+        // Keplerian spin — inner faster
         float kepler = pow(DISK_INNER / max(diskR, DISK_INNER), 0.65);
         float spin = diskAngle + time * 0.35 * kepler;
 
-        // Flowing plasma streaks — angular flow
-        float ang = spin * 8.0 / PI;
-        float rad = rNorm * 30.0;
+        // Flowing plasma streaks — primarily ANGULAR (along orbit direction)
+        // Use spin angle as primary coordinate, radius as secondary
+        float ang = spin * 6.0 / PI;
+        float rad = rNorm * 8.0; // LOW radial frequency — no banding
 
         float s1 = fbm(vec2(ang + time * 0.1, rad));
-        float s2 = fbm(vec2(ang * 0.6 - time * 0.06, rad * 1.3 + 40.0));
-        float s3 = noise(vec2(ang * 2.5 + time * 0.2, rad * 0.5 + 80.0));
-        float streaks = s1 * 0.5 + s2 * 0.3 + s3 * 0.2;
+        float s2 = fbm(vec2(ang * 0.7 - time * 0.07, rad + 30.0));
+        float streaks = s1 * 0.6 + s2 * 0.4;
 
-        // Very subtle ring modulation
-        float rings = 0.8 + 0.2 * sin(rNorm * 60.0 + streaks * 4.0);
-
-        float brightness = (0.3 + streaks * 0.7) * rings;
+        // Smooth continuous brightness — no ring modulation
+        float brightness = 0.3 + streaks * 0.7;
         brightness *= 1.0 + 0.3 * sin(diskAngle + 0.7); // Doppler
 
-        return tempColor(t) * brightness;
+        // Smooth radial temperature gradient (no sharp steps)
+        // Inner = hot bright, outer = cool dark
+        float temp = 1.0 - rNorm;
+        // Smooth cubic falloff
+        temp = temp * temp * (3.0 - 2.0 * temp);
+
+        // Blend colors smoothly using temp as a continuous gradient
+        vec3 hot    = vec3(1.0, 0.93, 0.8);
+        vec3 bright = vec3(1.0, 0.68, 0.18);
+        vec3 orange = vec3(0.95, 0.38, 0.03);
+        vec3 red    = vec3(0.5, 0.1, 0.015);
+        vec3 dark   = vec3(0.12, 0.02, 0.003);
+
+        // Continuous smooth gradient using mix chain
+        vec3 col = mix(dark, red, smoothstep(0.0, 0.25, temp));
+        col = mix(col, orange, smoothstep(0.2, 0.5, temp));
+        col = mix(col, bright, smoothstep(0.45, 0.75, temp));
+        col = mix(col, hot, smoothstep(0.8, 1.0, temp));
+
+        // Streaks modulate brightness, not color banding
+        return col * brightness;
     }
 
     void main() {
