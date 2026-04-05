@@ -142,32 +142,32 @@ body[data-theme="light"] h3 {
 
 body[data-theme="cosmos"] h1 {
     background: none;
-    -webkit-text-fill-color: #F0DFC0;
+    -webkit-text-fill-color: #F5E8D0;
     animation: none;
-    text-shadow: 0 0 30px rgba(240, 200, 140, 0.2), 0 0 60px rgba(240, 200, 140, 0.08);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 30px rgba(240, 200, 140, 0.25), 0 0 60px rgba(240, 200, 140, 0.1);
     filter: none;
 }
 
-/* Dark theme — champagne & silver */
+/* Dark theme — champagne & silver with dark halo */
 body[data-theme="dark"] h1 {
     background: none;
-    -webkit-text-fill-color: #F0DFC0;
+    -webkit-text-fill-color: #F5E8D0;
     animation: none;
-    text-shadow: 0 0 30px rgba(240, 200, 140, 0.2), 0 0 60px rgba(240, 200, 140, 0.08);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 30px rgba(240, 200, 140, 0.25), 0 0 60px rgba(240, 200, 140, 0.1);
     filter: none;
 }
 
 body[data-theme="dark"] .greeting {
     background: none;
-    -webkit-text-fill-color: #B8B0A8;
-    text-shadow: none;
+    -webkit-text-fill-color: #D0C8BC;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
     filter: none;
 }
 
 body[data-theme="dark"] .date-time {
     background: none;
-    -webkit-text-fill-color: #8A8478;
-    text-shadow: none;
+    -webkit-text-fill-color: #C0B8AC;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* Theme-specific input styles - moved to liquid-glass-buttons.css for consistency */

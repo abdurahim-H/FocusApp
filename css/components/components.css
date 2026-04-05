@@ -26,13 +26,14 @@
 .home-content h1 {
     font-size: clamp(2.5em, 8vw, 5em);
     font-weight: 400;
-    color: #F0DFC0;
-    -webkit-text-fill-color: #F0DFC0;
+    color: #F5E8D0;
+    -webkit-text-fill-color: #F5E8D0;
     margin-bottom: 20px;
     line-height: 1.1;
     letter-spacing: 0.04em;
-    text-shadow: 0 0 30px rgba(240, 200, 140, 0.2),
-                 0 0 60px rgba(240, 200, 140, 0.08);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5),
+                 0 0 30px rgba(240, 200, 140, 0.25),
+                 0 0 60px rgba(240, 200, 140, 0.1);
     filter: none;
     animation: none;
 }
@@ -40,21 +41,21 @@
 .greeting {
     font-size: 1.3em;
     font-weight: 300;
-    color: #B8B0A8;
-    -webkit-text-fill-color: #B8B0A8;
+    color: #D0C8BC;
+    -webkit-text-fill-color: #D0C8BC;
     margin-bottom: 30px;
     letter-spacing: 0.02em;
-    text-shadow: none;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
     filter: none;
     animation: none;
 }
 
 .date-time {
     font-size: 1em;
-    color: #8A8478;
-    -webkit-text-fill-color: #8A8478;
+    color: #C0B8AC;
+    -webkit-text-fill-color: #C0B8AC;
     margin-bottom: 40px;
-    text-shadow: none;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     font-weight: 400;
     letter-spacing: 0.03em;
 }
