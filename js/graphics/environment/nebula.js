@@ -169,15 +169,6 @@ const FRAGMENT = `
         }
 
         // ============================================
-        // THIN ACCENT STRAND — delicate single line (more curved)
-        // ============================================
-        float accD = abs(bandDist(ruv, 0.2, 1.5, 0.12));
-        float accLine = smoothstep(0.004, 0.0, accD);
-        float accGlow = smoothstep(0.015, 0.0, accD);
-        color += gold(0.9) * accLine * 0.7;
-        color += gold(0.5) * accGlow * 0.12;
-
-        // ============================================
         // SCATTERED AMBIENT GOLDEN DUST in dark areas
         // ============================================
         float ambDust = fbm(uv * 5.0 + vec2(-flow * 0.8, flow * 0.4));
