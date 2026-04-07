@@ -1,5 +1,10 @@
 // Navigation Module
-// Handles mode switching and navigation controls
+// Handles mode switching and navigation controls.
+//
+// Phase 2 note: Motion One spring on .mode was tried and reverted — Motion's
+// inline transform style conflicts with the CSS layout of .mode panels
+// (#home uses translateX(-50%) for centering, #focus/#ambient use margin auto).
+// The Phase 1 CSS visibility+transform approach in style.css is sufficient.
 
 import { state } from '../core/state.js';
 import { updateDateTime } from '../features/timer.js';
@@ -12,23 +17,20 @@ export function switchMode(mode) {
 
     state.mode = mode;
 
-    // Update nav buttons
+    // Update nav buttons (CSS handles the sliding pill via :has())
     const navButtons = document.querySelectorAll('.nav-btn');
-
     navButtons.forEach(btn => {
         const isActive = btn.dataset.mode === mode;
         btn.classList.toggle('active', isActive);
     });
 
-    // Update mode displays
+    // Update mode panels — CSS in style.css handles the visibility transition
     const modeElements = document.querySelectorAll('.mode');
-
     modeElements.forEach(modeEl => {
         const isActive = modeEl.id === mode;
         modeEl.classList.toggle('active', isActive);
     });
 
-    // Update date/time for home mode
     if (mode === 'home') {
         updateDateTime();
     }

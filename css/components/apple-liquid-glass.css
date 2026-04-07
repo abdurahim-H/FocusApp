@@ -1167,11 +1167,19 @@
     }
 }
 
-/* Focus visible for keyboard navigation */
+/* Focus visible for keyboard navigation — gold to match the app theme.
+   Mouse clicks won't trigger this (browsers only show :focus-visible for
+   keyboard/programmatic focus), so it only appears when tabbing through. */
 .ambient-controls .liquid-glass-btn:focus-visible,
 .timer-controls .liquid-glass-btn:focus-visible {
-    outline: 3px solid rgba(176, 224, 230, 0.8);
+    outline: 2px solid rgba(200, 146, 42, 0.55);
     outline-offset: 2px;
+}
+
+/* Hide focus ring entirely on mouse interaction */
+.ambient-controls .liquid-glass-btn:focus:not(:focus-visible),
+.timer-controls .liquid-glass-btn:focus:not(:focus-visible) {
+    outline: none;
 }
 
 /* High contrast mode */

@@ -4,20 +4,14 @@
 import { appState } from '../core/state.js';
 import { trackSetInterval } from '../utils/cleanup.js';
 
-// Apply productivity glow based on completion rate
+// Productivity glow disabled — leftover from an older design that put a
+// pulsing box-shadow on the .container when >70% of tasks were complete.
+// The visual feedback was overwhelming (giant gold/indigo panel behind the
+// nav buttons). Tasks already give per-item feedback via the checked checkmark
+// + strikethrough, so this container-level effect is redundant.
 export function updateProductivityGlow() {
-    const completedTasks = appState.tasks.filter(task => task.completed).length;
-    const totalTasks = appState.tasks.length;
-    const productivity = totalTasks > 0 ? completedTasks / totalTasks : 0;
-
     const container = document.querySelector('.container');
-    if (!container) return;
-
-    if (productivity > 0.7) {
-        container.classList.add('productivity-glow');
-    } else {
-        container.classList.remove('productivity-glow');
-    }
+    if (container) container.classList.remove('productivity-glow');
 }
 
 // No-ops kept for API compatibility with timer.js imports

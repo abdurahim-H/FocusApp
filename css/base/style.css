@@ -283,19 +283,20 @@ a {
 }
 
 
-/* Productivity glow effect */
+/* Productivity glow effect — gold to match the app theme.
+   Triggers when >70% of tasks are completed (see ui-effects.js). */
 .productivity-glow {
-    animation: productivityPulse 2s ease-in-out infinite;
+    animation: productivityPulse 2.4s ease-in-out infinite;
 }
 
 @keyframes productivityPulse {
-    0%, 100% { 
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.3),
-                    0 0 40px rgba(99, 102, 241, 0.1);
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(200, 146, 42, 0.18),
+                    0 0 40px rgba(200, 146, 42, 0.06);
     }
-    50% { 
-        box-shadow: 0 0 30px rgba(99, 102, 241, 0.5),
-                    0 0 60px rgba(99, 102, 241, 0.2);
+    50% {
+        box-shadow: 0 0 30px rgba(200, 146, 42, 0.28),
+                    0 0 60px rgba(200, 146, 42, 0.12);
     }
 }
 
@@ -426,35 +427,10 @@ input, textarea, select {
 }
 
 
-/* Enhanced theme-specific glow effects */
-body[data-theme="dark"] .productivity-glow {
-    animation: productivityPulseDark 2s ease-in-out infinite;
-}
-
+/* Theme-specific productivity glow — all themes use gold to match the app */
+body[data-theme="dark"] .productivity-glow,
 body[data-theme="cosmos"] .productivity-glow {
-    animation: productivityPulseCosmos 2s ease-in-out infinite;
-}
-
-@keyframes productivityPulseDark {
-    0%, 100% { 
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.3),
-                    0 0 40px rgba(99, 102, 241, 0.1);
-    }
-    50% { 
-        box-shadow: 0 0 30px rgba(99, 102, 241, 0.5),
-                    0 0 60px rgba(99, 102, 241, 0.2);
-    }
-}
-
-@keyframes productivityPulseCosmos {
-    0%, 100% { 
-        box-shadow: 0 0 25px rgba(168, 85, 247, 0.4),
-                    0 0 50px rgba(139, 92, 246, 0.2);
-    }
-    50% { 
-        box-shadow: 0 0 40px rgba(168, 85, 247, 0.6),
-                    0 0 80px rgba(139, 92, 246, 0.3);
-    }
+    animation: productivityPulse 2.4s ease-in-out infinite;
 }
 
 /* ===== ENHANCED SCROLLBAR ANIMATIONS ===== */

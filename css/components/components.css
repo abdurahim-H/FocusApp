@@ -198,13 +198,27 @@
     line-height: 1 !important;
 }
 
-/* Hide native checkbox completely */
+/* Hide native checkbox completely (sr-only pattern — no focus outline bleed) */
 .task-item input[type="checkbox"] {
     position: absolute !important;
     opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
     pointer-events: none !important;
+    outline: none !important;
+}
+
+.task-item input[type="checkbox"]:focus,
+.task-item input[type="checkbox"]:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 /* Gold checkmark box */
@@ -227,6 +241,34 @@
     border-color: rgba(200, 146, 42, 0.4) !important;
     transform: none !important;
     box-shadow: none !important;
+}
+
+/* Checked state — gold fill + white checkmark glyph */
+.task-item input[type="checkbox"]:checked + .checkmark {
+    background: rgba(200, 146, 42, 0.85) !important;
+    border-color: rgba(200, 146, 42, 0.95) !important;
+    box-shadow: 0 0 12px rgba(200, 146, 42, 0.35) !important;
+}
+
+.task-item input[type="checkbox"]:checked + .checkmark::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    pointer-events: none;
+}
+
+/* Completed task text — dimmed + strikethrough */
+.task-item .task-text.task-completed {
+    color: rgba(184, 176, 168, 0.45) !important;
+    text-decoration: line-through;
+    text-decoration-color: rgba(200, 146, 42, 0.5);
+    text-decoration-thickness: 1.5px;
 }
 
 /* Task text — warm silver */

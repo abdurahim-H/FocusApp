@@ -22,7 +22,8 @@ async function loadModules() {
         { name: 'sounds', path: '../features/sounds.js' },
         { name: 'navigation', path: '../ui/navigation.js' },
         { name: 'uiEffects', path: '../ui/ui-effects.js' },
-        { name: 'cleanup', path: '../utils/cleanup.js' }
+        { name: 'cleanup', path: '../utils/cleanup.js' },
+        { name: 'buttonFeel', path: '../ui/button-feel.js' }
     ];
 
     for (const module of moduleList) {
@@ -134,6 +135,11 @@ export async function initApp() {
 
         if (loadedModules.uiEffects?.initUIEffects) {
             loadedModules.uiEffects.initUIEffects();
+        }
+
+        // Phase 2: coordinated button press spring (delegated, app-wide)
+        if (loadedModules.buttonFeel?.initButtonFeel) {
+            loadedModules.buttonFeel.initButtonFeel();
         }
 
         // Start core timers and displays

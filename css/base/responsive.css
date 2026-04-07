@@ -249,6 +249,18 @@
     transform: scale(0.97) !important;
 }
 
+/* Kill browser default focus ring — the active gold pill is the indicator.
+   Keyboard users still see :focus-visible via a custom subtle ring below. */
+.nav-buttons .nav-btn:focus {
+    outline: none !important;
+}
+
+.nav-buttons .nav-btn:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(200, 146, 42, 0.4) !important;
+    border-radius: 24px !important;
+}
+
 /* Mobile adjustments */
 @media (max-width: 768px) {
     .nav-buttons .nav-btn {
