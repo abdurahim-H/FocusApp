@@ -22,10 +22,21 @@ export function deleteTask(id) {
     renderTasks();
 }
 
+export function clearAllTasks() {
+    state.tasks = [];
+    renderTasks();
+}
+
 export function renderTasks() {
     const list = document.getElementById('taskList');
     list.innerHTML = '';
-    
+
+    // Show/hide Clear All button based on task count
+    const clearBtn = document.getElementById('clearAllBtn');
+    if (clearBtn) {
+        clearBtn.classList.toggle('hidden', state.tasks.length === 0);
+    }
+
     state.tasks.forEach(task => {
         const li = document.createElement('li');
         li.className = 'task-item liquid-glass-task';

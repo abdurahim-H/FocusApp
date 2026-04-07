@@ -160,6 +160,13 @@ export async function initApp() {
         if (loadedModules.tasks?.addTask) {
             window.addTask = loadedModules.tasks.addTask;
         }
+        if (loadedModules.tasks?.clearAllTasks) {
+            window.clearAllTasks = loadedModules.tasks.clearAllTasks;
+            const clearBtn = document.getElementById('clearAllBtn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', loadedModules.tasks.clearAllTasks);
+            }
+        }
     }
 
     if (document.readyState === 'loading') {
