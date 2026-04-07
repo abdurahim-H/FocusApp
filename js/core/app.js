@@ -12,6 +12,9 @@ let modules = {};
  * @returns {Object} Loaded modules object
  */
 async function loadModules() {
+    // Bare paths only — adding ?v= query strings here causes module duplication
+    // because static imports inside these files use bare paths, and ES modules
+    // are keyed by URL. Hard refresh (Cmd+Shift+R) handles cache freshness.
     const moduleList = [
         { name: 'scene3d', path: '../graphics/scene/scene-manager.js' },
         { name: 'timer', path: '../features/timer.js' },
