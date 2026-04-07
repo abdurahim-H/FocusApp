@@ -150,23 +150,8 @@ export async function initApp() {
             loadedModules.timer.updateSessionDisplay();
         }
 
-        // Make task functions globally accessible
-        if (loadedModules.tasks?.toggleTask) {
-            window.toggleTask = loadedModules.tasks.toggleTask;
-        }
-        if (loadedModules.tasks?.deleteTask) {
-            window.deleteTask = loadedModules.tasks.deleteTask;
-        }
-        if (loadedModules.tasks?.addTask) {
-            window.addTask = loadedModules.tasks.addTask;
-        }
-        if (loadedModules.tasks?.clearAllTasks) {
-            window.clearAllTasks = loadedModules.tasks.clearAllTasks;
-            const clearBtn = document.getElementById('clearAllBtn');
-            if (clearBtn) {
-                clearBtn.addEventListener('click', loadedModules.tasks.clearAllTasks);
-            }
-        }
+        // Phase 1: task globals removed — tasks use signals + delegated events.
+        // (Clear-all button is wired inside tasks.initTaskRender.)
     }
 
     if (document.readyState === 'loading') {
@@ -200,12 +185,15 @@ function setupTimerControls(loadedModules) {
 }
 
 function setupTaskControls(loadedModules) {
-    // Task controls - use modules to access task functions
+    // Task controls — Add button + Enter key. Render & delete are reactive (see tasks.js).
     if (loadedModules.tasks) {
         document.getElementById('addTaskBtn').addEventListener('click', loadedModules.tasks.addTask);
         document.getElementById('taskInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') loadedModules.tasks.addTask();
         });
+        if (loadedModules.tasks.initTaskRender) {
+            loadedModules.tasks.initTaskRender();
+        }
     }
 }
 
