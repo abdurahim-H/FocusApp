@@ -133,6 +133,10 @@
     border-radius: 0 !important;
     padding: 12px 0 0 0 !important;
     margin-top: 10px;
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+    box-sizing: border-box !important;
     box-shadow: none !important;
     position: relative;
     z-index: 30;
@@ -299,7 +303,8 @@
 }
 
 .clear-all-btn.hidden {
-    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 /* Ambient Mode */

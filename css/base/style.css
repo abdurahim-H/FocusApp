@@ -160,7 +160,9 @@ a {
 }
 
 .task-list {
-    max-height: 140px;
+    height: 96px;
+    max-height: 96px;
+    min-height: 96px;
     overflow-y: auto;
     overflow-x: hidden;
     
