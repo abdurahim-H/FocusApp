@@ -127,7 +127,7 @@ const FRAGMENT = `
         // ==========================================
 
         // Rotate the disk around the black hole — whole structure orbits
-        float diskSpin = time * 0.08; // Slow full rotation
+        float diskSpin = time * 0.14; // Slightly faster full rotation
         float cds = cos(diskSpin);
         float sds = sin(diskSpin);
         // Only rotate the disk sampling coordinates, not the shadow/lensing
