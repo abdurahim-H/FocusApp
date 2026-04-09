@@ -209,40 +209,65 @@ a {
 
 .task-list {
     /* Phase 4 fix: max-height only (not fixed) so the list grows naturally
-       up to ~2.5 task heights, then scrolls when there are 3+ tasks. With
-       fixed height the scrollbar showed even with 2 tasks because Phase 4's
-       padding bump pushed them past the old 96px limit. */
+       up to ~2.5 task heights, then scrolls when there are 3+ tasks. */
     max-height: 108px;
     overflow-y: auto;
     overflow-x: hidden;
 
-    /* Firefox: thin gold scrollbar */
+    /* Firefox: thin gold scrollbar (Firefox can't do reveal-on-hover or
+       backdrop-filter on the scrollbar, so just keep it subtle). */
     scrollbar-width: thin;
-    scrollbar-color: rgba(200, 146, 42, 0.32) transparent;
+    scrollbar-color: rgba(200, 146, 42, 0.22) transparent;
 }
 
-/* WebKit scrollbar — narrow gold capsule that matches the app theme */
+/* ===== WebKit scrollbar — overlay style, reveal-on-hover =====
+   Designed to match the rest of the liquid-glass surfaces:
+   - 4px wide, capsule shape
+   - Translucent gold so the scene tints through
+   - Backdrop-filter blur picks up the scene behind it (same as the buttons)
+   - Nearly invisible at rest, full opacity when the list is hovered
+   - No track at all — the bar floats on the content edge */
 .task-list::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
     background: transparent;
 }
 
 .task-list::-webkit-scrollbar-track {
     background: transparent;
-    margin: 4px 0;
 }
 
 .task-list::-webkit-scrollbar-thumb {
-    background: rgba(200, 146, 42, 0.28) !important;
-    border-radius: 8px !important;
+    background: rgba(200, 146, 42, 0.18) !important;
+    backdrop-filter: blur(8px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(140%) !important;
+    border-radius: 999px !important;
     border: none !important;
     box-shadow: none !important;
-    transition: background 0.2s ease !important;
+    /* Nearly invisible at rest — only a hint that scrolling exists */
+    opacity: 0.35;
+    transition:
+        opacity 0.3s ease,
+        background-color 0.3s ease,
+        box-shadow 0.3s ease !important;
 }
 
+/* Reveal on list hover — the bar fades to full opacity when the user
+   approaches the task area, even before they touch the bar itself */
+.task-list:hover::-webkit-scrollbar-thumb {
+    opacity: 1;
+    background: rgba(200, 146, 42, 0.32) !important;
+}
+
+/* Direct bar hover — brightens further with a soft gold halo */
 .task-list::-webkit-scrollbar-thumb:hover {
     background: rgba(200, 146, 42, 0.5) !important;
-    box-shadow: 0 0 8px rgba(200, 146, 42, 0.32) !important;
+    box-shadow: 0 0 10px rgba(200, 146, 42, 0.35) !important;
+}
+
+/* While actively dragging — fully bright */
+.task-list::-webkit-scrollbar-thumb:active {
+    background: rgba(200, 146, 42, 0.65) !important;
+    box-shadow: 0 0 14px rgba(200, 146, 42, 0.45) !important;
 }
 
 .mode.active {
@@ -439,16 +464,10 @@ input, textarea, select {
 }
 
 
-/* ===== ENHANCED SCROLLBAR ANIMATIONS ===== */
-
-/* Container hover state - makes scrollbar slightly more visible */
-.task-list:hover::-webkit-scrollbar-thumb {
-    background: rgba(176, 224, 230, 0.08); /* Glass with slight teal tint */
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-}
-
-/* Cosmic corner styling for scrollbar track area */
+/* Scrollbar corner — transparent so it doesn't show as a colored block.
+   The .task-list scrollbar styles live above (lines ~210-275). Do not add
+   duplicate .task-list scrollbar rules here — they'll override the canonical
+   ones because of cascade order. */
 .task-list::-webkit-scrollbar-corner {
     background: transparent;
 }
@@ -474,9 +493,9 @@ body::-webkit-scrollbar {
     background: transparent;
 }
 
-/* Enhanced scrollbar for mode containers - also minimal */
+/* Mode container scrollbars — match the task-list overlay style */
 .mode::-webkit-scrollbar {
-    width: 12px;
+    width: 4px;
     background: transparent;
 }
 
@@ -485,39 +504,32 @@ body::-webkit-scrollbar {
 }
 
 .mode::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-    border-radius: 6px;
-    border: 0.5px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
+    background: rgba(200, 146, 42, 0.18);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    border-radius: 999px;
+    border: none;
+    box-shadow: none;
+    opacity: 0.35;
+    transition: opacity 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mode:hover::-webkit-scrollbar-thumb {
+    opacity: 1;
+    background: rgba(200, 146, 42, 0.32);
 }
 
 .mode::-webkit-scrollbar-thumb:hover {
-    background: rgba(176, 224, 230, 0.18);
-    border-color: rgba(176, 224, 230, 0.35);
-    box-shadow: 
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        0 4px 12px rgba(176, 224, 230, 0.2),
-        0 0 20px rgba(176, 224, 230, 0.25);
+    background: rgba(200, 146, 42, 0.5);
+    box-shadow: 0 0 10px rgba(200, 146, 42, 0.35);
 }
 
-/* ===== MOZILLA FIREFOX SCROLLBAR ENHANCEMENT ===== */
-/* Enhanced Firefox scrollbar theming */
-.task-list, .settings-modal, .mode {
+/* ===== Firefox scrollbar — gold theme ===== */
+/* Note: .task-list scrollbar-color is set in its own rule above with the
+   correct gold value. This block is for .settings-modal and .mode only. */
+.settings-modal, .mode {
     scrollbar-width: thin;
-    scrollbar-color: rgba(176, 224, 230, 0.4) transparent;
-}
-
-/* Support for upcoming CSS scrollbar styling */
-@supports (scrollbar-color: rgba(176, 224, 230, 0.4) transparent) {
-    .task-list, .settings-modal, .mode {
-        scrollbar-width: auto;
-        scrollbar-color: rgba(176, 224, 230, 0.4) transparent;
-    }
+    scrollbar-color: rgba(200, 146, 42, 0.22) transparent;
 }
 
 /* ===== SCROLLBAR FADE ANIMATION ===== */
