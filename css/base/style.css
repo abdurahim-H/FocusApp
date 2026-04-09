@@ -18,7 +18,42 @@
     --animation-speed: 1;
     --particle-density: 1;
     --performance-level: 1; /* 1 = high, 0.75 = medium, 0.5 = low */
-    
+
+    /* ===== Phase 3: Type scale (1.25 ratio) =====
+       Names follow a familiar T-shirt sizing convention. Use these for any
+       NEW typography. Existing font-size values stay unless obviously wrong —
+       refactoring all 100+ declarations would be a regression risk. */
+    --text-xs:   12px;   /* 0.75rem  — labels, captions */
+    --text-sm:   14px;   /* 0.875rem — body small, secondary text */
+    --text-base: 16px;   /* 1rem     — body */
+    --text-md:   20px;   /* 1.25rem  — large body, button labels */
+    --text-lg:   25px;   /* 1.5625rem — small heading */
+    --text-xl:   31px;   /* 1.953rem — section heading */
+    --text-2xl:  39px;   /* 2.441rem — display small */
+    --text-3xl:  49px;   /* 3.052rem — display medium */
+    --text-4xl:  61px;   /* 3.815rem — display large */
+    --text-5xl:  76px;   /* 4.768rem — hero */
+
+    /* ===== Phase 3: Spacing scale (4px base unit) =====
+       Multiples of 4 — never use a margin/padding that isn't on this scale. */
+    --space-1:  4px;
+    --space-2:  8px;
+    --space-3:  12px;
+    --space-4:  16px;
+    --space-5:  20px;
+    --space-6:  24px;
+    --space-8:  32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* ===== Phase 3: Letter-spacing scale ===== */
+    --tracking-tighter: -0.04em;  /* display, large heroes */
+    --tracking-tight:   -0.02em;  /* headings, button text */
+    --tracking-normal:  0;        /* body */
+    --tracking-wide:    0.02em;   /* labels */
+    --tracking-wider:   0.06em;   /* small caps */
+
     /* Liquid Glass Scrollbar Variables */
     --scrollbar-bg: rgba(176, 224, 230, 0.12);
     --scrollbar-border: rgba(255, 255, 255, 0.2);
@@ -49,12 +84,23 @@ body::-webkit-scrollbar {
 }
 
 body {
-    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    /* Phase 3: enable nice OpenType features for Inter
+       cv11 = single-storey 'a', ss03 = curved 'r' */
+    font-feature-settings: 'cv11', 'ss03', 'kern';
+    /* Optical sizing axis — Inter v4 supports `opsz`, browsers will pick the
+       right master based on the rendered size */
+    font-optical-sizing: auto;
+    font-size: var(--text-base);
+    line-height: 1.5;
+    letter-spacing: var(--tracking-normal);
     background: var(--bg-dark);
     color: var(--text-primary);
     transition: all 0.3s ease;
     position: relative;
     font-display: swap; /* Prevent layout shift from font loading */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* 3D Scene Container - FIXED for Babylon.js */
@@ -125,14 +171,16 @@ textarea,
 select, 
 a {
     pointer-events: auto !important;
-}/* Mode Display System — smooth transitions */
+}/* Mode Display System — display:none for inactive panels.
+   Why display:none and not visibility:hidden? With visibility:hidden the
+   outgoing panel still occupied its layout position and could bleed through
+   during transitions. display:none removes it from layout AND rendering
+   instantly with zero ambiguity.
+   IMPORTANT: do NOT animate opacity on .mode. Opacity between 0 and 1 on
+   the parent breaks backdrop-filter on the timer-control buttons (Phase 1 bug). */
 .mode {
+    display: none;
     position: relative;
-    visibility: hidden;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: visibility 0s linear 0.25s, opacity 0.25s ease, transform 0.25s ease;
-    pointer-events: none;
     text-align: center;
     max-width: 600px;
     width: 100%;
@@ -207,10 +255,7 @@ a {
 }
 
 .mode.active {
-    visibility: visible;
-    opacity: 1;
-    transform: translateY(0);
-    transition: visibility 0s linear 0s, opacity 0.25s ease, transform 0.25s ease;
+    display: block;
     pointer-events: auto;
     overflow: visible;
 }

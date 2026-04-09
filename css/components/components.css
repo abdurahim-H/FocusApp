@@ -25,12 +25,13 @@
 
 .home-content h1 {
     font-size: clamp(2.5em, 8vw, 5em);
-    font-weight: 400;
+    font-weight: 500;
     color: #F5E8D0;
     -webkit-text-fill-color: #F5E8D0;
-    margin-bottom: 20px;
-    line-height: 1.1;
-    letter-spacing: 0.04em;
+    margin-bottom: var(--space-5);
+    line-height: 1.05;
+    /* Phase 3: tighter tracking on display text reads more confident */
+    letter-spacing: var(--tracking-tighter);
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5),
                  0 0 30px rgba(240, 200, 140, 0.25),
                  0 0 60px rgba(240, 200, 140, 0.1);
@@ -39,25 +40,29 @@
 }
 
 .greeting {
-    font-size: 1.3em;
-    font-weight: 300;
+    font-size: var(--text-md);
+    font-weight: 400;
     color: #D0C8BC;
     -webkit-text-fill-color: #D0C8BC;
-    margin-bottom: 30px;
-    letter-spacing: 0.02em;
+    margin-bottom: var(--space-8);
+    letter-spacing: var(--tracking-normal);
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
     filter: none;
     animation: none;
 }
 
 .date-time {
-    font-size: 1em;
+    font-size: var(--text-sm);
     color: #C0B8AC;
     -webkit-text-fill-color: #C0B8AC;
-    margin-bottom: 40px;
+    margin-bottom: var(--space-10);
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     font-weight: 400;
-    letter-spacing: 0.03em;
+    /* Slightly looser tracking on small body text aids legibility */
+    letter-spacing: var(--tracking-wide);
+    /* Tabular numerals for the date+time row so it doesn't jitter as
+       the minute changes */
+    font-variant-numeric: tabular-nums;
 }
 
 /* Focus Mode Components */
@@ -86,8 +91,12 @@
     font-size: clamp(3.5em, 10vw, 5.5em);
     font-weight: 200;
     color: rgba(255, 255, 255, 0.97);
-    letter-spacing: -3px;
-    margin-bottom: 15px;
+    letter-spacing: var(--tracking-tighter);
+    /* Phase 3: tabular figures so the digits don't jitter as seconds tick.
+       Combined with slashed-zero (zero) for clearer 0 vs O distinction. */
+    font-variant-numeric: tabular-nums slashed-zero;
+    font-feature-settings: 'tnum', 'zero';
+    margin-bottom: var(--space-4);
     text-shadow:
         0 2px 8px rgba(0, 0, 0, 0.5),
         0 0 30px rgba(240, 200, 140, 0.3),
@@ -634,16 +643,20 @@
 .session-type {
     color: #F5E8D0;
     font-weight: 500;
-    font-size: 1em;
-    letter-spacing: 0.04em;
-    margin-bottom: 2px;
+    font-size: var(--text-md);
+    /* Phase 3: small caps style — looser tracking on shorter labels */
+    letter-spacing: var(--tracking-wide);
+    margin-bottom: var(--space-1);
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6),
                  0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .session-progress {
-    font-size: 0.8em;
+    font-size: var(--text-sm);
     color: #D0C8BC;
+    /* Tabular numerals so "Session 1 of 4" doesn't jitter */
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-wide);
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
