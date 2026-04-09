@@ -256,7 +256,7 @@ function cleanupUIEffects() {
     
     // Remove all effect classes
     const effectClasses = [
-        'productivity-glow', 'focus-intense', 'session-complete'
+        'focus-intense', 'session-complete'
     ];
 
     [container, body].forEach(el => {

@@ -283,26 +283,6 @@ a {
 }
 
 
-/* Productivity glow effect — gold to match the app theme.
-   Triggers when >70% of tasks are completed (see ui-effects.js). */
-.productivity-glow {
-    animation: productivityPulse 2.4s ease-in-out infinite;
-}
-
-@keyframes productivityPulse {
-    0%, 100% {
-        box-shadow: 0 0 20px rgba(200, 146, 42, 0.18),
-                    0 0 40px rgba(200, 146, 42, 0.06);
-    }
-    50% {
-        box-shadow: 0 0 30px rgba(200, 146, 42, 0.28),
-                    0 0 60px rgba(200, 146, 42, 0.12);
-    }
-}
-
-
-
-
 
 /* Performance optimization for reduced motion users */
 @media (prefers-reduced-motion: reduce) {
@@ -311,10 +291,6 @@ a {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
-    }
-    
-    .productivity-glow {
-        animation: none;
     }
 }
 
@@ -426,12 +402,6 @@ input, textarea, select {
     user-select: none;
 }
 
-
-/* Theme-specific productivity glow — all themes use gold to match the app */
-body[data-theme="dark"] .productivity-glow,
-body[data-theme="cosmos"] .productivity-glow {
-    animation: productivityPulse 2.4s ease-in-out infinite;
-}
 
 /* ===== ENHANCED SCROLLBAR ANIMATIONS ===== */
 

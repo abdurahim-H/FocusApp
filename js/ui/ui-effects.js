@@ -1,18 +1,9 @@
 // UI Visual Effects Module
-// Manages CSS-based visual effects that complement the 3D animations
-
-import { appState } from '../core/state.js';
-import { trackSetInterval } from '../utils/cleanup.js';
-
-// Productivity glow disabled — leftover from an older design that put a
-// pulsing box-shadow on the .container when >70% of tasks were complete.
-// The visual feedback was overwhelming (giant gold/indigo panel behind the
-// nav buttons). Tasks already give per-item feedback via the checked checkmark
-// + strikethrough, so this container-level effect is redundant.
-export function updateProductivityGlow() {
-    const container = document.querySelector('.container');
-    if (container) container.classList.remove('productivity-glow');
-}
+// Manages CSS-based visual effects that complement the 3D animations.
+//
+// The productivity glow (pulsing box-shadow on .container at >70% completion)
+// was removed — it was a leftover from an older design and gave overwhelming
+// visual feedback. Per-task feedback (checkmark + strikethrough) is sufficient.
 
 // No-ops kept for API compatibility with timer.js imports
 export function triggerTaskCompletionUI() {}
@@ -20,16 +11,11 @@ export function triggerFocusIntensity() {}
 export function removeFocusIntensity() {}
 export function triggerSessionCompleteUI() {}
 export function enhanceAchievement() {}
+export function updateProductivityGlow() {}
 
-// Initialize UI effects system
-export function initUIEffects() {
-    trackSetInterval(updateProductivityGlow, 1000);
-}
+// Initialize UI effects system — currently nothing to initialize.
+// Reserved for future per-frame visual effects (Phase 4+).
+export function initUIEffects() {}
 
 // Clean up all active effects
-export function cleanupUIEffects() {
-    const container = document.querySelector('.container');
-    if (container) {
-        container.classList.remove('productivity-glow');
-    }
-}
+export function cleanupUIEffects() {}
