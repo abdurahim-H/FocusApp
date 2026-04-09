@@ -99,6 +99,9 @@
     padding: 4px !important;
     border-radius: 28px !important;
     gap: 0 !important;
+    /* Phase 4: pill squash variables — JS sets these on tab change. */
+    --pill-scale-x: 1;
+    --pill-scale-y: 1;
 
     /* Nearly invisible — scene bleeds through */
     background: rgba(200, 146, 42, 0.04) !important;
@@ -148,11 +151,14 @@
         inset 0 1px 0 rgba(200, 146, 42, 0.35),
         inset 0 -0.5px 0 rgba(0, 0, 0, 0.05);
 
-    /* Spring animation */
+    /* Spring animation. Phase 4: transform inherits the squash vars so the
+       pill briefly compresses while sliding to a new tab. */
+    transform: scale(var(--pill-scale-x), var(--pill-scale-y));
+    transform-origin: center;
     transition:
         left 0.4s cubic-bezier(0.32, 0.72, 0, 1),
         box-shadow 0.3s ease,
-        transform 0.2s ease;
+        transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
 
     z-index: 0;
 }

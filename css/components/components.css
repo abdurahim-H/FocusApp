@@ -175,23 +175,28 @@
     align-items: center;
     justify-content: space-between !important;
     gap: 10px;
-    padding: 8px 4px !important;
+    padding: 8px 8px !important;
     border: none !important;
     border-bottom: 1px solid rgba(200, 146, 42, 0.06) !important;
     background: transparent !important;
     backdrop-filter: none !important;
-    border-radius: 0 !important;
+    border-radius: 8px !important;
     position: relative;
     z-index: 26;
     color: rgba(255, 255, 255, 0.75) !important;
-    font-size: 14px;
+    font-size: var(--text-sm);
     transform: none !important;
+    /* Phase 4: subtle hover lift */
+    transition:
+        background-color 0.25s ease,
+        box-shadow 0.3s ease,
+        border-color 0.25s ease !important;
 }
 
 .task-item:hover {
-    background: transparent !important;
-    transform: none !important;
-    box-shadow: none !important;
+    background: rgba(200, 146, 42, 0.04) !important;
+    border-bottom-color: rgba(200, 146, 42, 0.12) !important;
+    box-shadow: 0 2px 12px rgba(200, 146, 42, 0.08) !important;
 }
 
 /* Align checkbox and text vertically */
@@ -272,12 +277,35 @@
     pointer-events: none;
 }
 
-/* Completed task text — dimmed + strikethrough */
+/* Task text — base. The strikethrough is a pseudo-element so we can animate
+   its width from 0% → 100% (text-decoration can't be animated). */
+.task-item .task-text {
+    position: relative;
+    display: inline-block;
+    transition: color 0.4s ease;
+}
+
+.task-item .task-text::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 0;
+    height: 1.5px;
+    background: rgba(200, 146, 42, 0.6);
+    box-shadow: 0 0 6px rgba(200, 146, 42, 0.4);
+    transform: translateY(-50%);
+    transition: width 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+    pointer-events: none;
+}
+
+/* Completed — dim text + draw strikethrough across */
 .task-item .task-text.task-completed {
     color: rgba(184, 176, 168, 0.45) !important;
-    text-decoration: line-through;
-    text-decoration-color: rgba(200, 146, 42, 0.5);
-    text-decoration-thickness: 1.5px;
+}
+
+.task-item .task-text.task-completed::after {
+    width: 100%;
 }
 
 /* Task text — warm silver */
@@ -394,12 +422,13 @@
 
 /* ===== FOCUS TAB — GOLD LIQUID GLASS REDESIGN ===== */
 
-/* All timer buttons — kill variant colors, kill pseudo-element effects, gold liquid glass only */
+/* All timer buttons — gold liquid glass with two-light-source layering.
+   Phase 4: shadows simulate (1) cool ambient drop from above, (2) warm gold
+   rim light from below, plus an inner top highlight and a sharp gold edge. */
 .timer-controls .liquid-glass-btn {
     background: rgba(200, 146, 42, 0.05) !important;
-    border: 1px solid rgba(200, 146, 42, 0.15) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(200, 146, 42, 0.18) !important;
+    color: rgba(255, 255, 255, 0.92) !important;
     backdrop-filter: blur(30px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(30px) saturate(160%) !important;
     border-radius: 24px !important;
@@ -407,13 +436,24 @@
     min-height: 44px !important;
     font-weight: 500 !important;
     font-size: 14px !important;
-    letter-spacing: 0.01em !important;
+    letter-spacing: var(--tracking-tight) !important;
     box-shadow:
-        0 2px 12px rgba(0, 0, 0, 0.12),
-        0 1px 3px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(200, 146, 42, 0.1) !important;
-    text-shadow: none !important;
+        /* Ambient drop (simulates environment from above) */
+        0 1px 2px rgba(0, 0, 0, 0.12),
+        /* Key light shadow (cool, soft) */
+        0 6px 18px rgba(0, 0, 0, 0.2),
+        /* Inner top highlight (light from above hitting the rim) */
+        inset 0 1px 0 rgba(255, 226, 168, 0.22),
+        /* Inner bottom rim (warm gold bounce light) */
+        inset 0 -1px 0 rgba(200, 146, 42, 0.14) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
     transform: none !important;
+    /* Smooth hover transitions for all the visual props */
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.4s cubic-bezier(0.32, 0.72, 0, 1),
+        color 0.3s ease !important;
 }
 
 /* Kill ALL pseudo-element effects (lens-flare, starfield, micro-reflect) */
@@ -439,16 +479,23 @@
     border-radius: 20px !important;
 }
 
-/* Hover — subtle brighten, no scale/transform gimmicks */
+/* Hover — gold halo lights up, top highlight intensifies */
 .timer-controls .liquid-glass-btn:hover {
-    background: rgba(200, 146, 42, 0.1) !important;
-    border-color: rgba(200, 146, 42, 0.3) !important;
-    color: rgba(255, 255, 255, 0.95) !important;
+    background: rgba(200, 146, 42, 0.12) !important;
+    border-color: rgba(200, 146, 42, 0.36) !important;
+    color: rgba(255, 255, 255, 1) !important;
     transform: none !important;
     box-shadow:
-        0 4px 20px rgba(0, 0, 0, 0.15),
-        0 1px 4px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(200, 146, 42, 0.15) !important;
+        /* Ambient drop (slightly deeper) */
+        0 2px 4px rgba(0, 0, 0, 0.14),
+        /* Key light shadow (deeper) */
+        0 10px 28px rgba(0, 0, 0, 0.24),
+        /* Inner top highlight (brighter on hover) */
+        inset 0 1px 0 rgba(255, 230, 175, 0.32),
+        /* Inner bottom rim (brighter warm bounce) */
+        inset 0 -1px 0 rgba(200, 146, 42, 0.22),
+        /* Gold halo around the button on hover */
+        0 0 24px rgba(200, 146, 42, 0.22) !important;
 }
 
 /* Active press — subtle inset */
@@ -473,9 +520,25 @@
 }
 
 .task-input:focus {
-    background: rgba(200, 146, 42, 0.05) !important;
-    border-color: rgba(200, 146, 42, 0.22) !important;
-    box-shadow: 0 0 0 2px rgba(200, 146, 42, 0.1) !important;
+    background: rgba(200, 146, 42, 0.06) !important;
+    border-color: rgba(200, 146, 42, 0.32) !important;
+    outline: none !important;
+    /* Phase 4: breathing focus ring — soft gold halo that pulses ~2.4s.
+       The animation cycles box-shadow alpha + spread for a living feel. */
+    animation: inputBreathe 2.4s ease-in-out infinite;
+}
+
+@keyframes inputBreathe {
+    0%, 100% {
+        box-shadow:
+            0 0 0 2px rgba(200, 146, 42, 0.12),
+            0 0 12px rgba(200, 146, 42, 0.08);
+    }
+    50% {
+        box-shadow:
+            0 0 0 3px rgba(200, 146, 42, 0.22),
+            0 0 24px rgba(200, 146, 42, 0.18);
+    }
 }
 
 .task-input::placeholder {

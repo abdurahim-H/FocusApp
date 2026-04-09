@@ -5,6 +5,7 @@
 // inline transform style conflicts with the CSS layout of .mode panels
 // (#home uses translateX(-50%) for centering, #focus/#ambient use margin auto).
 // The Phase 1 CSS visibility+transform approach in style.css is sufficient.
+// Phase 4: brief squash/stretch on the nav pill when changing tabs.
 
 import { state } from '../core/state.js';
 import { updateDateTime } from '../features/timer.js';
@@ -15,6 +16,7 @@ export function switchMode(mode) {
         return;
     }
 
+    const previousMode = state.mode;
     state.mode = mode;
 
     // Update nav buttons (CSS handles the sliding pill via :has())
@@ -23,6 +25,11 @@ export function switchMode(mode) {
         const isActive = btn.dataset.mode === mode;
         btn.classList.toggle('active', isActive);
     });
+
+    // Phase 4: squash the nav pill briefly while it slides to the new tab
+    if (previousMode !== mode) {
+        triggerNavPillSquash();
+    }
 
     // Update mode panels — CSS in style.css handles the visibility transition
     const modeElements = document.querySelectorAll('.mode');
@@ -34,6 +41,22 @@ export function switchMode(mode) {
     if (mode === 'home') {
         updateDateTime();
     }
+}
+
+// Briefly squash the .nav-buttons container's CSS variable so the ::before
+// pill (which uses var(--pill-scale)) compresses then springs back. This is
+// the closest equivalent to Apple's tab pill squish without rebuilding the
+// pseudo-element layout.
+function triggerNavPillSquash() {
+    const nav = document.querySelector('.nav-buttons');
+    if (!nav) return;
+    nav.style.setProperty('--pill-scale-x', '0.88');
+    nav.style.setProperty('--pill-scale-y', '1.06');
+    // Snap back after the slide animation has had a moment to begin
+    setTimeout(() => {
+        nav.style.setProperty('--pill-scale-x', '1');
+        nav.style.setProperty('--pill-scale-y', '1');
+    }, 180);
 }
 
 export function setupNavigation() {
