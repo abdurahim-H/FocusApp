@@ -85,7 +85,13 @@ export function startTimer() {
     }
 
     updateSessionDisplay();
+    updateTimerDisplay();
 
+    // Tick once per second. The interval is created NOW, so the first
+    // callback fires after exactly 1000ms — which is correct: the user just
+    // started at 25:00, the first decrement should land at the 1-second mark.
+    // Combined with the 150ms auto-start delay, the perceived gap after a
+    // skip is ~1.15s instead of the old 2.2s.
     state.timer.interval = trackSetInterval(() => {
         if (state.timer.seconds === 0) {
             if (state.timer.minutes === 0) {
@@ -294,11 +300,14 @@ export function completeSession() {
         }
     }
 
-    // Auto-start next session
+    // Auto-start next session — short beat (150ms) so the user can see the
+    // session-type label flip, then immediately roll into the new countdown.
+    // (Was 1200ms originally to let the achievement notification animate, but
+    // the achievement UI was removed, so the long pause is now dead time.)
     state.timer.autoStartTimeout = setTimeout(() => {
         state.timer.transitioning = false;
         startTimer();
-    }, 1200);
+    }, 150);
 }
 
 /**
