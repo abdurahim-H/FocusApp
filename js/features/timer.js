@@ -406,23 +406,33 @@ function processAchievementQueue() {
         isShowingAchievement = false;
         return;
     }
-    
+
     isShowingAchievement = true;
     const achievement = document.getElementById('achievement');
+    const titleEl = document.getElementById('achievementTitle');
+    const descEl = document.getElementById('achievementDesc');
     const { title, desc } = achievementQueue.shift();
-    
-    document.getElementById('achievementTitle').textContent = title;
-    document.getElementById('achievementDesc').textContent = desc;
-    
+
+    // Achievement UI was removed from index.html — null-guard so the missing
+    // DOM doesn't throw and abort the caller (which used to freeze the timer
+    // mid-completeSession when Skip Focus was pressed).
+    if (!achievement || !titleEl || !descEl) {
+        isShowingAchievement = false;
+        return;
+    }
+
+    titleEl.textContent = title;
+    descEl.textContent = desc;
+
     if (currentAchievementTimeout) {
         clearTimeout(currentAchievementTimeout);
     }
-    
+
     achievement.classList.add('show');
-    
+
     currentAchievementTimeout = setTimeout(() => {
         achievement.classList.remove('show');
-        
+
         setTimeout(() => {
             processAchievementQueue();
         }, 500);
