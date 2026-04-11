@@ -34,14 +34,17 @@ function closeAnyModal() {
         document.body.style.overflow = '';
         return true;
     }
-    // Settings modal
+    // Settings modal — use the central close function if available
     const settingsOverlay = document.getElementById('settingsModalOverlay');
     if (settingsOverlay?.classList.contains('active')) {
-        settingsOverlay.classList.remove('active');
+        if (window._closeSettings) {
+            window._closeSettings();
+        } else {
+            settingsOverlay.classList.remove('active');
+            const settingsBtn = document.getElementById('settingsBtn');
+            if (settingsBtn) settingsBtn.classList.remove('open');
+        }
         document.body.style.overflow = '';
-        // Stop the star spin
-        const settingsBtn = document.getElementById('settingsBtn');
-        if (settingsBtn) settingsBtn.classList.remove('open');
         return true;
     }
     return false;

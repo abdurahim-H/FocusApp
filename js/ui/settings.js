@@ -248,7 +248,13 @@ export function setupSettingsModal() {
         // Enhance the modal structure first
         enhanceSettingsHeader();
         
-        // Settings button click — open modal + spin the star
+        // Central close function — used by ALL close paths
+        function closeSettings() {
+            settingsOverlay.classList.remove('active');
+            settingsBtn.classList.remove('open');
+        }
+
+        // Open modal + spin the star
         settingsBtn.addEventListener('click', function(event) {
             event.preventDefault();
             event.stopPropagation();
@@ -261,13 +267,33 @@ export function setupSettingsModal() {
             }
         });
 
-        // Click outside to close — stop star spin
+        // Click outside to close
         settingsOverlay.addEventListener('click', function(event) {
             if (event.target === settingsOverlay) {
-                settingsOverlay.classList.remove('active');
-                settingsBtn.classList.remove('open');
+                closeSettings();
             }
         });
+
+        // Close button (X) inside the panel header
+        const closeBtn = document.getElementById('settingsCloseBtn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                closeSettings();
+            });
+        }
+
+        // Reset to defaults button
+        const resetBtn = document.getElementById('resetSettingsBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                resetSettings();
+            });
+        }
+
+        // Expose closeSettings for keyboard.js Esc handler
+        window._closeSettings = closeSettings;
 
         // Proximity glow — the star brightens as the cursor approaches
         setupProximityGlow(settingsBtn);
