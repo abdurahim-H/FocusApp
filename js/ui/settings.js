@@ -678,9 +678,33 @@ function resetSettings() {
         state.timer.seconds = 0;
         updateTimerDisplay();
     }
-    
-    // Show success message
-    showSuccessMessage('Settings Reset! ✨');
+
+    // Brief inline confirmation on the Reset button itself
+    flashResetConfirmation();
+}
+
+// Small, scoped visual confirmation for "Reset to defaults".
+// Replaces the (now unstyled) toast — flashes the button label + color,
+// then restores it. Re-entrant: a second click cancels the pending revert.
+function flashResetConfirmation() {
+    const btn = document.getElementById('resetSettingsBtn');
+    if (!btn) return;
+
+    if (btn._resetFlashTimer) {
+        clearTimeout(btn._resetFlashTimer);
+    } else {
+        btn.dataset.originalLabel = btn.textContent;
+    }
+
+    btn.classList.add('is-confirmed');
+    btn.textContent = 'Reset ✓';
+
+    btn._resetFlashTimer = setTimeout(() => {
+        btn.classList.remove('is-confirmed');
+        btn.textContent = btn.dataset.originalLabel || 'Reset to defaults';
+        delete btn.dataset.originalLabel;
+        btn._resetFlashTimer = null;
+    }, 1400);
 }
 
 export function loadSettings() {
