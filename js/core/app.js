@@ -28,7 +28,8 @@ async function loadModules() {
         { name: 'statistics', path: '../features/statistics.js' },
         { name: 'notificationBanner', path: '../features/notification-banner.js' },
         { name: 'settings', path: '../ui/settings.js' },
-        { name: 'soundMixer', path: '../features/sound-mixer.js' }
+        { name: 'soundMixer', path: '../features/sound-mixer.js' },
+        { name: 'timerParticles', path: '../ui/timer-particles.js' }
     ];
 
     for (const module of moduleList) {
@@ -150,6 +151,11 @@ export async function initApp() {
         // Phase 2: coordinated button press spring (delegated, app-wide)
         if (loadedModules.buttonFeel?.initButtonFeel) {
             loadedModules.buttonFeel.initButtonFeel();
+        }
+
+        // Timer particle effect (experiment — revert if unwanted)
+        if (loadedModules.timerParticles?.initTimerParticles) {
+            loadedModules.timerParticles.initTimerParticles();
         }
 
         // Phase 5A: keyboard shortcuts (Space=start/pause, R=reset, 1/2/3=mode, /=input)

@@ -6,6 +6,7 @@ import { state } from '../core/state.js';
 import { triggerFocusIntensity, triggerSessionCompleteUI } from '../ui/ui-effects.js';
 import { trackSetInterval } from '../utils/cleanup.js';
 import { recordSessionComplete } from '../features/statistics.js';
+import { emitTimerParticles } from '../ui/timer-particles.js';
 import { 
     notifyFocusComplete, 
     notifyBreakComplete, 
@@ -105,6 +106,7 @@ export function startTimer() {
             state.timer.seconds--;
         }
         updateTimerDisplay();
+        emitTimerParticles();
     }, 1000);
 }
 
