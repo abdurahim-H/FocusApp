@@ -214,7 +214,7 @@
     position: fixed;
     top: 16px;
     right: 16px;
-    z-index: 1001;
+    z-index: 2002;
     width: 36px;
     height: 36px;
     display: flex;
@@ -273,15 +273,16 @@
     display: block;
 }
 
-/* The panel floats from the star button — no dimming, no backdrop.
-   Pure glass floating over the live scene. */
+/* The panel expands from the star. Its top-right corner aligns with the
+   star button so the star sits ON the corner. No separate close button —
+   clicking the star again closes it. */
 .settings-modal {
     position: fixed !important;
-    top: 56px !important;
-    right: 16px !important;
+    top: 10px !important;
+    right: 10px !important;
     width: 320px !important;
     max-width: 88vw !important;
-    max-height: calc(100vh - 80px) !important;
+    max-height: calc(100vh - 32px) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     background: rgba(10, 8, 5, 0.78) !important;
@@ -294,12 +295,22 @@
         inset 0 1px 0 rgba(255, 240, 210, 0.05) !important;
     backdrop-filter: blur(60px) saturate(170%) !important;
     -webkit-backdrop-filter: blur(60px) saturate(170%) !important;
-    opacity: 1 !important;
-    transform: scale(1) !important;
+    /* Entry animation — scales up from the star's corner */
     transform-origin: top right !important;
-    transition: none !important;
+    animation: settingsExpand 0.35s cubic-bezier(0.32, 0.72, 0, 1) both !important;
     scrollbar-width: none;
     z-index: 2001;
+}
+
+@keyframes settingsExpand {
+    from {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .settings-modal::-webkit-scrollbar { width: 0; display: none; }
@@ -311,48 +322,26 @@
 /* Kill the theme checkmark from themes.css */
 .settings-modal [data-theme]::after { display: none !important; }
 
-/* ── Header ── */
+/* ── Header — the star sits on the top-right corner, so we leave
+   padding-right for it and left-align the title ── */
 .settings-header {
     display: flex !important;
     align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 28px 24px 20px;
+    justify-content: flex-start;
+    padding: 24px 50px 16px 28px;
 }
 
 .settings-header h2 {
-    font-size: 15px !important;
+    font-size: 13px !important;
     font-weight: 500 !important;
-    color: rgba(255, 255, 255, 0.55) !important;
-    -webkit-text-fill-color: rgba(255, 255, 255, 0.55) !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.4) !important;
     background: none !important;
     background-clip: unset !important;
     -webkit-background-clip: unset !important;
     margin: 0 !important;
-    letter-spacing: 0.08em !important;
+    letter-spacing: 0.1em !important;
     text-transform: uppercase;
-}
-
-.settings-close {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 28px; height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.2);
-    cursor: pointer;
-    transition: all 0.25s ease;
-}
-
-.settings-close:hover {
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(255, 255, 255, 0.06);
 }
 
 /* ── Group ── */

@@ -255,16 +255,21 @@ export function setupSettingsModal() {
             settingsBtn.classList.remove('open');
         }
 
-        // Open modal + spin the star
+        // Star toggles the panel open/closed
         settingsBtn.addEventListener('click', function(event) {
             event.preventDefault();
             event.stopPropagation();
-            settingsOverlay.classList.add('active');
-            settingsBtn.classList.add('open');
 
-            if (!iosSettingsInitialized) {
-                initializeIOSEnhancements();
-                iosSettingsInitialized = true;
+            if (settingsOverlay.classList.contains('active')) {
+                closeSettings();
+            } else {
+                settingsOverlay.classList.add('active');
+                settingsBtn.classList.add('open');
+
+                if (!iosSettingsInitialized) {
+                    initializeIOSEnhancements();
+                    iosSettingsInitialized = true;
+                }
             }
         });
 
