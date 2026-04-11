@@ -269,10 +269,8 @@ export function setupSettingsModal() {
             }
             settingsBtn.classList.add('open');
 
-            if (!iosSettingsInitialized) {
-                initializeIOSEnhancements();
-                iosSettingsInitialized = true;
-            }
+            // initializeIOSEnhancements disabled — it injects unstyled ripple
+            // divs that inflated button heights (cosmic-settings.css is gone)
         }
 
         // Star toggles the panel open/closed

@@ -389,6 +389,10 @@
     position: relative;
 }
 
+.theme-card:focus {
+    outline: none;
+}
+
 .theme-card:hover {
     background: rgba(255, 255, 255, 0.03);
     color: rgba(255, 255, 255, 0.6);
@@ -405,6 +409,12 @@
     width: 100%;
     aspect-ratio: 1.2;
     border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* Prevent theme cards from changing size on any state */
+.theme-card {
     overflow: hidden;
 }
 
@@ -424,6 +434,15 @@
 .theme-card-name {
     font-weight: 500;
     letter-spacing: 0.04em;
+}
+
+.theme-card--coming-soon {
+    cursor: default;
+    opacity: 0.3;
+}
+
+.theme-card--coming-soon .theme-card-dot {
+    border-style: dashed;
 }
 
 /* ── Rows ── */

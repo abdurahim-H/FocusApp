@@ -218,12 +218,11 @@
     transition: transform 0.3s var(--apple-ease-bounce);
 }
 
-/* Hover state - elegant lift and glow */
+/* Hover state - glow only, no scale (scale conflicts with button-feel.js) */
 .ambient-controls .liquid-glass-btn:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.18);
     color: rgba(255, 255, 255, 1);
-    transform: translateY(-4px) scale(1.02);
     
     box-shadow: 
         0 12px 36px rgba(0, 0, 0, 0.35),
@@ -265,14 +264,7 @@
 /* Enhanced hover on active sounds */
 .ambient-controls .liquid-glass-btn.active:hover,
 .ambient-controls .liquid-glass-btn[data-playing="true"]:hover {
-    background: rgba(138, 43, 226, 0.2);
-    transform: translateY(-6px) scale(1.04);
-}
-
-/* Press effect */
-.ambient-controls .liquid-glass-btn:active {
-    transform: translateY(-2px) scale(0.98);
-    transition: transform 0.1s var(--apple-ease);
+    background: rgba(200, 146, 42, 0.2);
 }
 
 /* ===== TIMER CONTROLS - APPLE STYLE ===== */
@@ -344,7 +336,6 @@
     background: rgba(176, 224, 230, 0.18);
     border-color: rgba(176, 224, 230, 0.3);
     color: rgba(255, 255, 255, 1);
-    transform: translateY(-2px) scale(1.03);
     
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.3),
@@ -373,7 +364,6 @@
     background: rgba(255, 149, 0, 0.15);
     border-color: rgba(255, 149, 0, 0.25);
     color: rgba(255, 255, 255, 0.95);
-    transform: translateY(-2px) scale(1.03);
     
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.3),
@@ -400,7 +390,6 @@
     background: rgba(52, 199, 89, 0.15);
     border-color: rgba(52, 199, 89, 0.25);
     color: rgba(255, 255, 255, 0.95);
-    transform: translateY(-2px) scale(1.03);
     
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.3),
@@ -418,26 +407,9 @@
     font-size: 13px;
 }
 
-/* Hover state for all timer buttons */
-.timer-controls .liquid-glass-btn:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.95);
-    transform: translateY(-2px) scale(1.02);
-    
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        0 2px 12px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        inset 0 0 20px rgba(255, 255, 255, 0.06),
-        0 0 30px rgba(255, 255, 255, 0.12);
-}
-
-/* Press effect */
-.timer-controls .liquid-glass-btn:active {
-    transform: translateY(0) scale(0.98);
-    transition: transform 0.1s var(--apple-ease);
-}
+/* Hover/active transforms for timer buttons removed — they conflict with
+   button-feel.js's Web Animations API spring. The Phase 4 shadows in
+   components.css handle the visual feedback instead. */
 
 /* ===== APPLE MORPHING ANIMATIONS ===== */
 
@@ -521,9 +493,8 @@
 }
 
 .browse-sounds-btn:hover {
-    background: rgba(138, 43, 226, 0.12) !important;
-    border-color: rgba(138, 43, 226, 0.25) !important;
-    transform: translateY(-3px) scale(1.02) !important;
+    background: rgba(200, 146, 42, 0.12) !important;
+    border-color: rgba(200, 146, 42, 0.25) !important;
     
     box-shadow: 
         0 10px 40px rgba(0, 0, 0, 0.25),
@@ -882,19 +853,13 @@
 .sound-card:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-4px) scale(1.03);
     color: rgba(255, 255, 255, 1);
-    
-    box-shadow: 
-        0 12px 40px rgba(0, 0, 0, 0.35),
-        0 4px 16px rgba(138, 43, 226, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        0 0 35px rgba(138, 43, 226, 0.3);
-}
 
-.sound-card:hover .sound-icon {
-    transform: scale(1.15) rotate(5deg);
-    filter: drop-shadow(0 6px 18px rgba(138, 43, 226, 0.5));
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.35),
+        0 4px 16px rgba(200, 146, 42, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 35px rgba(200, 146, 42, 0.2);
 }
 
 /* Sound card active state */
@@ -917,13 +882,6 @@
 
 .sound-card.active:hover {
     background: rgba(200, 146, 42, 0.22);
-    transform: translateY(-6px) scale(1.05);
-}
-
-/* Sound card press */
-.sound-card:active {
-    transform: translateY(-2px) scale(0.98);
-    transition: transform 0.1s ease;
 }
 
 /* Responsive modal */
