@@ -4,6 +4,8 @@
 
 let particleSystem = null;
 let scene = null;
+// Reusable Vector3 for emitter — avoids .clone() allocation every frame
+let _petalEmitterPos = null;
 
 /**
  * Create the ethereal petals particle system
@@ -131,7 +133,9 @@ function createPetalTexture() {
  */
 export function updateEtherealPetals(elapsed, camera) {
     if (particleSystem && camera) {
-        particleSystem.emitter = camera.position.clone();
+        if (!_petalEmitterPos) _petalEmitterPos = new BABYLON.Vector3(0, 0, 0);
+        _petalEmitterPos.copyFrom(camera.position);
+        particleSystem.emitter = _petalEmitterPos;
     }
 }
 

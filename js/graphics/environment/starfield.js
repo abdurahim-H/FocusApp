@@ -19,6 +19,9 @@ let scene = null;
 let camera = null;
 let shadersRegistered = false;
 
+// Reusable Vector3 for emitter updates — avoids .clone() allocation every frame
+let _emitterPos = null;
+
 // Star twinkling shaders — smooth, organic breathing animation
 const STAR_VERTEX_SHADER = `
     precision highp float;
@@ -430,14 +433,13 @@ export function updateStarField(elapsed) {
         starLayers.near.mesh.rotation.x = elapsed * 0.004;
     }
 
-    // Update dust emitter position to follow camera
-    if (dustParticles && camera) {
-        dustParticles.emitter = camera.position.clone();
-    }
-
-    // Update debris emitter
-    if (debrisParticles && camera) {
-        debrisParticles.emitter = camera.position.clone();
+    // Update dust/debris emitter position to follow camera.
+    // Reuse a single Vector3 instead of .clone() to avoid GC pressure.
+    if ((dustParticles || debrisParticles) && camera) {
+        if (!_emitterPos) _emitterPos = new BABYLON.Vector3(0, 0, 0);
+        _emitterPos.copyFrom(camera.position);
+        if (dustParticles) dustParticles.emitter = _emitterPos;
+        if (debrisParticles) debrisParticles.emitter = _emitterPos;
     }
 }
 

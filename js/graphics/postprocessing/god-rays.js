@@ -5,6 +5,11 @@
 let godRayPostProcess = null;
 let lightScreenPos = { x: 0.5, y: 0.5 };
 
+// Reusable objects — avoids creating new Vector3/Matrix/viewport every frame (GC pressure fix)
+let _bhWorldPos = null;
+let _identityMatrix = null;
+const _viewport = { x: 0, y: 0, width: 0, height: 0 };
+
 const GODRAY_FRAGMENT = `
     precision highp float;
     varying vec2 vUV;
@@ -84,16 +89,19 @@ export function createGodRays(scene, camera) {
 export function updateGodRays(scene, camera) {
     if (!godRayPostProcess) return;
 
-    // Black hole world position
-    const bhWorldPos = new BABYLON.Vector3(0, -0.5, 0);
+    // Lazy-init cached objects (BABYLON may not be loaded at module eval time)
+    if (!_bhWorldPos) _bhWorldPos = new BABYLON.Vector3(0, -0.5, 0);
+    if (!_identityMatrix) _identityMatrix = BABYLON.Matrix.Identity();
 
     // Project to screen space [0,1]
     const engine = scene.getEngine();
+    _viewport.width = engine.getRenderWidth();
+    _viewport.height = engine.getRenderHeight();
     const projected = BABYLON.Vector3.Project(
-        bhWorldPos,
-        BABYLON.Matrix.Identity(),
+        _bhWorldPos,
+        _identityMatrix,
         scene.getTransformMatrix(),
-        { x: 0, y: 0, width: engine.getRenderWidth(), height: engine.getRenderHeight() }
+        _viewport
     );
 
     lightScreenPos.x = projected.x / engine.getRenderWidth();
