@@ -5,6 +5,7 @@
 import { state } from '../core/state.js';
 import { triggerFocusIntensity, triggerSessionCompleteUI } from '../ui/ui-effects.js';
 import { trackSetInterval } from '../utils/cleanup.js';
+import { recordSessionComplete } from '../features/statistics.js';
 import { 
     notifyFocusComplete, 
     notifyBreakComplete, 
@@ -237,8 +238,19 @@ export function completeSession() {
     } else {
         // Focus session completed
         state.timer.pomodoroCount++;
-        state.universe.focusMinutes += state.timer.settings.focusDuration;
+
+        // Calculate ACTUAL elapsed seconds (not configured duration).
+        // If user skipped at 24:45, remaining = 24*60+45 = 1485s,
+        // configured = 25*60 = 1500s, elapsed = 15s.
+        const configuredSeconds = state.timer.settings.focusDuration * 60;
+        const remainingSeconds = state.timer.minutes * 60 + state.timer.seconds;
+        const elapsedSeconds = configuredSeconds - remainingSeconds;
+
+        state.universe.focusMinutes += Math.round(elapsedSeconds / 60);
         state.universe.stars += 1;
+
+        // Phase 5B: record actual elapsed seconds in statistics
+        recordSessionComplete(elapsedSeconds);
 
         triggerSessionCompleteUI();
 

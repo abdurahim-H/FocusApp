@@ -6,6 +6,7 @@
 
 import { tasks, effect } from '../core/state.js';
 import { springAnim, anim, prefersReducedMotion } from '../core/motion.js';
+import { recordTaskToggle } from '../features/statistics.js';
 
 // ============================================================================
 // Mutations (immutable — required for signals to detect changes)
@@ -29,9 +30,16 @@ export function clearAllTasks() {
 }
 
 export function toggleTask(id) {
+    const task = tasks.value.find(t => t.id === id);
+    if (!task) return;
+
+    const newCompleted = !task.completed;
     tasks.value = tasks.value.map(t =>
-        t.id === id ? { ...t, completed: !t.completed } : t
+        t.id === id ? { ...t, completed: newCompleted } : t
     );
+
+    // Track both directions: completing increments, uncompleting decrements
+    recordTaskToggle(newCompleted);
 }
 
 // Legacy no-op — rendering is automatic now via the effect below.

@@ -23,7 +23,12 @@ async function loadModules() {
         { name: 'navigation', path: '../ui/navigation.js' },
         { name: 'uiEffects', path: '../ui/ui-effects.js' },
         { name: 'cleanup', path: '../utils/cleanup.js' },
-        { name: 'buttonFeel', path: '../ui/button-feel.js' }
+        { name: 'buttonFeel', path: '../ui/button-feel.js' },
+        { name: 'keyboard', path: '../features/keyboard.js' },
+        { name: 'statistics', path: '../features/statistics.js' },
+        { name: 'notificationBanner', path: '../features/notification-banner.js' },
+        { name: 'settings', path: '../ui/settings.js' },
+        { name: 'soundMixer', path: '../features/sound-mixer.js' }
     ];
 
     for (const module of moduleList) {
@@ -133,6 +138,11 @@ export async function initApp() {
             loadedModules.sounds.setupAmbientControls();
         }
 
+        // Phase 5D: sound mixer (presets + per-sound volume sliders)
+        if (loadedModules.soundMixer?.initSoundMixer) {
+            loadedModules.soundMixer.initSoundMixer();
+        }
+
         if (loadedModules.uiEffects?.initUIEffects) {
             loadedModules.uiEffects.initUIEffects();
         }
@@ -140,6 +150,32 @@ export async function initApp() {
         // Phase 2: coordinated button press spring (delegated, app-wide)
         if (loadedModules.buttonFeel?.initButtonFeel) {
             loadedModules.buttonFeel.initButtonFeel();
+        }
+
+        // Phase 5A: keyboard shortcuts (Space=start/pause, R=reset, 1/2/3=mode, /=input)
+        if (loadedModules.keyboard?.initKeyboardShortcuts) {
+            loadedModules.keyboard.initKeyboardShortcuts();
+        }
+
+        // Phase 5B: statistics tracking
+        if (loadedModules.statistics?.initStatistics) {
+            loadedModules.statistics.initStatistics();
+        }
+
+        // Phase 5E: notification permission banner
+        if (loadedModules.notificationBanner?.initNotificationBanner) {
+            loadedModules.notificationBanner.initNotificationBanner();
+        }
+
+        // Phase 5C: settings panel (load saved settings + wire modal)
+        if (loadedModules.settings?.loadSettings) {
+            loadedModules.settings.loadSettings();
+        }
+        if (loadedModules.settings?.setupSettingsModal) {
+            loadedModules.settings.setupSettingsModal();
+        }
+        if (loadedModules.settings?.setupSettingsControls) {
+            loadedModules.settings.setupSettingsControls();
         }
 
         // Start core timers and displays
