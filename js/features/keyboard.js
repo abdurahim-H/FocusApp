@@ -39,6 +39,9 @@ function closeAnyModal() {
     if (settingsOverlay?.classList.contains('active')) {
         settingsOverlay.classList.remove('active');
         document.body.style.overflow = '';
+        // Stop the star spin
+        const settingsBtn = document.getElementById('settingsBtn');
+        if (settingsBtn) settingsBtn.classList.remove('open');
         return true;
     }
     return false;

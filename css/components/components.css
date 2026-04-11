@@ -208,7 +208,8 @@
     box-shadow: 0 0 6px rgba(200, 146, 42, 0.4);
 }
 
-/* ===== SETTINGS TRIGGER — Phase 5C ===== */
+/* ===== SETTINGS STAR — Phase 5C ===== */
+/* --glow: 0..1 is set by JS based on mouse proximity. */
 .settings-trigger {
     position: fixed;
     top: 16px;
@@ -220,24 +221,34 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(200, 146, 42, 0.06);
-    border: 1px solid rgba(200, 146, 42, 0.15);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    color: rgba(200, 146, 42, 0.55);
+    background: transparent;
+    border: none;
+    color: rgba(200, 146, 42, calc(0.22 + var(--glow, 0) * 0.78));
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: color 0.15s ease;
+    --glow: 0;
 }
 
-.settings-trigger:hover {
-    background: rgba(200, 146, 42, 0.14);
-    border-color: rgba(200, 146, 42, 0.35);
-    color: rgba(200, 146, 42, 0.9);
-    box-shadow: 0 0 20px rgba(200, 146, 42, 0.2);
+/* The star SVG */
+.settings-star {
+    filter: drop-shadow(0 0 calc(var(--glow, 0) * 14px) rgba(255, 200, 100, calc(var(--glow, 0) * 0.7)));
+    transition: filter 0.1s ease, transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: filter, transform;
 }
 
-.settings-trigger:active {
-    transform: scale(0.92);
+/* Click press */
+.settings-trigger:active .settings-star {
+    transform: scale(0.82);
+}
+
+/* When settings modal is open — spin continuously */
+.settings-trigger.open .settings-star {
+    animation: starSpin 4s linear infinite;
+}
+
+@keyframes starSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
 }
 
 /* ===== SETTINGS MODAL OVERLAY — Phase 5C ===== */

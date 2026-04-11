@@ -248,28 +248,29 @@ export function setupSettingsModal() {
         // Enhance the modal structure first
         enhanceSettingsHeader();
         
-        // Settings button click
+        // Settings button click — open modal + spin the star
         settingsBtn.addEventListener('click', function(event) {
             event.preventDefault();
             event.stopPropagation();
             settingsOverlay.classList.add('active');
-            
-            // Initialize iOS enhancements if not done yet
+            settingsBtn.classList.add('open');
+
             if (!iosSettingsInitialized) {
                 initializeIOSEnhancements();
                 iosSettingsInitialized = true;
             }
-            
-            console.log('Settings modal opened');
         });
-        
-        // Click outside to close
+
+        // Click outside to close — stop star spin
         settingsOverlay.addEventListener('click', function(event) {
             if (event.target === settingsOverlay) {
                 settingsOverlay.classList.remove('active');
-                console.log('Settings modal closed by overlay click');
+                settingsBtn.classList.remove('open');
             }
         });
+
+        // Proximity glow — the star brightens as the cursor approaches
+        setupProximityGlow(settingsBtn);
         
         console.log('✅ Settings modal event listeners attached');
     }, 100);
@@ -720,3 +721,45 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
         applyThemeToUI('auto');
     }
 });
+
+// ============================================================================
+// Proximity glow — star brightens gradually as cursor approaches
+// ============================================================================
+function setupProximityGlow(btn) {
+    // How close (px) the cursor needs to be for max glow
+    const INNER_RADIUS = 0;     // full glow at center
+    const OUTER_RADIUS = 200;   // glow starts at 200px away
+
+    let rafId = null;
+    let mouseX = -9999;
+    let mouseY = -9999;
+
+    function updateGlow() {
+        const rect = btn.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dist = Math.hypot(mouseX - cx, mouseY - cy);
+
+        // Map distance to 0..1 (1 = on top, 0 = far away)
+        const t = 1 - Math.min(1, Math.max(0, (dist - INNER_RADIUS) / (OUTER_RADIUS - INNER_RADIUS)));
+
+        // Apply eased value so the ramp feels natural (ease-in quadratic)
+        const glow = t * t;
+        btn.style.setProperty('--glow', glow.toFixed(3));
+
+        rafId = null;
+    }
+
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        if (!rafId) rafId = requestAnimationFrame(updateGlow);
+    }, { passive: true });
+
+    // Reset when mouse leaves the window
+    document.addEventListener('mouseleave', () => {
+        mouseX = -9999;
+        mouseY = -9999;
+        btn.style.setProperty('--glow', '0');
+    });
+}
