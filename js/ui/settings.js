@@ -245,8 +245,9 @@ export function setupSettingsModal() {
             return;
         }
         
-        // Enhance the modal structure first
-        enhanceSettingsHeader();
+        // Phase 5C: enhanceSettingsHeader() disabled — it dynamically injected
+        // an old Reset/Save/X header that conflicts with the new clean HTML.
+        // The close button is now in index.html (#settingsCloseBtn).
         
         // Central close function — used by ALL close paths
         function closeSettings() {
@@ -465,27 +466,43 @@ export function setupSettingsControls() {
             }
         };
 
+        // Auto-save helper — applies + persists a setting immediately on change
+        function autoSave(key, value) {
+            localStorage.setItem(key, value);
+        }
+
         // Focus length range
         if (elements.focusRange && elements.focusValue) {
             elements.focusRange.addEventListener('input', () => {
-                elements.focusValue.textContent = elements.focusRange.value;
-                updateRangeProgress(elements.focusRange);
+                const v = parseInt(elements.focusRange.value);
+                elements.focusValue.textContent = v;
+                state.timer.settings.focusDuration = v;
+                autoSave('fu_focusLength', v);
+                if (!state.timer.isRunning && !state.timer.isBreak) {
+                    state.timer.minutes = v;
+                    state.timer.seconds = 0;
+                    updateTimerDisplay();
+                }
             });
         }
 
         // Short break length range
         if (elements.shortBreakRange && elements.shortBreakValue) {
             elements.shortBreakRange.addEventListener('input', () => {
-                elements.shortBreakValue.textContent = elements.shortBreakRange.value;
-                updateRangeProgress(elements.shortBreakRange);
+                const v = parseInt(elements.shortBreakRange.value);
+                elements.shortBreakValue.textContent = v;
+                state.timer.settings.shortBreakDuration = v;
+                autoSave('fu_shortBreakLength', v);
             });
         }
 
         // Long break length range
         if (elements.longBreakRange && elements.longBreakValue) {
             elements.longBreakRange.addEventListener('input', () => {
-                elements.longBreakValue.textContent = elements.longBreakRange.value;
-                updateRangeProgress(elements.longBreakRange);
+                const v = parseInt(elements.longBreakRange.value);
+                elements.longBreakValue.textContent = v;
+                state.timer.settings.longBreakDuration = v;
+                autoSave('fu_longBreakLength', v);
             });
         }
 
@@ -495,8 +512,7 @@ export function setupSettingsControls() {
                 const volume = parseInt(elements.soundRange.value);
                 elements.soundValue.textContent = volume;
                 setVolume(volume);
-                updateRangeProgress(elements.soundRange);
-                console.log(`🎛️ Settings: Ambient sound volume set to ${volume}%`);
+                autoSave('fu_soundVolume', volume);
             });
         }
 

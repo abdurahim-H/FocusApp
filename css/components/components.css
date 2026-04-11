@@ -254,59 +254,62 @@
 
 /* ===== SETTINGS PANEL — Phase 5C redesign ===== */
 
-/* Overlay — dark backdrop with blur ramp */
+/* ===== SETTINGS ===== */
+/* The overlay is invisible — no color, no blur. It only exists as a
+   click-outside target so clicking anywhere outside the panel closes it.
+   The scene stays completely untouched. */
 .settings-modal-overlay {
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
     z-index: 2000;
     display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 .settings-modal-overlay.active {
-    display: flex;
+    display: block;
 }
 
-/* Panel — glass morphism, gold accent, scales from top-right (star button origin) */
+/* The panel floats from the star button — no dimming, no backdrop.
+   Pure glass floating over the live scene. */
 .settings-modal {
-    width: 90vw !important;
-    max-width: 400px !important;
-    max-height: 82vh !important;
+    position: fixed !important;
+    top: 56px !important;
+    right: 16px !important;
+    width: 320px !important;
+    max-width: 88vw !important;
+    max-height: calc(100vh - 80px) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    background: rgba(14, 12, 8, 0.94) !important;
-    border: 1px solid rgba(200, 146, 42, 0.18) !important;
-    border-radius: 20px !important;
+    background: rgba(10, 8, 5, 0.78) !important;
+    border: 1px solid rgba(200, 146, 42, 0.1) !important;
+    border-radius: 24px !important;
     padding: 0 !important;
     box-shadow:
-        0 24px 80px rgba(0, 0, 0, 0.65),
-        0 4px 20px rgba(200, 146, 42, 0.08),
-        inset 0 1px 0 rgba(255, 240, 210, 0.08) !important;
-    backdrop-filter: blur(50px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(50px) saturate(160%) !important;
+        0 20px 60px rgba(0, 0, 0, 0.65),
+        0 0 0 0.5px rgba(255, 240, 210, 0.08),
+        inset 0 1px 0 rgba(255, 240, 210, 0.05) !important;
+    backdrop-filter: blur(60px) saturate(170%) !important;
+    -webkit-backdrop-filter: blur(60px) saturate(170%) !important;
     opacity: 1 !important;
     transform: scale(1) !important;
     transform-origin: top right !important;
     transition: none !important;
-    /* Scrollbar */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(200, 146, 42, 0.2) transparent;
+    scrollbar-width: none;
+    z-index: 2001;
 }
 
-.settings-modal::-webkit-scrollbar { width: 4px; background: transparent; }
-.settings-modal::-webkit-scrollbar-thumb {
-    background: rgba(200, 146, 42, 0.25);
-    border-radius: 999px;
-}
+.settings-modal::-webkit-scrollbar { width: 0; display: none; }
 
 /* Kill cosmic-settings.css remnants */
 .settings-modal::before { display: none !important; }
 .settings-modal::after { display: none !important; }
+
+/* Kill the theme checkmark from themes.css */
+.settings-modal [data-theme]::after { display: none !important; }
 
 /* ── Header ── */
 .settings-header {
@@ -314,25 +317,25 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: var(--space-5) var(--space-6) var(--space-4);
-    border-bottom: 1px solid rgba(200, 146, 42, 0.08);
+    padding: 28px 24px 20px;
 }
 
 .settings-header h2 {
-    font-size: var(--text-md) !important;
-    font-weight: 600 !important;
-    color: rgba(245, 235, 215, 0.9) !important;
-    -webkit-text-fill-color: rgba(245, 235, 215, 0.9) !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.55) !important;
     background: none !important;
     background-clip: unset !important;
     -webkit-background-clip: unset !important;
     margin: 0 !important;
-    letter-spacing: var(--tracking-tight) !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase;
 }
 
 .settings-close {
     position: absolute;
-    right: var(--space-4);
+    right: 20px;
     top: 50%;
     transform: translateY(-50%);
     width: 28px; height: 28px;
@@ -341,109 +344,118 @@
     justify-content: center;
     border-radius: 50%;
     border: none;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.4);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.2);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
 }
 
 .settings-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 /* ── Group ── */
 .settings-group {
-    padding: var(--space-4) var(--space-6);
-    border-bottom: 1px solid rgba(200, 146, 42, 0.06);
+    padding: 16px 28px;
 }
 
-.settings-group:last-of-type {
-    border-bottom: none;
+.settings-group + .settings-group {
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .settings-group-label {
     display: block;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    color: rgba(200, 146, 42, 0.5);
-    letter-spacing: var(--tracking-wider);
+    color: rgba(200, 160, 100, 0.4);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    margin-bottom: var(--space-3);
+    margin-bottom: 14px;
 }
 
-/* ── Theme cards ── */
+/* ── Theme/Scene cards ── */
 .theme-cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-2);
+    gap: 10px;
 }
 
 .theme-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-2);
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.02);
+    gap: 8px;
+    padding: 10px 8px 10px;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    background: transparent;
     cursor: pointer;
-    transition: all 0.25s ease;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: var(--text-xs);
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 11px;
+    position: relative;
 }
 
 .theme-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(200, 146, 42, 0.25);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .theme-card.active,
 .theme-card.btn-primary {
-    background: rgba(200, 146, 42, 0.1);
-    border-color: rgba(200, 146, 42, 0.45);
-    color: rgba(245, 232, 208, 0.95);
-    box-shadow: 0 0 20px rgba(200, 146, 42, 0.12);
+    border-color: rgba(200, 146, 42, 0.35);
+    background: rgba(200, 146, 42, 0.06);
+    color: rgba(240, 225, 200, 0.9);
+}
+
+.theme-card-preview {
+    width: 100%;
+    aspect-ratio: 1.2;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 .theme-card-dot {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    transition: border-color 0.2s ease;
+    width: 100%; height: 100%;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255, 255, 255, 0.06);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.theme-card.active .theme-card-dot {
-    border-color: rgba(200, 146, 42, 0.55);
+.theme-card.active .theme-card-dot,
+.theme-card.btn-primary .theme-card-dot {
+    border-color: rgba(200, 146, 42, 0.5);
+    box-shadow: 0 0 18px rgba(200, 146, 42, 0.2);
 }
 
 .theme-card-name {
     font-weight: 500;
-    letter-spacing: var(--tracking-wide);
+    letter-spacing: 0.04em;
 }
 
-/* ── Rows (slider + value) ── */
+/* ── Rows ── */
 .settings-row {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-1) 0;
+    gap: 12px;
+    padding: 6px 0;
 }
 
 .settings-row-label {
-    font-size: var(--text-sm);
-    color: rgba(220, 210, 195, 0.7);
-    min-width: 80px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.45);
+    min-width: 76px;
     flex-shrink: 0;
+    font-weight: 400;
 }
 
 .settings-row-value {
-    font-size: var(--text-sm);
+    font-size: 13px;
     font-weight: 600;
-    color: rgba(240, 220, 185, 0.85);
+    color: rgba(240, 225, 200, 0.7);
     font-variant-numeric: tabular-nums;
-    min-width: 36px;
+    min-width: 34px;
     text-align: right;
     flex-shrink: 0;
 }
@@ -453,132 +465,60 @@
     flex: 1;
     -webkit-appearance: none;
     appearance: none;
-    height: 3px;
-    border-radius: 2px;
-    background: rgba(200, 146, 42, 0.12);
+    height: 2px;
+    border-radius: 1px;
+    background: rgba(255, 255, 255, 0.08);
     outline: none;
     cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-.gold-slider:hover {
-    background: rgba(200, 146, 42, 0.2);
 }
 
 .gold-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 14px; height: 14px;
+    width: 12px; height: 12px;
     border-radius: 50%;
-    background: radial-gradient(circle at 40% 35%,
-        rgba(255, 226, 168, 0.95),
-        rgba(200, 146, 42, 0.9));
+    background: rgba(220, 180, 110, 0.9);
     border: none;
-    box-shadow:
-        0 0 6px rgba(200, 146, 42, 0.5),
-        0 2px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 8px rgba(200, 146, 42, 0.45);
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    transition: transform 0.15s ease, box-shadow 0.25s ease;
 }
 
 .gold-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-    box-shadow:
-        0 0 14px rgba(200, 146, 42, 0.65),
-        0 2px 8px rgba(0, 0, 0, 0.35);
+    transform: scale(1.3);
+    box-shadow: 0 0 18px rgba(200, 146, 42, 0.7);
 }
 
-.gold-slider:active::-webkit-slider-thumb {
-    transform: scale(1.1);
-}
-
-/* Firefox slider thumb */
 .gold-slider::-moz-range-thumb {
-    width: 14px; height: 14px;
+    width: 12px; height: 12px;
     border-radius: 50%;
-    background: radial-gradient(circle at 40% 35%,
-        rgba(255, 226, 168, 0.95),
-        rgba(200, 146, 42, 0.9));
+    background: rgba(220, 180, 110, 0.9);
     border: none;
-    box-shadow: 0 0 6px rgba(200, 146, 42, 0.5);
+    box-shadow: 0 0 8px rgba(200, 146, 42, 0.45);
     cursor: pointer;
-}
-
-/* ── Text input ── */
-.settings-text-input {
-    width: 100%;
-    padding: var(--space-2) var(--space-3);
-    border-radius: 10px;
-    border: 1px solid rgba(200, 146, 42, 0.1);
-    background: rgba(255, 255, 255, 0.03);
-    color: rgba(255, 255, 255, 0.88);
-    font-size: var(--text-sm);
-    font-family: inherit;
-    outline: none;
-    transition: all 0.25s ease;
-}
-
-.settings-text-input:focus {
-    border-color: rgba(200, 146, 42, 0.35);
-    background: rgba(200, 146, 42, 0.05);
-    box-shadow: 0 0 0 2px rgba(200, 146, 42, 0.1);
-}
-
-.settings-text-input::placeholder {
-    color: rgba(255, 255, 255, 0.2);
-}
-
-/* ── Notification row ── */
-.notification-status {
-    font-size: var(--text-sm);
-    color: rgba(192, 170, 130, 0.55);
-    flex: 1;
-}
-
-.notification-status.enabled { color: rgba(52, 199, 89, 0.85); }
-.notification-status.disabled { color: rgba(255, 69, 58, 0.75); }
-
-.settings-pill-btn {
-    padding: var(--space-1) var(--space-4);
-    border-radius: 999px;
-    border: 1px solid rgba(200, 146, 42, 0.3);
-    background: rgba(200, 146, 42, 0.08);
-    color: rgba(240, 220, 185, 0.85);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    letter-spacing: var(--tracking-wide);
-}
-
-.settings-pill-btn:hover {
-    background: rgba(200, 146, 42, 0.18);
-    border-color: rgba(200, 146, 42, 0.5);
-    box-shadow: 0 0 12px rgba(200, 146, 42, 0.2);
 }
 
 /* ── Footer ── */
 .settings-footer {
-    padding: var(--space-4) var(--space-6) var(--space-5);
+    padding: 12px 28px 22px;
     display: flex;
     justify-content: center;
 }
 
 .settings-reset-btn {
-    padding: var(--space-2) var(--space-5);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 6px 18px;
+    border-radius: 999px;
+    border: none;
     background: transparent;
-    color: rgba(255, 255, 255, 0.3);
-    font-size: var(--text-xs);
+    color: rgba(255, 255, 255, 0.18);
+    font-size: 11px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
-    letter-spacing: var(--tracking-wide);
+    transition: all 0.25s ease;
+    letter-spacing: 0.04em;
 }
 
 .settings-reset-btn:hover {
-    color: rgba(255, 120, 100, 0.8);
-    border-color: rgba(255, 69, 58, 0.25);
+    color: rgba(255, 130, 110, 0.75);
     background: rgba(255, 69, 58, 0.06);
 }
 

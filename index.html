@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="css/components/components.css?v=phase5">
     <link rel="stylesheet" href="css/components/apple-liquid-glass.css?v=phase5">
     <link rel="stylesheet" href="css/base/responsive.css?v=phase5">
-    <link rel="stylesheet" href="css/pages/cosmic-settings.css?v=phase5">
     
     <!-- Theme Initialization Script -->
     <script>
@@ -391,20 +390,26 @@
                 </button>
             </div>
 
-            <!-- Theme -->
+            <!-- Scene / Theme -->
             <div class="settings-group">
-                <span class="settings-group-label">Appearance</span>
+                <span class="settings-group-label">Scene</span>
                 <div class="theme-cards">
                     <button id="themeDarkBtn" data-theme="dark" class="theme-card active">
-                        <span class="theme-card-dot" style="background: #0a0a0f;"></span>
-                        <span class="theme-card-name">Dark</span>
+                        <span class="theme-card-preview">
+                            <span class="theme-card-dot" style="background: radial-gradient(ellipse at 50% 60%, #c8922a 0%, #4a2800 25%, #0a0a0f 55%);"></span>
+                        </span>
+                        <span class="theme-card-name">Black Hole</span>
                     </button>
                     <button id="themeCosmosBtn" data-theme="cosmos" class="theme-card">
-                        <span class="theme-card-dot" style="background: linear-gradient(135deg, #1a0a30, #3a1a60);"></span>
+                        <span class="theme-card-preview">
+                            <span class="theme-card-dot" style="background: radial-gradient(ellipse at 50% 50%, #6b3fa0 0%, #2a1050 35%, #080818 65%);"></span>
+                        </span>
                         <span class="theme-card-name">Cosmos</span>
                     </button>
                     <button id="themeAutoBtn" data-theme="auto" class="theme-card">
-                        <span class="theme-card-dot" style="background: linear-gradient(135deg, #0a0a0f 50%, #f3f4f6 50%);"></span>
+                        <span class="theme-card-preview">
+                            <span class="theme-card-dot" style="background: conic-gradient(from 135deg, #0a0a0f 50%, #d4d0c8 50%);"></span>
+                        </span>
                         <span class="theme-card-name">Auto</span>
                     </button>
                 </div>
@@ -430,28 +435,12 @@
                 </div>
             </div>
 
-            <!-- Sound -->
+            <!-- Volume -->
             <div class="settings-group">
-                <span class="settings-group-label">Sound</span>
                 <div class="settings-row">
                     <span class="settings-row-label">Volume</span>
                     <input type="range" id="soundVolumeRange" class="gold-slider" min="0" max="100" value="30">
                     <span class="settings-row-value"><span id="soundVolumeValue">30</span>%</span>
-                </div>
-            </div>
-
-            <!-- Greeting -->
-            <div class="settings-group">
-                <span class="settings-group-label">Greeting</span>
-                <input type="text" id="greetingInput" class="settings-text-input" placeholder="Welcome to Your Universe!">
-            </div>
-
-            <!-- Notifications -->
-            <div class="settings-group">
-                <span class="settings-group-label">Notifications</span>
-                <div class="settings-row">
-                    <span id="notificationStatus" class="notification-status pending">Click to enable</span>
-                    <button id="enableNotificationsBtn" class="settings-pill-btn">Enable</button>
                 </div>
             </div>
 
