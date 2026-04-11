@@ -223,8 +223,8 @@
     border-radius: 50%;
     background: transparent;
     border: none;
-    /* Warm white — not pure white (too cold), slight cream warmth */
-    color: rgba(245, 240, 230, calc(0.28 + var(--glow, 0) * 0.72));
+    /* Warm white — resting at 0.38 alpha, climbs to 1.0 with proximity glow */
+    color: rgba(245, 240, 230, calc(0.38 + var(--glow, 0) * 0.62));
     cursor: pointer;
     transition: color 0.15s ease;
     --glow: 0;
@@ -232,7 +232,7 @@
 
 /* The star SVG — warm white glow that intensifies on proximity */
 .settings-star {
-    filter: drop-shadow(0 0 calc(var(--glow, 0) * 16px) rgba(255, 248, 235, calc(var(--glow, 0) * 0.65)));
+    filter: drop-shadow(0 0 calc(2px + var(--glow, 0) * 16px) rgba(255, 248, 235, calc(0.15 + var(--glow, 0) * 0.6)));
     transition: filter 0.1s ease, transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
     will-change: filter, transform;
 }
