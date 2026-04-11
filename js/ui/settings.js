@@ -249,10 +249,30 @@ export function setupSettingsModal() {
         // an old Reset/Save/X header that conflicts with the new clean HTML.
         // The close button is now in index.html (#settingsCloseBtn).
         
+        const settingsPanel = document.getElementById('settingsPanel');
+
         // Central close function — used by ALL close paths
         function closeSettings() {
             settingsOverlay.classList.remove('active');
+            if (settingsPanel) {
+                settingsPanel.classList.remove('visible');
+                settingsPanel.classList.add('hidden');
+            }
             settingsBtn.classList.remove('open');
+        }
+
+        function openSettings() {
+            settingsOverlay.classList.add('active');
+            if (settingsPanel) {
+                settingsPanel.classList.remove('hidden');
+                settingsPanel.classList.add('visible');
+            }
+            settingsBtn.classList.add('open');
+
+            if (!iosSettingsInitialized) {
+                initializeIOSEnhancements();
+                iosSettingsInitialized = true;
+            }
         }
 
         // Star toggles the panel open/closed
@@ -260,32 +280,22 @@ export function setupSettingsModal() {
             event.preventDefault();
             event.stopPropagation();
 
-            if (settingsOverlay.classList.contains('active')) {
+            if (settingsPanel?.classList.contains('visible')) {
                 closeSettings();
             } else {
-                settingsOverlay.classList.add('active');
-                settingsBtn.classList.add('open');
-
-                if (!iosSettingsInitialized) {
-                    initializeIOSEnhancements();
-                    iosSettingsInitialized = true;
-                }
+                openSettings();
             }
         });
 
-        // Click outside to close
+        // Click outside to close (the invisible overlay)
         settingsOverlay.addEventListener('click', function(event) {
-            if (event.target === settingsOverlay) {
-                closeSettings();
-            }
+            closeSettings();
         });
 
-        // Close button (X) inside the panel header
-        const closeBtn = document.getElementById('settingsCloseBtn');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', function(event) {
-                event.preventDefault();
-                closeSettings();
+        // Prevent clicks inside the panel from closing via the overlay
+        if (settingsPanel) {
+            settingsPanel.addEventListener('click', function(event) {
+                event.stopPropagation();
             });
         }
 

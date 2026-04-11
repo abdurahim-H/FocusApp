@@ -14,11 +14,11 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap">
 
     <!-- Core Styles -->
-    <link rel="stylesheet" href="css/base/style.css?v=phase5d">
-    <link rel="stylesheet" href="css/base/themes.css?v=phase5">
-    <link rel="stylesheet" href="css/components/components.css?v=phase5">
-    <link rel="stylesheet" href="css/components/apple-liquid-glass.css?v=phase5">
-    <link rel="stylesheet" href="css/base/responsive.css?v=phase5">
+    <link rel="stylesheet" href="css/base/style.css?v=phase5bd">
+    <link rel="stylesheet" href="css/base/themes.css?v=phase5b">
+    <link rel="stylesheet" href="css/components/components.css?v=phase5b">
+    <link rel="stylesheet" href="css/components/apple-liquid-glass.css?v=phase5b">
+    <link rel="stylesheet" href="css/base/responsive.css?v=phase5b">
     
     <!-- Theme Initialization Script -->
     <script>
@@ -377,9 +377,13 @@
             <span class="progress-value" id="progressValue">0%</span>
         </div>
 
-    <!-- Settings Panel -->
-    <div class="settings-modal-overlay" id="settingsModalOverlay">
-        <div class="settings-modal" id="settingsPanel">
+    </div><!-- end .container — settings must be OUTSIDE because .container
+              has `contain: layout` which traps position:fixed elements -->
+
+    <!-- Settings click-outside catcher (invisible) -->
+    <div class="settings-modal-overlay" id="settingsModalOverlay"></div>
+    <!-- Settings panel — direct child of body, position:fixed works correctly -->
+    <div class="settings-modal hidden" id="settingsPanel">
             <!-- Header — no close button, the star serves as the toggle -->
             <div class="settings-header">
                 <h2>Settings</h2>
@@ -443,7 +447,6 @@
             <div class="settings-footer">
                 <button class="settings-reset-btn" id="resetSettingsBtn">Reset to defaults</button>
             </div>
-        </div>
     </div>
 
     <!-- Babylon.js Core — the only required dependency -->
@@ -451,7 +454,7 @@
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script>console.log('⏱️ [' + Math.round(performance.now() - window.__pageStart) + 'ms] Babylon.js loaded');</script>
 
-    <script type="module" src="js/core/app.js?v=phase5"></script>
+    <script type="module" src="js/core/app.js?v=phase5b"></script>
 </body>
 </html>
 

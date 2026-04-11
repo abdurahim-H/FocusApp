@@ -273,21 +273,21 @@
     display: block;
 }
 
-/* The panel expands from the star. Its top-right corner aligns with the
-   star button so the star sits ON the corner. No separate close button —
-   clicking the star again closes it. */
+/* Panel is an independent fixed element (not inside the overlay).
+   Positioned so the star (top:16px right:16px, 36x36) sits INSIDE
+   the panel's top-right area. */
 .settings-modal {
     position: fixed !important;
-    top: 10px !important;
-    right: 10px !important;
+    top: 2px !important;
+    right: 2px !important;
     width: 320px !important;
-    max-width: 88vw !important;
-    max-height: calc(100vh - 32px) !important;
+    max-width: 92vw !important;
+    max-height: calc(100vh - 16px) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     background: rgba(10, 8, 5, 0.78) !important;
     border: 1px solid rgba(200, 146, 42, 0.1) !important;
-    border-radius: 24px !important;
+    border-radius: 24px 14px 24px 24px !important;
     padding: 0 !important;
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.65),
@@ -295,22 +295,25 @@
         inset 0 1px 0 rgba(255, 240, 210, 0.05) !important;
     backdrop-filter: blur(60px) saturate(170%) !important;
     -webkit-backdrop-filter: blur(60px) saturate(170%) !important;
-    /* Entry animation — scales up from the star's corner */
     transform-origin: top right !important;
-    animation: settingsExpand 0.35s cubic-bezier(0.32, 0.72, 0, 1) both !important;
     scrollbar-width: none;
     z-index: 2001;
 }
 
+/* Closed state */
+.settings-modal.hidden {
+    display: none !important;
+}
+
+/* Open state — expand from the star corner */
+.settings-modal.visible {
+    display: block !important;
+    animation: settingsExpand 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
 @keyframes settingsExpand {
-    from {
-        opacity: 0;
-        transform: scale(0.4);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.3); }
+    to   { opacity: 1; transform: scale(1); }
 }
 
 .settings-modal::-webkit-scrollbar { width: 0; display: none; }
@@ -322,13 +325,13 @@
 /* Kill the theme checkmark from themes.css */
 .settings-modal [data-theme]::after { display: none !important; }
 
-/* ── Header — the star sits on the top-right corner, so we leave
-   padding-right for it and left-align the title ── */
+/* ── Header — starts below the star's area. The star (36px tall at top:16px)
+   sits inside the panel's top-right corner. Title lives below it. ── */
 .settings-header {
     display: flex !important;
     align-items: center;
     justify-content: flex-start;
-    padding: 24px 50px 16px 28px;
+    padding: 52px 28px 12px 28px;
 }
 
 .settings-header h2 {

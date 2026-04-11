@@ -34,17 +34,12 @@ function closeAnyModal() {
         document.body.style.overflow = '';
         return true;
     }
-    // Settings modal — use the central close function if available
-    const settingsOverlay = document.getElementById('settingsModalOverlay');
-    if (settingsOverlay?.classList.contains('active')) {
+    // Settings panel
+    const settingsPanel = document.getElementById('settingsPanel');
+    if (settingsPanel?.classList.contains('visible')) {
         if (window._closeSettings) {
             window._closeSettings();
-        } else {
-            settingsOverlay.classList.remove('active');
-            const settingsBtn = document.getElementById('settingsBtn');
-            if (settingsBtn) settingsBtn.classList.remove('open');
         }
-        document.body.style.overflow = '';
         return true;
     }
     return false;
