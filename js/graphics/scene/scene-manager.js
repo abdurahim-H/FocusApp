@@ -11,7 +11,7 @@ import { createCosmicMotes, updateCosmicMotes, disposeCosmicMotes } from '../env
 import { createEtherealPetals, updateEtherealPetals, disposeEtherealPetals } from '../environment/ethereal-petals.js';
 import { createCosmicPulse, updateCosmicPulse, disposeCosmicPulse } from '../environment/cosmic-pulse.js';
 import { createBlackHole, updateBlackHole, disposeBlackHole } from '../blackhole/blackhole.js';
-import { setupPostProcessing, disposePostProcessing, setExposure, createFilmGrainEffect } from '../postprocessing/pipeline.js';
+import { setupPostProcessing, disposePostProcessing, setExposure, getBaseExposure, createFilmGrainEffect } from '../postprocessing/pipeline.js';
 import { createAnamorphicStreak, disposeAnamorphicStreak } from '../postprocessing/anamorphic-streak.js';
 import { createGodRays, updateGodRays, disposeGodRays } from '../postprocessing/god-rays.js';
 import { detectDeviceProfile, createFPSWatchdog } from '../../utils/performance-profile.js';
@@ -67,6 +67,16 @@ export async function init3D() {
         // Detect device capability
         deviceProfile = detectDeviceProfile();
 
+        // User-override: scale the auto-detected star density by the setting.
+        // Read via a dynamic import so the store is optional at init time.
+        try {
+            const store = await import('../../ui/settings/store.js');
+            const densityOverride = store.get('scene.starDensity');
+            if (typeof densityOverride === 'number' && densityOverride > 0) {
+                deviceProfile.starMultiplier = deviceProfile.starMultiplier * densityOverride;
+            }
+        } catch (_) { /* store unavailable — use defaults */ }
+
         // Create scene with HDR support
         scene = new BABYLON.Scene(engine);
         scene.clearColor = new BABYLON.Color4(0.001, 0.001, 0.003, 1.0);
@@ -115,6 +125,24 @@ export async function init3D() {
 
         // Handle window resize
         window.addEventListener('resize', handleResize);
+
+        // Replay any saved scene settings now that pipeline + god rays exist.
+        // This catches the case where loadSettings() ran BEFORE the scene was
+        // ready, so the apply hooks had nothing to push into.
+        try {
+            const [{ APPLY_HOOKS }, store] = await Promise.all([
+                import('../../ui/settings/apply.js'),
+                import('../../ui/settings/store.js'),
+            ]);
+            const all = store.getAll();
+            for (const key of Object.keys(all)) {
+                if (!key.startsWith('scene.') && !key.startsWith('motion.')) continue;
+                const fn = APPLY_HOOKS[key];
+                if (typeof fn === 'function') {
+                    try { fn(all[key]); } catch (_) { /* tolerate */ }
+                }
+            }
+        } catch (_) { /* optional */ }
 
         // Mouse parallax (desktop only)
         if (!('ontouchstart' in window)) {
@@ -288,14 +316,15 @@ function updateCinematicCamera(elapsed) {
 }
 
 /**
- * Simulate auto-exposure based on scene brightness
+ * Simulate auto-exposure based on scene brightness. The base exposure is
+ * driven by Settings > Scene > Advanced > Exposure — this loop just adds a
+ * tiny sinusoidal variation on top so the scene breathes.
  * @param {number} elapsed
  */
 function updateAutoExposure(elapsed) {
-    // Subtle exposure variation to simulate camera response
-    const baseExposure = 1.0;
+    const base = getBaseExposure();
     const variation = Math.sin(elapsed * 0.1) * 0.05;
-    setExposure(baseExposure + variation);
+    setExposure(base + variation);
 }
 
 /**
@@ -328,6 +357,14 @@ function handleResize() {
  */
 export function getFPS() {
     return stats.fps;
+}
+
+/**
+ * Get the detected device profile (tier + quality knobs). Used by the
+ * Settings About panel and the "Auto" graphics preset.
+ */
+export function getDeviceProfile() {
+    return deviceProfile;
 }
 
 /**

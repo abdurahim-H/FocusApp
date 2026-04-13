@@ -7,9 +7,10 @@ import { triggerFocusIntensity, triggerSessionCompleteUI } from '../ui/ui-effect
 import { trackSetInterval } from '../utils/cleanup.js';
 import { recordSessionComplete } from '../features/statistics.js';
 import { emitTimerParticles } from '../ui/timer-particles.js';
-import { 
-    notifyFocusComplete, 
-    notifyBreakComplete, 
+import { get as settingsGet } from '../ui/settings/store.js';
+import {
+    notifyFocusComplete,
+    notifyBreakComplete,
     notifyPomodoroComplete,
     areNotificationsEnabled,
     requestNotificationPermission,
@@ -31,18 +32,19 @@ export function updateTimerDisplay() {
 export function updateSessionDisplay() {
     const pomodoroCountElement = document.getElementById('pomodoroCount');
     const pomodoroTotalElement = document.getElementById('pomodoroTotal');
-    
+    const goal = settingsGet('timer.pomodoroGoal') ?? 4;
+
     if (pomodoroCountElement) {
-        let currentSession = state.timer.isBreak 
+        let currentSession = state.timer.isBreak
             ? state.timer.pomodoroCount
             : state.timer.pomodoroCount + 1;
-        
-        currentSession = Math.min(currentSession, 4);
+
+        currentSession = Math.min(currentSession, goal);
         pomodoroCountElement.textContent = currentSession;
     }
-    
+
     if (pomodoroTotalElement) {
-        pomodoroTotalElement.textContent = '4';
+        pomodoroTotalElement.textContent = String(goal);
     }
 }
 
@@ -232,10 +234,12 @@ export function completeSession() {
             showAchievement('Break Complete!', 'Ready for another focus session');
         }
         
-        // Send break complete notification
-        sendNotificationSafely(() => 
-            notifyBreakComplete(state.timer.settings.focusDuration)
-        );
+        // Send break complete notification (if enabled)
+        if (settingsGet('notifications.breakComplete') !== false) {
+            sendNotificationSafely(() =>
+                notifyBreakComplete(state.timer.settings.focusDuration)
+            );
+        }
         
     } else {
         // Focus session completed
@@ -256,27 +260,32 @@ export function completeSession() {
 
         triggerSessionCompleteUI();
 
-        if (state.timer.pomodoroCount % 4 === 0) {
-            // Long break after 4 pomodoros
+        const longBreakInterval = settingsGet('timer.longBreakInterval') ?? 4;
+        if (state.timer.pomodoroCount % longBreakInterval === 0) {
+            // Long break after N pomodoros
             state.timer.minutes = state.timer.settings.longBreakDuration;
             state.timer.isLongBreak = true;
             showAchievement('Pomodoro Cycle Complete!', `Take a ${state.timer.settings.longBreakDuration}-minute long break`);
-            
-            // Send pomodoro cycle complete notification
-            sendNotificationSafely(() => 
-                notifyPomodoroComplete(state.timer.settings.longBreakDuration)
-            );
-            
+
+            // Send pomodoro cycle complete notification (if enabled)
+            if (settingsGet('notifications.cycleComplete') !== false) {
+                sendNotificationSafely(() =>
+                    notifyPomodoroComplete(state.timer.settings.longBreakDuration)
+                );
+            }
+
         } else {
             // Short break
             state.timer.minutes = state.timer.settings.shortBreakDuration;
             state.timer.isLongBreak = false;
             showAchievement('Focus Complete!', `Time for a ${state.timer.settings.shortBreakDuration}-minute break`);
-            
-            // Send focus complete notification
-            sendNotificationSafely(() => 
-                notifyFocusComplete(state.timer.settings.shortBreakDuration, false)
-            );
+
+            // Send focus complete notification (if enabled)
+            if (settingsGet('notifications.focusComplete') !== false) {
+                sendNotificationSafely(() =>
+                    notifyFocusComplete(state.timer.settings.shortBreakDuration, false)
+                );
+            }
         }
 
         state.timer.isBreak = true;
@@ -314,14 +323,21 @@ export function completeSession() {
         }
     }
 
-    // Auto-start next session — short beat (150ms) so the user can see the
-    // session-type label flip, then immediately roll into the new countdown.
-    // (Was 1200ms originally to let the achievement notification animate, but
-    // the achievement UI was removed, so the long pause is now dead time.)
-    state.timer.autoStartTimeout = setTimeout(() => {
+    // Auto-start next session — user-configurable via Settings > Timer > Flow.
+    // If disabled, we just clear the transitioning flag and wait for a manual
+    // click on Start.
+    const autoStart = settingsGet('timer.autoStart') !== false;
+    const delay = settingsGet('timer.autoStartDelay') ?? 150;
+    if (autoStart) {
+        state.timer.autoStartTimeout = setTimeout(() => {
+            state.timer.transitioning = false;
+            startTimer();
+        }, delay);
+    } else {
         state.timer.transitioning = false;
-        startTimer();
-    }, 150);
+        const startBtn = document.getElementById('startBtn');
+        if (startBtn) startBtn.classList.remove('hidden');
+    }
 }
 
 /**

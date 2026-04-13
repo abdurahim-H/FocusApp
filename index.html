@@ -382,72 +382,9 @@
 
     <!-- Settings click-outside catcher (invisible) -->
     <div class="settings-modal-overlay" id="settingsModalOverlay"></div>
-    <!-- Settings panel — direct child of body, position:fixed works correctly -->
-    <div class="settings-modal hidden" id="settingsPanel">
-            <!-- Header — no close button, the star serves as the toggle -->
-            <div class="settings-header">
-                <h2>Settings</h2>
-            </div>
-
-            <!-- Scene -->
-            <div class="settings-group">
-                <span class="settings-group-label">Scene</span>
-                <div class="theme-cards">
-                    <button id="themeDarkBtn" data-theme="dark" class="theme-card theme-card--blackhole active" disabled>
-                        <span class="theme-card-preview">
-                            <span class="theme-card-dot"></span>
-                        </span>
-                        <span class="theme-card-name">Black Hole</span>
-                    </button>
-                    <div class="theme-card theme-card--coming-soon">
-                        <span class="theme-card-preview">
-                            <span class="theme-card-dot" style="background: rgba(255,255,255,0.03);"></span>
-                        </span>
-                        <span class="theme-card-name">Coming soon</span>
-                    </div>
-                    <div class="theme-card theme-card--coming-soon">
-                        <span class="theme-card-preview">
-                            <span class="theme-card-dot" style="background: rgba(255,255,255,0.03);"></span>
-                        </span>
-                        <span class="theme-card-name">Coming soon</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Timer -->
-            <div class="settings-group">
-                <span class="settings-group-label">Timer</span>
-                <div class="settings-row">
-                    <span class="settings-row-label">Focus</span>
-                    <input type="range" id="focusLengthRange" class="gold-slider" min="1" max="90" value="25">
-                    <span class="settings-row-value"><span id="focusLengthValue">25</span>m</span>
-                </div>
-                <div class="settings-row">
-                    <span class="settings-row-label">Short break</span>
-                    <input type="range" id="shortBreakRange" class="gold-slider" min="1" max="30" value="5">
-                    <span class="settings-row-value"><span id="shortBreakValue">5</span>m</span>
-                </div>
-                <div class="settings-row">
-                    <span class="settings-row-label">Long break</span>
-                    <input type="range" id="longBreakRange" class="gold-slider" min="1" max="60" value="15">
-                    <span class="settings-row-value"><span id="longBreakValue">15</span>m</span>
-                </div>
-            </div>
-
-            <!-- Volume -->
-            <div class="settings-group">
-                <div class="settings-row">
-                    <span class="settings-row-label">Volume</span>
-                    <input type="range" id="soundVolumeRange" class="gold-slider" min="0" max="100" value="30">
-                    <span class="settings-row-value"><span id="soundVolumeValue">30</span>%</span>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="settings-footer">
-                <button class="settings-reset-btn" id="resetSettingsBtn">Reset to defaults</button>
-            </div>
-    </div>
+    <!-- Settings panel — all contents are rendered dynamically by
+         js/ui/settings/renderer.js against the schema. -->
+    <div class="settings-modal hidden" id="settingsPanel"></div>
 
     <!-- Babylon.js Core — the only required dependency -->
     <script>console.log('⏱️ [' + Math.round(performance.now() - window.__pageStart) + 'ms] Starting Babylon.js download...');</script>

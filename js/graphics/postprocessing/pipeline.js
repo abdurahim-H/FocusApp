@@ -7,6 +7,11 @@ let scene = null;
 let camera = null;
 let isWebGPU = false;
 
+// Mutable knobs used by live settings. Read inside shader onApply callbacks
+// and by scene-manager's auto-exposure loop.
+let baseExposure = 1.2;
+let grainIntensity = 0.03;
+
 /**
  * Setup the complete cinematic post-processing pipeline
  * @param {BABYLON.Scene} sceneRef - The Babylon.js scene
@@ -56,8 +61,8 @@ function configureHDR(pipeline) {
     pipeline.imageProcessing.toneMappingEnabled = true;
     pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
 
-    // Exposure — slightly brighter for vibrancy
-    pipeline.imageProcessing.exposure = 1.2;
+    // Exposure — slightly brighter for vibrancy. Mutable via setBaseExposure.
+    pipeline.imageProcessing.exposure = baseExposure;
 
     // Contrast — punchy, vibrant colors
     pipeline.imageProcessing.contrast = 1.4;
@@ -255,7 +260,7 @@ export function createFilmGrainEffect() {
     filmGrainPostProcess.onApply = function (effect) {
         grainTime += 0.016; // Approximate frame time
         effect.setFloat('time', grainTime);
-        effect.setFloat('grainIntensity', 0.03); // Barely visible grain
+        effect.setFloat('grainIntensity', grainIntensity); // mutable — driven by Settings
         effect.setFloat2('screenSize',
             scene.getEngine().getRenderWidth(),
             scene.getEngine().getRenderHeight()
@@ -285,12 +290,47 @@ export function setExposure(exposure) {
 }
 
 /**
- * Set film grain intensity
- * @param {number} intensity - 0-0.3 range
+ * Set film grain intensity (read on every frame by the grain onApply callback)
+ * @param {number} intensity - 0-0.1 range
  */
 export function setGrainIntensity(intensity) {
-    // Grain intensity is set in the onApply callback
-    // This function would need to modify a variable that the callback reads
+    grainIntensity = Math.max(0, Math.min(0.3, intensity));
+}
+
+/**
+ * Set the base exposure (before auto-exposure oscillation adds its variation).
+ * scene-manager.updateAutoExposure reads this via getBaseExposure.
+ * @param {number} value - 0.1-3 range
+ */
+export function setBaseExposure(value) {
+    baseExposure = Math.max(0.1, Math.min(3, value));
+    if (pipeline?.imageProcessing) {
+        pipeline.imageProcessing.exposure = baseExposure;
+    }
+}
+
+export function getBaseExposure() {
+    return baseExposure;
+}
+
+/**
+ * Set vignette strength.
+ * @param {number} weight - 0-3 range
+ */
+export function setVignetteWeight(weight) {
+    if (pipeline?.imageProcessing) {
+        pipeline.imageProcessing.vignetteWeight = Math.max(0, Math.min(3, weight));
+    }
+}
+
+/**
+ * Set chromatic aberration amount.
+ * @param {number} amount - 0-10 range
+ */
+export function setChromaticAberrationAmount(amount) {
+    if (pipeline?.chromaticAberration) {
+        pipeline.chromaticAberration.aberrationAmount = Math.max(0, Math.min(10, amount));
+    }
 }
 
 /**
@@ -298,8 +338,8 @@ export function setGrainIntensity(intensity) {
  * @param {boolean} enabled
  */
 export function setDepthOfFieldEnabled(enabled) {
-    if (pipeline) {
-        pipeline.depthOfFieldEnabled = enabled;
+    if (pipeline && !isWebGPU) {
+        pipeline.depthOfFieldEnabled = !!enabled;
     }
 }
 

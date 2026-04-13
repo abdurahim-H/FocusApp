@@ -5,6 +5,7 @@ let camera = null;
 let scene = null;
 let cameraEffectActive = false;
 let shakeMagnitude = 0;
+let shakeMultiplier = 1;   // User-tunable via Settings > Scene > Advanced
 
 /**
  * Initialize camera effects with references
@@ -18,12 +19,14 @@ export function initCameraEffects(cam, scn) {
 }
 
 /**
- * Trigger camera shake on task completion
+ * Trigger camera shake on task completion. Scaled by shakeMultiplier — if the
+ * user has set camera shake to 0, this becomes a no-op.
  */
 export function triggerTaskCompletionShake() {
-    if (!camera) return;
+    if (!camera || shakeMultiplier <= 0) return;
 
-    shakeMagnitude = 2.0;
+    const baseMagnitude = 2.0 * shakeMultiplier;
+    shakeMagnitude = baseMagnitude;
     const startTime = Date.now();
     const duration = 1200;
 
@@ -31,7 +34,7 @@ export function triggerTaskCompletionShake() {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
-        shakeMagnitude = 2.0 * (1 - progress * progress);
+        shakeMagnitude = baseMagnitude * (1 - progress * progress);
 
         if (progress < 1) {
             requestAnimationFrame(shakeUpdate);
@@ -40,6 +43,11 @@ export function triggerTaskCompletionShake() {
         }
     }
     shakeUpdate();
+}
+
+/** Settings hook — set the shake intensity multiplier. */
+export function setShakeMultiplier(v) {
+    shakeMultiplier = Math.max(0, Math.min(3, v));
 }
 
 /**

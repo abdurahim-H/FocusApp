@@ -1,23 +1,17 @@
 // keyboard.js
 //
-// Phase 5A: Global keyboard shortcuts.
+// Phase 5A + Phase 6: Global keyboard shortcuts. Bindings are read live from
+// the settings store on every keydown, so rebinding in Settings > Shortcuts
+// takes effect immediately.
 //
-// All shortcuts are guarded against firing when focus is inside an input,
-// textarea, or contenteditable element.
-//
-// Shortcut map:
-//   Space       → start/pause timer (toggle)
-//   R           → reset timer
-//   1           → switch to Home
-//   2           → switch to Focus
-//   3           → switch to Ambient
-//   /           → focus the task input (switches to Focus mode if needed)
-//   Escape      → close any open modal
-//   ?           → show shortcut hint (future)
+// Guards against firing when focus is in an input/textarea/contenteditable.
+// Escape always works, even when typing.
 
 import { state } from '../core/state.js';
 import { startTimer, pauseTimer, resetTimer } from '../features/timer.js';
 import { switchMode } from '../ui/navigation.js';
+import { get as settingsGet } from '../ui/settings/store.js';
+import { SHORTCUTS, getShortcut } from '../ui/settings/shortcuts-registry.js';
 
 function isTyping(e) {
     const tag = e.target.tagName;
@@ -27,26 +21,29 @@ function isTyping(e) {
 }
 
 function closeAnyModal() {
-    // Sound library modal
     const soundModal = document.getElementById('soundLibraryModal');
     if (soundModal?.classList.contains('active')) {
         soundModal.classList.remove('active');
         document.body.style.overflow = '';
         return true;
     }
-    // Settings panel
     const settingsPanel = document.getElementById('settingsPanel');
     if (settingsPanel?.classList.contains('visible')) {
-        if (window._closeSettings) {
-            window._closeSettings();
-        }
+        if (window._closeSettings) window._closeSettings();
         return true;
     }
     return false;
 }
 
+/** Return the currently-bound key for a shortcut id (falls back to default). */
+function boundKey(id) {
+    const s = getShortcut(id);
+    if (!s) return null;
+    return settingsGet(s.storeKey) ?? s.defaultKey;
+}
+
 function handleKeydown(e) {
-    // Escape always works — even inside inputs
+    // Escape always works
     if (e.key === 'Escape') {
         if (closeAnyModal()) {
             e.preventDefault();
@@ -54,55 +51,47 @@ function handleKeydown(e) {
         }
     }
 
-    // All other shortcuts: skip if user is typing
     if (isTyping(e)) return;
-
-    // Don't fire on combos (Ctrl+R = browser reload, not our reset)
     if (e.ctrlKey || e.metaKey || e.altKey) return;
 
-    switch (e.key) {
-        case ' ':
-            e.preventDefault();
-            if (state.timer.isRunning) {
-                pauseTimer();
-            } else {
-                startTimer();
-            }
-            break;
+    const k = e.key;
 
-        case 'r':
-            e.preventDefault();
-            resetTimer();
-            break;
-
-        case '1':
-            e.preventDefault();
-            switchMode('home');
-            break;
-
-        case '2':
-            e.preventDefault();
-            switchMode('focus');
-            break;
-
-        case '3':
-            e.preventDefault();
-            switchMode('ambient');
-            break;
-
-        case '/':
-            e.preventDefault();
-            // Switch to Focus mode if not already there
-            if (state.mode !== 'focus') {
-                switchMode('focus');
-            }
-            // Focus the task input after a brief delay (mode may need to render)
-            setTimeout(() => {
-                const input = document.getElementById('taskInput');
-                if (input) input.focus();
-            }, 50);
-            break;
+    if (k === boundKey('timer.toggle')) {
+        e.preventDefault();
+        if (state.timer.isRunning) pauseTimer();
+        else startTimer();
+        return;
     }
+    if (k === boundKey('timer.reset')) {
+        e.preventDefault();
+        resetTimer();
+        return;
+    }
+    if (k === boundKey('mode.home')) {
+        e.preventDefault();
+        switchMode('home');
+        return;
+    }
+    if (k === boundKey('mode.focus')) {
+        e.preventDefault();
+        switchMode('focus');
+        return;
+    }
+    if (k === boundKey('mode.ambient')) {
+        e.preventDefault();
+        switchMode('ambient');
+        return;
+    }
+    if (k === boundKey('task.focus')) {
+        e.preventDefault();
+        if (state.mode !== 'focus') switchMode('focus');
+        setTimeout(() => {
+            const input = document.getElementById('taskInput');
+            if (input) input.focus();
+        }, 50);
+        return;
+    }
+    // help.show is handled inside settings.js (cheatsheet toggle).
 }
 
 export function initKeyboardShortcuts() {
