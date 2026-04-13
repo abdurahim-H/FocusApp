@@ -493,15 +493,22 @@ export function clearAchievementQueue() {
 }
 
 // Date and Time
-export function updateDateTime() {
+export async function updateDateTime() {
     const now = new Date();
-    const options = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
+    // Read time format preference from settings store (defaults to '12h').
+    let hour12 = true;
+    try {
+        const { get } = await import('../ui/settings/store.js');
+        hour12 = get('timer.timeFormat') !== '24h';
+    } catch { /* store not ready yet — use default */ }
+    const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        hour12,
     };
     const dateTimeElement = document.getElementById('dateTime');
     if (dateTimeElement) {

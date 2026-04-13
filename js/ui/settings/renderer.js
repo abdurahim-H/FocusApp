@@ -5,7 +5,7 @@
 // activation) refresh the visible controls automatically.
 
 import { SECTIONS, SCHEMA, rowsForSection } from './schema.js';
-import { get as getSetting, set as setSetting, subscribe, resetSection as storeResetSection } from './store.js';
+import { get as getSetting, set as setSetting, subscribe, resetSection as storeResetSection, getDefault } from './store.js';
 import { GRAPHICS_PRESETS } from './graphics-presets.js';
 import { SHORTCUTS, displayKey, getShortcut } from './shortcuts-registry.js';
 import * as profiles from './profiles.js';
@@ -232,6 +232,7 @@ function renderSlider(row) {
     });
     registerSearchable(el, row.label, row.help, row.key);
     applyShowIf(row, el);
+    applyDirtyState(el, row.key);
     return el;
 }
 
@@ -256,6 +257,7 @@ function renderToggle(row) {
     });
     registerSearchable(el, row.label, row.help, row.key);
     applyShowIf(row, el);
+    applyDirtyState(el, row.key);
     return el;
 }
 
@@ -284,6 +286,7 @@ function renderStepper(row) {
         });
     });
     registerSearchable(el, row.label, '', row.key);
+    applyDirtyState(el, row.key);
     return el;
 }
 
@@ -309,6 +312,7 @@ function renderSegmented(row) {
         });
     });
     registerSearchable(el, row.label, row.help, row.key);
+    applyDirtyState(el, row.key);
     return el;
 }
 
@@ -357,6 +361,7 @@ function renderTextInput(row) {
     const input = el.querySelector('input');
     input.addEventListener('input', () => setSetting(row.key, input.value));
     registerSearchable(el, row.label, row.help, row.key);
+    applyDirtyState(el, row.key);
     return el;
 }
 
@@ -409,6 +414,9 @@ function handleButtonAction(id, triggerEl) {
             storeResetSection(activeSection);
             flashButton(triggerEl, 'Reset ✓');
             break;
+        case 'show-tour':
+            import('./onboarding.js').then(mod => mod.startTour());
+            break;
     }
 }
 
@@ -421,6 +429,27 @@ function flashButton(el, msg) {
         el.textContent = prev;
         el.classList.remove('is-confirmed');
     }, 1500);
+    showToast(msg);
+}
+
+/** Floating toast at the bottom of the viewport for extra visibility. */
+function showToast(msg) {
+    let container = document.getElementById('settings-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'settings-toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = msg;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('is-visible'));
+    setTimeout(() => {
+        toast.classList.remove('is-visible');
+        setTimeout(() => toast.remove(), 350);
+    }, 2000);
 }
 
 function confirmAction(el, msg, onConfirm) {
@@ -800,6 +829,10 @@ function refreshControl(key) {
     // Shortcuts (refresh the specific row's kbd display)
     if (key.startsWith('shortcuts.')) refreshShortcutRow(key);
 
+    // Dirty indicator — refresh for any row with this key.
+    const dirtyEl = rootEl.querySelector(`.sr[data-key="${cssEscape(key)}"]`);
+    if (dirtyEl) applyDirtyState(dirtyEl, key);
+
     // showIf dependencies — re-apply every row that declares a showIf.
     // Cheap: only affects the timer section, maybe a few rows.
     if (key === 'timer.autoStart') {
@@ -845,4 +878,13 @@ function escapeHtml(s) {
 function cssEscape(s) {
     // Minimal CSS.escape polyfill for our use (dot-separated keys).
     return String(s).replace(/[^a-zA-Z0-9_-]/g, c => `\\${c}`);
+}
+
+/** Mark a settings row as dirty (value != default) or clean. */
+function applyDirtyState(el, key) {
+    if (!el || !key) return;
+    const current = getSetting(key);
+    const def = getDefault(key);
+    const isDirty = current !== def;
+    el.classList.toggle('is-dirty', isDirty);
 }

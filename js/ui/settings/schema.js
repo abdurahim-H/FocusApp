@@ -168,6 +168,18 @@ export const SCHEMA = [
         min: 1, max: 12, step: 1, suffix: 'sessions', default: 4,
     },
 
+    { section: 'timer', type: 'group', label: 'Display' },
+    {
+        section: 'timer', type: 'select',
+        key: 'timer.timeFormat', label: 'Time format',
+        default: '12h',
+        options: [
+            { value: '12h', label: '12-hour' },
+            { value: '24h', label: '24-hour' },
+        ],
+        help: 'Affects the clock on the Home screen',
+    },
+
     {
         section: 'timer', type: 'group',
         label: 'Schedules',
@@ -295,6 +307,9 @@ export const SCHEMA = [
         section: 'data', type: 'button', id: 'clear-data',
         label: 'Clear all data (settings + stats)', danger: true, confirm: true,
     },
+
+    { section: 'data', type: 'group', label: 'Help' },
+    { section: 'data', type: 'button', id: 'show-tour', label: 'Replay welcome tour' },
 
     { section: 'data', type: 'group', label: 'About' },
     { section: 'data', type: 'readonly', key: 'about.version',   label: 'Version' },

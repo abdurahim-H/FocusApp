@@ -184,6 +184,9 @@ export async function initApp() {
             loadedModules.settings.setupSettingsControls();
         }
 
+        // T3.5: onboarding tour — auto-show on first visit
+        import('../ui/settings/onboarding.js').then(mod => mod.maybeShowFirstVisitTour()).catch(() => {});
+
         // Start core timers and displays
         if (loadedModules.timer?.updateUniverseStats) {
             loadedModules.timer.updateUniverseStats();

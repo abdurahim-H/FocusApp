@@ -85,6 +85,9 @@ export const APPLY_HOOKS = {
     'timer.longBreakDuration': (v) => {
         state.timer.settings.longBreakDuration = v;
     },
+    'timer.timeFormat': (v) => {
+        getModule('timer').then(mod => mod?.updateDateTime?.());
+    },
     // autoStart, autoStartDelay, longBreakInterval, pomodoroGoal:
     // Consumed directly from the store by timer.js on each completeSession tick,
     // so no apply hook is needed — writing the value is enough.
