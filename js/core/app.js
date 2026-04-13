@@ -29,7 +29,8 @@ async function loadModules() {
         { name: 'notificationBanner', path: '../features/notification-banner.js' },
         { name: 'settings', path: '../ui/settings.js' },
         { name: 'soundMixer', path: '../features/sound-mixer.js' },
-        { name: 'timerParticles', path: '../ui/timer-particles.js' }
+        { name: 'timerParticles', path: '../ui/timer-particles.js' },
+        { name: 'helpCenter', path: '../ui/help-center.js' }
     ];
 
     for (const module of moduleList) {
@@ -182,6 +183,11 @@ export async function initApp() {
         }
         if (loadedModules.settings?.setupSettingsControls) {
             loadedModules.settings.setupSettingsControls();
+        }
+
+        // Help center ? button
+        if (loadedModules.helpCenter?.setupHelpButton) {
+            loadedModules.helpCenter.setupHelpButton();
         }
 
         // T3.5: onboarding tour — auto-show on first visit

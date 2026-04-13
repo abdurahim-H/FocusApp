@@ -12,6 +12,7 @@ import { startTimer, pauseTimer, resetTimer } from '../features/timer.js';
 import { switchMode } from '../ui/navigation.js';
 import { get as settingsGet } from '../ui/settings/store.js';
 import { SHORTCUTS, getShortcut } from '../ui/settings/shortcuts-registry.js';
+import { toggleHelpCenter, isHelpCenterOpen } from '../ui/help-center.js';
 
 function isTyping(e) {
     const tag = e.target.tagName;
@@ -43,8 +44,13 @@ function boundKey(id) {
 }
 
 function handleKeydown(e) {
-    // Escape always works
+    // Escape always works — close help center first if open
     if (e.key === 'Escape') {
+        if (isHelpCenterOpen()) {
+            e.preventDefault();
+            toggleHelpCenter();
+            return;
+        }
         if (closeAnyModal()) {
             e.preventDefault();
             return;
@@ -91,7 +97,11 @@ function handleKeydown(e) {
         }, 50);
         return;
     }
-    // help.show is handled inside settings.js (cheatsheet toggle).
+    if (k === boundKey('help.show')) {
+        e.preventDefault();
+        toggleHelpCenter();
+        return;
+    }
 }
 
 export function initKeyboardShortcuts() {

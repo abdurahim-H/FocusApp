@@ -89,23 +89,13 @@ export function setupSettingsModal() {
 
         setupProximityGlow(star);
 
-        // Cheatsheet: `?` opens it, Esc closes it (if open).
+        // Cheatsheet `?` key is now handled by keyboard.js → help-center.js.
+        // Legacy cheatsheet Esc handler kept for backward compat if cheatsheet
+        // was opened via some other codepath.
         document.addEventListener('keydown', (e) => {
             if (cheatsheet.isVisible() && e.key === 'Escape') {
                 cheatsheet.hide();
                 e.preventDefault();
-                return;
-            }
-            // Don't fire while typing
-            const tag = e.target?.tagName;
-            if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable) return;
-            if (e.ctrlKey || e.metaKey || e.altKey) return;
-
-            const helpShortcut = SHORTCUTS.find(s => s.id === 'help.show');
-            const bound = store.get(helpShortcut.storeKey) ?? helpShortcut.defaultKey;
-            if (e.key === bound) {
-                e.preventDefault();
-                cheatsheet.toggle();
             }
         });
     }, 100);
