@@ -19,6 +19,7 @@ import * as cheatsheet from './settings/cheatsheet.js';
 import { initSchedules } from './settings/schedules.js';
 import { SHORTCUTS } from './settings/shortcuts-registry.js';
 import { readShareLinkFromURL } from './settings/data-io.js';
+import { isReducedMotion } from '../core/motion.js';
 
 let rendered = false;
 let panelVisible = false;
@@ -143,6 +144,11 @@ function setupProximityGlow(btn) {
     let mouseY = -9999;
 
     function updateGlow() {
+        if (isReducedMotion()) {
+            btn.style.setProperty('--glow', '0');
+            rafId = null;
+            return;
+        }
         const rect = btn.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;

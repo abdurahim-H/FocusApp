@@ -11,7 +11,7 @@
 // keyboard activation). The CSS rule sets a scale of 0.97; we override with JS
 // for pointer events because JS gives us the spring physics.
 
-import { springAnim, anim, prefersReducedMotion } from '../core/motion.js';
+import { springAnim, anim, isReducedMotion } from '../core/motion.js';
 
 const PRESSED_TRANSFORM = 'scale(0.94)';
 const RELEASED_TRANSFORM = 'scale(1)';
@@ -20,8 +20,6 @@ const RELEASED_TRANSFORM = 'scale(1)';
 const pressed = new WeakSet();
 
 export function initButtonFeel() {
-    if (prefersReducedMotion) return;
-
     document.addEventListener('pointerdown', onPointerDown, { passive: true });
     document.addEventListener('pointerup', onPointerUp, { passive: true });
     document.addEventListener('pointercancel', onPointerUp, { passive: true });
@@ -30,6 +28,7 @@ export function initButtonFeel() {
 }
 
 function onPointerDown(e) {
+    if (isReducedMotion()) return;
     const btn = e.target.closest('.liquid-glass-btn, .sound-card');
     if (!btn || btn.disabled) return;
     if (pressed.has(btn)) return;

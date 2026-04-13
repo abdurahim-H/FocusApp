@@ -1,6 +1,8 @@
 // camera-effects-babylon.js - Camera Effects for Babylon.js
 // Cinematic camera movements, shake effects, and dynamic transitions
 
+import { isReducedMotion } from '../../core/motion.js';
+
 let camera = null;
 let scene = null;
 let cameraEffectActive = false;
@@ -23,7 +25,7 @@ export function initCameraEffects(cam, scn) {
  * user has set camera shake to 0, this becomes a no-op.
  */
 export function triggerTaskCompletionShake() {
-    if (!camera || shakeMultiplier <= 0) return;
+    if (!camera || shakeMultiplier <= 0 || isReducedMotion()) return;
 
     const baseMagnitude = 2.0 * shakeMultiplier;
     shakeMagnitude = baseMagnitude;
@@ -54,7 +56,7 @@ export function setShakeMultiplier(v) {
  * Trigger cinematic zoom on session completion
  */
 export function triggerSessionCompleteZoom() {
-    if (cameraEffectActive || !camera) return;
+    if (cameraEffectActive || !camera || isReducedMotion()) return;
 
     cameraEffectActive = true;
     const startTime = Date.now();
@@ -141,6 +143,7 @@ export function updateCameraEffects() {
  * @param {number} duration - Duration in ms
  */
 export function triggerTimeDilationEffect(duration = 3000) {
+    if (isReducedMotion()) return;
     const startTime = Date.now();
 
     function dilationUpdate() {

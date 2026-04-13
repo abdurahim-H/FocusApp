@@ -4,6 +4,8 @@
 // Can be triggered from Settings > Data & About > "Replay welcome tour"
 // or automatically on first visit (checks localStorage flag).
 
+import { isReducedMotion } from '../../core/motion.js';
+
 const STORAGE_KEY = 'fu_tour_seen';
 
 const STEPS = [
@@ -99,7 +101,11 @@ function createOverlay() {
     overlay.querySelector('.tour-scrim').addEventListener('click', closeTour);
 
     // Force reflow then animate in
-    requestAnimationFrame(() => overlay.classList.add('is-active'));
+    if (isReducedMotion()) {
+        overlay.classList.add('is-active');
+    } else {
+        requestAnimationFrame(() => overlay.classList.add('is-active'));
+    }
 }
 
 function renderStep() {

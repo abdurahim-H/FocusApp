@@ -6,6 +6,8 @@
 // Easy revert: remove this file + the one `emitTimerParticles()` call in timer.js
 // + the module entry in app.js.
 
+import { isReducedMotion } from '../core/motion.js';
+
 const PARTICLE_COUNT = 8;
 const PARTICLE_LIFETIME = 800;
 const PARTICLE_SIZE_MIN = 1.5;
@@ -163,6 +165,7 @@ export function initTimerParticles() {
 }
 
 export function emitTimerParticles() {
+    if (isReducedMotion()) return;
     if (!ensureCanvas()) return;
     spawnParticles();
 }

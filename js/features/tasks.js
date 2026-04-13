@@ -5,7 +5,7 @@
 // (not innerHTML batch) so individual <li> elements can play exit animations.
 
 import { tasks, effect } from '../core/state.js';
-import { springAnim, anim, prefersReducedMotion } from '../core/motion.js';
+import { springAnim, anim, isReducedMotion } from '../core/motion.js';
 import { recordTaskToggle } from '../features/statistics.js';
 
 // ============================================================================
@@ -168,7 +168,7 @@ function updateTaskElement(el, task) {
 // ============================================================================
 
 function animateEnter(el) {
-    if (prefersReducedMotion) return;
+    if (isReducedMotion()) return;
     // Start state — invisible, slightly down and scaled
     el.style.opacity = '0';
     el.style.transform = 'translateY(-8px) scale(0.96)';
@@ -180,7 +180,7 @@ function animateEnter(el) {
 }
 
 function animateExit(el) {
-    if (prefersReducedMotion) {
+    if (isReducedMotion()) {
         return Promise.resolve();
     }
     const animation = anim(el, {
@@ -213,7 +213,7 @@ async function handleClearAllWithAnimation() {
         exiting.add(id);
         return new Promise(resolve => {
             setTimeout(async () => {
-                if (!prefersReducedMotion) await animateExit(el);
+                if (!isReducedMotion()) await animateExit(el);
                 el.remove();
                 elementsById.delete(id);
                 exiting.delete(id);

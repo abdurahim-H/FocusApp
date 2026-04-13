@@ -2,6 +2,7 @@
 // Handles modal UI, active sound chips, and audio playback for 25+ sounds
 
 import { state } from '../core/state.js';
+import { isReducedMotion } from '../core/motion.js';
 
 // Comprehensive sound library with audio file mappings
 const ambientSounds = {
@@ -272,26 +273,37 @@ function filterSoundCards(query) {
     const soundCards = document.querySelectorAll('.sound-card');
     let visibleCount = 0;
     
+    const reduceMotion = isReducedMotion();
     soundCards.forEach((card, index) => {
         const soundName = card.getAttribute('data-sound-name') || '';
         const soundTags = card.getAttribute('data-sound-tags') || '';
         const searchText = `${soundName} ${soundTags}`.toLowerCase();
-        
+
         const matches = !searchTerm || searchText.includes(searchTerm);
-        
+
         if (matches) {
-            // Stagger animation - show card
-            setTimeout(() => {
+            if (reduceMotion) {
                 card.style.display = 'flex';
-                card.style.animation = 'soundCardFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
-            }, visibleCount * 40); // 40ms stagger delay per visible card
+                card.style.animation = 'none';
+            } else {
+                // Stagger animation - show card
+                setTimeout(() => {
+                    card.style.display = 'flex';
+                    card.style.animation = 'soundCardFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+                }, visibleCount * 40); // 40ms stagger delay per visible card
+            }
             visibleCount++;
         } else {
-            // Hide card
-            card.style.animation = 'soundCardFadeOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards';
-            setTimeout(() => {
+            if (reduceMotion) {
                 card.style.display = 'none';
-            }, 300);
+                card.style.animation = 'none';
+            } else {
+                // Hide card
+                card.style.animation = 'soundCardFadeOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                setTimeout(() => {
+                    card.style.display = 'none';
+                }, 300);
+            }
         }
     });
     

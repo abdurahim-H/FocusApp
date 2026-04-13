@@ -1,6 +1,8 @@
 // cinematic-camera.js - Film-Quality Camera System
 // Deliberate, weighty camera motion that makes any frame look like a movie still
 
+import { isReducedMotion } from '../../core/motion.js';
+
 let camera = null;
 let scene = null;
 let canvas = null;
@@ -66,7 +68,7 @@ export function initCinematicCamera(sceneRef, cameraRef, canvasRef) {
  * Call this every frame
  */
 export function updateCinematicCamera(deltaTime) {
-    if (!camera) return;
+    if (!camera || isReducedMotion()) return;
     
     cameraState.time += deltaTime;
     
@@ -210,6 +212,7 @@ function easeInOutCubic(t) {
  * Trigger a dramatic zoom for special moments
  */
 export function triggerDramaticZoom(targetRadius = 30, duration = 3) {
+    if (isReducedMotion()) return;
     const startRadius = camera.radius;
     const startTime = cameraState.time;
     

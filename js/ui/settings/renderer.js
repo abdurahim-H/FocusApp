@@ -11,6 +11,7 @@ import { SHORTCUTS, displayKey, getShortcut } from './shortcuts-registry.js';
 import * as profiles from './profiles.js';
 import { registerSearchable, clearSearchIndex, applyQuery } from './search.js';
 import * as dataIO from './data-io.js';
+import { isReducedMotion } from '../../core/motion.js';
 
 // ============================================================================
 // Public entry point
@@ -456,11 +457,16 @@ function showToast(msg) {
     toast.className = 'toast';
     toast.textContent = msg;
     container.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.add('is-visible'));
-    setTimeout(() => {
-        toast.classList.remove('is-visible');
-        setTimeout(() => toast.remove(), 350);
-    }, 2000);
+    if (isReducedMotion()) {
+        toast.classList.add('is-visible');
+        setTimeout(() => { toast.remove(); }, 2000);
+    } else {
+        requestAnimationFrame(() => toast.classList.add('is-visible'));
+        setTimeout(() => {
+            toast.classList.remove('is-visible');
+            setTimeout(() => toast.remove(), 350);
+        }, 2000);
+    }
 }
 
 function confirmAction(el, msg, onConfirm) {

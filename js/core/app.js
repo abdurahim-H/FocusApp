@@ -5,6 +5,8 @@
  * Handles module loading, initialization, and core app setup
  */
 
+import { isReducedMotion } from '../core/motion.js';
+
 let modules = {};
 
 /**
@@ -68,15 +70,20 @@ export async function initApp() {
 
         // Start progress bar animation immediately
         if (loadingProgress) {
-            loadingProgress.style.transition = 'width 0.3s ease';
-            loadingProgress.style.width = '20%';
+            if (isReducedMotion()) {
+                loadingProgress.style.transition = 'none';
+                loadingProgress.style.width = '100%';
+            } else {
+                loadingProgress.style.transition = 'width 0.3s ease';
+                loadingProgress.style.width = '20%';
+            }
         }
 
         // Initialize 3D scene — progress bar tracks actual initialization
         try {
             if (loadedModules.scene3d?.init3D) {
                 // Animate progress during init
-                if (loadingProgress) {
+                if (loadingProgress && !isReducedMotion()) {
                     setTimeout(() => { loadingProgress.style.width = '50%'; }, 200);
                     setTimeout(() => { loadingProgress.style.width = '75%'; }, 600);
                 }
@@ -94,16 +101,22 @@ export async function initApp() {
                         container.classList.add('loaded');
                     }
 
-                    requestAnimationFrame(() => {
-                        setTimeout(() => {
-                            if (loadingScreen) {
-                                loadingScreen.classList.add('hide');
-                                setTimeout(() => {
-                                    loadingScreen.style.display = 'none';
-                                }, 300);
-                            }
-                        }, 200);
-                    });
+                    if (isReducedMotion()) {
+                        if (loadingScreen) {
+                            loadingScreen.style.display = 'none';
+                        }
+                    } else {
+                        requestAnimationFrame(() => {
+                            setTimeout(() => {
+                                if (loadingScreen) {
+                                    loadingScreen.classList.add('hide');
+                                    setTimeout(() => {
+                                        loadingScreen.style.display = 'none';
+                                    }, 300);
+                                }
+                            }, 200);
+                        });
+                    }
                 }).catch(err => {
                     console.error('3D initialization error:', err);
                     // Still hide loading screen on error

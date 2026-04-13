@@ -9,6 +9,7 @@
 
 import { state } from '../core/state.js';
 import { updateDateTime } from '../features/timer.js';
+import { isReducedMotion } from '../core/motion.js';
 
 export function switchMode(mode) {
     if (!mode) {
@@ -48,6 +49,7 @@ export function switchMode(mode) {
 // the closest equivalent to Apple's tab pill squish without rebuilding the
 // pseudo-element layout.
 function triggerNavPillSquash() {
+    if (isReducedMotion()) return;
     const nav = document.querySelector('.nav-buttons');
     if (!nav) return;
     nav.style.setProperty('--pill-scale-x', '0.88');
