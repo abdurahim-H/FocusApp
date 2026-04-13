@@ -24,7 +24,10 @@ export function openHelpCenter() {
     if (isOpen) return;
     ensureDOM();
     isOpen = true;
-    overlay.classList.add('is-active');
+    overlay.classList.remove('hc-hidden');
+    overlay.classList.add('hc-visible');
+    const catcher = document.getElementById('hcClickCatcher');
+    if (catcher) catcher.classList.add('active');
     if (helpTrap) helpTrap.activate(document.activeElement);
     const searchInput = overlay.querySelector('.hc-search__input');
     if (searchInput) setTimeout(() => searchInput.focus(), 80);
@@ -33,7 +36,10 @@ export function openHelpCenter() {
 export function closeHelpCenter() {
     if (!isOpen) return;
     isOpen = false;
-    overlay.classList.remove('is-active');
+    overlay.classList.remove('hc-visible');
+    overlay.classList.add('hc-hidden');
+    const catcher = document.getElementById('hcClickCatcher');
+    if (catcher) catcher.classList.remove('active');
     if (helpTrap) helpTrap.deactivate();
     activeCategory = null;
     // Reset to category grid view
@@ -64,35 +70,40 @@ export function isHelpCenterOpen() {
 function ensureDOM() {
     if (overlay) return;
 
+    // Click-catcher overlay (transparent, like settings)
+    const clickCatcher = document.createElement('div');
+    clickCatcher.className = 'hc-click-catcher';
+    clickCatcher.id = 'hcClickCatcher';
+    clickCatcher.addEventListener('click', closeHelpCenter);
+    document.body.appendChild(clickCatcher);
+
+    // Panel (fixed, no scrim — same pattern as settings)
     overlay = document.createElement('div');
-    overlay.className = 'hc-overlay';
+    overlay.className = 'hc-panel';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', 'Help Center');
     overlay.innerHTML = `
-        <div class="hc-scrim"></div>
-        <div class="hc-panel">
-            <div class="hc-panel__header">
-                <button class="hc-back" aria-label="Back to categories" style="display:none">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <h2 class="hc-title">Help Center</h2>
-                <button class="hc-close" aria-label="Close help center">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-            <div class="hc-search">
-                <svg class="hc-search__icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" class="hc-search__input" placeholder="Search help..." autocomplete="off" spellcheck="false">
-            </div>
-            <div class="hc-body">
-                <div class="hc-categories"></div>
-                <div class="hc-detail" style="display:none"></div>
-                <div class="hc-search-results" style="display:none"></div>
-            </div>
-            <div class="hc-panel__footer">
-                Press <kbd>?</kbd> or <kbd>Esc</kbd> to close
-            </div>
+        <div class="hc-panel__header">
+            <button class="hc-back" aria-label="Back to categories" style="display:none">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 class="hc-title">Help Center</h2>
+            <button class="hc-close" aria-label="Close help center">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="hc-search">
+            <svg class="hc-search__icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="hc-search__input" placeholder="Search help..." autocomplete="off" spellcheck="false">
+        </div>
+        <div class="hc-body">
+            <div class="hc-categories"></div>
+            <div class="hc-detail" style="display:none"></div>
+            <div class="hc-search-results" style="display:none"></div>
+        </div>
+        <div class="hc-panel__footer">
+            Press <kbd>?</kbd> or <kbd>Esc</kbd> to close
         </div>
     `;
 
@@ -112,7 +123,6 @@ function ensureDOM() {
     }
 
     // Event listeners
-    overlay.querySelector('.hc-scrim').addEventListener('click', closeHelpCenter);
     overlay.querySelector('.hc-close').addEventListener('click', closeHelpCenter);
     overlay.querySelector('.hc-back').addEventListener('click', showCategoryGrid);
 
@@ -126,6 +136,9 @@ function ensureDOM() {
             closeHelpCenter();
         }
     });
+
+    // Stop click propagation so clicking inside panel doesn't close it
+    overlay.addEventListener('click', (e) => e.stopPropagation());
 
     document.body.appendChild(overlay);
     helpTrap = createFocusTrap(overlay);
