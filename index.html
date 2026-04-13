@@ -82,7 +82,25 @@
                 <div class="greeting" id="greeting">Welcome to Your Universe!</div>
                 <div class="date-time" id="dateTime"></div>
             </div>
+
         </div>
+
+    <!-- Mini Focus Timer — OUTSIDE #home so it's viewport-positioned, draggable -->
+    <div class="home-mini-timer hidden" id="homeMiniTimer" role="status" aria-label="Focus timer">
+        <!-- Progress arc (SVG ring) -->
+        <svg class="hmt-ring" viewBox="0 0 56 56" aria-hidden="true">
+            <circle class="hmt-ring__track" cx="28" cy="28" r="25" />
+            <circle class="hmt-ring__fill" id="hmtRingFill" cx="28" cy="28" r="25" />
+        </svg>
+        <!-- Content -->
+        <div class="hmt-body">
+            <span class="hmt-label" id="hmtLabel">FOCUS</span>
+            <span class="hmt-time" id="hmtTime">25:00</span>
+            <span class="hmt-session" id="hmtSession">1 / 4</span>
+        </div>
+        <!-- Pulse ring (animated behind on active) -->
+        <div class="hmt-pulse" aria-hidden="true"></div>
+    </div>
 
         <!-- Focus Mode - Pomodoro Timer and Tasks -->
         <div class="mode" id="focus">

@@ -32,7 +32,8 @@ async function loadModules() {
         { name: 'settings', path: '../ui/settings.js' },
         { name: 'soundMixer', path: '../features/sound-mixer.js' },
         { name: 'timerParticles', path: '../ui/timer-particles.js' },
-        { name: 'helpCenter', path: '../ui/help-center.js' }
+        { name: 'helpCenter', path: '../ui/help-center.js' },
+        { name: 'homeMiniTimer', path: '../ui/home-mini-timer.js' }
     ];
 
     for (const module of moduleList) {
@@ -201,6 +202,11 @@ export async function initApp() {
         // Help center ? button
         if (loadedModules.helpCenter?.setupHelpButton) {
             loadedModules.helpCenter.setupHelpButton();
+        }
+
+        // Home mini timer
+        if (loadedModules.homeMiniTimer?.initHomeMiniTimer) {
+            loadedModules.homeMiniTimer.initHomeMiniTimer();
         }
 
         // T3.5: onboarding tour — auto-show on first visit

@@ -65,6 +65,259 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOME MINI TIMER — Luxury watch complication in the bottom-right
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.home-mini-timer {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px 16px 18px;
+    border-radius: 24px;
+    cursor: grab;
+
+    /* Premium glass — same recipe as settings panel */
+    background: rgba(8, 6, 3, 0.75);
+    border: 1px solid rgba(200, 146, 42, 0.12);
+    box-shadow:
+        0 16px 60px rgba(0, 0, 0, 0.55),
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        0 0 0 0.5px rgba(255, 240, 210, 0.04),
+        inset 0 1px 0 rgba(255, 240, 210, 0.06),
+        inset 0 -1px 0 rgba(200, 146, 42, 0.03);
+    backdrop-filter: blur(50px) saturate(170%) brightness(1.04);
+    -webkit-backdrop-filter: blur(50px) saturate(170%) brightness(1.04);
+
+    /* Entrance animation */
+    transform-origin: bottom right;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.home-mini-timer.hidden {
+    display: none !important;
+}
+
+.home-mini-timer.is-entering {
+    animation: hmtEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.home-mini-timer.is-leaving {
+    animation: hmtLeave 0.35s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes hmtEnter {
+    from { opacity: 0; transform: scale(0.88) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes hmtLeave {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to   { opacity: 0; transform: scale(0.92) translateY(6px); }
+}
+
+/* Hover — glass brightens, border warms */
+.home-mini-timer:hover {
+    background: rgba(12, 10, 6, 0.82);
+    border-color: rgba(200, 146, 42, 0.25);
+    box-shadow:
+        0 20px 70px rgba(0, 0, 0, 0.6),
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        0 0 0 0.5px rgba(200, 146, 42, 0.1),
+        0 0 30px rgba(200, 146, 42, 0.05),
+        inset 0 1px 0 rgba(255, 240, 210, 0.1),
+        inset 0 -1px 0 rgba(200, 146, 42, 0.05);
+    transform: translateY(-1px);
+}
+.home-mini-timer:active {
+    cursor: grabbing;
+}
+.home-mini-timer.is-dragging {
+    cursor: grabbing;
+    transition: none !important;
+    box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.7),
+        0 8px 24px rgba(0, 0, 0, 0.45),
+        0 0 0 0.5px rgba(200, 146, 42, 0.15),
+        0 0 40px rgba(200, 146, 42, 0.06),
+        inset 0 1px 0 rgba(255, 240, 210, 0.1),
+        inset 0 -1px 0 rgba(200, 146, 42, 0.05);
+    transform: scale(1.03);
+}
+
+/* ── SVG Progress Ring ── */
+.hmt-ring {
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    transform: rotate(-90deg);
+}
+.hmt-ring__track {
+    fill: none;
+    stroke: rgba(200, 146, 42, 0.06);
+    stroke-width: 2.5;
+}
+.hmt-ring__fill {
+    fill: none;
+    stroke: rgba(200, 146, 42, 0.55);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    /* Full circumference = 2 * PI * 25 ≈ 157.08 */
+    stroke-dasharray: 157.08;
+    stroke-dashoffset: 157.08;
+    transition: stroke-dashoffset 1s linear;
+    filter: drop-shadow(0 0 4px rgba(200, 146, 42, 0.25));
+}
+/* When timer is running, ring fill pulses subtly */
+.home-mini-timer.is-running .hmt-ring__fill {
+    animation: hmtRingPulse 4s ease-in-out infinite;
+}
+@keyframes hmtRingPulse {
+    0%, 100% { stroke: rgba(200, 146, 42, 0.55); filter: drop-shadow(0 0 4px rgba(200, 146, 42, 0.25)); }
+    50%      { stroke: rgba(220, 170, 70, 0.7);  filter: drop-shadow(0 0 8px rgba(200, 146, 42, 0.4)); }
+}
+/* Break mode: cooler color */
+.home-mini-timer.is-break .hmt-ring__fill {
+    stroke: rgba(100, 180, 160, 0.5);
+    filter: drop-shadow(0 0 4px rgba(100, 180, 160, 0.2));
+}
+.home-mini-timer.is-break.is-running .hmt-ring__fill {
+    animation: hmtRingPulseBreak 4s ease-in-out infinite;
+}
+@keyframes hmtRingPulseBreak {
+    0%, 100% { stroke: rgba(100, 180, 160, 0.5); filter: drop-shadow(0 0 4px rgba(100, 180, 160, 0.2)); }
+    50%      { stroke: rgba(130, 210, 190, 0.65); filter: drop-shadow(0 0 8px rgba(100, 180, 160, 0.35)); }
+}
+
+/* ── Text Content ── */
+.hmt-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    min-width: 70px;
+}
+
+.hmt-label {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(200, 160, 100, 0.5);
+    line-height: 1;
+}
+.home-mini-timer.is-break .hmt-label {
+    color: rgba(100, 180, 160, 0.5);
+}
+
+.hmt-time {
+    font-size: 30px;
+    font-weight: 200;
+    color: rgba(245, 232, 208, 0.95);
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums slashed-zero;
+    font-feature-settings: 'tnum', 'zero';
+    line-height: 1.1;
+    text-shadow:
+        0 1px 4px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(240, 200, 140, 0.2),
+        0 0 40px rgba(240, 200, 140, 0.08);
+}
+/* Breathing glow on the time digits when running */
+.home-mini-timer.is-running .hmt-time {
+    animation: hmtTimeGlow 5s ease-in-out infinite;
+}
+@keyframes hmtTimeGlow {
+    0%, 100% {
+        text-shadow:
+            0 1px 4px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(240, 200, 140, 0.2),
+            0 0 40px rgba(240, 200, 140, 0.08);
+    }
+    50% {
+        text-shadow:
+            0 1px 4px rgba(0, 0, 0, 0.4),
+            0 0 28px rgba(240, 200, 140, 0.3),
+            0 0 50px rgba(240, 200, 140, 0.12);
+    }
+}
+/* Paused: slightly dimmed, no glow animation */
+.home-mini-timer.is-paused .hmt-time {
+    color: rgba(245, 232, 208, 0.55);
+    text-shadow:
+        0 1px 4px rgba(0, 0, 0, 0.3),
+        0 0 10px rgba(240, 200, 140, 0.08);
+    animation: hmtTimePauseBlink 2.5s ease-in-out infinite;
+}
+@keyframes hmtTimePauseBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.hmt-session {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(200, 160, 100, 0.35);
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+/* ── Pulse ring (ambient glow behind the widget when running) ── */
+.hmt-pulse {
+    position: absolute;
+    inset: -6px;
+    border-radius: 28px;
+    opacity: 0;
+    pointer-events: none;
+    border: 1px solid rgba(200, 146, 42, 0.08);
+}
+.home-mini-timer.is-running .hmt-pulse {
+    animation: hmtPulseRing 3s ease-in-out infinite;
+}
+@keyframes hmtPulseRing {
+    0%   { opacity: 0; transform: scale(1); }
+    50%  { opacity: 1; transform: scale(1.02); }
+    100% { opacity: 0; transform: scale(1.06); }
+}
+.home-mini-timer.is-break.is-running .hmt-pulse {
+    border-color: rgba(100, 180, 160, 0.06);
+}
+
+/* ── Paused label overlay ── */
+.home-mini-timer.is-paused .hmt-label::after {
+    content: ' · PAUSED';
+    color: rgba(255, 200, 100, 0.4);
+    letter-spacing: 0.15em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+    .home-mini-timer {
+        bottom: 14px;
+        right: 14px;
+        padding: 10px 14px 10px 12px;
+        gap: 10px;
+        border-radius: 18px;
+    }
+    .hmt-ring { width: 40px; height: 40px; }
+    .hmt-time { font-size: 22px; }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .home-mini-timer.is-entering { animation: none; opacity: 1; }
+    .home-mini-timer.is-leaving { animation: none; }
+    .home-mini-timer.is-running .hmt-ring__fill { animation: none; }
+    .home-mini-timer.is-running .hmt-time { animation: none; }
+    .home-mini-timer.is-running .hmt-pulse { animation: none; display: none; }
+    .home-mini-timer.is-paused .hmt-time { animation: none; opacity: 0.6; }
+}
+
 /* Focus Mode Components */
 .focus-content {
     padding: 10px 20px;
