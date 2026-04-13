@@ -26,13 +26,14 @@
 //   advanced  — true → lives inside the collapsible Advanced group
 
 export const SECTIONS = [
-    { id: 'scene',         label: 'Scene',         iconPath: 'M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4-6.2-4.5-6.2 4.5 2.4-7.4L2 9.4h7.6z' }, // star
-    { id: 'timer',         label: 'Timer',         iconPath: 'M12 2a10 10 0 100 20 10 10 0 000-20zm1 10V6h-2v7l5.5 3.3 1-1.7z' },   // clock
-    { id: 'sounds',        label: 'Sounds',        iconPath: 'M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 8v8a4.5 4.5 0 002.5-4z' }, // speaker
-    { id: 'notifications', label: 'Notifications', iconPath: 'M12 22a2 2 0 002-2h-4a2 2 0 002 2zm6-6V11c0-3-2-5.5-5-6V4a1 1 0 10-2 0v1c-3 .5-5 3-5 6v5l-2 2v1h16v-1l-2-2z' }, // bell
-    { id: 'shortcuts',     label: 'Shortcuts',     iconPath: 'M20 5H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V7a2 2 0 00-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-3 0h2v2H5v-2zm0-3h2v2H5V8zm3 6h8v2H8v-2zm6-3h2v2h-2v-2zm0-3h2v2h-2V8zm3 3h2v2h-2v-2zm0-3h2v2h-2V8z' }, // keyboard
-    { id: 'profiles',      label: 'Profiles',      iconPath: 'M12 2L4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4z' }, // shield
-    { id: 'data',          label: 'Data & About',  iconPath: 'M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z' }, // info
+    // Feather-style stroke icons (rendered with stroke, not fill)
+    { id: 'scene',         label: 'Scene',         iconStroke: true, iconSvg: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/>' },
+    { id: 'timer',         label: 'Timer',         iconStroke: true, iconSvg: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>' },
+    { id: 'sounds',        label: 'Sounds',        iconStroke: true, iconSvg: '<path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07"/><path d="M19.07 4.93a10 10 0 010 14.14"/>' },
+    { id: 'notifications', label: 'Notifications', iconStroke: true, iconSvg: '<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>' },
+    { id: 'shortcuts',     label: 'Shortcuts',     iconStroke: true, iconSvg: '<rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>' },
+    { id: 'profiles',      label: 'Presets',       iconStroke: true, iconSvg: '<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/><circle cx="12" cy="12" r="3"/>' },
+    { id: 'data',          label: 'Data & About',  iconStroke: true, iconSvg: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>' },
 ];
 
 export const SCHEMA = [
@@ -266,7 +267,7 @@ export const SCHEMA = [
     // ═══════════════════════════════════════════════════════════════════════
     // PROFILES
     // ═══════════════════════════════════════════════════════════════════════
-    { section: 'profiles', type: 'group', label: 'Focus profiles' },
+    { section: 'profiles', type: 'group', label: 'Focus presets' },
     { section: 'profiles', type: 'profile-list' },
 
     // ═══════════════════════════════════════════════════════════════════════

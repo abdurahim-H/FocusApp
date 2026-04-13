@@ -91,7 +91,11 @@ function renderRail() {
         btn.dataset.section = section.id;
         btn.setAttribute('aria-label', section.label);
         btn.title = section.label;
-        btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="${section.iconPath}"/></svg>`;
+        if (section.iconStroke) {
+            btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${section.iconSvg}</svg>`;
+        } else {
+            btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="${section.iconPath}"/></svg>`;
+        }
         btn.addEventListener('click', () => setActiveSection(section.id));
         rail.appendChild(btn);
     }
@@ -225,10 +229,17 @@ function renderSlider(row) {
     `;
     const input = el.querySelector('input');
     const num = el.querySelector('.sr__num');
+    // Set initial fill percentage for the gradient track
+    const updateFill = () => {
+        const pct = ((input.value - input.min) / (input.max - input.min)) * 100;
+        input.style.setProperty('--fill', `${pct}%`);
+    };
+    updateFill();
     input.addEventListener('input', () => {
         const v = parseFloat(input.value);
         num.textContent = formatNumber(v);
         setSetting(row.key, v);
+        updateFill();
     });
     registerSearchable(el, row.label, row.help, row.key);
     applyShowIf(row, el);
@@ -502,6 +513,11 @@ function renderShortcutList() {
 function beginRebind(id, rowEl) {
     const s = getShortcut(id);
     if (!s || s.locked) return;
+    // If clicking the same row that's already rebinding, cancel instead
+    if (activeRebind && activeRebind.id === id) {
+        cancelRebind();
+        return;
+    }
     if (activeRebind) cancelRebind();
     activeRebind = { id, rowEl };
     rowEl.classList.add('is-rebinding');
@@ -794,7 +810,11 @@ function refreshControl(key) {
         const range = slider.querySelector('input');
         const num = slider.querySelector('.sr__num');
         const v = getSetting(key);
-        if (range && parseFloat(range.value) !== v) range.value = v;
+        if (range && parseFloat(range.value) !== v) {
+            range.value = v;
+            const pct = ((v - range.min) / (range.max - range.min)) * 100;
+            range.style.setProperty('--fill', `${pct}%`);
+        }
         if (num) num.textContent = formatNumber(v);
     }
     // Toggles

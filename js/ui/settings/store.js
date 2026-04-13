@@ -16,6 +16,7 @@
 //   exportJSON(), importJSON(json), snapshot(), restore(snapshot)
 
 import { SCHEMA } from './schema.js';
+import { SHORTCUTS } from './shortcuts-registry.js';
 
 const STORAGE_KEY = 'fu_settings_v2';
 
@@ -43,6 +44,11 @@ function buildDefaults() {
         if (row.key !== undefined && row.default !== undefined) {
             out[row.key] = row.default;
         }
+    }
+    // Shortcut keybindings live in SHORTCUTS registry, not SCHEMA rows.
+    // Include them so resetSection('shortcuts') and resetAll() restore defaults.
+    for (const s of SHORTCUTS) {
+        out[s.storeKey] = s.defaultKey;
     }
     return out;
 }
@@ -218,6 +224,12 @@ export function resetSection(sectionId) {
     for (const row of SCHEMA) {
         if (row.section === sectionId && row.key !== undefined) {
             if (row.key in DEFAULTS) set(row.key, DEFAULTS[row.key]);
+        }
+    }
+    // Shortcut keybindings aren't SCHEMA rows but belong to 'shortcuts' section
+    if (sectionId === 'shortcuts') {
+        for (const s of SHORTCUTS) {
+            if (s.storeKey in DEFAULTS) set(s.storeKey, DEFAULTS[s.storeKey]);
         }
     }
 }

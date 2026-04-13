@@ -50,15 +50,17 @@ export const GRAPHICS_PRESETS = {
     ultra: {
         label: 'Ultra',
         values: {
-            'scene.bloomWeight': 0.75,
-            'scene.exposure': 1.3,
+            'scene.bloomWeight': 0.65,
+            'scene.exposure': 1.25,
             'scene.godRayIntensity': 0.15,
-            'scene.vignette': 1.8,
-            'scene.chromaticAberration': 3,
-            'scene.grain': 0.04,
+            'scene.vignette': 1.6,
+            'scene.chromaticAberration': 2.5,
+            'scene.grain': 0.03,
             'scene.cameraShake': 1.2,
             'scene.starDensity': 1.5,
-            'scene.dofEnabled': true,
+            // DOF disabled — it blurs the entire scene making UI unreadable.
+            // Users can still enable it manually in Advanced if they want the cinematic look.
+            'scene.dofEnabled': false,
         },
     },
 };
