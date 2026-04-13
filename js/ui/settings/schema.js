@@ -267,7 +267,7 @@ export const SCHEMA = [
     // ═══════════════════════════════════════════════════════════════════════
     // PROFILES
     // ═══════════════════════════════════════════════════════════════════════
-    { section: 'profiles', type: 'group', label: 'Focus presets' },
+    { section: 'profiles', type: 'group', label: 'Focus presets', hint: 'Save current settings as a preset to switch between different focus setups.' },
     { section: 'profiles', type: 'profile-list' },
 
     // ═══════════════════════════════════════════════════════════════════════

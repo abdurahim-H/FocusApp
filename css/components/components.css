@@ -465,6 +465,21 @@
     color: rgba(200, 160, 100, 0.4);
     letter-spacing: 0.14em;
     text-transform: uppercase;
+}
+
+.settings-group__header:has(.settings-group__hint) {
+    flex-wrap: wrap;
+}
+
+.settings-group__hint {
+    width: 100%;
+    font-size: 11px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: normal;
+    text-transform: none;
+    margin: 2px 0 0;
+    line-height: 1.4;
     transition: color 0.2s ease;
 }
 .settings-group__chev {
@@ -1026,6 +1041,7 @@
 .profile-row--add {
     margin-top: 6px;
     gap: 4px;
+    padding-right: 6px;
 }
 .profile-row__new {
     flex: 1;

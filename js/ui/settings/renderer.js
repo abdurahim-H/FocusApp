@@ -172,6 +172,12 @@ function renderGroup(row) {
     const header = document.createElement('div');
     header.className = 'settings-group__header';
     header.innerHTML = `<span class="settings-group__label">${escapeHtml(row.label)}</span>`;
+    if (row.hint) {
+        const hint = document.createElement('p');
+        hint.className = 'settings-group__hint';
+        hint.textContent = row.hint;
+        header.appendChild(hint);
+    }
     if (row.collapsible) {
         const chev = document.createElement('span');
         chev.className = 'settings-group__chev';
