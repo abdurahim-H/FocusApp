@@ -1560,7 +1560,7 @@
 .stat-label {
     font-size: 10px;
     font-weight: 400;
-    color: rgba(180, 160, 125, 0.4);
+    color: rgba(180, 160, 125, 0.75);
     letter-spacing: var(--tracking-wider);
     text-transform: uppercase;
     line-height: 1;
@@ -2742,18 +2742,18 @@
 .hc-entry__cat {
     font-size: 9px;
     font-weight: 600;
-    color: rgba(200, 160, 100, 0.45);
+    color: rgba(200, 160, 100, 0.75);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 2px 6px;
     border-radius: 999px;
-    background: rgba(200, 146, 42, 0.06);
+    background: rgba(200, 146, 42, 0.08);
     white-space: nowrap;
     flex-shrink: 0;
 }
 .hc-entry__chev {
     flex-shrink: 0;
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.35);
     transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 .hc-entry.is-expanded .hc-entry__chev {
@@ -2846,4 +2846,41 @@
     font-size: 9px;
     color: rgba(240, 200, 120, 0.6);
     margin: 0 2px;
+}
+
+/* ===== PHASE 6: FOCUS-VISIBLE FOR ALL INTERACTIVE ELEMENTS ===== */
+
+/* Gold focus ring — consistent theme across the app */
+.settings-trigger:focus-visible,
+.help-trigger:focus-visible,
+.settings-rail__item:focus-visible,
+.hc-cat-card:focus-visible,
+.hc-close:focus-visible,
+.hc-back:focus-visible,
+.hc-entry__header:focus-visible,
+.preset-card:focus-visible,
+.stat-reset-btn:focus-visible,
+.clear-all-btn:focus-visible,
+.banner-btn:focus-visible,
+.stats-confirm-btn:focus-visible,
+.profile-row__new:focus-visible {
+    outline: 2px solid rgba(200, 146, 42, 0.65);
+    outline-offset: 2px;
+}
+
+/* Remove outline on mouse click */
+.settings-trigger:focus:not(:focus-visible),
+.help-trigger:focus:not(:focus-visible),
+.settings-rail__item:focus:not(:focus-visible),
+.hc-cat-card:focus:not(:focus-visible),
+.hc-close:focus:not(:focus-visible),
+.hc-back:focus:not(:focus-visible),
+.hc-entry__header:focus:not(:focus-visible),
+.preset-card:focus:not(:focus-visible),
+.stat-reset-btn:focus:not(:focus-visible),
+.clear-all-btn:focus:not(:focus-visible),
+.banner-btn:focus:not(:focus-visible),
+.stats-confirm-btn:focus:not(:focus-visible),
+.profile-row__new:focus:not(:focus-visible) {
+    outline: none;
 }

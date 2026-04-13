@@ -1164,7 +1164,7 @@
    keyboard/programmatic focus), so it only appears when tabbing through. */
 .ambient-controls .liquid-glass-btn:focus-visible,
 .timer-controls .liquid-glass-btn:focus-visible {
-    outline: 2px solid rgba(200, 146, 42, 0.55);
+    outline: 2px solid rgba(200, 146, 42, 0.65);
     outline-offset: 2px;
 }
 
@@ -1342,3 +1342,20 @@
 }
 
 /* Removed duplicate opacity rule - handled in liquid-glass-buttons.css */
+
+/* ===== PHASE 6: FOCUS-VISIBLE FOR SOUND & MODAL ELEMENTS ===== */
+
+.sound-card:focus-visible,
+.modal-close-btn:focus-visible,
+.browse-sounds-btn:focus-visible,
+.active-sound-chip .chip-close:focus-visible {
+    outline: 2px solid rgba(200, 146, 42, 0.65);
+    outline-offset: 2px;
+}
+
+.sound-card:focus:not(:focus-visible),
+.modal-close-btn:focus:not(:focus-visible),
+.browse-sounds-btn:focus:not(:focus-visible),
+.active-sound-chip .chip-close:focus:not(:focus-visible) {
+    outline: none;
+}

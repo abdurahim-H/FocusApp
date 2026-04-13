@@ -42,6 +42,24 @@ export function switchMode(mode) {
     if (mode === 'home') {
         updateDateTime();
     }
+
+    // Phase 6: Move focus to the primary element of the new mode panel
+    // so keyboard / screen-reader users land somewhere meaningful.
+    if (previousMode !== mode) {
+        setTimeout(() => {
+            const targets = {
+                home:    '#home h1',
+                focus:   '#timerDisplay',
+                ambient: '#browseSoundsBtn',
+            };
+            const el = document.querySelector(targets[mode]);
+            if (el) {
+                // Make non-interactive elements temporarily focusable
+                if (!el.getAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+                el.focus({ preventScroll: true });
+            }
+        }, 120);
+    }
 }
 
 // Briefly squash the .nav-buttons container's CSS variable so the ::before

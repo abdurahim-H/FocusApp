@@ -9,10 +9,12 @@
 //   - Programmatic: openHelpCenter() / closeHelpCenter()
 
 import { HELP_CATEGORIES } from './help-content.js';
+import { createFocusTrap } from './focus-trap.js';
 
 let overlay = null;
 let isOpen = false;
 let activeCategory = null;
+let helpTrap = null;
 
 // ============================================================================
 // Public API
@@ -23,6 +25,7 @@ export function openHelpCenter() {
     ensureDOM();
     isOpen = true;
     overlay.classList.add('is-active');
+    if (helpTrap) helpTrap.activate(document.activeElement);
     const searchInput = overlay.querySelector('.hc-search__input');
     if (searchInput) setTimeout(() => searchInput.focus(), 80);
 }
@@ -31,6 +34,7 @@ export function closeHelpCenter() {
     if (!isOpen) return;
     isOpen = false;
     overlay.classList.remove('is-active');
+    if (helpTrap) helpTrap.deactivate();
     activeCategory = null;
     // Reset to category grid view
     const grid = overlay.querySelector('.hc-categories');
@@ -62,6 +66,9 @@ function ensureDOM() {
 
     overlay = document.createElement('div');
     overlay.className = 'hc-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Help Center');
     overlay.innerHTML = `
         <div class="hc-scrim"></div>
         <div class="hc-panel">
@@ -121,6 +128,7 @@ function ensureDOM() {
     });
 
     document.body.appendChild(overlay);
+    helpTrap = createFocusTrap(overlay);
 }
 
 // ============================================================================

@@ -39,6 +39,9 @@
     </script>
 </head>
 <body data-theme="dark">
+    <!-- Skip to content link for keyboard users -->
+    <a href="#home" class="skip-link">Skip to content</a>
+
     <!-- Page start timer -->
     <script>window.__pageStart = performance.now(); console.log('⏱️ [0ms] Page body start');</script>
 
@@ -92,12 +95,12 @@
                 </div>
 
                 <div class="session-info">
-                    <h2 id="sessionType" class="session-type">Focus Time</h2>
+                    <h2 id="sessionType" class="session-type" aria-live="polite">Focus Time</h2>
                     <div class="session-progress">
                         Session <span id="pomodoroCount">1</span> of <span id="pomodoroTotal">4</span>
                     </div>
                 </div>
-                <div class="timer-display" id="timerDisplay">25:00</div>
+                <div class="timer-display" id="timerDisplay" aria-live="off" aria-atomic="true" role="timer">25:00</div>
                 
                 <div class="timer-controls">
                     <button class="liquid-glass-btn liquid-glass-btn--primary liquid-glass-btn--lens-flare" id="startBtn">
@@ -115,13 +118,13 @@
                     <button class="liquid-glass-btn liquid-glass-btn--success liquid-glass-btn--lens-flare hidden" id="skipFocusBtn">
                         <span class="btn-text">Skip Focus</span>
                     </button>
-                    <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--micro-reflect" id="resetSessionBtn" title="Reset entire Pomodoro cycle">
-                        <span class="btn-icon">⟳</span>
+                    <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--micro-reflect" id="resetSessionBtn" title="Reset entire Pomodoro cycle" aria-label="Reset entire Pomodoro cycle">
+                        <span class="btn-icon" aria-hidden="true">⟳</span>
                     </button>
                 </div>
 
                 <!-- Statistics Bar -->
-                <div class="stats-bar" id="statsBar">
+                <div class="stats-bar" id="statsBar" aria-label="Session statistics">
                     <!-- Live stats (hidden during confirmation) -->
                     <div class="stats-chips" id="statsChips">
                         <div class="stat-chip">
@@ -192,49 +195,50 @@
                     </div>
                     
                     <!-- Browse Library Button -->
-                    <button class="liquid-glass-btn browse-sounds-btn" id="browseSoundsBtn">
-                        <span class="btn-icon">🎵</span>
+                    <button class="liquid-glass-btn browse-sounds-btn" id="browseSoundsBtn" aria-label="Browse Sound Library">
+                        <span class="btn-icon" aria-hidden="true">🎵</span>
                         <span class="btn-text">Browse Sound Library</span>
                     </button>
                 </div>
                 
                 <!-- Sound Library Modal -->
-                <div class="sound-library-modal" id="soundLibraryModal">
+                <div class="sound-library-modal" id="soundLibraryModal" role="dialog" aria-modal="true" aria-label="Sound Library">
                     <div class="modal-backdrop"></div>
                     <div class="modal-container">
                         <!-- Modal Header -->
                         <div class="modal-header">
                             <h2 class="modal-title">Sound Library</h2>
-                            <button class="modal-close-btn" id="closeModalBtn">
-                                <span>✕</span>
+                            <button class="modal-close-btn" id="closeModalBtn" aria-label="Close sound library">
+                                <span aria-hidden="true">✕</span>
                             </button>
                         </div>
                         
                         <!-- Search Bar -->
                         <div class="modal-search-container">
-                            <input type="text" 
-                                   class="modal-search-input" 
-                                   id="modalSoundSearch" 
-                                   placeholder="Search sounds..." 
+                            <input type="text"
+                                   class="modal-search-input"
+                                   id="modalSoundSearch"
+                                   placeholder="Search sounds..."
+                                   aria-label="Search sounds"
                                    autocomplete="off"
                                    spellcheck="false">
-                            <span class="modal-search-icon">🔍</span>
+                            <span class="modal-search-icon" aria-hidden="true">🔍</span>
                         </div>
                         
                         <!-- Ambient Presets — Phase 5D -->
                         <div class="preset-section">
                             <h3 class="category-title">Quick Presets</h3>
                             <div class="preset-grid">
-                                <button class="preset-card" data-preset="rainy-library">
-                                    <span class="preset-icons">🌧️📚</span>
+                                <button class="preset-card" data-preset="rainy-library" aria-label="Rainy Library preset">
+                                    <span class="preset-icons" aria-hidden="true">🌧️📚</span>
                                     <span class="preset-name">Rainy Library</span>
                                 </button>
-                                <button class="preset-card" data-preset="forest-morning">
-                                    <span class="preset-icons">🌲🐦</span>
+                                <button class="preset-card" data-preset="forest-morning" aria-label="Forest Morning preset">
+                                    <span class="preset-icons" aria-hidden="true">🌲🐦</span>
                                     <span class="preset-name">Forest Morning</span>
                                 </button>
-                                <button class="preset-card" data-preset="deep-focus">
-                                    <span class="preset-icons">🎚️🌧️</span>
+                                <button class="preset-card" data-preset="deep-focus" aria-label="Deep Focus preset">
+                                    <span class="preset-icons" aria-hidden="true">🎚️🌧️</span>
                                     <span class="preset-name">Deep Focus</span>
                                 </button>
                             </div>
@@ -387,7 +391,7 @@
     <div class="settings-modal-overlay" id="settingsModalOverlay"></div>
     <!-- Settings panel — all contents are rendered dynamically by
          js/ui/settings/renderer.js against the schema. -->
-    <div class="settings-modal hidden" id="settingsPanel"></div>
+    <div class="settings-modal hidden" id="settingsPanel" role="dialog" aria-modal="true" aria-label="Settings"></div>
 
     <!-- Babylon.js Core — the only required dependency -->
     <script>console.log('⏱️ [' + Math.round(performance.now() - window.__pageStart) + 'ms] Starting Babylon.js download...');</script>

@@ -142,13 +142,13 @@ function createTaskElement(task) {
     li.innerHTML = `
         <div class="task-content">
             <label class="liquid-glass-checkbox" data-toggle-task="${task.id}">
-                <input type="checkbox" ${task.completed ? 'checked' : ''} tabindex="-1">
+                <input type="checkbox" ${task.completed ? 'checked' : ''} aria-label="${escapeHtml(task.text)}">
                 <span class="checkmark"></span>
             </label>
             <span class="task-text${task.completed ? ' task-completed' : ''}">${escapeHtml(task.text)}</span>
         </div>
         <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--danger" data-delete-task="${task.id}" aria-label="Delete task">
-            <span class="btn-icon">✕</span>
+            <span class="btn-icon" aria-hidden="true">✕</span>
         </button>
     `;
     return li;

@@ -5,6 +5,27 @@
  * A 3D productivity universe with pomodoro timer and ambient features
  */
 
+/* Phase 6: Skip-to-content link for keyboard navigation */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    z-index: 100000;
+    padding: 8px 16px;
+    background: rgba(20, 18, 14, 0.95);
+    color: rgba(240, 200, 120, 0.95);
+    border: 1px solid rgba(200, 146, 42, 0.4);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+    top: 16px;
+}
+
 /* Global Reset and Base Styles */
 * {
     margin: 0;
@@ -352,6 +373,38 @@ a {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
+    }
+}
+
+/* Phase 6: High contrast mode — boost borders, text, and focus rings */
+@media (prefers-contrast: high) {
+    :root {
+        --border-glass: rgba(255, 255, 255, 0.5);
+        --text-secondary: rgba(255, 255, 255, 0.9);
+    }
+
+    .stat-label {
+        color: rgba(220, 200, 165, 0.95) !important;
+    }
+
+    .stat-value {
+        color: rgba(245, 230, 200, 0.95) !important;
+    }
+
+    .nav-btn {
+        font-weight: 600 !important;
+    }
+
+    .task-input,
+    .modal-search-input,
+    .settings-search__input,
+    .hc-search__input {
+        border-width: 2px !important;
+    }
+
+    /* Stronger focus rings */
+    *:focus-visible {
+        outline-width: 3px !important;
     }
 }
 

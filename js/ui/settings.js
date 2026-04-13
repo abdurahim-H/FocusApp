@@ -20,9 +20,11 @@ import { initSchedules } from './settings/schedules.js';
 import { SHORTCUTS } from './settings/shortcuts-registry.js';
 import { readShareLinkFromURL } from './settings/data-io.js';
 import { isReducedMotion } from '../core/motion.js';
+import { createFocusTrap } from './focus-trap.js';
 
 let rendered = false;
 let panelVisible = false;
+let settingsTrap = null;
 
 // ============================================================================
 // Open / close
@@ -37,6 +39,7 @@ function closeSettings() {
         panel.classList.add('hidden');
     }
     if (star) star.classList.remove('open');
+    if (settingsTrap) settingsTrap.deactivate();
     panelVisible = false;
 }
 
@@ -50,6 +53,7 @@ function openSettings() {
         renderSettings(panel);
         rendered = true;
         startLiveReadonlyTicker(() => panelVisible);
+        settingsTrap = createFocusTrap(panel);
     }
 
     if (overlay) overlay.classList.add('active');
@@ -57,6 +61,11 @@ function openSettings() {
     panel.classList.add('visible');
     if (star) star.classList.add('open');
     panelVisible = true;
+    if (settingsTrap) settingsTrap.activate(star);
+
+    // Focus the search input for keyboard users
+    const searchInput = panel.querySelector('.settings-search__input');
+    if (searchInput) setTimeout(() => searchInput.focus(), 100);
 }
 
 function toggleSettings() {

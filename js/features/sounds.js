@@ -3,6 +3,7 @@
 
 import { state } from '../core/state.js';
 import { isReducedMotion } from '../core/motion.js';
+import { createFocusTrap } from '../ui/focus-trap.js';
 
 // Comprehensive sound library with audio file mappings
 const ambientSounds = {
@@ -337,9 +338,9 @@ function updateActiveSoundsDisplay() {
         const chip = document.createElement('div');
         chip.className = 'active-sound-chip';
         chip.innerHTML = `
-            <span class="chip-icon">${metadata.icon}</span>
+            <span class="chip-icon" aria-hidden="true">${metadata.icon}</span>
             <span class="chip-name">${metadata.name}</span>
-            <span class="chip-close" data-sound="${soundType}">×</span>
+            <button class="chip-close" data-sound="${soundType}" aria-label="Stop ${metadata.name}">×</button>
         `;
         
         // Add click handler to close button
@@ -359,38 +360,46 @@ function updateSoundCardState(soundType, isActive) {
     soundCards.forEach(card => {
         if (isActive) {
             card.classList.add('active');
+            card.setAttribute('aria-pressed', 'true');
         } else {
             card.classList.remove('active');
+            card.setAttribute('aria-pressed', 'false');
         }
     });
 }
 
 // Setup modal controls
+let soundModalTrap = null;
+
 function setupModalControls() {
     const modal = document.getElementById('soundLibraryModal');
     const browseBtn = document.getElementById('browseSoundsBtn');
     const closeBtn = document.getElementById('closeModalBtn');
     const backdrop = modal?.querySelector('.modal-backdrop');
     const searchInput = document.getElementById('modalSoundSearch');
-    
+
     if (!modal || !browseBtn) return;
-    
+
+    soundModalTrap = createFocusTrap(modal);
+
     // Open modal
     browseBtn.addEventListener('click', () => {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        
+        soundModalTrap.activate(browseBtn);
+
         // Focus search after animation
         setTimeout(() => {
             searchInput?.focus();
         }, 300);
     });
-    
+
     // Close modal
     const closeModal = () => {
         modal.classList.remove('active');
         document.body.style.overflow = '';
-        
+        soundModalTrap.deactivate();
+
         // Clear search
         if (searchInput) {
             searchInput.value = '';
