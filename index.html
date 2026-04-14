@@ -100,12 +100,19 @@
         </div>
         <!-- Controls -->
         <div class="hmt-controls">
+            <button class="hmt-btn hmt-btn--play-pause" id="hmtPlayPauseBtn" aria-label="Pause timer" data-state="">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>
+            </button>
             <button class="hmt-btn hmt-btn--skip" id="hmtSkipBtn" aria-label="Skip session">
                 <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M4 2.5a.5.5 0 0 1 .79-.407l5.5 4a.5.5 0 0 1 0 .814l-5.5 4A.5.5 0 0 1 4 10.5v-8zM11.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-1 0v-9a.5.5 0 0 1 .5-.5z"/></svg>
             </button>
             <button class="hmt-btn hmt-btn--reset" id="hmtResetBtn" aria-label="Reset timer">
                 <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5v4h4"/><path d="M2.9 10a5.5 5.5 0 1 0 1.1-5.5L2.5 6.5"/></svg>
             </button>
+        </div>
+        <!-- Resize handle (bottom-right corner) -->
+        <div class="hmt-resize" aria-hidden="true">
+            <svg viewBox="0 0 10 10" width="10" height="10"><path d="M9 1L1 9M9 5L5 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
         </div>
         <!-- Pulse ring (animated behind on active) -->
         <div class="hmt-pulse" aria-hidden="true"></div>

@@ -8,7 +8,7 @@
 import { state } from '../core/state.js';
 import { switchMode } from './navigation.js';
 import { get as settingsGet } from './settings/store.js';
-import { resetTimer, skipBreak, skipFocus } from '../features/timer.js';
+import { startTimer, pauseTimer, resetTimer, skipBreak, skipFocus } from '../features/timer.js';
 
 // ============================================================================
 // DOM references
@@ -48,12 +48,31 @@ export function initHomeMiniTimer() {
     // Restore timer state from sessionStorage (survives normal refresh)
     restoreTimerState();
 
-    // Click → navigate to Focus tab (only if not dragging)
-    container.addEventListener('click', (e) => {
-        if (isDragging) return;
-        e.stopPropagation();
-        switchMode('focus');
+    // Click on body area (not buttons) → navigate to Focus tab
+    const bodyArea = container.querySelector('.hmt-body');
+    const ringArea = container.querySelector('.hmt-ring');
+    [bodyArea, ringArea].forEach(el => {
+        if (el) el.addEventListener('click', (e) => {
+            if (isDragging) return;
+            e.stopPropagation();
+            switchMode('focus');
+        });
     });
+
+    // Stop container-level click from doing anything
+    container.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    // Start/Pause button
+    const playPauseBtn = document.getElementById('hmtPlayPauseBtn');
+    if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (state.timer.isRunning) pauseTimer();
+            else startTimer();
+        });
+    }
 
     // Skip button — skips current focus or break session
     const skipBtn = document.getElementById('hmtSkipBtn');
@@ -75,10 +94,20 @@ export function initHomeMiniTimer() {
         });
     }
 
-    // ── Drag support ──
-    container.addEventListener('pointerdown', onDragStart, { passive: false });
+    // ── Drag support (only from non-interactive areas) ──
+    container.addEventListener('pointerdown', (e) => {
+        // Don't drag from buttons
+        if (e.target.closest('.hmt-btn') || e.target.closest('.hmt-resize')) return;
+        onDragStart(e);
+    }, { passive: false });
     document.addEventListener('pointermove', onDragMove, { passive: false });
     document.addEventListener('pointerup', onDragEnd);
+
+    // ── Corner resize handle ──
+    const resizeHandle = container.querySelector('.hmt-resize');
+    if (resizeHandle) {
+        resizeHandle.addEventListener('pointerdown', onResizeStart, { passive: false });
+    }
 
     // Start polling timer state (lightweight — just reads state object)
     tickInterval = setInterval(tick, 500);
@@ -104,8 +133,7 @@ function onDragStart(e) {
     const rect = container.getBoundingClientRect();
     dragOffsetX = e.clientX - rect.left;
     dragOffsetY = e.clientY - rect.top;
-
-    container.setPointerCapture(e.pointerId);
+    // Don't setPointerCapture — it steals events from child buttons
 }
 
 function onDragMove(e) {
@@ -290,6 +318,19 @@ function tick() {
         ringFill.style.strokeDashoffset = offset.toFixed(2);
     }
 
+    // Update play/pause icon
+    const ppBtn = document.getElementById('hmtPlayPauseBtn');
+    if (ppBtn) {
+        const icon = isRunning
+            ? '<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>'
+            : '<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M4 2.5a.5.5 0 0 1 .77-.42l8.5 5.5a.5.5 0 0 1 0 .84l-8.5 5.5A.5.5 0 0 1 4 13.5v-11z"/></svg>';
+        if (ppBtn.dataset.state !== (isRunning ? 'running' : 'paused')) {
+            ppBtn.innerHTML = icon;
+            ppBtn.dataset.state = isRunning ? 'running' : 'paused';
+            ppBtn.setAttribute('aria-label', isRunning ? 'Pause timer' : 'Resume timer');
+        }
+    }
+
     // State classes
     container.classList.toggle('is-running', isRunning);
     container.classList.toggle('is-paused', timerState === 'paused');
@@ -320,4 +361,46 @@ function hide() {
         container.classList.remove('is-leaving');
         container.classList.add('hidden');
     }, { once: true });
+}
+
+// ============================================================================
+// Corner resize — drag corner handle to scale between min and max
+// ============================================================================
+const MIN_SCALE = 1;
+const MAX_SCALE = 1.35;
+let currentScale = 1;
+let resizing = false;
+let resizeStartX = 0;
+let resizeStartY = 0;
+let resizeStartScale = 1;
+
+function onResizeStart(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    resizing = true;
+    resizeStartX = e.clientX;
+    resizeStartY = e.clientY;
+    resizeStartScale = currentScale;
+    container.classList.add('is-resizing');
+
+    document.addEventListener('pointermove', onResizeMove);
+    document.addEventListener('pointerup', onResizeEnd);
+}
+
+function onResizeMove(e) {
+    if (!resizing) return;
+    // Diagonal distance from start — moving down-right grows, up-left shrinks
+    const dx = e.clientX - resizeStartX;
+    const dy = e.clientY - resizeStartY;
+    const delta = (dx + dy) / 200; // Sensitivity
+    const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, resizeStartScale + delta));
+    currentScale = newScale;
+    container.style.transform = `scale(${newScale.toFixed(3)})`;
+}
+
+function onResizeEnd() {
+    resizing = false;
+    container.classList.remove('is-resizing');
+    document.removeEventListener('pointermove', onResizeMove);
+    document.removeEventListener('pointerup', onResizeEnd);
 }

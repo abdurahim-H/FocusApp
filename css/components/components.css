@@ -77,9 +77,10 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 16px 24px 16px 18px;
-    border-radius: 24px;
+    padding: 18px 22px 18px 18px;
+    border-radius: 26px;
     cursor: grab;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 
     /* Premium glass — same recipe as settings panel */
     background: rgba(8, 6, 3, 0.75);
@@ -146,13 +147,12 @@
         0 0 40px rgba(200, 146, 42, 0.06),
         inset 0 1px 0 rgba(255, 240, 210, 0.1),
         inset 0 -1px 0 rgba(200, 146, 42, 0.05);
-    transform: scale(1.03);
 }
 
 /* ── SVG Progress Ring ── */
 .hmt-ring {
-    width: 58px;
-    height: 58px;
+    width: 62px;
+    height: 62px;
     flex-shrink: 0;
     transform: rotate(-90deg);
 }
@@ -215,7 +215,7 @@
 }
 
 .hmt-time {
-    font-size: 30px;
+    font-size: 32px;
     font-weight: 200;
     color: rgba(245, 232, 208, 0.95);
     letter-spacing: -0.03em;
@@ -267,12 +267,12 @@
     line-height: 1;
 }
 
-/* ── Controls (skip + reset) ── */
+/* ── Controls (play/pause + skip + reset) ── */
 .hmt-controls {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-left: 2px;
+    gap: 5px;
+    margin-left: 4px;
 }
 .hmt-btn {
     width: 30px;
@@ -313,6 +313,52 @@
     border-color: rgba(100, 180, 160, 0.25);
     color: rgba(160, 220, 200, 0.9);
     box-shadow: 0 0 12px rgba(100, 180, 160, 0.1);
+}
+
+/* Play/pause — slightly more prominent */
+.hmt-btn--play-pause {
+    background: rgba(200, 146, 42, 0.08);
+    color: rgba(200, 160, 100, 0.6);
+}
+.hmt-btn--play-pause:hover {
+    background: rgba(200, 146, 42, 0.18);
+    color: rgba(255, 220, 140, 1);
+    box-shadow: 0 0 14px rgba(200, 146, 42, 0.12);
+}
+.home-mini-timer.is-break .hmt-btn--play-pause:hover {
+    background: rgba(100, 180, 160, 0.15);
+    color: rgba(160, 220, 200, 1);
+    box-shadow: 0 0 14px rgba(100, 180, 160, 0.1);
+}
+
+/* ── Resize handle (bottom-right corner) ── */
+.hmt-resize {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: nwse-resize;
+    color: rgba(200, 160, 100, 0.12);
+    transition: color 0.2s ease;
+    border-radius: 0 0 6px 0;
+    touch-action: none;
+}
+.home-mini-timer:hover .hmt-resize {
+    color: rgba(200, 160, 100, 0.35);
+}
+.hmt-resize:hover {
+    color: rgba(200, 160, 100, 0.55) !important;
+}
+.home-mini-timer.is-resizing {
+    transition: none !important;
+}
+/* Ensure transform-origin is bottom-right for natural resize feel */
+.home-mini-timer {
+    transform-origin: bottom right;
 }
 
 /* Focus-visible */
