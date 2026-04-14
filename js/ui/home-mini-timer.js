@@ -8,6 +8,7 @@
 import { state } from '../core/state.js';
 import { switchMode } from './navigation.js';
 import { get as settingsGet } from './settings/store.js';
+import { resetTimer, skipBreak, skipFocus } from '../features/timer.js';
 
 // ============================================================================
 // DOM references
@@ -53,6 +54,26 @@ export function initHomeMiniTimer() {
         e.stopPropagation();
         switchMode('focus');
     });
+
+    // Skip button — skips current focus or break session
+    const skipBtn = document.getElementById('hmtSkipBtn');
+    if (skipBtn) {
+        skipBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (state.timer.isBreak) skipBreak();
+            else skipFocus();
+        });
+    }
+
+    // Reset button
+    const resetBtn = document.getElementById('hmtResetBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetTimer();
+            sessionStorage.removeItem(TIMER_STATE_KEY);
+        });
+    }
 
     // ── Drag support ──
     container.addEventListener('pointerdown', onDragStart, { passive: false });

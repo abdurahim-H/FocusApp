@@ -267,6 +267,63 @@
     line-height: 1;
 }
 
+/* ── Controls (skip + reset) ── */
+.hmt-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-left: 2px;
+}
+.hmt-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(200, 160, 100, 0.45);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    padding: 0;
+}
+.hmt-btn:hover {
+    background: rgba(200, 146, 42, 0.12);
+    border-color: rgba(200, 146, 42, 0.25);
+    color: rgba(255, 220, 140, 0.9);
+}
+.hmt-btn:active {
+    transform: scale(0.88);
+    transition-duration: 0.08s;
+}
+/* Skip button — slightly brighter to suggest primary action */
+.hmt-btn--skip:hover {
+    box-shadow: 0 0 12px rgba(200, 146, 42, 0.1);
+}
+/* Reset button — red tint on hover */
+.hmt-btn--reset:hover {
+    background: rgba(255, 69, 58, 0.1);
+    border-color: rgba(255, 69, 58, 0.2);
+    color: rgba(255, 120, 100, 0.9);
+}
+/* Break mode: skip button gets teal tint */
+.home-mini-timer.is-break .hmt-btn--skip:hover {
+    background: rgba(100, 180, 160, 0.12);
+    border-color: rgba(100, 180, 160, 0.25);
+    color: rgba(160, 220, 200, 0.9);
+    box-shadow: 0 0 12px rgba(100, 180, 160, 0.1);
+}
+
+/* Focus-visible */
+.hmt-btn:focus-visible {
+    outline: 2px solid rgba(200, 146, 42, 0.65);
+    outline-offset: 2px;
+}
+.hmt-btn:focus:not(:focus-visible) {
+    outline: none;
+}
+
 /* ── Pulse ring (ambient glow behind the widget when running) ── */
 .hmt-pulse {
     position: absolute;
