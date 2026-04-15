@@ -20,6 +20,7 @@ let sessionEl = null;
 let ringFill = null;
 let tickInterval = null;
 let visible = false;
+let hideBlockedUntil = 0; // Timestamp — tick won't hide before this
 
 // Ring geometry
 const CIRCUMFERENCE = 2 * Math.PI * 25; // r=25 in SVG viewBox
@@ -91,6 +92,10 @@ export function initHomeMiniTimer() {
             e.stopPropagation();
             resetTimer();
             sessionStorage.removeItem(TIMER_STATE_KEY);
+            // Keep the mini-timer visible by setting state to 'paused'
+            // so tick() treats it as active and doesn't hide the widget
+            state.timerState = 'paused';
+            if (labelEl) labelEl.textContent = 'RESET';
         });
     }
 
@@ -269,17 +274,23 @@ function tick() {
     if (!container) return;
 
     const { isRunning, isBreak, minutes, seconds, settings, pomodoroCount } = state.timer;
-    const timerState = state.timerState; // 'running' | 'paused' | 'stopped' | 'completed'
+    const timerState = state.timerState;
     const isActive = isRunning || timerState === 'paused';
 
-    // Only show on Home and Ambient modes — hide on Focus (redundant there)
-    const currentMode = state.mode;
-    const onVisibleTab = currentMode === 'home' || currentMode === 'ambient';
+    // Check which tab the user is actually on via DOM (state.mode gets
+    // overwritten by startTimer to 'timer', which is unreliable here)
+    const homePanel = document.getElementById('home');
+    const ambientPanel = document.getElementById('ambient');
+    const onVisibleTab = homePanel?.classList.contains('active') ||
+                         ambientPanel?.classList.contains('active');
 
     // Show/hide
+    const now = Date.now();
     if (isActive && onVisibleTab && !visible) {
         show();
-    } else if ((!isActive || !onVisibleTab) && visible) {
+    } else if (!onVisibleTab && visible && now >= hideBlockedUntil) {
+        hide();
+    } else if (!isActive && visible && now >= hideBlockedUntil) {
         hide();
     }
 
@@ -352,6 +363,11 @@ function show() {
     }, { once: true });
 }
 
+function hideAfterDelay(ms) {
+    hideBlockedUntil = Date.now() + ms;
+    setTimeout(() => hide(), ms);
+}
+
 function hide() {
     if (!visible) return;
     visible = false;
@@ -367,7 +383,7 @@ function hide() {
 // Corner resize — drag corner handle to scale between min and max
 // ============================================================================
 const MIN_SCALE = 1;
-const MAX_SCALE = 1.35;
+const MAX_SCALE = 1.8;
 let currentScale = 1;
 let resizing = false;
 let resizeStartX = 0;
