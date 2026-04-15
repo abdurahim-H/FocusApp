@@ -17,13 +17,15 @@ let container = null;
 let timeEl = null;
 let labelEl = null;
 let sessionEl = null;
-let ringFill = null;
+let minHand = null;
+let secHand = null;
+let progressArc = null;
 let tickInterval = null;
 let visible = false;
 let hideBlockedUntil = 0; // Timestamp — tick won't hide before this
 
-// Ring geometry
-const CIRCUMFERENCE = 2 * Math.PI * 25; // r=25 in SVG viewBox
+// Clock geometry
+const PROGRESS_CIRCUMFERENCE = 2 * Math.PI * 23; // r=23 in SVG viewBox
 
 // Drag state
 let isDragging = false;
@@ -38,11 +40,13 @@ const TIMER_STATE_KEY = 'fu_timer_session';
 // ============================================================================
 
 export function initHomeMiniTimer() {
-    container = document.getElementById('homeMiniTimer');
-    timeEl    = document.getElementById('hmtTime');
-    labelEl   = document.getElementById('hmtLabel');
-    sessionEl = document.getElementById('hmtSession');
-    ringFill  = document.getElementById('hmtRingFill');
+    container   = document.getElementById('homeMiniTimer');
+    timeEl      = document.getElementById('hmtTime');
+    labelEl     = document.getElementById('hmtLabel');
+    sessionEl   = document.getElementById('hmtSession');
+    minHand     = document.getElementById('hmtMinHand');
+    secHand     = document.getElementById('hmtSecHand');
+    progressArc = document.getElementById('hmtProgress');
 
     if (!container) return;
 
@@ -318,15 +322,28 @@ function tick() {
         sessionEl.textContent = `${Math.min(current, goal)} / ${goal}`;
     }
 
-    // Update progress ring
-    if (ringFill) {
-        const totalSeconds = isBreak
-            ? (state.timer.isLongBreak ? settings.longBreakDuration : settings.shortBreakDuration) * 60
-            : settings.focusDuration * 60;
-        const elapsed = totalSeconds - (minutes * 60 + seconds);
-        const progress = totalSeconds > 0 ? elapsed / totalSeconds : 0;
-        const offset = CIRCUMFERENCE * (1 - progress);
-        ringFill.style.strokeDashoffset = offset.toFixed(2);
+    // Update clock hands + progress arc
+    const totalSeconds = isBreak
+        ? (state.timer.isLongBreak ? settings.longBreakDuration : settings.shortBreakDuration) * 60
+        : settings.focusDuration * 60;
+    const remaining = minutes * 60 + seconds;
+    const elapsed = totalSeconds - remaining;
+    const progress = totalSeconds > 0 ? elapsed / totalSeconds : 0;
+
+    // Minute hand — full rotation maps to full session duration
+    if (minHand) {
+        const minAngle = progress * 360;
+        minHand.style.transform = `rotate(${minAngle.toFixed(1)}deg)`;
+    }
+    // Second hand — one full rotation per 60 seconds
+    if (secHand) {
+        const secAngle = (seconds / 60) * 360;
+        secHand.style.transform = `rotate(${secAngle.toFixed(1)}deg)`;
+    }
+    // Progress arc
+    if (progressArc) {
+        const offset = PROGRESS_CIRCUMFERENCE * (1 - progress);
+        progressArc.style.strokeDashoffset = offset.toFixed(2);
     }
 
     // Update play/pause icon
@@ -346,6 +363,7 @@ function tick() {
     container.classList.toggle('is-running', isRunning);
     container.classList.toggle('is-paused', timerState === 'paused');
     container.classList.toggle('is-break', isBreak);
+    container.classList.toggle('is-long-break', isBreak && state.timer.isLongBreak);
 }
 
 // ============================================================================
@@ -361,11 +379,6 @@ function show() {
     container.addEventListener('animationend', () => {
         container.classList.remove('is-entering');
     }, { once: true });
-}
-
-function hideAfterDelay(ms) {
-    hideBlockedUntil = Date.now() + ms;
-    setTimeout(() => hide(), ms);
 }
 
 function hide() {

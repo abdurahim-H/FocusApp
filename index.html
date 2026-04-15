@@ -87,10 +87,35 @@
 
     <!-- Mini Focus Timer — OUTSIDE #home so it's viewport-positioned, draggable -->
     <div class="home-mini-timer hidden" id="homeMiniTimer" role="status" aria-label="Focus timer">
-        <!-- Progress arc (SVG ring) -->
-        <svg class="hmt-ring" viewBox="0 0 56 56" aria-hidden="true">
-            <circle class="hmt-ring__track" cx="28" cy="28" r="25" />
-            <circle class="hmt-ring__fill" id="hmtRingFill" cx="28" cy="28" r="25" />
+        <!-- Analog clock face -->
+        <svg class="hmt-clock" viewBox="0 0 60 60" aria-hidden="true">
+            <!-- Outer ring -->
+            <circle class="hmt-clock__face" cx="30" cy="30" r="27" />
+            <!-- 12 hour markers -->
+            <g class="hmt-clock__markers">
+                <line x1="30" y1="5" x2="30" y2="9" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(30 30 30)" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(60 30 30)" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(90 30 30)" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(120 30 30)" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(150 30 30)" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(180 30 30)" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(210 30 30)" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(240 30 30)" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(270 30 30)" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(300 30 30)" />
+                <line x1="30" y1="5" x2="30" y2="9" transform="rotate(330 30 30)" />
+            </g>
+            <!-- Progress arc (behind hands) -->
+            <circle class="hmt-clock__progress" id="hmtProgress" cx="30" cy="30" r="23" />
+            <!-- Minute hand -->
+            <line class="hmt-clock__hand hmt-clock__hand--min" id="hmtMinHand"
+                  x1="30" y1="30" x2="30" y2="11" />
+            <!-- Second hand -->
+            <line class="hmt-clock__hand hmt-clock__hand--sec" id="hmtSecHand"
+                  x1="30" y1="30" x2="30" y2="9" />
+            <!-- Center dot -->
+            <circle class="hmt-clock__center" cx="30" cy="30" r="2" />
         </svg>
         <!-- Content -->
         <div class="hmt-body">

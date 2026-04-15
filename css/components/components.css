@@ -82,17 +82,15 @@
     cursor: grab;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 
-    /* Transparent glass */
-    background: rgba(8, 6, 3, 0.35);
-    border: 1px solid rgba(200, 146, 42, 0.08);
+    /* Transparent glass — very see-through */
+    background: rgba(8, 6, 3, 0.15);
+    border: 1px solid rgba(200, 146, 42, 0.06);
     box-shadow:
-        0 12px 40px rgba(0, 0, 0, 0.3),
-        0 4px 12px rgba(0, 0, 0, 0.2),
-        0 0 0 0.5px rgba(255, 240, 210, 0.03),
-        inset 0 1px 0 rgba(255, 240, 210, 0.04),
-        inset 0 -1px 0 rgba(200, 146, 42, 0.02);
-    backdrop-filter: blur(40px) saturate(160%) brightness(1.02);
-    -webkit-backdrop-filter: blur(40px) saturate(160%) brightness(1.02);
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        0 0 0 0.5px rgba(255, 240, 210, 0.02);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
 
     /* Entrance animation */
     transform-origin: bottom right;
@@ -123,15 +121,12 @@
 
 /* Hover — glass brightens slightly, border warms */
 .home-mini-timer:hover {
-    background: rgba(10, 8, 4, 0.5);
-    border-color: rgba(200, 146, 42, 0.18);
+    background: rgba(10, 8, 4, 0.25);
+    border-color: rgba(200, 146, 42, 0.12);
     box-shadow:
-        0 16px 50px rgba(0, 0, 0, 0.4),
-        0 4px 16px rgba(0, 0, 0, 0.25),
-        0 0 0 0.5px rgba(200, 146, 42, 0.08),
-        0 0 20px rgba(200, 146, 42, 0.03),
-        inset 0 1px 0 rgba(255, 240, 210, 0.06),
-        inset 0 -1px 0 rgba(200, 146, 42, 0.03);
+        0 16px 50px rgba(0, 0, 0, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.12),
+        0 0 0 0.5px rgba(200, 146, 42, 0.06);
 }
 .home-mini-timer:active {
     cursor: grabbing;
@@ -140,56 +135,139 @@
     cursor: grabbing;
     transition: none !important;
     box-shadow:
-        0 24px 80px rgba(0, 0, 0, 0.7),
-        0 8px 24px rgba(0, 0, 0, 0.45),
-        0 0 0 0.5px rgba(200, 146, 42, 0.15),
-        0 0 40px rgba(200, 146, 42, 0.06),
-        inset 0 1px 0 rgba(255, 240, 210, 0.1),
-        inset 0 -1px 0 rgba(200, 146, 42, 0.05);
+        0 24px 80px rgba(0, 0, 0, 0.3),
+        0 8px 24px rgba(0, 0, 0, 0.2),
+        0 0 0 0.5px rgba(200, 146, 42, 0.1);
 }
 
-/* ── SVG Progress Ring ── */
-.hmt-ring {
+/* ── Analog Clock ── */
+.hmt-clock {
     width: 62px;
     height: 62px;
     flex-shrink: 0;
-    transform: rotate(-90deg);
 }
-.hmt-ring__track {
-    fill: none;
-    stroke: rgba(200, 146, 42, 0.06);
-    stroke-width: 2.5;
+.hmt-clock__face {
+    fill: rgba(0, 0, 0, 0.15);
+    stroke: rgba(200, 146, 42, 0.2);
+    stroke-width: 1;
 }
-.hmt-ring__fill {
-    fill: none;
-    stroke: rgba(200, 146, 42, 0.55);
-    stroke-width: 2.5;
+.hmt-clock__markers line {
+    stroke: rgba(200, 146, 42, 0.35);
+    stroke-width: 1;
     stroke-linecap: round;
-    /* Full circumference = 2 * PI * 25 ≈ 157.08 */
-    stroke-dasharray: 157.08;
-    stroke-dashoffset: 157.08;
+}
+/* Cardinal markers (12, 3, 6, 9) slightly brighter */
+.hmt-clock__markers line:nth-child(3n+1) {
+    stroke: rgba(200, 146, 42, 0.55);
+    stroke-width: 1.4;
+}
+/* Progress arc — sweeps as timer counts down */
+.hmt-clock__progress {
+    fill: none;
+    stroke: rgba(200, 146, 42, 0.2);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 144.51;  /* 2 * PI * 23 */
+    stroke-dashoffset: 144.51;
+    transform: rotate(-90deg);
+    transform-origin: 30px 30px;
     transition: stroke-dashoffset 1s linear;
-    filter: drop-shadow(0 0 4px rgba(200, 146, 42, 0.25));
 }
-/* When timer is running, ring fill pulses subtly */
-.home-mini-timer.is-running .hmt-ring__fill {
-    animation: hmtRingPulse 4s ease-in-out infinite;
+/* Minute hand */
+.hmt-clock__hand--min {
+    stroke: rgba(245, 232, 208, 0.85);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    transform-origin: 30px 30px;
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 0 3px rgba(200, 146, 42, 0.3));
 }
-@keyframes hmtRingPulse {
-    0%, 100% { stroke: rgba(200, 146, 42, 0.55); filter: drop-shadow(0 0 4px rgba(200, 146, 42, 0.25)); }
-    50%      { stroke: rgba(220, 170, 70, 0.7);  filter: drop-shadow(0 0 8px rgba(200, 146, 42, 0.4)); }
+/* Second hand */
+.hmt-clock__hand--sec {
+    stroke: rgba(200, 146, 42, 0.7);
+    stroke-width: 0.8;
+    stroke-linecap: round;
+    transform-origin: 30px 30px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* Break mode: cooler color */
-.home-mini-timer.is-break .hmt-ring__fill {
+/* Center dot */
+.hmt-clock__center {
+    fill: rgba(200, 146, 42, 0.8);
+    filter: drop-shadow(0 0 2px rgba(200, 146, 42, 0.4));
+}
+
+/* ── Focus mode (default) — warm gold ── */
+.home-mini-timer.is-running .hmt-clock__hand--sec {
+    stroke: rgba(200, 146, 42, 0.85);
+    filter: drop-shadow(0 0 3px rgba(200, 146, 42, 0.4));
+}
+.home-mini-timer.is-running .hmt-clock__progress {
+    stroke: rgba(200, 146, 42, 0.35);
+    filter: drop-shadow(0 0 4px rgba(200, 146, 42, 0.2));
+}
+
+/* ── Short break — cool teal ── */
+.home-mini-timer.is-break .hmt-clock__face {
+    stroke: rgba(100, 180, 160, 0.2);
+}
+.home-mini-timer.is-break .hmt-clock__markers line {
+    stroke: rgba(100, 180, 160, 0.3);
+}
+.home-mini-timer.is-break .hmt-clock__markers line:nth-child(3n+1) {
     stroke: rgba(100, 180, 160, 0.5);
+}
+.home-mini-timer.is-break .hmt-clock__progress {
+    stroke: rgba(100, 180, 160, 0.25);
+}
+.home-mini-timer.is-break .hmt-clock__hand--min {
+    filter: drop-shadow(0 0 3px rgba(100, 180, 160, 0.3));
+}
+.home-mini-timer.is-break .hmt-clock__hand--sec {
+    stroke: rgba(100, 180, 160, 0.7);
+}
+.home-mini-timer.is-break .hmt-clock__center {
+    fill: rgba(100, 180, 160, 0.8);
+    filter: drop-shadow(0 0 2px rgba(100, 180, 160, 0.4));
+}
+.home-mini-timer.is-break.is-running .hmt-clock__hand--sec {
+    stroke: rgba(100, 180, 160, 0.85);
+    filter: drop-shadow(0 0 3px rgba(100, 180, 160, 0.4));
+}
+.home-mini-timer.is-break.is-running .hmt-clock__progress {
+    stroke: rgba(100, 180, 160, 0.35);
     filter: drop-shadow(0 0 4px rgba(100, 180, 160, 0.2));
 }
-.home-mini-timer.is-break.is-running .hmt-ring__fill {
-    animation: hmtRingPulseBreak 4s ease-in-out infinite;
+
+/* ── Long break — soft lavender ── */
+.home-mini-timer.is-long-break .hmt-clock__face {
+    stroke: rgba(140, 120, 200, 0.2);
 }
-@keyframes hmtRingPulseBreak {
-    0%, 100% { stroke: rgba(100, 180, 160, 0.5); filter: drop-shadow(0 0 4px rgba(100, 180, 160, 0.2)); }
-    50%      { stroke: rgba(130, 210, 190, 0.65); filter: drop-shadow(0 0 8px rgba(100, 180, 160, 0.35)); }
+.home-mini-timer.is-long-break .hmt-clock__markers line {
+    stroke: rgba(140, 120, 200, 0.3);
+}
+.home-mini-timer.is-long-break .hmt-clock__markers line:nth-child(3n+1) {
+    stroke: rgba(140, 120, 200, 0.5);
+}
+.home-mini-timer.is-long-break .hmt-clock__progress {
+    stroke: rgba(140, 120, 200, 0.25);
+}
+.home-mini-timer.is-long-break .hmt-clock__hand--min {
+    filter: drop-shadow(0 0 3px rgba(140, 120, 200, 0.3));
+}
+.home-mini-timer.is-long-break .hmt-clock__hand--sec {
+    stroke: rgba(140, 120, 200, 0.7);
+}
+.home-mini-timer.is-long-break .hmt-clock__center {
+    fill: rgba(140, 120, 200, 0.8);
+    filter: drop-shadow(0 0 2px rgba(140, 120, 200, 0.4));
+}
+.home-mini-timer.is-long-break.is-running .hmt-clock__hand--sec {
+    stroke: rgba(140, 120, 200, 0.85);
+    filter: drop-shadow(0 0 3px rgba(140, 120, 200, 0.4));
+}
+.home-mini-timer.is-long-break.is-running .hmt-clock__progress {
+    stroke: rgba(140, 120, 200, 0.35);
+    filter: drop-shadow(0 0 4px rgba(140, 120, 200, 0.2));
 }
 
 /* ── Text Content ── */
@@ -211,6 +289,9 @@
 }
 .home-mini-timer.is-break .hmt-label {
     color: rgba(100, 180, 160, 0.5);
+}
+.home-mini-timer.is-long-break .hmt-label {
+    color: rgba(140, 120, 200, 0.5);
 }
 
 .hmt-time {
@@ -389,6 +470,9 @@
 .home-mini-timer.is-break.is-running .hmt-pulse {
     border-color: rgba(100, 180, 160, 0.06);
 }
+.home-mini-timer.is-long-break.is-running .hmt-pulse {
+    border-color: rgba(140, 120, 200, 0.06);
+}
 
 /* ── Paused label overlay ── */
 .home-mini-timer.is-paused .hmt-label::after {
@@ -406,7 +490,7 @@
         gap: 10px;
         border-radius: 18px;
     }
-    .hmt-ring { width: 40px; height: 40px; }
+    .hmt-clock { width: 40px; height: 40px; }
     .hmt-time { font-size: 22px; }
 }
 
@@ -414,7 +498,7 @@
 @media (prefers-reduced-motion: reduce) {
     .home-mini-timer.is-entering { animation: none; opacity: 1; }
     .home-mini-timer.is-leaving { animation: none; }
-    .home-mini-timer.is-running .hmt-ring__fill { animation: none; }
+    .home-mini-timer.is-running .hmt-clock__hand--sec { transition: none; }
     .home-mini-timer.is-running .hmt-time { animation: none; }
     .home-mini-timer.is-running .hmt-pulse { animation: none; display: none; }
     .home-mini-timer.is-paused .hmt-time { animation: none; opacity: 0.6; }
