@@ -327,15 +327,32 @@ function updateAutoExposure(elapsed) {
 /**
  * Update performance statistics
  */
+// Rolling window of recent frame times so stats.fps reflects sustained
+// performance, not whichever single frame happened to land on a GC pause.
+// 60 samples ≈ 1 second at 60 fps — one hitch can't dominate.
+const FPS_WINDOW = 60;
+const _frameTimes = new Array(FPS_WINDOW).fill(16.67);
+let _frameIdx = 0;
+
 function updateStats() {
     const now = performance.now();
     stats.frameTime = now - stats.lastTime;
     stats.lastTime = now;
     stats.frameCount++;
 
-    // Calculate FPS every 30 frames
+    // Feed the rolling window. Skip obvious outliers (tab backgrounding,
+    // debugger pause) that would otherwise contaminate the average for
+    // an entire second afterward.
+    if (stats.frameTime > 0 && stats.frameTime < 500) {
+        _frameTimes[_frameIdx] = stats.frameTime;
+        _frameIdx = (_frameIdx + 1) % FPS_WINDOW;
+    }
+
+    // Recompute averaged FPS every 30 frames — same cadence as before.
     if (stats.frameCount % 30 === 0) {
-        stats.fps = Math.round(1000 / stats.frameTime);
+        let sum = 0;
+        for (let i = 0; i < FPS_WINDOW; i++) sum += _frameTimes[i];
+        stats.fps = Math.round(1000 / (sum / FPS_WINDOW));
     }
 }
 

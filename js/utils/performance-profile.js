@@ -81,11 +81,15 @@ export function detectDeviceProfile() {
  * @param {function} [onRecover] - Called when FPS has recovered; quality should be restored
  */
 export function createFPSWatchdog(stats, onDegrade, onRecover) {
-    const LOW_FPS = 24;           // below this counts as "bad"
-    const GOOD_FPS = 52;          // above this counts as "recovered"
-    const WARMUP_FRAMES = 300;    // 5s at 60fps — GPU/JIT settle
-    const DEGRADE_TRIGGER = 600;  // ~10s sustained bad before downgrade
-    const RECOVER_TRIGGER = 600;  // ~10s sustained good before restore
+    // Thresholds tuned so the watchdog can't fire on transient hitches and
+    // can actually recover on mid-range GPUs.
+    // stats.fps is a rolling 60-frame average (see updateStats in
+    // scene-manager.js) so we're comparing sustained performance here.
+    const LOW_FPS = 22;            // averaged fps below this is "bad"
+    const GOOD_FPS = 45;           // averaged fps above this is "recovered"
+    const WARMUP_FRAMES = 600;     // 10s at 60fps — scene, textures, JIT settle
+    const DEGRADE_TRIGGER = 1800;  // ~30s sustained bad before we downgrade
+    const RECOVER_TRIGGER = 600;   // ~10s sustained good — recover quickly
 
     let lowFPSFrames = 0;
     let goodFPSFrames = 0;
