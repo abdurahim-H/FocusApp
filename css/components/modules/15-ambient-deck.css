@@ -503,15 +503,18 @@
 .library-drawer.is-open { pointer-events: auto; }
 
 .library-drawer__scrim {
-    /* Transparent click-catcher. The rest of the page stays 100%
-       unchanged — no dim, no blur, no tint. Sits left of the panel
-       so clicks outside the drawer close it. */
+    /* Transparent click-catcher — no dim, no blur, no tint. Only
+       active while the drawer is open so it doesn't intercept clicks
+       on the deck beneath it while closed. */
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: min(460px, 100%);
     background: transparent;
+    pointer-events: none;
+}
+.library-drawer.is-open .library-drawer__scrim {
     pointer-events: auto;
 }
 
