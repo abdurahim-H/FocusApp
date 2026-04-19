@@ -84,3 +84,6 @@ extract-*.txt
 _archive/
 *-backup.*
 *.backup.*
+
+# Wrangler local state (from @cloudflare/vite-plugin dev server)
+.wrangler/
