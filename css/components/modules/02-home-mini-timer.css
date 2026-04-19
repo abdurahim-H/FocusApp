@@ -3,6 +3,12 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .home-mini-timer {
+    /* User-resizable scale — JS updates this custom property on corner drag.
+       Everything that modifies transform (base rule, enter/leave keyframes)
+       multiplies into this so the user's chosen size is never lost during
+       mode switches. */
+    --user-scale: 1;
+
     position: fixed;
     bottom: 80px;
     right: 60px;
@@ -24,6 +30,7 @@
     /* Only transition visual properties — never position (top/left/bottom/right)
        to prevent the jump when switching coordinate systems during drag */
     transform-origin: bottom right;
+    transform: scale(var(--user-scale));
     transition: background 0.4s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
                 box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
@@ -44,12 +51,12 @@
 }
 
 @keyframes hmtEnter {
-    from { opacity: 0; transform: scale(0.88) translateY(8px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
+    from { opacity: 0; transform: scale(calc(var(--user-scale) * 0.88)) translateY(8px); }
+    to   { opacity: 1; transform: scale(var(--user-scale)) translateY(0); }
 }
 @keyframes hmtLeave {
-    from { opacity: 1; transform: scale(1) translateY(0); }
-    to   { opacity: 0; transform: scale(0.92) translateY(6px); }
+    from { opacity: 1; transform: scale(var(--user-scale)) translateY(0); }
+    to   { opacity: 0; transform: scale(calc(var(--user-scale) * 0.92)) translateY(6px); }
 }
 
 /* Hover — glass brightens slightly, border warms */

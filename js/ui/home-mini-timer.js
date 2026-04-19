@@ -34,6 +34,7 @@ let dragOffsetY = 0;
 
 // Timer persistence
 const TIMER_STATE_KEY = 'fu_timer_session';
+const SCALE_KEY = 'fu_mini_timer_scale';
 
 // ============================================================================
 // Public API
@@ -52,6 +53,7 @@ export function initHomeMiniTimer() {
 
     // Restore timer state from sessionStorage (survives normal refresh)
     restoreTimerState();
+    restoreScale();
 
     // Click on body area (not buttons) → navigate to Focus tab
     const bodyArea = container.querySelector('.hmt-body');
@@ -422,8 +424,7 @@ function onResizeMove(e) {
     const dy = e.clientY - resizeStartY;
     const delta = (dx + dy) / 200; // Sensitivity
     const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, resizeStartScale + delta));
-    currentScale = newScale;
-    container.style.transform = `scale(${newScale.toFixed(3)})`;
+    applyScale(newScale);
 }
 
 function onResizeEnd() {
@@ -431,4 +432,23 @@ function onResizeEnd() {
     container.classList.remove('is-resizing');
     document.removeEventListener('pointermove', onResizeMove);
     document.removeEventListener('pointerup', onResizeEnd);
+    // Persist so the chosen size survives reloads.
+    try { localStorage.setItem(SCALE_KEY, String(currentScale)); } catch (_) {}
+}
+
+// Drive the scale through a CSS custom property so it composes with the
+// enter/leave keyframes. Setting style.transform directly would be clobbered
+// by `hmtEnter`'s `scale(1)` the next time the widget mounts.
+function applyScale(s) {
+    currentScale = s;
+    if (container) container.style.setProperty('--user-scale', s.toFixed(3));
+}
+
+function restoreScale() {
+    try {
+        const raw = localStorage.getItem(SCALE_KEY);
+        if (!raw) return;
+        const s = parseFloat(raw);
+        if (Number.isFinite(s) && s >= MIN_SCALE && s <= MAX_SCALE) applyScale(s);
+    } catch (_) {}
 }
