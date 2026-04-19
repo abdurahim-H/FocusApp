@@ -10,6 +10,7 @@
 // overlaps the 5-second sweep.
 
 import { get as getSetting, subscribe as subscribeStore } from './store.js';
+import * as nav from '../navigation.js';
 
 const STORE_KEY = 'timer.schedules';
 const SWEEP_MS = 5000;
@@ -24,7 +25,8 @@ function nowKey(d) {
 
 async function fire(action) {
     try {
-        const nav = await import('../navigation.js');
+        // navigation is statically imported above; timer is still lazy so
+        // it only loads when a schedule actually fires.
         const timer = await import('../../features/timer.js');
         switch (action) {
             case 'focus.start':

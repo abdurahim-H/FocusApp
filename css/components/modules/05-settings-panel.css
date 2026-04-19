@@ -1095,7 +1095,7 @@
     gap: 0;
     aspect-ratio: 16 / 9;
     justify-content: flex-end;
-    background: #050308 url('../../assets/images/blackhole.png') center/cover no-repeat;
+    background: #050308 url('../../../assets/images/blackhole.jpg') center/cover no-repeat;
     border-color: rgba(200, 146, 42, 0.2);
 }
 .theme-card--blackhole::after {
@@ -1107,13 +1107,13 @@
     );
 }
 .theme-card--blackhole:hover {
-    background: #050308 url('../../assets/images/blackhole.png') center/cover no-repeat;
+    background: #050308 url('../../../assets/images/blackhole.jpg') center/cover no-repeat;
     border-color: rgba(200, 146, 42, 0.4);
     box-shadow: 0 4px 24px rgba(200, 146, 42, 0.12);
 }
 .theme-card--blackhole.active,
 .theme-card--blackhole.btn-primary {
-    background: #050308 url('../../assets/images/blackhole.png') center/cover no-repeat;
+    background: #050308 url('../../../assets/images/blackhole.jpg') center/cover no-repeat;
     border-color: rgba(200, 146, 42, 0.6);
     box-shadow: 0 0 32px rgba(200, 146, 42, 0.25), 0 4px 20px rgba(0, 0, 0, 0.4);
 }
