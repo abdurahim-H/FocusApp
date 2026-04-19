@@ -9,7 +9,6 @@ import { createShootingStars, updateShootingStars, disposeShootingStars } from '
 import { createStarGlows, updateStarGlows, disposeStarGlows } from '../environment/star-glows.js';
 import { createCosmicMotes, updateCosmicMotes, disposeCosmicMotes } from '../environment/cosmic-motes.js';
 import { createEtherealPetals, updateEtherealPetals, disposeEtherealPetals } from '../environment/ethereal-petals.js';
-import { createCosmicPulse, updateCosmicPulse, disposeCosmicPulse } from '../environment/cosmic-pulse.js';
 import { createBlackHole, updateBlackHole, disposeBlackHole } from '../blackhole/blackhole.js';
 import { setupPostProcessing, disposePostProcessing, setExposure, getBaseExposure, createFilmGrainEffect } from '../postprocessing/pipeline.js';
 import { createAnamorphicStreak, disposeAnamorphicStreak } from '../postprocessing/anamorphic-streak.js';
@@ -98,7 +97,6 @@ export async function init3D() {
         createBlackHole(scene, camera);
         createCosmicMotes(scene);
         createEtherealPetals(scene);
-        createCosmicPulse(scene, camera);
 
         // Setup ambient lighting
         setupLighting();
@@ -111,14 +109,14 @@ export async function init3D() {
         createGodRays(scene, camera);
         createFilmGrainEffect();
 
-        // Setup FPS watchdog for adaptive quality
-        fpsWatchdog = createFPSWatchdog(stats, () => {
-            // Reduce bloom quality on sustained low FPS
-            const pipeline = scene?.postProcessRenderPipelineManager?.supportedPipelines;
-            if (engine) {
-                engine.setHardwareScalingLevel(1.5); // Render at lower resolution
-            }
-        });
+        // Setup FPS watchdog for adaptive quality. Downgrade and recovery
+        // toggle the same engine setting so a transient dip cannot latch the
+        // scene permanently into low-res mode.
+        fpsWatchdog = createFPSWatchdog(
+            stats,
+            () => { if (engine) engine.setHardwareScalingLevel(1.5); },
+            () => { if (engine) engine.setHardwareScalingLevel(1.0); }
+        );
 
         // Start render loop
         engine.runRenderLoop(renderLoop);
@@ -253,7 +251,6 @@ function renderLoop() {
     updateStarGlows(elapsed);
     updateCosmicMotes(elapsed);
     updateEtherealPetals(elapsed, camera);
-    updateCosmicPulse(elapsed);
     updateGodRays(scene, camera);
 
     // Update exposure based on camera position (auto-exposure simulation)
@@ -393,7 +390,6 @@ export function dispose() {
     disposeGodRays();
     disposeAnamorphicStreak();
     disposePostProcessing();
-    disposeCosmicPulse();
     disposeEtherealPetals();
     disposeCosmicMotes();
     disposeStarGlows();

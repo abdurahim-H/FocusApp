@@ -5,6 +5,15 @@
 let mesh = null;
 let material = null;
 
+const TAU = Math.PI * 2;
+// fbm plasma has no natural period; wrap at 4h so any pattern snap is
+// effectively unreachable in a normal session. Keeps shader inputs small
+// enough that fract()-based noise hashes stay sub-pixel accurate.
+const FLOW_WRAP = 4 * 60 * 60;
+
+let _spinCS = null;
+let _photonCS = null;
+
 const VERTEX = `
     precision highp float;
     attribute vec3 position;
@@ -20,7 +29,10 @@ const VERTEX = `
 const FRAGMENT = `
     precision highp float;
     varying vec2 vUV;
-    uniform float time;
+    // Pre-computed JS-side so angles stay bounded at float32 precision forever.
+    uniform vec2 spinCS;    // (cos, sin) of disk rotation angle
+    uniform vec2 photonCS;  // (cos, sin) of photon-ring phase
+    uniform float flowT;    // wrapped time for fbm plasma flow
 
     #define PI 3.14159265
     #define SHADOW_R 0.085
@@ -74,7 +86,7 @@ const FRAGMENT = `
 
         // LINEAR time flow offset — this is what makes it visibly spin
         // Kepler makes inner parts flow faster
-        float flowOffset = time * 0.35 * kepler;
+        float flowOffset = flowT * 0.35 * kepler;
 
         float s1 = fbm(vec2(cx * 4.0 + cy * 2.0 + flowOffset, rad + cx));
         float s2 = fbm(vec2(cy * 3.0 - cx * 1.5 + flowOffset * 0.7, rad + 30.0 + cy));
@@ -126,10 +138,11 @@ const FRAGMENT = `
         // This naturally creates the wide disk + dome + lower ring
         // ==========================================
 
-        // Rotate the disk around the black hole — whole structure orbits
-        float diskSpin = time * 0.14; // Slightly faster full rotation
-        float cds = cos(diskSpin);
-        float sds = sin(diskSpin);
+        // Rotate the disk around the black hole — whole structure orbits.
+        // cos/sin precomputed JS-side on a 2π-wrapped angle, so this stays
+        // perfectly smooth across arbitrarily long sessions.
+        float cds = spinCS.x;
+        float sds = spinCS.y;
         // Only rotate the disk sampling coordinates, not the shadow/lensing
         // We'll apply this rotation when computing disk coordinates below
 
@@ -191,7 +204,9 @@ const FRAGMENT = `
         // ==========================================
         float photonDist = abs(dist - PHOTON_R);
         float photonRing = exp(-photonDist * photonDist * 25000.0) * 0.35;
-        photonRing *= 0.65 + 0.35 * sin(atan(uv.y, uv.x) * 2.0 + time * 0.4);
+        // sin(A + B) = sin(A)*cos(B) + cos(A)*sin(B) — keeps phase bounded.
+        float phi2 = atan(uv.y, uv.x) * 2.0;
+        photonRing *= 0.65 + 0.35 * (sin(phi2) * photonCS.x + cos(phi2) * photonCS.y);
         color += vec3(1.0, 0.6, 0.2) * photonRing;
         alpha = max(alpha, photonRing);
 
@@ -244,11 +259,15 @@ export function createBlackHole(sceneRef, camera) {
         vertex: 'blackhole', fragment: 'blackhole'
     }, {
         attributes: ['position', 'uv'],
-        uniforms: ['worldViewProjection', 'time'],
+        uniforms: ['worldViewProjection', 'spinCS', 'photonCS', 'flowT'],
         needAlphaBlending: true
     });
 
-    material.setFloat('time', 0);
+    _spinCS = new BABYLON.Vector2(1, 0);
+    _photonCS = new BABYLON.Vector2(1, 0);
+    material.setVector2('spinCS', _spinCS);
+    material.setVector2('photonCS', _photonCS);
+    material.setFloat('flowT', 0);
     material.backFaceCulling = false;
     material.alphaMode = BABYLON.Engine.ALPHA_COMBINE;
     material.forceDepthWrite = false;
@@ -258,10 +277,19 @@ export function createBlackHole(sceneRef, camera) {
 }
 
 export function updateBlackHole(elapsed) {
-    if (material) material.setFloat('time', elapsed);
+    if (!material) return;
+    const spinA = (elapsed * 0.14) % TAU;
+    const photonA = (elapsed * 0.4) % TAU;
+    _spinCS.set(Math.cos(spinA), Math.sin(spinA));
+    _photonCS.set(Math.cos(photonA), Math.sin(photonA));
+    material.setVector2('spinCS', _spinCS);
+    material.setVector2('photonCS', _photonCS);
+    material.setFloat('flowT', elapsed % FLOW_WRAP);
 }
 
 export function disposeBlackHole() {
     if (mesh) { mesh.dispose(); mesh = null; }
     if (material) { material.dispose(); material = null; }
+    _spinCS = null;
+    _photonCS = null;
 }

@@ -142,7 +142,6 @@ function onDragStart(e) {
     const rect = container.getBoundingClientRect();
     dragOffsetX = e.clientX - rect.left;
     dragOffsetY = e.clientY - rect.top;
-    // Don't setPointerCapture — it steals events from child buttons
 }
 
 function onDragMove(e) {

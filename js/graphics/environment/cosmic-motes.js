@@ -159,16 +159,22 @@ export function createCosmicMotes(sceneRef) {
 
 }
 
+// Wrap time for the shader pulse — long sessions would otherwise lose sin()
+// precision and make the glow pulse lose its smoothness.
+const SHADER_TIME_WRAP = 4 * 60 * 60;
+
 /**
  * Update mote positions along their curved paths
  */
 export function updateCosmicMotes(elapsed) {
+    const shaderTime = elapsed % SHADER_TIME_WRAP;
     for (let i = 0; i < motes.length; i++) {
         const m = motes[i];
         const t = elapsed * m.speed;
         const p = m.path;
 
-        // Position along 3D Lissajous curve
+        // Position along 3D Lissajous curve — JS-side Math.sin handles large
+        // arguments fine, so we feed the raw `t` here.
         m.mesh.position.x = p.centerX + p.ampX * Math.sin(t * p.freqX + p.phaseX);
         m.mesh.position.y = p.centerY + p.ampY * Math.sin(t * p.freqY + p.phaseY);
         m.mesh.position.z = p.centerZ + p.ampZ * Math.sin(t * p.freqZ + p.phaseZ);
@@ -177,7 +183,7 @@ export function updateCosmicMotes(elapsed) {
         const cycleTime = (elapsed + m.lifecycleOffset) % m.lifecycleDuration;
         const life = cycleTime / m.lifecycleDuration;
 
-        m.material.setFloat('time', elapsed);
+        m.material.setFloat('time', shaderTime);
         m.material.setFloat('life', life);
     }
 }

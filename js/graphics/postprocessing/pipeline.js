@@ -256,9 +256,12 @@ export function createFilmGrainEffect() {
     );
 
     let grainTime = 0;
+    // Wrap so fract() inside the grain hash keeps sub-pixel precision.
+    // Without this the grain eventually blocks into large uniform cells.
+    const GRAIN_TIME_WRAP = 4 * 60 * 60;
 
     filmGrainPostProcess.onApply = function (effect) {
-        grainTime += 0.016; // Approximate frame time
+        grainTime = (grainTime + 0.016) % GRAIN_TIME_WRAP; // Approximate frame time
         effect.setFloat('time', grainTime);
         effect.setFloat('grainIntensity', grainIntensity); // mutable — driven by Settings
         effect.setFloat2('screenSize',

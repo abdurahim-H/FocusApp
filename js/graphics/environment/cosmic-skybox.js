@@ -4,6 +4,10 @@
 let skyMesh = null;
 let skyMaterial = null;
 
+// Wrap time before handing it to the shader — unbounded growth eventually
+// kills fract() precision in the cloud-noise fbm.
+const TIME_WRAP = 4 * 60 * 60;
+
 const VERTEX = `
     precision highp float;
     attribute vec3 position;
@@ -150,7 +154,7 @@ export function createCosmicSkybox(scene) {
 }
 
 export function updateCosmicSkybox(elapsed) {
-    if (skyMaterial) skyMaterial.setFloat('time', elapsed);
+    if (skyMaterial) skyMaterial.setFloat('time', elapsed % TIME_WRAP);
 }
 
 export function disposeCosmicSkybox() {

@@ -4,6 +4,13 @@
 let mesh = null;
 let material = null;
 
+// Wrap the shader time uniform so fract()/sin() inputs stay in a range where
+// float32 still has sub-pixel precision. Without this the 6-octave fbm
+// collapses into a smooth uniform glow after a few hours, and because the
+// nebula is ALPHA_ADD and overlaps the blackhole's screen area, that glow
+// washes the accretion disk into a muddy gradient with visible warp rings.
+const TIME_WRAP = 4 * 60 * 60;
+
 const VERTEX = `
     precision highp float;
     attribute vec3 position;
@@ -221,7 +228,7 @@ export function createNebula(sceneRef, camera, octaves = 5) {
 }
 
 export function updateNebula(elapsed) {
-    if (material) material.setFloat('time', elapsed);
+    if (material) material.setFloat('time', elapsed % TIME_WRAP);
 }
 
 export function disposeNebula() {

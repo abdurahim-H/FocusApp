@@ -73,32 +73,53 @@ export function detectDeviceProfile() {
 }
 
 /**
- * FPS watchdog — monitors performance and triggers quality reduction
+ * FPS watchdog — monitors performance and toggles quality reduction in both
+ * directions so a transient dip (GC pause, tab-switch hitch, OS spike) can't
+ * latch the scene into permanent low-res mode.
  * @param {object} stats - Performance stats object with fps property
- * @param {function} onDegrade - Callback when quality should be reduced
+ * @param {function} onDegrade - Called when quality should be reduced
+ * @param {function} [onRecover] - Called when FPS has recovered; quality should be restored
  */
-export function createFPSWatchdog(stats, onDegrade) {
+export function createFPSWatchdog(stats, onDegrade, onRecover) {
+    const LOW_FPS = 24;           // below this counts as "bad"
+    const GOOD_FPS = 52;          // above this counts as "recovered"
+    const WARMUP_FRAMES = 300;    // 5s at 60fps — GPU/JIT settle
+    const DEGRADE_TRIGGER = 600;  // ~10s sustained bad before downgrade
+    const RECOVER_TRIGGER = 600;  // ~10s sustained good before restore
+
     let lowFPSFrames = 0;
-    const threshold = 24;
-    const warmupFrames = 180; // 3 seconds at 60fps
+    let goodFPSFrames = 0;
     let totalFrames = 0;
     let degraded = false;
 
     return function check() {
         totalFrames++;
-        if (totalFrames < warmupFrames || degraded) return;
+        if (totalFrames < WARMUP_FRAMES) return;
+        if (stats.fps <= 0) return;
 
-        if (stats.fps > 0 && stats.fps < threshold) {
+        if (stats.fps < LOW_FPS) {
             lowFPSFrames++;
+            goodFPSFrames = 0;
+        } else if (stats.fps >= GOOD_FPS) {
+            goodFPSFrames++;
+            lowFPSFrames = Math.max(0, lowFPSFrames - 2);
         } else {
             lowFPSFrames = Math.max(0, lowFPSFrames - 1);
+            goodFPSFrames = Math.max(0, goodFPSFrames - 1);
         }
 
-        // Sustained low FPS for ~2 seconds
-        if (lowFPSFrames > 60) {
+        if (!degraded && lowFPSFrames > DEGRADE_TRIGGER) {
             degraded = true;
+            lowFPSFrames = 0;
+            goodFPSFrames = 0;
             console.warn(`⚠️ Sustained low FPS (${stats.fps}), reducing quality`);
             onDegrade();
+        } else if (degraded && goodFPSFrames > RECOVER_TRIGGER) {
+            degraded = false;
+            lowFPSFrames = 0;
+            goodFPSFrames = 0;
+            console.info(`✅ FPS recovered (${stats.fps}), restoring quality`);
+            if (typeof onRecover === 'function') onRecover();
         }
     };
 }

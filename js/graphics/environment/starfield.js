@@ -413,9 +413,14 @@ function createDebrisTexture() {
  * Creates parallax effect based on camera movement
  * @param {number} elapsed - Elapsed time in seconds
  */
+// Wrap time for the twinkling shader — unbounded growth degrades sin() phase
+// precision and causes the per-star breathing to go uneven after long sessions.
+const SHADER_TIME_WRAP = 4 * 60 * 60;
+
 export function updateStarField(elapsed) {
     // Update twinkling time uniform on all star materials
-    starMaterials.forEach(mat => mat.setFloat('time', elapsed));
+    const t = elapsed % SHADER_TIME_WRAP;
+    starMaterials.forEach(mat => mat.setFloat('time', t));
 
     // Rotate each layer at different speeds for parallax
     if (starLayers.far && starLayers.far.mesh) {

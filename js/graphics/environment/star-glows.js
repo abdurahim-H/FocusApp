@@ -159,13 +159,18 @@ export function createStarGlows(sceneRef, camera) {
 
 }
 
+// Wrap time — unbounded growth degrades sin() phase precision and makes
+// every star's breathing animation go chunky after long sessions.
+const TIME_WRAP = 4 * 60 * 60;
+
 /**
  * Update hero star glows
  * @param {number} elapsed - seconds since start
  */
 export function updateStarGlows(elapsed) {
+    const t = elapsed % TIME_WRAP;
     for (let i = 0; i < glowMeshes.length; i++) {
-        glowMeshes[i].material.setFloat('time', elapsed);
+        glowMeshes[i].material.setFloat('time', t);
     }
 }
 
