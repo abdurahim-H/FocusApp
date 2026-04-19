@@ -1,11 +1,10 @@
 import { defineConfig } from 'vite';
 import { cloudflare } from '@cloudflare/vite-plugin';
 
-// When you hook up a custom domain, set VITE_BASE=/ (or add a repo Variable
-// named VITE_BASE with value "/" at Settings → Secrets and variables → Actions).
-// For the default GitHub Pages URL, base stays /FocusApp/.
+// We deploy to universefocuses.com at root, so base stays '/'. Override
+// with VITE_BASE=/some-subpath/ only if you ever host under a subfolder.
 export default defineConfig({
-  base: process.env.VITE_BASE || '/FocusApp/',
+  base: process.env.VITE_BASE || '/',
   publicDir: 'public',
   // Cloudflare's Vite integration — wires up `wrangler deploy` and `wrangler
   // dev` to the Vite pipeline, and quiets wrangler's auto-detect/auto-setup
