@@ -5,40 +5,46 @@ import { state } from '../core/state.js';
 import { isReducedMotion } from '../core/motion.js';
 import { createFocusTrap } from '../ui/focus-trap.js';
 
+// Sound files live in Cloudflare R2 behind this CDN domain.
+// To add new sounds: upload to the `focusapp-sounds` R2 bucket, then add
+// a new entry in `ambientSounds` below. No rebuild of the audio library
+// is needed — only the mapping changes.
+const SOUND_CDN = 'https://cdn.universefocuses.com';
+
 // Comprehensive sound library with audio file mappings
 const ambientSounds = {
     // Nature sounds
-    rain: './sounds/rain_00.wav',
-    ocean: './sounds/ocean_04.wav',
-    forest: './sounds/forest_00.wav',
-    thunder: './sounds/rain_00.wav', // Placeholder
-    wind: './sounds/ocean_04.wav', // Placeholder
-    stream: './sounds/rain_00.wav', // Placeholder
-    birds: './sounds/forest_00.wav', // Placeholder
-    cricket: './sounds/forest_00.wav', // Placeholder
-    
+    rain: `${SOUND_CDN}/rain_00.wav`,
+    ocean: `${SOUND_CDN}/ocean_04.wav`,
+    forest: `${SOUND_CDN}/forest_00.wav`,
+    thunder: `${SOUND_CDN}/rain_00.wav`, // Placeholder
+    wind: `${SOUND_CDN}/ocean_04.wav`, // Placeholder
+    stream: `${SOUND_CDN}/rain_00.wav`, // Placeholder
+    birds: `${SOUND_CDN}/forest_00.wav`, // Placeholder
+    cricket: `${SOUND_CDN}/forest_00.wav`, // Placeholder
+
     // Indoor sounds
-    fireplace: './sounds/rain_00.wav', // Placeholder
-    cafe: './sounds/crowd_0.wav',
-    library: './sounds/crowd_0.wav', // Placeholder
-    fan: './sounds/ocean_04.wav', // Placeholder
-    clock: './sounds/ocean_04.wav', // Placeholder
-    
+    fireplace: `${SOUND_CDN}/rain_00.wav`, // Placeholder
+    cafe: `${SOUND_CDN}/crowd_0.wav`,
+    library: `${SOUND_CDN}/crowd_0.wav`, // Placeholder
+    fan: `${SOUND_CDN}/ocean_04.wav`, // Placeholder
+    clock: `${SOUND_CDN}/ocean_04.wav`, // Placeholder
+
     // Urban sounds
-    city: './sounds/crowd_0.wav', // Placeholder
-    train: './sounds/ocean_04.wav', // Placeholder
-    subway: './sounds/crowd_0.wav', // Placeholder
-    construction: './sounds/crowd_0.wav', // Placeholder
-    
+    city: `${SOUND_CDN}/crowd_0.wav`, // Placeholder
+    train: `${SOUND_CDN}/ocean_04.wav`, // Placeholder
+    subway: `${SOUND_CDN}/crowd_0.wav`, // Placeholder
+    construction: `${SOUND_CDN}/crowd_0.wav`, // Placeholder
+
     // White noise
-    whitenoise: './sounds/ocean_04.wav', // Placeholder
-    pinknoise: './sounds/ocean_04.wav', // Placeholder
-    brownnoise: './sounds/ocean_04.wav', // Placeholder
-    
+    whitenoise: `${SOUND_CDN}/ocean_04.wav`, // Placeholder
+    pinknoise: `${SOUND_CDN}/ocean_04.wav`, // Placeholder
+    brownnoise: `${SOUND_CDN}/ocean_04.wav`, // Placeholder
+
     // Musical
-    piano: './sounds/forest_00.wav', // Placeholder
-    guitar: './sounds/forest_00.wav', // Placeholder
-    chimes: './sounds/rain_00.wav', // Placeholder
+    piano: `${SOUND_CDN}/forest_00.wav`, // Placeholder
+    guitar: `${SOUND_CDN}/forest_00.wav`, // Placeholder
+    chimes: `${SOUND_CDN}/rain_00.wav`, // Placeholder
 };
 
 // Sound metadata for display
