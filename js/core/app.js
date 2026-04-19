@@ -22,11 +22,12 @@ import * as soundMixer from '../features/sound-mixer.js';
 import * as timerParticles from '../ui/timer-particles.js';
 import * as helpCenter from '../ui/help-center.js';
 import * as homeMiniTimer from '../ui/home-mini-timer.js';
+import * as ambientUI from '../ui/ambient-ui.js';
 
 const modules = {
     scene3d, timer, tasks, sounds, navigation, uiEffects, cleanup,
     buttonFeel, keyboard, statistics, notificationBanner, settings,
-    soundMixer, timerParticles, helpCenter, homeMiniTimer,
+    soundMixer, timerParticles, helpCenter, homeMiniTimer, ambientUI,
 };
 
 /**
@@ -139,7 +140,14 @@ export async function initApp() {
             loadedModules.sounds.setupAmbientControls();
         }
 
-        // Phase 5D: sound mixer (presets + per-sound volume sliders)
+        // Mixing-deck UI (Phase B) — wires the deck controls, library drawer,
+        // save-mix and sleep popovers, and the reactive state bindings.
+        if (loadedModules.ambientUI?.initAmbientUI) {
+            loadedModules.ambientUI.initAmbientUI();
+        }
+
+        // Sound-mixer module still initialised so its CRUD / activateMix()
+        // exports are ready by the time the deck UI calls them.
         if (loadedModules.soundMixer?.initSoundMixer) {
             loadedModules.soundMixer.initSoundMixer();
         }

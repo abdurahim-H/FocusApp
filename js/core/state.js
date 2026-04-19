@@ -19,6 +19,17 @@ export const universeStars = signal(0);
 export const universeFocusMinutes = signal(0);
 export const universeTasksCompleted = signal(0);
 
+// ── Ambient v2 state ────────────────────────────────────────────────────────
+// Per-track controls keyed by sound id. Each value:
+//   { volume, eq: { low, mid, high }, pan, muted }
+//   volume 0..1 | eq dB -12..+12 | pan -1..+1
+export const ambientTracks = signal({});
+export const ambientMaster = signal({ volume: 0.5 });
+// User-saved mixes. Each: { id, name, createdAt, active: [soundId…], tracks: { [id]: {…} } }
+export const ambientMixes = signal([]);
+// Active sleep timer, or null. { endAt: epoch ms, duration: ms }
+export const ambientSleepTimer = signal(null);
+
 // Re-export so other modules can subscribe without importing from CDN directly
 export { signal, effect, computed };
 
@@ -95,6 +106,11 @@ function loadPersisted() {
         if (typeof data.universeStars === 'number') universeStars.value = data.universeStars;
         if (typeof data.universeFocusMinutes === 'number') universeFocusMinutes.value = data.universeFocusMinutes;
         if (typeof data.universeTasksCompleted === 'number') universeTasksCompleted.value = data.universeTasksCompleted;
+        if (data.ambientTracks && typeof data.ambientTracks === 'object') ambientTracks.value = data.ambientTracks;
+        if (data.ambientMaster && typeof data.ambientMaster === 'object') ambientMaster.value = data.ambientMaster;
+        if (Array.isArray(data.ambientMixes)) ambientMixes.value = data.ambientMixes;
+        // Sleep timer is intentionally NOT restored — ambient can't resume silently
+        // on a new page load before a user gesture unlocks the AudioContext.
     } catch (e) {
         console.warn('[state] failed to load persisted state:', e);
     }
@@ -114,6 +130,9 @@ effect(() => {
         universeStars: universeStars.value,
         universeFocusMinutes: universeFocusMinutes.value,
         universeTasksCompleted: universeTasksCompleted.value,
+        ambientTracks: ambientTracks.value,
+        ambientMaster: ambientMaster.value,
+        ambientMixes: ambientMixes.value,
     };
     if (!persistInitialized) {
         persistInitialized = true;

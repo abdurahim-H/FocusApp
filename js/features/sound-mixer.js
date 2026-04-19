@@ -1,125 +1,191 @@
-// sound-mixer.js
+// sound-mixer.js — mix activation + user-savable mixes
 //
-// Phase 5D: Sound mixer — ambient presets + per-sound volume sliders.
-//
-// Presets: predefined combinations of sounds at specific volumes.
-// Per-sound volume: injected into the active-sound-chips as range sliders.
+// A "mix" is a named snapshot of the deck: which tracks are active, each
+// track's volume/EQ/pan/mute. Users can save the current deck as a mix,
+// reload it later, and the engine crossfades smoothly between mixes instead
+// of the old silent-pause-then-play behaviour.
 
-import { toggleAmbientSound, setSoundVolume, stopAllAmbientSounds, isSoundActive } from './sounds.js';
-import { state } from '../core/state.js';
+import {
+    playSound,
+    stopSound,
+    setSoundVolume,
+    setSoundEQ,
+    setSoundPan,
+    setSoundMuted,
+    getActiveSounds,
+    getTrackState,
+    ensureAudio,
+} from './sounds.js';
+import { ambientTracks, ambientMixes, activeSounds } from '../core/state.js';
 
-// ============================================================================
-// Preset definitions — { soundType: volumePercent }
-// ============================================================================
-const PRESETS = {
-    'rainy-library': {
-        sounds: { rain: 65, library: 35 },
-        label: 'Rainy Library',
+// ═══════════════════════════════════════════════════════════════════════════
+// Starter mixes — shipped built-ins so the deck isn't empty on first visit.
+// Users still save their own on top.
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const BUILTIN_MIXES = [
+    {
+        id: 'builtin:rainy-library',
+        name: 'Rainy Library',
+        icon: '📚',
+        builtin: true,
+        active: ['rain', 'cafe'],
+        tracks: {
+            rain: { volume: 0.65, eq: { low: 0, mid: 0, high: -2 }, pan: 0, muted: false },
+            cafe: { volume: 0.35, eq: { low: -2, mid: 0, high: 0 }, pan: 0, muted: false },
+        },
     },
-    'forest-morning': {
-        sounds: { forest: 60, birds: 50, stream: 40 },
-        label: 'Forest Morning',
+    {
+        id: 'builtin:forest-walk',
+        name: 'Forest Walk',
+        icon: '🌿',
+        builtin: true,
+        active: ['forest', 'rain'],
+        tracks: {
+            forest: { volume: 0.6, eq: { low: 0, mid: 0, high: 0 }, pan: 0, muted: false },
+            rain:   { volume: 0.3, eq: { low: 0, mid: 0, high: -1 }, pan: 0, muted: false },
+        },
     },
-    'deep-focus': {
-        sounds: { brownnoise: 55, rain: 25 },
-        label: 'Deep Focus',
+    {
+        id: 'builtin:ocean-breath',
+        name: 'Ocean Breath',
+        icon: '🌊',
+        builtin: true,
+        active: ['ocean'],
+        tracks: {
+            ocean: { volume: 0.75, eq: { low: 2, mid: 0, high: -2 }, pan: 0, muted: false },
+        },
     },
-};
+];
 
-// ============================================================================
-// Activate a preset — stops all current sounds, starts preset sounds
-// ============================================================================
-async function activatePreset(presetId) {
-    const preset = PRESETS[presetId];
-    if (!preset) return;
+// ═══════════════════════════════════════════════════════════════════════════
+// Mix CRUD
+// ═══════════════════════════════════════════════════════════════════════════
 
-    // Stop all existing sounds first
-    stopAllAmbientSounds();
+export function getAllMixes() {
+    return [...BUILTIN_MIXES, ...ambientMixes.value];
+}
 
-    // Small delay to let stop complete
-    await new Promise(r => setTimeout(r, 100));
+export function getMix(id) {
+    return getAllMixes().find((m) => m.id === id) || null;
+}
 
-    // Start each sound in the preset at its volume
-    for (const [soundType, volume] of Object.entries(preset.sounds)) {
-        if (!isSoundActive(soundType)) {
-            await toggleAmbientSound(soundType);
-        }
-        setSoundVolume(soundType, volume);
+/** Snapshot the deck as it stands right now and persist as a user mix. */
+export function saveCurrentMix(name) {
+    const trimmed = (name || '').trim();
+    if (!trimmed) throw new Error('Mix name is required');
+
+    const active = [...activeSounds.value];
+    if (active.length === 0) throw new Error('Add at least one sound before saving a mix');
+
+    const tracks = {};
+    for (const id of active) tracks[id] = cloneTrackState(getTrackState(id));
+
+    const mix = {
+        id: `user:${Date.now().toString(36)}`,
+        name: trimmed,
+        builtin: false,
+        createdAt: Date.now(),
+        active,
+        tracks,
+    };
+    ambientMixes.value = [...ambientMixes.value, mix];
+    return mix;
+}
+
+export function renameMix(id, name) {
+    const trimmed = (name || '').trim();
+    if (!trimmed) throw new Error('Mix name is required');
+    ambientMixes.value = ambientMixes.value.map((m) =>
+        m.id === id ? { ...m, name: trimmed } : m
+    );
+}
+
+export function deleteMix(id) {
+    ambientMixes.value = ambientMixes.value.filter((m) => m.id !== id);
+}
+
+/** Overwrite an existing user mix with the current deck state. */
+export function updateMix(id) {
+    const existing = ambientMixes.value.find((m) => m.id === id);
+    if (!existing) return;
+    const active = [...activeSounds.value];
+    const tracks = {};
+    for (const soundId of active) tracks[soundId] = cloneTrackState(getTrackState(soundId));
+    ambientMixes.value = ambientMixes.value.map((m) =>
+        m.id === id ? { ...m, active, tracks, updatedAt: Date.now() } : m
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Activation — crossfade current deck to a target mix
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CROSSFADE_MS = 1200;
+
+export async function activateMix(mixOrId) {
+    const mix = typeof mixOrId === 'string' ? getMix(mixOrId) : mixOrId;
+    if (!mix) return false;
+
+    await ensureAudio();
+
+    const currentActive = new Set(getActiveSounds());
+    const targetActive = new Set(mix.active || []);
+
+    // 1. Apply target track state BEFORE toggling so crossfades land at the
+    //    correct volume / EQ / pan.
+    const trackPatch = {};
+    for (const [id, st] of Object.entries(mix.tracks || {})) {
+        trackPatch[id] = cloneTrackState(st);
+    }
+    ambientTracks.value = { ...ambientTracks.value, ...trackPatch };
+
+    // 2. Stop tracks that aren't in the target (fade out).
+    for (const id of currentActive) {
+        if (!targetActive.has(id)) stopSound(id, { fadeMs: CROSSFADE_MS });
     }
 
-    // Update preset button states
-    updatePresetStates(presetId);
-}
-
-function updatePresetStates(activePresetId) {
-    document.querySelectorAll('.preset-card').forEach(card => {
-        card.classList.toggle('active', card.dataset.preset === activePresetId);
-    });
-}
-
-// ============================================================================
-// Per-sound volume sliders in active-sound-chips
-// ============================================================================
-
-// Patch the chip rendering to include a volume slider.
-// We observe mutations on the #activeSounds container and inject sliders
-// into newly added chips.
-function observeActiveChips() {
-    const container = document.getElementById('activeSounds');
-    if (!container) return;
-
-    const observer = new MutationObserver(() => {
-        injectVolumeSliders(container);
-    });
-
-    observer.observe(container, { childList: true, subtree: true });
-
-    // Also inject on init for already-active sounds
-    injectVolumeSliders(container);
-}
-
-function injectVolumeSliders(container) {
-    const chips = container.querySelectorAll('.active-sound-chip');
-    chips.forEach(chip => {
-        // Skip if slider already injected
-        if (chip.querySelector('.chip-volume-slider')) return;
-
-        const soundType = chip.querySelector('.chip-close')?.dataset.sound;
-        if (!soundType) return;
-
-        const slider = document.createElement('input');
-        slider.type = 'range';
-        slider.className = 'chip-volume-slider';
-        slider.min = '0';
-        slider.max = '100';
-        slider.value = '30';
-        slider.dataset.sound = soundType;
-
-        slider.addEventListener('input', () => {
-            setSoundVolume(soundType, parseInt(slider.value));
-        });
-
-        // Prevent click from propagating to chip close
-        slider.addEventListener('click', e => e.stopPropagation());
-
-        // Insert before the close button
-        const closeBtn = chip.querySelector('.chip-close');
-        chip.insertBefore(slider, closeBtn);
-    });
-}
-
-// ============================================================================
-// Setup
-// ============================================================================
-export function initSoundMixer() {
-    // Preset card click handlers
-    document.querySelectorAll('.preset-card').forEach(card => {
-        const presetId = card.dataset.preset;
-        if (presetId) {
-            card.addEventListener('click', () => activatePreset(presetId));
+    // 3. Start (or re-apply) tracks that are in the target (fade in).
+    for (const id of targetActive) {
+        await playSound(id, { fadeMs: CROSSFADE_MS });
+        // Already-playing tracks need explicit updates since playSound only
+        // kicks off a new source when there wasn't one.
+        if (currentActive.has(id)) {
+            const st = mix.tracks?.[id];
+            if (st) {
+                setSoundVolume(id, st.volume);
+                setSoundEQ(id, 'low', st.eq.low);
+                setSoundEQ(id, 'mid', st.eq.mid);
+                setSoundEQ(id, 'high', st.eq.high);
+                setSoundPan(id, st.pan);
+                setSoundMuted(id, st.muted);
+            }
         }
-    });
+    }
 
-    // Per-sound volume slider injection
-    observeActiveChips();
+    return true;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Compat shim — called from core/app.js during module init.
+// UI wiring lives in ambient-ui.js (Phase B).
+// ═══════════════════════════════════════════════════════════════════════════
+
+export function initSoundMixer() { /* no-op */ }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Utils
+// ═══════════════════════════════════════════════════════════════════════════
+
+function cloneTrackState(st) {
+    return {
+        volume: st?.volume ?? 0.7,
+        eq: {
+            low:  st?.eq?.low  ?? 0,
+            mid:  st?.eq?.mid  ?? 0,
+            high: st?.eq?.high ?? 0,
+        },
+        pan: st?.pan ?? 0,
+        muted: !!st?.muted,
+    };
 }

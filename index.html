@@ -276,197 +276,121 @@
             </div>
         </div>
 
-        <!-- Ambient Mode - Relaxation and Sounds -->
+        <!-- Ambient Mode — mixing deck -->
         <div class="mode" id="ambient">
-            <div class="ambient-content">
-                <div class="ambient-section">
-                    <h3 class="ambient-title">Ambient Sounds</h3>
-                    
-                    <!-- Active Sounds Display -->
-                    <div class="active-sounds-container" id="activeSounds">
-                        <!-- Active sound chips will be inserted here dynamically -->
-                    </div>
-                    
-                    <!-- Browse Library Button -->
-                    <button class="liquid-glass-btn browse-sounds-btn" id="browseSoundsBtn" aria-label="Browse Sound Library">
-                        <span class="btn-icon" aria-hidden="true">🎵</span>
-                        <span class="btn-text">Browse Sound Library</span>
-                    </button>
-                </div>
-                
-                <!-- Sound Library Modal -->
-                <div class="sound-library-modal" id="soundLibraryModal" role="dialog" aria-modal="true" aria-label="Sound Library">
-                    <div class="modal-backdrop"></div>
-                    <div class="modal-container">
-                        <!-- Modal Header -->
-                        <div class="modal-header">
-                            <h2 class="modal-title">Sound Library</h2>
-                            <button class="modal-close-btn" id="closeModalBtn" aria-label="Close sound library">
-                                <span aria-hidden="true">✕</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Search Bar -->
-                        <div class="modal-search-container">
-                            <input type="text"
-                                   class="modal-search-input"
-                                   id="modalSoundSearch"
-                                   placeholder="Search sounds..."
-                                   aria-label="Search sounds"
-                                   autocomplete="off"
-                                   spellcheck="false">
-                            <span class="modal-search-icon" aria-hidden="true">🔍</span>
-                        </div>
-                        
-                        <!-- Ambient Presets — Phase 5D -->
-                        <div class="preset-section">
-                            <h3 class="category-title">Quick Presets</h3>
-                            <div class="preset-grid">
-                                <button class="preset-card" data-preset="rainy-library" aria-label="Rainy Library preset">
-                                    <span class="preset-icons" aria-hidden="true">🌧️📚</span>
-                                    <span class="preset-name">Rainy Library</span>
-                                </button>
-                                <button class="preset-card" data-preset="forest-morning" aria-label="Forest Morning preset">
-                                    <span class="preset-icons" aria-hidden="true">🌲🐦</span>
-                                    <span class="preset-name">Forest Morning</span>
-                                </button>
-                                <button class="preset-card" data-preset="deep-focus" aria-label="Deep Focus preset">
-                                    <span class="preset-icons" aria-hidden="true">🎚️🌧️</span>
-                                    <span class="preset-name">Deep Focus</span>
-                                </button>
-                            </div>
-                        </div>
+            <div class="ambient-content deck">
 
-                        <!-- Sound Grid -->
-                        <div class="modal-content">
-                            <!-- Nature Category -->
-                            <div class="sound-category">
-                                <h3 class="category-title">Nature</h3>
-                                <div class="sound-grid">
-                                    <button class="sound-card" data-sound="rain" data-sound-name="Rain" data-sound-tags="nature water weather">
-                                        <span class="sound-icon">🌧️</span>
-                                        <span class="sound-name">Rain</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="ocean" data-sound-name="Ocean Waves" data-sound-tags="nature water sea beach">
-                                        <span class="sound-icon">🌊</span>
-                                        <span class="sound-name">Ocean Waves</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="forest" data-sound-name="Forest" data-sound-tags="nature trees birds">
-                                        <span class="sound-icon">🌲</span>
-                                        <span class="sound-name">Forest</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="thunder" data-sound-name="Thunder" data-sound-tags="nature storm weather">
-                                        <span class="sound-icon">⚡</span>
-                                        <span class="sound-name">Thunder</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="wind" data-sound-name="Wind" data-sound-tags="nature weather breeze">
-                                        <span class="sound-icon">💨</span>
-                                        <span class="sound-name">Wind</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="stream" data-sound-name="Stream" data-sound-tags="nature water river">
-                                        <span class="sound-icon">💧</span>
-                                        <span class="sound-name">Stream</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="birds" data-sound-name="Birds" data-sound-tags="nature animals chirping">
-                                        <span class="sound-icon">🐦</span>
-                                        <span class="sound-name">Birds</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="cricket" data-sound-name="Crickets" data-sound-tags="nature insects night">
-                                        <span class="sound-icon">🦗</span>
-                                        <span class="sound-name">Crickets</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Indoor Category -->
-                            <div class="sound-category">
-                                <h3 class="category-title">Indoor</h3>
-                                <div class="sound-grid">
-                                    <button class="sound-card" data-sound="fireplace" data-sound-name="Fireplace" data-sound-tags="indoor fire cozy warm">
-                                        <span class="sound-icon">🔥</span>
-                                        <span class="sound-name">Fireplace</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="cafe" data-sound-name="Cafe" data-sound-tags="indoor people coffee social">
-                                        <span class="sound-icon">☕</span>
-                                        <span class="sound-name">Cafe</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="library" data-sound-name="Library" data-sound-tags="indoor quiet study">
-                                        <span class="sound-icon">📚</span>
-                                        <span class="sound-name">Library</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="fan" data-sound-name="Fan" data-sound-tags="indoor white noise">
-                                        <span class="sound-icon">🌀</span>
-                                        <span class="sound-name">Fan</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="clock" data-sound-name="Clock Ticking" data-sound-tags="indoor time rhythmic">
-                                        <span class="sound-icon">⏰</span>
-                                        <span class="sound-name">Clock</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Urban Category -->
-                            <div class="sound-category">
-                                <h3 class="category-title">Urban</h3>
-                                <div class="sound-grid">
-                                    <button class="sound-card" data-sound="city" data-sound-name="City Traffic" data-sound-tags="urban cars street">
-                                        <span class="sound-icon">🚗</span>
-                                        <span class="sound-name">City Traffic</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="train" data-sound-name="Train" data-sound-tags="urban travel transport">
-                                        <span class="sound-icon">🚂</span>
-                                        <span class="sound-name">Train</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="subway" data-sound-name="Subway" data-sound-tags="urban metro underground">
-                                        <span class="sound-icon">🚇</span>
-                                        <span class="sound-name">Subway</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="construction" data-sound-name="Construction" data-sound-tags="urban work building">
-                                        <span class="sound-icon">🏗️</span>
-                                        <span class="sound-name">Construction</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- White Noise Category -->
-                            <div class="sound-category">
-                                <h3 class="category-title">White Noise</h3>
-                                <div class="sound-grid">
-                                    <button class="sound-card" data-sound="whitenoise" data-sound-name="White Noise" data-sound-tags="noise sleep focus">
-                                        <span class="sound-icon">📻</span>
-                                        <span class="sound-name">White Noise</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="pinknoise" data-sound-name="Pink Noise" data-sound-tags="noise sleep calm">
-                                        <span class="sound-icon">🎙️</span>
-                                        <span class="sound-name">Pink Noise</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="brownnoise" data-sound-name="Brown Noise" data-sound-tags="noise deep focus">
-                                        <span class="sound-icon">🎚️</span>
-                                        <span class="sound-name">Brown Noise</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Musical Category -->
-                            <div class="sound-category">
-                                <h3 class="category-title">Musical</h3>
-                                <div class="sound-grid">
-                                    <button class="sound-card" data-sound="piano" data-sound-name="Piano" data-sound-tags="music instrument calm">
-                                        <span class="sound-icon">🎹</span>
-                                        <span class="sound-name">Piano</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="guitar" data-sound-name="Guitar" data-sound-tags="music instrument acoustic">
-                                        <span class="sound-icon">🎸</span>
-                                        <span class="sound-name">Guitar</span>
-                                    </button>
-                                    <button class="sound-card" data-sound="chimes" data-sound-name="Wind Chimes" data-sound-tags="music meditation peaceful">
-                                        <span class="sound-icon">🎐</span>
-                                        <span class="sound-name">Wind Chimes</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Saved mixes strip -->
+                <section class="mixes-rail" aria-label="Saved mixes">
+                    <div class="mixes-rail__track" id="mixesRail"></div>
+                </section>
+
+                <!-- Active track cards -->
+                <section class="deck-tracks" id="deckTracks" aria-label="Active sounds"></section>
+
+                <!-- Empty state when deck is quiet -->
+                <div class="deck-empty" id="deckEmpty" aria-live="polite">
+                    <div class="deck-empty__star" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                            <path d="M12 0 C12 8, 16 12, 24 12 C16 12, 12 16, 12 24 C12 16, 8 12, 0 12 C8 12, 12 8, 12 0Z"/>
+                        </svg>
                     </div>
+                    <p class="deck-empty__title">Your deck is quiet</p>
+                    <p class="deck-empty__subtitle">Tap <strong>+ Add sound</strong> to begin a mix, or pick one from above.</p>
+                </div>
+
+                <!-- Deck controls bar -->
+                <footer class="deck-controls" aria-label="Deck controls">
+                    <button class="deck-btn deck-btn--primary" id="deckAddSoundBtn" aria-label="Add a sound to the deck">
+                        <span class="deck-btn__icon" aria-hidden="true">+</span>
+                        <span class="deck-btn__label">Add sound</span>
+                    </button>
+                    <button class="deck-btn" id="deckSaveMixBtn" aria-label="Save current mix">
+                        <span class="deck-btn__icon" aria-hidden="true">♡</span>
+                        <span class="deck-btn__label">Save mix</span>
+                    </button>
+                    <button class="deck-btn" id="deckSleepBtn" aria-label="Set sleep timer">
+                        <span class="deck-btn__icon" aria-hidden="true">☾</span>
+                        <span class="deck-btn__label">Sleep</span>
+                    </button>
+                    <button class="deck-btn" id="deckRandomBtn" aria-label="Surprise me — random mix">
+                        <span class="deck-btn__icon" aria-hidden="true">✧</span>
+                        <span class="deck-btn__label">Surprise me</span>
+                    </button>
+                    <button class="deck-btn" id="deckFullscreenBtn" aria-label="Enter immersive mode">
+                        <span class="deck-btn__icon" aria-hidden="true">⛶</span>
+                        <span class="deck-btn__label">Immerse</span>
+                    </button>
+                    <button class="deck-btn deck-btn--danger" id="deckStopAllBtn" aria-label="Stop all sounds">
+                        <span class="deck-btn__icon" aria-hidden="true">■</span>
+                        <span class="deck-btn__label">Stop all</span>
+                    </button>
+
+                    <!-- Master volume -->
+                    <div class="deck-master" role="group" aria-label="Master volume">
+                        <span class="deck-master__label">Master</span>
+                        <input class="deck-master__slider" id="deckMasterVolume"
+                               type="range" min="0" max="100" step="1"
+                               aria-label="Master volume">
+                        <span class="deck-master__value" id="deckMasterValue">50%</span>
+                    </div>
+                </footer>
+            </div>
+
+            <!-- Library drawer (slides in) -->
+            <aside class="library-drawer" id="libraryDrawer"
+                   role="dialog" aria-modal="true" aria-label="Sound library" aria-hidden="true">
+                <div class="library-drawer__scrim" data-drawer-close></div>
+                <div class="library-drawer__panel">
+                    <header class="library-drawer__header">
+                        <h2 class="library-drawer__title">Sound Library</h2>
+                        <button class="library-drawer__close" data-drawer-close aria-label="Close library">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </header>
+                    <div class="library-drawer__search">
+                        <span class="library-drawer__search-icon" aria-hidden="true">⌕</span>
+                        <input type="search" id="libraryDrawerSearch"
+                               class="library-drawer__input"
+                               placeholder="Search sounds"
+                               aria-label="Search sounds"
+                               autocomplete="off" spellcheck="false">
+                    </div>
+                    <div class="library-drawer__body" id="libraryDrawerBody"></div>
+                    <p class="library-drawer__footnote">More sounds arriving soon. Nudge us: <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>.</p>
+                </div>
+            </aside>
+
+            <!-- Save-mix popover -->
+            <div class="save-mix-popover" id="saveMixPopover" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Save mix">
+                <div class="save-mix-popover__scrim" data-popover-close></div>
+                <form class="save-mix-popover__card" id="saveMixForm">
+                    <h3 class="save-mix-popover__title">Save this mix</h3>
+                    <label class="save-mix-popover__label" for="saveMixName">Mix name</label>
+                    <input type="text" id="saveMixName" class="save-mix-popover__input"
+                           placeholder="My perfect rain"
+                           maxlength="40" autocomplete="off" required>
+                    <div class="save-mix-popover__actions">
+                        <button type="button" class="deck-btn" data-popover-close>Cancel</button>
+                        <button type="submit" class="deck-btn deck-btn--primary">Save</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sleep-timer popover -->
+            <div class="sleep-popover" id="sleepPopover" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Sleep timer">
+                <div class="sleep-popover__scrim" data-popover-close></div>
+                <div class="sleep-popover__card">
+                    <h3 class="sleep-popover__title">Sleep timer</h3>
+                    <p class="sleep-popover__hint">Fades everything out when time's up.</p>
+                    <div class="sleep-popover__options" role="group" aria-label="Sleep duration">
+                        <button class="sleep-chip" data-minutes="15">15 min</button>
+                        <button class="sleep-chip" data-minutes="30">30 min</button>
+                        <button class="sleep-chip" data-minutes="60">1 hour</button>
+                        <button class="sleep-chip" data-minutes="120">2 hours</button>
+                    </div>
+                    <button class="deck-btn deck-btn--danger" id="sleepCancelBtn" hidden>Cancel timer</button>
+                    <button class="deck-btn" data-popover-close>Close</button>
                 </div>
             </div>
         </div>
