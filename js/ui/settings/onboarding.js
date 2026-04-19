@@ -112,6 +112,8 @@ function renderStep() {
     if (!overlay) return;
     const step = STEPS[currentStep];
     overlay.querySelector('.tour-card__title').textContent = step.title;
+    // XSS safety: step.body is static author HTML from the STEPS array above.
+    // If tour steps are ever sourced from user input, switch to textContent.
     overlay.querySelector('.tour-card__body').innerHTML = step.body;
     overlay.querySelector('.tour-card__step').textContent = `${currentStep + 1} / ${STEPS.length}`;
 

@@ -435,6 +435,12 @@ function handleButtonAction(id, triggerEl) {
         case 'show-tour':
             import('./onboarding.js').then(mod => mod.startTour());
             break;
+        case 'open-privacy':
+            window.open('/privacy.html', '_blank', 'noopener');
+            break;
+        case 'open-terms':
+            window.open('/terms.html', '_blank', 'noopener');
+            break;
     }
 }
 

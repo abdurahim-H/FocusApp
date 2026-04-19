@@ -242,6 +242,9 @@ function applySearch(query) {
 function createEntryEl(entry, categoryLabel) {
     const el = document.createElement('div');
     el.className = 'hc-entry';
+    // XSS safety contract: entry.q and entry.a come from help-content.js which
+    // is static, author-written HTML (intentional <strong>, <kbd>, <table>).
+    // If you ever load entries from user input or an external API, escape both.
     el.innerHTML = `
         <button class="hc-entry__header" aria-expanded="false">
             <span class="hc-entry__q">${entry.q}</span>

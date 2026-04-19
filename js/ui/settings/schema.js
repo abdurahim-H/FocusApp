@@ -312,6 +312,15 @@ export const SCHEMA = [
     { section: 'data', type: 'group', label: 'Help' },
     { section: 'data', type: 'button', id: 'show-tour', label: 'Replay welcome tour' },
 
+    { section: 'data', type: 'group', label: 'Legal' },
+    {
+        section: 'data', type: 'button-row',
+        items: [
+            { id: 'open-privacy', label: 'Privacy Policy' },
+            { id: 'open-terms',   label: 'Terms of Service' },
+        ],
+    },
+
     { section: 'data', type: 'group', label: 'About' },
     { section: 'data', type: 'readonly', key: 'about.version',   label: 'Version' },
     { section: 'data', type: 'readonly', key: 'about.gpuTier',   label: 'GPU tier' },
