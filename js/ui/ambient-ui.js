@@ -21,6 +21,7 @@ import {
     activateMix, saveCurrentMix, deleteMix, renameMix,
 } from '../features/sound-mixer.js';
 import { createFocusTrap } from './focus-trap.js';
+import { get as settingsGet, set as settingsSet, subscribe as settingsSub } from './settings/store.js';
 
 // Planned sounds we've teased but not shipped — shown as "coming soon"
 // cards in the library so users know the catalog is growing.
@@ -57,6 +58,8 @@ export function initAmbientUI() {
     wireSavePopover();
     wireSleepPopover();
     wireImmersive();
+    wireTimerIntegration();
+    wireHomeMiniPlayer();
     renderLibrary(); // static-ish: render once
 
     // Reactive renders
@@ -64,6 +67,9 @@ export function initAmbientUI() {
     effect(() => { renderTracks(); });
     effect(() => { syncMasterUI(); });
     effect(() => { syncSleepUI(); });
+    effect(() => { syncHomeMiniPlayer(); });
+    // Re-render mixes rail when the focus-start pin changes.
+    settingsSub('sounds.focusStartMixId', () => renderMixesRail());
 
     // Error surfacing for failed loads (R2 down, etc.)
     onAmbientEvent((type, payload) => {
@@ -71,6 +77,9 @@ export function initAmbientUI() {
             toast(`Couldn't load "${labelFor(payload.id)}". Try again or pick another sound.`);
         }
     });
+
+    // If the page was opened via a /?mix=… share link, offer to load it.
+    maybeLoadSharedMix();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -147,29 +156,55 @@ function renderMixesRail() {
     const rail = document.getElementById('mixesRail');
     if (!rail) return;
     const mixes = getAllMixes();
+    const pinnedId = settingsGet('sounds.focusStartMixId');
 
     rail.innerHTML = mixes
-        .map((m) => `
-            <button class="mix-card ${m.builtin ? 'mix-card--builtin' : 'mix-card--user'}"
-                    data-mix-id="${escapeAttr(m.id)}"
-                    aria-label="Activate ${escapeAttr(m.name)} mix">
-                <span class="mix-card__icon" aria-hidden="true">${m.icon || '♪'}</span>
-                <span class="mix-card__name">${escapeHtml(m.name)}</span>
-                <span class="mix-card__count">${m.active?.length || 0}</span>
-                ${m.builtin ? '' : `
-                    <button class="mix-card__menu" data-mix-menu="${escapeAttr(m.id)}"
-                            aria-label="Mix options" title="Rename or delete">⋯</button>
-                `}
-            </button>
-        `)
+        .map((m) => {
+            const isPinned = pinnedId === m.id;
+            return `
+                <button class="mix-card ${m.builtin ? 'mix-card--builtin' : 'mix-card--user'} ${isPinned ? 'is-pinned' : ''}"
+                        data-mix-id="${escapeAttr(m.id)}"
+                        aria-label="Activate ${escapeAttr(m.name)} mix${isPinned ? ' (auto-starts with focus)' : ''}">
+                    <span class="mix-card__icon" aria-hidden="true">${m.icon || '♪'}</span>
+                    <span class="mix-card__name">${escapeHtml(m.name)}</span>
+                    <span class="mix-card__count">${m.active?.length || 0}</span>
+                    <button class="mix-card__pin ${isPinned ? 'is-on' : ''}"
+                            data-mix-pin="${escapeAttr(m.id)}"
+                            aria-label="${isPinned ? 'Unpin from focus start' : 'Pin as focus-start mix'}"
+                            title="${isPinned ? 'Pinned as focus-start mix' : 'Pin as focus-start mix'}">
+                        ${isPinned ? '★' : '☆'}
+                    </button>
+                    ${m.builtin ? '' : `
+                        <button class="mix-card__menu" data-mix-menu="${escapeAttr(m.id)}"
+                                aria-label="Mix options" title="Rename or delete">⋯</button>
+                    `}
+                </button>
+            `;
+        })
         .join('');
 
     rail.querySelectorAll('[data-mix-id]').forEach((el) => {
         el.addEventListener('click', async (e) => {
-            // Ignore clicks on the overflow menu
-            if (e.target.closest('[data-mix-menu]')) return;
+            // Ignore clicks on embedded controls.
+            if (e.target.closest('[data-mix-menu]') || e.target.closest('[data-mix-pin]')) return;
             await ensureAudio();
             await activateMix(el.dataset.mixId);
+        });
+    });
+
+    rail.querySelectorAll('[data-mix-pin]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.mixPin;
+            const current = settingsGet('sounds.focusStartMixId');
+            if (current === id) {
+                settingsSet('sounds.focusStartMixId', null);
+                toast('Unpinned. Focus sessions won\'t auto-start a mix.');
+            } else {
+                settingsSet('sounds.focusStartMixId', id);
+                settingsSet('sounds.autoStartOnFocus', true);
+                toast(`Pinned. Focus sessions will auto-start "${getAllMixes().find((m) => m.id === id)?.name}".`);
+            }
         });
     });
 
@@ -184,14 +219,91 @@ function renderMixesRail() {
 function openMixMenu(anchor, mixId) {
     const mix = ambientMixes.value.find((m) => m.id === mixId);
     if (!mix) return;
-    // Simple inline menu — rename / delete.
-    const next = prompt(`Rename "${mix.name}" — leave blank to delete`, mix.name);
-    if (next === null) return;            // cancelled
-    const trimmed = next.trim();
-    if (!trimmed) {
-        if (confirm(`Delete mix "${mix.name}"?`)) deleteMix(mixId);
-    } else if (trimmed !== mix.name) {
-        renameMix(mixId, trimmed);
+    const choice = prompt(
+        `Options for "${mix.name}":\n\n` +
+        `1 — Rename\n` +
+        `2 — Share (copy link)\n` +
+        `3 — Delete\n\n` +
+        `Type 1, 2, or 3`,
+        '1'
+    );
+    if (choice === null) return;
+    switch (choice.trim()) {
+        case '1': {
+            const name = prompt('New name:', mix.name);
+            if (name && name.trim() && name.trim() !== mix.name) renameMix(mixId, name.trim());
+            break;
+        }
+        case '2': {
+            const url = buildShareUrl(mix);
+            navigator.clipboard?.writeText(url).then(
+                () => toast('Share link copied.'),
+                () => prompt('Copy this link:', url)
+            );
+            break;
+        }
+        case '3': {
+            if (confirm(`Delete mix "${mix.name}"?`)) {
+                if (settingsGet('sounds.focusStartMixId') === mixId) {
+                    settingsSet('sounds.focusStartMixId', null);
+                }
+                deleteMix(mixId);
+            }
+            break;
+        }
+    }
+}
+
+function buildShareUrl(mix) {
+    const payload = {
+        n: mix.name,
+        a: mix.active || [],
+        t: mix.tracks || {},
+        i: mix.icon,
+    };
+    const b64 = encodeURIComponent(
+        btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
+    );
+    return `${location.origin}/?mix=${b64}`;
+}
+
+/** Parse ?mix= from the URL (if present) and return a mix-shaped object, or null. */
+function decodeSharedMix() {
+    try {
+        const params = new URLSearchParams(location.search);
+        const raw = params.get('mix');
+        if (!raw) return null;
+        const json = decodeURIComponent(escape(atob(decodeURIComponent(raw))));
+        const payload = JSON.parse(json);
+        if (!payload || !Array.isArray(payload.a)) return null;
+        return {
+            id: `shared:${Date.now().toString(36)}`,
+            name: payload.n || 'Shared mix',
+            icon: payload.i || '🎵',
+            builtin: false,
+            shared: true,
+            active: payload.a,
+            tracks: payload.t || {},
+        };
+    } catch (_) { return null; }
+}
+
+async function maybeLoadSharedMix() {
+    const mix = decodeSharedMix();
+    if (!mix) return;
+    // Don't auto-audio on page load (autoplay policy) — stash and surface a toast.
+    // Clear ?mix= from the URL so a refresh doesn't re-import.
+    try {
+        const url = new URL(location.href);
+        url.searchParams.delete('mix');
+        history.replaceState({}, '', url);
+    } catch (_) {}
+    // Show a one-tap prompt to load it. Using toast + a button would need more
+    // UI; prompt() is adequate for a rarely-used flow.
+    if (confirm(`Load the shared mix "${mix.name}"? You can save it afterwards.`)) {
+        await ensureAudio();
+        await activateMix(mix);
+        toast('Shared mix loaded. Click ♡ Save mix to keep it.');
     }
 }
 
@@ -623,6 +735,34 @@ function syncSleepUI() {
 setInterval(() => { if (ambientSleepTimer.value) syncSleepUI(); }, 1000);
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Timer integration (C.2)
+// Listens for `focus-timer:start` / `focus-timer:end` events dispatched by
+// timer.js, and:
+//   • on focus session start, auto-activates the pinned mix (if any)
+//   • on any session end, fades the master to silence over 4s
+// ═══════════════════════════════════════════════════════════════════════════
+
+function wireTimerIntegration() {
+    document.addEventListener('focus-timer:start', async (e) => {
+        const { isBreak } = e.detail || {};
+        if (isBreak) return;
+        if (!settingsGet('sounds.autoStartOnFocus')) return;
+        const mixId = settingsGet('sounds.focusStartMixId');
+        if (!mixId) return;
+        const mix = getAllMixes().find((m) => m.id === mixId);
+        if (!mix) return;
+        await ensureAudio();
+        await activateMix(mix);
+    });
+
+    document.addEventListener('focus-timer:end', () => {
+        if (!settingsGet('sounds.autoFadeOnSessionEnd')) return;
+        if (activeSounds.value.length === 0) return;
+        fadeOutAll(4000);
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Immersive fullscreen mode (D.1)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -639,6 +779,91 @@ function toggleImmersive() {
 }
 function enterImmersive() { document.body.classList.add('is-immersive'); }
 function exitImmersive()  { document.body.classList.remove('is-immersive'); }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Home mini-player (C.3)
+// A compact floating widget on the Home tab that surfaces whenever at least
+// one track is playing. Mirrors the mini-timer on the opposite corner.
+// ═══════════════════════════════════════════════════════════════════════════
+
+let hmaPaused = false;      // true when the user pauses from the mini-player
+let hmaPrevMaster = 0.5;     // volume to restore on resume
+
+function wireHomeMiniPlayer() {
+    const btn = document.getElementById('hmaPlayPauseBtn');
+    const vol = document.getElementById('hmaVolume');
+
+    btn?.addEventListener('click', async () => {
+        await ensureAudio();
+        if (hmaPaused) {
+            // Resume by fading master back to the previous volume.
+            setMasterVolume(hmaPrevMaster, { fadeMs: 400 });
+            hmaPaused = false;
+        } else {
+            hmaPrevMaster = ambientMaster.value?.volume ?? 0.5;
+            setMasterVolume(0, { fadeMs: 400 });
+            hmaPaused = true;
+        }
+        syncHomeMiniPlayer();
+    });
+
+    vol?.addEventListener('input', async () => {
+        await ensureAudio();
+        hmaPaused = false;
+        setMasterVolume(Number(vol.value) / 100, { fadeMs: 60 });
+    });
+}
+
+function syncHomeMiniPlayer() {
+    const widget = document.getElementById('homeMiniAmbient');
+    if (!widget) return;
+
+    const hasActive = activeSounds.value.length > 0;
+    const onHomeTab = document.getElementById('home')?.classList.contains('active');
+    const shouldShow = hasActive && onHomeTab;
+
+    // Show / hide with entrance animation.
+    if (shouldShow && widget.classList.contains('hidden')) {
+        widget.classList.remove('hidden');
+        widget.classList.add('is-entering');
+        widget.addEventListener('animationend', () => widget.classList.remove('is-entering'), { once: true });
+    } else if (!shouldShow && !widget.classList.contains('hidden')) {
+        widget.classList.add('is-leaving');
+        widget.addEventListener('animationend', () => {
+            widget.classList.remove('is-leaving');
+            widget.classList.add('hidden');
+        }, { once: true });
+    }
+    if (!shouldShow) return;
+
+    // Label: one track → show its name; multiple → "Custom mix".
+    const nameEl = document.getElementById('hmaName');
+    if (nameEl) {
+        const ids = activeSounds.value;
+        nameEl.textContent = ids.length === 1 ? labelFor(ids[0]) : `${ids.length} sounds`;
+    }
+
+    // Volume + play/pause icon
+    const volSlider = document.getElementById('hmaVolume');
+    const volPct = document.getElementById('hmaPct');
+    const v = Math.round((ambientMaster.value?.volume ?? 0.5) * 100);
+    if (volSlider && document.activeElement !== volSlider) volSlider.value = String(v);
+    if (volPct) volPct.textContent = `${v}%`;
+
+    const btn = document.getElementById('hmaPlayPauseBtn');
+    if (btn) {
+        btn.innerHTML = hmaPaused
+            ? '<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M4 2.5a.5.5 0 0 1 .77-.42l8.5 5.5a.5.5 0 0 1 0 .84l-8.5 5.5A.5.5 0 0 1 4 13.5v-11z"/></svg>'
+            : '<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>';
+        btn.setAttribute('aria-label', hmaPaused ? 'Resume ambient mix' : 'Pause ambient mix');
+    }
+}
+
+// Keep the mini-player in sync when the user switches tabs (mode change
+// isn't a signal effect-tracks automatically — the current app uses a
+// class toggle on #home). Poll every 600ms while listening to avoid
+// wiring into navigation internals.
+setInterval(() => syncHomeMiniPlayer(), 600);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Toast

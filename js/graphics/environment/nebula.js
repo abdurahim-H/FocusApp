@@ -1,8 +1,11 @@
 // nebula.js - Wide flowing golden shawl
 // A broad river of golden silk with internal flowing structure and dusty dissolving edges
 
+import { getMasterEnergy } from '../../features/sounds.js';
+
 let mesh = null;
 let material = null;
+let smoothedEnergy = 0;
 
 // Wrap the shader time uniform so fract()/sin() inputs stay in a range where
 // float32 still has sub-pixel precision. Without this the 6-octave fbm
@@ -27,6 +30,7 @@ const FRAGMENT = `
     precision highp float;
     varying vec2 vUV;
     uniform float time;
+    uniform float energy;   // 0..1 master-bus amplitude from the ambient engine
 
     float hash(vec2 p) {
         vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -135,6 +139,9 @@ const FRAGMENT = `
             float filaments = smoothstep(0.3, 0.7, filamentNoise);
             filaments = pow(filaments, 1.5);
 
+            // Subtle reactivity: audio energy brightens filaments up to ~10%.
+            filaments *= 1.0 + energy * 0.12;
+
             // Bright center core
             float coreIntensity = smoothstep(0.4, 0.0, bandPos);
 
@@ -214,11 +221,12 @@ export function createNebula(sceneRef, camera, octaves = 5) {
         vertex: 'nebula', fragment: 'nebula'
     }, {
         attributes: ['position', 'uv'],
-        uniforms: ['worldViewProjection', 'time'],
+        uniforms: ['worldViewProjection', 'time', 'energy'],
         needAlphaBlending: true
     });
 
     material.setFloat('time', 0);
+    material.setFloat('energy', 0);
     material.backFaceCulling = false;
     material.alphaMode = BABYLON.Engine.ALPHA_ADD;
     material.forceDepthWrite = false;
@@ -228,7 +236,18 @@ export function createNebula(sceneRef, camera, octaves = 5) {
 }
 
 export function updateNebula(elapsed) {
-    if (material) material.setFloat('time', elapsed % TIME_WRAP);
+    if (!material) return;
+    material.setFloat('time', elapsed % TIME_WRAP);
+    // Smooth the audio energy so the nebula breathes with it instead of jittering.
+    // Frame-rate-independent low-pass: alpha ≈ 0.06 ~ 250ms time constant at 60fps.
+    const raw = safeEnergy();
+    smoothedEnergy = smoothedEnergy + (raw - smoothedEnergy) * 0.06;
+    material.setFloat('energy', smoothedEnergy);
+}
+
+function safeEnergy() {
+    try { return Math.max(0, Math.min(1, getMasterEnergy())); }
+    catch (_) { return 0; }
 }
 
 export function disposeNebula() {

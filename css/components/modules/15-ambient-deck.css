@@ -85,10 +85,11 @@
     font-size: 11px;
     font-variant-numeric: tabular-nums;
 }
-.mix-card__menu {
+.mix-card__menu,
+.mix-card__pin {
     margin-left: 2px;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border: none;
     border-radius: 8px;
     background: transparent;
@@ -96,9 +97,19 @@
     font-size: 14px;
     line-height: 1;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, transform 0.25s var(--deck-spring);
 }
-.mix-card__menu:hover { background: var(--deck-gold-faint); color: var(--deck-cream); }
+.mix-card__menu:hover,
+.mix-card__pin:hover { background: var(--deck-gold-faint); color: var(--deck-cream); transform: scale(1.1); }
+.mix-card__pin.is-on {
+    color: var(--deck-gold);
+    filter: drop-shadow(0 0 6px rgba(200, 146, 42, 0.6));
+}
+.mix-card.is-pinned {
+    border-color: var(--deck-gold-soft);
+    box-shadow: 0 0 0 1px var(--deck-gold-soft) inset,
+                0 0 20px rgba(200, 146, 42, 0.14);
+}
 
 .mix-card--builtin::before {
     content: '';
@@ -797,6 +808,161 @@
     background: var(--deck-gold-faint);
     border-color: var(--deck-gold-soft);
     transform: translateY(-1px);
+}
+
+/* ── Home mini ambient player ───────────────────────────────────────────── */
+/* Fixed-position compact player that surfaces on the Home tab whenever at
+   least one ambient track is playing. Sibling of the mini-timer. */
+
+.home-mini-ambient {
+    position: fixed;
+    bottom: 80px;
+    left: 60px;
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px 12px;
+    min-width: 220px;
+    border-radius: 18px;
+    background: rgba(8, 6, 3, 0.05);
+    border: 1px solid var(--deck-gold-line);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--deck-cream);
+    font-size: 12px;
+    transform-origin: bottom left;
+    transform: scale(var(--user-ambient-scale, 1));
+    transition: background 0.3s var(--deck-ease),
+                border-color 0.3s var(--deck-ease),
+                box-shadow 0.3s var(--deck-ease),
+                opacity 0.35s var(--deck-ease);
+    user-select: none;
+    -webkit-user-select: none;
+}
+.home-mini-ambient.hidden { display: none !important; }
+
+.home-mini-ambient.is-entering {
+    animation: hmaEnter 0.45s var(--deck-spring) both;
+}
+.home-mini-ambient.is-leaving {
+    animation: hmaLeave 0.3s var(--deck-ease) both;
+}
+@keyframes hmaEnter {
+    from { opacity: 0; transform: scale(0.9) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes hmaLeave {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to   { opacity: 0; transform: scale(0.94) translateY(6px); }
+}
+
+.home-mini-ambient:hover {
+    background: rgba(10, 8, 4, 0.1);
+    border-color: var(--deck-gold-soft);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+
+.hma-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.hma-icon {
+    color: var(--deck-gold);
+    font-size: 13px;
+    filter: drop-shadow(0 0 4px rgba(200, 146, 42, 0.5));
+}
+.hma-name {
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--deck-cream-soft);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 140px;
+}
+
+.hma-body {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.hma-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    border: 1px solid var(--deck-gold-line);
+    background: rgba(255, 240, 210, 0.04);
+    color: var(--deck-cream);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s, transform 0.25s var(--deck-spring);
+}
+.hma-btn:hover {
+    background: var(--deck-gold-faint);
+    border-color: var(--deck-gold-soft);
+}
+.hma-btn:active { transform: scale(0.94); }
+
+.hma-volume {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 12px;
+    background: transparent;
+    cursor: pointer;
+}
+.hma-volume::-webkit-slider-runnable-track {
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(255, 240, 210, 0.1);
+}
+.hma-volume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 11px;
+    height: 11px;
+    margin-top: -4px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #FFF1D8, var(--deck-gold));
+    box-shadow: 0 0 8px rgba(200, 146, 42, 0.5);
+    cursor: grab;
+}
+.hma-volume::-moz-range-thumb {
+    width: 11px;
+    height: 11px;
+    border: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #FFF1D8, var(--deck-gold));
+}
+
+.hma-pct {
+    min-width: 32px;
+    text-align: right;
+    font-size: 11px;
+    color: var(--deck-cream-soft);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+    .home-mini-ambient {
+        bottom: 12px;
+        left: 12px;
+        min-width: 0;
+        max-width: calc(50vw - 20px);
+        padding: 10px 12px 10px;
+    }
+    .hma-name { max-width: 80px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-mini-ambient.is-entering,
+    .home-mini-ambient.is-leaving { animation: none; }
 }
 
 /* ── Ambient toast ──────────────────────────────────────────────────────── */

@@ -209,6 +209,18 @@ export const SCHEMA = [
         default: true,
         help: 'Restore your last mix on page load',
     },
+    {
+        section: 'sounds', type: 'toggle',
+        key: 'sounds.autoFadeOnSessionEnd', label: 'Fade out when session ends',
+        default: true,
+        help: 'Smoothly fades the mix to silence when a focus or break ends',
+    },
+    {
+        section: 'sounds', type: 'toggle',
+        key: 'sounds.autoStartOnFocus', label: 'Auto-start mix on focus session',
+        default: false,
+        help: 'When a focus session begins, play the mix pinned as your focus-start mix',
+    },
 
     // ═══════════════════════════════════════════════════════════════════════
     // NOTIFICATIONS

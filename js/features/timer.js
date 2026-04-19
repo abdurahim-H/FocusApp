@@ -67,6 +67,11 @@ export function startTimer() {
     state.currentMode = state.timer.isBreak ? 'break' : 'focus';
     state.mode = 'timer';
 
+    // Broadcast so ambient / other features can react (auto-start a mix, etc.)
+    document.dispatchEvent(new CustomEvent('focus-timer:start', {
+        detail: { isBreak: state.timer.isBreak, isLongBreak: !!state.timer.isLongBreak },
+    }));
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     if (startBtn) startBtn.classList.add('hidden');
@@ -208,6 +213,11 @@ export function completeSession() {
     state.timer.isRunning = false;
     state.timer.transitioning = true;
     state.timerState = 'completed';
+
+    // Broadcast so ambient / other features can react.
+    document.dispatchEvent(new CustomEvent('focus-timer:end', {
+        detail: { isBreak: state.timer.isBreak, isLongBreak: !!state.timer.isLongBreak },
+    }));
 
     if (DEBUG_NOTIFICATIONS) {
         console.log('🔔 Session completed, checking notification status...');

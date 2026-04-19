@@ -119,6 +119,27 @@
 
         </div>
 
+    <!-- Mini Ambient Player — pairs with mini-timer on the home tab -->
+    <div class="home-mini-ambient hidden" id="homeMiniAmbient" role="status" aria-label="Ambient player">
+        <div class="hma-head">
+            <span class="hma-icon" aria-hidden="true">♪</span>
+            <span class="hma-name" id="hmaName">Ambient</span>
+        </div>
+        <div class="hma-body">
+            <button class="hma-btn hma-btn--play-pause" id="hmaPlayPauseBtn"
+                    type="button" aria-label="Pause ambient mix">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
+                    <rect x="3" y="2" width="3.5" height="12" rx="1"/>
+                    <rect x="9.5" y="2" width="3.5" height="12" rx="1"/>
+                </svg>
+            </button>
+            <input type="range" class="hma-volume" id="hmaVolume"
+                   min="0" max="100" step="1" value="50"
+                   aria-label="Master volume">
+            <span class="hma-pct" id="hmaPct">50%</span>
+        </div>
+    </div>
+
     <!-- Mini Focus Timer — OUTSIDE #home so it's viewport-positioned, draggable -->
     <div class="home-mini-timer hidden" id="homeMiniTimer" role="status" aria-label="Focus timer">
         <!-- Analog clock face -->

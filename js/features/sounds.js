@@ -224,6 +224,8 @@ export async function playSound(id, { fadeMs = FADE_IN_MS } = {}) {
     node.pan.pan.value = clamp(t.pan, -1, 1);
 
     _addActive(id);
+    setupMediaSession();
+    ensureSilentKeepAlive();
     emit('play', { id });
     return true;
 }
@@ -265,6 +267,13 @@ export function stopAllAmbientSounds({ fadeMs = FADE_OUT_MS } = {}) {
     for (const id of Array.from(tracks.keys())) {
         stopSound(id, { fadeMs });
     }
+    // Release the lock-screen keep-alive after the fade clears.
+    setTimeout(() => {
+        if (tracks.size === 0) {
+            teardownSilentKeepAlive();
+            mediaSessionStopped();
+        }
+    }, fadeMs + 80);
 }
 
 /** Is a track currently playing (and not in the middle of fading out)? */
@@ -404,6 +413,86 @@ function emit(type, payload) {
 export function onAmbientEvent(fn) {
     listeners.add(fn);
     return () => listeners.delete(fn);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Media Session API — lock-screen, headphone, CarPlay controls
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Browsers only surface MediaSession controls when there's actual playback
+// activity they can observe. Web Audio alone isn't always enough, so we
+// pipe a silent looping HTMLAudioElement through the graph whenever at
+// least one track is playing. Zero audible contribution, but satisfies
+// the browser's "something is playing" heuristic.
+
+let silentEl = null;
+let mediaSessionAttached = false;
+
+function ensureSilentKeepAlive() {
+    if (silentEl) return;
+    // A tiny 1-second silent WAV, looped. ~44 bytes total.
+    // Generated via: ffmpeg -f lavfi -i anullsrc=r=8000:cl=mono -t 1 silent.wav
+    const silentWav =
+        'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+    silentEl = new Audio(silentWav);
+    silentEl.loop = true;
+    silentEl.volume = 0;
+    // Don't await — we just need the element registered.
+    silentEl.play().catch(() => { /* will retry after next user gesture */ });
+}
+
+function teardownSilentKeepAlive() {
+    if (!silentEl) return;
+    try { silentEl.pause(); silentEl.src = ''; } catch (_) {}
+    silentEl = null;
+}
+
+function setupMediaSession() {
+    if (mediaSessionAttached) return;
+    if (!('mediaSession' in navigator)) return;
+    mediaSessionAttached = true;
+
+    try {
+        navigator.mediaSession.setActionHandler('play', () => {
+            ensureSilentKeepAlive();
+            silentEl?.play().catch(() => {});
+            emit('mediasession-play');
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+            // Fade master to 0 but don't discard tracks — a user "pause"
+            // should be resumable.
+            setMasterVolume(0, { fadeMs: 400 });
+            emit('mediasession-pause');
+        });
+        navigator.mediaSession.setActionHandler('stop', () => {
+            stopAllAmbientSounds();
+            emit('mediasession-stop');
+        });
+    } catch (_) {
+        // Some handlers aren't supported on every browser — silently ignore.
+    }
+}
+
+/** Call from the UI whenever the current mix changes so the lock-screen
+ *  shows the right title. */
+export function setMediaSessionMix({ name, artwork } = {}) {
+    if (!('mediaSession' in navigator) || !navigator.mediaSession) return;
+    try {
+        navigator.mediaSession.metadata = new window.MediaMetadata({
+            title: name || 'Ambient mix',
+            artist: 'Cosmic Focus',
+            album: 'Focus ambience',
+            artwork: artwork || [
+                { src: '/icon.svg', sizes: '128x128', type: 'image/svg+xml' },
+            ],
+        });
+        navigator.mediaSession.playbackState = 'playing';
+    } catch (_) {}
+}
+
+function mediaSessionStopped() {
+    if (!('mediaSession' in navigator) || !navigator.mediaSession) return;
+    try { navigator.mediaSession.playbackState = 'paused'; } catch (_) {}
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -15,6 +15,7 @@ import {
     getActiveSounds,
     getTrackState,
     ensureAudio,
+    setMediaSessionMix,
 } from './sounds.js';
 import { ambientTracks, ambientMixes, activeSounds } from '../core/state.js';
 
@@ -144,6 +145,9 @@ export async function activateMix(mixOrId) {
     for (const id of currentActive) {
         if (!targetActive.has(id)) stopSound(id, { fadeMs: CROSSFADE_MS });
     }
+
+    // Reflect the mix on the lock screen.
+    setMediaSessionMix({ name: mix.name });
 
     // 3. Start (or re-apply) tracks that are in the target (fade in).
     for (const id of targetActive) {
