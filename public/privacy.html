@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050308">
+    <meta name="robots" content="index, follow">
+    <title>Privacy Policy — Cosmic Focus</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/file_03.svg">
+    <link rel="canonical" href="https://universefocuses.com/privacy.html">
+    <style>
+        :root { color-scheme: dark; }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            background: #050308;
+            color: #E8DCC3;
+            line-height: 1.65;
+            padding: 48px 24px 96px;
+        }
+        main { max-width: 720px; margin: 0 auto; }
+        header { margin-bottom: 40px; }
+        a.back {
+            color: rgba(200, 146, 42, 0.9);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        a.back:hover { text-decoration: underline; }
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin: 16px 0 8px;
+            color: #F5E8D0;
+        }
+        .updated {
+            color: rgba(220, 205, 180, 0.55);
+            font-size: 13px;
+            margin: 0;
+        }
+        h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #F0DFC0;
+            margin: 40px 0 12px;
+            letter-spacing: -0.01em;
+        }
+        p, li { color: rgba(232, 220, 195, 0.85); }
+        p { margin: 0 0 14px; }
+        ul { padding-left: 22px; margin: 0 0 14px; }
+        li { margin-bottom: 6px; }
+        strong { color: #F5E8D0; }
+        a { color: rgba(200, 146, 42, 0.95); }
+        code {
+            font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+            font-size: 0.9em;
+            background: rgba(200, 146, 42, 0.1);
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header>
+            <a class="back" href="/">← Back to Cosmic Focus</a>
+            <h1>Privacy Policy</h1>
+            <p class="updated">Last updated: April 19, 2026</p>
+        </header>
+
+        <p>This Privacy Policy explains what information Cosmic Focus (the "Service", accessible at <a href="https://universefocuses.com">universefocuses.com</a>) collects, how it is used, and the choices you have.</p>
+
+        <h2>1. Data stored locally on your device</h2>
+        <p>Most of what Cosmic Focus stores is kept in your own browser, on your own device, using <code>localStorage</code> and <code>sessionStorage</code>. This includes:</p>
+        <ul>
+            <li>Your tasks, focus session history, and statistics</li>
+            <li>Your settings (timer durations, scene quality, keyboard shortcuts, sound preferences, etc.)</li>
+            <li>Saved focus presets and schedules</li>
+            <li>UI state such as the position of the mini timer</li>
+        </ul>
+        <p>This data never leaves your device unless you are signed into an account (see below). Clearing your browser storage for this site removes it permanently.</p>
+
+        <h2>2. Data stored in your account (optional)</h2>
+        <p>If you choose to create an account, we use <strong>Supabase</strong> to store a copy of your productivity data (tasks, stats, settings, presets) so it can follow you across devices. The account stores:</p>
+        <ul>
+            <li>Your email address (and, if you sign in with a third-party provider, the identifier they return)</li>
+            <li>The productivity data listed above, keyed to your account</li>
+            <li>Timestamps of account creation, last sign-in, and last sync</li>
+        </ul>
+        <p>You can use Cosmic Focus anonymously without ever creating an account. You can export or delete all account data at any time from <em>Settings → Data & About</em>.</p>
+
+        <h2>3. Third-party services</h2>
+        <p>The Service loads resources from the following third parties when you use it:</p>
+        <ul>
+            <li><strong>Cloudflare</strong> — hosts the site and provides security/CDN services.</li>
+            <li><strong>Google Fonts</strong> — serves the Inter font family.</li>
+            <li><strong>Babylon.js CDN</strong> — serves the 3D rendering library.</li>
+            <li><strong>Supabase</strong> — powers optional accounts and cloud sync.</li>
+        </ul>
+        <p>These providers may receive your IP address and basic request metadata as part of delivering their service. We do not share additional information with them.</p>
+
+        <h2>4. Analytics</h2>
+        <p>We use <strong>Cloudflare Web Analytics</strong>, which is cookieless and does not track individual users across sites. It provides aggregate information about page views and performance. We do not use Google Analytics, Facebook Pixel, or any advertising trackers.</p>
+
+        <h2>5. Cookies</h2>
+        <p>Cosmic Focus does not set tracking cookies. Supabase may set a session cookie to keep you signed in if you have an account. That cookie is used only for authentication.</p>
+
+        <h2>6. Your rights</h2>
+        <p>You can at any time:</p>
+        <ul>
+            <li>Export your data as JSON or CSV from <em>Settings → Data & About</em>.</li>
+            <li>Delete everything stored locally via <em>Settings → Data & About → Clear all data</em>.</li>
+            <li>Delete your account and all associated cloud data from <em>Settings → Account</em>.</li>
+        </ul>
+        <p>Under the GDPR and CCPA you also have the right to request access to, correction of, or deletion of your personal data. Contact us as described below.</p>
+
+        <h2>7. Children</h2>
+        <p>Cosmic Focus is not directed at children under 13 and we do not knowingly collect personal information from children.</p>
+
+        <h2>8. Changes to this policy</h2>
+        <p>We may update this Privacy Policy from time to time. The "Last updated" date at the top of this page reflects the most recent version.</p>
+
+        <h2>9. Contact</h2>
+        <p>Questions about this policy? Email <a href="mailto:hello@universefocuses.com">hello@universefocuses.com</a>.</p>
+    </main>
+</body>
+</html>

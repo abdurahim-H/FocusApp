@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050308">
+    <title>Lost in space — Cosmic Focus</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/file_03.svg">
+    <style>
+        :root { color-scheme: dark; }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; height: 100%; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            background:
+                radial-gradient(ellipse at 70% 30%, rgba(200, 146, 42, 0.12), transparent 55%),
+                radial-gradient(ellipse at 20% 80%, rgba(64, 32, 100, 0.20), transparent 60%),
+                #050308;
+            color: #F5E8D0;
+            display: grid;
+            place-items: center;
+            min-height: 100%;
+            padding: 32px;
+        }
+        main { text-align: center; max-width: 520px; }
+        .code {
+            font-size: clamp(72px, 18vw, 140px);
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            margin: 0;
+            background: linear-gradient(135deg, #F0DFC0, #C8922A);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 500;
+            margin: 24px 0 12px;
+            letter-spacing: -0.01em;
+        }
+        p {
+            color: rgba(220, 205, 180, 0.75);
+            line-height: 1.6;
+            margin: 0 0 28px;
+        }
+        a {
+            display: inline-block;
+            padding: 10px 22px;
+            border-radius: 12px;
+            background: rgba(200, 146, 42, 0.18);
+            border: 1px solid rgba(200, 146, 42, 0.4);
+            color: #F0DFC0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+        }
+        a:hover {
+            background: rgba(200, 146, 42, 0.3);
+            border-color: rgba(200, 146, 42, 0.6);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <p class="code">404</p>
+        <h1>This page drifted past the event horizon.</h1>
+        <p>The link you followed doesn't exist here. Head back to the universe and keep focusing.</p>
+        <a href="/">Return home</a>
+    </main>
+</body>
+</html>

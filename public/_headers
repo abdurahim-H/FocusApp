@@ -1,0 +1,24 @@
+# Cloudflare Pages headers — security + caching
+# Reference: https://developers.cloudflare.com/pages/configuration/headers/
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Hashed assets are immutable — cache hard.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML is revalidated on every request so new deploys show up immediately.
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Sound files rarely change; cache aggressively.
+/sounds/*
+  Cache-Control: public, max-age=2592000

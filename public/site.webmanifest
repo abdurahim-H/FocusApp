@@ -1,0 +1,19 @@
+{
+  "name": "Cosmic Focus",
+  "short_name": "Cosmic Focus",
+  "description": "A Pomodoro timer set inside a real-time 3D black-hole universe.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#050308",
+  "theme_color": "#050308",
+  "icons": [
+    {
+      "src": "/assets/file_03.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
