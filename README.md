@@ -51,6 +51,16 @@ npm run lint:fix   # auto-fix what's fixable
 npm run format     # just format
 ```
 
+## Tests
+
+```bash
+npm run test:install   # one-time: download Chromium for Playwright (~150 MB)
+npm test               # run the smoke suite headless (~4 min)
+npm run test:ui        # open Playwright's UI runner for debugging
+```
+
+The smoke suite lives in `tests/smoke.spec.js` and exercises the real app against the Vite dev server — no mocks. It covers tab switching, the timer start/pause flow, tasks, stats, settings modal, help center, ambient sound browser, and the legal pages.
+
 ## Architecture
 
 ```
@@ -80,7 +90,13 @@ public/
 dist/            build output (gitignored)
 ```
 
-For the architectural contract future Claude Code sessions (and humans) should know about — shader time wrapping, FPS watchdog reversibility, settings schema pattern, CSS organization — see [**CLAUDE.md**](CLAUDE.md).
+## Documentation map
+
+- **[CLAUDE.md](CLAUDE.md)** — invariants and gotchas every contributor (human or AI) must honour
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** — deeper technical narrative: render loop, scene layers, settings schema, state model
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** — infrastructure runbook: Cloudflare Workers, R2, DNS, env vars, SSL, how to recover when prod breaks
+- **[SECURITY.md](SECURITY.md)** — how to report vulnerabilities, supported versions, CSP + data-handling policy
+- **[CHANGELOG.md](CHANGELOG.md)** — versioned release history
 
 ## Stack
 
@@ -89,6 +105,7 @@ For the architectural contract future Claude Code sessions (and humans) should k
 - **Hosting:** Cloudflare Workers with Static Assets
 - **File storage:** Cloudflare R2 (`cdn.universefocuses.com`) for audio
 - **Lint/format:** Biome 2
+- **Tests:** Playwright (smoke / e2e)
 - **Build target:** modern evergreen browsers (Chrome 80+, Firefox 75+, Safari 14+, Edge 80+)
 
 ## License
