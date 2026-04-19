@@ -51,24 +51,29 @@ export async function initApp() {
         const loadingScreen = document.getElementById('loadingScreen');
         const container = document.querySelector('.container');
 
-        // Start progress bar animation immediately
+        // The orbital progress arc is driven by a --progress custom property
+        // (0-100). CSS maps that to stroke-dashoffset. See style.css.
+        const setProgress = (pct) => {
+            if (loadingProgress) loadingProgress.style.setProperty('--progress', String(pct));
+        };
+
+        // Start progress animation immediately
         if (loadingProgress) {
             if (isReducedMotion()) {
                 loadingProgress.style.transition = 'none';
-                loadingProgress.style.width = '100%';
+                setProgress(100);
             } else {
-                loadingProgress.style.transition = 'width 0.3s ease';
-                loadingProgress.style.width = '20%';
+                setProgress(20);
             }
         }
 
-        // Initialize 3D scene — progress bar tracks actual initialization
+        // Initialize 3D scene — progress arc tracks actual initialization
         try {
             if (loadedModules.scene3d?.init3D) {
                 // Animate progress during init
                 if (loadingProgress && !isReducedMotion()) {
-                    setTimeout(() => { loadingProgress.style.width = '50%'; }, 200);
-                    setTimeout(() => { loadingProgress.style.width = '75%'; }, 600);
+                    setTimeout(() => setProgress(50), 200);
+                    setTimeout(() => setProgress(75), 600);
                 }
 
                 loadedModules.scene3d.init3D().then(success => {
@@ -76,10 +81,8 @@ export async function initApp() {
                         console.error('3D scene initialization returned false');
                     }
 
-                    // Scene is ready — complete the loading bar and hide screen
-                    if (loadingProgress) {
-                        loadingProgress.style.width = '100%';
-                    }
+                    // Scene is ready — complete the progress arc and hide screen
+                    setProgress(100);
                     if (container) {
                         container.classList.add('loaded');
                     }

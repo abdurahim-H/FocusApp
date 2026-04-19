@@ -74,11 +74,17 @@
     <script>window.__pageStart = performance.now(); console.log('⏱️ [0ms] Page body start');</script>
 
     <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-text">Initializing Universe...</div>
-        <div class="loading-bar">
-            <div class="loading-progress" id="loadingProgress"></div>
+    <div class="loading-screen" id="loadingScreen" role="status" aria-live="polite" aria-label="Loading Cosmic Focus">
+        <div class="loading-orbit">
+            <svg class="loading-orbit__ring" viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="loading-orbit__track" cx="60" cy="60" r="52" />
+                <circle class="loading-orbit__progress" id="loadingProgress" cx="60" cy="60" r="52" />
+            </svg>
+            <svg class="loading-orbit__star" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 0 C12 8, 16 12, 24 12 C16 12, 12 16, 12 24 C12 16, 8 12, 0 12 C8 12, 12 8, 12 0Z" />
+            </svg>
         </div>
+        <div class="loading-text">Cosmic Focus</div>
     </div>
 
     <!-- 3D Scene Container -->
