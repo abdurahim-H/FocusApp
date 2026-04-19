@@ -503,11 +503,15 @@
 .library-drawer.is-open { pointer-events: auto; }
 
 .library-drawer__scrim {
+    /* Drawer is not a full modal — keep the scene visible.
+       Cover only the area to the LEFT of the drawer panel so clicks
+       outside still close it, but nothing gets blurred. */
     position: absolute;
-    inset: 0;
-    background: rgba(4, 3, 2, 0.55);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: min(460px, 100%);
+    background: rgba(4, 3, 2, 0.18);
     opacity: 0;
     transition: opacity 0.35s var(--deck-ease);
 }
