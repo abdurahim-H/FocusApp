@@ -18,7 +18,3 @@
 
 /
   Cache-Control: public, max-age=0, must-revalidate
-
-# Sound files rarely change; cache aggressively.
-/sounds/*
-  Cache-Control: public, max-age=2592000
