@@ -10,6 +10,13 @@ export default defineConfig({
   // dev` to the Vite pipeline, and quiets wrangler's auto-detect/auto-setup
   // flow that was failing in CI because there was no plugins array.
   plugins: [cloudflare()],
+  // Strip noisy debug logging from production bundles. console.warn and
+  // console.error are kept because they surface real problems to the user
+  // / to error trackers. `vite dev` still shows everything.
+  esbuild: {
+    pure: ['console.log', 'console.debug', 'console.info'],
+    drop: ['debugger'],
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
