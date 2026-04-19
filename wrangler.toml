@@ -1,0 +1,10 @@
+# Cloudflare Workers — Static Assets config.
+# Tells `npx wrangler deploy` to serve the Vite build output as a static site.
+# https://developers.cloudflare.com/workers/static-assets/
+
+name = "focusapp"
+compatibility_date = "2026-04-19"
+
+[assets]
+directory = "./dist"
+not_found_handling = "404-page"
