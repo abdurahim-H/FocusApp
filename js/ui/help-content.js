@@ -20,7 +20,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How do I start my first focus session?',
-                a: 'Click <strong>Focus</strong> in the navigation bar, then click <strong>Start Focus</strong>. The timer begins counting down from your configured focus duration (default 25 minutes). When it hits zero, you automatically get a break.',
+                a: 'Click <strong>Focus</strong> in the navigation bar, then click <strong>Start Focus</strong>. The timer begins counting down from your configured focus duration (default 25 minutes). When it hits zero, you automatically get a break. Once a session is running, a compact mini timer also appears on the Home tab so you can track progress while checking the clock.',
             },
             {
                 q: 'Does my data save automatically?',
@@ -29,6 +29,14 @@ export const HELP_CATEGORIES = [
             {
                 q: 'Can I use this on my phone?',
                 a: 'The app works in mobile browsers but is designed primarily for desktop use. The 3D scene and keyboard shortcuts are optimized for larger screens.',
+            },
+            {
+                q: 'What is the 3D scene behind the UI?',
+                a: 'A real-time cinematic space scene — a tilted accretion disk around a black hole, a golden nebula, a parallax starfield, drifting cosmic motes, and shooting stars. It is fully animated and reacts to your mouse. Quality can be tuned or scaled down in <strong>Settings → Scene</strong>.',
+            },
+            {
+                q: 'Can I replay the welcome tour?',
+                a: 'Yes. Open <strong>Settings → Data & About → Replay welcome tour</strong>. The same 8-step walkthrough you saw on first visit will run again, highlighting the key parts of the UI one by one.',
             },
         ],
     },
@@ -68,6 +76,22 @@ export const HELP_CATEGORIES = [
             {
                 q: 'Do I get notifications when a session ends?',
                 a: 'Yes, if you grant notification permission. Go to <strong>Settings → Notifications</strong> to enable/disable alerts for focus complete, break complete, and full cycle complete. You can also set auto-close timing.',
+            },
+            {
+                q: 'What is the mini timer on the Home tab?',
+                a: 'A compact floating widget that appears on the Home tab as soon as a focus or break session is running or paused. It shows a live countdown, a circular progress ring, the current label (FOCUS / BREAK), and the session count (e.g. "1 / 4"). It also has its own Play/Pause and Skip buttons, so you can control the timer without leaving Home. Click the face to jump straight to the Focus tab.',
+            },
+            {
+                q: 'Can I drag the mini timer?',
+                a: 'Yes. Click and hold anywhere on the mini timer that isn\'t a button, then drag it to park it wherever you like on the Home screen. Its position is remembered for your session.',
+            },
+            {
+                q: 'What happens to my timer if I refresh the page?',
+                a: 'The current session is preserved through a normal refresh — the elapsed time, remaining time, session number, and running/paused state are all restored. Closing the tab entirely resets the cycle back to Session 1.',
+            },
+            {
+                q: 'What is the difference between "Long break every" and "Cycle goal"?',
+                a: '<strong>Long break every</strong> controls when the rhythm switches from short break to long break (default every 4 focus sessions). <strong>Cycle goal</strong> is the total number of focus sessions that make up one full cycle — it\'s the "1 of N" you see in the session counter. Set them independently in <strong>Settings → Timer → Flow</strong>.',
             },
         ],
     },
@@ -122,6 +146,33 @@ export const HELP_CATEGORIES = [
         ],
     },
     {
+        id: 'statistics',
+        label: 'Statistics',
+        iconSvg: '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+        entries: [
+            {
+                q: 'Where can I see my session statistics?',
+                a: 'The <strong>stats bar</strong> sits directly under the timer controls on the Focus tab. It shows four live chips: sessions today, total focus time, tasks done today, and current streak.',
+            },
+            {
+                q: 'What do each of the stats track?',
+                a: '<strong>Sessions</strong> — Focus sessions completed today; resets automatically at midnight.<br><strong>Total focus time</strong> — Lifetime focus time, formatted as hours/minutes/seconds.<br><strong>Tasks done</strong> — Tasks you checked off today; also resets at midnight.<br><strong>Streak</strong> — Consecutive calendar days with at least one completed focus session.',
+            },
+            {
+                q: 'How does the streak work?',
+                a: 'It counts every consecutive day that you finish at least one focus session. Miss a day and the streak resets to zero the next time you complete a session. Finishing a session on the same day keeps the streak intact.',
+            },
+            {
+                q: 'Can I export my statistics?',
+                a: 'Yes. Open <strong>Settings → Data & About → Stats (CSV)</strong>. You\'ll get a CSV file with columns for sessions today, total focus seconds, tasks completed today, current streak, and the last focus date — ready to import into a spreadsheet.',
+            },
+            {
+                q: 'Can I reset my statistics?',
+                a: 'Yes. Click the small <strong>⟳</strong> button at the end of the stats bar on the Focus tab. It asks for a confirmation, then zeroes out every stat. The <strong>Clear all data</strong> option in Settings also wipes stats (along with everything else).',
+            },
+        ],
+    },
+    {
         id: 'settings-presets',
         label: 'Settings & Presets',
         iconSvg: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>',
@@ -147,6 +198,10 @@ export const HELP_CATEGORIES = [
                 a: 'Resets only the settings in the section you\'re currently viewing back to defaults. Other sections stay untouched.',
             },
             {
+                q: 'What does "Reset all settings" do?',
+                a: 'Resets every section — Scene, Timer, Sounds, Notifications, Shortcuts, Motion, and Presets — back to their defaults in one step. It does <em>not</em> touch tasks or statistics.',
+            },
+            {
                 q: 'What does "Clear all data" do?',
                 a: 'The nuclear option. Wipes <strong>everything</strong>: settings, presets, statistics, tasks, and sounds. The page reloads completely fresh. Requires a double-confirmation to prevent accidents.',
             },
@@ -161,6 +216,34 @@ export const HELP_CATEGORIES = [
             {
                 q: 'How do I customize the greeting?',
                 a: 'Go to <strong>Settings → Data & About</strong> and find the <strong>Greeting</strong> text field. You can use <code>{{time}}</code> as a placeholder that becomes "morning", "afternoon", "evening", or "night" based on the current hour.',
+            },
+            {
+                q: 'What themes are available?',
+                a: 'Currently only the <strong>Black Hole</strong> theme — a tilted accretion disk, gravitational lensing, a photon ring, and a flowing golden nebula. Two more themes are marked "Coming soon" in <strong>Settings → Scene → Theme</strong>.',
+            },
+            {
+                q: 'What do the Advanced scene settings do?',
+                a: 'Open <strong>Settings → Scene → Advanced</strong> to fine-tune the look:<br><strong>Bloom</strong> — softness/intensity of glow around bright areas.<br><strong>Exposure</strong> — overall brightness of the scene.<br><strong>God rays</strong> — volumetric light beams from the black hole.<br><strong>Vignette</strong> — dark edge falloff around the viewport.<br><strong>Chromatic</strong> — subtle rainbow fringe at the edges (lens aberration).<br><strong>Film grain</strong> — animated noise texture over the image.<br><strong>Camera shake</strong> — strength of the cinematic camera drift.<br><strong>Star density</strong> — how many stars are spawned (applies on next load).<br><strong>Depth of field</strong> — optional focus blur (WebGL2 only).',
+            },
+            {
+                q: 'What does Depth of field do?',
+                a: 'Adds a cinematic focus blur — elements near the camera\'s focal distance stay sharp while things in front of or behind go soft. It\'s off by default because it can make the scene feel blurry if misconfigured, and it\'s disabled entirely on WebGPU due to texture-format compatibility.',
+            },
+            {
+                q: 'What is the Reduce motion setting?',
+                a: 'In <strong>Settings → Shortcuts → Motion</strong>. When on, the app dampens or skips the larger UI animations (tour fade-in, modal springs, timer ticks, etc.). It overrides the <code>prefers-reduced-motion</code> system setting so you can force it on even if your OS isn\'t set that way.',
+            },
+            {
+                q: 'What does the Animation speed slider do?',
+                a: 'A global multiplier from 0.5× to 2× on most UI animations — micro-transitions, hover pulses, tour intros, mini-timer reveals, etc. Slow it down if motion feels too busy, or speed it up if you find the defaults sluggish.',
+            },
+            {
+                q: 'What does the About section show?',
+                a: 'Under <strong>Settings → Data & About → About</strong> you\'ll see the app version, the detected GPU tier (used by the "Auto" quality preset), the active render engine (WebGL2 / WebGPU), a live FPS readout, and your browser. Useful when reporting an issue or verifying a performance tier.',
+            },
+            {
+                q: 'Do I need to be online to use Cosmic Focus?',
+                a: 'No. Once the page has loaded, the timer, tasks, settings, stats, and ambient sounds all run entirely in your browser. A connection is only needed for the initial page load and for re-fetching sound files the first time you use them.',
             },
         ],
     },
