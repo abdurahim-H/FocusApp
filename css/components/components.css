@@ -2921,6 +2921,12 @@
     box-shadow: 0 0 0 3px rgba(200, 146, 42, 0.5), 0 0 24px rgba(200, 146, 42, 0.3) !important;
     border-radius: 16px;
 }
+/* Preserve fixed positioning for already-pinned targets (e.g. the top-right
+   settings trigger) — otherwise `position: relative` above drops them into
+   document flow and they snap to the top-left of the body. */
+.settings-trigger.tour-highlight {
+    position: fixed;
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    HELP CENTER — Full-screen searchable overlay
