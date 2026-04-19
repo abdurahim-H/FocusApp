@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "A stunning 3D productivity application featuring physics-accurate black hole visualizations and immersive cosmic environments",
   "main": "index.html",
+  "type": "module",
   "scripts": {
-    "start": "python3 -m http.server 8000",
-    "serve": "npx serve .",
-    "dev": "python3 -m http.server 8000 --bind 127.0.0.1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "python3 -m http.server 8000"
   },
   "keywords": [
     "productivity",
@@ -39,8 +41,10 @@
     "not dead",
     "not ie 11"
   ],
-  "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "esbuild": "^0.28.0",
+    "vite": "^8.0.8"
+  },
   "files": [
     "index.html",
     "css/",

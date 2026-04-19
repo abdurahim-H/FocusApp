@@ -6,53 +6,35 @@
  */
 
 import { isReducedMotion } from '../core/motion.js';
+import * as scene3d from '../graphics/scene/scene-manager.js';
+import * as timer from '../features/timer.js';
+import * as tasks from '../features/tasks.js';
+import * as sounds from '../features/sounds.js';
+import * as navigation from '../ui/navigation.js';
+import * as uiEffects from '../ui/ui-effects.js';
+import * as cleanup from '../utils/cleanup.js';
+import * as buttonFeel from '../ui/button-feel.js';
+import * as keyboard from '../features/keyboard.js';
+import * as statistics from '../features/statistics.js';
+import * as notificationBanner from '../features/notification-banner.js';
+import * as settings from '../ui/settings.js';
+import * as soundMixer from '../features/sound-mixer.js';
+import * as timerParticles from '../ui/timer-particles.js';
+import * as helpCenter from '../ui/help-center.js';
+import * as homeMiniTimer from '../ui/home-mini-timer.js';
 
-let modules = {};
-
-/**
- * Dynamically loads all application modules
- * @returns {Object} Loaded modules object
- */
-async function loadModules() {
-    // Bare paths only — adding ?v= query strings here causes module duplication
-    // because static imports inside these files use bare paths, and ES modules
-    // are keyed by URL. Hard refresh (Cmd+Shift+R) handles cache freshness.
-    const moduleList = [
-        { name: 'scene3d', path: '../graphics/scene/scene-manager.js' },
-        { name: 'timer', path: '../features/timer.js' },
-        { name: 'tasks', path: '../features/tasks.js' },
-        { name: 'sounds', path: '../features/sounds.js' },
-        { name: 'navigation', path: '../ui/navigation.js' },
-        { name: 'uiEffects', path: '../ui/ui-effects.js' },
-        { name: 'cleanup', path: '../utils/cleanup.js' },
-        { name: 'buttonFeel', path: '../ui/button-feel.js' },
-        { name: 'keyboard', path: '../features/keyboard.js' },
-        { name: 'statistics', path: '../features/statistics.js' },
-        { name: 'notificationBanner', path: '../features/notification-banner.js' },
-        { name: 'settings', path: '../ui/settings.js' },
-        { name: 'soundMixer', path: '../features/sound-mixer.js' },
-        { name: 'timerParticles', path: '../ui/timer-particles.js' },
-        { name: 'helpCenter', path: '../ui/help-center.js' },
-        { name: 'homeMiniTimer', path: '../ui/home-mini-timer.js' }
-    ];
-
-    for (const module of moduleList) {
-        try {
-            modules[module.name] = await import(module.path);
-        } catch (error) {
-            console.error(`✗ Failed to load module ${module.name}:`, error);
-        }
-    }
-
-    return modules;
-}
+const modules = {
+    scene3d, timer, tasks, sounds, navigation, uiEffects, cleanup,
+    buttonFeel, keyboard, statistics, notificationBanner, settings,
+    soundMixer, timerParticles, helpCenter, homeMiniTimer,
+};
 
 /**
  * Initialize the application
  * Sets up all modules and core functionality
  */
 export async function initApp() {
-    const loadedModules = await loadModules();
+    const loadedModules = modules;
 
     // Initialize cleanup system first
     if (loadedModules.cleanup?.initCleanupSystem) {
