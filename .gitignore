@@ -87,3 +87,9 @@ _archive/
 
 # Wrangler local state (from @cloudflare/vite-plugin dev server)
 .wrangler/
+
+# Playwright artifacts
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
