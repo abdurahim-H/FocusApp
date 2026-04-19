@@ -1,0 +1,76 @@
+/* ===== PRESET CARDS — Phase 5D ===== */
+.preset-section {
+    padding: 0 var(--space-6);
+    margin-bottom: var(--space-4);
+}
+
+.preset-grid {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.preset-card {
+    flex: 1 1 0;
+    min-width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-2);
+    border-radius: 16px;
+    border: 1px solid rgba(200, 146, 42, 0.15);
+    background: rgba(200, 146, 42, 0.04);
+    color: rgba(240, 223, 192, 0.8);
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.preset-card:hover {
+    background: rgba(200, 146, 42, 0.12);
+    border-color: rgba(200, 146, 42, 0.4);
+    box-shadow: 0 4px 20px rgba(200, 146, 42, 0.15);
+}
+
+.preset-card.active {
+    background: rgba(200, 146, 42, 0.18);
+    border-color: rgba(200, 146, 42, 0.55);
+    box-shadow: 0 4px 24px rgba(200, 146, 42, 0.25);
+}
+
+.preset-icons {
+    font-size: var(--text-md);
+    line-height: 1;
+}
+
+.preset-name {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    text-align: center;
+}
+
+/* Per-sound volume slider in active-sound chips */
+.chip-volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 60px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(200, 146, 42, 0.2);
+    outline: none;
+    cursor: pointer;
+    margin: 0 var(--space-1);
+}
+
+.chip-volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(200, 146, 42, 0.8);
+    border: 1.5px solid rgba(255, 226, 168, 0.5);
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(200, 146, 42, 0.4);
+}
+

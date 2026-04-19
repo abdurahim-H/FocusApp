@@ -1,0 +1,57 @@
+/* ===== NOTIFICATION BANNER — Phase 5E ===== */
+.notification-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    margin-bottom: var(--space-3);
+    background: rgba(200, 146, 42, 0.06);
+    border: 1px solid rgba(200, 146, 42, 0.15);
+    border-radius: 16px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.notification-banner.hidden {
+    display: none;
+}
+
+.banner-text {
+    font-size: var(--text-sm);
+    color: rgba(240, 223, 192, 0.8);
+    letter-spacing: var(--tracking-normal);
+}
+
+.banner-btn {
+    background: transparent;
+    border: 1px solid rgba(200, 146, 42, 0.25);
+    border-radius: 12px;
+    padding: var(--space-1) var(--space-3);
+    color: #F0DFC0;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.banner-btn.banner-enable {
+    background: rgba(200, 146, 42, 0.12);
+    border-color: rgba(200, 146, 42, 0.4);
+}
+
+.banner-btn:hover {
+    background: rgba(200, 146, 42, 0.18);
+    border-color: rgba(200, 146, 42, 0.5);
+}
+
+.banner-btn.banner-dismiss {
+    color: rgba(192, 170, 130, 0.55);
+    border-color: rgba(200, 146, 42, 0.1);
+}
+
+.banner-btn.banner-dismiss:hover {
+    color: rgba(192, 170, 130, 0.8);
+}
+

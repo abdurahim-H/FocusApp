@@ -1,0 +1,118 @@
+/* ===== ONBOARDING TOUR — T3.5 ===== */
+.tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+}
+.tour-overlay.is-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.tour-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+.tour-card {
+    position: relative;
+    z-index: 1;
+    width: 90vw;
+    max-width: 380px;
+    background: rgba(18, 16, 10, 0.96);
+    border: 1px solid rgba(200, 146, 42, 0.25);
+    border-radius: 20px;
+    padding: 28px 24px 20px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 4px 20px rgba(200, 146, 42, 0.12),
+        inset 0 1px 0 rgba(255, 226, 168, 0.1);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    transform: translateY(12px) scale(0.97);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.35s ease;
+}
+.tour-overlay.is-active .tour-card {
+    transform: translateY(0) scale(1);
+}
+.tour-card__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #F5E8D0;
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+}
+.tour-card__body {
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(220, 205, 180, 0.8);
+    margin-bottom: 20px;
+}
+.tour-card__body kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(200, 146, 42, 0.15);
+    border: 1px solid rgba(200, 146, 42, 0.3);
+    color: #F0DFC0;
+    font-size: 11px;
+    font-family: inherit;
+}
+.tour-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.tour-card__step {
+    font-size: 11px;
+    color: rgba(192, 170, 130, 0.5);
+    font-variant-numeric: tabular-nums;
+}
+.tour-card__actions {
+    display: flex;
+    gap: 8px;
+}
+.tour-btn {
+    padding: 6px 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    background: transparent;
+    color: rgba(192, 170, 130, 0.6);
+}
+.tour-btn--skip:hover {
+    color: rgba(192, 170, 130, 0.9);
+}
+.tour-btn--next {
+    background: rgba(200, 146, 42, 0.18);
+    border-color: rgba(200, 146, 42, 0.4);
+    color: #F0DFC0;
+}
+.tour-btn--next:hover {
+    background: rgba(200, 146, 42, 0.3);
+    border-color: rgba(200, 146, 42, 0.6);
+}
+/* Highlight ring on targeted elements during tour */
+.tour-highlight {
+    position: relative;
+    z-index: 10001;
+    box-shadow: 0 0 0 3px rgba(200, 146, 42, 0.5), 0 0 24px rgba(200, 146, 42, 0.3) !important;
+    border-radius: 16px;
+}
+/* Preserve fixed positioning for already-pinned targets (e.g. the top-right
+   settings trigger) — otherwise `position: relative` above drops them into
+   document flow and they snap to the top-left of the body. */
+.settings-trigger.tour-highlight {
+    position: fixed;
+}
+

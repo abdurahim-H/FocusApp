@@ -1,0 +1,67 @@
+/* components.css */
+
+/**
+ * Cosmic Focus - UI Components
+ * Navigation, buttons, modals, forms, and interactive elements
+ */
+
+/* Navigation Components - All styling handled in apple-liquid-glass.css and responsive.css */
+
+/* Content Mode Layouts */
+.home-content {
+    position: relative;
+    z-index: 20;
+    text-align: center;
+}
+
+#home {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 600px;
+    width: 100%;
+}
+
+.home-content h1 {
+    font-size: clamp(2.5em, 8vw, 5em);
+    font-weight: 500;
+    color: #F5E8D0;
+    -webkit-text-fill-color: #F5E8D0;
+    margin-bottom: var(--space-5);
+    line-height: 1.05;
+    /* Phase 3: tighter tracking on display text reads more confident */
+    letter-spacing: var(--tracking-tighter);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5),
+                 0 0 30px rgba(240, 200, 140, 0.25),
+                 0 0 60px rgba(240, 200, 140, 0.1);
+    filter: none;
+    animation: none;
+}
+
+.greeting {
+    font-size: var(--text-md);
+    font-weight: 400;
+    color: #D0C8BC;
+    -webkit-text-fill-color: #D0C8BC;
+    margin-bottom: var(--space-8);
+    letter-spacing: var(--tracking-normal);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    filter: none;
+    animation: none;
+}
+
+.date-time {
+    font-size: var(--text-sm);
+    color: #C0B8AC;
+    -webkit-text-fill-color: #C0B8AC;
+    margin-bottom: var(--space-10);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    font-weight: 400;
+    /* Slightly looser tracking on small body text aids legibility */
+    letter-spacing: var(--tracking-wide);
+    /* Tabular numerals for the date+time row so it doesn't jitter as
+       the minute changes */
+    font-variant-numeric: tabular-nums;
+}
+

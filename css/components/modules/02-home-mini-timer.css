@@ -1,0 +1,500 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOME MINI TIMER — Luxury watch complication in the bottom-right
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.home-mini-timer {
+    position: fixed;
+    bottom: 80px;
+    right: 60px;
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px 18px 18px;
+    border-radius: 26px;
+    cursor: grab;
+
+    /* Transparent glass — nearly invisible */
+    background: rgba(8, 6, 3, 0.05);
+    border: 1px solid rgba(200, 146, 42, 0.03);
+    box-shadow: none;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    /* Only transition visual properties — never position (top/left/bottom/right)
+       to prevent the jump when switching coordinate systems during drag */
+    transform-origin: bottom right;
+    transition: background 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.home-mini-timer.hidden {
+    display: none !important;
+}
+
+.home-mini-timer.is-entering {
+    animation: hmtEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.home-mini-timer.is-leaving {
+    animation: hmtLeave 0.35s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes hmtEnter {
+    from { opacity: 0; transform: scale(0.88) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes hmtLeave {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to   { opacity: 0; transform: scale(0.92) translateY(6px); }
+}
+
+/* Hover — glass brightens slightly, border warms */
+.home-mini-timer:hover {
+    background: rgba(10, 8, 4, 0.1);
+    border-color: rgba(200, 146, 42, 0.08);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+.home-mini-timer:active {
+    cursor: grabbing;
+}
+.home-mini-timer.is-dragging {
+    cursor: grabbing;
+    transition: none !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Analog Clock ── */
+.hmt-clock {
+    width: 62px;
+    height: 62px;
+    flex-shrink: 0;
+}
+.hmt-clock__face {
+    fill: rgba(0, 0, 0, 0.15);
+    stroke: rgba(200, 146, 42, 0.2);
+    stroke-width: 1;
+}
+.hmt-clock__markers line {
+    stroke: rgba(200, 146, 42, 0.35);
+    stroke-width: 1;
+    stroke-linecap: round;
+}
+/* Cardinal markers (12, 3, 6, 9) slightly brighter */
+.hmt-clock__markers line:nth-child(3n+1) {
+    stroke: rgba(200, 146, 42, 0.55);
+    stroke-width: 1.4;
+}
+/* Progress arc — sweeps as timer counts down */
+.hmt-clock__progress {
+    fill: none;
+    stroke: rgba(200, 146, 42, 0.2);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 144.51;  /* 2 * PI * 23 */
+    stroke-dashoffset: 144.51;
+    transform: rotate(-90deg);
+    transform-origin: 30px 30px;
+    transition: stroke-dashoffset 1s linear;
+}
+/* Minute hand */
+.hmt-clock__hand--min {
+    stroke: rgba(245, 232, 208, 0.85);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    transform-origin: 30px 30px;
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 0 3px rgba(200, 146, 42, 0.3));
+}
+/* Second hand */
+.hmt-clock__hand--sec {
+    stroke: rgba(200, 146, 42, 0.7);
+    stroke-width: 0.8;
+    stroke-linecap: round;
+    transform-origin: 30px 30px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Center dot */
+.hmt-clock__center {
+    fill: rgba(200, 146, 42, 0.8);
+    filter: drop-shadow(0 0 2px rgba(200, 146, 42, 0.4));
+}
+
+/* ── Focus mode (default) — warm gold ── */
+.home-mini-timer.is-running .hmt-clock__hand--sec {
+    stroke: rgba(200, 146, 42, 0.85);
+    filter: drop-shadow(0 0 3px rgba(200, 146, 42, 0.4));
+}
+.home-mini-timer.is-running .hmt-clock__progress {
+    stroke: rgba(200, 146, 42, 0.35);
+    filter: drop-shadow(0 0 4px rgba(200, 146, 42, 0.2));
+}
+
+/* ── Short break — cool teal ── */
+.home-mini-timer.is-break .hmt-clock__face {
+    stroke: rgba(100, 180, 160, 0.2);
+}
+.home-mini-timer.is-break .hmt-clock__markers line {
+    stroke: rgba(100, 180, 160, 0.3);
+}
+.home-mini-timer.is-break .hmt-clock__markers line:nth-child(3n+1) {
+    stroke: rgba(100, 180, 160, 0.5);
+}
+.home-mini-timer.is-break .hmt-clock__progress {
+    stroke: rgba(100, 180, 160, 0.25);
+}
+.home-mini-timer.is-break .hmt-clock__hand--min {
+    filter: drop-shadow(0 0 3px rgba(100, 180, 160, 0.3));
+}
+.home-mini-timer.is-break .hmt-clock__hand--sec {
+    stroke: rgba(100, 180, 160, 0.7);
+}
+.home-mini-timer.is-break .hmt-clock__center {
+    fill: rgba(100, 180, 160, 0.8);
+    filter: drop-shadow(0 0 2px rgba(100, 180, 160, 0.4));
+}
+.home-mini-timer.is-break.is-running .hmt-clock__hand--sec {
+    stroke: rgba(100, 180, 160, 0.85);
+    filter: drop-shadow(0 0 3px rgba(100, 180, 160, 0.4));
+}
+.home-mini-timer.is-break.is-running .hmt-clock__progress {
+    stroke: rgba(100, 180, 160, 0.35);
+    filter: drop-shadow(0 0 4px rgba(100, 180, 160, 0.2));
+}
+
+/* ── Long break — soft lavender ── */
+.home-mini-timer.is-long-break .hmt-clock__face {
+    stroke: rgba(140, 120, 200, 0.2);
+}
+.home-mini-timer.is-long-break .hmt-clock__markers line {
+    stroke: rgba(140, 120, 200, 0.3);
+}
+.home-mini-timer.is-long-break .hmt-clock__markers line:nth-child(3n+1) {
+    stroke: rgba(140, 120, 200, 0.5);
+}
+.home-mini-timer.is-long-break .hmt-clock__progress {
+    stroke: rgba(140, 120, 200, 0.25);
+}
+.home-mini-timer.is-long-break .hmt-clock__hand--min {
+    filter: drop-shadow(0 0 3px rgba(140, 120, 200, 0.3));
+}
+.home-mini-timer.is-long-break .hmt-clock__hand--sec {
+    stroke: rgba(140, 120, 200, 0.7);
+}
+.home-mini-timer.is-long-break .hmt-clock__center {
+    fill: rgba(140, 120, 200, 0.8);
+    filter: drop-shadow(0 0 2px rgba(140, 120, 200, 0.4));
+}
+.home-mini-timer.is-long-break.is-running .hmt-clock__hand--sec {
+    stroke: rgba(140, 120, 200, 0.85);
+    filter: drop-shadow(0 0 3px rgba(140, 120, 200, 0.4));
+}
+.home-mini-timer.is-long-break.is-running .hmt-clock__progress {
+    stroke: rgba(140, 120, 200, 0.35);
+    filter: drop-shadow(0 0 4px rgba(140, 120, 200, 0.2));
+}
+
+/* ── Text Content ── */
+.hmt-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    min-width: 70px;
+}
+
+.hmt-label {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(200, 160, 100, 0.5);
+    line-height: 1;
+}
+.home-mini-timer.is-break .hmt-label {
+    color: rgba(100, 180, 160, 0.5);
+}
+.home-mini-timer.is-long-break .hmt-label {
+    color: rgba(140, 120, 200, 0.5);
+}
+
+.hmt-time {
+    font-size: 32px;
+    font-weight: 200;
+    color: rgba(245, 232, 208, 0.95);
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums slashed-zero;
+    font-feature-settings: 'tnum', 'zero';
+    line-height: 1.1;
+    text-shadow:
+        0 1px 4px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(240, 200, 140, 0.2),
+        0 0 40px rgba(240, 200, 140, 0.08);
+}
+/* Breathing glow on the time digits when running */
+.home-mini-timer.is-running .hmt-time {
+    animation: hmtTimeGlow 5s ease-in-out infinite;
+}
+@keyframes hmtTimeGlow {
+    0%, 100% {
+        text-shadow:
+            0 1px 4px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(240, 200, 140, 0.2),
+            0 0 40px rgba(240, 200, 140, 0.08);
+    }
+    50% {
+        text-shadow:
+            0 1px 4px rgba(0, 0, 0, 0.4),
+            0 0 28px rgba(240, 200, 140, 0.3),
+            0 0 50px rgba(240, 200, 140, 0.12);
+    }
+}
+/* Paused: slightly dimmed, no glow animation */
+.home-mini-timer.is-paused .hmt-time {
+    color: rgba(245, 232, 208, 0.55);
+    text-shadow:
+        0 1px 4px rgba(0, 0, 0, 0.3),
+        0 0 10px rgba(240, 200, 140, 0.08);
+    animation: hmtTimePauseBlink 2.5s ease-in-out infinite;
+}
+@keyframes hmtTimePauseBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.hmt-session {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(200, 160, 100, 0.35);
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+/* ── Controls (play/pause + skip + reset) ── */
+.hmt-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-left: 4px;
+}
+.hmt-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(200, 160, 100, 0.45);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    padding: 0;
+}
+.hmt-btn:hover {
+    background: rgba(200, 146, 42, 0.12);
+    border-color: rgba(200, 146, 42, 0.25);
+    color: rgba(255, 220, 140, 0.9);
+}
+.hmt-btn:active {
+    transform: scale(0.88);
+    transition-duration: 0.08s;
+}
+/* Skip button — slightly brighter to suggest primary action */
+.hmt-btn--skip:hover {
+    box-shadow: 0 0 12px rgba(200, 146, 42, 0.1);
+}
+/* Reset button — red tint on hover */
+.hmt-btn--reset:hover {
+    background: rgba(255, 69, 58, 0.1);
+    border-color: rgba(255, 69, 58, 0.2);
+    color: rgba(255, 120, 100, 0.9);
+}
+/* Break mode: skip button gets teal tint */
+.home-mini-timer.is-break .hmt-btn--skip:hover {
+    background: rgba(100, 180, 160, 0.12);
+    border-color: rgba(100, 180, 160, 0.25);
+    color: rgba(160, 220, 200, 0.9);
+    box-shadow: 0 0 12px rgba(100, 180, 160, 0.1);
+}
+
+/* Play/pause — slightly more prominent */
+.hmt-btn--play-pause {
+    background: rgba(200, 146, 42, 0.08);
+    color: rgba(200, 160, 100, 0.6);
+}
+.hmt-btn--play-pause:hover {
+    background: rgba(200, 146, 42, 0.18);
+    color: rgba(255, 220, 140, 1);
+    box-shadow: 0 0 14px rgba(200, 146, 42, 0.12);
+}
+.home-mini-timer.is-break .hmt-btn--play-pause:hover {
+    background: rgba(100, 180, 160, 0.15);
+    color: rgba(160, 220, 200, 1);
+    box-shadow: 0 0 14px rgba(100, 180, 160, 0.1);
+}
+
+/* ── Resize handle (bottom-right corner) ── */
+.hmt-resize {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: nwse-resize;
+    color: rgba(200, 160, 100, 0.12);
+    transition: color 0.2s ease;
+    border-radius: 0 0 6px 0;
+    touch-action: none;
+}
+.home-mini-timer:hover .hmt-resize {
+    color: rgba(200, 160, 100, 0.35);
+}
+.hmt-resize:hover {
+    color: rgba(200, 160, 100, 0.55) !important;
+}
+.home-mini-timer.is-resizing {
+    transition: none !important;
+}
+/* Ensure transform-origin is bottom-right for natural resize feel */
+.home-mini-timer {
+    transform-origin: bottom right;
+}
+
+/* Focus-visible */
+.hmt-btn:focus-visible {
+    outline: 2px solid rgba(200, 146, 42, 0.65);
+    outline-offset: 2px;
+}
+.hmt-btn:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ── Pulse ring (ambient glow behind the widget when running) ── */
+.hmt-pulse {
+    position: absolute;
+    inset: -6px;
+    border-radius: 28px;
+    opacity: 0;
+    pointer-events: none;
+    border: 1px solid rgba(200, 146, 42, 0.08);
+}
+.home-mini-timer.is-running .hmt-pulse {
+    animation: hmtPulseRing 3s ease-in-out infinite;
+}
+@keyframes hmtPulseRing {
+    0%   { opacity: 0; transform: scale(1); }
+    50%  { opacity: 1; transform: scale(1.02); }
+    100% { opacity: 0; transform: scale(1.06); }
+}
+.home-mini-timer.is-break.is-running .hmt-pulse {
+    border-color: rgba(100, 180, 160, 0.06);
+}
+.home-mini-timer.is-long-break.is-running .hmt-pulse {
+    border-color: rgba(140, 120, 200, 0.06);
+}
+
+/* ── Paused label overlay ── */
+.home-mini-timer.is-paused .hmt-label::after {
+    content: ' · PAUSED';
+    color: rgba(255, 200, 100, 0.4);
+    letter-spacing: 0.15em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+    .home-mini-timer {
+        bottom: 14px;
+        right: 14px;
+        padding: 10px 14px 10px 12px;
+        gap: 10px;
+        border-radius: 18px;
+    }
+    .hmt-clock { width: 40px; height: 40px; }
+    .hmt-time { font-size: 22px; }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .home-mini-timer.is-entering { animation: none; opacity: 1; }
+    .home-mini-timer.is-leaving { animation: none; }
+    .home-mini-timer.is-running .hmt-clock__hand--sec { transition: none; }
+    .home-mini-timer.is-running .hmt-time { animation: none; }
+    .home-mini-timer.is-running .hmt-pulse { animation: none; display: none; }
+    .home-mini-timer.is-paused .hmt-time { animation: none; opacity: 0.6; }
+}
+
+/* Focus Mode Components */
+.focus-content {
+    padding: 10px 20px;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    position: relative;
+    z-index: 20;
+}
+
+/* Focus mode — positioned slightly below center, out of flex flow */
+#focus {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 500px;
+    width: 100%;
+}
+
+.timer-display {
+    font-size: clamp(3.5em, 10vw, 5.5em);
+    font-weight: 200;
+    color: rgba(255, 255, 255, 0.97);
+    letter-spacing: var(--tracking-tighter);
+    /* Phase 3: tabular figures so the digits don't jitter as seconds tick.
+       Combined with slashed-zero (zero) for clearer 0 vs O distinction. */
+    font-variant-numeric: tabular-nums slashed-zero;
+    font-feature-settings: 'tnum', 'zero';
+    margin-bottom: var(--space-4);
+    text-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(240, 200, 140, 0.3),
+        0 0 60px rgba(240, 200, 140, 0.1);
+    animation: timerGlow 6s ease-in-out infinite;
+    position: relative;
+    z-index: 21;
+}
+
+@keyframes timerGlow {
+    0%, 100% {
+        text-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.5),
+            0 0 30px rgba(240, 200, 140, 0.3),
+            0 0 60px rgba(240, 200, 140, 0.1);
+    }
+    50% {
+        text-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.5),
+            0 0 40px rgba(240, 200, 140, 0.4),
+            0 0 80px rgba(240, 200, 140, 0.15);
+    }
+}
+
+.timer-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 22;
+    align-items: center;
+}
+

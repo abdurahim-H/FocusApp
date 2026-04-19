@@ -1,0 +1,44 @@
+/* ===== SETTINGS STAR — Phase 5C ===== */
+/* --glow: 0..1 is set by JS based on mouse proximity. */
+.settings-trigger {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 2002;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    /* Warm white — resting at 0.38 alpha, climbs to 1.0 with proximity glow */
+    color: rgba(245, 240, 230, calc(0.38 + var(--glow, 0) * 0.62));
+    cursor: pointer;
+    transition: color 0.15s ease;
+    --glow: 0;
+}
+
+/* The star SVG — warm white glow that intensifies on proximity */
+.settings-star {
+    filter: drop-shadow(0 0 calc(2px + var(--glow, 0) * 16px) rgba(255, 248, 235, calc(0.15 + var(--glow, 0) * 0.6)));
+    transition: filter 0.1s ease, transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: filter, transform;
+}
+
+/* Click press */
+.settings-trigger:active .settings-star {
+    transform: scale(0.82);
+}
+
+/* When settings modal is open — spin continuously */
+.settings-trigger.open .settings-star {
+    animation: starSpin 4s linear infinite;
+}
+
+@keyframes starSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+

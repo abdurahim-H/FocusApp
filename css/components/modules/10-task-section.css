@@ -1,0 +1,286 @@
+/* ===== TASK SECTION — near-invisible, minimal ===== */
+
+/* Gold task input */
+.task-input {
+    background: rgba(200, 146, 42, 0.03) !important;
+    border: 1px solid rgba(200, 146, 42, 0.1) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 12px 0 0 12px !important;
+    backdrop-filter: blur(20px) !important;
+    font-size: 14px !important;
+    padding: 10px 16px !important;
+    box-shadow: none !important;
+    min-height: 40px !important;
+}
+
+.task-input:focus {
+    background: rgba(200, 146, 42, 0.06) !important;
+    border-color: rgba(200, 146, 42, 0.32) !important;
+    outline: none !important;
+    /* Phase 4: breathing focus ring — soft gold halo that pulses ~2.4s.
+       The animation cycles box-shadow alpha + spread for a living feel. */
+    animation: inputBreathe 2.4s ease-in-out infinite;
+}
+
+@keyframes inputBreathe {
+    0%, 100% {
+        box-shadow:
+            0 0 0 2px rgba(200, 146, 42, 0.12),
+            0 0 12px rgba(200, 146, 42, 0.08);
+    }
+    50% {
+        box-shadow:
+            0 0 0 3px rgba(200, 146, 42, 0.22),
+            0 0 24px rgba(200, 146, 42, 0.18);
+    }
+}
+
+.task-input::placeholder {
+    color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Task Add button — connected to input */
+.task-input-group .liquid-glass-btn {
+    background: rgba(200, 146, 42, 0.06) !important;
+    border: 1px solid rgba(200, 146, 42, 0.15) !important;
+    border-left: none !important;
+    color: #F0DFC0 !important;
+    border-radius: 0 12px 12px 0 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    min-height: 40px !important;
+    min-width: 60px !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+.task-input-group .liquid-glass-btn::before,
+.task-input-group .liquid-glass-btn::after {
+    display: none !important;
+}
+
+.task-input-group .liquid-glass-btn:hover {
+    background: rgba(200, 146, 42, 0.1) !important;
+    border-color: rgba(200, 146, 42, 0.25) !important;
+    transform: none !important;
+}
+
+@keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.2); opacity: 1; }
+}
+
+.ambient-text {
+    font-size: 1.2em;
+    opacity: 0.8;
+    text-align: center;
+}
+
+/* Reset Session Button */
+.reset-session-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    color: var(--text-primary);
+    box-shadow: 0 4px 15px var(--shadow);
+    min-width: 50px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.reset-session-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.reset-session-btn:active {
+    transform: translateY(-1px) scale(0.95);
+    box-shadow: 0 2px 10px var(--shadow);
+}
+
+/* Reset button click animation */
+.reset-session-btn.clicked {
+    animation: resetClickEffect 0.6s ease-out;
+}
+
+@keyframes resetClickEffect {
+    0% {
+        transform: translateY(-2px) scale(1);
+        box-shadow: 0 6px 20px var(--shadow);
+    }
+    15% {
+        transform: translateY(-1px) scale(0.9);
+        box-shadow: 0 2px 10px var(--shadow);
+    }
+    30% {
+        transform: translateY(-2px) scale(1.1);
+        box-shadow: 0 8px 25px rgba(6, 214, 160, 0.4);
+        border-color: var(--accent);
+    }
+    60% {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(6, 214, 160, 0.3);
+    }
+    100% {
+        transform: translateY(-2px) scale(1);
+        box-shadow: 0 6px 20px var(--shadow);
+        border-color: var(--border-glass);
+    }
+}
+
+/* Responsive adjustments for reset session button */
+@media (max-width: 768px) {
+    .timer-controls {
+        gap: 10px;
+    }
+    
+    .reset-session-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1em;
+    }
+}
+
+@media (max-width: 480px) {
+    .timer-controls {
+        gap: 8px;
+    }
+    
+    .reset-session-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1em;
+    }
+}
+
+/* Progress Indicator */
+.progress-3d {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 15px;
+    padding: 15px 20px;
+    box-shadow: 0 8px 32px var(--shadow);
+    z-index: 1000;
+}
+
+.progress-label {
+    font-size: 0.9em;
+    opacity: 0.7;
+    margin-right: 10px;
+}
+
+.progress-value {
+    font-weight: 600;
+    color: var(--accent);
+}
+
+/* Session Info — gold hierarchy */
+.session-info {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.session-type {
+    color: #F5E8D0;
+    font-weight: 500;
+    font-size: var(--text-md);
+    /* Phase 3: small caps style — looser tracking on shorter labels */
+    letter-spacing: var(--tracking-wide);
+    margin-bottom: var(--space-1);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6),
+                 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.session-progress {
+    font-size: var(--text-sm);
+    color: #D0C8BC;
+    /* Tabular numerals so "Session 1 of 4" doesn't jitter */
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-wide);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Hidden elements */
+.hidden {
+    display: none !important;
+}
+
+/* Hidden Elements */
+.hidden {
+    display: none !important;
+}
+
+/* Prevent 3D bleed-through */
+.glass-card,
+.focus-content,
+.task-section {
+    isolation: isolate;
+}
+
+/* Ambient Sound Button Active States - NOT nav buttons */
+.btn.active:not(.nav-btn),
+.liquid-glass-btn.active:not(.nav-btn) {
+    background: rgba(176, 224, 230, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 
+        0 6px 20px rgba(255, 255, 255, 0.12),
+        0 2px 8px rgba(176, 224, 230, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 1) !important;
+    font-weight: 400 !important;
+    text-shadow: 0 0 10px rgba(176, 224, 230, 0.4) !important;
+}
+
+.btn.active:hover:not(.nav-btn),
+.liquid-glass-btn.active:hover:not(.nav-btn) {
+    background: rgba(176, 224, 230, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 
+        0 8px 30px rgba(255, 255, 255, 0.15),
+        0 3px 12px rgba(176, 224, 230, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    text-shadow: 0 0 12px rgba(176, 224, 230, 0.5) !important;
+}
+
+.btn.active::after:not(.nav-btn),
+.liquid-glass-btn.active::after:not(.nav-btn) {
+    content: '●';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.6em;
+    color: rgba(176, 224, 230, 0.9);
+    line-height: 1;
+    pointer-events: none;
+    text-shadow: 0 0 5px rgba(176, 224, 230, 0.8);
+    animation: activePulse 2s ease-in-out infinite;
+}
+
+@keyframes activePulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Navigation button active states handled exclusively in responsive.css */
+
