@@ -24,10 +24,10 @@ const SOUND_CDN = 'https://cdn.universefocuses.com';
 // Real sounds served from R2. More "coming soon" slots are advertised in the
 // library UI so users know the catalog is growing.
 export const SOUND_LIBRARY = {
-    rain:   { name: 'Rain',   icon: '🌧️', category: 'Nature', url: `${SOUND_CDN}/rain_00.wav` },
-    ocean:  { name: 'Ocean',  icon: '🌊', category: 'Nature', url: `${SOUND_CDN}/ocean_04.wav` },
-    forest: { name: 'Forest', icon: '🌲', category: 'Nature', url: `${SOUND_CDN}/forest_00.wav` },
-    cafe:   { name: 'Café',   icon: '☕', category: 'Indoor', url: `${SOUND_CDN}/crowd_0.wav` },
+    rain:   { name: 'Rain',   icon: '🌧️', category: 'Nature', url: `${SOUND_CDN}/rain_00.ogg` },
+    ocean:  { name: 'Ocean',  icon: '🌊', category: 'Nature', url: `${SOUND_CDN}/ocean_04.ogg` },
+    forest: { name: 'Forest', icon: '🌲', category: 'Nature', url: `${SOUND_CDN}/forest_00.ogg` },
+    cafe:   { name: 'Café',   icon: '☕', category: 'Indoor', url: `${SOUND_CDN}/crowd_0.ogg` },
 };
 
 // Defaults for a brand-new track entry.
