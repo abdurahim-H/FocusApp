@@ -324,6 +324,15 @@ export const SCHEMA = [
     { section: 'data', type: 'group', label: 'Help' },
     { section: 'data', type: 'button', id: 'show-tour', label: 'Replay welcome tour' },
 
+    { section: 'data', type: 'group', label: 'Feedback' },
+    {
+        section: 'data', type: 'button-row',
+        items: [
+            { id: 'report-bug',      label: 'Report a bug' },
+            { id: 'request-feature', label: 'Request a feature' },
+        ],
+    },
+
     { section: 'data', type: 'group', label: 'Legal' },
     {
         section: 'data', type: 'button-row',

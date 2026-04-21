@@ -71,11 +71,16 @@ export function initAmbientUI() {
     // Re-render mixes rail when the focus-start pin changes.
     settingsSub('sounds.focusStartMixId', () => renderMixesRail());
 
-    // Error surfacing for failed loads (R2 down, etc.)
+    // Error surfacing for failed loads (R2 down, CORS misconfigured, etc.)
+    let corsWarningShown = false;
     onAmbientEvent((type, payload) => {
-        if (type === 'load-error') {
-            toast(`Couldn't load "${labelFor(payload.id)}". Try again or pick another sound.`);
+        if (type !== 'load-error') return;
+        if (payload.kind === 'cors' && !corsWarningShown) {
+            corsWarningShown = true;
+            toast('Audio blocked by browser (CORS). The site owner needs to allow CORS on the sound CDN.');
+            return;
         }
+        toast(`Couldn't load "${labelFor(payload.id)}". Try again or pick another sound.`);
     });
 
     // If the page was opened via a /?mix=… share link, offer to load it.

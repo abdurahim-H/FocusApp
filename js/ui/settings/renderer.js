@@ -441,6 +441,12 @@ function handleButtonAction(id, triggerEl) {
         case 'open-terms':
             window.open('/terms.html', '_blank', 'noopener');
             break;
+        case 'report-bug':
+            import('../feedback.js').then((m) => m.openFeedback('bug'));
+            break;
+        case 'request-feature':
+            import('../feedback.js').then((m) => m.openFeedback('feature'));
+            break;
     }
 }
 

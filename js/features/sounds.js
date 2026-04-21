@@ -199,7 +199,13 @@ export async function playSound(id, { fadeMs = FADE_IN_MS } = {}) {
         buffer = await loadBuffer(id);
     } catch (err) {
         console.warn(`[sounds] failed to load ${id}:`, err);
-        emit('load-error', { id, error: err });
+        // CORS failure is the most common production cause — fetch rejects
+        // before any bytes arrive when the R2 bucket isn't configured with
+        // Access-Control-Allow-Origin. Classify so the UI can surface a
+        // more helpful message.
+        const msg = String(err?.message || err);
+        const isCORS = /CORS|cross[- ]origin|Failed to fetch|NetworkError|access.control/i.test(msg);
+        emit('load-error', { id, error: err, kind: isCORS ? 'cors' : 'network' });
         return false;
     }
 
