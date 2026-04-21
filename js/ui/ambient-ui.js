@@ -455,9 +455,10 @@ function buildTrackCard(id) {
             } else {
                 card.classList.remove('is-tuned');
                 // Hide from AT after the collapse animation completes.
+                // Matches the 320ms CSS transition with a tiny safety buffer.
                 setTimeout(() => {
                     if (!card.classList.contains('is-tuned')) tunePanel.hidden = true;
-                }, 360);
+                }, 340);
             }
             tuneBtn.setAttribute('aria-expanded', opening ? 'true' : 'false');
         });

@@ -384,8 +384,11 @@
 .track-card__tune {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 0.34s var(--deck-ease),
-                opacity 0.3s var(--deck-ease);
+    /* Single duration for both animated properties so opacity finishes
+       at exactly the same moment the height reaches 0 — avoids the
+       "content disappears then height keeps collapsing" two-phase feel. */
+    transition: grid-template-rows 0.32s var(--deck-ease),
+                opacity 0.32s var(--deck-ease);
     opacity: 0;
 }
 .track-card.is-tuned .track-card__tune {
@@ -401,8 +404,17 @@
 .track-card__tune-inner {
     overflow: hidden;
     min-height: 0;
+    /* box-sizing: border-box so the 14px padding counts INSIDE the
+       min-height: 0 constraint. Without this the intrinsic box min height
+       is 28px (padding top + bottom), which fights the grid row's 0fr
+       target and stutters the animation at both ends. */
+    box-sizing: border-box;
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    /* Top-align both columns so EQ and pan collapse from the same origin
+       at the same rate — prevents the "EQ shrinks from bottom, pan
+       drifts from centre" desync that reads as two-phase collapse. */
+    align-items: start;
     gap: 14px;
     padding: 14px;
     border-radius: 14px;
@@ -414,7 +426,6 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-    align-self: stretch;
 }
 .eq-band {
     display: flex;
@@ -437,17 +448,16 @@
     letter-spacing: 0.02em;
 }
 
-/* Pan — compact group, sits beside EQ */
+/* Pan — compact group, sits beside EQ. Both columns top-align so the
+   panel collapses uniformly (EQ and pan shrink together, not in phases). */
 .track-card__pan {
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 10px;
-    padding: 0 4px;
-    align-self: center;
+    padding: 18px 4px 0 14px;
     cursor: help;
     border-left: 1px solid rgba(255, 240, 210, 0.05);
-    padding-left: 14px;
 }
 .pan-icon {
     color: var(--deck-cream-dim);
