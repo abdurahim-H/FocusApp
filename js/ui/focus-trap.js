@@ -50,11 +50,26 @@ export function createFocusTrap(container) {
             container.removeEventListener('keydown', handler);
             handler = null;
         }
-        if (trigger && typeof trigger.focus === 'function') {
-            // Delay slightly so the closing animation doesn't fight with focus
-            setTimeout(() => trigger.focus(), 16);
-        }
+        // Capture into a local — trigger is nulled synchronously below, and
+        // the setTimeout closure would otherwise read `null` at fire time.
+        const t = trigger;
         trigger = null;
+
+        // Move focus out of the container synchronously. Callers typically
+        // set aria-hidden="true" on the container right after deactivate(),
+        // which would otherwise trip the "aria-hidden on a focused
+        // descendant" accessibility warning.
+        const active = document.activeElement;
+        if (active && container.contains(active) && typeof active.blur === 'function') {
+            active.blur();
+        }
+
+        if (t && typeof t.focus === 'function') {
+            setTimeout(() => {
+                // Element may have been removed from the DOM while we waited.
+                if (t.isConnected && typeof t.focus === 'function') t.focus();
+            }, 16);
+        }
     }
 
     return { activate, deactivate };

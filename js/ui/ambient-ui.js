@@ -387,26 +387,46 @@ function buildTrackCard(id) {
             <span class="track-card__volume-pct" data-readout="volume">70%</span>
         </div>
 
-        <div class="track-card__eq" role="group" aria-label="${escapeAttr(def.name)} EQ">
-            ${['low', 'mid', 'high'].map((band) => `
-                <label class="eq-band">
-                    <span class="eq-band__label">${bandLabel(band)}</span>
-                    <input type="range" class="eq-band__slider"
-                           min="-12" max="12" step="1" value="0"
-                           aria-label="${escapeAttr(def.name)} ${bandLabel(band)} EQ"
-                           data-control="eq" data-band="${band}">
-                    <span class="eq-band__value" data-readout="eq-${band}">0 dB</span>
-                </label>
-            `).join('')}
-        </div>
+        <button class="track-card__tune-btn" data-action="tune" aria-expanded="false" aria-controls="tune-${escapeAttr(id)}">
+            <svg class="tune-btn__icon" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                <line x1="3" y1="4" x2="13" y2="4"/><circle cx="6" cy="4" r="1.5" fill="currentColor" stroke="none"/>
+                <line x1="3" y1="8" x2="13" y2="8"/><circle cx="10" cy="8" r="1.5" fill="currentColor" stroke="none"/>
+                <line x1="3" y1="12" x2="13" y2="12"/><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="tune-btn__label">Tune</span>
+            <svg class="tune-btn__chev" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <polyline points="4 6 8 10 12 6"/>
+            </svg>
+        </button>
 
-        <div class="track-card__pan">
-            <span class="pan-label pan-label--left" aria-hidden="true">L</span>
-            <input type="range" class="track-slider track-slider--pan"
-                   min="-100" max="100" step="1" value="0"
-                   aria-label="${escapeAttr(def.name)} pan"
-                   data-control="pan">
-            <span class="pan-label pan-label--right" aria-hidden="true">R</span>
+        <div class="track-card__tune" id="tune-${escapeAttr(id)}" hidden>
+            <div class="track-card__tune-inner">
+                <div class="track-card__eq" role="group" aria-label="${escapeAttr(def.name)} tone">
+                    ${['low', 'mid', 'high'].map((band) => `
+                        <label class="eq-band" title="${bandTooltip(band)}">
+                            <span class="eq-band__label">${bandLabel(band)}</span>
+                            <input type="range" class="eq-band__slider"
+                                   min="-12" max="12" step="1" value="0"
+                                   aria-label="${escapeAttr(def.name)} ${bandLabel(band)}"
+                                   data-control="eq" data-band="${band}">
+                            <span class="eq-band__value" data-readout="eq-${band}">0</span>
+                        </label>
+                    `).join('')}
+                </div>
+
+                <div class="track-card__pan" title="Pan — stereo position from left to right">
+                    <svg class="pan-icon pan-icon--left" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 4L3 5.5H1.5v5H3L5 12z"/><path d="M8 6.5a2.5 2.5 0 010 3"/>
+                    </svg>
+                    <input type="range" class="track-slider track-slider--pan"
+                           min="-100" max="100" step="1" value="0"
+                           aria-label="${escapeAttr(def.name)} pan"
+                           data-control="pan">
+                    <svg class="pan-icon pan-icon--right" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M11 4l2 1.5h1.5v5H13L11 12z"/><path d="M8 6.5a2.5 2.5 0 000 3"/>
+                    </svg>
+                </div>
+            </div>
         </div>
     `;
 
@@ -418,6 +438,27 @@ function buildTrackCard(id) {
     card.querySelector('[data-action="remove"]').addEventListener('click', () => {
         stopSound(id);
     });
+    const tuneBtn = card.querySelector('[data-action="tune"]');
+    const tunePanel = card.querySelector('.track-card__tune');
+    if (tuneBtn && tunePanel) {
+        tuneBtn.addEventListener('click', () => {
+            const opening = !card.classList.contains('is-tuned');
+            if (opening) {
+                tunePanel.hidden = false;
+                // Force a reflow so the initial 0fr sticks, then animate to 1fr.
+                // eslint-disable-next-line no-unused-expressions
+                tunePanel.offsetHeight;
+                card.classList.add('is-tuned');
+            } else {
+                card.classList.remove('is-tuned');
+                // Hide from AT after the collapse animation completes.
+                setTimeout(() => {
+                    if (!card.classList.contains('is-tuned')) tunePanel.hidden = true;
+                }, 360);
+            }
+            tuneBtn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+        });
+    }
     card.querySelectorAll('[data-control]').forEach((el) => {
         el.addEventListener('input', () => {
             const kind = el.dataset.control;
@@ -446,7 +487,9 @@ function refreshTrackCard(card, id) {
         const sl = card.querySelector(`[data-control="eq"][data-band="${band}"]`);
         const rd = card.querySelector(`[data-readout="eq-${band}"]`);
         if (sl && document.activeElement !== sl) sl.value = String(st.eq[band]);
-        if (rd) rd.textContent = `${st.eq[band] > 0 ? '+' : ''}${st.eq[band]} dB`;
+        if (rd) rd.textContent = st.eq[band] === 0
+            ? '0'
+            : `${st.eq[band] > 0 ? '+' : ''}${st.eq[band]}`;
     }
 
     const panSlider = card.querySelector('[data-control="pan"]');
@@ -576,9 +619,11 @@ async function openDrawer() {
 function closeDrawer() {
     const drawer = document.getElementById('libraryDrawer');
     if (!drawer) return;
+    // Deactivate FIRST — moves focus off any descendant — so the following
+    // aria-hidden="true" doesn't hide the focused element from AT.
+    drawerTrap?.deactivate();
     drawer.classList.remove('is-open');
     drawer.setAttribute('aria-hidden', 'true');
-    drawerTrap?.deactivate();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -626,9 +671,9 @@ function openSavePopover() {
 function closeSavePopover() {
     const pop = document.getElementById('saveMixPopover');
     if (!pop) return;
+    savePopoverTrap?.deactivate();
     pop.classList.remove('is-open');
     pop.setAttribute('aria-hidden', 'true');
-    savePopoverTrap?.deactivate();
 }
 
 function defaultMixName() {
@@ -680,9 +725,10 @@ function openSleepPopover() {
 function closeSleepPopover() {
     const pop = document.getElementById('sleepPopover');
     if (!pop) return;
+    // Deactivate first so aria-hidden doesn't tag a focused descendant.
+    sleepPopoverTrap?.deactivate();
     pop.classList.remove('is-open');
     pop.setAttribute('aria-hidden', 'true');
-    sleepPopoverTrap?.deactivate();
 }
 
 function startSleepTimer(minutes) {
@@ -904,7 +950,12 @@ function pickUnique(arr, k) {
     return out;
 }
 function labelFor(id) { return SOUND_LIBRARY[id]?.name || id; }
-function bandLabel(b) { return b === 'low' ? 'Low' : b === 'mid' ? 'Mid' : 'High'; }
+function bandLabel(b) { return b === 'low' ? 'Bass' : b === 'mid' ? 'Mid' : 'Treble'; }
+function bandTooltip(b) {
+    return b === 'low' ? 'Bass — low end, rumble and depth'
+         : b === 'mid' ? 'Mid — body and warmth'
+         :               'Treble — sparkle and air';
+}
 
 function escapeHtml(s) {
     const div = document.createElement('div');

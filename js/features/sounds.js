@@ -264,12 +264,23 @@ function playFallback(id, { fadeMs = FADE_IN_MS } = {}) {
     audio.loop = true;
     audio.preload = 'auto';
     audio.volume = 0;  // fade in
-    audio.addEventListener('error', (e) => {
-        console.warn(`[sounds] fallback error for ${id}:`, e);
-        emit('load-error', { id, error: e, kind: 'network' });
+    // Mark used by stopFallback so the teardown-triggered error event
+    // (which fires when we set src='') doesn't get mistaken for a real
+    // load failure.
+    audio.__stopping = false;
+    const onError = (e) => {
+        if (audio.__stopping) return;
+        // MediaError code: 1 abort, 2 network, 3 decode, 4 src not supported.
+        const mediaErr = audio.error;
+        if (mediaErr && mediaErr.code === 1) return;  // aborted, expected
+        console.warn(`[sounds] fallback error for ${id}:`, mediaErr?.message || e.type);
+        emit('load-error', { id, error: mediaErr || e, kind: 'network' });
+        audio.removeEventListener('error', onError);
         fallbackTracks.delete(id);
         _removeActive(id);
-    });
+    };
+    audio.addEventListener('error', onError);
+    audio.__onError = onError;
     fallbackTracks.set(id, audio);
     const playP = audio.play();
     if (playP) playP.catch(() => { /* error event fires separately */ });
@@ -314,7 +325,11 @@ function stopFallback(id, { fadeMs = FADE_OUT_MS } = {}) {
     const from = audio.volume;
     fadeFallback(id, from, 0, fadeMs);
     setTimeout(() => {
-        try { audio.pause(); audio.src = ''; } catch (_) {}
+        // Mark + detach listener BEFORE src='' — that assignment itself fires
+        // an error event we don't want to surface.
+        audio.__stopping = true;
+        if (audio.__onError) audio.removeEventListener('error', audio.__onError);
+        try { audio.pause(); audio.removeAttribute('src'); audio.load(); } catch (_) {}
         fallbackTracks.delete(id);
     }, fadeMs + 40);
     _removeActive(id);
