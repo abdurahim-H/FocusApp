@@ -10,9 +10,18 @@ import { createStarGlows, updateStarGlows, disposeStarGlows } from '../environme
 import { createCosmicMotes, updateCosmicMotes, disposeCosmicMotes } from '../environment/cosmic-motes.js';
 import { createEtherealPetals, updateEtherealPetals, disposeEtherealPetals } from '../environment/ethereal-petals.js';
 import { createBlackHole, updateBlackHole, disposeBlackHole } from '../blackhole/blackhole.js';
-import { setupPostProcessing, disposePostProcessing, setExposure, getBaseExposure, createFilmGrainEffect } from '../postprocessing/pipeline.js';
-import { createAnamorphicStreak, disposeAnamorphicStreak } from '../postprocessing/anamorphic-streak.js';
-import { createGodRays, updateGodRays, disposeGodRays } from '../postprocessing/god-rays.js';
+import {
+    setupPostProcessing, disposePostProcessing,
+    setExposure, getBaseExposure, createFilmGrainEffect,
+    setBloomEnabled, setBloomKernel,
+    setFilmGrainEnabled, setChromaticAberrationEnabled,
+} from '../postprocessing/pipeline.js';
+import {
+    createAnamorphicStreak, disposeAnamorphicStreak, setAnamorphicStreakEnabled,
+} from '../postprocessing/anamorphic-streak.js';
+import {
+    createGodRays, updateGodRays, disposeGodRays, setGodRaysEnabled,
+} from '../postprocessing/god-rays.js';
 import { detectDeviceProfile, createFPSWatchdog } from '../../utils/performance-profile.js';
 
 
@@ -109,14 +118,44 @@ export async function init3D() {
         createGodRays(scene, camera);
         createFilmGrainEffect();
 
-        // Setup FPS watchdog for adaptive quality. Downgrade and recovery
-        // toggle the same engine setting so a transient dip cannot latch the
-        // scene permanently into low-res mode.
-        fpsWatchdog = createFPSWatchdog(
-            stats,
-            () => { if (engine) engine.setHardwareScalingLevel(1.5); },
-            () => { if (engine) engine.setHardwareScalingLevel(1.0); }
-        );
+        // Setup FPS watchdog with a multi-level graceful-degradation ladder.
+        // Instead of dropping render resolution the moment FPS dips (the old
+        // binary-downgrade behaviour that made the scene look pixelated),
+        // we now switch off expensive post-process effects one rung at a
+        // time. Hardware scaling is a last-resort fallback. Every 5 minutes
+        // we probe whether full quality is sustainable again.
+        const BLOOM_DEFAULT_KERNEL = 64;
+        fpsWatchdog = createFPSWatchdog(stats, (from, to) => {
+            applyQualityLevel(to, { from });
+        }, 5);
+
+        function applyQualityLevel(level, { from } = {}) {
+            if (!scene || !camera) return;
+            // Each level is additive: level 3 implies everything at level 1..3.
+            // We walk the full ladder each time so recovery is symmetric.
+
+            // Level 1 — cheap post-processes first (minimal visual cost).
+            const wantGrain       = level < 1;
+            const wantChromatic   = level < 1;
+            // Level 2 — anamorphic streak (visible on bright elements).
+            const wantStreak      = level < 2;
+            // Level 3 — god rays (the radial beam effect).
+            const wantGodRays     = level < 3;
+            // Level 4 — shrink bloom kernel (halves the most expensive pass).
+            const targetKernel    = level < 4 ? BLOOM_DEFAULT_KERNEL : Math.floor(BLOOM_DEFAULT_KERNEL / 2);
+            // Level 5 — last resort: lower render resolution slightly.
+            const targetScaling   = level < 5 ? 1.0 : 1.25;
+
+            try { setFilmGrainEnabled(wantGrain); } catch (e) { /* ignore */ }
+            try { setChromaticAberrationEnabled(wantChromatic); } catch (e) { /* ignore */ }
+            try { setAnamorphicStreakEnabled(wantStreak, scene, camera); } catch (e) { /* ignore */ }
+            try { setGodRaysEnabled(wantGodRays, scene, camera); } catch (e) { /* ignore */ }
+            try { setBloomKernel(targetKernel); } catch (e) { /* ignore */ }
+            try { if (engine) engine.setHardwareScalingLevel(targetScaling); } catch (e) { /* ignore */ }
+        }
+
+        // Expose for debugging / settings.
+        window.__applyQualityLevel = applyQualityLevel;
 
         // Start render loop
         engine.runRenderLoop(renderLoop);

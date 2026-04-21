@@ -282,6 +282,52 @@ export function setBloomIntensity(intensity) {
     }
 }
 
+// ── Graceful-degradation toggles used by the FPS watchdog ──────────────────
+
+/** Turn bloom on/off entirely. The effect is cheap to rebuild so we avoid
+ *  disposing it — just gate it off via the pipeline flag. */
+export function setBloomEnabled(enabled) {
+    if (pipeline) pipeline.bloomEnabled = !!enabled;
+}
+
+/** Shrink the bloom kernel (visual hit small, perf win meaningful). */
+export function setBloomKernel(size) {
+    if (pipeline) pipeline.bloomKernel = Math.max(8, Math.min(128, size | 0));
+}
+
+/** Gate the film-grain post-process without disposing it. The onApply
+ *  callback is swapped to a no-op, which keeps the pipeline intact. */
+let _grainOnApplySaved = null;
+export function setFilmGrainEnabled(enabled) {
+    if (!filmGrainPostProcess) return;
+    if (enabled) {
+        if (_grainOnApplySaved) {
+            filmGrainPostProcess.onApply = _grainOnApplySaved;
+            _grainOnApplySaved = null;
+        }
+        filmGrainPostProcess.externalTextureSamplerBinding = false;
+    } else if (!_grainOnApplySaved) {
+        _grainOnApplySaved = filmGrainPostProcess.onApply;
+        filmGrainPostProcess.onApply = function () {
+            // Still bind the screenSize + grainIntensity=0 so the shader becomes
+            // a pass-through (grain scaled to 0).
+            const fx = arguments[0];
+            if (!fx) return;
+            fx.setFloat('time', 0);
+            fx.setFloat('grainIntensity', 0);
+            fx.setFloat2(
+                'screenSize',
+                scene.getEngine().getRenderWidth(),
+                scene.getEngine().getRenderHeight()
+            );
+        };
+    }
+}
+
+export function setChromaticAberrationEnabled(enabled) {
+    if (pipeline) pipeline.chromaticAberrationEnabled = !!enabled;
+}
+
 /**
  * Update exposure dynamically
  * @param {number} exposure - 0.1-3 range
