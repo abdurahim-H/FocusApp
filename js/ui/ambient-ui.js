@@ -441,23 +441,43 @@ function buildTrackCard(id) {
     const tuneBtn = card.querySelector('[data-action="tune"]');
     const tunePanel = card.querySelector('.track-card__tune');
     if (tuneBtn && tunePanel) {
+        let tuneTimer = 0;
         tuneBtn.addEventListener('click', () => {
             const opening = !card.classList.contains('is-tuned');
+            clearTimeout(tuneTimer);
+
             if (opening) {
+                // Mount, lock to 0, measure natural height, then on the
+                // SAME frame flip class + set target height so opacity and
+                // height transitions start together and finish together.
                 tunePanel.hidden = false;
-                // Wait one paint so the hidden→visible display flip commits
-                // BEFORE the class change kicks the grid-rows transition.
-                // Using rAF instead of a forced layout read (offsetHeight)
-                // avoids a synchronous reflow that stalls the click frame.
+                tunePanel.style.height = '0px';
+                const target = tunePanel.scrollHeight;
                 requestAnimationFrame(() => {
                     card.classList.add('is-tuned');
+                    tunePanel.style.height = target + 'px';
                 });
+                tuneTimer = setTimeout(() => {
+                    if (card.classList.contains('is-tuned')) {
+                        tunePanel.style.height = '';
+                    }
+                }, 340);
             } else {
-                card.classList.remove('is-tuned');
-                // Hide from AT after the collapse animation completes.
-                // Matches the 320ms CSS transition with a tiny safety buffer.
-                setTimeout(() => {
-                    if (!card.classList.contains('is-tuned')) tunePanel.hidden = true;
+                // Capture current concrete height (needed because after
+                // open the inline height was cleared and 'auto' can't
+                // animate). Then on the next frame flip class + set 0px
+                // so both transitions start and finish in lockstep.
+                const current = tunePanel.scrollHeight;
+                tunePanel.style.height = current + 'px';
+                requestAnimationFrame(() => {
+                    card.classList.remove('is-tuned');
+                    tunePanel.style.height = '0px';
+                });
+                tuneTimer = setTimeout(() => {
+                    if (!card.classList.contains('is-tuned')) {
+                        tunePanel.hidden = true;
+                        tunePanel.style.height = '';
+                    }
                 }, 340);
             }
             tuneBtn.setAttribute('aria-expanded', opening ? 'true' : 'false');
