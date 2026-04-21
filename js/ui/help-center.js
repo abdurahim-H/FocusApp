@@ -165,7 +165,7 @@ function showCategory(catId) {
 
     detail.innerHTML = `<h3 class="hc-detail__title">${cat.label}</h3>`;
     for (const entry of cat.entries) {
-        detail.appendChild(createEntryEl(entry));
+        detail.appendChild(createEntryEl(entry, null, cat.iconSvg));
     }
 }
 
@@ -223,7 +223,7 @@ function applySearch(query) {
             const haystack = (entry.q + ' ' + stripHtml(entry.a) + ' ' + cat.label).toLowerCase();
             const matches = tokens.every(t => haystack.includes(t));
             if (matches) {
-                const el = createEntryEl(entry, cat.label);
+                const el = createEntryEl(entry, cat.label, cat.iconSvg);
                 searchResults.appendChild(el);
                 matchCount++;
             }
@@ -239,14 +239,18 @@ function applySearch(query) {
 // Entry rendering
 // ============================================================================
 
-function createEntryEl(entry, categoryLabel) {
+function createEntryEl(entry, categoryLabel, categoryIconSvg) {
     const el = document.createElement('div');
     el.className = 'hc-entry';
     // XSS safety contract: entry.q and entry.a come from help-content.js which
     // is static, author-written HTML (intentional <strong>, <kbd>, <table>).
     // If you ever load entries from user input or an external API, escape both.
+    const iconHtml = categoryIconSvg
+        ? `<svg class="hc-entry__icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${categoryIconSvg}</svg>`
+        : '';
     el.innerHTML = `
         <button class="hc-entry__header" aria-expanded="false">
+            ${iconHtml}
             <span class="hc-entry__q">${entry.q}</span>
             ${categoryLabel ? `<span class="hc-entry__cat">${categoryLabel}</span>` : ''}
             <svg class="hc-entry__chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>

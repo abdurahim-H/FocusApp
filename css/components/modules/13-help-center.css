@@ -283,6 +283,18 @@
 .hc-entry__header:hover {
     color: rgba(255, 220, 140, 1);
 }
+.hc-entry__icon {
+    flex-shrink: 0;
+    color: rgba(200, 160, 100, 0.55);
+    transition: color 0.2s ease, filter 0.2s ease;
+}
+.hc-entry__header:hover .hc-entry__icon {
+    color: rgba(255, 220, 140, 0.95);
+    filter: drop-shadow(0 0 4px rgba(200, 146, 42, 0.2));
+}
+.hc-entry.is-expanded .hc-entry__icon {
+    color: rgba(255, 220, 140, 0.85);
+}
 .hc-entry__q {
     flex: 1;
     font-size: 13px;

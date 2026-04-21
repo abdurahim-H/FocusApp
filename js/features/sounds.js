@@ -182,30 +182,46 @@ function applyTrackState(id, node, fadeMs = 0) {
 const FADE_IN_MS = 400;
 const FADE_OUT_MS = 600;
 
+// When fetch() fails with CORS, we fall back to bare <audio> elements.
+// Basic playback works without CORS; we lose EQ, pan, smooth Web-Audio
+// fades, and scene reactivity. Better than silent audio.
+const fallbackTracks = new Map();  // id -> HTMLAudioElement
+let fallbackMode = false;
+
 /** Start a track (or ensure it's playing). Fades in. */
 export async function playSound(id, { fadeMs = FADE_IN_MS } = {}) {
     await ensureAudio();
     if (!SOUND_LIBRARY[id]) return false;
 
     // Already playing? just re-apply state.
-    if (tracks.has(id)) {
-        applyTrackState(id, tracks.get(id), fadeMs);
+    if (tracks.has(id) || fallbackTracks.has(id)) {
+        if (tracks.has(id)) applyTrackState(id, tracks.get(id), fadeMs);
+        if (fallbackTracks.has(id)) applyFallbackVolume(id);
         _addActive(id);
         return true;
     }
+
+    // Use the CORS-free path immediately if we already proved it's needed.
+    if (fallbackMode) return playFallback(id, { fadeMs });
 
     let buffer;
     try {
         buffer = await loadBuffer(id);
     } catch (err) {
         console.warn(`[sounds] failed to load ${id}:`, err);
-        // CORS failure is the most common production cause — fetch rejects
-        // before any bytes arrive when the R2 bucket isn't configured with
-        // Access-Control-Allow-Origin. Classify so the UI can surface a
-        // more helpful message.
         const msg = String(err?.message || err);
         const isCORS = /CORS|cross[- ]origin|Failed to fetch|NetworkError|access.control/i.test(msg);
-        emit('load-error', { id, error: err, kind: isCORS ? 'cors' : 'network' });
+        if (isCORS) {
+            // Lock the engine into fallback mode for the rest of the session
+            // so subsequent plays skip the failing fetch attempt.
+            if (!fallbackMode) {
+                fallbackMode = true;
+                console.info('[sounds] CORS blocked — switching to HTMLAudioElement fallback');
+                emit('load-error', { id, error: err, kind: 'cors' });
+            }
+            return playFallback(id, { fadeMs });
+        }
+        emit('load-error', { id, error: err, kind: 'network' });
         return false;
     }
 
@@ -236,8 +252,81 @@ export async function playSound(id, { fadeMs = FADE_IN_MS } = {}) {
     return true;
 }
 
+// ── Fallback helpers (HTMLAudioElement path when CORS blocks fetch) ────────
+
+function playFallback(id, { fadeMs = FADE_IN_MS } = {}) {
+    if (fallbackTracks.has(id)) {
+        applyFallbackVolume(id);
+        _addActive(id);
+        return true;
+    }
+    const audio = new Audio(SOUND_LIBRARY[id].url);
+    audio.loop = true;
+    audio.preload = 'auto';
+    audio.volume = 0;  // fade in
+    audio.addEventListener('error', (e) => {
+        console.warn(`[sounds] fallback error for ${id}:`, e);
+        emit('load-error', { id, error: e, kind: 'network' });
+        fallbackTracks.delete(id);
+        _removeActive(id);
+    });
+    fallbackTracks.set(id, audio);
+    const playP = audio.play();
+    if (playP) playP.catch(() => { /* error event fires separately */ });
+    fadeFallback(id, 0, fallbackTargetFor(id), fadeMs);
+    _addActive(id);
+    ensureSilentKeepAlive();
+    setupMediaSession();
+    emit('play', { id });
+    return true;
+}
+
+function fallbackTargetFor(id) {
+    const t = getTrackState(id);
+    const master = ambientMaster.value?.volume ?? 0.5;
+    return t.muted ? 0 : master * t.volume;
+}
+
+function applyFallbackVolume(id) {
+    const audio = fallbackTracks.get(id);
+    if (!audio) return;
+    audio.volume = clamp01(fallbackTargetFor(id));
+}
+
+function fadeFallback(id, from, to, durationMs) {
+    const audio = fallbackTracks.get(id);
+    if (!audio) return;
+    const start = performance.now();
+    const step = () => {
+        const a = fallbackTracks.get(id);
+        if (!a) return;
+        const elapsed = performance.now() - start;
+        const t = Math.max(0, Math.min(1, elapsed / durationMs));
+        a.volume = clamp01(from + (to - from) * t);
+        if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+}
+
+function stopFallback(id, { fadeMs = FADE_OUT_MS } = {}) {
+    const audio = fallbackTracks.get(id);
+    if (!audio) return;
+    const from = audio.volume;
+    fadeFallback(id, from, 0, fadeMs);
+    setTimeout(() => {
+        try { audio.pause(); audio.src = ''; } catch (_) {}
+        fallbackTracks.delete(id);
+    }, fadeMs + 40);
+    _removeActive(id);
+}
+
+function refreshAllFallbackVolumes() {
+    for (const id of fallbackTracks.keys()) applyFallbackVolume(id);
+}
+
 /** Stop a track. Fades out, then tears down the graph. */
 export function stopSound(id, { fadeMs = FADE_OUT_MS } = {}) {
+    if (fallbackTracks.has(id)) return stopFallback(id, { fadeMs });
     const node = tracks.get(id);
     if (!node || node.stopping) {
         _removeActive(id);
@@ -270,12 +359,11 @@ export async function toggleAmbientSound(id) {
 
 /** Stop every track. */
 export function stopAllAmbientSounds({ fadeMs = FADE_OUT_MS } = {}) {
-    for (const id of Array.from(tracks.keys())) {
-        stopSound(id, { fadeMs });
-    }
+    for (const id of Array.from(tracks.keys())) stopSound(id, { fadeMs });
+    for (const id of Array.from(fallbackTracks.keys())) stopFallback(id, { fadeMs });
     // Release the lock-screen keep-alive after the fade clears.
     setTimeout(() => {
-        if (tracks.size === 0) {
+        if (tracks.size === 0 && fallbackTracks.size === 0) {
             teardownSilentKeepAlive();
             mediaSessionStopped();
         }
@@ -285,11 +373,15 @@ export function stopAllAmbientSounds({ fadeMs = FADE_OUT_MS } = {}) {
 /** Is a track currently playing (and not in the middle of fading out)? */
 export function isSoundActive(id) {
     const node = tracks.get(id);
-    return !!(node && !node.stopping);
+    if (node && !node.stopping) return true;
+    return fallbackTracks.has(id);
 }
 
 export function getActiveSounds() {
-    return Array.from(tracks.keys()).filter((id) => !tracks.get(id).stopping);
+    const out = [];
+    for (const id of tracks.keys()) if (!tracks.get(id).stopping) out.push(id);
+    for (const id of fallbackTracks.keys()) if (!out.includes(id)) out.push(id);
+    return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -304,6 +396,7 @@ export function setSoundVolume(id, value01) {
         const target = getTrackState(id).muted ? 0 : v;
         node.gain.gain.setTargetAtTime(target, ctx.currentTime, 0.04);
     }
+    if (fallbackTracks.has(id)) applyFallbackVolume(id);
 }
 
 /** Back-compat shim: `setSoundVolume(id, percent0to100)` callers still work. */
@@ -340,6 +433,7 @@ export function setSoundMuted(id, muted) {
         const target = muted ? 0 : t.volume;
         node.gain.gain.setTargetAtTime(target, ctx.currentTime, 0.04);
     }
+    if (fallbackTracks.has(id)) applyFallbackVolume(id);
 }
 
 /** Master volume (0..1). Fades smoothly. */
@@ -351,6 +445,7 @@ export function setMasterVolume(value01, { fadeMs = 200 } = {}) {
         masterGain.gain.cancelScheduledValues(now);
         masterGain.gain.linearRampToValueAtTime(v, now + fadeMs / 1000);
     }
+    refreshAllFallbackVolumes();
 }
 
 export function getMasterVolume() {
