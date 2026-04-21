@@ -313,14 +313,22 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s var(--deck-spring);
+    /* Calm ease-out — no spring overshoot. Spring on a small button
+       reads as a nervous pop, not a premium click. */
+    transition: background 0.18s var(--deck-ease),
+                color 0.18s var(--deck-ease),
+                border-color 0.18s var(--deck-ease),
+                transform 0.14s var(--deck-ease);
 }
 .track-iconbtn:hover {
     background: var(--deck-gold-faint);
     color: var(--deck-cream);
     border-color: var(--deck-gold-line);
 }
-.track-iconbtn:active { transform: scale(0.92); }
+.track-iconbtn:active {
+    transform: scale(0.94);
+    transition-duration: 0.08s;
+}
 .track-iconbtn.is-muted { color: var(--deck-gold); background: var(--deck-gold-faint); }
 .track-iconbtn[aria-expanded="true"] {
     color: var(--deck-gold);

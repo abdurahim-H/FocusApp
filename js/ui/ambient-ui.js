@@ -445,10 +445,13 @@ function buildTrackCard(id) {
             const opening = !card.classList.contains('is-tuned');
             if (opening) {
                 tunePanel.hidden = false;
-                // Force a reflow so the initial 0fr sticks, then animate to 1fr.
-                // eslint-disable-next-line no-unused-expressions
-                tunePanel.offsetHeight;
-                card.classList.add('is-tuned');
+                // Wait one paint so the hidden→visible display flip commits
+                // BEFORE the class change kicks the grid-rows transition.
+                // Using rAF instead of a forced layout read (offsetHeight)
+                // avoids a synchronous reflow that stalls the click frame.
+                requestAnimationFrame(() => {
+                    card.classList.add('is-tuned');
+                });
             } else {
                 card.classList.remove('is-tuned');
                 // Hide from AT after the collapse animation completes.
