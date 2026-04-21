@@ -361,13 +361,31 @@ function buildTrackCard(id) {
     card.className = 'track-card';
     card.dataset.sound = id;
     card.innerHTML = `
-        <header class="track-card__head">
+        <div class="track-card__row">
             <span class="track-card__icon" aria-hidden="true">${def.icon}</span>
             <div class="track-card__titles">
                 <h4 class="track-card__name">${escapeHtml(def.name)}</h4>
                 <span class="track-card__category">${escapeHtml(def.category)}</span>
             </div>
+            <div class="track-card__volume" title="Track volume — blend this sound against the others in your mix">
+                <svg class="track-card__volume-icon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
+                    <path d="M5 3.5L2.5 5.5H1v5h1.5L5 12.5V3.5z"/>
+                    <path d="M7.8 5.2a3.2 3.2 0 010 5.6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+                <input type="range" class="track-slider track-slider--volume"
+                       min="0" max="100" step="1" value="70"
+                       aria-label="${escapeAttr(def.name)} volume"
+                       data-control="volume">
+                <span class="track-card__volume-pct" data-readout="volume">70%</span>
+            </div>
             <div class="track-card__actions">
+                <button class="track-iconbtn" data-action="tune" aria-expanded="false" aria-controls="tune-${escapeAttr(id)}" aria-label="Tune ${escapeAttr(def.name)}">
+                    <svg class="tune-btn__icon" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                        <line x1="3" y1="4" x2="13" y2="4"/><circle cx="6" cy="4" r="1.6" fill="currentColor" stroke="none"/>
+                        <line x1="3" y1="8" x2="13" y2="8"/><circle cx="10" cy="8" r="1.6" fill="currentColor" stroke="none"/>
+                        <line x1="3" y1="12" x2="13" y2="12"/><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/>
+                    </svg>
+                </button>
                 <button class="track-iconbtn" data-action="mute" aria-pressed="false" aria-label="Mute ${escapeAttr(def.name)}">
                     <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
                         <path d="M6 3L3 5H1v6h2l3 2V3zm4.5 1.5a4.5 4.5 0 010 7 .5.5 0 01-.5-.87 3.5 3.5 0 000-5.26.5.5 0 01.5-.87zm-1.5 2a2.5 2.5 0 010 3 .5.5 0 01-.5-.87 1.5 1.5 0 000-1.26.5.5 0 01.5-.87z"/>
@@ -379,31 +397,7 @@ function buildTrackCard(id) {
                     </svg>
                 </button>
             </div>
-        </header>
-
-        <div class="track-card__volume" title="Track volume — blend this sound against the others in your mix">
-            <svg class="track-card__volume-icon" viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
-                <path d="M5 3.5L2.5 5.5H1v5h1.5L5 12.5V3.5z"/>
-                <path d="M7.8 5.2a3.2 3.2 0 010 5.6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-            <input type="range" class="track-slider track-slider--volume"
-                   min="0" max="100" step="1" value="70"
-                   aria-label="${escapeAttr(def.name)} volume"
-                   data-control="volume">
-            <span class="track-card__volume-pct" data-readout="volume">70%</span>
         </div>
-
-        <button class="track-card__tune-btn" data-action="tune" aria-expanded="false" aria-controls="tune-${escapeAttr(id)}">
-            <svg class="tune-btn__icon" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
-                <line x1="3" y1="4" x2="13" y2="4"/><circle cx="6" cy="4" r="1.5" fill="currentColor" stroke="none"/>
-                <line x1="3" y1="8" x2="13" y2="8"/><circle cx="10" cy="8" r="1.5" fill="currentColor" stroke="none"/>
-                <line x1="3" y1="12" x2="13" y2="12"/><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="tune-btn__label">Tune</span>
-            <svg class="tune-btn__chev" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                <polyline points="4 6 8 10 12 6"/>
-            </svg>
-        </button>
 
         <div class="track-card__tune" id="tune-${escapeAttr(id)}" hidden>
             <div class="track-card__tune-inner">
