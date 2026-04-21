@@ -95,6 +95,7 @@ function wireMasterVolume() {
     const slider = document.getElementById('deckMasterVolume');
     if (!slider) return;
     slider.addEventListener('input', async () => {
+        slider.style.setProperty('--fill', `${slider.value}%`);
         await ensureAudio();
         setMasterVolume(Number(slider.value) / 100, { fadeMs: 60 });
     });
@@ -105,6 +106,7 @@ function syncMasterUI() {
     const label = document.getElementById('deckMasterValue');
     const v = Math.round((ambientMaster.value?.volume ?? 0.5) * 100);
     if (slider && Number(slider.value) !== v) slider.value = String(v);
+    if (slider) slider.style.setProperty('--fill', `${v}%`);
     if (label) label.textContent = `${v}%`;
 }
 
@@ -379,7 +381,11 @@ function buildTrackCard(id) {
             </div>
         </header>
 
-        <div class="track-card__volume">
+        <div class="track-card__volume" title="Track volume — blend this sound against the others in your mix">
+            <svg class="track-card__volume-icon" viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
+                <path d="M5 3.5L2.5 5.5H1v5h1.5L5 12.5V3.5z"/>
+                <path d="M7.8 5.2a3.2 3.2 0 010 5.6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
             <input type="range" class="track-slider track-slider--volume"
                    min="0" max="100" step="1" value="70"
                    aria-label="${escapeAttr(def.name)} volume"
@@ -462,9 +468,19 @@ function buildTrackCard(id) {
     card.querySelectorAll('[data-control]').forEach((el) => {
         el.addEventListener('input', () => {
             const kind = el.dataset.control;
-            if (kind === 'volume') setSoundVolume(id, Number(el.value) / 100);
-            else if (kind === 'eq') setSoundEQ(id, el.dataset.band, Number(el.value));
-            else if (kind === 'pan') setSoundPan(id, Number(el.value) / 100);
+            const v = Number(el.value);
+            // Paint the gold fill immediately for instant feedback — the
+            // state refresh that normally does this isn't synchronous.
+            if (kind === 'volume') {
+                el.style.setProperty('--fill', `${v}%`);
+                setSoundVolume(id, v / 100);
+            } else if (kind === 'eq') {
+                el.style.setProperty('--fill', `${((v + 12) / 24) * 100}%`);
+                setSoundEQ(id, el.dataset.band, v);
+            } else if (kind === 'pan') {
+                el.style.setProperty('--fill', `${((v + 100) / 200) * 100}%`);
+                setSoundPan(id, v / 100);
+            }
         });
     });
 
@@ -478,15 +494,24 @@ function refreshTrackCard(card, id) {
 
     const volSlider = card.querySelector('[data-control="volume"]');
     const volReadout = card.querySelector('[data-readout="volume"]');
+    const volPct = Math.round(st.volume * 100);
     if (volSlider && document.activeElement !== volSlider) {
-        volSlider.value = String(Math.round(st.volume * 100));
+        volSlider.value = String(volPct);
     }
-    if (volReadout) volReadout.textContent = `${Math.round(st.volume * 100)}%`;
+    if (volSlider) volSlider.style.setProperty('--fill', `${volPct}%`);
+    if (volReadout) volReadout.textContent = `${volPct}%`;
 
     for (const band of ['low', 'mid', 'high']) {
         const sl = card.querySelector(`[data-control="eq"][data-band="${band}"]`);
         const rd = card.querySelector(`[data-readout="eq-${band}"]`);
         if (sl && document.activeElement !== sl) sl.value = String(st.eq[band]);
+        // Band range is -12..+12. Centre the gold fill at the 50% mark so
+        // boost grows rightwards and cut grows leftwards from the middle.
+        if (sl) {
+            const pct = ((st.eq[band] + 12) / 24) * 100;
+            sl.style.setProperty('--fill', `${pct}%`);
+            sl.style.setProperty('--centre', '50%');
+        }
         if (rd) rd.textContent = st.eq[band] === 0
             ? '0'
             : `${st.eq[band] > 0 ? '+' : ''}${st.eq[band]}`;
@@ -495,6 +520,12 @@ function refreshTrackCard(card, id) {
     const panSlider = card.querySelector('[data-control="pan"]');
     if (panSlider && document.activeElement !== panSlider) {
         panSlider.value = String(Math.round(st.pan * 100));
+    }
+    if (panSlider) {
+        // Pan -100..+100 also centres at 50%.
+        const pct = ((st.pan + 1) / 2) * 100;
+        panSlider.style.setProperty('--fill', `${pct}%`);
+        panSlider.style.setProperty('--centre', '50%');
     }
 
     const muteBtn = card.querySelector('[data-action="mute"]');
