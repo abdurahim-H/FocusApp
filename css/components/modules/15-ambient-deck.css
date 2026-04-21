@@ -219,8 +219,17 @@
         linear-gradient(168deg, rgba(255, 240, 210, 0.035) 0%, rgba(200, 146, 42, 0.015) 60%, transparent 100%),
         var(--deck-bg);
     border: 1px solid var(--deck-gold-line);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
+    /* Paint containment: during the Tune expand/collapse animation the
+       card's height changes every frame. Without `contain`, every frame
+       re-rasterizes the backdrop-filter blur across the ENTIRE page
+       underneath — Babylon's 3D scene, gradients, everything — because
+       the browser can't be sure nothing else changed. `contain: layout
+       paint` tells the browser the card is self-contained, so only the
+       card's own box needs repainting. Dramatic perf win during the
+       animation frames. */
+    contain: layout paint;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     box-shadow:
         inset 0 1px 0 rgba(255, 240, 210, 0.06),
         inset 0 -1px 0 rgba(0, 0, 0, 0.3),
@@ -366,32 +375,32 @@
     letter-spacing: 0.02em;
 }
 
-/* Collapsible Tune panel. The tune button lives inline in the row now;
+/* Collapsible Tune panel. The tune button lives inline in the row;
    clicking it toggles this. grid-template-rows 0fr → 1fr is the pure-CSS
-   auto-height collapse that's smoothly animatable. */
+   auto-height collapse — requires `overflow: hidden; min-height: 0` on
+   the single grid child so the row can actually shrink below the child's
+   intrinsic size. Without those the browser fights the transition every
+   frame and the animation reads as janky. */
 .track-card__tune {
     display: grid;
     grid-template-rows: 0fr;
     transition: grid-template-rows 0.34s var(--deck-ease),
-                opacity 0.34s var(--deck-ease),
-                margin-top 0.34s var(--deck-ease);
+                opacity 0.3s var(--deck-ease);
     opacity: 0;
-    margin-top: 0;
-}
-.track-card__tune-inner {
-    overflow: hidden;
-    min-height: 0;
 }
 .track-card.is-tuned .track-card__tune {
     grid-template-rows: 1fr;
     opacity: 1;
-    margin-top: 14px;
 }
 .track-card__tune[hidden] { display: none; }
 
 /* EQ — 3 bands, side by side, with pan sharing the same strip to the right.
-   All live inside the inner box so the feature still feels like one panel. */
+   overflow: hidden + min-height: 0 are load-bearing for the parent's
+   grid-rows 0fr↔1fr collapse — without them the grid row can't shrink
+   below the child's intrinsic height and the animation fights itself. */
 .track-card__tune-inner {
+    overflow: hidden;
+    min-height: 0;
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 14px;
