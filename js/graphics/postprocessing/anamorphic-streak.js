@@ -90,3 +90,14 @@ export function disposeAnamorphicStreak() {
         streakPostProcess = null;
     }
 }
+
+/** Graceful-degradation toggle. Creating / disposing is cheap because the
+ *  compiled shader is cached in Babylon's ShadersStore. */
+export function setAnamorphicStreakEnabled(enabled, scene, camera) {
+    if (enabled) {
+        if (!streakPostProcess && scene && camera) createAnamorphicStreak(scene, camera);
+    } else {
+        disposeAnamorphicStreak();
+    }
+}
+export function isAnamorphicStreakActive() { return !!streakPostProcess; }

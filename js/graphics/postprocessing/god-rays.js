@@ -130,3 +130,14 @@ export function disposeGodRays() {
         godRayPostProcess = null;
     }
 }
+
+/** Used by the FPS watchdog's graceful-degradation ladder.
+ *  Disables by disposing (frees GPU cycles); re-enables by recreating. */
+export function setGodRaysEnabled(enabled, scene, camera) {
+    if (enabled) {
+        if (!godRayPostProcess && scene && camera) createGodRays(scene, camera);
+    } else {
+        disposeGodRays();
+    }
+}
+export function isGodRaysActive() { return !!godRayPostProcess; }
