@@ -90,8 +90,8 @@ function renderRail() {
         btn.type = 'button';
         btn.className = 'settings-rail__item';
         btn.dataset.section = section.id;
+        btn.dataset.tooltip = section.label;
         btn.setAttribute('aria-label', section.label);
-        btn.title = section.label;
         if (section.iconStroke) {
             btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${section.iconSvg}</svg>`;
         } else {
@@ -215,6 +215,7 @@ function renderRow(row) {
         case 'profile-list':     return renderProfileList(row);
         case 'schedule-list':    return renderScheduleList(row);
         case 'readonly':         return renderReadonly(row);
+        case 'feedback-form':    return renderFeedbackForm(row);
     }
     return null;
 }
@@ -404,6 +405,132 @@ function renderButtonRow(row) {
     return el;
 }
 
+// ============================================================================
+// Feedback form — inline (no modal, no backdrop blur)
+// Lives inside the Feedback settings section. User picks bug / feature,
+// types a description, then sends via mailto or copies to clipboard.
+// Diagnostics are auto-appended by the send/copy helpers in feedback.js.
+// ============================================================================
+function renderFeedbackForm() {
+    const el = document.createElement('div');
+    el.className = 'sr sr-feedback';
+    el.innerHTML = `
+        <p class="sr-feedback__intro">
+            Spotted a bug or have an idea? Tell us here — we read every one.
+        </p>
+
+        <div class="sr-feedback__type" role="tablist" aria-label="Feedback type">
+            <button type="button" class="sr-feedback__type-btn is-active"
+                    role="tab" aria-selected="true" data-type="bug">
+                <span aria-hidden="true">🐞</span>
+                <span>Bug report</span>
+            </button>
+            <button type="button" class="sr-feedback__type-btn"
+                    role="tab" aria-selected="false" data-type="feature">
+                <span aria-hidden="true">✦</span>
+                <span>Feature request</span>
+            </button>
+        </div>
+
+        <label class="sr-feedback__label" for="sr-feedback-body"
+               data-bug-label="What happened, what did you expect, and what steps triggered it?"
+               data-feature-label="What would make Cosmic Focus better for you?">
+            What happened, what did you expect, and what steps triggered it?
+        </label>
+        <textarea id="sr-feedback-body"
+                  class="sr-feedback__body"
+                  rows="6"
+                  maxlength="4000"
+                  placeholder="Describe what you saw…"
+                  spellcheck="true"></textarea>
+
+        <p class="sr-feedback__small">
+            We'll attach your browser, GPU, and viewport automatically so the
+            report is reproducible. Nothing else.
+        </p>
+
+        <div class="sr-feedback__actions">
+            <button type="button" class="sr-feedback__btn sr-feedback__btn--primary"
+                    data-action="send" disabled>
+                Send report
+            </button>
+            <button type="button" class="sr-feedback__btn"
+                    data-action="copy" disabled>
+                Copy as email
+            </button>
+        </div>
+
+        <p class="sr-feedback__email">
+            Goes to <a href="mailto:__EMAIL__">__EMAIL__</a>
+        </p>
+    `;
+
+    // Lazy-import the helper so the feedback.js bundle stays out of the
+    // critical path unless someone opens this section.
+    const helpersP = import('../feedback.js');
+
+    // Insert the real email (keeps it in one place in feedback.js).
+    helpersP.then(({ SUPPORT_EMAIL }) => {
+        el.querySelectorAll('.sr-feedback__email a, .sr-feedback__email').forEach((node) => {
+            node.innerHTML = node.innerHTML.replaceAll('__EMAIL__', SUPPORT_EMAIL);
+        });
+        el.querySelector('.sr-feedback__email a').setAttribute('href', `mailto:${SUPPORT_EMAIL}`);
+    });
+
+    let currentType = 'bug';
+    const textarea = el.querySelector('.sr-feedback__body');
+    const label    = el.querySelector('.sr-feedback__label');
+    const sendBtn  = el.querySelector('[data-action="send"]');
+    const copyBtn  = el.querySelector('[data-action="copy"]');
+
+    function syncButtons() {
+        const empty = textarea.value.trim().length === 0;
+        sendBtn.disabled = empty;
+        copyBtn.disabled = empty;
+        sendBtn.textContent = currentType === 'feature' ? 'Send request' : 'Send report';
+    }
+    textarea.addEventListener('input', syncButtons);
+
+    el.querySelectorAll('[data-type]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            currentType = btn.dataset.type;
+            el.querySelectorAll('[data-type]').forEach((b) => {
+                const active = b === btn;
+                b.classList.toggle('is-active', active);
+                b.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            // Swap the label prompt to fit the chosen type.
+            label.textContent = currentType === 'feature'
+                ? label.dataset.featureLabel
+                : label.dataset.bugLabel;
+            textarea.setAttribute(
+                'placeholder',
+                currentType === 'feature' ? 'What would you like us to build…' : 'Describe what you saw…'
+            );
+            syncButtons();
+        });
+    });
+
+    sendBtn.addEventListener('click', async () => {
+        const body = textarea.value.trim();
+        if (!body) return;
+        const { sendFeedback } = await helpersP;
+        sendFeedback(currentType, body);
+        flashButton(sendBtn, 'Opening mail…');
+    });
+    copyBtn.addEventListener('click', async () => {
+        const body = textarea.value.trim();
+        if (!body) return;
+        const { copyFeedbackToClipboard } = await helpersP;
+        await copyFeedbackToClipboard(currentType, body);
+        flashButton(copyBtn, 'Copied ✓');
+    });
+
+    syncButtons();
+    registerSearchable(el, 'feedback bug feature report send email', '');
+    return el;
+}
+
 function handleButtonAction(id, triggerEl) {
     switch (id) {
         case 'export-json': dataIO.downloadSettingsJSON(); flashButton(triggerEl, 'Downloaded ✓'); break;
@@ -440,12 +567,6 @@ function handleButtonAction(id, triggerEl) {
             break;
         case 'open-terms':
             window.open('/terms.html', '_blank', 'noopener');
-            break;
-        case 'report-bug':
-            import('../feedback.js').then((m) => m.openFeedback('bug'));
-            break;
-        case 'request-feature':
-            import('../feedback.js').then((m) => m.openFeedback('feature'));
             break;
     }
 }
