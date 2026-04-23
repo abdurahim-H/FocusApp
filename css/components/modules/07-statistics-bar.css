@@ -38,7 +38,7 @@
 .stat-divider {
     width: 1px;
     height: 24px;
-    background: rgba(200, 146, 42, 0.12);
+    background: rgba(225, 205, 150, 0.12);
 }
 
 /* Stats chips container — holds both the live stats and the confirm overlay */
@@ -55,31 +55,42 @@
     display: none;
 }
 
-/* Reset icon button — ghosted, barely visible until hovered */
+/* Reset icon button — visible at rest, brightens on hover.
+   Previously was barely visible (0.2 alpha on amber) which made it feel
+   broken. Now sits at a confident 0.55 alpha champagne with a faint
+   hairline border so it reads as a proper affordance even over a dim
+   backdrop. */
 .stat-reset-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    border: none;
-    background: transparent;
-    color: rgba(200, 146, 42, 0.2);
+    border: 1px solid rgba(225, 205, 150, 0.18);
+    background: rgba(225, 205, 150, 0.04);
+    color: rgba(225, 205, 150, 0.6);
     cursor: pointer;
-    transition: all 0.3s ease;
     padding: 0;
     flex-shrink: 0;
+    transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.18s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .stat-reset-btn:hover {
-    color: rgba(200, 146, 42, 0.65);
-    background: rgba(200, 146, 42, 0.08);
-    box-shadow: 0 0 12px rgba(200, 146, 42, 0.15);
+    color: rgba(255, 240, 210, 0.95);
+    border-color: rgba(225, 205, 150, 0.45);
+    background: rgba(225, 205, 150, 0.12);
+    box-shadow: 0 0 14px rgba(225, 205, 150, 0.2);
+    transform: rotate(-30deg);
 }
 
 .stat-reset-btn:active {
-    transform: scale(0.88);
+    transform: rotate(-30deg) scale(0.9);
+    transition-duration: 0.1s;
 }
 
 /* Confirmation inline — replaces stats with a smooth swap */
@@ -123,12 +134,12 @@
 
 .stats-confirm-no {
     background: transparent;
-    border-color: rgba(200, 146, 42, 0.18);
+    border-color: rgba(225, 205, 150, 0.18);
     color: rgba(192, 170, 130, 0.65);
 }
 
 .stats-confirm-no:hover {
-    border-color: rgba(200, 146, 42, 0.4);
+    border-color: rgba(225, 205, 150, 0.4);
     color: rgba(240, 223, 192, 0.9);
 }
 
@@ -143,7 +154,7 @@
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border: none !important;
-    border-top: 1px solid rgba(200, 146, 42, 0.08) !important;
+    border-top: 1px solid rgba(225, 205, 150, 0.08) !important;
     border-radius: 0 !important;
     padding: 12px 0 0 0 !important;
     margin-top: 10px;
@@ -182,7 +193,7 @@
     gap: 10px;
     padding: 8px 8px !important;
     border: none !important;
-    border-bottom: 1px solid rgba(200, 146, 42, 0.06) !important;
+    border-bottom: 1px solid rgba(225, 205, 150, 0.06) !important;
     background: transparent !important;
     backdrop-filter: none !important;
     border-radius: 8px !important;
@@ -199,9 +210,9 @@
 }
 
 .task-item:hover {
-    background: rgba(200, 146, 42, 0.04) !important;
-    border-bottom-color: rgba(200, 146, 42, 0.12) !important;
-    box-shadow: 0 2px 12px rgba(200, 146, 42, 0.08) !important;
+    background: rgba(225, 205, 150, 0.04) !important;
+    border-bottom-color: rgba(225, 205, 150, 0.12) !important;
+    box-shadow: 0 2px 12px rgba(225, 205, 150, 0.08) !important;
 }
 
 /* Align checkbox and text vertically */
@@ -247,8 +258,8 @@
     height: 20px !important;
     min-width: 20px !important;
     border-radius: 6px !important;
-    background: rgba(200, 146, 42, 0.06) !important;
-    border: 1.5px solid rgba(200, 146, 42, 0.25) !important;
+    background: rgba(225, 205, 150, 0.06) !important;
+    border: 1.5px solid rgba(225, 205, 150, 0.25) !important;
     box-shadow: none !important;
     backdrop-filter: none !important;
     cursor: pointer;
@@ -256,17 +267,17 @@
 }
 
 .task-item .liquid-glass-checkbox:hover .checkmark {
-    background: rgba(200, 146, 42, 0.12) !important;
-    border-color: rgba(200, 146, 42, 0.4) !important;
+    background: rgba(225, 205, 150, 0.12) !important;
+    border-color: rgba(225, 205, 150, 0.4) !important;
     transform: none !important;
     box-shadow: none !important;
 }
 
 /* Checked state — gold fill + white checkmark glyph */
 .task-item input[type="checkbox"]:checked + .checkmark {
-    background: rgba(200, 146, 42, 0.85) !important;
-    border-color: rgba(200, 146, 42, 0.95) !important;
-    box-shadow: 0 0 12px rgba(200, 146, 42, 0.35) !important;
+    background: rgba(225, 205, 150, 0.85) !important;
+    border-color: rgba(225, 205, 150, 0.95) !important;
+    box-shadow: 0 0 12px rgba(225, 205, 150, 0.35) !important;
 }
 
 .task-item input[type="checkbox"]:checked + .checkmark::after {
@@ -297,8 +308,8 @@
     top: 50%;
     width: 0;
     height: 1.5px;
-    background: rgba(200, 146, 42, 0.6);
-    box-shadow: 0 0 6px rgba(200, 146, 42, 0.4);
+    background: rgba(225, 205, 150, 0.6);
+    box-shadow: 0 0 6px rgba(225, 205, 150, 0.4);
     transform: translateY(-50%);
     transition: width 0.45s cubic-bezier(0.65, 0, 0.35, 1);
     pointer-events: none;
@@ -323,8 +334,8 @@
 /* Delete button — small gold X */
 .task-item .liquid-glass-btn {
     background: transparent !important;
-    border: 1px solid rgba(200, 146, 42, 0.12) !important;
-    color: rgba(200, 146, 42, 0.5) !important;
+    border: 1px solid rgba(225, 205, 150, 0.12) !important;
+    color: rgba(225, 205, 150, 0.5) !important;
     min-height: 28px !important;
     min-width: 28px !important;
     width: 28px !important;

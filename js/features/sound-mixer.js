@@ -24,6 +24,10 @@ import { ambientTracks, ambientMixes, activeSounds } from '../core/state.js';
 // Users still save their own on top.
 // ═══════════════════════════════════════════════════════════════════════════
 
+// Curated starter mixes — each a deliberate mood built from the four
+// available sounds (rain, ocean, forest, cafe). Volumes, EQ tilts and
+// pans are hand-tuned so the mixes feel like a chef's selection, not an
+// arbitrary sample. Users save their own mixes on top, unlimited.
 export const BUILTIN_MIXES = [
     {
         id: 'builtin:rainy-library',
@@ -55,6 +59,66 @@ export const BUILTIN_MIXES = [
         active: ['ocean'],
         tracks: {
             ocean: { volume: 0.75, eq: { low: 2, mid: 0, high: -2 }, pan: 0, muted: false },
+        },
+    },
+    {
+        id: 'builtin:storm-window',
+        name: 'Storm Window',
+        icon: '⛈️',
+        builtin: true,
+        active: ['rain', 'cafe'],
+        tracks: {
+            // Heavy rain outside, faint room presence inside
+            rain: { volume: 0.85, eq: { low: 4, mid: 0, high: 1 }, pan: 0, muted: false },
+            cafe: { volume: 0.18, eq: { low: -4, mid: -2, high: -3 }, pan: 0, muted: false },
+        },
+    },
+    {
+        id: 'builtin:tide-pool',
+        name: 'Tide Pool',
+        icon: '🐚',
+        builtin: true,
+        active: ['ocean', 'forest'],
+        tracks: {
+            // Waves meeting a wooded shoreline
+            ocean:  { volume: 0.6, eq: { low: 2, mid: 0, high: -2 }, pan: -0.2, muted: false },
+            forest: { volume: 0.35, eq: { low: -2, mid: 0, high: 2 }, pan: 0.25, muted: false },
+        },
+    },
+    {
+        id: 'builtin:garden-cafe',
+        name: 'Garden Café',
+        icon: '🍵',
+        builtin: true,
+        active: ['cafe', 'forest'],
+        tracks: {
+            // Terrace espresso in a leafy courtyard
+            cafe:   { volume: 0.55, eq: { low: -1, mid: 0, high: 1 }, pan: 0, muted: false },
+            forest: { volume: 0.4, eq: { low: 0, mid: 0, high: 0 }, pan: 0, muted: false },
+        },
+    },
+    {
+        id: 'builtin:deep-work',
+        name: 'Deep Work',
+        icon: '✦',
+        builtin: true,
+        active: ['rain', 'forest'],
+        tracks: {
+            // Steady white-noise floor — all fine-frequency detail pulled
+            // down so the mix disappears into the background.
+            rain:   { volume: 0.45, eq: { low: 1, mid: -3, high: -5 }, pan: 0, muted: false },
+            forest: { volume: 0.25, eq: { low: 0, mid: -2, high: -4 }, pan: 0, muted: false },
+        },
+    },
+    {
+        id: 'builtin:night-shore',
+        name: 'Night Shore',
+        icon: '🌙',
+        builtin: true,
+        active: ['ocean'],
+        tracks: {
+            // Low-tide hush, deep bass swell
+            ocean: { volume: 0.5, eq: { low: 5, mid: -1, high: -4 }, pan: 0, muted: false },
         },
     },
 ];

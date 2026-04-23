@@ -2,8 +2,8 @@
 
 /* Gold task input */
 .task-input {
-    background: rgba(200, 146, 42, 0.03) !important;
-    border: 1px solid rgba(200, 146, 42, 0.1) !important;
+    background: rgba(225, 205, 150, 0.03) !important;
+    border: 1px solid rgba(225, 205, 150, 0.1) !important;
     color: rgba(255, 255, 255, 0.9) !important;
     border-radius: 12px 0 0 12px !important;
     backdrop-filter: blur(20px) !important;
@@ -14,8 +14,8 @@
 }
 
 .task-input:focus {
-    background: rgba(200, 146, 42, 0.06) !important;
-    border-color: rgba(200, 146, 42, 0.32) !important;
+    background: rgba(225, 205, 150, 0.06) !important;
+    border-color: rgba(225, 205, 150, 0.32) !important;
     outline: none !important;
     /* Phase 4: breathing focus ring — soft gold halo that pulses ~2.4s.
        The animation cycles box-shadow alpha + spread for a living feel. */
@@ -25,13 +25,13 @@
 @keyframes inputBreathe {
     0%, 100% {
         box-shadow:
-            0 0 0 2px rgba(200, 146, 42, 0.12),
-            0 0 12px rgba(200, 146, 42, 0.08);
+            0 0 0 2px rgba(225, 205, 150, 0.12),
+            0 0 12px rgba(225, 205, 150, 0.08);
     }
     50% {
         box-shadow:
-            0 0 0 3px rgba(200, 146, 42, 0.22),
-            0 0 24px rgba(200, 146, 42, 0.18);
+            0 0 0 3px rgba(225, 205, 150, 0.22),
+            0 0 24px rgba(225, 205, 150, 0.18);
     }
 }
 
@@ -41,10 +41,10 @@
 
 /* Task Add button — connected to input */
 .task-input-group .liquid-glass-btn {
-    background: rgba(200, 146, 42, 0.06) !important;
-    border: 1px solid rgba(200, 146, 42, 0.15) !important;
+    background: rgba(225, 205, 150, 0.06) !important;
+    border: 1px solid rgba(225, 205, 150, 0.15) !important;
     border-left: none !important;
-    color: #F0DFC0 !important;
+    color: #EFE3C9 !important;
     border-radius: 0 12px 12px 0 !important;
     box-shadow: none !important;
     text-shadow: none !important;
@@ -62,8 +62,8 @@
 }
 
 .task-input-group .liquid-glass-btn:hover {
-    background: rgba(200, 146, 42, 0.1) !important;
-    border-color: rgba(200, 146, 42, 0.25) !important;
+    background: rgba(225, 205, 150, 0.1) !important;
+    border-color: rgba(225, 205, 150, 0.25) !important;
     transform: none !important;
 }
 

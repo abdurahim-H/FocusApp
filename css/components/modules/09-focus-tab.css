@@ -4,8 +4,8 @@
    Phase 4: shadows simulate (1) cool ambient drop from above, (2) warm gold
    rim light from below, plus an inner top highlight and a sharp gold edge. */
 .timer-controls .liquid-glass-btn {
-    background: rgba(200, 146, 42, 0.05) !important;
-    border: 1px solid rgba(200, 146, 42, 0.18) !important;
+    background: rgba(225, 205, 150, 0.05) !important;
+    border: 1px solid rgba(225, 205, 150, 0.18) !important;
     color: rgba(255, 255, 255, 0.92) !important;
     backdrop-filter: blur(30px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(30px) saturate(160%) !important;
@@ -23,7 +23,7 @@
         /* Inner top highlight (light from above hitting the rim) */
         inset 0 1px 0 rgba(255, 226, 168, 0.22),
         /* Inner bottom rim (warm gold bounce light) */
-        inset 0 -1px 0 rgba(200, 146, 42, 0.14) !important;
+        inset 0 -1px 0 rgba(225, 205, 150, 0.14) !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
     transform: none !important;
     /* Smooth hover transitions for all the visual props */
@@ -42,8 +42,8 @@
 
 /* Primary action (Start Focus) — slightly brighter gold border */
 .timer-controls .liquid-glass-btn--primary {
-    background: rgba(200, 146, 42, 0.08) !important;
-    border: 1px solid rgba(200, 146, 42, 0.25) !important;
+    background: rgba(225, 205, 150, 0.08) !important;
+    border: 1px solid rgba(225, 205, 150, 0.25) !important;
     color: rgba(255, 255, 255, 0.95) !important;
     font-weight: 600 !important;
 }
@@ -59,8 +59,8 @@
 
 /* Hover — gold halo lights up, top highlight intensifies */
 .timer-controls .liquid-glass-btn:hover {
-    background: rgba(200, 146, 42, 0.12) !important;
-    border-color: rgba(200, 146, 42, 0.36) !important;
+    background: rgba(225, 205, 150, 0.12) !important;
+    border-color: rgba(225, 205, 150, 0.36) !important;
     color: rgba(255, 255, 255, 1) !important;
     transform: none !important;
     box-shadow:
@@ -71,14 +71,14 @@
         /* Inner top highlight (brighter on hover) */
         inset 0 1px 0 rgba(255, 230, 175, 0.32),
         /* Inner bottom rim (brighter warm bounce) */
-        inset 0 -1px 0 rgba(200, 146, 42, 0.22),
+        inset 0 -1px 0 rgba(225, 205, 150, 0.22),
         /* Gold halo around the button on hover */
-        0 0 24px rgba(200, 146, 42, 0.22) !important;
+        0 0 24px rgba(225, 205, 150, 0.22) !important;
 }
 
 /* Active press — subtle inset */
 .timer-controls .liquid-glass-btn:active {
     transform: scale(0.97) !important;
-    background: rgba(200, 146, 42, 0.06) !important;
+    background: rgba(225, 205, 150, 0.06) !important;
 }
 

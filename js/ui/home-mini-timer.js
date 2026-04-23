@@ -26,7 +26,6 @@ let hideBlockedUntil = 0; // Timestamp — tick won't hide before this
 
 // Sliver (minimized / docked form)
 let sliver = null;
-let sliverFill = null;
 let sliverMM = null;
 let sliverSS = null;
 let docked = false;
@@ -60,7 +59,6 @@ export function initHomeMiniTimer() {
 
     // Sliver (docked form) references
     sliver     = document.getElementById('hmtSliver');
-    sliverFill = document.getElementById('hmtSliverFill');
     sliverMM   = document.getElementById('hmtSliverMM');
     sliverSS   = document.getElementById('hmtSliverSS');
 
@@ -80,11 +78,33 @@ export function initHomeMiniTimer() {
         });
     }
 
-    // Sliver click → unfurl back into the full mini-timer
-    if (sliver) {
-        sliver.addEventListener('click', (e) => {
+    // Sliver expand chevron → unfurl back to the full mini-timer
+    const sliverExpandBtn = document.getElementById('hmtSliverExpand');
+    if (sliverExpandBtn) {
+        sliverExpandBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             undockFromSliver();
+        });
+    }
+
+    // Sliver play/pause button
+    const sliverPlayBtn = document.getElementById('hmtSliverPlayPauseBtn');
+    if (sliverPlayBtn) {
+        sliverPlayBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (state.timer.isRunning) pauseTimer();
+            else startTimer();
+        });
+    }
+
+    // Sliver reset button
+    const sliverResetBtn = document.getElementById('hmtSliverResetBtn');
+    if (sliverResetBtn) {
+        sliverResetBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetTimer();
+            sessionStorage.removeItem(TIMER_STATE_KEY);
+            state.timerState = 'paused';
         });
     }
 
@@ -563,21 +583,27 @@ function hideSliver({ animate = true } = {}) {
     }
 }
 
-/** Push timer state into the sliver: countdown, progress fill, running glow. */
+/** Push timer state into the sliver: countdown text, play/pause icon, state classes. */
 function syncSliver() {
     if (!sliver || sliver.classList.contains('hidden')) return;
-    const { isRunning, isBreak, minutes, seconds, settings } = state.timer;
+    const { isRunning, isBreak, minutes, seconds } = state.timer;
     const timerState = state.timerState;
 
     if (sliverMM) sliverMM.textContent = String(minutes).padStart(2, '0');
     if (sliverSS) sliverSS.textContent = String(seconds).padStart(2, '0');
 
-    const totalSeconds = isBreak
-        ? (state.timer.isLongBreak ? settings.longBreakDuration : settings.shortBreakDuration) * 60
-        : settings.focusDuration * 60;
-    const remaining = minutes * 60 + seconds;
-    const progress = totalSeconds > 0 ? (totalSeconds - remaining) / totalSeconds : 0;
-    if (sliverFill) sliverFill.style.height = `${Math.min(100, progress * 100).toFixed(1)}%`;
+    // Swap play/pause icon to match the timer's running state.
+    const pp = document.getElementById('hmtSliverPlayPauseBtn');
+    if (pp) {
+        const targetState = isRunning ? 'running' : 'paused';
+        if (pp.dataset.state !== targetState) {
+            pp.innerHTML = isRunning
+                ? '<svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>'
+                : '<svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M4 2.5a.5.5 0 0 1 .77-.42l8.5 5.5a.5.5 0 0 1 0 .84l-8.5 5.5A.5.5 0 0 1 4 13.5v-11z"/></svg>';
+            pp.dataset.state = targetState;
+            pp.setAttribute('aria-label', isRunning ? 'Pause timer' : 'Resume timer');
+        }
+    }
 
     sliver.classList.toggle('is-running', isRunning);
     sliver.classList.toggle('is-paused', timerState === 'paused' && !isRunning);

@@ -264,7 +264,7 @@
 /* Enhanced hover on active sounds */
 .ambient-controls .liquid-glass-btn.active:hover,
 .ambient-controls .liquid-glass-btn[data-playing="true"]:hover {
-    background: rgba(200, 146, 42, 0.2);
+    background: rgba(225, 205, 150, 0.2);
 }
 
 /* ===== TIMER CONTROLS - APPLE STYLE ===== */
@@ -493,8 +493,8 @@
 }
 
 .browse-sounds-btn:hover {
-    background: rgba(200, 146, 42, 0.12) !important;
-    border-color: rgba(200, 146, 42, 0.25) !important;
+    background: rgba(225, 205, 150, 0.12) !important;
+    border-color: rgba(225, 205, 150, 0.25) !important;
     
     box-shadow: 
         0 10px 40px rgba(0, 0, 0, 0.25),
@@ -632,14 +632,14 @@
     background: rgba(20, 18, 12, 0.95);
     backdrop-filter: blur(60px) saturate(180%);
     -webkit-backdrop-filter: blur(60px) saturate(180%);
-    border: 1px solid rgba(200, 146, 42, 0.22);
+    border: 1px solid rgba(225, 205, 150, 0.22);
     border-radius: 32px;
 
     box-shadow:
         0 25px 100px rgba(0, 0, 0, 0.6),
-        0 10px 40px rgba(200, 146, 42, 0.18),
+        0 10px 40px rgba(225, 205, 150, 0.18),
         inset 0 1px 0 rgba(255, 226, 168, 0.18),
-        inset 0 0 60px rgba(200, 146, 42, 0.05);
+        inset 0 0 60px rgba(225, 205, 150, 0.05);
 
     display: flex;
     flex-direction: column;
@@ -857,23 +857,23 @@
 
     box-shadow:
         0 12px 40px rgba(0, 0, 0, 0.35),
-        0 4px 16px rgba(200, 146, 42, 0.2),
+        0 4px 16px rgba(225, 205, 150, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        0 0 35px rgba(200, 146, 42, 0.2);
+        0 0 35px rgba(225, 205, 150, 0.2);
 }
 
 /* Sound card active state */
 .sound-card.active {
-    background: rgba(200, 146, 42, 0.16);
-    border-color: rgba(200, 146, 42, 0.4);
+    background: rgba(225, 205, 150, 0.16);
+    border-color: rgba(225, 205, 150, 0.4);
     color: rgba(255, 255, 255, 0.98);
 
     box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.3),
-        0 2px 12px rgba(200, 146, 42, 0.32),
+        0 2px 12px rgba(225, 205, 150, 0.32),
         inset 0 1px 0 rgba(255, 226, 168, 0.28),
-        inset 0 0 30px rgba(200, 146, 42, 0.14),
-        0 0 50px rgba(200, 146, 42, 0.32);
+        inset 0 0 30px rgba(225, 205, 150, 0.14),
+        0 0 50px rgba(225, 205, 150, 0.32);
 
     /* Phase 4: subtle pulse synced to a slow ~2.4s rhythm — feels like the
        sound is breathing while it plays */
@@ -881,7 +881,7 @@
 }
 
 .sound-card.active:hover {
-    background: rgba(200, 146, 42, 0.22);
+    background: rgba(225, 205, 150, 0.22);
 }
 
 /* Responsive modal */
@@ -982,43 +982,43 @@
    referencing it. New gold pulse below is what the sound cards actually use. */
 @keyframes cosmicSoundPulse {
     0%, 100% {
-        border-color: rgba(200, 146, 42, 0.32);
+        border-color: rgba(225, 205, 150, 0.32);
         box-shadow:
             0 8px 32px rgba(0, 0, 0, 0.3),
-            0 2px 12px rgba(200, 146, 42, 0.28),
+            0 2px 12px rgba(225, 205, 150, 0.28),
             inset 0 1px 0 rgba(255, 226, 168, 0.25),
-            inset 0 0 25px rgba(200, 146, 42, 0.12),
-            0 0 40px rgba(200, 146, 42, 0.32);
+            inset 0 0 25px rgba(225, 205, 150, 0.12),
+            0 0 40px rgba(225, 205, 150, 0.32);
     }
     50% {
         border-color: rgba(255, 200, 100, 0.45);
         box-shadow:
             0 8px 32px rgba(0, 0, 0, 0.3),
-            0 2px 16px rgba(200, 146, 42, 0.4),
+            0 2px 16px rgba(225, 205, 150, 0.4),
             inset 0 1px 0 rgba(255, 226, 168, 0.32),
-            inset 0 0 32px rgba(200, 146, 42, 0.18),
-            0 0 56px rgba(200, 146, 42, 0.42);
+            inset 0 0 32px rgba(225, 205, 150, 0.18),
+            0 0 56px rgba(225, 205, 150, 0.42);
     }
 }
 
 @keyframes goldSoundPulse {
     0%, 100% {
-        border-color: rgba(200, 146, 42, 0.36);
+        border-color: rgba(225, 205, 150, 0.36);
         box-shadow:
             0 8px 32px rgba(0, 0, 0, 0.3),
-            0 2px 12px rgba(200, 146, 42, 0.28),
+            0 2px 12px rgba(225, 205, 150, 0.28),
             inset 0 1px 0 rgba(255, 226, 168, 0.25),
-            inset 0 0 26px rgba(200, 146, 42, 0.1),
-            0 0 38px rgba(200, 146, 42, 0.28);
+            inset 0 0 26px rgba(225, 205, 150, 0.1),
+            0 0 38px rgba(225, 205, 150, 0.28);
     }
     50% {
         border-color: rgba(255, 200, 110, 0.5);
         box-shadow:
             0 10px 36px rgba(0, 0, 0, 0.32),
-            0 3px 18px rgba(200, 146, 42, 0.42),
+            0 3px 18px rgba(225, 205, 150, 0.42),
             inset 0 1px 0 rgba(255, 230, 175, 0.35),
-            inset 0 0 36px rgba(200, 146, 42, 0.2),
-            0 0 60px rgba(200, 146, 42, 0.45);
+            inset 0 0 36px rgba(225, 205, 150, 0.2),
+            0 0 60px rgba(225, 205, 150, 0.45);
     }
 }
 
@@ -1164,7 +1164,7 @@
    keyboard/programmatic focus), so it only appears when tabbing through. */
 .ambient-controls .liquid-glass-btn:focus-visible,
 .timer-controls .liquid-glass-btn:focus-visible {
-    outline: 2px solid rgba(200, 146, 42, 0.65);
+    outline: 2px solid rgba(225, 205, 150, 0.65);
     outline-offset: 2px;
 }
 
@@ -1349,7 +1349,7 @@
 .modal-close-btn:focus-visible,
 .browse-sounds-btn:focus-visible,
 .active-sound-chip .chip-close:focus-visible {
-    outline: 2px solid rgba(200, 146, 42, 0.65);
+    outline: 2px solid rgba(225, 205, 150, 0.65);
     outline-offset: 2px;
 }
 

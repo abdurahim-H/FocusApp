@@ -117,22 +117,6 @@
     font-size: 11px;
     font-variant-numeric: tabular-nums;
 }
-.mix-card__menu,
-.mix-card__pin {
-    margin-left: 2px;
-    width: 22px;
-    height: 22px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--deck-cream-dim);
-    font-size: 14px;
-    line-height: 1;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, transform 0.25s var(--deck-spring);
-}
-.mix-card__menu:hover,
-.mix-card__pin:hover { background: var(--deck-gold-faint); color: var(--deck-cream); transform: scale(1.1); }
 .mix-card__pin.is-on {
     color: var(--deck-gold);
     filter: drop-shadow(0 0 6px rgba(225, 205, 150, 0.6));
@@ -155,6 +139,210 @@
             mask-composite: exclude;
     pointer-events: none;
     opacity: 0.9;
+}
+
+/* Mix card's inline controls (pin + menu) now styled together — they were
+   previously slightly different heights. Unified to a 22×22 icon button
+   with matching hover states. */
+.mix-card__pin,
+.mix-card__menu {
+    margin-left: 2px;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--deck-cream-dim);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.25s var(--deck-spring);
+}
+.mix-card__pin:hover,
+.mix-card__menu:hover {
+    background: var(--deck-gold-faint);
+    color: var(--deck-cream);
+    transform: scale(1.1);
+}
+
+/* ── Mix menu popover — anchored popover that replaces the old native
+   prompt() dialog. Rendered as a floating element appended to <body>,
+   positioned just below/above the clicked ... button. Matches the
+   deck's visual language: deep-dark gradient card, champagne accents,
+   soft radius, generous shadow. ── */
+.mix-menu {
+    position: fixed;
+    z-index: 2100;
+    min-width: 200px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    /* Solid dark layered gradient — no backdrop-filter. */
+    background:
+        linear-gradient(180deg, rgba(20, 16, 10, 0.98), rgba(12, 9, 5, 0.98));
+    border: 1px solid rgba(225, 205, 150, 0.22);
+    border-radius: 14px;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 240, 210, 0.07),
+        0 18px 48px rgba(0, 0, 0, 0.55),
+        0 6px 18px rgba(0, 0, 0, 0.45),
+        0 0 28px rgba(225, 205, 150, 0.08);
+    color: var(--deck-cream);
+    font-family: inherit;
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+    transform-origin: top right;
+    transition: opacity 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mix-menu.is-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+.mix-menu.is-leaving {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+    transition-duration: 0.14s;
+}
+
+.mix-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px 9px 10px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--deck-cream);
+    font: inherit;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mix-menu__item svg {
+    color: rgba(225, 205, 150, 0.75);
+    flex-shrink: 0;
+    transition: color 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mix-menu__item:hover {
+    background: rgba(225, 205, 150, 0.09);
+    color: #FFF6E4;
+}
+.mix-menu__item:hover svg {
+    color: rgba(255, 230, 170, 1);
+}
+.mix-menu__item:focus-visible {
+    outline: 2px solid rgba(225, 205, 150, 0.6);
+    outline-offset: -2px;
+}
+
+.mix-menu__item--danger:hover {
+    background: rgba(220, 70, 70, 0.1);
+    color: rgba(255, 170, 170, 1);
+}
+.mix-menu__item--danger:hover svg {
+    color: rgba(255, 170, 170, 1);
+}
+
+/* Rename form (inline) + Delete confirm (inline) — replaces the list of
+   actions when the user picks Rename or Delete. */
+.mix-menu__form,
+.mix-menu__confirm {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 240px;
+}
+.mix-menu__input {
+    padding: 9px 11px;
+    border-radius: 9px;
+    border: 1px solid rgba(225, 205, 150, 0.22);
+    background: rgba(0, 0, 0, 0.35);
+    color: var(--deck-cream);
+    font: inherit;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    outline: none;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                background 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mix-menu__input:focus {
+    border-color: rgba(225, 205, 150, 0.55);
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 0 3px rgba(225, 205, 150, 0.1);
+}
+
+.mix-menu__confirm-text {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--deck-cream);
+}
+.mix-menu__confirm-text strong { color: #FFF6E4; font-weight: 500; }
+.mix-menu__confirm-sub {
+    font-size: 11.5px;
+    color: var(--deck-cream-dim);
+    letter-spacing: 0.01em;
+}
+
+.mix-menu__row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+.mix-menu__btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font: inherit;
+    font-size: 12.5px;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mix-menu__btn--ghost {
+    background: transparent;
+    color: var(--deck-cream-soft);
+    border-color: rgba(255, 240, 210, 0.1);
+}
+.mix-menu__btn--ghost:hover {
+    background: rgba(255, 240, 210, 0.05);
+    color: var(--deck-cream);
+    border-color: rgba(255, 240, 210, 0.18);
+}
+.mix-menu__btn--primary {
+    background: linear-gradient(180deg, rgba(225, 205, 150, 0.22), rgba(225, 205, 150, 0.12));
+    color: #FFF6E4;
+    border-color: rgba(225, 205, 150, 0.45);
+}
+.mix-menu__btn--primary:hover {
+    background: linear-gradient(180deg, rgba(225, 205, 150, 0.32), rgba(225, 205, 150, 0.18));
+    border-color: rgba(225, 205, 150, 0.65);
+    box-shadow: 0 0 14px rgba(225, 205, 150, 0.2);
+}
+.mix-menu__btn--danger {
+    background: rgba(220, 70, 70, 0.12);
+    color: rgba(255, 170, 170, 1);
+    border-color: rgba(220, 70, 70, 0.35);
+}
+.mix-menu__btn--danger:hover {
+    background: rgba(220, 70, 70, 0.22);
+    border-color: rgba(220, 70, 70, 0.55);
+    box-shadow: 0 0 14px rgba(220, 70, 70, 0.2);
 }
 
 /* ── Empty state ──────────────────────────────────────────────────────────

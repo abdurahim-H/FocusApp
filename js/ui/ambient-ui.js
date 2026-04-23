@@ -181,10 +181,12 @@ function renderMixesRail() {
                             title="${isPinned ? 'Pinned as focus-start mix' : 'Pin as focus-start mix'}">
                         ${isPinned ? '★' : '☆'}
                     </button>
-                    ${m.builtin ? '' : `
-                        <button class="mix-card__menu" data-mix-menu="${escapeAttr(m.id)}"
-                                aria-label="Mix options" title="Rename or delete">⋯</button>
-                    `}
+                    <button class="mix-card__menu" data-mix-menu="${escapeAttr(m.id)}"
+                            aria-label="Mix options" title="${m.builtin ? 'Share' : 'Rename, share, or delete'}">
+                        <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
+                            <circle cx="3" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="13" cy="8" r="1.4"/>
+                        </svg>
+                    </button>
                 </button>
             `;
         })
@@ -223,43 +225,213 @@ function renderMixesRail() {
     });
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Mix menu popover — anchored popover with Rename / Share / Delete actions.
+// Replaces the old native prompt() / confirm() dialogs with a proper in-app
+// surface that matches the deck's visual language. Built-in mixes get only
+// Share + Pin (renaming and deleting a built-in doesn't make sense).
+// ═══════════════════════════════════════════════════════════════════════════
+
+let activeMixMenu = null;
+
+function closeMixMenu() {
+    if (!activeMixMenu) return;
+    const el = activeMixMenu.el;
+    activeMixMenu = null;
+    el.classList.add('is-leaving');
+    setTimeout(() => el.remove(), 180);
+    document.removeEventListener('click', onMixMenuOutsideClick, true);
+    document.removeEventListener('keydown', onMixMenuKeydown);
+    window.removeEventListener('resize', closeMixMenu);
+    window.removeEventListener('scroll', closeMixMenu, true);
+}
+
+function onMixMenuOutsideClick(e) {
+    if (!activeMixMenu) return;
+    if (activeMixMenu.el.contains(e.target)) return;
+    if (activeMixMenu.anchor.contains(e.target)) return;
+    closeMixMenu();
+}
+
+function onMixMenuKeydown(e) {
+    if (e.key === 'Escape' && activeMixMenu) {
+        e.stopPropagation();
+        closeMixMenu();
+    }
+}
+
 function openMixMenu(anchor, mixId) {
-    const mix = ambientMixes.value.find((m) => m.id === mixId);
+    // Toggle if re-clicking the same anchor
+    if (activeMixMenu && activeMixMenu.mixId === mixId) { closeMixMenu(); return; }
+    if (activeMixMenu) closeMixMenu();
+
+    const mix = ambientMixes.value.find((m) => m.id === mixId)
+        || (getAllMixes().find((m) => m.id === mixId));
     if (!mix) return;
-    const safeName = safeDialogText(mix.name);
-    const choice = prompt(
-        `Options for "${safeName}":\n\n` +
-        `1 — Rename\n` +
-        `2 — Share (copy link)\n` +
-        `3 — Delete\n\n` +
-        `Type 1, 2, or 3`,
-        '1'
-    );
-    if (choice === null) return;
-    switch (choice.trim()) {
-        case '1': {
-            const name = prompt('New name:', mix.name);
-            if (name && name.trim() && name.trim() !== mix.name) renameMix(mixId, name.trim());
-            break;
+
+    const el = document.createElement('div');
+    el.className = 'mix-menu';
+    el.setAttribute('role', 'menu');
+    el.innerHTML = mixMenuViewActions(mix);
+    document.body.appendChild(el);
+
+    positionMixMenu(el, anchor);
+    activeMixMenu = { el, anchor, mixId, mix };
+    requestAnimationFrame(() => el.classList.add('is-open'));
+
+    bindMixMenuActions(el, mix);
+
+    document.addEventListener('click', onMixMenuOutsideClick, true);
+    document.addEventListener('keydown', onMixMenuKeydown);
+    window.addEventListener('resize', closeMixMenu);
+    window.addEventListener('scroll', closeMixMenu, true);
+}
+
+function positionMixMenu(el, anchor) {
+    const rect = anchor.getBoundingClientRect();
+    // First render: measure
+    el.style.visibility = 'hidden';
+    el.style.left = '0px';
+    el.style.top = '0px';
+    const menuRect = el.getBoundingClientRect();
+    // Place below the anchor, right-aligned to it — flip up if it would
+    // overflow the viewport bottom.
+    const gap = 6;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let left = rect.right - menuRect.width;
+    let top = rect.bottom + gap;
+    if (top + menuRect.height > vh - 8) {
+        top = rect.top - menuRect.height - gap;  // flip above
+    }
+    left = Math.max(8, Math.min(left, vw - menuRect.width - 8));
+    top = Math.max(8, top);
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
+    el.style.visibility = '';
+}
+
+function mixMenuViewActions(mix) {
+    const rename = mix.builtin ? '' : `
+        <button class="mix-menu__item" data-mix-action="rename" type="button">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2 2-8 8H4v-2l8-8z"/></svg>
+            <span>Rename</span>
+        </button>
+    `;
+    const del = mix.builtin ? '' : `
+        <button class="mix-menu__item mix-menu__item--danger" data-mix-action="delete" type="button">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h10M6 4V2.5h4V4M4.5 4l.7 9a1 1 0 0 0 1 .9h3.6a1 1 0 0 0 1-.9L11.5 4"/></svg>
+            <span>Delete</span>
+        </button>
+    `;
+    return `
+        ${rename}
+        <button class="mix-menu__item" data-mix-action="share" type="button">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 8.5l3-3M9.5 5.5a2 2 0 1 1 2.8 2.8L10 10.6M6.5 5.5L4.2 7.8a2 2 0 1 0 2.8 2.8L9.3 8.3"/></svg>
+            <span>Copy share link</span>
+        </button>
+        ${del}
+    `;
+}
+
+function mixMenuViewRename(mix) {
+    return `
+        <form class="mix-menu__form" data-mix-action-form="rename">
+            <input class="mix-menu__input" type="text"
+                   value="${escapeAttr(mix.name)}"
+                   maxlength="40"
+                   aria-label="New mix name"
+                   placeholder="Mix name">
+            <div class="mix-menu__row">
+                <button type="button" class="mix-menu__btn mix-menu__btn--ghost" data-mix-action="cancel">Cancel</button>
+                <button type="submit" class="mix-menu__btn mix-menu__btn--primary">Save</button>
+            </div>
+        </form>
+    `;
+}
+
+function mixMenuViewDelete(mix) {
+    return `
+        <div class="mix-menu__confirm">
+            <p class="mix-menu__confirm-text">Delete <strong>${escapeHtml(mix.name)}</strong>?<br><span class="mix-menu__confirm-sub">This can't be undone.</span></p>
+            <div class="mix-menu__row">
+                <button type="button" class="mix-menu__btn mix-menu__btn--ghost" data-mix-action="cancel">Cancel</button>
+                <button type="button" class="mix-menu__btn mix-menu__btn--danger" data-mix-action="confirm-delete">Delete</button>
+            </div>
+        </div>
+    `;
+}
+
+function bindMixMenuActions(el, mix) {
+    el.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-mix-action]');
+        if (!btn) return;
+        e.stopPropagation();
+        const action = btn.dataset.mixAction;
+
+        if (action === 'rename') {
+            el.innerHTML = mixMenuViewRename(mix);
+            positionMixMenu(el, activeMixMenu.anchor);
+            const input = el.querySelector('.mix-menu__input');
+            if (input) { input.focus(); input.select(); }
+            el.querySelector('[data-mix-action-form="rename"]').addEventListener('submit', (ev) => {
+                ev.preventDefault();
+                const next = (input.value || '').trim();
+                if (next && next !== mix.name) renameMix(mix.id, next);
+                closeMixMenu();
+            });
+            el.querySelector('[data-mix-action="cancel"]').addEventListener('click', closeMixMenu);
+            return;
         }
-        case '2': {
-            const url = buildShareUrl(mix);
-            navigator.clipboard?.writeText(url).then(
-                () => toast('Share link copied.'),
-                () => prompt('Copy this link:', url)
-            );
-            break;
-        }
-        case '3': {
-            if (confirm(`Delete mix "${safeName}"?`)) {
-                if (settingsGet('sounds.focusStartMixId') === mixId) {
+
+        if (action === 'delete') {
+            el.innerHTML = mixMenuViewDelete(mix);
+            positionMixMenu(el, activeMixMenu.anchor);
+            el.querySelector('[data-mix-action="cancel"]').addEventListener('click', closeMixMenu);
+            el.querySelector('[data-mix-action="confirm-delete"]').addEventListener('click', () => {
+                if (settingsGet('sounds.focusStartMixId') === mix.id) {
                     settingsSet('sounds.focusStartMixId', null);
                 }
-                deleteMix(mixId);
-            }
-            break;
+                deleteMix(mix.id);
+                toast(`Deleted "${safeDialogText(mix.name)}".`);
+                closeMixMenu();
+            });
+            return;
         }
-    }
+
+        if (action === 'share') {
+            const url = buildShareUrl(mix);
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(
+                    () => toast('Share link copied to clipboard.'),
+                    () => {
+                        // Clipboard denied — show the URL so the user can copy manually.
+                        el.innerHTML = `
+                            <div class="mix-menu__confirm">
+                                <p class="mix-menu__confirm-sub" style="margin:0 0 8px">Copy this link:</p>
+                                <input class="mix-menu__input" value="${escapeAttr(url)}" readonly>
+                                <div class="mix-menu__row">
+                                    <button type="button" class="mix-menu__btn mix-menu__btn--primary" data-mix-action="cancel">Done</button>
+                                </div>
+                            </div>
+                        `;
+                        positionMixMenu(el, activeMixMenu.anchor);
+                        const inp = el.querySelector('.mix-menu__input');
+                        if (inp) { inp.focus(); inp.select(); }
+                        el.querySelector('[data-mix-action="cancel"]').addEventListener('click', closeMixMenu);
+                    }
+                );
+                closeMixMenu();
+            } else {
+                // Older browsers without Clipboard API
+                closeMixMenu();
+                window.prompt('Copy this link:', url);
+            }
+            return;
+        }
+
+        if (action === 'cancel') closeMixMenu();
+    });
 }
 
 function buildShareUrl(mix) {

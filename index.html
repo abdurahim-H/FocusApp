@@ -209,26 +209,38 @@
     </div>
 
     <!-- Docked sliver — the minimized form of the mini-timer, pinned to the
-         right viewport edge, always on top regardless of scroll. Click to
-         expand back into the full mini-timer. -->
-    <button class="hmt-sliver hidden" id="hmtSliver" aria-label="Expand focus timer" type="button">
-        <!-- Vertical progress rail -->
-        <div class="hmt-sliver__rail" aria-hidden="true">
-            <div class="hmt-sliver__fill" id="hmtSliverFill"></div>
-        </div>
+         right viewport edge, always on top regardless of scroll.
+         Structure: a container DIV (not a button) holding an expand-hitbox
+         at top, the countdown in the middle, and two interactive controls
+         (play/pause + reset) at the bottom. Using a DIV + explicit child
+         buttons avoids nested-button HTML issues. -->
+    <div class="hmt-sliver hidden" id="hmtSliver" role="group" aria-label="Minimized focus timer">
+        <!-- Expand hitbox — click to unfurl back to the full mini-timer -->
+        <button class="hmt-sliver__expand" id="hmtSliverExpand" aria-label="Expand focus timer" type="button">
+            <svg class="hmt-sliver__chev" viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="10 3 5 8 10 13"/>
+            </svg>
+        </button>
         <!-- Time (compact digital, stacked MM over SS) -->
-        <div class="hmt-sliver__time" aria-hidden="true">
+        <div class="hmt-sliver__time" aria-live="polite" aria-atomic="true">
             <span class="hmt-sliver__mm" id="hmtSliverMM">25</span>
-            <span class="hmt-sliver__sep">·</span>
+            <span class="hmt-sliver__sep" aria-hidden="true">·</span>
             <span class="hmt-sliver__ss" id="hmtSliverSS">00</span>
         </div>
-        <!-- Expand chevron — points inward (left) toward the main viewport -->
-        <svg class="hmt-sliver__chev" viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="10 3 5 8 10 13"/>
-        </svg>
+        <!-- Play/Pause + Reset controls stacked at the bottom -->
+        <div class="hmt-sliver__controls">
+            <button class="hmt-sliver__btn hmt-sliver__btn--play" id="hmtSliverPlayPauseBtn" aria-label="Pause timer" type="button" data-state="">
+                <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>
+            </button>
+            <button class="hmt-sliver__btn hmt-sliver__btn--reset" id="hmtSliverResetBtn" aria-label="Reset timer" type="button">
+                <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2.5 2.5v4h4"/><path d="M2.9 10a5.5 5.5 0 1 0 1.1-5.5L2.5 6.5"/>
+                </svg>
+            </button>
+        </div>
         <!-- Pulse overlay, active when timer is running -->
         <div class="hmt-sliver__pulse" aria-hidden="true"></div>
-    </button>
+    </div>
 
         <!-- Focus Mode - Pomodoro Timer and Tasks -->
         <div class="mode" id="focus">

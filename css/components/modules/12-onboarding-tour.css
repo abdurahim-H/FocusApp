@@ -27,12 +27,12 @@
     width: 90vw;
     max-width: 380px;
     background: rgba(18, 16, 10, 0.96);
-    border: 1px solid rgba(200, 146, 42, 0.25);
+    border: 1px solid rgba(225, 205, 150, 0.25);
     border-radius: 20px;
     padding: 28px 24px 20px;
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.6),
-        0 4px 20px rgba(200, 146, 42, 0.12),
+        0 4px 20px rgba(225, 205, 150, 0.12),
         inset 0 1px 0 rgba(255, 226, 168, 0.1);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
@@ -59,9 +59,9 @@
     display: inline-block;
     padding: 1px 6px;
     border-radius: 4px;
-    background: rgba(200, 146, 42, 0.15);
-    border: 1px solid rgba(200, 146, 42, 0.3);
-    color: #F0DFC0;
+    background: rgba(225, 205, 150, 0.15);
+    border: 1px solid rgba(225, 205, 150, 0.3);
+    color: #EFE3C9;
     font-size: 11px;
     font-family: inherit;
 }
@@ -94,19 +94,19 @@
     color: rgba(192, 170, 130, 0.9);
 }
 .tour-btn--next {
-    background: rgba(200, 146, 42, 0.18);
-    border-color: rgba(200, 146, 42, 0.4);
-    color: #F0DFC0;
+    background: rgba(225, 205, 150, 0.18);
+    border-color: rgba(225, 205, 150, 0.4);
+    color: #EFE3C9;
 }
 .tour-btn--next:hover {
-    background: rgba(200, 146, 42, 0.3);
-    border-color: rgba(200, 146, 42, 0.6);
+    background: rgba(225, 205, 150, 0.3);
+    border-color: rgba(225, 205, 150, 0.6);
 }
 /* Highlight ring on targeted elements during tour */
 .tour-highlight {
     position: relative;
     z-index: 10001;
-    box-shadow: 0 0 0 3px rgba(200, 146, 42, 0.5), 0 0 24px rgba(200, 146, 42, 0.3) !important;
+    box-shadow: 0 0 0 3px rgba(225, 205, 150, 0.5), 0 0 24px rgba(225, 205, 150, 0.3) !important;
     border-radius: 16px;
 }
 /* Preserve fixed positioning for already-pinned targets (e.g. the top-right

@@ -104,10 +104,10 @@
     --pill-scale-y: 1;
 
     /* Nearly invisible — scene bleeds through */
-    background: rgba(200, 146, 42, 0.04) !important;
+    background: rgba(225, 205, 150, 0.04) !important;
 
     /* Thin gold-tinted border */
-    border: 1px solid rgba(200, 146, 42, 0.15) !important;
+    border: 1px solid rgba(225, 205, 150, 0.15) !important;
 
     /* Frosted glass blur */
     backdrop-filter: blur(40px) saturate(180%) !important;
@@ -117,7 +117,7 @@
     box-shadow:
         0 4px 24px rgba(0, 0, 0, 0.15),
         0 1px 3px rgba(0, 0, 0, 0.1),
-        inset 0 0.5px 0 rgba(200, 146, 42, 0.12) !important;
+        inset 0 0.5px 0 rgba(225, 205, 150, 0.12) !important;
 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
@@ -135,11 +135,11 @@
     /* Glass bubble — warm gold tint */
     background: linear-gradient(
         180deg,
-        rgba(200, 146, 42, 0.18) 0%,
-        rgba(200, 146, 42, 0.04) 100%
+        rgba(225, 205, 150, 0.18) 0%,
+        rgba(225, 205, 150, 0.04) 100%
     );
 
-    border: 0.5px solid rgba(200, 146, 42, 0.22);
+    border: 0.5px solid rgba(225, 205, 150, 0.22);
 
     backdrop-filter: blur(20px) saturate(160%) brightness(1.15);
     -webkit-backdrop-filter: blur(20px) saturate(160%) brightness(1.15);
@@ -148,7 +148,7 @@
     box-shadow:
         0 2px 12px rgba(0, 0, 0, 0.12),
         0 6px 20px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(200, 146, 42, 0.35),
+        inset 0 1px 0 rgba(225, 205, 150, 0.35),
         inset 0 -0.5px 0 rgba(0, 0, 0, 0.05);
 
     /* Spring animation. Phase 4: transform inherits the squash vars so the
@@ -174,8 +174,8 @@
     border-radius: 24px 24px 50% 50%;
     background: linear-gradient(
         180deg,
-        rgba(200, 146, 42, 0.2) 0%,
-        rgba(200, 146, 42, 0.0) 100%
+        rgba(225, 205, 150, 0.2) 0%,
+        rgba(225, 205, 150, 0.0) 100%
     );
     pointer-events: none;
     z-index: 0;
@@ -263,7 +263,7 @@
 
 .nav-buttons .nav-btn:focus-visible {
     outline: none !important;
-    box-shadow: 0 0 0 2px rgba(200, 146, 42, 0.65) !important;
+    box-shadow: 0 0 0 2px rgba(225, 205, 150, 0.65) !important;
     border-radius: 24px !important;
 }
 
