@@ -364,14 +364,17 @@ function tick() {
     const elapsed = totalSeconds - remaining;
     const progress = totalSeconds > 0 ? elapsed / totalSeconds : 0;
 
-    // Minute hand — full rotation maps to full session duration
+    // Minute hand — full rotation over the session duration, clockwise.
     if (minHand) {
         const minAngle = progress * 360;
         minHand.style.transform = `rotate(${minAngle.toFixed(1)}deg)`;
     }
-    // Second hand — one full rotation per 60 seconds
+    // Second hand — clockwise sweep. The timer counts DOWN (seconds 59→0),
+    // so using seconds/60 directly produced a counterclockwise motion. Flip
+    // to elapsed-in-current-minute so the angle increases over time.
     if (secHand) {
-        const secAngle = (seconds / 60) * 360;
+        const secElapsed = (60 - seconds) % 60;
+        const secAngle = (secElapsed / 60) * 360;
         secHand.style.transform = `rotate(${secAngle.toFixed(1)}deg)`;
     }
     // Progress arc
