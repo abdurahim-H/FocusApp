@@ -535,32 +535,43 @@ export function onAmbientEvent(fn) {
 // Media Session API — lock-screen, headphone, CarPlay controls
 // ═══════════════════════════════════════════════════════════════════════════
 //
-// Browsers only surface MediaSession controls when there's actual playback
-// activity they can observe. Web Audio alone isn't always enough, so we
-// pipe a silent looping HTMLAudioElement through the graph whenever at
-// least one track is playing. Zero audible contribution, but satisfies
-// the browser's "something is playing" heuristic.
+// Browsers only surface MediaSession controls when there's observable audio
+// playback. The old implementation used a tiny silent WAV looped through an
+// HTMLAudioElement — but the base64-encoded WAV actually had a 0-byte data
+// chunk (0 seconds of audio), which made the browser cycle
+// seeking/seeked/canplay/canplaythrough/timeupdate thousands of times per
+// second trying to loop nothing. Captured in a trace as ~267K media events
+// in 24 seconds, which cascaded into ~800K V8 async-task events and pinned
+// the Renderer CPU at 2+ cores — that was the fan spin and the OOM crashes.
+//
+// Modern Chrome's MediaSession surfaces as long as the active AudioContext
+// is producing output. Driving a silent AudioBufferSourceNode through the
+// graph satisfies that without touching the HTMLAudioElement machinery and
+// without any media events at all.
 
-let silentEl = null;
+let silentSource = null;
 let mediaSessionAttached = false;
 
 function ensureSilentKeepAlive() {
-    if (silentEl) return;
-    // A tiny 1-second silent WAV, looped. ~44 bytes total.
-    // Generated via: ffmpeg -f lavfi -i anullsrc=r=8000:cl=mono -t 1 silent.wav
-    const silentWav =
-        'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-    silentEl = new Audio(silentWav);
-    silentEl.loop = true;
-    silentEl.volume = 0;
-    // Don't await — we just need the element registered.
-    silentEl.play().catch(() => { /* will retry after next user gesture */ });
+    if (silentSource || !ctx) return;
+    try {
+        // 1 second of zeros at the context's native sample rate. Looping is
+        // seamless because every sample is 0; there's no discontinuity at
+        // the loop point, so no clicks. No media events either.
+        const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+        silentSource = ctx.createBufferSource();
+        silentSource.buffer = buf;
+        silentSource.loop = true;
+        silentSource.connect(ctx.destination);
+        silentSource.start(0);
+    } catch (_) { /* ignore — keep-alive is best-effort */ }
 }
 
 function teardownSilentKeepAlive() {
-    if (!silentEl) return;
-    try { silentEl.pause(); silentEl.src = ''; } catch (_) {}
-    silentEl = null;
+    if (!silentSource) return;
+    try { silentSource.stop(); } catch (_) {}
+    try { silentSource.disconnect(); } catch (_) {}
+    silentSource = null;
 }
 
 function setupMediaSession() {
@@ -571,7 +582,6 @@ function setupMediaSession() {
     try {
         navigator.mediaSession.setActionHandler('play', () => {
             ensureSilentKeepAlive();
-            silentEl?.play().catch(() => {});
             emit('mediasession-play');
         });
         navigator.mediaSession.setActionHandler('pause', () => {
