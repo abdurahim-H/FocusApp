@@ -142,6 +142,13 @@
 
     <!-- Mini Focus Timer — OUTSIDE #home so it's viewport-positioned, draggable -->
     <div class="home-mini-timer hidden" id="homeMiniTimer" role="status" aria-label="Focus timer">
+        <!-- Minimize button — top-right, sends the timer to the right-edge sliver -->
+        <button class="hmt-minimize" id="hmtMinimizeBtn" aria-label="Dock timer to the right edge" type="button">
+            <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 3 11 8 6 13"/>
+                <line x1="13.5" y1="3" x2="13.5" y2="13" opacity="0.55"/>
+            </svg>
+        </button>
         <!-- Analog clock face -->
         <svg class="hmt-clock" viewBox="0 0 60 60" aria-hidden="true">
             <!-- Outer ring -->
@@ -197,6 +204,28 @@
         <!-- Pulse ring (animated behind on active) -->
         <div class="hmt-pulse" aria-hidden="true"></div>
     </div>
+
+    <!-- Docked sliver — the minimized form of the mini-timer, pinned to the
+         right viewport edge, always on top regardless of scroll. Click to
+         expand back into the full mini-timer. -->
+    <button class="hmt-sliver hidden" id="hmtSliver" aria-label="Expand focus timer" type="button">
+        <!-- Vertical progress rail -->
+        <div class="hmt-sliver__rail" aria-hidden="true">
+            <div class="hmt-sliver__fill" id="hmtSliverFill"></div>
+        </div>
+        <!-- Time (compact digital, stacked MM over SS) -->
+        <div class="hmt-sliver__time" aria-hidden="true">
+            <span class="hmt-sliver__mm" id="hmtSliverMM">25</span>
+            <span class="hmt-sliver__sep">·</span>
+            <span class="hmt-sliver__ss" id="hmtSliverSS">00</span>
+        </div>
+        <!-- Expand chevron — points inward (left) toward the main viewport -->
+        <svg class="hmt-sliver__chev" viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="10 3 5 8 10 13"/>
+        </svg>
+        <!-- Pulse overlay, active when timer is running -->
+        <div class="hmt-sliver__pulse" aria-hidden="true"></div>
+    </button>
 
         <!-- Focus Mode - Pomodoro Timer and Tasks -->
         <div class="mode" id="focus">

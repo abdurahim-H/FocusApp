@@ -505,3 +505,328 @@
     align-items: center;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   MINIMIZE BUTTON — top-right corner of the mini-timer
+   A discreet chevron+wall glyph meaning "slide this to the right edge".
+   Stays quiet by default; brightens on hover/focus. Tucked above the first
+   control button so it doesn't interrupt the existing controls column.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.hmt-minimize {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    color: rgba(200, 160, 100, 0.38);
+    cursor: pointer;
+    z-index: 5;
+    transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.hmt-minimize:hover,
+.hmt-minimize:focus-visible {
+    color: rgba(255, 220, 140, 0.95);
+    background: rgba(200, 146, 42, 0.1);
+    border-color: rgba(200, 146, 42, 0.22);
+    outline: none;
+}
+.hmt-minimize:hover { transform: translateX(1.5px); }
+.hmt-minimize:active { transform: translateX(3px) scale(0.94); }
+
+/* When the mini-timer is being docked (animating toward the right edge),
+   fade the minimize button so it doesn't flash around during the morph. */
+.home-mini-timer.is-docking .hmt-minimize { opacity: 0; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DOCK TRANSITION — applied on the mini-timer while it glides to the right
+   edge and morphs into the sliver. The path feels magnetic: slight lift,
+   rapid glide, settle. Uses a single transform so opacity + transform can
+   be composited by the GPU without triggering layout.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.home-mini-timer.is-docking {
+    /* Disable the user's idle hover transitions during the morph so the
+       animation is deterministic. */
+    transition: none !important;
+    animation: hmtDockOut 0.55s cubic-bezier(0.65, 0, 0.3, 1) both;
+    pointer-events: none;
+}
+@keyframes hmtDockOut {
+    0% {
+        opacity: 1;
+        transform: scale(var(--user-scale)) translate(0, 0);
+        filter: blur(0);
+    }
+    35% {
+        opacity: 1;
+        transform: scale(calc(var(--user-scale) * 1.02)) translate(-2px, -4px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(calc(var(--user-scale) * 0.42)) translate(var(--dock-dx, 200px), var(--dock-dy, 0px));
+        filter: blur(4px);
+    }
+}
+
+/* Undocking: mini-timer unfurling out of the sliver toward its saved position */
+.home-mini-timer.is-undocking {
+    transition: none !important;
+    animation: hmtDockIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    pointer-events: none;
+}
+@keyframes hmtDockIn {
+    0% {
+        opacity: 0;
+        transform: scale(calc(var(--user-scale) * 0.42)) translate(var(--dock-dx, 200px), var(--dock-dy, 0px));
+        filter: blur(4px);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(calc(var(--user-scale) * 1.04)) translate(0, -2px);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(var(--user-scale)) translate(0, 0);
+        filter: blur(0);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SLIVER — the minimized form. A tall narrow pill pinned to the right edge
+   of the viewport, rounded on the left, flush on the right. Always on top
+   regardless of scroll. Designed to read as a luxury bookmark / crown.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.hmt-sliver {
+    --sliver-w: 44px;
+    --sliver-h: 220px;
+
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: var(--sliver-w);
+    height: var(--sliver-h);
+    z-index: 1600;
+    padding: 16px 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    /* A layered dark gradient — solid enough to not need backdrop-filter.
+       Subtle warm-gold inner edge on the LEFT side reads as if a lamp is
+       lighting the sliver from inside the page. */
+    background:
+        linear-gradient(90deg, rgba(200, 146, 42, 0.08) 0%, rgba(200, 146, 42, 0) 50%),
+        linear-gradient(180deg, rgba(16, 12, 7, 0.94) 0%, rgba(10, 7, 4, 0.96) 100%);
+
+    border: 1px solid rgba(200, 146, 42, 0.22);
+    border-right: none;
+    border-top-left-radius: 22px;
+    border-bottom-left-radius: 22px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+
+    /* Depth — two shadows: a tight close shadow + a broader atmospheric glow. */
+    box-shadow:
+        inset 1px 0 0 rgba(255, 240, 210, 0.08),
+        inset 0 1px 0 rgba(255, 240, 210, 0.05),
+        -4px 0 14px rgba(0, 0, 0, 0.35),
+        -14px 0 46px rgba(0, 0, 0, 0.4),
+        -18px 0 60px rgba(200, 146, 42, 0.09);
+
+    color: rgba(240, 223, 192, 0.95);
+    font-family: inherit;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Remove default button styling */
+    appearance: none;
+    outline: none;
+}
+.hmt-sliver.hidden { display: none !important; }
+
+/* Enter: slide in from the right edge. The sliver was rendered off-screen
+   initially, now glides in and settles flush. */
+.hmt-sliver.is-entering {
+    animation: hmtSliverEnter 0.58s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes hmtSliverEnter {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(calc(var(--sliver-w) + 20px));
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+/* Leave: slides out back to the right edge */
+.hmt-sliver.is-leaving {
+    animation: hmtSliverLeave 0.4s cubic-bezier(0.65, 0, 0.85, 0) both;
+    pointer-events: none;
+}
+@keyframes hmtSliverLeave {
+    from { opacity: 1; transform: translateY(-50%) translateX(0); }
+    to   { opacity: 0; transform: translateY(-50%) translateX(calc(var(--sliver-w) + 20px)); }
+}
+
+/* Hover — the sliver nudges left like it's offering to slide back. Warm
+   gold intensifies, the atmospheric glow breathes outward. */
+.hmt-sliver:hover {
+    transform: translateY(-50%) translateX(-4px);
+    border-color: rgba(200, 146, 42, 0.4);
+    background:
+        linear-gradient(90deg, rgba(200, 146, 42, 0.14) 0%, rgba(200, 146, 42, 0) 55%),
+        linear-gradient(180deg, rgba(20, 15, 9, 0.97) 0%, rgba(12, 9, 5, 0.98) 100%);
+    box-shadow:
+        inset 1px 0 0 rgba(255, 240, 210, 0.14),
+        inset 0 1px 0 rgba(255, 240, 210, 0.08),
+        -6px 0 20px rgba(0, 0, 0, 0.4),
+        -18px 0 60px rgba(0, 0, 0, 0.45),
+        -22px 0 80px rgba(200, 146, 42, 0.18);
+}
+.hmt-sliver:active {
+    transform: translateY(-50%) translateX(-1px) scale(0.985);
+    transition-duration: 0.12s;
+}
+.hmt-sliver:focus-visible {
+    outline: 2px solid rgba(200, 146, 42, 0.6);
+    outline-offset: 3px;
+}
+
+/* ── Progress rail — a thin vertical gold bar running through the center ── */
+.hmt-sliver__rail {
+    position: relative;
+    width: 2px;
+    height: 56px;
+    border-radius: 2px;
+    background: rgba(255, 240, 210, 0.08);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.hmt-sliver__fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Height set inline by JS based on progress 0-100%. */
+    height: 0%;
+    background: linear-gradient(180deg,
+        rgba(255, 225, 150, 1) 0%,
+        rgba(200, 146, 42, 1) 100%);
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(200, 146, 42, 0.7);
+    transition: height 1s linear;
+}
+
+/* ── Digital time — MM over SS, small and jeweled ── */
+.hmt-sliver__time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    font-family: 'SF Mono', 'JetBrains Mono', Monaco, monospace;
+    font-size: 13px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: rgba(240, 223, 192, 0.92);
+    text-shadow: 0 0 12px rgba(200, 146, 42, 0.3);
+}
+.hmt-sliver__mm,
+.hmt-sliver__ss {
+    line-height: 1;
+}
+.hmt-sliver__sep {
+    font-size: 10px;
+    color: rgba(200, 146, 42, 0.5);
+    line-height: 0.6;
+    margin: 1px 0;
+}
+
+/* ── Expand chevron at the bottom, dim by default, wakes on hover ── */
+.hmt-sliver__chev {
+    color: rgba(200, 160, 100, 0.42);
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+}
+.hmt-sliver:hover .hmt-sliver__chev {
+    color: rgba(255, 220, 140, 0.95);
+    transform: translateX(-3px);
+}
+
+/* ── Breathing pulse behind, active only when timer is running.
+   A soft gold glow pulses gently to signal "still counting" without
+   being distracting. ── */
+.hmt-sliver__pulse {
+    position: absolute;
+    inset: -1px;
+    border-top-left-radius: inherit;
+    border-bottom-left-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(ellipse at 0% 50%,
+        rgba(200, 146, 42, 0.18) 0%,
+        rgba(200, 146, 42, 0) 70%);
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hmt-sliver.is-running .hmt-sliver__pulse {
+    opacity: 1;
+    animation: hmtSliverBreathe 3.2s ease-in-out infinite;
+}
+@keyframes hmtSliverBreathe {
+    0%, 100% { opacity: 0.6; }
+    50%      { opacity: 1; }
+}
+
+/* Paused state: sliver loses warmth slightly, pulse goes quiet */
+.hmt-sliver.is-paused .hmt-sliver__fill { opacity: 0.55; }
+
+/* When the full mini-timer is visible, the sliver hides.
+   When the user docks, the sliver appears. These are controlled via the
+   `hidden` attribute in JS but this rule ensures smooth swap. */
+.home-mini-timer:not(.hidden) ~ .hmt-sliver:not(.hidden) {
+    /* Both visible briefly during the dock handoff — the animations handle
+       the crossfade. No static styling needed here. */
+}
+
+/* Motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .home-mini-timer.is-docking,
+    .home-mini-timer.is-undocking,
+    .hmt-sliver.is-entering,
+    .hmt-sliver.is-leaving {
+        animation-duration: 0.15s !important;
+    }
+    .hmt-sliver.is-running .hmt-sliver__pulse { animation: none; }
+}
+
+/* Narrow screens — slightly smaller sliver */
+@media (max-width: 480px) {
+    .hmt-sliver {
+        --sliver-w: 38px;
+        --sliver-h: 180px;
+    }
+    .hmt-sliver__time { font-size: 12px; }
+}
+

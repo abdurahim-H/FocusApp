@@ -24,6 +24,14 @@ let tickInterval = null;
 let visible = false;
 let hideBlockedUntil = 0; // Timestamp — tick won't hide before this
 
+// Sliver (minimized / docked form)
+let sliver = null;
+let sliverFill = null;
+let sliverMM = null;
+let sliverSS = null;
+let docked = false;
+let dockAnimating = false;
+
 // Clock geometry
 const PROGRESS_CIRCUMFERENCE = 2 * Math.PI * 23; // r=23 in SVG viewBox
 
@@ -35,6 +43,7 @@ let dragOffsetY = 0;
 // Timer persistence
 const TIMER_STATE_KEY = 'fu_timer_session';
 const SCALE_KEY = 'fu_mini_timer_scale';
+const DOCKED_KEY = 'fu_mini_timer_docked';
 
 // ============================================================================
 // Public API
@@ -49,11 +58,35 @@ export function initHomeMiniTimer() {
     secHand     = document.getElementById('hmtSecHand');
     progressArc = document.getElementById('hmtProgress');
 
+    // Sliver (docked form) references
+    sliver     = document.getElementById('hmtSliver');
+    sliverFill = document.getElementById('hmtSliverFill');
+    sliverMM   = document.getElementById('hmtSliverMM');
+    sliverSS   = document.getElementById('hmtSliverSS');
+
     if (!container) return;
 
     // Restore timer state from sessionStorage (survives normal refresh)
     restoreTimerState();
     restoreScale();
+    restoreDockedState();
+
+    // Minimize button → glide the timer to the right edge as a sliver
+    const minimizeBtn = document.getElementById('hmtMinimizeBtn');
+    if (minimizeBtn) {
+        minimizeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dockToSliver();
+        });
+    }
+
+    // Sliver click → unfurl back into the full mini-timer
+    if (sliver) {
+        sliver.addEventListener('click', (e) => {
+            e.stopPropagation();
+            undockFromSliver();
+        });
+    }
 
     // Click on body area (not buttons) → navigate to Focus tab
     const bodyArea = container.querySelector('.hmt-body');
@@ -365,6 +398,11 @@ function tick() {
     container.classList.toggle('is-paused', timerState === 'paused');
     container.classList.toggle('is-break', isBreak);
     container.classList.toggle('is-long-break', isBreak && state.timer.isLongBreak);
+
+    // Keep the docked sliver's countdown / progress fill in sync too —
+    // every tick, not just on show, so MM:SS updates visibly at 0.5Hz
+    // polling cadence. Cheap: a few textContent writes + one height %.
+    if (docked) syncSliver();
 }
 
 // ============================================================================
@@ -374,9 +412,16 @@ function tick() {
 function show() {
     if (visible) return;
     visible = true;
+
+    // If user previously docked, skip the full mini-timer and show the
+    // sliver directly — their preference is preserved across sessions.
+    if (docked) {
+        showSliver({ animate: true });
+        return;
+    }
+
     container.classList.remove('hidden', 'is-leaving');
     container.classList.add('is-entering');
-    // Remove animation class after it completes
     container.addEventListener('animationend', () => {
         container.classList.remove('is-entering');
     }, { once: true });
@@ -386,11 +431,160 @@ function hide() {
     if (!visible) return;
     visible = false;
     container.classList.remove('is-entering', 'is-running', 'is-paused', 'is-break');
+
+    // If we're currently showing the sliver, fade it out; otherwise the
+    // full mini-timer.
+    if (docked && sliver && !sliver.classList.contains('hidden')) {
+        hideSliver({ animate: true });
+        return;
+    }
+
     container.classList.add('is-leaving');
     container.addEventListener('animationend', () => {
         container.classList.remove('is-leaving');
         container.classList.add('hidden');
     }, { once: true });
+}
+
+// ============================================================================
+// Dock / undock — morph between the full mini-timer and the right-edge sliver
+// ============================================================================
+
+/** Glide the mini-timer to the right edge, then swap in the sliver. */
+function dockToSliver() {
+    if (!container || !sliver || dockAnimating) return;
+    if (container.classList.contains('hidden')) return;
+    dockAnimating = true;
+
+    // Measure the vector from the mini-timer's current center to the
+    // sliver's future center, so the dock animation glides along the
+    // exact path (not a rough direction). The mini-timer is
+    // right/bottom-anchored, the sliver is right/center-anchored —
+    // without this delta the animation just fades, which reads as
+    // "the widget disappeared" rather than "the widget moved there".
+    const miniRect = container.getBoundingClientRect();
+    const miniCx = miniRect.left + miniRect.width / 2;
+    const miniCy = miniRect.top + miniRect.height / 2;
+    const sliverW = parseFloat(getComputedStyle(sliver).getPropertyValue('--sliver-w')) || 44;
+    const viewportW = window.innerWidth;
+    const viewportH = window.innerHeight;
+    const sliverCx = viewportW - sliverW / 2;
+    const sliverCy = viewportH / 2;
+    const dx = sliverCx - miniCx;
+    const dy = sliverCy - miniCy;
+
+    container.style.setProperty('--dock-dx', `${dx.toFixed(1)}px`);
+    container.style.setProperty('--dock-dy', `${dy.toFixed(1)}px`);
+    container.classList.remove('is-entering', 'is-leaving');
+    container.classList.add('is-docking');
+
+    // Mid-animation, swap — hide the mini-timer and show the sliver
+    // entering. Timing (~320ms in) is the moment the mini-timer has
+    // compressed down enough that the two can crossfade without either
+    // looking truncated.
+    window.setTimeout(() => {
+        container.classList.add('hidden');
+        container.classList.remove('is-docking');
+        showSliver({ animate: true });
+    }, 320);
+
+    // Persist the user's preference
+    docked = true;
+    try { localStorage.setItem(DOCKED_KEY, '1'); } catch (_) {}
+
+    // Keep a reasonable animation completion window before allowing
+    // another dock toggle.
+    window.setTimeout(() => { dockAnimating = false; }, 650);
+}
+
+/** Slide the sliver away and unfurl the full mini-timer back in. */
+function undockFromSliver() {
+    if (!container || !sliver || dockAnimating) return;
+    dockAnimating = true;
+
+    // Compute the same dock vector so the mini-timer animates in FROM
+    // the sliver's position, not from thin air.
+    const miniRectFake = container.getBoundingClientRect();
+    const targetCx = miniRectFake.left + miniRectFake.width / 2;
+    const targetCy = miniRectFake.top + miniRectFake.height / 2;
+    const sliverW = parseFloat(getComputedStyle(sliver).getPropertyValue('--sliver-w')) || 44;
+    const sliverCx = window.innerWidth - sliverW / 2;
+    const sliverCy = window.innerHeight / 2;
+    const dx = sliverCx - targetCx;
+    const dy = sliverCy - targetCy;
+    container.style.setProperty('--dock-dx', `${dx.toFixed(1)}px`);
+    container.style.setProperty('--dock-dy', `${dy.toFixed(1)}px`);
+
+    hideSliver({ animate: true });
+
+    // Short beat so the sliver's leave animation is visibly out before
+    // the full mini-timer starts unfurling — otherwise the two overlap
+    // muddily at the right edge.
+    window.setTimeout(() => {
+        container.classList.remove('hidden', 'is-entering', 'is-leaving', 'is-docking');
+        container.classList.add('is-undocking');
+        container.addEventListener('animationend', () => {
+            container.classList.remove('is-undocking');
+        }, { once: true });
+    }, 120);
+
+    docked = false;
+    try { localStorage.removeItem(DOCKED_KEY); } catch (_) {}
+
+    window.setTimeout(() => { dockAnimating = false; }, 750);
+}
+
+function showSliver({ animate = true } = {}) {
+    if (!sliver) return;
+    sliver.classList.remove('hidden', 'is-leaving');
+    if (animate) {
+        sliver.classList.add('is-entering');
+        sliver.addEventListener('animationend', () => {
+            sliver.classList.remove('is-entering');
+        }, { once: true });
+    }
+    syncSliver();
+}
+
+function hideSliver({ animate = true } = {}) {
+    if (!sliver) return;
+    sliver.classList.remove('is-entering');
+    if (animate) {
+        sliver.classList.add('is-leaving');
+        sliver.addEventListener('animationend', () => {
+            sliver.classList.remove('is-leaving');
+            sliver.classList.add('hidden');
+        }, { once: true });
+    } else {
+        sliver.classList.add('hidden');
+    }
+}
+
+/** Push timer state into the sliver: countdown, progress fill, running glow. */
+function syncSliver() {
+    if (!sliver || sliver.classList.contains('hidden')) return;
+    const { isRunning, isBreak, minutes, seconds, settings } = state.timer;
+    const timerState = state.timerState;
+
+    if (sliverMM) sliverMM.textContent = String(minutes).padStart(2, '0');
+    if (sliverSS) sliverSS.textContent = String(seconds).padStart(2, '0');
+
+    const totalSeconds = isBreak
+        ? (state.timer.isLongBreak ? settings.longBreakDuration : settings.shortBreakDuration) * 60
+        : settings.focusDuration * 60;
+    const remaining = minutes * 60 + seconds;
+    const progress = totalSeconds > 0 ? (totalSeconds - remaining) / totalSeconds : 0;
+    if (sliverFill) sliverFill.style.height = `${Math.min(100, progress * 100).toFixed(1)}%`;
+
+    sliver.classList.toggle('is-running', isRunning);
+    sliver.classList.toggle('is-paused', timerState === 'paused' && !isRunning);
+    sliver.classList.toggle('is-break', isBreak);
+}
+
+function restoreDockedState() {
+    try {
+        docked = localStorage.getItem(DOCKED_KEY) === '1';
+    } catch (_) { docked = false; }
 }
 
 // ============================================================================
