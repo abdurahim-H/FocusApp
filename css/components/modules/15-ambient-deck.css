@@ -11,11 +11,11 @@
 }
 
 .ambient-content.deck {
-    --deck-gold:       rgba(200, 146, 42, 1);
-    --deck-gold-soft:  rgba(200, 146, 42, 0.5);
-    --deck-gold-faint: rgba(200, 146, 42, 0.12);
-    --deck-gold-line:  rgba(200, 146, 42, 0.18);
-    --deck-cream:      #F0DFC0;
+    --deck-gold:       rgba(225, 205, 150, 1);
+    --deck-gold-soft:  rgba(225, 205, 150, 0.5);
+    --deck-gold-faint: rgba(225, 205, 150, 0.12);
+    --deck-gold-line:  rgba(225, 205, 150, 0.18);
+    --deck-cream:      #EFE3C9;
     --deck-cream-soft: rgba(240, 223, 192, 0.7);
     --deck-cream-dim:  rgba(240, 223, 192, 0.45);
     --deck-bg:         rgba(12, 9, 5, 0.72);
@@ -99,13 +99,13 @@
     background: var(--deck-bg-hover);
     border-color: var(--deck-gold-soft);
     transform: translateY(-1px);
-    box-shadow: 0 10px 28px rgba(200, 146, 42, 0.12);
+    box-shadow: 0 10px 28px rgba(225, 205, 150, 0.12);
 }
 .mix-card:active { transform: translateY(0) scale(0.98); }
 
 .mix-card__icon {
     font-size: 16px;
-    filter: drop-shadow(0 0 6px rgba(200, 146, 42, 0.3));
+    filter: drop-shadow(0 0 6px rgba(225, 205, 150, 0.3));
 }
 .mix-card__name { color: inherit; }
 .mix-card__count {
@@ -135,12 +135,12 @@
 .mix-card__pin:hover { background: var(--deck-gold-faint); color: var(--deck-cream); transform: scale(1.1); }
 .mix-card__pin.is-on {
     color: var(--deck-gold);
-    filter: drop-shadow(0 0 6px rgba(200, 146, 42, 0.6));
+    filter: drop-shadow(0 0 6px rgba(225, 205, 150, 0.6));
 }
 .mix-card.is-pinned {
     border-color: var(--deck-gold-soft);
     box-shadow: 0 0 0 1px var(--deck-gold-soft) inset,
-                0 0 20px rgba(200, 146, 42, 0.14);
+                0 0 20px rgba(225, 205, 150, 0.14);
 }
 
 .mix-card--builtin::before {
@@ -149,7 +149,7 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(200, 146, 42, 0.35), rgba(200, 146, 42, 0.05));
+    background: linear-gradient(135deg, rgba(225, 205, 150, 0.35), rgba(225, 205, 150, 0.05));
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
@@ -157,46 +157,92 @@
     opacity: 0.9;
 }
 
-/* ── Empty state ────────────────────────────────────────────────────────── */
+/* ── Empty state ──────────────────────────────────────────────────────────
+   Structural readability problem: the empty-state text sits directly over
+   Babylon's scene, which spans the full tonal range (white accretion disk
+   through black void). No single text color is readable against all of it.
+   Fix: give the content a contained radial pool of darkness that fades
+   into the surrounding cosmos at the edges — the text gets a consistent
+   dark backdrop at its core, but the scene still breathes around it so
+   the empty state doesn't look like a hard box pasted over the universe.
+   Belt-and-braces: text-shadow under title + subtitle for an extra
+   layer of contrast insurance against particularly bright backdrops. */
 
 .deck-empty {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    padding: 72px 20px;
-    color: var(--deck-cream-dim);
+    justify-content: center;
+    gap: 14px;
+    padding: 96px 40px;
+    min-height: 280px;
+    color: var(--deck-cream-soft);
     text-align: center;
+    isolation: isolate; /* own stacking context so ::before stays behind */
 }
+/* The dark pool — radial gradient that's almost opaque at the centre and
+   fades to fully transparent at the edges. Wider than the content box so
+   the fade is gentle and the edges feel atmospheric, not cropped. */
+.deck-empty::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 140%;
+    height: 140%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse at center,
+        rgba(6, 5, 3, 0.82) 0%,
+        rgba(6, 5, 3, 0.6) 28%,
+        rgba(6, 5, 3, 0.25) 55%,
+        rgba(6, 5, 3, 0) 78%);
+    pointer-events: none;
+    z-index: -1;
+}
+
 .deck-empty__star {
-    width: 44px;
-    height: 44px;
+    width: 56px;
+    height: 56px;
     color: var(--deck-gold);
     filter:
-        drop-shadow(0 0 10px rgba(200, 146, 42, 0.5))
-        drop-shadow(0 0 24px rgba(200, 146, 42, 0.2));
+        drop-shadow(0 0 12px rgba(225, 205, 150, 0.8))
+        drop-shadow(0 0 28px rgba(225, 205, 150, 0.35))
+        drop-shadow(0 0 48px rgba(225, 205, 150, 0.15));
     animation: deckEmptyBreath 3.4s var(--deck-ease) infinite;
 }
 .deck-empty__title {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 500;
-    color: var(--deck-cream-soft);
-    margin: 4px 0 0;
-    letter-spacing: 0.02em;
+    color: var(--deck-cream);
+    margin: 6px 0 0;
+    letter-spacing: 0.015em;
+    /* Halo — adds a dark pool directly under each glyph so even if the
+       radial backdrop is compromised by layout shift, the text still has
+       readable contrast. Three-shadow stack builds depth without reading
+       as a drop-shadow box. */
+    text-shadow:
+        0 0 12px rgba(0, 0, 0, 0.9),
+        0 0 24px rgba(0, 0, 0, 0.7),
+        0 2px 4px rgba(0, 0, 0, 0.6);
 }
 .deck-empty__subtitle {
-    font-size: 13px;
-    line-height: 1.55;
-    max-width: 360px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    max-width: 380px;
     margin: 0;
+    color: rgba(230, 220, 195, 0.72);
+    text-shadow:
+        0 0 10px rgba(0, 0, 0, 0.85),
+        0 0 20px rgba(0, 0, 0, 0.6);
 }
 .deck-empty__subtitle strong {
     color: var(--deck-cream);
     font-weight: 500;
 }
 @keyframes deckEmptyBreath {
-    0%, 100% { opacity: 0.7; transform: scale(1); }
-    50%      { opacity: 1;   transform: scale(1.08); }
+    0%, 100% { opacity: 0.78; transform: scale(1); }
+    50%      { opacity: 1;    transform: scale(1.08); }
 }
 
 /* ── Track cards (row layout) ───────────────────────────────────────────── */
@@ -216,7 +262,7 @@
     padding: 14px 18px;
     border-radius: var(--deck-radius);
     background:
-        linear-gradient(168deg, rgba(255, 240, 210, 0.035) 0%, rgba(200, 146, 42, 0.015) 60%, transparent 100%),
+        linear-gradient(168deg, rgba(255, 240, 210, 0.035) 0%, rgba(225, 205, 150, 0.015) 60%, transparent 100%),
         var(--deck-bg);
     border: 1px solid var(--deck-gold-line);
     /* Paint containment: during the Tune expand/collapse animation the
@@ -249,15 +295,15 @@
 }
 .track-card:hover {
     background:
-        linear-gradient(168deg, rgba(255, 240, 210, 0.05) 0%, rgba(200, 146, 42, 0.02) 60%, transparent 100%),
+        linear-gradient(168deg, rgba(255, 240, 210, 0.05) 0%, rgba(225, 205, 150, 0.02) 60%, transparent 100%),
         var(--deck-bg-hover);
-    border-color: rgba(200, 146, 42, 0.3);
+    border-color: rgba(225, 205, 150, 0.3);
     box-shadow:
         inset 0 1px 0 rgba(255, 240, 210, 0.08),
         inset 0 -1px 0 rgba(0, 0, 0, 0.3),
         0 4px 14px rgba(0, 0, 0, 0.4),
         0 18px 44px rgba(0, 0, 0, 0.45),
-        0 0 32px rgba(200, 146, 42, 0.07);
+        0 0 32px rgba(225, 205, 150, 0.07);
 }
 .track-card.is-muted { opacity: 0.58; }
 
@@ -280,8 +326,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 12px;
-    background: radial-gradient(circle at 35% 30%, rgba(200, 146, 42, 0.2), rgba(200, 146, 42, 0.04) 70%);
-    box-shadow: inset 0 0 0 1px rgba(200, 146, 42, 0.16);
+    background: radial-gradient(circle at 35% 30%, rgba(225, 205, 150, 0.2), rgba(225, 205, 150, 0.04) 70%);
+    box-shadow: inset 0 0 0 1px rgba(225, 205, 150, 0.16);
 }
 .track-card__titles {
     display: flex;
@@ -342,7 +388,7 @@
 .track-iconbtn[aria-expanded="true"] {
     color: var(--deck-gold);
     background: var(--deck-gold-faint);
-    border-color: rgba(200, 146, 42, 0.28);
+    border-color: rgba(225, 205, 150, 0.28);
 }
 .track-iconbtn--danger:hover {
     background: rgba(220, 70, 70, 0.12);
@@ -529,7 +575,7 @@
     box-shadow:
         0 0 0 2px rgba(8, 6, 3, 0.55),
         0 1px 3px rgba(0, 0, 0, 0.5),
-        0 0 10px rgba(200, 146, 42, 0.55);
+        0 0 10px rgba(225, 205, 150, 0.55);
     cursor: grab;
     transition: transform 0.2s var(--deck-spring);
 }
@@ -550,7 +596,7 @@
     box-shadow:
         0 0 0 2px rgba(8, 6, 3, 0.55),
         0 1px 3px rgba(0, 0, 0, 0.5),
-        0 0 10px rgba(200, 146, 42, 0.55);
+        0 0 10px rgba(225, 205, 150, 0.55);
     cursor: grab;
 }
 
@@ -607,13 +653,13 @@
 }
 
 .deck-btn--primary {
-    background: linear-gradient(135deg, rgba(200, 146, 42, 0.28), rgba(200, 146, 42, 0.14));
-    border-color: rgba(200, 146, 42, 0.55);
+    background: linear-gradient(135deg, rgba(225, 205, 150, 0.28), rgba(225, 205, 150, 0.14));
+    border-color: rgba(225, 205, 150, 0.55);
     color: var(--deck-cream);
 }
 .deck-btn--primary:hover {
-    background: linear-gradient(135deg, rgba(200, 146, 42, 0.38), rgba(200, 146, 42, 0.22));
-    box-shadow: 0 10px 28px rgba(200, 146, 42, 0.18);
+    background: linear-gradient(135deg, rgba(225, 205, 150, 0.38), rgba(225, 205, 150, 0.22));
+    box-shadow: 0 10px 28px rgba(225, 205, 150, 0.18);
 }
 
 .deck-btn--danger {
@@ -764,7 +810,7 @@
 }
 .library-drawer__body::-webkit-scrollbar { width: 8px; }
 .library-drawer__body::-webkit-scrollbar-thumb {
-    background: rgba(200, 146, 42, 0.2);
+    background: rgba(225, 205, 150, 0.2);
     border-radius: 999px;
 }
 
@@ -816,14 +862,14 @@
     background: rgba(255, 240, 210, 0.07);
     border-color: var(--deck-gold-soft);
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(200, 146, 42, 0.12);
+    box-shadow: 0 12px 28px rgba(225, 205, 150, 0.12);
 }
 .libcard:active { transform: translateY(-1px) scale(0.98); }
 .libcard.is-active {
     background: var(--deck-gold-faint);
     border-color: var(--deck-gold-soft);
     box-shadow: 0 0 0 1px var(--deck-gold-soft) inset,
-                0 0 28px rgba(200, 146, 42, 0.2);
+                0 0 28px rgba(225, 205, 150, 0.2);
 }
 .libcard.is-active::after {
     content: '';
@@ -843,7 +889,7 @@
 }
 .libcard__icon {
     font-size: 24px;
-    filter: drop-shadow(0 0 6px rgba(200, 146, 42, 0.25));
+    filter: drop-shadow(0 0 6px rgba(225, 205, 150, 0.25));
 }
 .libcard__name {
     font-size: 12px;
@@ -904,7 +950,7 @@
     background: linear-gradient(180deg, rgba(18, 14, 8, 0.95), rgba(8, 6, 3, 0.98));
     border: 1px solid var(--deck-gold-line);
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6),
-                0 0 60px rgba(200, 146, 42, 0.1);
+                0 0 60px rgba(225, 205, 150, 0.1);
     animation: popoverPop 0.4s var(--deck-spring);
 }
 @keyframes popoverPop {
@@ -1037,7 +1083,7 @@
 .hma-icon {
     color: var(--deck-gold);
     font-size: 13px;
-    filter: drop-shadow(0 0 4px rgba(200, 146, 42, 0.5));
+    filter: drop-shadow(0 0 4px rgba(225, 205, 150, 0.5));
 }
 .hma-name {
     font-size: 12px;
@@ -1096,7 +1142,7 @@
     margin-top: -4px;
     border-radius: 50%;
     background: radial-gradient(circle at 30% 30%, #FFF1D8, var(--deck-gold));
-    box-shadow: 0 0 8px rgba(200, 146, 42, 0.5);
+    box-shadow: 0 0 8px rgba(225, 205, 150, 0.5);
     cursor: grab;
 }
 .hma-volume::-moz-range-thumb {
@@ -1134,10 +1180,10 @@
 /* ── Inline feedback form (lives inside Settings → Feedback) ─────────────── */
 
 .sr-feedback {
-    --fb-gold:       rgba(200, 146, 42, 1);
-    --fb-gold-soft:  rgba(200, 146, 42, 0.5);
-    --fb-gold-faint: rgba(200, 146, 42, 0.12);
-    --fb-gold-line:  rgba(200, 146, 42, 0.2);
+    --fb-gold:       rgba(225, 205, 150, 1);
+    --fb-gold-soft:  rgba(225, 205, 150, 0.5);
+    --fb-gold-faint: rgba(225, 205, 150, 0.12);
+    --fb-gold-line:  rgba(225, 205, 150, 0.2);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -1176,14 +1222,14 @@
     transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .sr-feedback__type-btn:hover {
-    color: #F0DFC0;
+    color: #EFE3C9;
     background: rgba(255, 240, 210, 0.04);
 }
 .sr-feedback__type-btn.is-active {
     background: var(--fb-gold-faint);
     border-color: var(--fb-gold-soft);
     color: #F5E8D0;
-    box-shadow: 0 0 14px rgba(200, 146, 42, 0.15);
+    box-shadow: 0 0 14px rgba(225, 205, 150, 0.15);
 }
 .sr-feedback__type-btn:active { transform: scale(0.97); }
 
@@ -1200,7 +1246,7 @@
     border-radius: 12px;
     border: 1px solid var(--fb-gold-line);
     background: rgba(0, 0, 0, 0.35);
-    color: #F0DFC0;
+    color: #EFE3C9;
     font: 400 13px/1.55 inherit;
     outline: none;
     resize: vertical;
@@ -1241,7 +1287,7 @@
 }
 .sr-feedback__btn:hover:not(:disabled) {
     background: rgba(255, 240, 210, 0.08);
-    color: #F0DFC0;
+    color: #EFE3C9;
     border-color: var(--fb-gold-soft);
     transform: translateY(-1px);
 }
@@ -1251,18 +1297,18 @@
     cursor: not-allowed;
 }
 .sr-feedback__btn--primary {
-    background: linear-gradient(135deg, rgba(200, 146, 42, 0.28), rgba(200, 146, 42, 0.14));
-    border-color: rgba(200, 146, 42, 0.55);
+    background: linear-gradient(135deg, rgba(225, 205, 150, 0.28), rgba(225, 205, 150, 0.14));
+    border-color: rgba(225, 205, 150, 0.55);
     color: #F5E8D0;
 }
 .sr-feedback__btn--primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, rgba(200, 146, 42, 0.4), rgba(200, 146, 42, 0.22));
-    box-shadow: 0 10px 24px rgba(200, 146, 42, 0.18);
+    background: linear-gradient(135deg, rgba(225, 205, 150, 0.4), rgba(225, 205, 150, 0.22));
+    box-shadow: 0 10px 24px rgba(225, 205, 150, 0.18);
 }
 .sr-feedback__btn.is-confirmed {
-    background: rgba(200, 146, 42, 0.24);
+    background: rgba(225, 205, 150, 0.24);
     color: #F5E8D0;
-    border-color: rgba(200, 146, 42, 0.55);
+    border-color: rgba(225, 205, 150, 0.55);
 }
 
 .sr-feedback__email {
