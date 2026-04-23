@@ -773,7 +773,7 @@ function buildProfileListUI() {
         if (!p.builtin) {
             row.querySelector('.profile-row__save').addEventListener('click', () => profiles.overwriteWithCurrent(p.id));
             row.querySelector('.profile-row__del').addEventListener('click', () => {
-                if (confirm(`Delete profile "${p.name}"?`)) profiles.remove(p.id);
+                if (confirm(`Delete profile "${safeDialogText(p.name)}"?`)) profiles.remove(p.id);
             });
         }
         wrap.appendChild(row);
@@ -1038,6 +1038,15 @@ function escapeHtml(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[c]));
+}
+
+// Strip control chars + cap length for user-provided strings that end up
+// in prompt()/confirm() dialogs. Not XSS (those dialogs don't render HTML)
+// but prevents a malicious name with newlines from spoofing dialog text.
+function safeDialogText(s, max = 60) {
+    let out = String(s ?? '').replace(/[\r\n\t\x00-\x1F\x7F]/g, '');
+    if (out.length > max) out = out.slice(0, max - 1) + '…';
+    return out;
 }
 
 function cssEscape(s) {

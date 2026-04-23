@@ -119,11 +119,32 @@ function loadPersisted() {
 loadPersisted();
 
 // Auto-persist whenever any tracked signal changes.
-// The first run subscribes; subsequent runs write to storage.
+// Debounced: during interactions like slider drags the same signals fire
+// 30-60 times/sec. The previous implementation ran JSON.stringify of the
+// ENTIRE app state + a synchronous localStorage.setItem on every change,
+// blocking the main thread per frame and compounding with other perf
+// costs. Now the effect schedules one write per animation frame (and
+// coalesces bursts), and the actual write happens in the idle time of a
+// requestAnimationFrame — never inside a signal-setter call path.
 let persistInitialized = false;
+let persistScheduled = false;
+let persistSnapshot = null;
+function schedulePersist() {
+    if (persistScheduled) return;
+    persistScheduled = true;
+    requestAnimationFrame(() => {
+        persistScheduled = false;
+        if (!persistSnapshot) return;
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(persistSnapshot));
+        } catch (e) {
+            console.warn('[state] failed to persist:', e);
+        }
+    });
+}
 effect(() => {
-    // Touch every persisted signal so the effect tracks them all
-    const snapshot = {
+    // Touch every persisted signal so the effect tracks them all.
+    persistSnapshot = {
         tasks: tasks.value,
         mode: mode.value,
         activeSounds: activeSounds.value,
@@ -138,9 +159,14 @@ effect(() => {
         persistInitialized = true;
         return;
     }
+    schedulePersist();
+});
+// Flush on page hide so state isn't lost if the user closes the tab
+// mid-interaction (pagehide is the modern, reliable choice — fires on
+// back-forward cache eviction too, unlike beforeunload).
+window.addEventListener('pagehide', () => {
+    if (!persistSnapshot) return;
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
-    } catch (e) {
-        console.warn('[state] failed to persist:', e);
-    }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(persistSnapshot));
+    } catch (_) {}
 });

@@ -375,48 +375,37 @@
     letter-spacing: 0.02em;
 }
 
-/* Collapsible Tune panel. The tune button lives inline in the row;
-   clicking it toggles this. grid-template-rows 0fr → 1fr is the pure-CSS
-   auto-height collapse — requires `overflow: hidden; min-height: 0` on
-   the single grid child so the row can actually shrink below the child's
-   intrinsic size. Without those the browser fights the transition every
-   frame and the animation reads as janky. */
+/* Collapsible Tune panel — JS-driven explicit-height animation.
+   The old grid-template-rows 0fr↔1fr approach was fragile: it doesn't
+   animate at all on older Safari/Firefox, and even in modern Chrome it
+   fights child padding + min-height constraints in ways that produced
+   the visible two-phase collapse feel. Explicit pixel heights set by JS
+   give bulletproof, identical behavior across every engine. JS measures
+   scrollHeight on open, animates 0 → Npx, then clears the inline height
+   so the panel reflows naturally when content changes (EQ values). */
 .track-card__tune {
-    display: grid;
-    grid-template-rows: 0fr;
-    /* Single duration for both animated properties so opacity finishes
-       at exactly the same moment the height reaches 0 — avoids the
-       "content disappears then height keeps collapsing" two-phase feel. */
-    transition: grid-template-rows 0.32s var(--deck-ease),
-                opacity 0.32s var(--deck-ease);
+    height: 0;
+    overflow: hidden;
     opacity: 0;
+    transition: height 0.32s var(--deck-ease),
+                opacity 0.32s var(--deck-ease);
 }
 .track-card.is-tuned .track-card__tune {
-    grid-template-rows: 1fr;
     opacity: 1;
+    /* height is set by JS inline */
 }
 .track-card__tune[hidden] { display: none; }
 
-/* EQ — 3 bands, side by side, with pan sharing the same strip to the right.
-   overflow: hidden + min-height: 0 are load-bearing for the parent's
-   grid-rows 0fr↔1fr collapse — without them the grid row can't shrink
-   below the child's intrinsic height and the animation fights itself. */
+/* EQ + pan panel interior — gets clipped by the outer .track-card__tune
+   which has overflow: hidden and an animated `height`. */
 .track-card__tune-inner {
-    overflow: hidden;
-    min-height: 0;
-    /* box-sizing: border-box so the 14px padding counts INSIDE the
-       min-height: 0 constraint. Without this the intrinsic box min height
-       is 28px (padding top + bottom), which fights the grid row's 0fr
-       target and stutters the animation at both ends. */
     box-sizing: border-box;
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-    /* Top-align both columns so EQ and pan collapse from the same origin
-       at the same rate — prevents the "EQ shrinks from bottom, pan
-       drifts from centre" desync that reads as two-phase collapse. */
     align-items: start;
     gap: 14px;
     padding: 14px;
+    margin-top: 14px;
     border-radius: 14px;
     background: rgba(0, 0, 0, 0.34);
     border: 1px solid rgba(255, 240, 210, 0.035);

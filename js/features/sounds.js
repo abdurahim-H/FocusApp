@@ -83,14 +83,19 @@ export async function ensureAudio() {
     return ctx;
 }
 
-/** 0..1 amplitude of the current master-bus output. Useful for scene reactivity. */
+/** 0..1 amplitude of the current master-bus output. Useful for scene reactivity.
+ *  Called every render frame (60-120Hz). The scratch buffer is cached so we
+ *  don't allocate a fresh Uint8Array on every frame. */
+let energyScratch = null;
 export function getMasterEnergy() {
     if (!masterAnalyser) return 0;
-    const buf = new Uint8Array(masterAnalyser.frequencyBinCount);
-    masterAnalyser.getByteFrequencyData(buf);
+    if (!energyScratch || energyScratch.length !== masterAnalyser.frequencyBinCount) {
+        energyScratch = new Uint8Array(masterAnalyser.frequencyBinCount);
+    }
+    masterAnalyser.getByteFrequencyData(energyScratch);
     let sum = 0;
-    for (let i = 0; i < buf.length; i++) sum += buf[i];
-    return sum / (buf.length * 255);
+    for (let i = 0; i < energyScratch.length; i++) sum += energyScratch[i];
+    return sum / (energyScratch.length * 255);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -354,9 +359,18 @@ export function stopSound(id, { fadeMs = FADE_OUT_MS } = {}) {
     node.gain.gain.setValueAtTime(node.gain.gain.value, now);
     node.gain.gain.linearRampToValueAtTime(0, now + duration);
     setTimeout(() => {
+        // Disconnect every node in the chain. Previously only source+gain
+        // were disconnected; the 3 biquad filters + stereo panner stayed
+        // wired to masterGain and kept processing silence on the audio
+        // thread forever, leaking cost that compounds across stop/start
+        // cycles.
         try { node.source?.stop(); } catch (_) { /* already stopped */ }
         try { node.source?.disconnect(); } catch (_) {}
         try { node.gain.disconnect(); } catch (_) {}
+        try { node.lowEq.disconnect(); } catch (_) {}
+        try { node.midEq.disconnect(); } catch (_) {}
+        try { node.highEq.disconnect(); } catch (_) {}
+        try { node.pan.disconnect(); } catch (_) {}
         tracks.delete(id);
     }, fadeMs + 40);
     _removeActive(id);

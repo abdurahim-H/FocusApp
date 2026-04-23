@@ -226,8 +226,9 @@ function renderMixesRail() {
 function openMixMenu(anchor, mixId) {
     const mix = ambientMixes.value.find((m) => m.id === mixId);
     if (!mix) return;
+    const safeName = safeDialogText(mix.name);
     const choice = prompt(
-        `Options for "${mix.name}":\n\n` +
+        `Options for "${safeName}":\n\n` +
         `1 — Rename\n` +
         `2 — Share (copy link)\n` +
         `3 — Delete\n\n` +
@@ -250,7 +251,7 @@ function openMixMenu(anchor, mixId) {
             break;
         }
         case '3': {
-            if (confirm(`Delete mix "${mix.name}"?`)) {
+            if (confirm(`Delete mix "${safeName}"?`)) {
                 if (settingsGet('sounds.focusStartMixId') === mixId) {
                     settingsSet('sounds.focusStartMixId', null);
                 }
@@ -307,7 +308,7 @@ async function maybeLoadSharedMix() {
     } catch (_) {}
     // Show a one-tap prompt to load it. Using toast + a button would need more
     // UI; prompt() is adequate for a rarely-used flow.
-    if (confirm(`Load the shared mix "${mix.name}"? You can save it afterwards.`)) {
+    if (confirm(`Load the shared mix "${safeDialogText(mix.name)}"? You can save it afterwards.`)) {
         await ensureAudio();
         await activateMix(mix);
         toast('Shared mix loaded. Click ♡ Save mix to keep it.');
@@ -441,23 +442,42 @@ function buildTrackCard(id) {
     const tuneBtn = card.querySelector('[data-action="tune"]');
     const tunePanel = card.querySelector('.track-card__tune');
     if (tuneBtn && tunePanel) {
+        let tuneTimer = 0;
         tuneBtn.addEventListener('click', () => {
             const opening = !card.classList.contains('is-tuned');
+            clearTimeout(tuneTimer);
             if (opening) {
+                // Mount, lock to 0, measure natural height, then on the SAME
+                // frame flip class + set target height so opacity and height
+                // transitions start together and finish together.
                 tunePanel.hidden = false;
-                // Wait one paint so the hidden→visible display flip commits
-                // BEFORE the class change kicks the grid-rows transition.
-                // Using rAF instead of a forced layout read (offsetHeight)
-                // avoids a synchronous reflow that stalls the click frame.
+                tunePanel.style.height = '0px';
+                const target = tunePanel.scrollHeight;
                 requestAnimationFrame(() => {
                     card.classList.add('is-tuned');
+                    tunePanel.style.height = target + 'px';
                 });
+                tuneTimer = setTimeout(() => {
+                    if (card.classList.contains('is-tuned')) {
+                        // Clear the inline height so later content changes
+                        // (EQ value text updates) can still reflow naturally.
+                        tunePanel.style.height = '';
+                    }
+                }, 340);
             } else {
-                card.classList.remove('is-tuned');
-                // Hide from AT after the collapse animation completes.
-                // Matches the 320ms CSS transition with a tiny safety buffer.
-                setTimeout(() => {
-                    if (!card.classList.contains('is-tuned')) tunePanel.hidden = true;
+                // Capture current concrete height — after open the inline
+                // height was cleared to '' and 'auto' can't animate FROM.
+                const current = tunePanel.scrollHeight;
+                tunePanel.style.height = current + 'px';
+                requestAnimationFrame(() => {
+                    card.classList.remove('is-tuned');
+                    tunePanel.style.height = '0px';
+                });
+                tuneTimer = setTimeout(() => {
+                    if (!card.classList.contains('is-tuned')) {
+                        tunePanel.hidden = true;
+                        tunePanel.style.height = '';
+                    }
                 }, 340);
             }
             tuneBtn.setAttribute('aria-expanded', opening ? 'true' : 'false');
@@ -984,6 +1004,16 @@ function bandTooltip(b) {
     return b === 'low' ? 'Bass — low end, rumble and depth'
          : b === 'mid' ? 'Mid — body and warmth'
          :               'Treble — sparkle and air';
+}
+
+// Strip control chars (newlines, etc.) and cap length — for user-provided
+// strings going into prompt()/confirm() dialogs. prompt/confirm aren't
+// HTML-interpreting contexts so this isn't XSS, but a malicious mix name
+// with newlines/quotes could craft a misleading dialog message.
+function safeDialogText(s, max = 60) {
+    let out = String(s ?? '').replace(/[\r\n\t\x00-\x1F\x7F]/g, '');
+    if (out.length > max) out = out.slice(0, max - 1) + '…';
+    return out;
 }
 
 function escapeHtml(s) {
