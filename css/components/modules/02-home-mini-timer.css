@@ -281,68 +281,113 @@
     line-height: 1;
 }
 
-/* ── Controls (play/pause + skip + reset) ── */
+/* ── Controls (dock + play/pause + skip + reset) ──
+   Ghost-button aesthetic: no filled backgrounds by default so the four
+   glyphs read as a clean vertical rhythm of icons, not a pile of boxes.
+   Each button is 30 × 30 with a transparent interior and only a hairline
+   border at 6% opacity. Hover brings a quiet warm-gold tint — enough to
+   feel responsive, not enough to shout. */
 .hmt-controls {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    margin-left: 4px;
+    align-items: center;
+    gap: 8px;
+    margin-left: 6px;
+    padding: 2px 0;
 }
+
+/* Hairline divider that separates the dock control from the playback
+   controls — same visual language as the gold accent line on the edge
+   of the deck. Thin, soft, almost subliminal. */
+.hmt-controls__divider {
+    width: 18px;
+    height: 1px;
+    background: linear-gradient(90deg,
+        rgba(200, 146, 42, 0) 0%,
+        rgba(200, 146, 42, 0.35) 50%,
+        rgba(200, 146, 42, 0) 100%);
+    margin: 1px 0 2px;
+    flex-shrink: 0;
+}
+
 .hmt-btn {
     width: 30px;
     height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(200, 146, 42, 0.06);
+    border-radius: 9px;
+    background: transparent;
     color: rgba(200, 160, 100, 0.45);
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
     padding: 0;
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
 .hmt-btn:hover {
-    background: rgba(200, 146, 42, 0.12);
-    border-color: rgba(200, 146, 42, 0.25);
-    color: rgba(255, 220, 140, 0.9);
+    color: rgba(255, 220, 140, 0.95);
+    border-color: rgba(200, 146, 42, 0.3);
+    background: rgba(200, 146, 42, 0.08);
 }
 .hmt-btn:active {
-    transform: scale(0.88);
-    transition-duration: 0.08s;
-}
-/* Skip button — slightly brighter to suggest primary action */
-.hmt-btn--skip:hover {
-    box-shadow: 0 0 12px rgba(200, 146, 42, 0.1);
-}
-/* Reset button — red tint on hover */
-.hmt-btn--reset:hover {
-    background: rgba(255, 69, 58, 0.1);
-    border-color: rgba(255, 69, 58, 0.2);
-    color: rgba(255, 120, 100, 0.9);
-}
-/* Break mode: skip button gets teal tint */
-.home-mini-timer.is-break .hmt-btn--skip:hover {
-    background: rgba(100, 180, 160, 0.12);
-    border-color: rgba(100, 180, 160, 0.25);
-    color: rgba(160, 220, 200, 0.9);
-    box-shadow: 0 0 12px rgba(100, 180, 160, 0.1);
+    transform: scale(0.9);
+    transition-duration: 0.1s;
 }
 
-/* Play/pause — slightly more prominent */
-.hmt-btn--play-pause {
-    background: rgba(200, 146, 42, 0.08);
-    color: rgba(200, 160, 100, 0.6);
-}
-.hmt-btn--play-pause:hover {
-    background: rgba(200, 146, 42, 0.18);
-    color: rgba(255, 220, 140, 1);
+/* Dock — only visible when you need it; slides slightly on hover to
+   suggest direction. */
+.hmt-btn--dock { color: rgba(200, 160, 100, 0.35); }
+.hmt-btn--dock:hover { transform: translateX(1.5px); }
+.hmt-btn--dock:active { transform: translateX(2.5px) scale(0.92); }
+
+/* Skip — brighter resting glow signals it's the most-used action. */
+.hmt-btn--skip:hover {
     box-shadow: 0 0 14px rgba(200, 146, 42, 0.12);
 }
+
+/* Reset — red-warm intent only on hover. */
+.hmt-btn--reset:hover {
+    background: rgba(255, 69, 58, 0.08);
+    border-color: rgba(255, 69, 58, 0.25);
+    color: rgba(255, 140, 120, 0.95);
+}
+
+/* Break mode: skip gets the teal-warm treatment. */
+.home-mini-timer.is-break .hmt-btn--skip:hover {
+    background: rgba(100, 180, 160, 0.1);
+    border-color: rgba(100, 180, 160, 0.28);
+    color: rgba(160, 220, 200, 0.95);
+    box-shadow: 0 0 14px rgba(100, 180, 160, 0.12);
+}
+
+/* Play/pause — the one primary action; gets a quieter permanent tint
+   and a stronger hover glow so the eye lands on it first without it
+   being a shouting filled button. */
+.hmt-btn--play-pause {
+    border-color: rgba(200, 146, 42, 0.18);
+    background: rgba(200, 146, 42, 0.04);
+    color: rgba(230, 190, 120, 0.75);
+}
+.hmt-btn--play-pause:hover {
+    border-color: rgba(200, 146, 42, 0.45);
+    background: rgba(200, 146, 42, 0.14);
+    color: rgba(255, 220, 140, 1);
+    box-shadow: 0 0 16px rgba(200, 146, 42, 0.18);
+}
+.home-mini-timer.is-break .hmt-btn--play-pause {
+    border-color: rgba(100, 180, 160, 0.2);
+    background: rgba(100, 180, 160, 0.05);
+    color: rgba(180, 220, 200, 0.8);
+}
 .home-mini-timer.is-break .hmt-btn--play-pause:hover {
-    background: rgba(100, 180, 160, 0.15);
-    color: rgba(160, 220, 200, 1);
-    box-shadow: 0 0 14px rgba(100, 180, 160, 0.1);
+    border-color: rgba(100, 180, 160, 0.45);
+    background: rgba(100, 180, 160, 0.13);
+    color: rgba(180, 230, 210, 1);
+    box-shadow: 0 0 16px rgba(100, 180, 160, 0.16);
 }
 
 /* ── Resize handle (bottom-right corner) ── */
@@ -504,47 +549,6 @@
     z-index: 22;
     align-items: center;
 }
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   MINIMIZE BUTTON — top-right corner of the mini-timer
-   A discreet chevron+wall glyph meaning "slide this to the right edge".
-   Stays quiet by default; brightens on hover/focus. Tucked above the first
-   control button so it doesn't interrupt the existing controls column.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.hmt-minimize {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid transparent;
-    border-radius: 7px;
-    background: transparent;
-    color: rgba(200, 160, 100, 0.38);
-    cursor: pointer;
-    z-index: 5;
-    transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
-}
-.hmt-minimize:hover,
-.hmt-minimize:focus-visible {
-    color: rgba(255, 220, 140, 0.95);
-    background: rgba(200, 146, 42, 0.1);
-    border-color: rgba(200, 146, 42, 0.22);
-    outline: none;
-}
-.hmt-minimize:hover { transform: translateX(1.5px); }
-.hmt-minimize:active { transform: translateX(3px) scale(0.94); }
-
-/* When the mini-timer is being docked (animating toward the right edge),
-   fade the minimize button so it doesn't flash around during the morph. */
-.home-mini-timer.is-docking .hmt-minimize { opacity: 0; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    DOCK TRANSITION — applied on the mini-timer while it glides to the right

@@ -142,13 +142,6 @@
 
     <!-- Mini Focus Timer — OUTSIDE #home so it's viewport-positioned, draggable -->
     <div class="home-mini-timer hidden" id="homeMiniTimer" role="status" aria-label="Focus timer">
-        <!-- Minimize button — top-right, sends the timer to the right-edge sliver -->
-        <button class="hmt-minimize" id="hmtMinimizeBtn" aria-label="Dock timer to the right edge" type="button">
-            <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="6 3 11 8 6 13"/>
-                <line x1="13.5" y1="3" x2="13.5" y2="13" opacity="0.55"/>
-            </svg>
-        </button>
         <!-- Analog clock face -->
         <svg class="hmt-clock" viewBox="0 0 60 60" aria-hidden="true">
             <!-- Outer ring -->
@@ -187,6 +180,16 @@
         </div>
         <!-- Controls -->
         <div class="hmt-controls">
+            <!-- Dock / minimize — lives at the top of the column with a hairline
+                 divider below, set apart from the playback controls by meaning
+                 and by a tiny strip of space. -->
+            <button class="hmt-btn hmt-btn--dock" id="hmtMinimizeBtn" aria-label="Dock timer to the right edge" type="button">
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 3 11 8 6 13"/>
+                    <line x1="13.25" y1="3" x2="13.25" y2="13" opacity="0.5"/>
+                </svg>
+            </button>
+            <span class="hmt-controls__divider" aria-hidden="true"></span>
             <button class="hmt-btn hmt-btn--play-pause" id="hmtPlayPauseBtn" aria-label="Pause timer" data-state="">
                 <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>
             </button>
