@@ -158,47 +158,26 @@
 }
 
 /* ── Empty state ──────────────────────────────────────────────────────────
-   Structural readability problem: the empty-state text sits directly over
-   Babylon's scene, which spans the full tonal range (white accretion disk
-   through black void). No single text color is readable against all of it.
-   Fix: give the content a contained radial pool of darkness that fades
-   into the surrounding cosmos at the edges — the text gets a consistent
-   dark backdrop at its core, but the scene still breathes around it so
-   the empty state doesn't look like a hard box pasted over the universe.
-   Belt-and-braces: text-shadow under title + subtitle for an extra
-   layer of contrast insurance against particularly bright backdrops. */
+   Floating text over Babylon's scene can't pick a single color that works
+   against the full tonal range (white disk → black void). The elegant
+   solution for a cosmic, premium app is not to add darkness — it's to
+   give the text its own LIGHT SOURCE. A luminous champagne halo around
+   bright-cream text reads as a celestial object (a jewel, a lantern, a
+   pale moon) separating from the scene through warmth and glow, not
+   shadow. The halo is light that pushes contrast outward: over a bright
+   disk region the text's lit ring extends its presence; over dark space
+   the bright interior pops; the transition between the two is gradient-
+   smooth, never a hard edge. */
 
 .deck-empty {
-    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    padding: 96px 40px;
-    min-height: 280px;
-    color: var(--deck-cream-soft);
+    gap: 16px;
+    padding: 84px 32px;
+    color: var(--deck-cream);
     text-align: center;
-    isolation: isolate; /* own stacking context so ::before stays behind */
-}
-/* The dark pool — radial gradient that's almost opaque at the centre and
-   fades to fully transparent at the edges. Wider than the content box so
-   the fade is gentle and the edges feel atmospheric, not cropped. */
-.deck-empty::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 140%;
-    height: 140%;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(ellipse at center,
-        rgba(6, 5, 3, 0.82) 0%,
-        rgba(6, 5, 3, 0.6) 28%,
-        rgba(6, 5, 3, 0.25) 55%,
-        rgba(6, 5, 3, 0) 78%);
-    pointer-events: none;
-    z-index: -1;
 }
 
 .deck-empty__star {
@@ -206,38 +185,38 @@
     height: 56px;
     color: var(--deck-gold);
     filter:
-        drop-shadow(0 0 12px rgba(225, 205, 150, 0.8))
-        drop-shadow(0 0 28px rgba(225, 205, 150, 0.35))
-        drop-shadow(0 0 48px rgba(225, 205, 150, 0.15));
+        drop-shadow(0 0 12px rgba(225, 205, 150, 0.9))
+        drop-shadow(0 0 32px rgba(225, 205, 150, 0.5))
+        drop-shadow(0 0 64px rgba(225, 205, 150, 0.22));
     animation: deckEmptyBreath 3.4s var(--deck-ease) infinite;
 }
 .deck-empty__title {
     font-size: 18px;
     font-weight: 500;
-    color: var(--deck-cream);
+    color: #FFF6E4;                 /* luminous cream — reads bright */
     margin: 6px 0 0;
     letter-spacing: 0.015em;
-    /* Halo — adds a dark pool directly under each glyph so even if the
-       radial backdrop is compromised by layout shift, the text still has
-       readable contrast. Three-shadow stack builds depth without reading
-       as a drop-shadow box. */
+    /* The light halo — a tight white-cream glow inside a wider warm
+       champagne glow. Stacking multiple light-coloured text-shadows
+       makes the glyphs look luminous rather than outlined, and the
+       warm outer ring gently separates them from anything behind. */
     text-shadow:
-        0 0 12px rgba(0, 0, 0, 0.9),
-        0 0 24px rgba(0, 0, 0, 0.7),
-        0 2px 4px rgba(0, 0, 0, 0.6);
+        0 0 10px rgba(255, 244, 220, 0.55),
+        0 0 22px rgba(255, 225, 170, 0.45),
+        0 0 40px rgba(225, 205, 150, 0.4);
 }
 .deck-empty__subtitle {
     font-size: 13.5px;
     line-height: 1.6;
     max-width: 380px;
     margin: 0;
-    color: rgba(230, 220, 195, 0.72);
+    color: rgba(246, 235, 210, 0.85);
     text-shadow:
-        0 0 10px rgba(0, 0, 0, 0.85),
-        0 0 20px rgba(0, 0, 0, 0.6);
+        0 0 8px rgba(255, 240, 210, 0.45),
+        0 0 18px rgba(225, 205, 150, 0.3);
 }
 .deck-empty__subtitle strong {
-    color: var(--deck-cream);
+    color: #FFF6E4;
     font-weight: 500;
 }
 @keyframes deckEmptyBreath {
