@@ -101,7 +101,15 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What is the Home mini-timer?',
-                a: "A compact floating widget on the Home tab that appears as soon as any session is running or paused. Shows countdown, progress ring, session number, and gives you play/pause + skip controls without leaving the tab. Click the face to jump to the Focus tab. It's draggable and remembers its size across reloads.",
+                a: "A compact floating widget that appears as soon as any session is running or paused. Shows the countdown, progress arc, session number (1 / 4), and the play/pause + skip + reset controls. The clock face is a real analogue dial — minute hand sweeps over the session, second hand ticks. Click the time digits to jump to the Focus tab.",
+            },
+            {
+                q: 'Can I move or resize the mini-timer?',
+                a: "Yes. Drag from any non-button area to reposition it anywhere on screen. Drag the small <strong>↘</strong> handle at the bottom-right corner to resize. Position and size both persist across reloads.",
+            },
+            {
+                q: 'What does the dock button do?',
+                a: "The <strong>›</strong> arrow at the top of the mini-timer's controls column docks it as a thin <strong>sliver</strong> pinned to the right edge of the viewport. The sliver shows MM·SS, plus play/pause, skip, and reset. Click the chevron at the top of the sliver to unfurl back to the full mini-timer. Your dock preference persists across reloads.",
             },
             {
                 q: 'What happens to my timer if I refresh?',
@@ -171,6 +179,14 @@ export const HELP_CATEGORIES = [
             {
                 q: 'How do I remove a sound?',
                 a: '<strong>Drag the body into the black hole.</strong> Once inside the event horizon it gets gravitationally lensed and consumed; the audio fades out in lockstep with the visual. (You can also use the <strong>Clear sky</strong> button in the toolbar to remove all of them at once.)',
+            },
+            {
+                q: 'I removed a sound by accident. Can I get it back?',
+                a: 'Yes — open the library (<strong>+</strong> in the toolbar) and pick the same sound again. It spawns fresh and rejoins the orbit. Track-level state (volume, EQ, pan) is whatever the defaults are; if you had it tuned, save the constellation first next time.',
+            },
+            {
+                q: 'What does each cosmos toolbar button do?',
+                a: 'Hover any toolbar button to see its name. From left to right:<br><strong>Add a sound</strong> (⊕) opens the sound library.<br><strong>Save constellation</strong> (★) saves the current arrangement.<br><strong>Sleep timer</strong> (☾) sets a 15/30/60/120 min fade-out.<br><strong>Surprise me</strong> (✦) drops in a random arrangement.<br><strong>Immersive mode</strong> (⌗) hides the chrome.<br><strong>Clear sky</strong> (⊝) fades out and removes every sound.',
             },
             {
                 q: 'How does the master volume work?',

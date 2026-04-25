@@ -1638,6 +1638,8 @@
 }
 
 .cosmos-tool {
+    /* Position relative so the ::after tooltip can anchor to it. */
+    position: relative;
     width: 38px;
     height: 38px;
     display: inline-flex;
@@ -1654,6 +1656,66 @@
                 border-color 0.2s ease,
                 box-shadow 0.2s ease,
                 transform 0.18s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Tooltip — instant, styled hover/focus label. Shows the data-tooltip
+   text in a small floating pill above the button. Replaces the native
+   browser title (which has a 1-2s delay and unstyleable look). */
+.cosmos-tool[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(8, 6, 3, 0.94);
+    border: 1px solid rgba(255, 205, 115, 0.28);
+    color: rgba(255, 246, 225, 0.98);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.45),
+        0 0 24px rgba(255, 205, 115, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1;
+}
+.cosmos-tool[data-tooltip]::before {
+    /* Small downward-pointing arrow connecting the label to the button. */
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid rgba(255, 205, 115, 0.28);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.cosmos-tool[data-tooltip]:hover::after,
+.cosmos-tool[data-tooltip]:focus-visible::after,
+.cosmos-tool[data-tooltip]:hover::before,
+.cosmos-tool[data-tooltip]:focus-visible::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+/* Hide tooltip when button is disabled — no point teasing an unavailable
+   action. */
+.cosmos-tool:disabled::after,
+.cosmos-tool[aria-disabled="true"]::after,
+.cosmos-tool:disabled::before,
+.cosmos-tool[aria-disabled="true"]::before {
+    display: none;
 }
 .cosmos-tool:hover {
     background: rgba(255, 205, 115, 0.14);

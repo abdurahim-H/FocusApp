@@ -28,6 +28,7 @@ import {
 } from '../features/sounds.js';
 import {
     dismissBody,
+    disposeAllBodies,
     dragBody,
     isInsideEventHorizon,
     listBodies,
@@ -119,9 +120,19 @@ export function initCosmosPointer({ onSelectionChange } = {}) {
         for (const id of playingIds) {
             if (!listBodies().some((b) => b.id === id)) summonBody(id);
         }
-        // Conversely, dispose of any body whose track is no longer active.
+        // Conversely, dismiss any body whose track is no longer active.
         for (const b of listBodies()) {
             if (!playingIds.includes(b.id)) dismissBody(b.id);
+        }
+        // Belt + braces: if every track is gone but a body somehow
+        // survived (rAF stalled, animation interrupted), nuke them all.
+        if (playingIds.length === 0 && listBodies().length > 0) {
+            // Wait for in-flight dismiss animations to finish, then
+            // hard-dispose any survivor. 1.2s covers our 700ms dismiss
+            // animation plus the 200ms safety margin in dismissBody.
+            setTimeout(() => {
+                if (getActiveSounds().length === 0) disposeAllBodies();
+            }, 1200);
         }
     });
 

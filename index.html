@@ -341,45 +341,60 @@
               overlays inside makes them non-clickable / clipped. -->
 
     <!-- Cosmos Toolbar — bottom-centre floating control surface. Outside
-         .container so it isn't trapped by `contain: layout`. -->
+         .container so it isn't trapped by `contain: layout`. Each button
+         carries a data-tooltip read by the .cosmos-tool::after rule —
+         instant, styled, no native-title delay. -->
     <div class="cosmos-toolbar" id="cosmosToolbar" role="group" aria-label="Cosmos controls">
-        <button class="cosmos-tool" id="deckAddSoundBtn" aria-label="Open sound library" title="Open sound library">
+        <button class="cosmos-tool" id="deckAddSoundBtn"
+                aria-label="Add a sound — opens the sound library"
+                data-tooltip="Add a sound">
             <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="10" cy="10" r="6"/>
-                <line x1="10" y1="7" x2="10" y2="13"/>
-                <line x1="7" y1="10" x2="13" y2="10"/>
+                <circle cx="10" cy="10" r="7"/>
+                <line x1="10" y1="6.5" x2="10" y2="13.5"/>
+                <line x1="6.5" y1="10" x2="13.5" y2="10"/>
             </svg>
         </button>
-        <button class="cosmos-tool" id="deckSaveMixBtn" aria-label="Save constellation" title="Save constellation">
+        <button class="cosmos-tool" id="deckSaveMixBtn"
+                aria-label="Save the current arrangement as a constellation"
+                data-tooltip="Save constellation">
             <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M10 3 L11.5 8 L17 8 L12.5 11.5 L14 17 L10 13.5 L6 17 L7.5 11.5 L3 8 L8.5 8 Z"/>
+                <path d="M10 2.5 L11.85 7.4 L17.1 7.7 L13 11.05 L14.4 16.15 L10 13.4 L5.6 16.15 L7 11.05 L2.9 7.7 L8.15 7.4 Z"/>
             </svg>
         </button>
-        <button class="cosmos-tool" id="deckSleepBtn" aria-label="Sleep timer" title="Sleep timer">
+        <button class="cosmos-tool" id="deckSleepBtn"
+                aria-label="Set a sleep timer"
+                data-tooltip="Sleep timer">
             <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M16 12.5 a6 6 0 0 1 -8.5 -8.5 a7 7 0 1 0 8.5 8.5z"/>
+                <path d="M16.5 12.5 a6.5 6.5 0 0 1 -9 -9 a7.5 7.5 0 1 0 9 9z"/>
             </svg>
         </button>
-        <button class="cosmos-tool" id="deckRandomBtn" aria-label="Surprise constellation" title="Surprise constellation">
-            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 4 L7 4 L17 16 L13 16 Z" fill="currentColor" fill-opacity="0.18"/>
-                <path d="M13 4 L17 4 L17 8"/>
-                <path d="M17 4 L13 8"/>
-                <path d="M3 16 L7 12"/>
+        <button class="cosmos-tool" id="deckRandomBtn"
+                aria-label="Surprise me — pick a random constellation"
+                data-tooltip="Surprise me">
+            <!-- Sparkle / magic — a 4-point star with a small companion star,
+                 the universal "random / magic / surprise" mark. Replaces
+                 the ambiguous arrow-bracket glyph. -->
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true">
+                <path d="M8 2.5 L8.9 6.6 L13 7.5 L8.9 8.4 L8 12.5 L7.1 8.4 L3 7.5 L7.1 6.6 Z"/>
+                <path d="M14.5 11.5 L15 13.6 L17.1 14.1 L15 14.6 L14.5 16.7 L14 14.6 L11.9 14.1 L14 13.6 Z"/>
             </svg>
         </button>
-        <button class="cosmos-tool" id="deckFullscreenBtn" aria-label="Immersive mode" title="Immersive mode">
+        <button class="cosmos-tool" id="deckFullscreenBtn"
+                aria-label="Enter immersive mode — hide chrome"
+                data-tooltip="Immersive mode">
             <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="3 7 3 3 7 3"/>
-                <polyline points="13 3 17 3 17 7"/>
-                <polyline points="17 13 17 17 13 17"/>
-                <polyline points="7 17 3 17 3 13"/>
+                <polyline points="3 7.5 3 3 7.5 3"/>
+                <polyline points="12.5 3 17 3 17 7.5"/>
+                <polyline points="17 12.5 17 17 12.5 17"/>
+                <polyline points="7.5 17 3 17 3 12.5"/>
             </svg>
         </button>
-        <button class="cosmos-tool cosmos-tool--danger" id="deckStopAllBtn" aria-label="Clear sky" title="Clear sky — stop all sounds">
+        <button class="cosmos-tool cosmos-tool--danger" id="deckStopAllBtn"
+                aria-label="Clear sky — stop and remove every active sound"
+                data-tooltip="Clear sky">
             <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="10" cy="10" r="6"/>
-                <line x1="6" y1="10" x2="14" y2="10"/>
+                <circle cx="10" cy="10" r="7"/>
+                <line x1="6.5" y1="10" x2="13.5" y2="10"/>
             </svg>
         </button>
     </div>
