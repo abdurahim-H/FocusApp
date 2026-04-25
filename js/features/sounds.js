@@ -13,7 +13,7 @@
 // it otherwise. State restored from localStorage is silent until the first
 // play() call unlocks the context.
 
-import { state, ambientTracks, ambientMaster, activeSounds, effect } from '../core/state.js';
+import { activeSounds, ambientMaster, ambientTracks, effect, state } from '../core/state.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Sound library
@@ -24,10 +24,10 @@ const SOUND_CDN = 'https://cdn.universefocuses.com';
 // Real sounds served from R2. More "coming soon" slots are advertised in the
 // library UI so users know the catalog is growing.
 export const SOUND_LIBRARY = {
-    rain:   { name: 'Rain',   icon: '🌧️', category: 'Nature', url: `${SOUND_CDN}/rain_00.ogg` },
-    ocean:  { name: 'Ocean',  icon: '🌊', category: 'Nature', url: `${SOUND_CDN}/ocean_04.ogg` },
+    rain: { name: 'Rain', icon: '🌧️', category: 'Nature', url: `${SOUND_CDN}/rain_00.ogg` },
+    ocean: { name: 'Ocean', icon: '🌊', category: 'Nature', url: `${SOUND_CDN}/ocean_04.ogg` },
     forest: { name: 'Forest', icon: '🌲', category: 'Nature', url: `${SOUND_CDN}/forest_00.ogg` },
-    cafe:   { name: 'Café',   icon: '☕', category: 'Indoor', url: `${SOUND_CDN}/crowd_0.ogg` },
+    cafe: { name: 'Café', icon: '☕', category: 'Indoor', url: `${SOUND_CDN}/crowd_0.ogg` },
 };
 
 // Defaults for a brand-new track entry.
@@ -78,7 +78,11 @@ export async function ensureAudio() {
         masterReady = true;
     }
     if (ctx.state === 'suspended') {
-        try { await ctx.resume(); } catch (_) { /* ignore */ }
+        try {
+            await ctx.resume();
+        } catch (_) {
+            /* ignore */
+        }
     }
     return ctx;
 }
@@ -98,12 +102,64 @@ export function getMasterEnergy() {
     return sum / (energyScratch.length * 255);
 }
 
+// Per-track scratch buffers, keyed by track id, so each cosmic body can
+// pull its own FFT every frame without per-frame allocation.
+const trackEnergyScratch = new Map();
+
+/** Average 0..1 energy for a single track. Returns 0 if the track isn't
+ *  playing or its analyser is gone. */
+export function getTrackEnergy(id) {
+    const node = tracks.get(id);
+    if (!node || !node.analyser) return 0;
+    let scratch = trackEnergyScratch.get(id);
+    if (!scratch || scratch.length !== node.analyser.frequencyBinCount) {
+        scratch = new Uint8Array(node.analyser.frequencyBinCount);
+        trackEnergyScratch.set(id, scratch);
+    }
+    node.analyser.getByteFrequencyData(scratch);
+    let sum = 0;
+    for (let i = 0; i < scratch.length; i++) sum += scratch[i];
+    return sum / (scratch.length * 255);
+}
+
+/** Three-band energy for a track: { low, mid, high } each 0..1.
+ *  Lets each celestial body deform per-band — the rain droplet shimmers on
+ *  high frequencies, the ocean ring swells on bass, the forest moss
+ *  twists on mids. Reuses the per-track analyser; same scratch buffer. */
+export function getTrackBandEnergy(id) {
+    const node = tracks.get(id);
+    if (!node || !node.analyser) return { low: 0, mid: 0, high: 0 };
+    let scratch = trackEnergyScratch.get(id);
+    if (!scratch || scratch.length !== node.analyser.frequencyBinCount) {
+        scratch = new Uint8Array(node.analyser.frequencyBinCount);
+        trackEnergyScratch.set(id, scratch);
+    }
+    node.analyser.getByteFrequencyData(scratch);
+    // 256-bin FFT => bin 0..127. With ctx sample rate 48kHz the Nyquist is
+    // 24kHz, so each bin spans ~187Hz. Bands: low <= bin 5 (~940Hz),
+    // mid 6..32 (~6kHz), high 33..127 (rest).
+    const n = scratch.length;
+    const lowEnd = Math.min(5, n);
+    const midEnd = Math.min(32, n);
+    let lo = 0,
+        mi = 0,
+        hi = 0;
+    for (let i = 0; i < lowEnd; i++) lo += scratch[i];
+    for (let i = lowEnd; i < midEnd; i++) mi += scratch[i];
+    for (let i = midEnd; i < n; i++) hi += scratch[i];
+    return {
+        low: lo / Math.max(1, lowEnd) / 255,
+        mid: mi / Math.max(1, midEnd - lowEnd) / 255,
+        high: hi / Math.max(1, n - midEnd) / 255,
+    };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Buffer cache
 // ═══════════════════════════════════════════════════════════════════════════
 
-const bufferCache = new Map();       // id -> AudioBuffer
-const bufferPromises = new Map();    // id -> Promise<AudioBuffer> (in-flight)
+const bufferCache = new Map(); // id -> AudioBuffer
+const bufferPromises = new Map(); // id -> Promise<AudioBuffer> (in-flight)
 
 async function loadBuffer(id) {
     if (bufferCache.has(id)) return bufferCache.get(id);
@@ -129,11 +185,11 @@ async function loadBuffer(id) {
 // Per-track node graph
 // ═══════════════════════════════════════════════════════════════════════════
 
-const tracks = new Map();  // id -> { source, gain, lowEq, midEq, highEq, pan, stopping }
+const tracks = new Map(); // id -> { source, gain, lowEq, midEq, highEq, pan, stopping }
 
 function createTrackGraph(id) {
     const gain = ctx.createGain();
-    gain.gain.value = 0;        // Start silent, fade in.
+    gain.gain.value = 0; // Start silent, fade in.
 
     const lowEq = ctx.createBiquadFilter();
     lowEq.type = 'lowshelf';
@@ -154,13 +210,23 @@ function createTrackGraph(id) {
     const pan = ctx.createStereoPanner();
     pan.pan.value = 0;
 
+    // Per-track analyser — taps the post-pan signal so the cosmos sound-body
+    // bound to this track gets FFT data that reflects exactly what the user
+    // hears for it (volume + EQ + mute + pan all factored in). It's a
+    // dead-end branch — no downstream connection — so it doesn't double-mix
+    // into the master bus, just measures.
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.82;
+
     gain.connect(lowEq);
     lowEq.connect(midEq);
     midEq.connect(highEq);
     highEq.connect(pan);
     pan.connect(masterGain);
+    pan.connect(analyser);
 
-    return { gain, lowEq, midEq, highEq, pan, source: null, stopping: false };
+    return { gain, lowEq, midEq, highEq, pan, analyser, source: null, stopping: false };
 }
 
 /** Apply the saved state (volume/eq/pan/muted) to a track's nodes. */
@@ -190,7 +256,7 @@ const FADE_OUT_MS = 600;
 // When fetch() fails with CORS, we fall back to bare <audio> elements.
 // Basic playback works without CORS; we lose EQ, pan, smooth Web-Audio
 // fades, and scene reactivity. Better than silent audio.
-const fallbackTracks = new Map();  // id -> HTMLAudioElement
+const fallbackTracks = new Map(); // id -> HTMLAudioElement
 let fallbackMode = false;
 
 /** Start a track (or ensure it's playing). Fades in. */
@@ -215,7 +281,9 @@ export async function playSound(id, { fadeMs = FADE_IN_MS } = {}) {
     } catch (err) {
         console.warn(`[sounds] failed to load ${id}:`, err);
         const msg = String(err?.message || err);
-        const isCORS = /CORS|cross[- ]origin|Failed to fetch|NetworkError|access.control/i.test(msg);
+        const isCORS = /CORS|cross[- ]origin|Failed to fetch|NetworkError|access.control/i.test(
+            msg
+        );
         if (isCORS) {
             // Lock the engine into fallback mode for the rest of the session
             // so subsequent plays skip the failing fetch attempt.
@@ -268,7 +336,7 @@ function playFallback(id, { fadeMs = FADE_IN_MS } = {}) {
     const audio = new Audio(SOUND_LIBRARY[id].url);
     audio.loop = true;
     audio.preload = 'auto';
-    audio.volume = 0;  // fade in
+    audio.volume = 0; // fade in
     // Mark used by stopFallback so the teardown-triggered error event
     // (which fires when we set src='') doesn't get mistaken for a real
     // load failure.
@@ -277,7 +345,7 @@ function playFallback(id, { fadeMs = FADE_IN_MS } = {}) {
         if (audio.__stopping) return;
         // MediaError code: 1 abort, 2 network, 3 decode, 4 src not supported.
         const mediaErr = audio.error;
-        if (mediaErr && mediaErr.code === 1) return;  // aborted, expected
+        if (mediaErr && mediaErr.code === 1) return; // aborted, expected
         console.warn(`[sounds] fallback error for ${id}:`, mediaErr?.message || e.type);
         emit('load-error', { id, error: mediaErr || e, kind: 'network' });
         audio.removeEventListener('error', onError);
@@ -288,7 +356,10 @@ function playFallback(id, { fadeMs = FADE_IN_MS } = {}) {
     audio.__onError = onError;
     fallbackTracks.set(id, audio);
     const playP = audio.play();
-    if (playP) playP.catch(() => { /* error event fires separately */ });
+    if (playP)
+        playP.catch(() => {
+            /* error event fires separately */
+        });
     fadeFallback(id, 0, fallbackTargetFor(id), fadeMs);
     _addActive(id);
     ensureSilentKeepAlive();
@@ -334,7 +405,11 @@ function stopFallback(id, { fadeMs = FADE_OUT_MS } = {}) {
         // an error event we don't want to surface.
         audio.__stopping = true;
         if (audio.__onError) audio.removeEventListener('error', audio.__onError);
-        try { audio.pause(); audio.removeAttribute('src'); audio.load(); } catch (_) {}
+        try {
+            audio.pause();
+            audio.removeAttribute('src');
+            audio.load();
+        } catch (_) {}
         fallbackTracks.delete(id);
     }, fadeMs + 40);
     _removeActive(id);
@@ -364,14 +439,34 @@ export function stopSound(id, { fadeMs = FADE_OUT_MS } = {}) {
         // wired to masterGain and kept processing silence on the audio
         // thread forever, leaking cost that compounds across stop/start
         // cycles.
-        try { node.source?.stop(); } catch (_) { /* already stopped */ }
-        try { node.source?.disconnect(); } catch (_) {}
-        try { node.gain.disconnect(); } catch (_) {}
-        try { node.lowEq.disconnect(); } catch (_) {}
-        try { node.midEq.disconnect(); } catch (_) {}
-        try { node.highEq.disconnect(); } catch (_) {}
-        try { node.pan.disconnect(); } catch (_) {}
+        try {
+            node.source?.stop();
+        } catch (_) {
+            /* already stopped */
+        }
+        try {
+            node.source?.disconnect();
+        } catch (_) {}
+        try {
+            node.gain.disconnect();
+        } catch (_) {}
+        try {
+            node.lowEq.disconnect();
+        } catch (_) {}
+        try {
+            node.midEq.disconnect();
+        } catch (_) {}
+        try {
+            node.highEq.disconnect();
+        } catch (_) {}
+        try {
+            node.pan.disconnect();
+        } catch (_) {}
+        try {
+            node.analyser?.disconnect();
+        } catch (_) {}
         tracks.delete(id);
+        trackEnergyScratch.delete(id);
     }, fadeMs + 40);
     _removeActive(id);
     emit('stop', { id });
@@ -440,9 +535,8 @@ export function setSoundEQ(id, band, valueDb) {
     mutateTrack(id, { eq: next });
     const node = tracks.get(id);
     if (!node) return;
-    const param = band === 'low' ? node.lowEq.gain
-                : band === 'mid' ? node.midEq.gain
-                :                  node.highEq.gain;
+    const param =
+        band === 'low' ? node.lowEq.gain : band === 'mid' ? node.midEq.gain : node.highEq.gain;
     param.setTargetAtTime(v, ctx.currentTime, 0.04);
 }
 
@@ -536,7 +630,9 @@ function _removeActive(id) {
 const listeners = new Set();
 function emit(type, payload) {
     for (const fn of listeners) {
-        try { fn(type, payload); } catch (_) {}
+        try {
+            fn(type, payload);
+        } catch (_) {}
     }
 }
 /** Subscribe to engine events: 'play' | 'stop' | 'load-error'. Returns unsubscribe. */
@@ -578,13 +674,19 @@ function ensureSilentKeepAlive() {
         silentSource.loop = true;
         silentSource.connect(ctx.destination);
         silentSource.start(0);
-    } catch (_) { /* ignore — keep-alive is best-effort */ }
+    } catch (_) {
+        /* ignore — keep-alive is best-effort */
+    }
 }
 
 function teardownSilentKeepAlive() {
     if (!silentSource) return;
-    try { silentSource.stop(); } catch (_) {}
-    try { silentSource.disconnect(); } catch (_) {}
+    try {
+        silentSource.stop();
+    } catch (_) {}
+    try {
+        silentSource.disconnect();
+    } catch (_) {}
     silentSource = null;
 }
 
@@ -622,9 +724,7 @@ export function setMediaSessionMix({ name, artwork } = {}) {
             title: name || 'Ambient mix',
             artist: 'Cosmic Focus',
             album: 'Focus ambience',
-            artwork: artwork || [
-                { src: '/icon.svg', sizes: '128x128', type: 'image/svg+xml' },
-            ],
+            artwork: artwork || [{ src: '/icon.svg', sizes: '128x128', type: 'image/svg+xml' }],
         });
         navigator.mediaSession.playbackState = 'playing';
     } catch (_) {}
@@ -632,7 +732,9 @@ export function setMediaSessionMix({ name, artwork } = {}) {
 
 function mediaSessionStopped() {
     if (!('mediaSession' in navigator) || !navigator.mediaSession) return;
-    try { navigator.mediaSession.playbackState = 'paused'; } catch (_) {}
+    try {
+        navigator.mediaSession.playbackState = 'paused';
+    } catch (_) {}
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -660,5 +762,9 @@ export function setVolume(pct) {
 // Utilities
 // ═══════════════════════════════════════════════════════════════════════════
 
-function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
-function clamp01(v) { return clamp(Number.isFinite(v) ? v : 0, 0, 1); }
+function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+}
+function clamp01(v) {
+    return clamp(Number.isFinite(v) ? v : 0, 0, 1);
+}

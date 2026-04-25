@@ -27,7 +27,8 @@ export function setupPostProcessing(sceneRef, cameraRef) {
     isWebGPU = engine.isWebGPU || (engine.name && engine.name.includes('WebGPU'));
     // Enable HDR rendering on the scene
     scene.imageProcessingConfiguration.toneMappingEnabled = true;
-    scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+    scene.imageProcessingConfiguration.toneMappingType =
+        BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
 
     // Use DefaultRenderingPipeline for comprehensive post-processing
     pipeline = new BABYLON.DefaultRenderingPipeline(
@@ -59,14 +60,14 @@ export function setupPostProcessing(sceneRef, cameraRef) {
 function configureHDR(pipeline) {
     pipeline.imageProcessingEnabled = true;
     pipeline.imageProcessing.toneMappingEnabled = true;
-    pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+    pipeline.imageProcessing.toneMappingType =
+        BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
 
     // Exposure — slightly brighter for vibrancy. Mutable via setBaseExposure.
     pipeline.imageProcessing.exposure = baseExposure;
 
     // Contrast — punchy, vibrant colors
     pipeline.imageProcessing.contrast = 1.4;
-
 }
 
 /**
@@ -75,11 +76,10 @@ function configureHDR(pipeline) {
  */
 function configureBloom(pipeline) {
     pipeline.bloomEnabled = true;
-    pipeline.bloomThreshold = 0.65;   // Catches hero star glows + bright nebula
-    pipeline.bloomWeight = 0.55;     // Visible glow on bright stars
-    pipeline.bloomKernel = 64;       // Quality kernel
-    pipeline.bloomScale = 0.55;      // Slightly wider for star halos
-
+    pipeline.bloomThreshold = 0.65; // Catches hero star glows + bright nebula
+    pipeline.bloomWeight = 0.55; // Visible glow on bright stars
+    pipeline.bloomKernel = 64; // Quality kernel
+    pipeline.bloomScale = 0.55; // Slightly wider for star halos
 }
 
 /**
@@ -99,9 +99,8 @@ function configureDepthOfField(pipeline) {
     pipeline.depthOfFieldEnabled = false;
     pipeline.depthOfFieldBlurLevel = BABYLON.DepthOfFieldEffectBlurLevel.Low;
     pipeline.depthOfField.focalLength = 50;
-    pipeline.depthOfField.fStop = 4.0;       // Smaller aperture = more in focus
+    pipeline.depthOfField.fStop = 4.0; // Smaller aperture = more in focus
     pipeline.depthOfField.focusDistance = 65; // Match camera distance
-
 }
 
 /**
@@ -110,9 +109,8 @@ function configureDepthOfField(pipeline) {
  */
 function configureChromaticAberration(pipeline) {
     pipeline.chromaticAberrationEnabled = true;
-    pipeline.chromaticAberration.aberrationAmount = 2;     // Barely perceptible
-    pipeline.chromaticAberration.radialIntensity = 0.8;    // Edges only
-
+    pipeline.chromaticAberration.aberrationAmount = 2; // Barely perceptible
+    pipeline.chromaticAberration.radialIntensity = 0.8; // Edges only
 }
 
 /**
@@ -124,7 +122,6 @@ function configureAntiAliasing(pipeline) {
 
     // Reduce MSAA samples on WebGPU to avoid texture format issues
     pipeline.samples = isWebGPU ? 1 : 4;
-
 }
 
 /**
@@ -137,8 +134,8 @@ function configureVignette(pipeline) {
     pipeline.imageProcessing.vignetteStretch = 0.5;
     pipeline.imageProcessing.vignetteColor = new BABYLON.Color4(0, 0, 0.02, 0);
     pipeline.imageProcessing.vignetteCameraFov = 0.6;
-    pipeline.imageProcessing.vignetteBlendMode = BABYLON.ImageProcessingConfiguration.VIGNETTEMODE_MULTIPLY;
-
+    pipeline.imageProcessing.vignetteBlendMode =
+        BABYLON.ImageProcessingConfiguration.VIGNETTEMODE_MULTIPLY;
 }
 
 /**
@@ -166,7 +163,6 @@ function configureColorGrading(pipeline) {
 
     pipeline.imageProcessing.colorCurvesEnabled = true;
     pipeline.imageProcessing.colorCurves = curves;
-
 }
 
 /**
@@ -195,7 +191,7 @@ export function getCamera() {
  */
 export function createFilmGrainEffect() {
     // Film grain shader
-    BABYLON.Effect.ShadersStore["filmGrainFragmentShader"] = `
+    BABYLON.Effect.ShadersStore['filmGrainFragmentShader'] = `
         precision highp float;
 
         varying vec2 vUV;
@@ -260,16 +256,16 @@ export function createFilmGrainEffect() {
     // Without this the grain eventually blocks into large uniform cells.
     const GRAIN_TIME_WRAP = 4 * 60 * 60;
 
-    filmGrainPostProcess.onApply = function (effect) {
+    filmGrainPostProcess.onApply = (effect) => {
         grainTime = (grainTime + 0.016) % GRAIN_TIME_WRAP; // Approximate frame time
         effect.setFloat('time', grainTime);
         effect.setFloat('grainIntensity', grainIntensity); // mutable — driven by Settings
-        effect.setFloat2('screenSize',
+        effect.setFloat2(
+            'screenSize',
             scene.getEngine().getRenderWidth(),
             scene.getEngine().getRenderHeight()
         );
     };
-
 }
 
 /**

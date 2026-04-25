@@ -17,19 +17,23 @@ export const HELP_CATEGORIES = [
         entries: [
             {
                 q: 'What is Cosmic Focus?',
-                a: 'A cinematic Pomodoro timer built on top of a real-time 3D black-hole scene. Focused work sessions, ambient sounds, task list, and live stats — all in your browser, no account needed.',
+                a: 'A cinematic Pomodoro timer built on top of a real-time 3D black-hole scene. Focused work sessions, ambient sounds you arrange as a constellation around the black hole, task list, and live stats — all in your browser, no account needed.',
             },
             {
-                q: 'What are the three modes?',
-                a: '<strong>Home</strong> — landing page with greeting, clock, and the mini-timer once a session is running.<br><strong>Focus</strong> — the Pomodoro timer, task list, and session stats.<br><strong>Ambient</strong> — the mixing deck for layering rain, café, forest and more.',
+                q: 'What are the two tabs?',
+                a: "<strong>Home</strong> — landing page with greeting, clock, and the floating mini-timer once a session is running.<br><strong>Focus</strong> — the Pomodoro timer, task list, and session stats.<br>Ambient sounds aren't a separate tab anymore — they live in the cosmos itself, controlled directly in the 3D scene from any tab.",
             },
             {
                 q: 'How do I start my first focus session?',
                 a: 'Click <strong>Focus</strong>, then <strong>Start Focus</strong>. The timer begins counting down. When it hits zero, it rolls into a short break automatically. A compact mini-timer also appears on the Home tab.',
             },
             {
+                q: 'How do I add ambient sounds?',
+                a: 'Open the <strong>cosmos toolbar</strong> at the bottom of the screen and tap the <strong>+</strong> icon. Pick a sound from the library — it spawns as a glowing celestial body that orbits the black hole. Drag the body to set volume and pan. See <em>Cosmos Sound System</em> below for the full guide.',
+            },
+            {
                 q: 'Does my data save automatically?',
-                a: 'Yes. Tasks, settings, stats, and saved ambient mixes all persist in your browser\'s local storage. No server, no account. Closing the tab and reopening it restores everything.',
+                a: "Yes. Tasks, settings, stats, and saved constellations all persist in your browser's local storage. No server, no account. Closing the tab and reopening it restores everything.",
             },
             {
                 q: 'How do I open Settings?',
@@ -37,7 +41,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'Can I replay the welcome tour?',
-                a: 'Yes. <strong>Settings → Data & About → Replay welcome tour</strong>. The same 8-step walkthrough you saw on first visit runs again.',
+                a: 'Yes. <strong>Settings → Data & About → Replay welcome tour</strong>. The same 10-step walkthrough you saw on first visit runs again.',
             },
             {
                 q: 'Do I need to be online?',
@@ -97,7 +101,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What is the Home mini-timer?',
-                a: 'A compact floating widget on the Home tab that appears as soon as any session is running or paused. Shows countdown, progress ring, session number, and gives you play/pause + skip controls without leaving the tab. Click the face to jump to the Focus tab. It\'s draggable and remembers its size across reloads.',
+                a: "A compact floating widget on the Home tab that appears as soon as any session is running or paused. Shows countdown, progress ring, session number, and gives you play/pause + skip controls without leaving the tab. Click the face to jump to the Focus tab. It's draggable and remembers its size across reloads.",
             },
             {
                 q: 'What happens to my timer if I refresh?',
@@ -112,7 +116,8 @@ export const HELP_CATEGORIES = [
     {
         id: 'tasks',
         label: 'Tasks',
-        iconSvg: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
+        iconSvg:
+            '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
         entries: [
             {
                 q: 'How do I add a task?',
@@ -124,7 +129,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'Do tasks persist?',
-                a: 'Yes. Tasks are saved to local storage automatically. Close the tab, come back, they\'re there.',
+                a: "Yes. Tasks are saved to local storage automatically. Close the tab, come back, they're there.",
             },
             {
                 q: 'Is there a keyboard shortcut for the task input?',
@@ -134,61 +139,90 @@ export const HELP_CATEGORIES = [
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // AMBIENT SOUNDS  (matches Settings → Sounds)
+    // COSMOS SOUND SYSTEM  (matches Settings → Sounds)
     // ═══════════════════════════════════════════════════════════════════════
     {
-        id: 'ambient-sounds',
-        label: 'Ambient Sounds',
+        id: 'cosmos-sounds',
+        label: 'Cosmos Sound System',
         // iconSvg matches Settings → Sounds (speaker + waves)
-        iconSvg: '<path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07"/><path d="M19.07 4.93a10 10 0 010 14.14"/>',
+        iconSvg:
+            '<path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07"/><path d="M19.07 4.93a10 10 0 010 14.14"/>',
         entries: [
             {
-                q: 'How do I start an ambient mix?',
-                a: 'Open the <strong>Ambient</strong> tab. The saved-mixes rail at the top has three built-ins (Rainy Library, Forest Walk, Ocean Breath) — click one to crossfade into it. Or click <strong>+ Add sound</strong> to pick individual tracks from the library drawer.',
+                q: 'What is the Cosmos Sound System?',
+                a: "Every ambient sound is represented as a glowing celestial body that orbits the black hole. You compose your mix by arranging this constellation: drag a body to set its volume and pan, click it to open an EQ ring, drag it into the black hole to remove it. The black hole itself is the master volume. There's no panel of sliders — the cosmos is the mixer.",
             },
             {
-                q: 'Can I layer multiple sounds?',
-                a: 'Yes — that\'s the point. Each track becomes a card with its own volume slider, 3-band EQ, pan, mute, and remove controls. Mix rain + café + forest to taste.',
+                q: 'How do I add a sound?',
+                a: 'Tap the <strong>+</strong> icon in the cosmos toolbar (bottom-centre of the screen). The library drawer slides in. Pick a sound — it spawns as a celestial body that flies into orbit around the black hole. The audio comes up as the body settles.',
+            },
+            {
+                q: 'How do I adjust volume and pan?',
+                a: "<strong>Drag the body</strong> directly. Vertical drag (up/down) sets volume — closer to the black hole means louder. Horizontal drag (left/right) sets stereo pan. The body's glow scales with volume and the audio updates in real time.",
+            },
+            {
+                q: 'How do I tweak EQ?',
+                a: "<strong>Click a body</strong> (without dragging) to open its EQ control ring — three concentric rings labelled <strong>Bass</strong>, <strong>Mid</strong>, and <strong>Treble</strong>. Each ring has a notch you drag to set ±12 dB for that band. The body's color shifts in real time as you adjust. Click outside the ring to close.",
+            },
+            {
+                q: 'How do I mute a sound?',
+                a: 'Click the body to open its EQ ring; the <strong>mute</strong> button sits at the bottom of the ring. The body dims while muted; click again to unmute.',
+            },
+            {
+                q: 'How do I remove a sound?',
+                a: '<strong>Drag the body into the black hole.</strong> Once inside the event horizon it gets gravitationally lensed and consumed; the audio fades out in lockstep with the visual. (You can also use the <strong>Clear sky</strong> button in the toolbar to remove all of them at once.)',
+            },
+            {
+                q: 'How does the master volume work?',
+                a: '<strong>The black hole is the master bus.</strong> Drag it vertically (up = louder, down = quieter). The accretion disk and photon ring brighten with master energy, so you can see the loudness, not just hear it.',
             },
             {
                 q: 'What sounds are available?',
-                a: 'Today: <strong>Rain</strong>, <strong>Ocean</strong>, <strong>Forest</strong>, and <strong>Café</strong>. More are coming — you\'ll see them tagged "Soon" in the library drawer. If you have a sound you\'d love to see, use <strong>Settings → Feedback</strong>.',
+                a: 'Today: <strong>Rain</strong> (translucent droplet-nebula, shimmer on highs), <strong>Ocean</strong> (wave-ringed gas giant, swell on bass), <strong>Forest</strong> (moss-canopy moon, twist on mids), and <strong>Café</strong> (warm hearth-star, flares on highs). Each body has a bespoke shader bound to its own audio FFT — every body breathes with its own audio, not the master. More sounds tagged "Soon" appear in the library drawer.',
             },
             {
-                q: 'What are the three built-in mixes?',
-                a: '<strong>Rainy Library</strong> (rain + café, default 65/35), <strong>Forest Walk</strong> (forest + distant rain), <strong>Ocean Breath</strong> (ocean only, boosted lows). Each is a starting point — click it, then tweak.',
+                q: 'What is a constellation?',
+                a: 'A saved arrangement of celestial bodies — the set of active sounds plus each body\'s position, volume, EQ, and pan. Replaces the old "saved mixes" concept. You can save your current sky as a constellation and recall it later; loading one animates the bodies back into formation.',
             },
             {
-                q: 'How do I save my own mix?',
-                a: 'Get the deck tuned the way you like, then click the <strong>♡ Save mix</strong> button in the deck controls bar. Give it a name. It\'ll appear as a card in the saved-mixes rail.',
+                q: 'How do I save the current constellation?',
+                a: "Tap the <strong>★</strong> in the cosmos toolbar. Give it a name. The constellation appears in the library drawer's <em>Constellations</em> section as a small dot-cluster portrait of the orbital arrangement.",
             },
             {
-                q: 'How do I rename, delete, or share a mix?',
-                a: 'Click the <strong>⋯</strong> on any user mix card in the rail. Options: <strong>Rename</strong>, <strong>Share</strong> (copies a <code>/?mix=…</code> link anyone can open), <strong>Delete</strong>. Built-in mixes can\'t be modified.',
+                q: 'What are the built-in constellations?',
+                a: 'Eight curated starters in the library drawer: <strong>Rainy Library</strong>, <strong>Forest Walk</strong>, <strong>Ocean Breath</strong>, <strong>Storm Window</strong>, <strong>Tide Pool</strong>, <strong>Garden Café</strong>, <strong>Deep Work</strong>, and <strong>Night Shore</strong>. Each is a hand-tuned arrangement — click to crossfade into it, then drag bodies to refine.',
             },
             {
-                q: 'What does the star icon on mix cards do?',
-                a: 'Pins that mix as your <strong>focus-start mix</strong>. Combined with <em>Settings → Sounds → Auto-start mix on focus session</em>, this automatically fires the mix every time you start a focus session. Unpin by clicking again.',
+                q: 'How do I rename, delete, or share a constellation?',
+                a: 'In the library drawer, click the <strong>⋯</strong> on any saved constellation. Options: <strong>Rename</strong>, <strong>Share</strong> (copies a <code>/?mix=…</code> link anyone can open), <strong>Delete</strong>. Built-in constellations can be shared but not modified.',
+            },
+            {
+                q: 'How do I pin a constellation as my focus-start arrangement?',
+                a: 'Click the <strong>star</strong> on any constellation in the library. Combined with <em>Settings → Sounds → Auto-start mix on focus session</em>, this automatically loads the pinned constellation every time you start a focus session.',
+            },
+            {
+                q: 'What does the cosmos toolbar do?',
+                a: 'Floating pill at the bottom-centre of the screen. Six tools:<br><strong>+</strong> Open the sound library<br><strong>★</strong> Save current constellation<br><strong>☾</strong> Sleep timer<br><strong>✧</strong> Surprise me — random constellation<br><strong>⛶</strong> Immersive mode — hides chrome, scene fills viewport<br><strong>⊝</strong> Clear sky — fade out all sounds',
             },
             {
                 q: 'What is the sleep timer?',
-                a: 'Deck controls → <strong>☾ Sleep</strong>. Choose 15, 30, 60, or 120 minutes. A gentle fade-out begins in the last 30 seconds, then everything stops. Cancel from the same popover while it\'s running.',
+                a: 'Cosmos toolbar → <strong>☾</strong>. Choose 15, 30, 60, or 120 minutes. A gentle fade-out begins in the last 30 seconds, then everything stops. The toolbar button glows while the timer is running.',
             },
             {
-                q: 'What\'s "Surprise me"?',
-                a: 'Picks 1–3 sounds at random with tasteful volumes and small EQ tilts. Good when you\'re indecisive.',
+                q: 'What is "Surprise me"?',
+                a: "Cosmos toolbar → <strong>✧</strong>. Picks 1–3 sounds at random with tasteful volumes and small EQ tilts and spawns them into orbit. Good when you're indecisive.",
             },
             {
-                q: 'What\'s Immerse?',
-                a: 'A fullscreen mode for the deck. Hides the nav, settings star, and mini-timer so the black-hole scene fills the viewport with the mixing deck floating over it. Press <kbd>Esc</kbd> to exit.',
+                q: 'What is Immersive mode?',
+                a: 'Cosmos toolbar → <strong>⛶</strong>. Hides the nav, settings star, mini-timer, and toolbar so the black-hole scene fills the viewport. Press <kbd>Esc</kbd> to exit.',
             },
             {
-                q: 'Where is the master volume?',
-                a: 'The right side of the deck control bar — labelled <strong>MASTER</strong>. Also available from <strong>Settings → Sounds → Master</strong>. Both sliders stay in sync.',
+                q: 'Can I use the keyboard or a screen reader instead of dragging bodies?',
+                a: "Yes. Press <kbd>Alt</kbd>+<kbd>L</kbd> (or <kbd>Cmd</kbd>+<kbd>L</kbd> on macOS) to open the <strong>Cosmos accessible mixer</strong> — a flat panel with every active sound as a row containing volume / pan sliders, mute, and remove. Tab between fields, Esc closes. Screen readers can always reach the same panel; it's rendered off-screen at rest, full parity with the visual surface.",
             },
             {
                 q: 'What does "Remember active sounds" do?',
-                a: '<strong>Settings → Sounds → Behavior → Remember active sounds</strong>. When on (default), your last mix is restored on page load.',
+                a: '<strong>Settings → Sounds → Behavior → Remember active sounds</strong>. When on (default), your last constellation is restored on page load.',
             },
             {
                 q: 'What does "Fade out when session ends" do?',
@@ -196,19 +230,23 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What does "Auto-start mix on focus session" do?',
-                a: '<strong>Settings → Sounds → Auto-start mix on focus session</strong>. When on, starting a focus session activates your pinned focus-start mix (see the star icon on mix cards). Off by default.',
+                a: '<strong>Settings → Sounds → Auto-start mix on focus session</strong>. When on, starting a focus session loads your pinned constellation (see the star icon on constellations in the library). Off by default.',
             },
             {
-                q: 'Why don\'t my sounds play?',
-                a: 'Sound files are hosted on a CDN. If the CDN blocks cross-origin access, the app falls back to basic HTML playback (no EQ, no pan, no scene reactivity) — audio still plays. If you hear silence entirely, check your master volume and that the track isn\'t muted (click 🔇 to unmute).',
+                q: "Why don't my sounds play?",
+                a: "Sound files are hosted on a CDN. If the CDN blocks cross-origin access, the app falls back to basic HTML playback (no EQ, no pan, no scene reactivity) — audio still plays. If you hear silence entirely, drag the black hole upward (master volume), and check the body isn't muted (click it to open the EQ ring and check the mute toggle at the bottom).",
             },
             {
-                q: 'Does ambient keep playing when I leave the Ambient tab?',
-                a: 'Yes. Sounds continue across Home / Focus / Ambient tabs. The home mini-player (bottom-left of Home) gives you play/pause and master volume without switching tabs.',
+                q: 'Does ambient keep playing when I switch tabs?',
+                a: "Yes. Sounds continue across Home and Focus tabs — the cosmos is always there in the background. The cosmos toolbar is also always available regardless of which tab you're on.",
             },
             {
-                q: 'Can I control ambient from my phone\'s lock screen?',
-                a: 'Yes — through the Media Session API. Lock-screen play/pause and Bluetooth / CarPlay controls route to the ambient engine while a mix is playing.',
+                q: "Can I control ambient from my phone's lock screen?",
+                a: 'Yes — through the Media Session API. Lock-screen play/pause and Bluetooth / CarPlay controls route to the ambient engine while a constellation is playing.',
+            },
+            {
+                q: 'How are the bodies audio-reactive?',
+                a: "Each track has its own <code>AnalyserNode</code> tapped after its post-pan signal, feeding FFT data straight into that body's shader. The rain droplet shimmers on highs, the ocean ring swells on bass, the forest moss twists on mids — all driven by the actual frequency content of the audio coming out of <em>that</em> track, not the master bus.",
             },
         ],
     },
@@ -220,7 +258,8 @@ export const HELP_CATEGORIES = [
         id: 'scene',
         label: 'Scene & Visuals',
         // iconSvg matches Settings → Scene (sun)
-        iconSvg: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/>',
+        iconSvg:
+            '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/>',
         entries: [
             {
                 q: 'What is the 3D scene?',
@@ -272,7 +311,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'Why does the scene look pixelated after hours?',
-                a: 'The FPS watchdog monitors sustained performance. If sustained FPS drops below 22 for 30 seconds, the watchdog degrades quality gradually — first disabling film grain and chromatic aberration, then anamorphic streak, then god rays, then halving bloom kernel, and only as a last resort lowering render resolution. Every 5 minutes it probes full quality to check if the device can handle it again. If you\'re seeing pixelation, your device is genuinely struggling — try lowering <em>Settings → Scene → Quality</em> to Medium or Low.',
+                a: "The FPS watchdog monitors sustained performance. If sustained FPS drops below 22 for 30 seconds, the watchdog degrades quality gradually — first disabling film grain and chromatic aberration, then anamorphic streak, then god rays, then halving bloom kernel, and only as a last resort lowering render resolution. Every 5 minutes it probes full quality to check if the device can handle it again. If you're seeing pixelation, your device is genuinely struggling — try lowering <em>Settings → Scene → Quality</em> to Medium or Low.",
             },
         ],
     },
@@ -284,22 +323,23 @@ export const HELP_CATEGORIES = [
         id: 'notifications',
         label: 'Notifications',
         // iconSvg matches Settings → Notifications (bell)
-        iconSvg: '<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
+        iconSvg:
+            '<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
         entries: [
             {
                 q: 'How do I enable desktop notifications?',
-                a: '<strong>Settings → Notifications → Enable notifications</strong>. You\'ll see the browser permission prompt — click Allow. After that, Cosmic Focus can send a system notification when a session ends, even if the tab is in the background.',
+                a: "<strong>Settings → Notifications → Enable notifications</strong>. You'll see the browser permission prompt — click Allow. After that, Cosmic Focus can send a system notification when a session ends, even if the tab is in the background.",
             },
             {
                 q: 'What notifications can I control?',
-                a: 'Three separate toggles under <strong>Settings → Notifications → Alerts</strong>:<br><strong>Focus session complete</strong> — when a focus timer reaches zero<br><strong>Break complete</strong> — when a short or long break ends<br><strong>Full cycle complete</strong> — when you\'ve finished all sessions in a full Pomodoro cycle',
+                a: "Three separate toggles under <strong>Settings → Notifications → Alerts</strong>:<br><strong>Focus session complete</strong> — when a focus timer reaches zero<br><strong>Break complete</strong> — when a short or long break ends<br><strong>Full cycle complete</strong> — when you've finished all sessions in a full Pomodoro cycle",
             },
             {
                 q: 'How long do notifications stay on screen?',
                 a: '<strong>Settings → Notifications → Auto-close after</strong>. Choose 5, 10, 15 (default), or 30 seconds — or <strong>Never</strong> to leave them until the user dismisses them manually.',
             },
             {
-                q: 'Notifications aren\'t working — what do I check?',
+                q: "Notifications aren't working — what do I check?",
                 a: 'First: <strong>Settings → Notifications → Permission</strong> should read "Enabled". If it says "Blocked", revoke the block in your browser\'s site settings and re-grant it. If your OS has Do Not Disturb on, notifications are silenced by the OS — check your system Focus / DND setting.',
             },
         ],
@@ -311,7 +351,8 @@ export const HELP_CATEGORIES = [
     {
         id: 'statistics',
         label: 'Statistics',
-        iconSvg: '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+        iconSvg:
+            '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
         entries: [
             {
                 q: 'Where can I see my stats?',
@@ -343,23 +384,24 @@ export const HELP_CATEGORIES = [
         id: 'shortcuts',
         label: 'Shortcuts & Motion',
         // iconSvg matches Settings → Shortcuts (keyboard)
-        iconSvg: '<rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>',
+        iconSvg:
+            '<rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>',
         entries: [
             {
                 q: 'What keyboard shortcuts exist?',
-                a: '<table class="hc-shortcut-table"><tr><td><kbd>Space</kbd></td><td>Start / pause timer</td></tr><tr><td><kbd>R</kbd></td><td>Reset timer</td></tr><tr><td><kbd>1</kbd></td><td>Switch to Home</td></tr><tr><td><kbd>2</kbd></td><td>Switch to Focus</td></tr><tr><td><kbd>3</kbd></td><td>Switch to Ambient</td></tr><tr><td><kbd>/</kbd></td><td>Focus the task input</td></tr><tr><td><kbd>?</kbd></td><td>Open this Help Center</td></tr><tr><td><kbd>Esc</kbd></td><td>Close any modal / panel</td></tr></table>',
+                a: '<table class="hc-shortcut-table"><tr><td><kbd>Space</kbd></td><td>Start / pause timer</td></tr><tr><td><kbd>R</kbd></td><td>Reset timer</td></tr><tr><td><kbd>1</kbd></td><td>Switch to Home</td></tr><tr><td><kbd>2</kbd></td><td>Switch to Focus</td></tr><tr><td><kbd>/</kbd></td><td>Focus the task input</td></tr><tr><td><kbd>?</kbd></td><td>Open this Help Center</td></tr><tr><td><kbd>Alt</kbd>+<kbd>L</kbd></td><td>Open the cosmos accessible mixer (flat keyboard surface for the sound bodies)</td></tr><tr><td><kbd>Esc</kbd></td><td>Close any modal / panel</td></tr></table>',
             },
             {
                 q: 'Can I rebind shortcuts?',
-                a: 'Yes. <strong>Settings → Shortcuts → Keyboard</strong>. Click any row, then press the key you want to assign. Click the same row again or press <kbd>Esc</kbd> to cancel. The <kbd>Esc</kbd> shortcut itself can\'t be rebound — it\'s the universal escape hatch.',
+                a: "Yes. <strong>Settings → Shortcuts → Keyboard</strong>. Click any row, then press the key you want to assign. Click the same row again or press <kbd>Esc</kbd> to cancel. The <kbd>Esc</kbd> shortcut itself can't be rebound — it's the universal escape hatch.",
             },
             {
-                q: 'Shortcuts don\'t work while I\'m typing — is that a bug?',
-                a: 'No, by design. Shortcuts are disabled when you\'re focused on a text input (task field, search box, settings inputs, feedback textarea) so your keystrokes go into the field. Press <kbd>Esc</kbd> to unfocus first.',
+                q: "Shortcuts don't work while I'm typing — is that a bug?",
+                a: "No, by design. Shortcuts are disabled when you're focused on a text input (task field, search box, settings inputs, feedback textarea) so your keystrokes go into the field. Press <kbd>Esc</kbd> to unfocus first.",
             },
             {
                 q: 'What is Reduce motion?',
-                a: '<strong>Settings → Shortcuts → Motion → Reduce motion</strong>. When on, the app dampens or skips the larger UI animations (tour fade-in, modal springs, timer tick pulses, etc.). It overrides the <code>prefers-reduced-motion</code> system setting so you can force it on even if your OS isn\'t set that way.',
+                a: "<strong>Settings → Shortcuts → Motion → Reduce motion</strong>. When on, the app dampens or skips the larger UI animations (tour fade-in, modal springs, timer tick pulses, etc.). It overrides the <code>prefers-reduced-motion</code> system setting so you can force it on even if your OS isn't set that way.",
             },
             {
                 q: 'What does the Animation speed slider do?',
@@ -375,7 +417,8 @@ export const HELP_CATEGORIES = [
         id: 'presets',
         label: 'Focus Presets',
         // iconSvg matches Settings → Presets (cog + dot)
-        iconSvg: '<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/><circle cx="12" cy="12" r="3"/>',
+        iconSvg:
+            '<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/><circle cx="12" cy="12" r="3"/>',
         entries: [
             {
                 q: 'What are focus presets?',
@@ -383,7 +426,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How do I create one?',
-                a: '<strong>Settings → Presets → Focus presets → New preset</strong>. Give it a name. Whatever your current Settings look like becomes the preset\'s snapshot.',
+                a: "<strong>Settings → Presets → Focus presets → New preset</strong>. Give it a name. Whatever your current Settings look like becomes the preset's snapshot.",
             },
             {
                 q: 'How do I switch presets?',
@@ -394,8 +437,8 @@ export const HELP_CATEGORIES = [
                 a: 'Yes — the row has inline edit + delete controls. The built-in "Default" preset can\'t be deleted; it\'s your safe fallback.',
             },
             {
-                q: 'Difference between focus presets and ambient mixes?',
-                a: '<strong>Focus preset</strong> = snapshot of <em>all</em> Settings (timer, scene, sounds, notifications…). <strong>Ambient mix</strong> = just the set of active sounds and their per-track volume/EQ/pan. They\'re orthogonal — you can pair any preset with any mix.',
+                q: 'Difference between focus presets and constellations?',
+                a: "<strong>Focus preset</strong> = snapshot of <em>all</em> Settings (timer, scene, sounds, notifications…). <strong>Constellation</strong> = just the active sounds plus each body's orbital position, volume, EQ, and pan. They're orthogonal — you can pair any preset with any constellation.",
             },
         ],
     },
@@ -407,7 +450,8 @@ export const HELP_CATEGORIES = [
         id: 'feedback',
         label: 'Feedback',
         // iconSvg matches Settings → Feedback (chat bubble)
-        iconSvg: '<path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>',
+        iconSvg:
+            '<path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>',
         entries: [
             {
                 q: 'How do I report a bug or request a feature?',
@@ -415,14 +459,14 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What information gets sent along with my feedback?',
-                a: 'Only auto-collected technical context that helps reproduce what you\'re describing: app version, browser + platform string, GPU (if your browser exposes it), viewport size, language, and a timestamp. Nothing identifying or personal. You can see the exact content in the copied email.',
+                a: "Only auto-collected technical context that helps reproduce what you're describing: app version, browser + platform string, GPU (if your browser exposes it), viewport size, language, and a timestamp. Nothing identifying or personal. You can see the exact content in the copied email.",
             },
             {
                 q: 'Who does my feedback go to?',
                 a: 'Straight to the maintainer at the email shown under the form. No intermediary, no tracking, no ticketing system.',
             },
             {
-                q: 'What if I don\'t have a mail client set up?',
+                q: "What if I don't have a mail client set up?",
                 a: 'Click <strong>Copy as email</strong> instead. That puts "To: …, Subject: …, body" on your clipboard — paste it into whatever you use (webmail, Slack DM, GitHub issue).',
             },
         ],
@@ -435,7 +479,8 @@ export const HELP_CATEGORIES = [
         id: 'data',
         label: 'Data & Privacy',
         // iconSvg matches Settings → Data & About (info circle)
-        iconSvg: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+        iconSvg:
+            '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
         entries: [
             {
                 q: 'How do I customize the greeting?',
@@ -459,7 +504,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What does "Clear all data" do?',
-                a: 'The nuclear option. Wipes <strong>everything</strong> — settings, presets, statistics, tasks, ambient mixes. Page reloads fresh. Requires double-confirmation.',
+                a: 'The nuclear option. Wipes <strong>everything</strong> — settings, presets, statistics, tasks, saved constellations. Page reloads fresh. Requires double-confirmation.',
             },
             {
                 q: 'What is the gold dot next to a setting label?',
@@ -467,7 +512,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'Is my data private?',
-                a: 'Yes. Everything lives in your browser\'s <code>localStorage</code>. No server, no analytics about you personally, no account. Ambient sound files are fetched from a CDN (Cloudflare R2). The 3D library (Babylon.js) is loaded once from a CDN. None of them receive identifying information.',
+                a: "Yes. Everything lives in your browser's <code>localStorage</code>. No server, no analytics about you personally, no account. Ambient sound files are fetched from a CDN (Cloudflare R2). The 3D library (Babylon.js) is loaded once from a CDN. None of them receive identifying information.",
             },
             {
                 q: 'Where can I read the privacy policy and terms?',

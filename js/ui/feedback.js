@@ -11,7 +11,8 @@ const APP_VERSION = '1.0.0';
 /** Open the user's mail client with a pre-filled email. */
 export function sendFeedback(type, description) {
     const { subject, body } = compose(type, description);
-    const href = `mailto:${SUPPORT_EMAIL}` +
+    const href =
+        `mailto:${SUPPORT_EMAIL}` +
         `?subject=${encodeURIComponent(subject)}` +
         `&body=${encodeURIComponent(body)}`;
     window.location.href = href;
@@ -30,15 +31,18 @@ export async function copyFeedbackToClipboard(type, description) {
         ta.value = blob;
         document.body.appendChild(ta);
         ta.select();
-        try { document.execCommand('copy'); } catch (_) { /* ignore */ }
+        try {
+            document.execCommand('copy');
+        } catch (_) {
+            /* ignore */
+        }
         ta.remove();
     }
 }
 
 function compose(type, description) {
-    const subject = type === 'feature'
-        ? '[Cosmic Focus] Feature request'
-        : '[Cosmic Focus] Bug report';
+    const subject =
+        type === 'feature' ? '[Cosmic Focus] Feature request' : '[Cosmic Focus] Bug report';
     const body =
         (description || '').trim() +
         '\n\n— — — Diagnostics (auto-filled) — — —\n' +
@@ -54,7 +58,9 @@ function getSystemInfo() {
     lines.push(`Browser: ${navigator.userAgent}`);
     lines.push(`Platform: ${navigator.platform || 'unknown'}`);
     lines.push(`Language: ${navigator.language}`);
-    lines.push(`Viewport: ${window.innerWidth}×${window.innerHeight} @ ${window.devicePixelRatio || 1}x`);
+    lines.push(
+        `Viewport: ${window.innerWidth}×${window.innerHeight} @ ${window.devicePixelRatio || 1}x`
+    );
 
     try {
         const c = document.createElement('canvas');
@@ -67,7 +73,9 @@ function getSystemInfo() {
             }
         }
         c.remove();
-    } catch (_) { /* ignore */ }
+    } catch (_) {
+        /* ignore */
+    }
 
     return lines.join('\n');
 }

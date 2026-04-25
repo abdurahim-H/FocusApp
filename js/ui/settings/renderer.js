@@ -4,14 +4,20 @@
 // Listens to store changes so external updates (preset switch, profile
 // activation) refresh the visible controls automatically.
 
-import { SECTIONS, SCHEMA, rowsForSection } from './schema.js';
-import { get as getSetting, set as setSetting, subscribe, resetSection as storeResetSection, getDefault } from './store.js';
-import { GRAPHICS_PRESETS } from './graphics-presets.js';
-import { SHORTCUTS, displayKey, getShortcut } from './shortcuts-registry.js';
-import * as profiles from './profiles.js';
-import { registerSearchable, clearSearchIndex, applyQuery } from './search.js';
-import * as dataIO from './data-io.js';
 import { isReducedMotion } from '../../core/motion.js';
+import * as dataIO from './data-io.js';
+import { GRAPHICS_PRESETS } from './graphics-presets.js';
+import * as profiles from './profiles.js';
+import { rowsForSection, SCHEMA, SECTIONS } from './schema.js';
+import { applyQuery, clearSearchIndex, registerSearchable } from './search.js';
+import { displayKey, getShortcut, SHORTCUTS } from './shortcuts-registry.js';
+import {
+    getDefault,
+    get as getSetting,
+    set as setSetting,
+    resetSection as storeResetSection,
+    subscribe,
+} from './store.js';
 
 // ============================================================================
 // Public entry point
@@ -41,10 +47,10 @@ export function renderSettings(root) {
 export function setActiveSection(id) {
     activeSection = id;
     if (!rootEl) return;
-    rootEl.querySelectorAll('.settings-rail__item').forEach(el => {
+    rootEl.querySelectorAll('.settings-rail__item').forEach((el) => {
         el.classList.toggle('is-active', el.dataset.section === id);
     });
-    rootEl.querySelectorAll('.settings-section').forEach(el => {
+    rootEl.querySelectorAll('.settings-section').forEach((el) => {
         el.classList.toggle('is-active', el.dataset.section === id);
     });
 }
@@ -167,7 +173,7 @@ function renderGroup(row) {
     const group = document.createElement('div');
     group.className = 'settings-group-v2';
     if (row.collapsible) group.classList.add('is-collapsible');
-    if (row.collapsed)   group.classList.add('is-collapsed');
+    if (row.collapsed) group.classList.add('is-collapsed');
 
     const header = document.createElement('div');
     header.className = 'settings-group__header';
@@ -201,21 +207,36 @@ function renderGroup(row) {
 // ============================================================================
 function renderRow(row) {
     switch (row.type) {
-        case 'slider':           return renderSlider(row);
-        case 'toggle':           return renderToggle(row);
-        case 'stepper':          return renderStepper(row);
-        case 'segmented':        return renderSegmented(row);
-        case 'select':           return renderSegmented(row);  // reuse
-        case 'theme-cards':      return renderThemeCards(row);
-        case 'text':             return renderTextInput(row);
-        case 'button':           return renderButton(row);
-        case 'button-row':       return renderButtonRow(row);
-        case 'shortcut-list':    return renderShortcutList(row);
-        case 'notif-permission': return renderNotifPermission(row);
-        case 'profile-list':     return renderProfileList(row);
-        case 'schedule-list':    return renderScheduleList(row);
-        case 'readonly':         return renderReadonly(row);
-        case 'feedback-form':    return renderFeedbackForm(row);
+        case 'slider':
+            return renderSlider(row);
+        case 'toggle':
+            return renderToggle(row);
+        case 'stepper':
+            return renderStepper(row);
+        case 'segmented':
+            return renderSegmented(row);
+        case 'select':
+            return renderSegmented(row); // reuse
+        case 'theme-cards':
+            return renderThemeCards(row);
+        case 'text':
+            return renderTextInput(row);
+        case 'button':
+            return renderButton(row);
+        case 'button-row':
+            return renderButtonRow(row);
+        case 'shortcut-list':
+            return renderShortcutList(row);
+        case 'notif-permission':
+            return renderNotifPermission(row);
+        case 'profile-list':
+            return renderProfileList(row);
+        case 'schedule-list':
+            return renderScheduleList(row);
+        case 'readonly':
+            return renderReadonly(row);
+        case 'feedback-form':
+            return renderFeedbackForm(row);
     }
     return null;
 }
@@ -295,7 +316,7 @@ function renderStepper(row) {
         </div>
     `;
     const val = el.querySelector('.sr__step-value');
-    el.querySelectorAll('.sr__step-btn').forEach(btn => {
+    el.querySelectorAll('.sr__step-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
             const dir = parseInt(btn.dataset.dir);
             let next = getSetting(row.key) + dir * (row.step || 1);
@@ -314,15 +335,19 @@ function renderSegmented(row) {
     el.className = 'sr sr-segmented';
     el.dataset.key = row.key;
     const current = getSetting(row.key);
-    const optionsHtml = row.options.map(o => `
+    const optionsHtml = row.options
+        .map(
+            (o) => `
         <button type="button" class="sr__seg-btn ${o.value === current ? 'is-active' : ''}" data-value="${o.value}">${escapeHtml(o.label)}</button>
-    `).join('');
+    `
+        )
+        .join('');
     el.innerHTML = `
         <div class="sr__label">${escapeHtml(row.label)}</div>
         <div class="sr__segmented">${optionsHtml}</div>
         ${row.help ? `<div class="sr__help">${escapeHtml(row.help)}</div>` : ''}
     `;
-    el.querySelectorAll('.sr__seg-btn').forEach(btn => {
+    el.querySelectorAll('.sr__seg-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
             let v = btn.dataset.value;
             // Preserve number types for numeric select values
@@ -339,25 +364,29 @@ function renderThemeCards(row) {
     const el = document.createElement('div');
     el.className = 'sr sr-theme-cards';
     el.dataset.key = row.key;
-    const cards = row.options.map((o, i) => {
-        const active = o.value === getSetting(row.key);
-        const blackhole = o.value === 'blackhole';
-        const disabled = o.disabled ? 'disabled' : '';
-        const classes = [
-            'theme-card',
-            blackhole ? 'theme-card--blackhole' : '',
-            o.disabled ? 'theme-card--coming-soon' : '',
-            active ? 'active' : '',
-        ].filter(Boolean).join(' ');
-        return `
+    const cards = row.options
+        .map((o, i) => {
+            const active = o.value === getSetting(row.key);
+            const blackhole = o.value === 'blackhole';
+            const disabled = o.disabled ? 'disabled' : '';
+            const classes = [
+                'theme-card',
+                blackhole ? 'theme-card--blackhole' : '',
+                o.disabled ? 'theme-card--coming-soon' : '',
+                active ? 'active' : '',
+            ]
+                .filter(Boolean)
+                .join(' ');
+            return `
             <button type="button" class="${classes}" data-value="${o.value}" ${disabled}>
                 ${blackhole ? '' : '<span class="theme-card-preview"><span class="theme-card-dot"></span></span>'}
                 <span class="theme-card-name">${escapeHtml(o.label)}</span>
             </button>
         `;
-    }).join('');
+        })
+        .join('');
     el.innerHTML = `<div class="theme-cards">${cards}</div>`;
-    el.querySelectorAll('button[data-value]').forEach(btn => {
+    el.querySelectorAll('button[data-value]').forEach((btn) => {
         btn.addEventListener('click', () => {
             if (btn.hasAttribute('disabled')) return;
             setSetting(row.key, btn.dataset.value);
@@ -397,11 +426,16 @@ function renderButton(row) {
 function renderButtonRow(row) {
     const el = document.createElement('div');
     el.className = 'sr sr-button-row';
-    el.innerHTML = row.items.map(it => `<button type="button" class="sr__btn" data-id="${it.id}">${escapeHtml(it.label)}</button>`).join('');
-    el.querySelectorAll('button').forEach(btn => {
+    el.innerHTML = row.items
+        .map(
+            (it) =>
+                `<button type="button" class="sr__btn" data-id="${it.id}">${escapeHtml(it.label)}</button>`
+        )
+        .join('');
+    el.querySelectorAll('button').forEach((btn) => {
         btn.addEventListener('click', () => handleButtonAction(btn.dataset.id, btn));
     });
-    registerSearchable(el, row.items.map(it => it.label).join(' '), '');
+    registerSearchable(el, row.items.map((it) => it.label).join(' '), '');
     return el;
 }
 
@@ -479,9 +513,9 @@ function renderFeedbackForm() {
 
     let currentType = 'bug';
     const textarea = el.querySelector('.sr-feedback__body');
-    const label    = el.querySelector('.sr-feedback__label');
-    const sendBtn  = el.querySelector('[data-action="send"]');
-    const copyBtn  = el.querySelector('[data-action="copy"]');
+    const label = el.querySelector('.sr-feedback__label');
+    const sendBtn = el.querySelector('[data-action="send"]');
+    const copyBtn = el.querySelector('[data-action="copy"]');
 
     function syncButtons() {
         const empty = textarea.value.trim().length === 0;
@@ -500,12 +534,13 @@ function renderFeedbackForm() {
                 b.setAttribute('aria-selected', active ? 'true' : 'false');
             });
             // Swap the label prompt to fit the chosen type.
-            label.textContent = currentType === 'feature'
-                ? label.dataset.featureLabel
-                : label.dataset.bugLabel;
+            label.textContent =
+                currentType === 'feature' ? label.dataset.featureLabel : label.dataset.bugLabel;
             textarea.setAttribute(
                 'placeholder',
-                currentType === 'feature' ? 'What would you like us to build…' : 'Describe what you saw…'
+                currentType === 'feature'
+                    ? 'What would you like us to build…'
+                    : 'Describe what you saw…'
             );
             syncButtons();
         });
@@ -533,8 +568,14 @@ function renderFeedbackForm() {
 
 function handleButtonAction(id, triggerEl) {
     switch (id) {
-        case 'export-json': dataIO.downloadSettingsJSON(); flashButton(triggerEl, 'Downloaded ✓'); break;
-        case 'export-csv':  dataIO.downloadStatsCSV();    flashButton(triggerEl, 'Downloaded ✓'); break;
+        case 'export-json':
+            dataIO.downloadSettingsJSON();
+            flashButton(triggerEl, 'Downloaded ✓');
+            break;
+        case 'export-csv':
+            dataIO.downloadStatsCSV();
+            flashButton(triggerEl, 'Downloaded ✓');
+            break;
         case 'share-link': {
             const link = dataIO.buildShareLink();
             navigator.clipboard?.writeText(link).then(
@@ -544,7 +585,9 @@ function handleButtonAction(id, triggerEl) {
             break;
         }
         case 'import-json':
-            dataIO.pickAndImport().then(ok => flashButton(triggerEl, ok ? 'Imported ✓' : 'Invalid file'));
+            dataIO
+                .pickAndImport()
+                .then((ok) => flashButton(triggerEl, ok ? 'Imported ✓' : 'Invalid file'));
             break;
         case 'reset-all':
             confirmAction(triggerEl, 'Reset everything?', () => {
@@ -560,7 +603,7 @@ function handleButtonAction(id, triggerEl) {
             flashButton(triggerEl, 'Reset ✓');
             break;
         case 'show-tour':
-            import('./onboarding.js').then(mod => mod.startTour());
+            import('./onboarding.js').then((mod) => mod.startTour());
             break;
         case 'open-privacy':
             window.open('/privacy.html', '_blank', 'noopener');
@@ -598,7 +641,9 @@ function showToast(msg) {
     container.appendChild(toast);
     if (isReducedMotion()) {
         toast.classList.add('is-visible');
-        setTimeout(() => { toast.remove(); }, 2000);
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
     } else {
         requestAnimationFrame(() => toast.classList.add('is-visible'));
         setTimeout(() => {
@@ -714,7 +759,8 @@ function finishRebind() {
 function renderNotifPermission() {
     const el = document.createElement('div');
     el.className = 'sr sr-notif-permission';
-    const permission = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+    const permission =
+        typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
     el.innerHTML = `
         <div class="sr__header">
             <span class="sr__label">Desktop notifications</span>
@@ -723,7 +769,8 @@ function renderNotifPermission() {
         <button type="button" class="sr__btn">Enable notifications</button>
     `;
     const btn = el.querySelector('button');
-    btn.disabled = (permission === 'denied' || permission === 'granted' || permission === 'unsupported');
+    btn.disabled =
+        permission === 'denied' || permission === 'granted' || permission === 'unsupported';
     btn.addEventListener('click', async () => {
         const { requestNotificationPermission } = await import('../../utils/notifications.js');
         const ok = await requestNotificationPermission();
@@ -738,7 +785,7 @@ function renderNotifPermission() {
 
 function permissionLabel(p) {
     if (p === 'granted') return 'Enabled';
-    if (p === 'denied')  return 'Blocked';
+    if (p === 'denied') return 'Blocked';
     if (p === 'default') return 'Not set';
     return 'Unsupported';
 }
@@ -764,14 +811,22 @@ function buildProfileListUI() {
         if (profiles.getActive() === p.id) row.classList.add('is-active');
         row.innerHTML = `
             <button type="button" class="profile-row__activate">${escapeHtml(p.name)}</button>
-            ${p.builtin ? '<span class="profile-row__badge">built-in</span>' : `
+            ${
+                p.builtin
+                    ? '<span class="profile-row__badge">built-in</span>'
+                    : `
                 <button type="button" class="profile-row__save" title="Overwrite with current">save</button>
                 <button type="button" class="profile-row__del" title="Delete">✕</button>
-            `}
+            `
+            }
         `;
-        row.querySelector('.profile-row__activate').addEventListener('click', () => profiles.activate(p.id));
+        row.querySelector('.profile-row__activate').addEventListener('click', () =>
+            profiles.activate(p.id)
+        );
         if (!p.builtin) {
-            row.querySelector('.profile-row__save').addEventListener('click', () => profiles.overwriteWithCurrent(p.id));
+            row.querySelector('.profile-row__save').addEventListener('click', () =>
+                profiles.overwriteWithCurrent(p.id)
+            );
             row.querySelector('.profile-row__del').addEventListener('click', () => {
                 if (confirm(`Delete profile "${safeDialogText(p.name)}"?`)) profiles.remove(p.id);
             });
@@ -833,13 +888,18 @@ function buildScheduleListUI(key) {
         `;
         row.querySelector('.schedule-row__toggle').addEventListener('click', () => {
             const list = [...getSetting(key)];
-            const idx = list.findIndex(x => x.id === s.id);
-            if (idx >= 0) { list[idx] = { ...list[idx], enabled: !list[idx].enabled }; }
+            const idx = list.findIndex((x) => x.id === s.id);
+            if (idx >= 0) {
+                list[idx] = { ...list[idx], enabled: !list[idx].enabled };
+            }
             setSetting(key, list);
             refreshScheduleList(key);
         });
         row.querySelector('.schedule-row__del').addEventListener('click', () => {
-            setSetting(key, (getSetting(key) || []).filter(x => x.id !== s.id));
+            setSetting(
+                key,
+                (getSetting(key) || []).filter((x) => x.id !== s.id)
+            );
             refreshScheduleList(key);
         });
         wrap.appendChild(row);
@@ -917,12 +977,20 @@ function renderReadonly(row) {
 function updateReadonlyValue(key, el) {
     const info = dataIO.getAboutInfo();
     switch (key) {
-        case 'about.version': el.textContent = info.version; break;
-        case 'about.gpuTier': el.textContent = info.gpuTier; break;
-        case 'about.engine':  el.textContent = info.engine;  break;
-        case 'about.browser': el.textContent = info.browser; break;
+        case 'about.version':
+            el.textContent = info.version;
+            break;
+        case 'about.gpuTier':
+            el.textContent = info.gpuTier;
+            break;
+        case 'about.engine':
+            el.textContent = info.engine;
+            break;
+        case 'about.browser':
+            el.textContent = info.browser;
+            break;
         case 'about.fps': {
-            import('../../graphics/scene/scene-manager.js').then(sm => {
+            import('../../graphics/scene/scene-manager.js').then((sm) => {
                 const fps = sm.getFPS?.();
                 el.textContent = fps != null ? `${fps}` : '—';
             });
@@ -940,7 +1008,8 @@ export function startLiveReadonlyTicker(isVisibleFn) {
         const el = liveReadonlyRefs.get('about.fps');
         if (el) updateReadonlyValue('about.fps', el);
         const gpuEl = liveReadonlyRefs.get('about.gpuTier');
-        if (gpuEl && gpuEl.textContent === 'detecting…') updateReadonlyValue('about.gpuTier', gpuEl);
+        if (gpuEl && gpuEl.textContent === 'detecting…')
+            updateReadonlyValue('about.gpuTier', gpuEl);
     }, 800);
 }
 
@@ -970,21 +1039,27 @@ function refreshControl(key) {
         toggle.setAttribute('aria-checked', v ? 'true' : 'false');
     }
     // Segmented
-    rootEl.querySelectorAll(`.sr-segmented[data-key="${cssEscape(key)}"] .sr__seg-btn`).forEach(btn => {
-        const v = String(getSetting(key));
-        btn.classList.toggle('is-active', btn.dataset.value === v);
-    });
+    rootEl
+        .querySelectorAll(`.sr-segmented[data-key="${cssEscape(key)}"] .sr__seg-btn`)
+        .forEach((btn) => {
+            const v = String(getSetting(key));
+            btn.classList.toggle('is-active', btn.dataset.value === v);
+        });
     // Stepper
-    const stepper = rootEl.querySelector(`.sr-stepper[data-key="${cssEscape(key)}"] .sr__step-value`);
+    const stepper = rootEl.querySelector(
+        `.sr-stepper[data-key="${cssEscape(key)}"] .sr__step-value`
+    );
     if (stepper) {
-        const row = SCHEMA.find(r => r.key === key);
+        const row = SCHEMA.find((r) => r.key === key);
         const v = getSetting(key);
         stepper.textContent = `${v}${row?.suffix ? ` ${row.suffix}` : ''}`;
     }
     // Theme cards
-    rootEl.querySelectorAll(`.sr-theme-cards[data-key="${cssEscape(key)}"] button[data-value]`).forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.value === getSetting(key));
-    });
+    rootEl
+        .querySelectorAll(`.sr-theme-cards[data-key="${cssEscape(key)}"] button[data-value]`)
+        .forEach((btn) => {
+            btn.classList.toggle('active', btn.dataset.value === getSetting(key));
+        });
     // Text
     const txt = rootEl.querySelector(`.sr-text[data-key="${cssEscape(key)}"] input`);
     if (txt && txt.value !== getSetting(key)) txt.value = getSetting(key) || '';
@@ -1001,17 +1076,22 @@ function refreshControl(key) {
     // showIf dependencies — re-apply every row that declares a showIf.
     // Cheap: only affects the timer section, maybe a few rows.
     if (key === 'timer.autoStart') {
-        rootEl.querySelectorAll('.sr[data-key="timer.autoStartDelay"]').forEach(el => {
-            applyShowIf(SCHEMA.find(r => r.key === 'timer.autoStartDelay'), el);
+        rootEl.querySelectorAll('.sr[data-key="timer.autoStartDelay"]').forEach((el) => {
+            applyShowIf(
+                SCHEMA.find((r) => r.key === 'timer.autoStartDelay'),
+                el
+            );
         });
     }
 }
 
 function refreshShortcutRow(storeKey) {
     if (!rootEl) return;
-    const shortcut = SHORTCUTS.find(s => s.storeKey === storeKey);
+    const shortcut = SHORTCUTS.find((s) => s.storeKey === storeKey);
     if (!shortcut) return;
-    const row = rootEl.querySelector(`.shortcut-row[data-id="${cssEscape(shortcut.id)}"] .shortcut-row__key`);
+    const row = rootEl.querySelector(
+        `.shortcut-row[data-id="${cssEscape(shortcut.id)}"] .shortcut-row__key`
+    );
     if (row) row.textContent = displayKey(getSetting(storeKey));
 }
 
@@ -1035,9 +1115,17 @@ function formatNumber(v) {
 }
 
 function escapeHtml(s) {
-    return String(s ?? '').replace(/[&<>"']/g, c => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[c]));
+    return String(s ?? '').replace(
+        /[&<>"']/g,
+        (c) =>
+            ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+            })[c]
+    );
 }
 
 // Strip control chars + cap length for user-provided strings that end up
@@ -1051,7 +1139,7 @@ function safeDialogText(s, max = 60) {
 
 function cssEscape(s) {
     // Minimal CSS.escape polyfill for our use (dot-separated keys).
-    return String(s).replace(/[^a-zA-Z0-9_-]/g, c => `\\${c}`);
+    return String(s).replace(/[^a-zA-Z0-9_-]/g, (c) => `\\${c}`);
 }
 
 /** Mark a settings row as dirty (value != default) or clean. */

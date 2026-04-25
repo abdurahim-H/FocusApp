@@ -207,4 +207,36 @@ The user has a persistent file-based memory system at `~/.claude/projects/-Users
 - Default working branch is `master`. PRs target `master`.
 - Commits go **only** to `master` (the user explicitly asked to stop dual-pushing to `framework_new`). Ignore the older `framework_new` branch unless the user says otherwise.
 - Never force-push `master`. Never skip hooks.
-- Commit message style: present-tense imperative, lowercase first word, focus on **why** not **what**. Include the `Co-Authored-By: Claude ...` trailer.
+
+## Commit message style
+
+Write the way a senior engineer commits to a serious codebase. The reader is another engineer six months from now skimming `git log` to find the change that broke something or to understand why a piece of code looks the way it does.
+
+**Do:**
+- Lead with a short imperative subject line (≤72 chars), lowercase first word, no trailing period.
+- Focus the body on the **why** and the non-obvious **how**: the problem that was found, the root cause, the constraint that forced the chosen approach, the trade-off accepted. Plain prose, terse but specific.
+- Reference concrete things: file paths, function names, the exact bug symptom, the commit / issue being fixed if there is one.
+- When a change has more than one piece, use bullet points in the body — short fragments, no marketing voice.
+
+**Do not:**
+- Don't write subjects like "feat: implement comprehensive cosmos sound system overhaul" — no conventional-commits prefixes unless the repo already uses them, no buzzwords ("comprehensive", "robust", "seamless", "leverage", "enhance"), no emoji, no exclamation marks.
+- Don't write a body that just paraphrases the subject. If there's nothing more to say, ship a one-line commit.
+- Don't list every file you touched — the diff already shows that.
+- Don't narrate the implementation linearly ("first I added X, then I updated Y"). Describe the end state.
+- Don't include "as requested by the user", "based on user feedback", or "per the conversation". The reader doesn't have access to that context and shouldn't need it.
+- Don't include a `Co-Authored-By: Claude …` trailer or any other AI attribution. The user has explicitly asked for commits that don't read as AI-generated.
+- No `--no-verify`, no `--no-gpg-sign`, no skipping hooks.
+
+**Example of the bar:**
+
+```
+fix track-card hit testing on focus tab
+
+`.container` has `contain: layout style paint` which makes it the containing
+block for fixed descendants. The cosmos toolbar lived inside `.container`,
+so its z-index competed only within that local stacking context — clicks
+landed on the canvas behind it instead. Hoisted the toolbar, library
+drawer, and popovers out of `.container`, same pattern the settings panel
+already uses. Help button no longer overlaps because the toolbar moved to
+bottom-centre.
+```

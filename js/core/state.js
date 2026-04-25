@@ -6,7 +6,7 @@
 //   so existing code keeps working without modification.
 // - localStorage persistence is wired automatically via effect().
 
-import { signal, effect, computed } from 'https://esm.sh/@preact/signals-core@1.8.0';
+import { computed, effect, signal } from 'https://esm.sh/@preact/signals-core@1.8.0';
 
 // ============================================================================
 // Reactive signals
@@ -31,7 +31,7 @@ export const ambientMixes = signal([]);
 export const ambientSleepTimer = signal(null);
 
 // Re-export so other modules can subscribe without importing from CDN directly
-export { signal, effect, computed };
+export { computed, effect, signal };
 
 // ============================================================================
 // Legacy state object (backed by signals where applicable)
@@ -41,28 +41,52 @@ export { signal, effect, computed };
 
 const universeShim = {
     level: 1,
-    get stars() { return universeStars.value; },
-    set stars(v) { universeStars.value = v; },
-    get focusMinutes() { return universeFocusMinutes.value; },
-    set focusMinutes(v) { universeFocusMinutes.value = v; },
-    get tasksCompleted() { return universeTasksCompleted.value; },
-    set tasksCompleted(v) { universeTasksCompleted.value = v; },
+    get stars() {
+        return universeStars.value;
+    },
+    set stars(v) {
+        universeStars.value = v;
+    },
+    get focusMinutes() {
+        return universeFocusMinutes.value;
+    },
+    set focusMinutes(v) {
+        universeFocusMinutes.value = v;
+    },
+    get tasksCompleted() {
+        return universeTasksCompleted.value;
+    },
+    set tasksCompleted(v) {
+        universeTasksCompleted.value = v;
+    },
 };
 
 const soundsShim = {
     audio: null,
     sources: {},
     buffers: {},
-    get active() { return activeSounds.value; },
-    set active(v) { activeSounds.value = v; },
+    get active() {
+        return activeSounds.value;
+    },
+    set active(v) {
+        activeSounds.value = v;
+    },
 };
 
 export const state = {
-    get mode() { return mode.value; },
-    set mode(v) { mode.value = v; },
+    get mode() {
+        return mode.value;
+    },
+    set mode(v) {
+        mode.value = v;
+    },
 
-    get tasks() { return tasks.value; },
-    set tasks(v) { tasks.value = v; },
+    get tasks() {
+        return tasks.value;
+    },
+    set tasks(v) {
+        tasks.value = v;
+    },
 
     currentMode: 'home',
     timerState: 'stopped',
@@ -79,8 +103,8 @@ export const state = {
         settings: {
             focusDuration: 25,
             shortBreakDuration: 5,
-            longBreakDuration: 15
-        }
+            longBreakDuration: 15,
+        },
     },
 
     universe: universeShim,
@@ -104,10 +128,14 @@ function loadPersisted() {
         if (typeof data.mode === 'string') mode.value = data.mode;
         if (Array.isArray(data.activeSounds)) activeSounds.value = data.activeSounds;
         if (typeof data.universeStars === 'number') universeStars.value = data.universeStars;
-        if (typeof data.universeFocusMinutes === 'number') universeFocusMinutes.value = data.universeFocusMinutes;
-        if (typeof data.universeTasksCompleted === 'number') universeTasksCompleted.value = data.universeTasksCompleted;
-        if (data.ambientTracks && typeof data.ambientTracks === 'object') ambientTracks.value = data.ambientTracks;
-        if (data.ambientMaster && typeof data.ambientMaster === 'object') ambientMaster.value = data.ambientMaster;
+        if (typeof data.universeFocusMinutes === 'number')
+            universeFocusMinutes.value = data.universeFocusMinutes;
+        if (typeof data.universeTasksCompleted === 'number')
+            universeTasksCompleted.value = data.universeTasksCompleted;
+        if (data.ambientTracks && typeof data.ambientTracks === 'object')
+            ambientTracks.value = data.ambientTracks;
+        if (data.ambientMaster && typeof data.ambientMaster === 'object')
+            ambientMaster.value = data.ambientMaster;
         if (Array.isArray(data.ambientMixes)) ambientMixes.value = data.ambientMixes;
         // Sleep timer is intentionally NOT restored — ambient can't resume silently
         // on a new page load before a user gesture unlocks the AudioContext.

@@ -4,8 +4,8 @@
 // Phase 2: animated add/remove via Motion One. The render is now diff-based
 // (not innerHTML batch) so individual <li> elements can play exit animations.
 
-import { tasks, effect } from '../core/state.js';
-import { springAnim, anim, isReducedMotion } from '../core/motion.js';
+import { anim, isReducedMotion, springAnim } from '../core/motion.js';
+import { effect, tasks } from '../core/state.js';
 import { recordTaskToggle } from '../features/statistics.js';
 
 // ============================================================================
@@ -22,7 +22,7 @@ export function addTask() {
 }
 
 export function deleteTask(id) {
-    tasks.value = tasks.value.filter(t => t.id !== id);
+    tasks.value = tasks.value.filter((t) => t.id !== id);
 }
 
 export function clearAllTasks() {
@@ -30,13 +30,11 @@ export function clearAllTasks() {
 }
 
 export function toggleTask(id) {
-    const task = tasks.value.find(t => t.id === id);
+    const task = tasks.value.find((t) => t.id === id);
     if (!task) return;
 
     const newCompleted = !task.completed;
-    tasks.value = tasks.value.map(t =>
-        t.id === id ? { ...t, completed: newCompleted } : t
-    );
+    tasks.value = tasks.value.map((t) => (t.id === id ? { ...t, completed: newCompleted } : t));
 
     // Track both directions: completing increments, uncompleting decrements
     recordTaskToggle(newCompleted);
@@ -94,7 +92,7 @@ export function initTaskRender() {
     // Reactive diff-based render
     effect(() => {
         const current = tasks.value;
-        const currentIds = new Set(current.map(t => t.id));
+        const currentIds = new Set(current.map((t) => t.id));
 
         // 1. Remove elements that disappeared (and aren't already exiting)
         for (const [id, el] of elementsById) {
@@ -173,20 +171,29 @@ function animateEnter(el) {
     el.style.opacity = '0';
     el.style.transform = 'translateY(-8px) scale(0.96)';
     // Spring into place
-    springAnim(el, {
-        opacity: [0, 1],
-        transform: ['translateY(-8px) scale(0.96)', 'translateY(0px) scale(1)'],
-    }, 'standard', { duration: 0.5 });
+    springAnim(
+        el,
+        {
+            opacity: [0, 1],
+            transform: ['translateY(-8px) scale(0.96)', 'translateY(0px) scale(1)'],
+        },
+        'standard',
+        { duration: 0.5 }
+    );
 }
 
 function animateExit(el) {
     if (isReducedMotion()) {
         return Promise.resolve();
     }
-    const animation = anim(el, {
-        opacity: [1, 0],
-        transform: ['translateY(0px) scale(1)', 'translateX(20px) scale(0.92)'],
-    }, { duration: 0.28, easing: 'ease-in' });
+    const animation = anim(
+        el,
+        {
+            opacity: [1, 0],
+            transform: ['translateY(0px) scale(1)', 'translateX(20px) scale(0.92)'],
+        },
+        { duration: 0.28, easing: 'ease-in' }
+    );
     return animation.finished;
 }
 
@@ -211,7 +218,7 @@ async function handleClearAllWithAnimation() {
     // Stagger out
     const exits = allElements.map(([id, el], i) => {
         exiting.add(id);
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             setTimeout(async () => {
                 if (!isReducedMotion()) await animateExit(el);
                 el.remove();

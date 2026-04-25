@@ -104,10 +104,10 @@
     --pill-scale-y: 1;
 
     /* Nearly invisible — scene bleeds through */
-    background: rgba(225, 205, 150, 0.04) !important;
+    background: rgba(255, 205, 115, 0.04) !important;
 
     /* Thin gold-tinted border */
-    border: 1px solid rgba(225, 205, 150, 0.15) !important;
+    border: 1px solid rgba(255, 205, 115, 0.15) !important;
 
     /* Frosted glass blur */
     backdrop-filter: blur(40px) saturate(180%) !important;
@@ -117,29 +117,32 @@
     box-shadow:
         0 4px 24px rgba(0, 0, 0, 0.15),
         0 1px 3px rgba(0, 0, 0, 0.1),
-        inset 0 0.5px 0 rgba(225, 205, 150, 0.12) !important;
+        inset 0 0.5px 0 rgba(255, 205, 115, 0.12) !important;
 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Active pill — elevated glass bubble with specular highlight */
+/* Active pill — elevated glass bubble with specular highlight.
+   Sized for 2 tabs (Home / Focus) — Ambient was removed when sounds
+   moved into the cosmos. Width = 50% minus the container's 4px padding
+   on each side, divided in two. */
 .nav-buttons::before {
     content: '';
     position: absolute;
     top: 4px;
     left: 4px;
     height: calc(100% - 8px);
-    width: calc(33.333% - 2.666px);
+    width: calc(50% - 4px);
     border-radius: 24px;
 
     /* Glass bubble — warm gold tint */
     background: linear-gradient(
         180deg,
-        rgba(225, 205, 150, 0.18) 0%,
-        rgba(225, 205, 150, 0.04) 100%
+        rgba(255, 205, 115, 0.18) 0%,
+        rgba(255, 205, 115, 0.04) 100%
     );
 
-    border: 0.5px solid rgba(225, 205, 150, 0.22);
+    border: 0.5px solid rgba(255, 205, 115, 0.22);
 
     backdrop-filter: blur(20px) saturate(160%) brightness(1.15);
     -webkit-backdrop-filter: blur(20px) saturate(160%) brightness(1.15);
@@ -148,7 +151,7 @@
     box-shadow:
         0 2px 12px rgba(0, 0, 0, 0.12),
         0 6px 20px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(225, 205, 150, 0.35),
+        inset 0 1px 0 rgba(255, 205, 115, 0.35),
         inset 0 -0.5px 0 rgba(0, 0, 0, 0.05);
 
     /* Spring animation. Phase 4: transform inherits the squash vars so the
@@ -170,12 +173,12 @@
     top: 6px;
     left: 4px;
     height: 40%;
-    width: calc(33.333% - 2.666px);
+    width: calc(50% - 4px);
     border-radius: 24px 24px 50% 50%;
     background: linear-gradient(
         180deg,
-        rgba(225, 205, 150, 0.2) 0%,
-        rgba(225, 205, 150, 0.0) 100%
+        rgba(255, 205, 115, 0.2) 0%,
+        rgba(255, 205, 115, 0.0) 100%
     );
     pointer-events: none;
     z-index: 0;
@@ -184,26 +187,15 @@
     transition: left 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Position pill + specular for each active state */
-.nav-buttons:has([data-mode="home"].active)::before {
-    left: 4px;
-}
+/* Position pill + specular for each active state — two tabs only. */
+.nav-buttons:has([data-mode="home"].active)::before,
 .nav-buttons:has([data-mode="home"].active)::after {
     left: 4px;
 }
 
-.nav-buttons:has([data-mode="focus"].active)::before {
-    left: calc(33.333% + 1.333px);
-}
+.nav-buttons:has([data-mode="focus"].active)::before,
 .nav-buttons:has([data-mode="focus"].active)::after {
-    left: calc(33.333% + 1.333px);
-}
-
-.nav-buttons:has([data-mode="ambient"].active)::before {
-    left: calc(66.666% - 1.333px);
-}
-.nav-buttons:has([data-mode="ambient"].active)::after {
-    left: calc(66.666% - 1.333px);
+    left: 50%;
 }
 
 /* Buttons — clean text */
@@ -263,7 +255,7 @@
 
 .nav-buttons .nav-btn:focus-visible {
     outline: none !important;
-    box-shadow: 0 0 0 2px rgba(225, 205, 150, 0.65) !important;
+    box-shadow: 0 0 0 2px rgba(255, 205, 115, 0.65) !important;
     border-radius: 24px !important;
 }
 

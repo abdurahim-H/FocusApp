@@ -1,10 +1,10 @@
 // Application Cleanup and Resource Management
 // Handles proper cleanup of animations, event listeners, and 3D resources
 
-let activeAnimationFrames = new Set();
-let activeIntervals = new Set();
-let activeTimeouts = new Set();
-let eventListeners = new Map();
+const activeAnimationFrames = new Set();
+const activeIntervals = new Set();
+const activeTimeouts = new Set();
+const eventListeners = new Map();
 let cleanupInitialized = false;
 
 // Store original functions
@@ -21,8 +21,7 @@ let pausedAnimationFrames = new Set();
 export function initCleanupSystem() {
     if (cleanupInitialized) return;
     cleanupInitialized = true;
-    
-    
+
     // Store original functions
     originalRequestAnimationFrame = window.requestAnimationFrame;
     originalCancelAnimationFrame = window.cancelAnimationFrame;
@@ -31,15 +30,15 @@ export function initCleanupSystem() {
     originalSetTimeout = window.setTimeout;
     originalClearTimeout = window.clearTimeout;
     originalAddEventListener = EventTarget.prototype.addEventListener;
-    
+
     // Don't override global functions immediately - wait for app to initialize first
     // We'll use wrapper functions instead
-    
+
     // Setup automatic cleanup on page unload
     window.addEventListener('beforeunload', () => {
         cleanupApplication();
     });
-    
+
     // Setup tab visibility handling for animation pause/resume
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
@@ -48,7 +47,6 @@ export function initCleanupSystem() {
             resumeAnimations();
         }
     });
-    
 }
 
 // Pause all animations when tab is hidden
@@ -57,7 +55,7 @@ function pauseAnimations() {
     // Store currently active animation frames
     pausedAnimationFrames = new Set(activeAnimationFrames);
     // Cancel all active animation frames
-    pausedAnimationFrames.forEach(frameId => {
+    pausedAnimationFrames.forEach((frameId) => {
         originalCancelAnimationFrame(frameId);
     });
 }
@@ -88,52 +86,52 @@ export function enableAggressiveTracking() {
         console.warn('🧹 Cleanup system not initialized, cannot enable aggressive tracking');
         return;
     }
-    
+
     setupTrackingWrappers();
 }
 
 // Setup tracking wrappers for global functions
 function setupTrackingWrappers() {
     // Wrap requestAnimationFrame to track active animation frames
-    window.requestAnimationFrame = function(callback) {
+    window.requestAnimationFrame = (callback) => {
         const id = originalRequestAnimationFrame(callback);
         activeAnimationFrames.add(id);
         return id;
     };
 
     // Wrap cancelAnimationFrame to track cancellations
-    window.cancelAnimationFrame = function(id) {
+    window.cancelAnimationFrame = (id) => {
         activeAnimationFrames.delete(id);
         return originalCancelAnimationFrame(id);
     };
 
     // Wrap setInterval to track active intervals
-    window.setInterval = function(callback, delay) {
+    window.setInterval = (callback, delay) => {
         const id = originalSetInterval(callback, delay);
         activeIntervals.add(id);
         return id;
     };
 
     // Wrap clearInterval to track cancellations
-    window.clearInterval = function(id) {
+    window.clearInterval = (id) => {
         activeIntervals.delete(id);
         return originalClearInterval(id);
     };
 
-    window.setTimeout = function(callback, delay) {
+    window.setTimeout = (callback, delay) => {
         const id = originalSetTimeout(callback, delay);
         activeTimeouts.add(id);
         return id;
     };
 
     // Wrap clearTimeout to track cancellations
-    window.clearTimeout = function(id) {
+    window.clearTimeout = (id) => {
         activeTimeouts.delete(id);
         return originalClearTimeout(id);
     };
 
     // Enhanced addEventListener tracking
-    EventTarget.prototype.addEventListener = function(type, listener, options) {
+    EventTarget.prototype.addEventListener = function (type, listener, options) {
         const key = `${this.constructor.name}_${type}_${listener.toString().substring(0, 50)}`;
         if (!eventListeners.has(this)) {
             eventListeners.set(this, new Map());
@@ -145,7 +143,6 @@ function setupTrackingWrappers() {
 
 // Global cleanup function
 export function cleanupApplication() {
-    
     // Cancel all active animation frames
     let frameCount = 0;
     for (const frameId of activeAnimationFrames) {
@@ -153,7 +150,7 @@ export function cleanupApplication() {
         frameCount++;
     }
     activeAnimationFrames.clear();
-    
+
     // Clear all active intervals
     let intervalCount = 0;
     for (const intervalId of activeIntervals) {
@@ -161,7 +158,7 @@ export function cleanupApplication() {
         intervalCount++;
     }
     activeIntervals.clear();
-    
+
     // Clear all active timeouts
     let timeoutCount = 0;
     for (const timeoutId of activeTimeouts) {
@@ -169,13 +166,12 @@ export function cleanupApplication() {
         timeoutCount++;
     }
     activeTimeouts.clear();
-    
+
     // Cleanup Three.js resources
     cleanup3DResources();
-    
+
     // Cleanup UI effects
     cleanupUIEffects();
-    
 }
 
 // 3D resource cleanup (supports both Three.js and Babylon.js)
@@ -194,7 +190,6 @@ function cleanup3DResources() {
 
 // Babylon.js resource cleanup
 function cleanupBabylonResources() {
-
     // Dispose engine (handles scene, meshes, materials, textures)
     if (window.babylonEngine) {
         window.babylonEngine.dispose();
@@ -217,7 +212,7 @@ function cleanupThreeResources() {
 
             if (object.material) {
                 if (Array.isArray(object.material)) {
-                    object.material.forEach(material => {
+                    object.material.forEach((material) => {
                         disposeMaterial(material);
                         materialCount++;
                     });
@@ -234,7 +229,6 @@ function cleanupThreeResources() {
         window.renderer.dispose();
         window.renderer.forceContextLoss();
     }
-
 
     function disposeMaterial(material) {
         if (material.map) {
@@ -253,19 +247,16 @@ function cleanupUIEffects() {
     const body = document.body;
     const container = document.querySelector('.container');
     const allElements = document.querySelectorAll('*');
-    
-    // Remove all effect classes
-    const effectClasses = [
-        'focus-intense', 'session-complete'
-    ];
 
-    [container, body].forEach(el => {
+    // Remove all effect classes
+    const effectClasses = ['focus-intense', 'session-complete'];
+
+    [container, body].forEach((el) => {
         if (!el) return;
-        effectClasses.forEach(className => {
+        effectClasses.forEach((className) => {
             el.classList.remove(className);
         });
     });
-    
 }
 
 // Export tracking functions for use by other modules
@@ -306,7 +297,7 @@ export function reportMemoryUsage() {
             limit: `${(memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB`,
             activeFrames: activeAnimationFrames.size,
             activeIntervals: activeIntervals.size,
-            activeTimeouts: activeTimeouts.size
+            activeTimeouts: activeTimeouts.size,
         });
     }
 }

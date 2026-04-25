@@ -78,5 +78,5 @@ export function displayKey(k) {
 
 /** Look up a shortcut by id. */
 export function getShortcut(id) {
-    return SHORTCUTS.find(s => s.id === id);
+    return SHORTCUTS.find((s) => s.id === id);
 }

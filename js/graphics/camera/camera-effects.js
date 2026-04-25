@@ -7,7 +7,7 @@ let camera = null;
 let scene = null;
 let cameraEffectActive = false;
 let shakeMagnitude = 0;
-let shakeMultiplier = 1;   // User-tunable via Settings > Scene > Advanced
+let shakeMultiplier = 1; // User-tunable via Settings > Scene > Advanced
 
 /**
  * Initialize camera effects with references
@@ -70,9 +70,7 @@ export function triggerSessionCompleteZoom() {
         const progress = Math.min(elapsed / duration, 1);
 
         // Cinematic easing (ease-in-out quad)
-        const eased = progress < 0.5
-            ? 2 * progress * progress
-            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+        const eased = progress < 0.5 ? 2 * progress * progress : 1 - (-2 * progress + 2) ** 2 / 2;
 
         camera.radius = startRadius + (targetRadius - startRadius) * eased;
         camera.alpha = startAlpha + progress * 0.5;
@@ -104,7 +102,7 @@ function returnToNormalOrbit() {
         const progress = Math.min(elapsed / duration, 1);
 
         // Ease-out cubic
-        const eased = 1 - Math.pow(1 - progress, 3);
+        const eased = 1 - (1 - progress) ** 3;
 
         camera.radius = startRadius + (targetRadius - startRadius) * eased;
 

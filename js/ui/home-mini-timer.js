@@ -6,9 +6,9 @@
 // whether a session is active (running or paused).
 
 import { state } from '../core/state.js';
+import { pauseTimer, resetTimer, skipBreak, skipFocus, startTimer } from '../features/timer.js';
 import { switchMode } from './navigation.js';
 import { get as settingsGet } from './settings/store.js';
-import { startTimer, pauseTimer, resetTimer, skipBreak, skipFocus } from '../features/timer.js';
 
 // ============================================================================
 // DOM references
@@ -22,7 +22,7 @@ let secHand = null;
 let progressArc = null;
 let tickInterval = null;
 let visible = false;
-let hideBlockedUntil = 0; // Timestamp — tick won't hide before this
+const hideBlockedUntil = 0; // Timestamp — tick won't hide before this
 
 // Sliver (minimized / docked form)
 let sliver = null;
@@ -49,18 +49,18 @@ const DOCKED_KEY = 'fu_mini_timer_docked';
 // ============================================================================
 
 export function initHomeMiniTimer() {
-    container   = document.getElementById('homeMiniTimer');
-    timeEl      = document.getElementById('hmtTime');
-    labelEl     = document.getElementById('hmtLabel');
-    sessionEl   = document.getElementById('hmtSession');
-    minHand     = document.getElementById('hmtMinHand');
-    secHand     = document.getElementById('hmtSecHand');
+    container = document.getElementById('homeMiniTimer');
+    timeEl = document.getElementById('hmtTime');
+    labelEl = document.getElementById('hmtLabel');
+    sessionEl = document.getElementById('hmtSession');
+    minHand = document.getElementById('hmtMinHand');
+    secHand = document.getElementById('hmtSecHand');
     progressArc = document.getElementById('hmtProgress');
 
     // Sliver (docked form) references
-    sliver     = document.getElementById('hmtSliver');
-    sliverMM   = document.getElementById('hmtSliverMM');
-    sliverSS   = document.getElementById('hmtSliverSS');
+    sliver = document.getElementById('hmtSliver');
+    sliverMM = document.getElementById('hmtSliverMM');
+    sliverSS = document.getElementById('hmtSliverSS');
 
     if (!container) return;
 
@@ -97,6 +97,16 @@ export function initHomeMiniTimer() {
         });
     }
 
+    // Sliver skip button — fires the same skip action as the full mini-timer.
+    const sliverSkipBtn = document.getElementById('hmtSliverSkipBtn');
+    if (sliverSkipBtn) {
+        sliverSkipBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (state.timer.isBreak) skipBreak();
+            else skipFocus();
+        });
+    }
+
     // Sliver reset button
     const sliverResetBtn = document.getElementById('hmtSliverResetBtn');
     if (sliverResetBtn) {
@@ -111,12 +121,13 @@ export function initHomeMiniTimer() {
     // Click on body area (not buttons) → navigate to Focus tab
     const bodyArea = container.querySelector('.hmt-body');
     const ringArea = container.querySelector('.hmt-ring');
-    [bodyArea, ringArea].forEach(el => {
-        if (el) el.addEventListener('click', (e) => {
-            if (isDragging) return;
-            e.stopPropagation();
-            switchMode('focus');
-        });
+    [bodyArea, ringArea].forEach((el) => {
+        if (el)
+            el.addEventListener('click', (e) => {
+                if (isDragging) return;
+                e.stopPropagation();
+                switchMode('focus');
+            });
     });
 
     // Stop container-level click from doing anything
@@ -159,11 +170,15 @@ export function initHomeMiniTimer() {
     }
 
     // ── Drag support (only from non-interactive areas) ──
-    container.addEventListener('pointerdown', (e) => {
-        // Don't drag from buttons
-        if (e.target.closest('.hmt-btn') || e.target.closest('.hmt-resize')) return;
-        onDragStart(e);
-    }, { passive: false });
+    container.addEventListener(
+        'pointerdown',
+        (e) => {
+            // Don't drag from buttons
+            if (e.target.closest('.hmt-btn') || e.target.closest('.hmt-resize')) return;
+            onDragStart(e);
+        },
+        { passive: false }
+    );
     document.addEventListener('pointermove', onDragMove, { passive: false });
     document.addEventListener('pointerup', onDragEnd);
 
@@ -184,7 +199,8 @@ export function initHomeMiniTimer() {
 // Drag to reposition
 // ============================================================================
 
-let dragStartX = 0, dragStartY = 0;
+let dragStartX = 0,
+    dragStartY = 0;
 let dragMoved = false;
 
 function onDragStart(e) {
@@ -232,7 +248,9 @@ function onDragEnd(e) {
 
     if (dragMoved) {
         // Prevent the click event from firing after drag
-        setTimeout(() => { isDragging = false; }, 50);
+        setTimeout(() => {
+            isDragging = false;
+        }, 50);
     } else {
         isDragging = false;
     }
@@ -248,16 +266,19 @@ function onDragEnd(e) {
 function persistTimerState() {
     try {
         const t = state.timer;
-        sessionStorage.setItem(TIMER_STATE_KEY, JSON.stringify({
-            isRunning: t.isRunning,
-            isBreak: t.isBreak,
-            isLongBreak: t.isLongBreak,
-            minutes: t.minutes,
-            seconds: t.seconds,
-            pomodoroCount: t.pomodoroCount,
-            timerState: state.timerState,
-            savedAt: Date.now(),
-        }));
+        sessionStorage.setItem(
+            TIMER_STATE_KEY,
+            JSON.stringify({
+                isRunning: t.isRunning,
+                isBreak: t.isBreak,
+                isLongBreak: t.isLongBreak,
+                minutes: t.minutes,
+                seconds: t.seconds,
+                pomodoroCount: t.pomodoroCount,
+                timerState: state.timerState,
+                savedAt: Date.now(),
+            })
+        );
     } catch (_) {}
 }
 
@@ -284,7 +305,7 @@ function restoreTimerState() {
 
         if (saved.isRunning) {
             // Timer was running — subtract elapsed time
-            let totalRemaining = saved.minutes * 60 + saved.seconds - elapsedSec;
+            const totalRemaining = saved.minutes * 60 + saved.seconds - elapsedSec;
             if (totalRemaining <= 0) {
                 // Session would have ended — don't restore, clean up
                 sessionStorage.removeItem(TIMER_STATE_KEY);
@@ -339,8 +360,8 @@ function tick() {
     // overwritten by startTimer to 'timer', which is unreliable here)
     const homePanel = document.getElementById('home');
     const ambientPanel = document.getElementById('ambient');
-    const onVisibleTab = homePanel?.classList.contains('active') ||
-                         ambientPanel?.classList.contains('active');
+    const onVisibleTab =
+        homePanel?.classList.contains('active') || ambientPanel?.classList.contains('active');
 
     // Show/hide
     const now = Date.now();
@@ -445,9 +466,13 @@ function show() {
 
     container.classList.remove('hidden', 'is-leaving');
     container.classList.add('is-entering');
-    container.addEventListener('animationend', () => {
-        container.classList.remove('is-entering');
-    }, { once: true });
+    container.addEventListener(
+        'animationend',
+        () => {
+            container.classList.remove('is-entering');
+        },
+        { once: true }
+    );
 }
 
 function hide() {
@@ -463,10 +488,14 @@ function hide() {
     }
 
     container.classList.add('is-leaving');
-    container.addEventListener('animationend', () => {
-        container.classList.remove('is-leaving');
-        container.classList.add('hidden');
-    }, { once: true });
+    container.addEventListener(
+        'animationend',
+        () => {
+            container.classList.remove('is-leaving');
+            container.classList.add('hidden');
+        },
+        { once: true }
+    );
 }
 
 // ============================================================================
@@ -513,11 +542,15 @@ function dockToSliver() {
 
     // Persist the user's preference
     docked = true;
-    try { localStorage.setItem(DOCKED_KEY, '1'); } catch (_) {}
+    try {
+        localStorage.setItem(DOCKED_KEY, '1');
+    } catch (_) {}
 
     // Keep a reasonable animation completion window before allowing
     // another dock toggle.
-    window.setTimeout(() => { dockAnimating = false; }, 650);
+    window.setTimeout(() => {
+        dockAnimating = false;
+    }, 650);
 }
 
 /** Slide the sliver away and unfurl the full mini-timer back in. */
@@ -546,15 +579,23 @@ function undockFromSliver() {
     window.setTimeout(() => {
         container.classList.remove('hidden', 'is-entering', 'is-leaving', 'is-docking');
         container.classList.add('is-undocking');
-        container.addEventListener('animationend', () => {
-            container.classList.remove('is-undocking');
-        }, { once: true });
+        container.addEventListener(
+            'animationend',
+            () => {
+                container.classList.remove('is-undocking');
+            },
+            { once: true }
+        );
     }, 120);
 
     docked = false;
-    try { localStorage.removeItem(DOCKED_KEY); } catch (_) {}
+    try {
+        localStorage.removeItem(DOCKED_KEY);
+    } catch (_) {}
 
-    window.setTimeout(() => { dockAnimating = false; }, 750);
+    window.setTimeout(() => {
+        dockAnimating = false;
+    }, 750);
 }
 
 function showSliver({ animate = true } = {}) {
@@ -562,9 +603,13 @@ function showSliver({ animate = true } = {}) {
     sliver.classList.remove('hidden', 'is-leaving');
     if (animate) {
         sliver.classList.add('is-entering');
-        sliver.addEventListener('animationend', () => {
-            sliver.classList.remove('is-entering');
-        }, { once: true });
+        sliver.addEventListener(
+            'animationend',
+            () => {
+                sliver.classList.remove('is-entering');
+            },
+            { once: true }
+        );
     }
     syncSliver();
 }
@@ -574,10 +619,14 @@ function hideSliver({ animate = true } = {}) {
     sliver.classList.remove('is-entering');
     if (animate) {
         sliver.classList.add('is-leaving');
-        sliver.addEventListener('animationend', () => {
-            sliver.classList.remove('is-leaving');
-            sliver.classList.add('hidden');
-        }, { once: true });
+        sliver.addEventListener(
+            'animationend',
+            () => {
+                sliver.classList.remove('is-leaving');
+                sliver.classList.add('hidden');
+            },
+            { once: true }
+        );
     } else {
         sliver.classList.add('hidden');
     }
@@ -613,7 +662,9 @@ function syncSliver() {
 function restoreDockedState() {
     try {
         docked = localStorage.getItem(DOCKED_KEY) === '1';
-    } catch (_) { docked = false; }
+    } catch (_) {
+        docked = false;
+    }
 }
 
 // ============================================================================
@@ -656,7 +707,9 @@ function onResizeEnd() {
     document.removeEventListener('pointermove', onResizeMove);
     document.removeEventListener('pointerup', onResizeEnd);
     // Persist so the chosen size survives reloads.
-    try { localStorage.setItem(SCALE_KEY, String(currentScale)); } catch (_) {}
+    try {
+        localStorage.setItem(SCALE_KEY, String(currentScale));
+    } catch (_) {}
 }
 
 // Drive the scale through a CSS custom property so it composes with the

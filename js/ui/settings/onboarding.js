@@ -11,42 +11,52 @@ const STORAGE_KEY = 'fu_tour_seen';
 const STEPS = [
     {
         title: 'Welcome to Cosmic Focus',
-        body: 'A cinematic Pomodoro timer with a living black hole scene behind it. Let\u2019s take a quick tour.',
-        target: null, // no highlight — centered intro
+        body: 'A cinematic Pomodoro timer where ambient sound is something you arrange in space. Let’s take 30 seconds.',
+        target: null,
     },
     {
-        title: 'Navigation',
-        body: 'Switch between Home, Focus, and Ambient modes with these tabs.',
+        title: 'Two tabs',
+        body: 'Home for the dashboard, Focus for the timer + tasks. Sounds are everywhere — they live in the cosmos.',
         target: '.nav-buttons',
     },
     {
         title: 'Focus Timer',
-        body: 'Start a Pomodoro session. The timer counts down and auto-rolls into breaks.',
+        body: 'Start a Pomodoro session. Counts down, auto-rolls into breaks. <kbd>Space</kbd> starts/pauses.',
         target: '.timer-controls',
     },
     {
-        title: 'Tasks',
-        body: 'Add tasks for your session. They persist across refreshes and animate in/out.',
-        target: '.task-section',
+        title: 'Open the sound library',
+        body: 'Tap the <strong>+</strong> in the cosmos toolbar to summon ambient sounds. Each sound becomes a celestial body orbiting the black hole.',
+        target: '#deckAddSoundBtn',
     },
     {
-        title: 'Ambient Sounds',
-        body: 'Switch to the Ambient tab to mix background sounds while you work.',
-        target: '[data-mode="ambient"]',
-    },
-    {
-        title: 'Settings',
-        body: 'Tweak graphics quality, timer durations, keyboard shortcuts, profiles, and more.',
-        target: '.settings-trigger',
-    },
-    {
-        title: 'Keyboard Shortcuts',
-        body: 'Press <kbd>?</kbd> anytime to see all keyboard shortcuts. Space starts/pauses the timer.',
+        title: 'Bodies are your mixer',
+        body: '<strong>Drag a body up/down</strong> to set volume. <strong>Left/right</strong> to pan. <strong>Click</strong> to open its EQ ring. <strong>Drag toward the black hole</strong> to remove it — gravity does the rest.',
         target: null,
     },
     {
-        title: 'You\u2019re all set!',
-        body: 'Enjoy your cosmic focus sessions. You can replay this tour from Settings \u2192 Data & About.',
+        title: 'The black hole is master',
+        body: 'Drag the black hole vertically to set master volume. The accretion disk brightens with the loudness.',
+        target: null,
+    },
+    {
+        title: 'Constellations',
+        body: 'Save your favourite arrangements. Tap the <strong>star</strong> in the toolbar to save the current constellation. Recall it any time from the library.',
+        target: '#deckSaveMixBtn',
+    },
+    {
+        title: 'Tasks',
+        body: 'Track what you’re working on. Tasks persist across refreshes.',
+        target: '.task-section',
+    },
+    {
+        title: 'Settings',
+        body: 'Graphics quality, timer durations, keyboard shortcuts, profiles, theming.',
+        target: '.settings-trigger',
+    },
+    {
+        title: 'You’re ready',
+        body: 'Press <kbd>?</kbd> any time for help. Replay this tour from Settings → Data & About.',
         target: null,
     },
 ];
@@ -121,7 +131,9 @@ function renderStep() {
     nextBtn.textContent = currentStep === STEPS.length - 1 ? 'Done' : 'Next';
 
     // Highlight target element
-    document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+    document
+        .querySelectorAll('.tour-highlight')
+        .forEach((el) => el.classList.remove('tour-highlight'));
     if (step.target) {
         const targetEl = document.querySelector(step.target);
         if (targetEl) targetEl.classList.add('tour-highlight');
@@ -139,7 +151,9 @@ function nextStep() {
 
 function closeTour() {
     if (!overlay) return;
-    document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+    document
+        .querySelectorAll('.tour-highlight')
+        .forEach((el) => el.classList.remove('tour-highlight'));
     overlay.classList.remove('is-active');
     setTimeout(() => {
         overlay?.remove();

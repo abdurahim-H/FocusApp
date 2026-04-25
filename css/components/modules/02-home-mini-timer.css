@@ -22,7 +22,7 @@
 
     /* Transparent glass — nearly invisible */
     background: rgba(8, 6, 3, 0.05);
-    border: 1px solid rgba(225, 205, 150, 0.03);
+    border: 1px solid rgba(255, 205, 115, 0.03);
     box-shadow: none;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -62,7 +62,7 @@
 /* Hover — glass brightens slightly, border warms */
 .home-mini-timer:hover {
     background: rgba(10, 8, 4, 0.1);
-    border-color: rgba(225, 205, 150, 0.08);
+    border-color: rgba(255, 205, 115, 0.08);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
 }
 .home-mini-timer:active {
@@ -82,23 +82,23 @@
 }
 .hmt-clock__face {
     fill: rgba(0, 0, 0, 0.15);
-    stroke: rgba(225, 205, 150, 0.2);
+    stroke: rgba(255, 205, 115, 0.2);
     stroke-width: 1;
 }
 .hmt-clock__markers line {
-    stroke: rgba(225, 205, 150, 0.35);
+    stroke: rgba(255, 205, 115, 0.35);
     stroke-width: 1;
     stroke-linecap: round;
 }
 /* Cardinal markers (12, 3, 6, 9) slightly brighter */
 .hmt-clock__markers line:nth-child(3n+1) {
-    stroke: rgba(225, 205, 150, 0.55);
+    stroke: rgba(255, 205, 115, 0.55);
     stroke-width: 1.4;
 }
 /* Progress arc — sweeps as timer counts down */
 .hmt-clock__progress {
     fill: none;
-    stroke: rgba(225, 205, 150, 0.2);
+    stroke: rgba(255, 205, 115, 0.2);
     stroke-width: 2;
     stroke-linecap: round;
     stroke-dasharray: 144.51;  /* 2 * PI * 23 */
@@ -109,16 +109,16 @@
 }
 /* Minute hand */
 .hmt-clock__hand--min {
-    stroke: rgba(245, 232, 208, 0.85);
+    stroke: rgba(255, 242, 218, 0.85);
     stroke-width: 1.8;
     stroke-linecap: round;
     transform-origin: 30px 30px;
     transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: drop-shadow(0 0 3px rgba(225, 205, 150, 0.3));
+    filter: drop-shadow(0 0 3px rgba(255, 205, 115, 0.3));
 }
 /* Second hand */
 .hmt-clock__hand--sec {
-    stroke: rgba(225, 205, 150, 0.7);
+    stroke: rgba(255, 205, 115, 0.7);
     stroke-width: 0.8;
     stroke-linecap: round;
     transform-origin: 30px 30px;
@@ -126,18 +126,18 @@
 }
 /* Center dot */
 .hmt-clock__center {
-    fill: rgba(225, 205, 150, 0.8);
-    filter: drop-shadow(0 0 2px rgba(225, 205, 150, 0.4));
+    fill: rgba(255, 205, 115, 0.8);
+    filter: drop-shadow(0 0 2px rgba(255, 205, 115, 0.4));
 }
 
 /* ── Focus mode (default) — warm gold ── */
 .home-mini-timer.is-running .hmt-clock__hand--sec {
-    stroke: rgba(225, 205, 150, 0.85);
-    filter: drop-shadow(0 0 3px rgba(225, 205, 150, 0.4));
+    stroke: rgba(255, 205, 115, 0.85);
+    filter: drop-shadow(0 0 3px rgba(255, 205, 115, 0.4));
 }
 .home-mini-timer.is-running .hmt-clock__progress {
-    stroke: rgba(225, 205, 150, 0.35);
-    filter: drop-shadow(0 0 4px rgba(225, 205, 150, 0.2));
+    stroke: rgba(255, 205, 115, 0.35);
+    filter: drop-shadow(0 0 4px rgba(255, 205, 115, 0.2));
 }
 
 /* ── Short break — cool teal ── */
@@ -218,7 +218,7 @@
     font-weight: 700;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(230, 220, 180, 0.5);
+    color: rgba(255, 230, 188, 0.5);
     line-height: 1;
 }
 .home-mini-timer.is-break .hmt-label {
@@ -231,7 +231,7 @@
 .hmt-time {
     font-size: 32px;
     font-weight: 200;
-    color: rgba(245, 232, 208, 0.95);
+    color: rgba(255, 242, 218, 0.95);
     letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums slashed-zero;
     font-feature-settings: 'tnum', 'zero';
@@ -261,7 +261,7 @@
 }
 /* Paused: slightly dimmed, no glow animation */
 .home-mini-timer.is-paused .hmt-time {
-    color: rgba(245, 232, 208, 0.55);
+    color: rgba(255, 242, 218, 0.55);
     text-shadow:
         0 1px 4px rgba(0, 0, 0, 0.3),
         0 0 10px rgba(240, 200, 140, 0.08);
@@ -275,7 +275,7 @@
 .hmt-session {
     font-size: 9px;
     font-weight: 500;
-    color: rgba(230, 220, 180, 0.35);
+    color: rgba(255, 230, 188, 0.35);
     letter-spacing: 0.06em;
     font-variant-numeric: tabular-nums;
     line-height: 1;
@@ -303,9 +303,9 @@
     width: 18px;
     height: 1px;
     background: linear-gradient(90deg,
-        rgba(225, 205, 150, 0) 0%,
-        rgba(225, 205, 150, 0.35) 50%,
-        rgba(225, 205, 150, 0) 100%);
+        rgba(255, 205, 115, 0) 0%,
+        rgba(255, 205, 115, 0.35) 50%,
+        rgba(255, 205, 115, 0) 100%);
     margin: 1px 0 2px;
     flex-shrink: 0;
 }
@@ -316,10 +316,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(225, 205, 150, 0.06);
+    border: 1px solid rgba(255, 205, 115, 0.18);
     border-radius: 9px;
-    background: transparent;
-    color: rgba(230, 220, 180, 0.45);
+    background: rgba(255, 205, 115, 0.04);
+    color: rgba(255, 230, 188, 0.78);
     cursor: pointer;
     padding: 0;
     transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
@@ -330,23 +330,27 @@
 }
 .hmt-btn:hover {
     color: rgba(255, 220, 140, 0.95);
-    border-color: rgba(225, 205, 150, 0.3);
-    background: rgba(225, 205, 150, 0.08);
+    border-color: rgba(255, 205, 115, 0.45);
+    background: rgba(255, 205, 115, 0.12);
+    box-shadow: 0 0 12px rgba(255, 205, 115, 0.14);
 }
 .hmt-btn:active {
     transform: scale(0.9);
     transition-duration: 0.1s;
 }
 
-/* Dock — only visible when you need it; slides slightly on hover to
-   suggest direction. */
-.hmt-btn--dock { color: rgba(230, 220, 180, 0.35); }
+/* Dock — quieter resting state since it's a tertiary action. Slides slightly
+   on hover to suggest direction. */
+.hmt-btn--dock {
+    color: rgba(255, 230, 188, 0.55);
+    border-color: rgba(255, 205, 115, 0.12);
+}
 .hmt-btn--dock:hover { transform: translateX(1.5px); }
 .hmt-btn--dock:active { transform: translateX(2.5px) scale(0.92); }
 
-/* Skip — brighter resting glow signals it's the most-used action. */
+/* Skip — soft glow signals it's the most-used action after play/pause. */
 .hmt-btn--skip:hover {
-    box-shadow: 0 0 14px rgba(225, 205, 150, 0.12);
+    box-shadow: 0 0 16px rgba(255, 205, 115, 0.22);
 }
 
 /* Reset — red-warm intent only on hover. */
@@ -368,15 +372,15 @@
    and a stronger hover glow so the eye lands on it first without it
    being a shouting filled button. */
 .hmt-btn--play-pause {
-    border-color: rgba(225, 205, 150, 0.18);
-    background: rgba(225, 205, 150, 0.04);
+    border-color: rgba(255, 205, 115, 0.18);
+    background: rgba(255, 205, 115, 0.04);
     color: rgba(230, 190, 120, 0.75);
 }
 .hmt-btn--play-pause:hover {
-    border-color: rgba(225, 205, 150, 0.45);
-    background: rgba(225, 205, 150, 0.14);
+    border-color: rgba(255, 205, 115, 0.45);
+    background: rgba(255, 205, 115, 0.14);
     color: rgba(255, 220, 140, 1);
-    box-shadow: 0 0 16px rgba(225, 205, 150, 0.18);
+    box-shadow: 0 0 16px rgba(255, 205, 115, 0.18);
 }
 .home-mini-timer.is-break .hmt-btn--play-pause {
     border-color: rgba(145, 210, 195, 0.2);
@@ -401,16 +405,16 @@
     align-items: center;
     justify-content: center;
     cursor: nwse-resize;
-    color: rgba(230, 220, 180, 0.12);
+    color: rgba(255, 230, 188, 0.12);
     transition: color 0.2s ease;
     border-radius: 0 0 6px 0;
     touch-action: none;
 }
 .home-mini-timer:hover .hmt-resize {
-    color: rgba(230, 220, 180, 0.35);
+    color: rgba(255, 230, 188, 0.35);
 }
 .hmt-resize:hover {
-    color: rgba(230, 220, 180, 0.55) !important;
+    color: rgba(255, 230, 188, 0.55) !important;
 }
 .home-mini-timer.is-resizing {
     transition: none !important;
@@ -422,7 +426,7 @@
 
 /* Focus-visible */
 .hmt-btn:focus-visible {
-    outline: 2px solid rgba(225, 205, 150, 0.65);
+    outline: 2px solid rgba(255, 205, 115, 0.65);
     outline-offset: 2px;
 }
 .hmt-btn:focus:not(:focus-visible) {
@@ -436,7 +440,7 @@
     border-radius: 28px;
     opacity: 0;
     pointer-events: none;
-    border: 1px solid rgba(225, 205, 150, 0.08);
+    border: 1px solid rgba(255, 205, 115, 0.08);
 }
 .home-mini-timer.is-running .hmt-pulse {
     animation: hmtPulseRing 3s ease-in-out infinite;
@@ -611,7 +615,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 .hmt-sliver {
     --sliver-w: 46px;
-    --sliver-h: 232px;
+    --sliver-h: 264px;
 
     position: fixed;
     top: 50%;
@@ -631,10 +635,10 @@
        edge reads as if a lamp is glowing from inside the page just off-
        screen. No backdrop-filter — GPU-cheap. */
     background:
-        linear-gradient(90deg, rgba(225, 205, 150, 0.08) 0%, rgba(225, 205, 150, 0) 50%),
+        linear-gradient(90deg, rgba(255, 205, 115, 0.08) 0%, rgba(255, 205, 115, 0) 50%),
         linear-gradient(180deg, rgba(16, 12, 7, 0.94) 0%, rgba(10, 7, 4, 0.96) 100%);
 
-    border: 1px solid rgba(225, 205, 150, 0.22);
+    border: 1px solid rgba(255, 205, 115, 0.22);
     border-right: none;
     border-top-left-radius: 22px;
     border-bottom-left-radius: 22px;
@@ -642,13 +646,13 @@
     border-bottom-right-radius: 0;
 
     box-shadow:
-        inset 1px 0 0 rgba(255, 240, 210, 0.08),
-        inset 0 1px 0 rgba(255, 240, 210, 0.05),
+        inset 1px 0 0 rgba(255, 246, 225, 0.08),
+        inset 0 1px 0 rgba(255, 246, 225, 0.05),
         -4px 0 14px rgba(0, 0, 0, 0.35),
         -14px 0 46px rgba(0, 0, 0, 0.4),
-        -18px 0 60px rgba(225, 205, 150, 0.09);
+        -18px 0 60px rgba(255, 205, 115, 0.09);
 
-    color: rgba(240, 223, 192, 0.95);
+    color: rgba(255, 235, 200, 0.95);
     font-family: inherit;
     user-select: none;
     -webkit-user-select: none;
@@ -690,16 +694,16 @@
    Warm champagne intensifies, atmospheric glow breathes outward. */
 .hmt-sliver:hover {
     transform: translateY(-50%) translateX(-4px);
-    border-color: rgba(225, 205, 150, 0.4);
+    border-color: rgba(255, 205, 115, 0.4);
     background:
-        linear-gradient(90deg, rgba(225, 205, 150, 0.14) 0%, rgba(225, 205, 150, 0) 55%),
+        linear-gradient(90deg, rgba(255, 205, 115, 0.14) 0%, rgba(255, 205, 115, 0) 55%),
         linear-gradient(180deg, rgba(20, 15, 9, 0.97) 0%, rgba(12, 9, 5, 0.98) 100%);
     box-shadow:
-        inset 1px 0 0 rgba(255, 240, 210, 0.14),
-        inset 0 1px 0 rgba(255, 240, 210, 0.08),
+        inset 1px 0 0 rgba(255, 246, 225, 0.14),
+        inset 0 1px 0 rgba(255, 246, 225, 0.08),
         -6px 0 20px rgba(0, 0, 0, 0.4),
         -18px 0 60px rgba(0, 0, 0, 0.45),
-        -22px 0 80px rgba(225, 205, 150, 0.18);
+        -22px 0 80px rgba(255, 205, 115, 0.18);
 }
 
 /* ── Expand hitbox at the top — the only click target that re-opens
@@ -719,15 +723,15 @@
     transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .hmt-sliver__expand:hover {
-    background: rgba(225, 205, 150, 0.06);
+    background: rgba(255, 205, 115, 0.06);
 }
 .hmt-sliver__expand:focus-visible {
-    outline: 2px solid rgba(225, 205, 150, 0.6);
+    outline: 2px solid rgba(255, 205, 115, 0.6);
     outline-offset: -4px;
     border-radius: 10px;
 }
 .hmt-sliver__chev {
-    color: rgba(230, 220, 180, 0.5);
+    color: rgba(255, 230, 188, 0.5);
     transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                 transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     flex-shrink: 0;
@@ -749,8 +753,8 @@
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.04em;
-    color: rgba(240, 223, 192, 0.95);
-    text-shadow: 0 0 12px rgba(225, 205, 150, 0.35);
+    color: rgba(255, 235, 200, 0.95);
+    text-shadow: 0 0 12px rgba(255, 205, 115, 0.35);
     pointer-events: none;
     flex-shrink: 0;
 }
@@ -760,7 +764,7 @@
 }
 .hmt-sliver__sep {
     font-size: 10px;
-    color: rgba(225, 205, 150, 0.55);
+    color: rgba(255, 205, 115, 0.55);
     line-height: 0.6;
     margin: 1px 0;
 }
@@ -785,7 +789,7 @@
     border: 1px solid transparent;
     border-radius: 8px;
     background: transparent;
-    color: rgba(230, 220, 180, 0.55);
+    color: rgba(255, 230, 188, 0.55);
     cursor: pointer;
     transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
                 border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
@@ -793,29 +797,29 @@
                 transform 0.18s cubic-bezier(0.32, 0.72, 0, 1);
 }
 .hmt-sliver__btn:hover {
-    color: rgba(255, 240, 210, 1);
-    border-color: rgba(225, 205, 150, 0.35);
-    background: rgba(225, 205, 150, 0.1);
+    color: rgba(255, 246, 225, 1);
+    border-color: rgba(255, 205, 115, 0.35);
+    background: rgba(255, 205, 115, 0.1);
 }
 .hmt-sliver__btn:active {
     transform: scale(0.88);
     transition-duration: 0.1s;
 }
 .hmt-sliver__btn:focus-visible {
-    outline: 2px solid rgba(225, 205, 150, 0.6);
+    outline: 2px solid rgba(255, 205, 115, 0.6);
     outline-offset: 2px;
 }
 /* Play/pause gets a subtle permanent tint — the primary action. */
 .hmt-sliver__btn--play {
     color: rgba(240, 215, 165, 0.75);
-    border-color: rgba(225, 205, 150, 0.18);
-    background: rgba(225, 205, 150, 0.05);
+    border-color: rgba(255, 205, 115, 0.18);
+    background: rgba(255, 205, 115, 0.05);
 }
 .hmt-sliver__btn--play:hover {
-    color: rgba(255, 240, 210, 1);
-    border-color: rgba(225, 205, 150, 0.45);
-    background: rgba(225, 205, 150, 0.14);
-    box-shadow: 0 0 12px rgba(225, 205, 150, 0.15);
+    color: rgba(255, 246, 225, 1);
+    border-color: rgba(255, 205, 115, 0.45);
+    background: rgba(255, 205, 115, 0.14);
+    box-shadow: 0 0 12px rgba(255, 205, 115, 0.15);
 }
 
 /* ── Breathing pulse behind, active only when timer is running.
@@ -828,8 +832,8 @@
     pointer-events: none;
     opacity: 0;
     background: radial-gradient(ellipse at 0% 50%,
-        rgba(225, 205, 150, 0.18) 0%,
-        rgba(225, 205, 150, 0) 70%);
+        rgba(255, 205, 115, 0.18) 0%,
+        rgba(255, 205, 115, 0) 70%);
     transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: -1;
 }

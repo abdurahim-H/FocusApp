@@ -11,7 +11,7 @@
 //
 // Persisted in localStorage key `fu_stats_v1`.
 
-import { signal, effect } from '../core/state.js';
+import { effect, signal } from '../core/state.js';
 
 // ============================================================================
 // Signals
@@ -59,12 +59,12 @@ function loadStats() {
         const isToday = data.lastFocusDate === today;
 
         // Sessions today — reset if not today
-        sessionsToday.value = isToday && typeof data.sessionsToday === 'number'
-            ? data.sessionsToday : 0;
+        sessionsToday.value =
+            isToday && typeof data.sessionsToday === 'number' ? data.sessionsToday : 0;
 
         // Tasks completed today — reset if not today
-        tasksCompletedToday.value = isToday && typeof data.tasksCompletedToday === 'number'
-            ? data.tasksCompletedToday : 0;
+        tasksCompletedToday.value =
+            isToday && typeof data.tasksCompletedToday === 'number' ? data.tasksCompletedToday : 0;
 
         // Streak
         if (typeof data.currentStreak === 'number') {
@@ -221,7 +221,10 @@ function setupResetFlow() {
     }
 
     function hideConfirm() {
-        if (timeout) { clearTimeout(timeout); timeout = null; }
+        if (timeout) {
+            clearTimeout(timeout);
+            timeout = null;
+        }
         confirm.classList.add('hidden');
         chips.classList.remove('hidden');
     }

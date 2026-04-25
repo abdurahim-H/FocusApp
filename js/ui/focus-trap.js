@@ -23,8 +23,9 @@ export function createFocusTrap(container) {
         trigger = triggerEl || document.activeElement;
         handler = (e) => {
             if (e.key !== 'Tab') return;
-            const focusable = Array.from(container.querySelectorAll(FOCUSABLE))
-                .filter(el => el.offsetParent !== null); // visible only
+            const focusable = Array.from(container.querySelectorAll(FOCUSABLE)).filter(
+                (el) => el.offsetParent !== null
+            ); // visible only
             if (focusable.length === 0) return;
 
             const first = focusable[0];

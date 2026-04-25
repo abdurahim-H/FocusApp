@@ -3,7 +3,7 @@
 // Floating overlay showing every keyboard shortcut. Triggered by pressing `?`
 // (the shortcut itself — `help.show`). A second `?` or Escape closes it.
 
-import { SHORTCUTS, displayKey } from './shortcuts-registry.js';
+import { displayKey, SHORTCUTS } from './shortcuts-registry.js';
 import { get as getSetting } from './store.js';
 
 let overlayEl = null;
@@ -72,7 +72,15 @@ export function isVisible() {
 }
 
 function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[c]));
+    return String(s).replace(
+        /[&<>"']/g,
+        (c) =>
+            ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+            })[c]
+    );
 }

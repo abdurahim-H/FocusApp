@@ -28,11 +28,11 @@ const STORAGE_KEY = 'fu_settings_v2';
 // ('dark', 'cosmos', 'auto') don't match the new theme ids ('blackhole') —
 // inheriting the legacy value would leave the Black Hole card unselected.
 const LEGACY_MIRROR = {
-    'timer.focusDuration':      'fu_focusLength',
+    'timer.focusDuration': 'fu_focusLength',
     'timer.shortBreakDuration': 'fu_shortBreakLength',
-    'timer.longBreakDuration':  'fu_longBreakLength',
-    'sounds.masterVolume':      'fu_soundVolume',
-    'greeting.text':            'fu_greeting',
+    'timer.longBreakDuration': 'fu_longBreakLength',
+    'sounds.masterVolume': 'fu_soundVolume',
+    'greeting.text': 'fu_greeting',
 };
 
 // ============================================================================
@@ -58,9 +58,9 @@ const DEFAULTS = buildDefaults();
 // ============================================================================
 // State
 // ============================================================================
-let state = { ...DEFAULTS };
-const subscribers = new Map();   // key → Set<fn>
-const globalSubs = new Set();    // fired on every change (key, value, old)
+const state = { ...DEFAULTS };
+const subscribers = new Map(); // key → Set<fn>
+const globalSubs = new Set(); // fired on every change (key, value, old)
 
 // ============================================================================
 // Persistence
@@ -120,7 +120,9 @@ function writeLegacyMirror(key, value) {
     if (!legacyKey) return;
     try {
         localStorage.setItem(legacyKey, String(value));
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+        /* ignore */
+    }
 }
 
 // ============================================================================
@@ -130,12 +132,14 @@ let applyHooks = null;
 function lazyLoadApplyHooks() {
     if (applyHooks !== null) return applyHooks;
     // apply.js imports from here too, so we resolve it lazily after module init.
-    import('./apply.js').then(mod => {
-        applyHooks = mod.APPLY_HOOKS || {};
-    }).catch(e => {
-        console.warn('[settings/store] apply hooks unavailable:', e);
-        applyHooks = {};
-    });
+    import('./apply.js')
+        .then((mod) => {
+            applyHooks = mod.APPLY_HOOKS || {};
+        })
+        .catch((e) => {
+            console.warn('[settings/store] apply hooks unavailable:', e);
+            applyHooks = {};
+        });
     return null;
 }
 
@@ -146,7 +150,9 @@ function runApplyHook(key, value) {
     }
     const fn = applyHooks[key];
     if (typeof fn === 'function') {
-        try { fn(value); } catch (e) {
+        try {
+            fn(value);
+        } catch (e) {
             console.warn(`[settings/apply] hook for ${key} threw:`, e);
         }
     }
@@ -205,11 +211,19 @@ function notify(key, value, old) {
     const set_ = subscribers.get(key);
     if (set_) {
         for (const fn of set_) {
-            try { fn(value, old, key); } catch (e) { console.warn(e); }
+            try {
+                fn(value, old, key);
+            } catch (e) {
+                console.warn(e);
+            }
         }
     }
     for (const fn of globalSubs) {
-        try { fn(key, value, old); } catch (e) { console.warn(e); }
+        try {
+            fn(key, value, old);
+        } catch (e) {
+            console.warn(e);
+        }
     }
 }
 

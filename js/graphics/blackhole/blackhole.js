@@ -33,6 +33,7 @@ const FRAGMENT = `
     uniform vec2 spinCS;    // (cos, sin) of disk rotation angle
     uniform vec2 photonCS;  // (cos, sin) of photon-ring phase
     uniform float flowT;    // wrapped time for fbm plasma flow
+    uniform float masterEnergy; // 0..1 — drives accretion-disk brightness
 
     #define PI 3.14159265
     #define SHADOW_R 0.085
@@ -207,6 +208,10 @@ const FRAGMENT = `
         // sin(A + B) = sin(A)*cos(B) + cos(A)*sin(B) — keeps phase bounded.
         float phi2 = atan(uv.y, uv.x) * 2.0;
         photonRing *= 0.65 + 0.35 * (sin(phi2) * photonCS.x + cos(phi2) * photonCS.y);
+        // Master volume amplifies the photon ring — the black hole reads
+        // brighter when the user has the master cranked, dimmer when it's
+        // pulled down. Caps at +50% intensity so it never feels gaudy.
+        photonRing *= 1.0 + masterEnergy * 0.5;
         color += vec3(1.0, 0.6, 0.2) * photonRing;
         alpha = max(alpha, photonRing);
 
@@ -241,33 +246,49 @@ const FRAGMENT = `
 `;
 
 export function createBlackHole(sceneRef, camera) {
-
     BABYLON.Effect.ShadersStore['blackholeVertexShader'] = VERTEX;
     BABYLON.Effect.ShadersStore['blackholeFragmentShader'] = FRAGMENT;
 
-    mesh = BABYLON.MeshBuilder.CreatePlane('blackhole', {
-        width: 2, height: 2
-    }, sceneRef);
+    mesh = BABYLON.MeshBuilder.CreatePlane(
+        'blackhole',
+        {
+            width: 2,
+            height: 2,
+        },
+        sceneRef
+    );
 
     mesh.position = new BABYLON.Vector3(0, -0.5, 0);
     mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
     mesh.scaling = new BABYLON.Vector3(28, 28, 28);
     mesh.renderingGroupId = 1;
-    mesh.isPickable = false;
+    // Pickable now — vertical drag on the black hole is the master volume
+    // control. The cosmos pointer layer reads mesh.metadata to recognise
+    // it. Sound bodies still pick before the black hole because their
+    // pickable-only filter targets `soundBodyId`.
+    mesh.isPickable = true;
+    mesh.metadata = { isBlackHole: true };
 
-    material = new BABYLON.ShaderMaterial('blackholeMat', sceneRef, {
-        vertex: 'blackhole', fragment: 'blackhole'
-    }, {
-        attributes: ['position', 'uv'],
-        uniforms: ['worldViewProjection', 'spinCS', 'photonCS', 'flowT'],
-        needAlphaBlending: true
-    });
+    material = new BABYLON.ShaderMaterial(
+        'blackholeMat',
+        sceneRef,
+        {
+            vertex: 'blackhole',
+            fragment: 'blackhole',
+        },
+        {
+            attributes: ['position', 'uv'],
+            uniforms: ['worldViewProjection', 'spinCS', 'photonCS', 'flowT', 'masterEnergy'],
+            needAlphaBlending: true,
+        }
+    );
 
     _spinCS = new BABYLON.Vector2(1, 0);
     _photonCS = new BABYLON.Vector2(1, 0);
     material.setVector2('spinCS', _spinCS);
     material.setVector2('photonCS', _photonCS);
     material.setFloat('flowT', 0);
+    material.setFloat('masterEnergy', 0);
     material.backFaceCulling = false;
     material.alphaMode = BABYLON.Engine.ALPHA_COMBINE;
     material.forceDepthWrite = false;
@@ -276,7 +297,7 @@ export function createBlackHole(sceneRef, camera) {
     return mesh;
 }
 
-export function updateBlackHole(elapsed) {
+export function updateBlackHole(elapsed, { masterEnergy = 0 } = {}) {
     if (!material) return;
     const spinA = (elapsed * 0.14) % TAU;
     const photonA = (elapsed * 0.4) % TAU;
@@ -285,11 +306,18 @@ export function updateBlackHole(elapsed) {
     material.setVector2('spinCS', _spinCS);
     material.setVector2('photonCS', _photonCS);
     material.setFloat('flowT', elapsed % FLOW_WRAP);
+    material.setFloat('masterEnergy', masterEnergy);
 }
 
 export function disposeBlackHole() {
-    if (mesh) { mesh.dispose(); mesh = null; }
-    if (material) { material.dispose(); material = null; }
+    if (mesh) {
+        mesh.dispose();
+        mesh = null;
+    }
+    if (material) {
+        material.dispose();
+        material = null;
+    }
     _spinCS = null;
     _photonCS = null;
 }

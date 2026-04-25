@@ -3,12 +3,12 @@
 // Radial march from fragment toward projected black hole center
 
 let godRayPostProcess = null;
-let lightScreenPos = { x: 0.5, y: 0.5 };
+const lightScreenPos = { x: 0.5, y: 0.5 };
 
 // Mutable shader params — modifiable at runtime via the settings store.
 // Exposure 0 effectively disables the effect while keeping the post-process
 // attached (avoids having to re-link the post chain on toggle).
-let params = { density: 0.6, decay: 0.94, exposure: 0.1 };
+const params = { density: 0.6, decay: 0.94, exposure: 0.1 };
 
 // Reusable objects — avoids creating new Vector3/Matrix/viewport every frame (GC pressure fix)
 let _bhWorldPos = null;
@@ -75,7 +75,7 @@ export function createGodRays(scene, camera) {
         scene.getEngine()
     );
 
-    godRayPostProcess.onApply = function (effect) {
+    godRayPostProcess.onApply = (effect) => {
         effect.setFloat2('lightPos', lightScreenPos.x, lightScreenPos.y);
         effect.setFloat('density', params.density);
         effect.setFloat('decay', params.decay);
@@ -140,4 +140,6 @@ export function setGodRaysEnabled(enabled, scene, camera) {
         disposeGodRays();
     }
 }
-export function isGodRaysActive() { return !!godRayPostProcess; }
+export function isGodRaysActive() {
+    return !!godRayPostProcess;
+}

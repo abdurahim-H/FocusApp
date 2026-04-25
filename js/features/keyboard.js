@@ -8,11 +8,11 @@
 // Escape always works, even when typing.
 
 import { state } from '../core/state.js';
-import { startTimer, pauseTimer, resetTimer } from '../features/timer.js';
+import { pauseTimer, resetTimer, startTimer } from '../features/timer.js';
+import { isHelpCenterOpen, toggleHelpCenter } from '../ui/help-center.js';
 import { switchMode } from '../ui/navigation.js';
+import { getShortcut, SHORTCUTS } from '../ui/settings/shortcuts-registry.js';
 import { get as settingsGet } from '../ui/settings/store.js';
-import { SHORTCUTS, getShortcut } from '../ui/settings/shortcuts-registry.js';
-import { toggleHelpCenter, isHelpCenterOpen } from '../ui/help-center.js';
 
 function isTyping(e) {
     const tag = e.target.tagName;
@@ -83,11 +83,9 @@ function handleKeydown(e) {
         switchMode('focus');
         return;
     }
-    if (k === boundKey('mode.ambient')) {
-        e.preventDefault();
-        switchMode('ambient');
-        return;
-    }
+    // mode.ambient kept as a no-op binding for back-compat with users
+    // who already have a key bound — Ambient is no longer a top-level
+    // tab; sounds live in the cosmos and are managed via the toolbar.
     if (k === boundKey('task.focus')) {
         e.preventDefault();
         if (state.mode !== 'focus') switchMode('focus');

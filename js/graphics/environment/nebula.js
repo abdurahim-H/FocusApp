@@ -204,26 +204,36 @@ const FRAGMENT = `
 `;
 
 export function createNebula(sceneRef, camera, octaves = 5) {
-
     BABYLON.Effect.ShadersStore['nebulaVertexShader'] = VERTEX;
     BABYLON.Effect.ShadersStore['nebulaFragmentShader'] = FRAGMENT;
 
-    mesh = BABYLON.MeshBuilder.CreatePlane('nebula', {
-        width: 2, height: 2
-    }, sceneRef);
+    mesh = BABYLON.MeshBuilder.CreatePlane(
+        'nebula',
+        {
+            width: 2,
+            height: 2,
+        },
+        sceneRef
+    );
 
     mesh.position = BABYLON.Vector3.Zero();
     mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
     mesh.scaling = new BABYLON.Vector3(120, 120, 120);
     mesh.renderingGroupId = 1;
 
-    material = new BABYLON.ShaderMaterial('nebulaMat', sceneRef, {
-        vertex: 'nebula', fragment: 'nebula'
-    }, {
-        attributes: ['position', 'uv'],
-        uniforms: ['worldViewProjection', 'time', 'energy'],
-        needAlphaBlending: true
-    });
+    material = new BABYLON.ShaderMaterial(
+        'nebulaMat',
+        sceneRef,
+        {
+            vertex: 'nebula',
+            fragment: 'nebula',
+        },
+        {
+            attributes: ['position', 'uv'],
+            uniforms: ['worldViewProjection', 'time', 'energy'],
+            needAlphaBlending: true,
+        }
+    );
 
     material.setFloat('time', 0);
     material.setFloat('energy', 0);
@@ -246,11 +256,20 @@ export function updateNebula(elapsed) {
 }
 
 function safeEnergy() {
-    try { return Math.max(0, Math.min(1, getMasterEnergy())); }
-    catch (_) { return 0; }
+    try {
+        return Math.max(0, Math.min(1, getMasterEnergy()));
+    } catch (_) {
+        return 0;
+    }
 }
 
 export function disposeNebula() {
-    if (mesh) { mesh.dispose(); mesh = null; }
-    if (material) { material.dispose(); material = null; }
+    if (mesh) {
+        mesh.dispose();
+        mesh = null;
+    }
+    if (material) {
+        material.dispose();
+        material = null;
+    }
 }

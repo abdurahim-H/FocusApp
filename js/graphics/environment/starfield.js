@@ -7,7 +7,7 @@ const LAYERS = {
     MID_STARS: { count: 8000, minRadius: 150, maxRadius: 400, speedMultiplier: 0.5 },
     NEAR_STARS: { count: 2000, minRadius: 80, maxRadius: 150, speedMultiplier: 1.0 },
     DUST: { count: 2000, minRadius: 20, maxRadius: 100, speedMultiplier: 2.0 },
-    DEBRIS: { count: 500, minRadius: 15, maxRadius: 60, speedMultiplier: 3.0 }
+    DEBRIS: { count: 500, minRadius: 15, maxRadius: 60, speedMultiplier: 3.0 },
 };
 
 // Scene references
@@ -93,7 +93,7 @@ export function createStarField(sceneRef, cameraRef, starMultiplier = 1.0) {
     // Scale star counts based on device capability
     const scale = (config) => ({
         ...config,
-        count: Math.round(config.count * starMultiplier)
+        count: Math.round(config.count * starMultiplier),
     });
 
     // Create each star layer
@@ -118,20 +118,24 @@ export function createStarField(sceneRef, cameraRef, starMultiplier = 1.0) {
 function createStarLayer(name, config, brightnessScale) {
     const SPS = new BABYLON.SolidParticleSystem(name, scene, {
         updatable: false,
-        isPickable: false
+        isPickable: false,
     });
 
     // Minimal geometry — stars are tiny points, 2 segments = 8 triangles per star
-    const starModel = BABYLON.MeshBuilder.CreateSphere('starModel', {
-        diameter: 1,
-        segments: 2
-    }, scene);
+    const starModel = BABYLON.MeshBuilder.CreateSphere(
+        'starModel',
+        {
+            diameter: 1,
+            segments: 2,
+        },
+        scene
+    );
 
     // Add particles
     SPS.addShape(starModel, config.count, {
         positionFunction: (particle, i) => {
             setStarParticleProperties(particle, config, brightnessScale);
-        }
+        },
     });
 
     SPS.buildMesh();
@@ -141,14 +145,19 @@ function createStarLayer(name, config, brightnessScale) {
     registerStarShaders();
 
     // GPU-based twinkling via ShaderMaterial
-    const mat = new BABYLON.ShaderMaterial(name + 'Mat', scene, {
-        vertex: 'starTwinkle',
-        fragment: 'starTwinkle'
-    }, {
-        attributes: ['position', 'normal', 'color'],
-        uniforms: ['worldViewProjection', 'time'],
-        needAlphaBlending: true
-    });
+    const mat = new BABYLON.ShaderMaterial(
+        name + 'Mat',
+        scene,
+        {
+            vertex: 'starTwinkle',
+            fragment: 'starTwinkle',
+        },
+        {
+            attributes: ['position', 'normal', 'color'],
+            uniforms: ['worldViewProjection', 'time'],
+            needAlphaBlending: true,
+        }
+    );
 
     mat.setFloat('time', 0);
     mat.backFaceCulling = false;
@@ -185,7 +194,8 @@ function setStarParticleProperties(particle, config, brightnessScale) {
     const stellar = getStellarClassification(type);
 
     // Scale based on layer depth (farther = smaller apparent size)
-    const depthScale = 1.0 - (radius - config.minRadius) / (config.maxRadius - config.minRadius) * 0.5;
+    const depthScale =
+        1.0 - ((radius - config.minRadius) / (config.maxRadius - config.minRadius)) * 0.5;
     particle.scaling = new BABYLON.Vector3(
         stellar.scale * depthScale,
         stellar.scale * depthScale,
@@ -212,49 +222,49 @@ function getStellarClassification(type) {
         // Bright blue — rare, prominent, triggers bloom
         return {
             scale: 0.7 + Math.random() * 0.5,
-            color: new BABYLON.Color4(0.9, 1.0, 2.2, 1.0)
+            color: new BABYLON.Color4(0.9, 1.0, 2.2, 1.0),
         };
     } else if (type < 0.06) {
         // Bright crisp white — visible bloom
         return {
             scale: 0.45 + Math.random() * 0.35,
-            color: new BABYLON.Color4(1.8, 1.8, 1.9, 1.0)
+            color: new BABYLON.Color4(1.8, 1.8, 1.9, 1.0),
         };
     } else if (type < 0.15) {
         // Medium white — clean bright points
         return {
             scale: 0.3 + Math.random() * 0.2,
-            color: new BABYLON.Color4(1.4, 1.4, 1.5, 1.0)
+            color: new BABYLON.Color4(1.4, 1.4, 1.5, 1.0),
         };
     } else if (type < 0.24) {
         // Cool blue-white
         return {
             scale: 0.22 + Math.random() * 0.15,
-            color: new BABYLON.Color4(1.1, 1.2, 1.5, 0.95)
+            color: new BABYLON.Color4(1.1, 1.2, 1.5, 0.95),
         };
     } else if (type < 0.37) {
         // Warm white — slight golden tint
         return {
             scale: 0.18 + Math.random() * 0.15,
-            color: new BABYLON.Color4(1.3, 1.15, 0.9, 0.95)
+            color: new BABYLON.Color4(1.3, 1.15, 0.9, 0.95),
         };
-    } else if (type < 0.50) {
+    } else if (type < 0.5) {
         // Golden — complements the ribbons
         return {
             scale: 0.14 + Math.random() * 0.12,
-            color: new BABYLON.Color4(1.15, 0.9, 0.55, 0.85)
+            color: new BABYLON.Color4(1.15, 0.9, 0.55, 0.85),
         };
     } else if (type < 0.63) {
         // Subtle warm amber
         return {
             scale: 0.1 + Math.random() * 0.1,
-            color: new BABYLON.Color4(1.0, 0.75, 0.4, 0.7)
+            color: new BABYLON.Color4(1.0, 0.75, 0.4, 0.7),
         };
     } else {
         // Faint blue-white fill — background texture
         return {
             scale: 0.07 + Math.random() * 0.08,
-            color: new BABYLON.Color4(0.6, 0.65, 0.8, 0.5)
+            color: new BABYLON.Color4(0.6, 0.65, 0.8, 0.5),
         };
     }
 }
@@ -264,7 +274,6 @@ function getStellarClassification(type) {
  * Tiny particles that catch light and create depth
  */
 function createDustParticles() {
-
     dustParticles = new BABYLON.ParticleSystem('dust', 2000, scene);
 
     // Create tiny dust texture
@@ -273,8 +282,8 @@ function createDustParticles() {
 
     // Emit from box — particles FLOW in a direction (diagonal drift)
     dustParticles.createBoxEmitter(
-        new BABYLON.Vector3(0.5, 0.2, 0.1),   // Direction 1 — diagonal flow
-        new BABYLON.Vector3(1.0, 0.4, 0.3),   // Direction 2
+        new BABYLON.Vector3(0.5, 0.2, 0.1), // Direction 1 — diagonal flow
+        new BABYLON.Vector3(1.0, 0.4, 0.3), // Direction 2
         new BABYLON.Vector3(-60, -40, -60),
         new BABYLON.Vector3(60, 40, 60)
     );
@@ -313,7 +322,6 @@ function createDustParticles() {
  * Small rocks/ice specks at mid-distance
  */
 function createDebrisParticles() {
-
     debrisParticles = new BABYLON.ParticleSystem('debris', 300, scene);
 
     // Create debris texture
@@ -370,7 +378,7 @@ function createDustTexture() {
     const ctx = texture.getContext();
 
     // Soft radial gradient
-    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
     gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
     gradient.addColorStop(0.3, 'rgba(200, 210, 255, 0.6)');
     gradient.addColorStop(0.7, 'rgba(150, 160, 200, 0.2)');
@@ -395,13 +403,13 @@ function createDebrisTexture() {
     // Irregular rocky shape
     ctx.fillStyle = '#4a4540';
     ctx.beginPath();
-    ctx.ellipse(size/2, size/2, size/2.5, size/3, Math.PI/6, 0, Math.PI * 2);
+    ctx.ellipse(size / 2, size / 2, size / 2.5, size / 3, Math.PI / 6, 0, Math.PI * 2);
     ctx.fill();
 
     // Add some variation
     ctx.fillStyle = '#5a5550';
     ctx.beginPath();
-    ctx.ellipse(size/2.2, size/2.3, size/4, size/5, -Math.PI/4, 0, Math.PI * 2);
+    ctx.ellipse(size / 2.2, size / 2.3, size / 4, size / 5, -Math.PI / 4, 0, Math.PI * 2);
     ctx.fill();
 
     texture.update();
@@ -420,7 +428,7 @@ const SHADER_TIME_WRAP = 4 * 60 * 60;
 export function updateStarField(elapsed) {
     // Update twinkling time uniform on all star materials
     const t = elapsed % SHADER_TIME_WRAP;
-    starMaterials.forEach(mat => mat.setFloat('time', t));
+    starMaterials.forEach((mat) => mat.setFloat('time', t));
 
     // Rotate each layer at different speeds for parallax
     if (starLayers.far && starLayers.far.mesh) {
@@ -460,7 +468,7 @@ export function getStarField() {
  * Dispose all starfield resources
  */
 export function disposeStarField() {
-    Object.values(starLayers).forEach(layer => {
+    Object.values(starLayers).forEach((layer) => {
         if (layer && layer.dispose) {
             layer.dispose();
         }

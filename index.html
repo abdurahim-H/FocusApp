@@ -100,11 +100,11 @@
     <!-- Help Center Button -->
     <button class="help-trigger" id="helpBtn" aria-label="Help">?</button>
 
-    <!-- Main Navigation -->
+    <!-- Main Navigation — Ambient tab removed; sounds live in the cosmos
+         and are managed via the Cosmos Toolbar (top-left of viewport). -->
     <div class="nav-buttons">
         <button class="nav-btn active" data-mode="home">Home</button>
         <button class="nav-btn" data-mode="focus">Focus</button>
-        <button class="nav-btn" data-mode="ambient">Ambient</button>
     </div>
 
     <!-- Main Content Container -->
@@ -119,26 +119,10 @@
 
         </div>
 
-    <!-- Mini Ambient Player — pairs with mini-timer on the home tab -->
-    <div class="home-mini-ambient hidden" id="homeMiniAmbient" role="status" aria-label="Ambient player">
-        <div class="hma-head">
-            <span class="hma-icon" aria-hidden="true">♪</span>
-            <span class="hma-name" id="hmaName">Ambient</span>
-        </div>
-        <div class="hma-body">
-            <button class="hma-btn hma-btn--play-pause" id="hmaPlayPauseBtn"
-                    type="button" aria-label="Pause ambient mix">
-                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
-                    <rect x="3" y="2" width="3.5" height="12" rx="1"/>
-                    <rect x="9.5" y="2" width="3.5" height="12" rx="1"/>
-                </svg>
-            </button>
-            <input type="range" class="hma-volume" id="hmaVolume"
-                   min="0" max="100" step="1" value="50"
-                   aria-label="Master volume">
-            <span class="hma-pct" id="hmaPct">50%</span>
-        </div>
-    </div>
+    <!-- (home-mini-ambient widget removed — the cosmos itself is the
+         "now playing" surface. Active sounds appear as celestial bodies
+         orbiting the black hole; user-input flows through the cosmos
+         pointer layer, not a floating chip.) -->
 
     <!-- Mini Focus Timer — OUTSIDE #home so it's viewport-positioned, draggable -->
     <div class="home-mini-timer hidden" id="homeMiniTimer" role="status" aria-label="Focus timer">
@@ -227,10 +211,13 @@
             <span class="hmt-sliver__sep" aria-hidden="true">·</span>
             <span class="hmt-sliver__ss" id="hmtSliverSS">00</span>
         </div>
-        <!-- Play/Pause + Reset controls stacked at the bottom -->
+        <!-- Play/Pause + Skip + Reset controls stacked at the bottom -->
         <div class="hmt-sliver__controls">
             <button class="hmt-sliver__btn hmt-sliver__btn--play" id="hmtSliverPlayPauseBtn" aria-label="Pause timer" type="button" data-state="">
                 <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>
+            </button>
+            <button class="hmt-sliver__btn hmt-sliver__btn--skip" id="hmtSliverSkipBtn" aria-label="Skip session" type="button">
+                <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M4 2.5a.5.5 0 0 1 .79-.407l5.5 4a.5.5 0 0 1 0 .814l-5.5 4A.5.5 0 0 1 4 10.5v-8zM11.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-1 0v-9a.5.5 0 0 1 .5-.5z"/></svg>
             </button>
             <button class="hmt-sliver__btn hmt-sliver__btn--reset" id="hmtSliverResetBtn" aria-label="Reset timer" type="button">
                 <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -341,133 +328,118 @@
             </div>
         </div>
 
-        <!-- Ambient Mode — mixing deck -->
-        <div class="mode" id="ambient">
-            <div class="ambient-content deck">
-
-                <!-- Saved mixes strip -->
-                <section class="mixes-rail" aria-label="Saved mixes">
-                    <div class="mixes-rail__track" id="mixesRail"></div>
-                </section>
-
-                <!-- Active track cards -->
-                <section class="deck-tracks" id="deckTracks" aria-label="Active sounds"></section>
-
-                <!-- Empty state when deck is quiet -->
-                <div class="deck-empty" id="deckEmpty" aria-live="polite">
-                    <div class="deck-empty__star" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
-                            <path d="M12 0 C12 8, 16 12, 24 12 C16 12, 12 16, 12 24 C12 16, 8 12, 0 12 C8 12, 12 8, 12 0Z"/>
-                        </svg>
-                    </div>
-                    <p class="deck-empty__title">Your deck is quiet</p>
-                    <p class="deck-empty__subtitle">Tap <strong>+ Add sound</strong> to begin a mix, or pick one from above.</p>
-                </div>
-
-                <!-- Deck controls bar -->
-                <footer class="deck-controls" aria-label="Deck controls">
-                    <button class="deck-btn deck-btn--primary" id="deckAddSoundBtn" aria-label="Add a sound to the deck">
-                        <span class="deck-btn__icon" aria-hidden="true">+</span>
-                        <span class="deck-btn__label">Add sound</span>
-                    </button>
-                    <button class="deck-btn" id="deckSaveMixBtn" aria-label="Save current mix">
-                        <span class="deck-btn__icon" aria-hidden="true">♡</span>
-                        <span class="deck-btn__label">Save mix</span>
-                    </button>
-                    <button class="deck-btn" id="deckSleepBtn" aria-label="Set sleep timer">
-                        <span class="deck-btn__icon" aria-hidden="true">☾</span>
-                        <span class="deck-btn__label">Sleep</span>
-                    </button>
-                    <button class="deck-btn" id="deckRandomBtn" aria-label="Surprise me — random mix">
-                        <span class="deck-btn__icon" aria-hidden="true">✧</span>
-                        <span class="deck-btn__label">Surprise me</span>
-                    </button>
-                    <button class="deck-btn" id="deckFullscreenBtn" aria-label="Enter immersive mode">
-                        <span class="deck-btn__icon" aria-hidden="true">⛶</span>
-                        <span class="deck-btn__label">Immerse</span>
-                    </button>
-                    <button class="deck-btn deck-btn--danger" id="deckStopAllBtn" aria-label="Stop all sounds">
-                        <span class="deck-btn__icon" aria-hidden="true">■</span>
-                        <span class="deck-btn__label">Stop all</span>
-                    </button>
-
-                    <!-- Master volume -->
-                    <div class="deck-master" role="group" aria-label="Master volume">
-                        <span class="deck-master__label">Master</span>
-                        <input class="deck-master__slider" id="deckMasterVolume"
-                               type="range" min="0" max="100" step="1"
-                               aria-label="Master volume">
-                        <span class="deck-master__value" id="deckMasterValue">50%</span>
-                    </div>
-                </footer>
-            </div>
-
-            <!-- Library drawer (slides in) -->
-            <aside class="library-drawer" id="libraryDrawer"
-                   role="dialog" aria-modal="true" aria-label="Sound library" aria-hidden="true">
-                <div class="library-drawer__scrim" data-drawer-close></div>
-                <div class="library-drawer__panel">
-                    <header class="library-drawer__header">
-                        <h2 class="library-drawer__title">Sound Library</h2>
-                        <button class="library-drawer__close" data-drawer-close aria-label="Close library">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </header>
-                    <div class="library-drawer__search">
-                        <span class="library-drawer__search-icon" aria-hidden="true">⌕</span>
-                        <input type="search" id="libraryDrawerSearch"
-                               class="library-drawer__input"
-                               placeholder="Search sounds"
-                               aria-label="Search sounds"
-                               autocomplete="off" spellcheck="false">
-                    </div>
-                    <div class="library-drawer__body" id="libraryDrawerBody"></div>
-                    <p class="library-drawer__footnote">More sounds arriving soon. Nudge us: <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>.</p>
-                </div>
-            </aside>
-
-            <!-- Save-mix popover -->
-            <div class="save-mix-popover" id="saveMixPopover" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Save mix">
-                <div class="save-mix-popover__scrim" data-popover-close></div>
-                <form class="save-mix-popover__card" id="saveMixForm">
-                    <h3 class="save-mix-popover__title">Save this mix</h3>
-                    <label class="save-mix-popover__label" for="saveMixName">Mix name</label>
-                    <input type="text" id="saveMixName" class="save-mix-popover__input"
-                           placeholder="My perfect rain"
-                           maxlength="40" autocomplete="off" required>
-                    <div class="save-mix-popover__actions">
-                        <button type="button" class="deck-btn" data-popover-close>Cancel</button>
-                        <button type="submit" class="deck-btn deck-btn--primary">Save</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Sleep-timer popover -->
-            <div class="sleep-popover" id="sleepPopover" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Sleep timer">
-                <div class="sleep-popover__scrim" data-popover-close></div>
-                <div class="sleep-popover__card">
-                    <h3 class="sleep-popover__title">Sleep timer</h3>
-                    <p class="sleep-popover__hint">Fades everything out when time's up.</p>
-                    <div class="sleep-popover__options" role="group" aria-label="Sleep duration">
-                        <button class="sleep-chip" data-minutes="15">15 min</button>
-                        <button class="sleep-chip" data-minutes="30">30 min</button>
-                        <button class="sleep-chip" data-minutes="60">1 hour</button>
-                        <button class="sleep-chip" data-minutes="120">2 hours</button>
-                    </div>
-                    <button class="deck-btn deck-btn--danger" id="sleepCancelBtn" hidden>Cancel timer</button>
-                    <button class="deck-btn" data-popover-close>Close</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Progress Indicator -->
         <div class="progress-3d" id="progress3d" style="display: none;">
             <span class="progress-label">Universe Energy:</span>
             <span class="progress-value" id="progressValue">0%</span>
         </div>
 
-    </div><!-- end .container — settings must be OUTSIDE because .container
-              has `contain: layout` which traps position:fixed elements -->
+    </div><!-- end .container — anything position:fixed below MUST live
+              outside this element. .container has `contain: layout style
+              paint` which makes it the containing block for fixed
+              descendants and clips paint to its box. Putting fixed
+              overlays inside makes them non-clickable / clipped. -->
+
+    <!-- Cosmos Toolbar — bottom-centre floating control surface. Outside
+         .container so it isn't trapped by `contain: layout`. -->
+    <div class="cosmos-toolbar" id="cosmosToolbar" role="group" aria-label="Cosmos controls">
+        <button class="cosmos-tool" id="deckAddSoundBtn" aria-label="Open sound library" title="Open sound library">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="10" cy="10" r="6"/>
+                <line x1="10" y1="7" x2="10" y2="13"/>
+                <line x1="7" y1="10" x2="13" y2="10"/>
+            </svg>
+        </button>
+        <button class="cosmos-tool" id="deckSaveMixBtn" aria-label="Save constellation" title="Save constellation">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M10 3 L11.5 8 L17 8 L12.5 11.5 L14 17 L10 13.5 L6 17 L7.5 11.5 L3 8 L8.5 8 Z"/>
+            </svg>
+        </button>
+        <button class="cosmos-tool" id="deckSleepBtn" aria-label="Sleep timer" title="Sleep timer">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 12.5 a6 6 0 0 1 -8.5 -8.5 a7 7 0 1 0 8.5 8.5z"/>
+            </svg>
+        </button>
+        <button class="cosmos-tool" id="deckRandomBtn" aria-label="Surprise constellation" title="Surprise constellation">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 4 L7 4 L17 16 L13 16 Z" fill="currentColor" fill-opacity="0.18"/>
+                <path d="M13 4 L17 4 L17 8"/>
+                <path d="M17 4 L13 8"/>
+                <path d="M3 16 L7 12"/>
+            </svg>
+        </button>
+        <button class="cosmos-tool" id="deckFullscreenBtn" aria-label="Immersive mode" title="Immersive mode">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="3 7 3 3 7 3"/>
+                <polyline points="13 3 17 3 17 7"/>
+                <polyline points="17 13 17 17 13 17"/>
+                <polyline points="7 17 3 17 3 13"/>
+            </svg>
+        </button>
+        <button class="cosmos-tool cosmos-tool--danger" id="deckStopAllBtn" aria-label="Clear sky" title="Clear sky — stop all sounds">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="10" cy="10" r="6"/>
+                <line x1="6" y1="10" x2="14" y2="10"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Library drawer — outside .container so it overlays the viewport. -->
+    <aside class="library-drawer" id="libraryDrawer"
+           role="dialog" aria-modal="true" aria-label="Sound library" aria-hidden="true">
+        <div class="library-drawer__scrim" data-drawer-close></div>
+        <div class="library-drawer__panel">
+            <header class="library-drawer__header">
+                <h2 class="library-drawer__title">Sound Library</h2>
+                <button class="library-drawer__close" data-drawer-close aria-label="Close library">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </header>
+            <div class="library-drawer__search">
+                <span class="library-drawer__search-icon" aria-hidden="true">⌕</span>
+                <input type="search" id="libraryDrawerSearch"
+                       class="library-drawer__input"
+                       placeholder="Search sounds"
+                       aria-label="Search sounds"
+                       autocomplete="off" spellcheck="false">
+            </div>
+            <div class="library-drawer__body" id="libraryDrawerBody"></div>
+            <p class="library-drawer__footnote">More sounds arriving soon. Nudge us: <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>.</p>
+        </div>
+    </aside>
+
+    <!-- Save-constellation popover — outside .container. -->
+    <div class="save-mix-popover" id="saveMixPopover" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Save constellation">
+        <div class="save-mix-popover__scrim" data-popover-close></div>
+        <form class="save-mix-popover__card" id="saveMixForm">
+            <h3 class="save-mix-popover__title">Save this constellation</h3>
+            <label class="save-mix-popover__label" for="saveMixName">Constellation name</label>
+            <input type="text" id="saveMixName" class="save-mix-popover__input"
+                   placeholder="Rainy library"
+                   maxlength="40" autocomplete="off" required>
+            <div class="save-mix-popover__actions">
+                <button type="button" class="deck-btn" data-popover-close>Cancel</button>
+                <button type="submit" class="deck-btn deck-btn--primary">Save</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sleep-timer popover — outside .container. -->
+    <div class="sleep-popover" id="sleepPopover" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Sleep timer">
+        <div class="sleep-popover__scrim" data-popover-close></div>
+        <div class="sleep-popover__card">
+            <h3 class="sleep-popover__title">Sleep timer</h3>
+            <p class="sleep-popover__hint">Fades everything out when time's up.</p>
+            <div class="sleep-popover__options" role="group" aria-label="Sleep duration">
+                <button class="sleep-chip" data-minutes="15">15 min</button>
+                <button class="sleep-chip" data-minutes="30">30 min</button>
+                <button class="sleep-chip" data-minutes="60">1 hour</button>
+                <button class="sleep-chip" data-minutes="120">2 hours</button>
+            </div>
+            <button class="deck-btn deck-btn--danger" id="sleepCancelBtn" hidden>Cancel timer</button>
+            <button class="deck-btn" data-popover-close>Close</button>
+        </div>
+    </div>
 
     <!-- Settings click-outside catcher (invisible) -->
     <div class="settings-modal-overlay" id="settingsModalOverlay"></div>

@@ -8,7 +8,7 @@
 //
 // Loaded from esm.sh as a single static import so we never duplicate the module.
 
-import { animate, spring, stagger, inView } from 'https://esm.sh/motion@10.18.0';
+import { animate, inView, spring, stagger } from 'https://esm.sh/motion@10.18.0';
 
 // ============================================================================
 // Reduced motion detection — system pref + user override
@@ -21,7 +21,9 @@ reducedMotionQuery.addEventListener('change', (e) => {
 
 // User override via Settings > Shortcuts & Motion > Reduce motion.
 let forceReduced = false;
-export function setForceReducedMotion(v) { forceReduced = !!v; }
+export function setForceReducedMotion(v) {
+    forceReduced = !!v;
+}
 
 /** True if motion should be reduced — either the system or the user asked. */
 export function isReducedMotion() {
@@ -40,7 +42,7 @@ export function setSpeedMultiplier(v) {
 // ============================================================================
 export const SPRING = {
     // Snappy, used for button presses + small UI feedback
-    snappy:   { stiffness: 600, damping: 28, mass: 0.6 },
+    snappy: { stiffness: 600, damping: 28, mass: 0.6 },
     // Default for most UI motion (tasks entering, mode transitions)
     standard: { stiffness: 380, damping: 30, mass: 0.9 },
     // Slow, expressive — for big hero moments (modal open, achievement)
@@ -62,13 +64,14 @@ export function anim(target, keyframes, options = {}) {
         // Apply final keyframe instantly so the visual end state is correct
         const els = normalizeTargets(target);
         const finalFrame = extractFinalFrame(keyframes);
-        els.forEach(el => Object.assign(el.style, finalFrame));
+        els.forEach((el) => Object.assign(el.style, finalFrame));
         return { finished: Promise.resolve(), cancel: () => {}, stop: () => {} };
     }
     // Respect the speed multiplier by dividing explicit durations.
-    const opts = (speedMultiplier !== 1 && typeof options.duration === 'number')
-        ? { ...options, duration: options.duration / speedMultiplier }
-        : options;
+    const opts =
+        speedMultiplier !== 1 && typeof options.duration === 'number'
+            ? { ...options, duration: options.duration / speedMultiplier }
+            : options;
     return animate(target, keyframes, opts);
 }
 
@@ -84,7 +87,7 @@ export function springAnim(target, keyframes, presetName = 'standard', overrides
 }
 
 // Re-export raw Motion primitives for advanced use
-export { animate, spring, stagger, inView };
+export { animate, inView, spring, stagger };
 
 // ============================================================================
 // Helpers

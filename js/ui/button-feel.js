@@ -11,7 +11,7 @@
 // keyboard activation). The CSS rule sets a scale of 0.97; we override with JS
 // for pointer events because JS gives us the spring physics.
 
-import { springAnim, anim, isReducedMotion } from '../core/motion.js';
+import { anim, isReducedMotion, springAnim } from '../core/motion.js';
 
 const PRESSED_TRANSFORM = 'scale(0.94)';
 const RELEASED_TRANSFORM = 'scale(1)';
@@ -34,14 +34,20 @@ function onPointerDown(e) {
     if (pressed.has(btn)) return;
     pressed.add(btn);
 
-    springAnim(btn, {
-        transform: [getCurrentTransform(btn), PRESSED_TRANSFORM],
-    }, 'snappy', { duration: 0.18 });
+    springAnim(
+        btn,
+        {
+            transform: [getCurrentTransform(btn), PRESSED_TRANSFORM],
+        },
+        'snappy',
+        { duration: 0.18 }
+    );
 }
 
 function onPointerUp(e) {
     // For pointerleave we get the element being left; for up/cancel we use target
-    const btn = (e.target && e.target.closest) ? e.target.closest('.liquid-glass-btn, .sound-card') : null;
+    const btn =
+        e.target && e.target.closest ? e.target.closest('.liquid-glass-btn, .sound-card') : null;
     if (!btn) {
         // Sweep any pressed buttons (handles pointerleave on parent)
         document.querySelectorAll('.liquid-glass-btn, .sound-card').forEach(release);
@@ -53,9 +59,14 @@ function onPointerUp(e) {
 function release(btn) {
     if (!pressed.has(btn)) return;
     pressed.delete(btn);
-    springAnim(btn, {
-        transform: [PRESSED_TRANSFORM, RELEASED_TRANSFORM],
-    }, 'standard', { duration: 0.32 });
+    springAnim(
+        btn,
+        {
+            transform: [PRESSED_TRANSFORM, RELEASED_TRANSFORM],
+        },
+        'standard',
+        { duration: 0.32 }
+    );
 }
 
 function getCurrentTransform(el) {

@@ -142,7 +142,7 @@ body[data-theme="light"] h3 {
 
 body[data-theme="cosmos"] h1 {
     background: none;
-    -webkit-text-fill-color: #F5E8D0;
+    -webkit-text-fill-color: #FFF1D2;
     animation: none;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 30px rgba(240, 200, 140, 0.25), 0 0 60px rgba(240, 200, 140, 0.1);
     filter: none;
@@ -151,7 +151,7 @@ body[data-theme="cosmos"] h1 {
 /* Dark theme — champagne & silver with dark halo */
 body[data-theme="dark"] h1 {
     background: none;
-    -webkit-text-fill-color: #F5E8D0;
+    -webkit-text-fill-color: #FFF1D2;
     animation: none;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 30px rgba(240, 200, 140, 0.25), 0 0 60px rgba(240, 200, 140, 0.1);
     filter: none;

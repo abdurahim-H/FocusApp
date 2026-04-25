@@ -17,7 +17,7 @@ const GRAVITY = 18;
 
 let canvas = null;
 let ctx = null;
-let particles = [];
+const particles = [];
 let animating = false;
 let lastTime = 0;
 
@@ -47,8 +47,10 @@ function ensureCanvas() {
     if (rect.width === 0 || rect.height === 0) return false;
 
     const dpr = window.devicePixelRatio || 1;
-    if (canvas.width !== Math.round(rect.width * dpr) ||
-        canvas.height !== Math.round(rect.height * dpr)) {
+    if (
+        canvas.width !== Math.round(rect.width * dpr) ||
+        canvas.height !== Math.round(rect.height * dpr)
+    ) {
         canvas.width = Math.round(rect.width * dpr);
         canvas.height = Math.round(rect.height * dpr);
         ctx = canvas.getContext('2d');
@@ -133,9 +135,7 @@ function tick(time) {
         p.y += p.vy * dt;
 
         const progress = 1 - p.life / p.maxLife;
-        const alpha = progress < 0.15
-            ? progress / 0.15
-            : 1 - (progress - 0.15) / 0.85;
+        const alpha = progress < 0.15 ? progress / 0.15 : 1 - (progress - 0.15) / 0.85;
 
         ctx.save();
         ctx.globalAlpha = alpha * 0.7;

@@ -10,15 +10,15 @@ let notificationPermission = 'default';
  */
 export function initNotifications() {
     console.log('🔔 Initializing notification system...');
-    
+
     if ('Notification' in window) {
         notificationPermission = Notification.permission;
         console.log('📱 Current notification permission:', notificationPermission);
-        
+
         if (notificationPermission === 'default') {
             console.log('⚠️ Permission is default, will request on user interaction');
         }
-        
+
         console.log('✅ Notification system initialized, permission:', notificationPermission);
     } else {
         console.warn('⚠️ Browser notifications not supported');
@@ -37,7 +37,7 @@ export async function requestNotificationPermission() {
     try {
         const permission = await Notification.requestPermission();
         notificationPermission = permission;
-        
+
         if (permission === 'granted') {
             console.log('✅ Notification permission granted');
             // Show a test notification to confirm it works
@@ -60,12 +60,12 @@ function showTestNotification() {
     if (notificationPermission === 'granted') {
         try {
             new Notification('Cosmic Focus', {
-                body: 'Notifications are now enabled! You\'ll be notified when sessions complete.',
+                body: "Notifications are now enabled! You'll be notified when sessions complete.",
                 icon: '/favicon.ico',
                 badge: '/favicon.ico',
                 tag: 'test-notification',
                 silent: false,
-                requireInteraction: false
+                requireInteraction: false,
             });
         } catch (error) {
             console.error('Failed to create test notification:', error);
@@ -77,24 +77,27 @@ function showTestNotification() {
  * Show notification when focus session completes
  */
 export function notifyFocusComplete(breakDuration, isLongBreak = false) {
-    console.log('🔔 Attempting to show focus complete notification', { 
-        breakDuration, 
-        isLongBreak, 
-        permission: notificationPermission 
+    console.log('🔔 Attempting to show focus complete notification', {
+        breakDuration,
+        isLongBreak,
+        permission: notificationPermission,
     });
-    
+
     if (notificationPermission !== 'granted') {
-        console.warn('❌ Cannot show notification - permission not granted:', notificationPermission);
+        console.warn(
+            '❌ Cannot show notification - permission not granted:',
+            notificationPermission
+        );
         return;
     }
 
     const title = 'Focus Session Complete! 🎯';
-    const body = isLongBreak 
+    const body = isLongBreak
         ? `Great work! Time for a ${breakDuration}-minute long break. You've earned it!`
         : `Well done! Take a ${breakDuration}-minute break to recharge.`;
-    
+
     console.log('✅ Creating notification:', { title, body });
-    
+
     try {
         const notification = new Notification(title, {
             body: body,
@@ -103,11 +106,11 @@ export function notifyFocusComplete(breakDuration, isLongBreak = false) {
             tag: 'focus-complete',
             silent: false,
             requireInteraction: true,
-            timestamp: Date.now()
+            timestamp: Date.now(),
         });
 
         // Handle notification clicks
-        notification.onclick = function() {
+        notification.onclick = function () {
             console.log('📱 Focus complete notification clicked');
             window.focus(); // Bring the app window to front
             this.close();
@@ -117,7 +120,7 @@ export function notifyFocusComplete(breakDuration, isLongBreak = false) {
         setTimeout(() => {
             notification.close();
         }, 15000);
-        
+
         return notification;
     } catch (error) {
         console.error('Failed to create focus complete notification:', error);
@@ -136,7 +139,7 @@ export function notifyBreakComplete(focusDuration) {
 
     const title = 'Break Complete! ⚡';
     const body = `Break time is over. Ready to start a ${focusDuration}-minute focus session?`;
-    
+
     try {
         const notification = new Notification(title, {
             body: body,
@@ -145,11 +148,11 @@ export function notifyBreakComplete(focusDuration) {
             tag: 'break-complete',
             silent: false,
             requireInteraction: true,
-            timestamp: Date.now()
+            timestamp: Date.now(),
         });
 
         // Handle notification clicks
-        notification.onclick = function() {
+        notification.onclick = function () {
             console.log('📱 Break complete notification clicked');
             window.focus(); // Bring the app window to front
             this.close();
@@ -159,7 +162,7 @@ export function notifyBreakComplete(focusDuration) {
         setTimeout(() => {
             notification.close();
         }, 15000);
-        
+
         return notification;
     } catch (error) {
         console.error('Failed to create break complete notification:', error);
@@ -178,7 +181,7 @@ export function notifyPomodoroComplete(longBreakDuration) {
 
     const title = 'Pomodoro Cycle Complete! 🏆';
     const body = `Amazing! You've completed 4 focus sessions. Take a well-deserved ${longBreakDuration}-minute long break.`;
-    
+
     try {
         const notification = new Notification(title, {
             body: body,
@@ -188,11 +191,11 @@ export function notifyPomodoroComplete(longBreakDuration) {
             silent: false,
             requireInteraction: true,
             vibrate: [200, 100, 200], // Vibration pattern for mobile devices
-            timestamp: Date.now()
+            timestamp: Date.now(),
         });
 
         // Handle notification clicks
-        notification.onclick = function() {
+        notification.onclick = function () {
             console.log('📱 Pomodoro complete notification clicked');
             window.focus();
             this.close();
@@ -202,7 +205,7 @@ export function notifyPomodoroComplete(longBreakDuration) {
         setTimeout(() => {
             notification.close();
         }, 20000);
-        
+
         return notification;
     } catch (error) {
         console.error('Failed to create pomodoro complete notification:', error);
@@ -218,7 +221,7 @@ export function notifyMeditationMilestone(minutes) {
 
     const title = 'Meditation Milestone! 🧘';
     const body = `You've been meditating for ${minutes} minutes. Keep going!`;
-    
+
     try {
         const notification = new Notification(title, {
             body: body,
@@ -227,14 +230,14 @@ export function notifyMeditationMilestone(minutes) {
             tag: 'meditation-milestone',
             silent: true, // Silent for meditation
             requireInteraction: false,
-            timestamp: Date.now()
+            timestamp: Date.now(),
         });
 
         // Auto-close quickly for meditation
         setTimeout(() => {
             notification.close();
         }, 3000);
-        
+
         return notification;
     } catch (error) {
         console.error('Failed to create meditation milestone notification:', error);
@@ -270,12 +273,12 @@ export function showNotificationPrompt() {
         const shouldAsk = confirm(
             'Enable desktop notifications to get alerts when your focus sessions and breaks complete, even when this tab is not active?'
         );
-        
+
         if (shouldAsk) {
             return requestNotificationPermission();
         }
     }
-    
+
     return Promise.resolve(notificationPermission === 'granted');
 }
 
@@ -284,7 +287,7 @@ export function showNotificationPrompt() {
  */
 export function testNotification() {
     console.log('🧪 Testing notification...');
-    
+
     if (notificationPermission === 'granted') {
         try {
             const notification = new Notification('Test Notification 🧪', {
@@ -293,14 +296,14 @@ export function testNotification() {
                 badge: '/favicon.ico',
                 tag: 'test',
                 silent: false,
-                timestamp: Date.now()
+                timestamp: Date.now(),
             });
-            
-            notification.onclick = function() {
+
+            notification.onclick = function () {
                 console.log('Test notification clicked');
                 this.close();
             };
-            
+
             setTimeout(() => notification.close(), 5000);
             console.log('✅ Test notification sent');
             return notification;

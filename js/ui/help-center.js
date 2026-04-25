@@ -8,8 +8,8 @@
 //   - The ? keyboard shortcut
 //   - Programmatic: openHelpCenter() / closeHelpCenter()
 
-import { HELP_CATEGORIES } from './help-content.js';
 import { createFocusTrap } from './focus-trap.js';
+import { HELP_CATEGORIES } from './help-content.js';
 
 let overlay = null;
 let isOpen = false;
@@ -47,11 +47,17 @@ export function closeHelpCenter() {
     const detail = overlay.querySelector('.hc-detail');
     const backBtn = overlay.querySelector('.hc-back');
     if (grid) grid.style.display = '';
-    if (detail) { detail.style.display = 'none'; detail.innerHTML = ''; }
+    if (detail) {
+        detail.style.display = 'none';
+        detail.innerHTML = '';
+    }
     if (backBtn) backBtn.style.display = 'none';
     // Clear search
     const input = overlay.querySelector('.hc-search__input');
-    if (input) { input.value = ''; applySearch(''); }
+    if (input) {
+        input.value = '';
+        applySearch('');
+    }
 }
 
 export function toggleHelpCenter() {
@@ -149,7 +155,7 @@ function ensureDOM() {
 // ============================================================================
 
 function showCategory(catId) {
-    const cat = HELP_CATEGORIES.find(c => c.id === catId);
+    const cat = HELP_CATEGORIES.find((c) => c.id === catId);
     if (!cat) return;
     activeCategory = catId;
 
@@ -221,7 +227,7 @@ function applySearch(query) {
     for (const cat of HELP_CATEGORIES) {
         for (const entry of cat.entries) {
             const haystack = (entry.q + ' ' + stripHtml(entry.a) + ' ' + cat.label).toLowerCase();
-            const matches = tokens.every(t => haystack.includes(t));
+            const matches = tokens.every((t) => haystack.includes(t));
             if (matches) {
                 const el = createEntryEl(entry, cat.label, cat.iconSvg);
                 searchResults.appendChild(el);

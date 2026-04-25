@@ -6,28 +6,48 @@
  */
 
 import { isReducedMotion } from '../core/motion.js';
-import * as scene3d from '../graphics/scene/scene-manager.js';
-import * as timer from '../features/timer.js';
-import * as tasks from '../features/tasks.js';
-import * as sounds from '../features/sounds.js';
-import * as navigation from '../ui/navigation.js';
-import * as uiEffects from '../ui/ui-effects.js';
-import * as cleanup from '../utils/cleanup.js';
-import * as buttonFeel from '../ui/button-feel.js';
 import * as keyboard from '../features/keyboard.js';
-import * as statistics from '../features/statistics.js';
 import * as notificationBanner from '../features/notification-banner.js';
-import * as settings from '../ui/settings.js';
 import * as soundMixer from '../features/sound-mixer.js';
-import * as timerParticles from '../ui/timer-particles.js';
+import * as sounds from '../features/sounds.js';
+import * as statistics from '../features/statistics.js';
+import * as tasks from '../features/tasks.js';
+import * as timer from '../features/timer.js';
+import * as scene3d from '../graphics/scene/scene-manager.js';
+import * as ambientUI from '../ui/ambient-ui.js';
+import * as buttonFeel from '../ui/button-feel.js';
+import * as cosmosA11y from '../ui/cosmos-a11y.js';
+import * as cosmosEqRing from '../ui/cosmos-eq-ring.js';
+import * as cosmosPointer from '../ui/cosmos-pointer.js';
 import * as helpCenter from '../ui/help-center.js';
 import * as homeMiniTimer from '../ui/home-mini-timer.js';
-import * as ambientUI from '../ui/ambient-ui.js';
+import * as navigation from '../ui/navigation.js';
+import * as settings from '../ui/settings.js';
+import * as timerParticles from '../ui/timer-particles.js';
+import * as uiEffects from '../ui/ui-effects.js';
+import * as cleanup from '../utils/cleanup.js';
 
 const modules = {
-    scene3d, timer, tasks, sounds, navigation, uiEffects, cleanup,
-    buttonFeel, keyboard, statistics, notificationBanner, settings,
-    soundMixer, timerParticles, helpCenter, homeMiniTimer, ambientUI,
+    scene3d,
+    timer,
+    tasks,
+    sounds,
+    navigation,
+    uiEffects,
+    cleanup,
+    buttonFeel,
+    keyboard,
+    statistics,
+    notificationBanner,
+    settings,
+    soundMixer,
+    timerParticles,
+    helpCenter,
+    homeMiniTimer,
+    ambientUI,
+    cosmosPointer,
+    cosmosEqRing,
+    cosmosA11y,
 };
 
 /**
@@ -77,41 +97,46 @@ export async function initApp() {
                     setTimeout(() => setProgress(75), 600);
                 }
 
-                loadedModules.scene3d.init3D().then(success => {
-                    if (!success) {
-                        console.error('3D scene initialization returned false');
-                    }
-
-                    // Scene is ready — complete the progress arc and hide screen
-                    setProgress(100);
-                    if (container) {
-                        container.classList.add('loaded');
-                    }
-
-                    if (isReducedMotion()) {
-                        if (loadingScreen) {
-                            loadingScreen.style.display = 'none';
+                loadedModules.scene3d
+                    .init3D()
+                    .then((success) => {
+                        if (!success) {
+                            console.error('3D scene initialization returned false');
                         }
-                    } else {
-                        requestAnimationFrame(() => {
+
+                        // Scene is ready — complete the progress arc and hide screen
+                        setProgress(100);
+                        if (container) {
+                            container.classList.add('loaded');
+                        }
+
+                        if (isReducedMotion()) {
+                            if (loadingScreen) {
+                                loadingScreen.style.display = 'none';
+                            }
+                        } else {
+                            requestAnimationFrame(() => {
+                                setTimeout(() => {
+                                    if (loadingScreen) {
+                                        loadingScreen.classList.add('hide');
+                                        setTimeout(() => {
+                                            loadingScreen.style.display = 'none';
+                                        }, 300);
+                                    }
+                                }, 200);
+                            });
+                        }
+                    })
+                    .catch((err) => {
+                        console.error('3D initialization error:', err);
+                        // Still hide loading screen on error
+                        if (loadingScreen) {
+                            loadingScreen.classList.add('hide');
                             setTimeout(() => {
-                                if (loadingScreen) {
-                                    loadingScreen.classList.add('hide');
-                                    setTimeout(() => {
-                                        loadingScreen.style.display = 'none';
-                                    }, 300);
-                                }
-                            }, 200);
-                        });
-                    }
-                }).catch(err => {
-                    console.error('3D initialization error:', err);
-                    // Still hide loading screen on error
-                    if (loadingScreen) {
-                        loadingScreen.classList.add('hide');
-                        setTimeout(() => { loadingScreen.style.display = 'none'; }, 300);
-                    }
-                });
+                                loadingScreen.style.display = 'none';
+                            }, 300);
+                        }
+                    });
             } else {
                 console.error('scene3d module or init3D function not found');
             }
@@ -144,6 +169,24 @@ export async function initApp() {
         // save-mix and sleep popovers, and the reactive state bindings.
         if (loadedModules.ambientUI?.initAmbientUI) {
             loadedModules.ambientUI.initAmbientUI();
+        }
+
+        // Cosmos sound system — pointer/keyboard layer that drives the
+        // celestial bodies in the Babylon scene. Spawns/dismisses bodies
+        // on play/stop, handles drag-for-volume/pan, click-to-select for
+        // EQ ring. Initialises after scene3d so the canvas exists.
+        if (loadedModules.cosmosPointer?.initCosmosPointer) {
+            loadedModules.cosmosPointer.initCosmosPointer({
+                onSelectionChange: (id) => {
+                    document.dispatchEvent(new CustomEvent('cosmos-selection', { detail: { id } }));
+                },
+            });
+        }
+        if (loadedModules.cosmosEqRing?.initCosmosEqRing) {
+            loadedModules.cosmosEqRing.initCosmosEqRing();
+        }
+        if (loadedModules.cosmosA11y?.initCosmosA11y) {
+            loadedModules.cosmosA11y.initCosmosA11y();
         }
 
         // Sound-mixer module still initialised so its CRUD / activateMix()
@@ -203,7 +246,9 @@ export async function initApp() {
         }
 
         // T3.5: onboarding tour — auto-show on first visit
-        import('../ui/settings/onboarding.js').then(mod => mod.maybeShowFirstVisitTour()).catch(() => {});
+        import('../ui/settings/onboarding.js')
+            .then((mod) => mod.maybeShowFirstVisitTour())
+            .catch(() => {});
 
         // Start core timers and displays
         if (loadedModules.timer?.updateUniverseStats) {
@@ -236,21 +281,30 @@ export async function initApp() {
 function setupTimerControls(loadedModules) {
     // Timer controls - use modules to access timer functions
     if (loadedModules.timer) {
-        document.getElementById('startBtn').addEventListener('click', loadedModules.timer.startTimer);
-        document.getElementById('pauseBtn').addEventListener('click', loadedModules.timer.pauseTimer);
-        document.getElementById('resetBtn').addEventListener('click', loadedModules.timer.resetTimer);
-        document.getElementById('skipBreakBtn').addEventListener('click', loadedModules.timer.skipBreak);
-        document.getElementById('skipFocusBtn').addEventListener('click', loadedModules.timer.skipFocus);
+        document
+            .getElementById('startBtn')
+            .addEventListener('click', loadedModules.timer.startTimer);
+        document
+            .getElementById('pauseBtn')
+            .addEventListener('click', loadedModules.timer.pauseTimer);
+        document
+            .getElementById('resetBtn')
+            .addEventListener('click', loadedModules.timer.resetTimer);
+        document
+            .getElementById('skipBreakBtn')
+            .addEventListener('click', loadedModules.timer.skipBreak);
+        document
+            .getElementById('skipFocusBtn')
+            .addEventListener('click', loadedModules.timer.skipFocus);
 
         // Enhanced reset session button with click animation
         document.getElementById('resetSessionBtn').addEventListener('click', function () {
-            const btn = this;
-            btn.classList.add('clicked');
+            this.classList.add('clicked');
             loadedModules.timer.resetSession();
 
             // Remove animation class after animation completes
             setTimeout(() => {
-                btn.classList.remove('clicked');
+                this.classList.remove('clicked');
             }, 600);
         });
     }
@@ -259,7 +313,9 @@ function setupTimerControls(loadedModules) {
 function setupTaskControls(loadedModules) {
     // Task controls — Add button + Enter key. Render & delete are reactive (see tasks.js).
     if (loadedModules.tasks) {
-        document.getElementById('addTaskBtn').addEventListener('click', loadedModules.tasks.addTask);
+        document
+            .getElementById('addTaskBtn')
+            .addEventListener('click', loadedModules.tasks.addTask);
         document.getElementById('taskInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') loadedModules.tasks.addTask();
         });
@@ -281,7 +337,7 @@ document.addEventListener('keydown', (event) => {
 });
 
 // Initialize the app with performance optimizations
-(async function () {
+(async () => {
     try {
         // Wait for fonts to load before showing content to prevent layout shift
         if (document.fonts && document.fonts.ready) {

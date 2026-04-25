@@ -19,23 +19,23 @@
     gap: var(--space-1);
     padding: var(--space-3) var(--space-2);
     border-radius: 16px;
-    border: 1px solid rgba(225, 205, 150, 0.15);
-    background: rgba(225, 205, 150, 0.04);
+    border: 1px solid rgba(255, 205, 115, 0.15);
+    background: rgba(255, 205, 115, 0.04);
     color: rgba(246, 235, 210, 0.8);
     cursor: pointer;
     transition: all 0.25s ease;
 }
 
 .preset-card:hover {
-    background: rgba(225, 205, 150, 0.12);
-    border-color: rgba(225, 205, 150, 0.4);
-    box-shadow: 0 4px 20px rgba(225, 205, 150, 0.15);
+    background: rgba(255, 205, 115, 0.12);
+    border-color: rgba(255, 205, 115, 0.4);
+    box-shadow: 0 4px 20px rgba(255, 205, 115, 0.15);
 }
 
 .preset-card.active {
-    background: rgba(225, 205, 150, 0.18);
-    border-color: rgba(225, 205, 150, 0.55);
-    box-shadow: 0 4px 24px rgba(225, 205, 150, 0.25);
+    background: rgba(255, 205, 115, 0.18);
+    border-color: rgba(255, 205, 115, 0.55);
+    box-shadow: 0 4px 24px rgba(255, 205, 115, 0.25);
 }
 
 .preset-icons {
@@ -57,7 +57,7 @@
     width: 60px;
     height: 3px;
     border-radius: 2px;
-    background: rgba(225, 205, 150, 0.2);
+    background: rgba(255, 205, 115, 0.2);
     outline: none;
     cursor: pointer;
     margin: 0 var(--space-1);
@@ -68,9 +68,9 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: rgba(225, 205, 150, 0.8);
+    background: rgba(255, 205, 115, 0.8);
     border: 1.5px solid rgba(255, 226, 168, 0.5);
     cursor: pointer;
-    box-shadow: 0 0 6px rgba(225, 205, 150, 0.4);
+    box-shadow: 0 0 6px rgba(255, 205, 115, 0.4);
 }
 

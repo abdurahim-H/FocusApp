@@ -12,15 +12,15 @@
 //   - Bind the `?` key to the shortcut cheatsheet
 //   - Start schedules watcher
 
-import { renderSettings, startLiveReadonlyTicker } from './settings/renderer.js';
-import * as store from './settings/store.js';
-import { APPLY_HOOKS } from './settings/apply.js';
-import * as cheatsheet from './settings/cheatsheet.js';
-import { initSchedules } from './settings/schedules.js';
-import { SHORTCUTS } from './settings/shortcuts-registry.js';
-import { readShareLinkFromURL } from './settings/data-io.js';
 import { isReducedMotion } from '../core/motion.js';
 import { createFocusTrap } from './focus-trap.js';
+import { APPLY_HOOKS } from './settings/apply.js';
+import * as cheatsheet from './settings/cheatsheet.js';
+import { readShareLinkFromURL } from './settings/data-io.js';
+import { renderSettings, startLiveReadonlyTicker } from './settings/renderer.js';
+import { initSchedules } from './settings/schedules.js';
+import { SHORTCUTS } from './settings/shortcuts-registry.js';
+import * as store from './settings/store.js';
 
 let rendered = false;
 let panelVisible = false;
@@ -135,7 +135,11 @@ export function loadSettings() {
     for (const key of Object.keys(all)) {
         const fn = APPLY_HOOKS[key];
         if (typeof fn === 'function') {
-            try { fn(all[key]); } catch (e) { /* tolerate */ }
+            try {
+                fn(all[key]);
+            } catch (e) {
+                /* tolerate */
+            }
         }
     }
 
@@ -168,11 +172,15 @@ function setupProximityGlow(btn) {
         rafId = null;
     }
 
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        if (!rafId) rafId = requestAnimationFrame(updateGlow);
-    }, { passive: true });
+    document.addEventListener(
+        'mousemove',
+        (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            if (!rafId) rafId = requestAnimationFrame(updateGlow);
+        },
+        { passive: true }
+    );
 
     document.addEventListener('mouseleave', () => {
         mouseX = -9999;

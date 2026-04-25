@@ -9,8 +9,8 @@
 // schedule; a `lastFired` marker keeps it from re-triggering if the minute
 // overlaps the 5-second sweep.
 
-import { get as getSetting, subscribe as subscribeStore } from './store.js';
 import * as nav from '../navigation.js';
+import { get as getSetting, subscribe as subscribeStore } from './store.js';
 
 const STORE_KEY = 'timer.schedules';
 const SWEEP_MS = 5000;
@@ -19,7 +19,7 @@ const lastFired = new Map(); // id → 'YYYY-MM-DD HH:MM'
 let interval = null;
 
 function nowKey(d) {
-    const pad = n => String(n).padStart(2, '0');
+    const pad = (n) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
@@ -37,7 +37,9 @@ async function fire(action) {
                 nav?.switchMode?.('focus');
                 break;
             case 'ambient.switch':
-                nav?.switchMode?.('ambient');
+                // Ambient is no longer a top-level tab; legacy schedules
+                // route to the focus tab where the cosmos toolbar lives.
+                nav?.switchMode?.('focus');
                 break;
             case 'home.switch':
                 nav?.switchMode?.('home');

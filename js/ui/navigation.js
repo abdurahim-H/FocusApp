@@ -7,9 +7,9 @@
 // The Phase 1 CSS visibility+transform approach in style.css is sufficient.
 // Phase 4: brief squash/stretch on the nav pill when changing tabs.
 
+import { isReducedMotion } from '../core/motion.js';
 import { state } from '../core/state.js';
 import { updateDateTime } from '../features/timer.js';
-import { isReducedMotion } from '../core/motion.js';
 
 export function switchMode(mode) {
     if (!mode) {
@@ -22,7 +22,7 @@ export function switchMode(mode) {
 
     // Update nav buttons (CSS handles the sliding pill via :has())
     const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(btn => {
+    navButtons.forEach((btn) => {
         const isActive = btn.dataset.mode === mode;
         btn.classList.toggle('active', isActive);
     });
@@ -34,7 +34,7 @@ export function switchMode(mode) {
 
     // Update mode panels — CSS in style.css handles the visibility transition
     const modeElements = document.querySelectorAll('.mode');
-    modeElements.forEach(modeEl => {
+    modeElements.forEach((modeEl) => {
         const isActive = modeEl.id === mode;
         modeEl.classList.toggle('active', isActive);
     });
@@ -48,9 +48,8 @@ export function switchMode(mode) {
     if (previousMode !== mode) {
         setTimeout(() => {
             const targets = {
-                home:    '#home h1',
-                focus:   '#timerDisplay',
-                ambient: '#browseSoundsBtn',
+                home: '#home h1',
+                focus: '#timerDisplay',
             };
             const el = document.querySelector(targets[mode]);
             if (el) {
@@ -89,7 +88,7 @@ export function setupNavigation() {
         btn.parentNode.replaceChild(newBtn, btn);
 
         // Add click listener to the button itself
-        newBtn.addEventListener('click', function(e) {
+        newBtn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             switchMode(this.dataset.mode);
@@ -97,8 +96,8 @@ export function setupNavigation() {
 
         // Also add listener to any child elements (like span.btn-text)
         const childElements = newBtn.querySelectorAll('*');
-        childElements.forEach(child => {
-            child.addEventListener('click', function(e) {
+        childElements.forEach((child) => {
+            child.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 switchMode(newBtn.dataset.mode);
@@ -107,7 +106,7 @@ export function setupNavigation() {
     });
 
     // Also add a document-level listener as backup
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', (e) => {
         // Check if click was on a navigation element
         const navBtn = e.target.closest('.nav-btn');
         if (navBtn && navBtn.dataset.mode) {

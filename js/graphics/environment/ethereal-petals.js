@@ -20,7 +20,7 @@ export function createEtherealPetals(sceneRef) {
 
     // Emit from a very large box encompassing the scene
     particleSystem.createBoxEmitter(
-        new BABYLON.Vector3(0.1, -0.3, 0.05),    // Gentle downward-diagonal drift
+        new BABYLON.Vector3(0.1, -0.3, 0.05), // Gentle downward-diagonal drift
         new BABYLON.Vector3(0.3, -0.1, 0.15),
         new BABYLON.Vector3(-120, -60, -120),
         new BABYLON.Vector3(120, 80, 120)
@@ -47,8 +47,8 @@ export function createEtherealPetals(sceneRef) {
 
     // Color — cool violet/pink with some warm gold edge highlights
     // Mix of colors for variety
-    particleSystem.color1 = new BABYLON.Color4(0.65, 0.45, 0.85, 0.35);  // Soft violet
-    particleSystem.color2 = new BABYLON.Color4(0.85, 0.5, 0.7, 0.25);    // Dusty rose
+    particleSystem.color1 = new BABYLON.Color4(0.65, 0.45, 0.85, 0.35); // Soft violet
+    particleSystem.color2 = new BABYLON.Color4(0.85, 0.5, 0.7, 0.25); // Dusty rose
     particleSystem.colorDead = new BABYLON.Color4(0.5, 0.35, 0.6, 0);
 
     // Size fades over life — appears, drifts, vanishes

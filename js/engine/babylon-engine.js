@@ -13,7 +13,7 @@ const CONFIG = {
     preserveDrawingBuffer: false,
     stencil: false,
     adaptToDeviceRatio: true,
-    powerPreference: 'high-performance'
+    powerPreference: 'high-performance',
 };
 
 /**
@@ -25,7 +25,6 @@ export async function initEngine() {
     if (isInitialized && engine) {
         return { engine, canvas, isWebGPU };
     }
-
 
     // Get or create canvas
     const container = document.getElementById('scene-container');
@@ -54,21 +53,20 @@ export async function initEngine() {
 
     container.appendChild(canvas);
 
-
-    // NOTE: WebGPU is disabled because Babylon.js DefaultRenderingPipeline 
+    // NOTE: WebGPU is disabled because Babylon.js DefaultRenderingPipeline
     // has compatibility issues with WebGPU's rgba16float texture format.
     // This causes black screen when bloom/DOF are enabled.
     // WebGL2 provides reliable post-processing and is still high performance.
     // TODO: Re-enable WebGPU once Babylon.js fixes pipeline compatibility
     const useWebGPU = false; // Disabled for now
 
-    if (useWebGPU && await checkWebGPUSupport()) {
+    if (useWebGPU && (await checkWebGPUSupport())) {
         try {
             engine = new BABYLON.WebGPUEngine(canvas, {
                 antialias: CONFIG.antialias,
                 stencil: CONFIG.stencil,
                 adaptToDeviceRatio: CONFIG.adaptToDeviceRatio,
-                powerPreference: CONFIG.powerPreference
+                powerPreference: CONFIG.powerPreference,
             });
 
             await engine.initAsync();
@@ -81,7 +79,6 @@ export async function initEngine() {
 
     // Fall back to WebGL2 if WebGPU failed or unavailable
     if (!engine) {
-
         // Ensure canvas has valid dimensions
         if (canvas.width === 0 || canvas.height === 0) {
             canvas.width = window.innerWidth;
@@ -95,7 +92,7 @@ export async function initEngine() {
                 adaptToDeviceRatio: CONFIG.adaptToDeviceRatio,
                 powerPreference: CONFIG.powerPreference,
                 failIfMajorPerformanceCaveat: false,
-                doNotHandleContextLost: false
+                doNotHandleContextLost: false,
             });
             isWebGPU = false;
         } catch (webglError) {
@@ -107,12 +104,14 @@ export async function initEngine() {
                     preserveDrawingBuffer: CONFIG.preserveDrawingBuffer,
                     stencil: CONFIG.stencil,
                     disableWebGL2Support: true,
-                    failIfMajorPerformanceCaveat: false
+                    failIfMajorPerformanceCaveat: false,
                 });
                 isWebGPU = false;
             } catch (webgl1Error) {
                 console.error('❌ All WebGL initialization failed:', webgl1Error);
-                throw new Error('WebGL initialization failed. Please enable hardware acceleration in your browser settings.');
+                throw new Error(
+                    'WebGL initialization failed. Please enable hardware acceleration in your browser settings.'
+                );
             }
         }
     }
@@ -212,4 +211,4 @@ export function disposeEngine() {
 }
 
 // Export for external access
-export { engine, canvas, isWebGPU };
+export { canvas, engine, isWebGPU };

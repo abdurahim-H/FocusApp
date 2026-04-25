@@ -2,7 +2,7 @@
 //
 // Export / import / reset / about helpers used by the Data & About section.
 
-import { exportJSON, importJSON, snapshot, resetAll, resetSection } from './store.js';
+import { exportJSON, importJSON, resetAll, resetSection, snapshot } from './store.js';
 
 const APP_VERSION = '5.3.0';
 
@@ -19,13 +19,13 @@ export async function downloadStatsCSV() {
     const stats = await import('../../features/statistics.js');
     const rows = [
         ['metric', 'value'],
-        ['sessionsToday',     stats.sessionsToday.value],
+        ['sessionsToday', stats.sessionsToday.value],
         ['totalFocusSeconds', stats.totalFocusSeconds.value],
         ['tasksCompletedToday', stats.tasksCompletedToday.value],
-        ['currentStreak',     stats.currentStreak.value],
-        ['lastFocusDate',     stats.lastFocusDate.value],
+        ['currentStreak', stats.currentStreak.value],
+        ['lastFocusDate', stats.lastFocusDate.value],
     ];
-    const csv = rows.map(r => r.map(csvCell).join(',')).join('\n');
+    const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     triggerDownload(blob, `cosmic-focus-stats-${timestamp()}.csv`);
 }
@@ -69,7 +69,10 @@ export function pickAndImport() {
         input.accept = 'application/json,.json';
         input.addEventListener('change', () => {
             const f = input.files?.[0];
-            if (!f) { resolve(false); return; }
+            if (!f) {
+                resolve(false);
+                return;
+            }
             const reader = new FileReader();
             reader.onload = () => {
                 const ok = importJSON(String(reader.result || ''));
@@ -122,21 +125,23 @@ export function getAboutInfo() {
         browser: detectBrowser(),
     };
     // Scene-manager exposes the device profile once init3D has run.
-    import('../../graphics/scene/scene-manager.js').then(sm => {
+    import('../../graphics/scene/scene-manager.js').then((sm) => {
         try {
             const profile = sm.getDeviceProfile?.();
             if (profile?.tier) info.gpuTier = profile.tier;
-        } catch (e) { /* ignore */ }
+        } catch (e) {
+            /* ignore */
+        }
     });
     return info;
 }
 
 function detectBrowser() {
     const ua = navigator.userAgent;
-    if (/Edg\//.test(ua))     return 'Edge';
-    if (/Chrome\//.test(ua))  return 'Chrome';
+    if (/Edg\//.test(ua)) return 'Edge';
+    if (/Chrome\//.test(ua)) return 'Chrome';
     if (/Firefox\//.test(ua)) return 'Firefox';
-    if (/Safari\//.test(ua))  return 'Safari';
+    if (/Safari\//.test(ua)) return 'Safari';
     return 'Unknown';
 }
 
@@ -151,8 +156,8 @@ function csvCell(v) {
 
 function timestamp() {
     const d = new Date();
-    const pad = n => String(n).padStart(2, '0');
-    return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
 }
 
 function triggerDownload(blob, filename) {

@@ -5,7 +5,7 @@
 // Shows only when Notification.permission === 'default' (not yet asked)
 // and user hasn't dismissed it this session.
 
-import { mode, effect } from '../core/state.js';
+import { effect, mode } from '../core/state.js';
 import { requestNotificationPermission } from '../utils/notifications.js';
 
 let dismissed = false;

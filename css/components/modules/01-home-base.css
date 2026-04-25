@@ -26,8 +26,8 @@
 .home-content h1 {
     font-size: clamp(2.5em, 8vw, 5em);
     font-weight: 500;
-    color: #F5E8D0;
-    -webkit-text-fill-color: #F5E8D0;
+    color: #FFF1D2;
+    -webkit-text-fill-color: #FFF1D2;
     margin-bottom: var(--space-5);
     line-height: 1.05;
     /* Phase 3: tighter tracking on display text reads more confident */

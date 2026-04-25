@@ -71,9 +71,13 @@ export const GRAPHICS_PRESETS = {
  */
 export function tierToPreset(tier) {
     switch (tier) {
-        case 'low':    return 'low';
-        case 'medium': return 'medium';
-        case 'high':   return 'high';
-        default:       return 'high';
+        case 'low':
+            return 'low';
+        case 'medium':
+            return 'medium';
+        case 'high':
+            return 'high';
+        default:
+            return 'high';
     }
 }

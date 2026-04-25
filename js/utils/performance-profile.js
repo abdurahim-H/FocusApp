@@ -12,7 +12,7 @@ export function detectDeviceProfile() {
         shaderOctaves: 5,
         enableDOF: true,
         bloomKernel: 64,
-        glowSize: 512
+        glowSize: 512,
     };
 
     const isMobile = window.innerWidth < 768 || 'ontouchstart' in window;
@@ -32,11 +32,17 @@ export function detectDeviceProfile() {
                 const rendererLower = renderer.toLowerCase();
 
                 // Low-end mobile GPUs
-                if (/mali-4|mali-t[67]|adreno\s?[2-3]|powervr\s?sgx|intel\s?hd\s?[234]/i.test(rendererLower)) {
+                if (
+                    /mali-4|mali-t[67]|adreno\s?[2-3]|powervr\s?sgx|intel\s?hd\s?[234]/i.test(
+                        rendererLower
+                    )
+                ) {
                     gpuTier = 'low';
                 }
                 // Mid-range
-                else if (/mali-g[5-7]|adreno\s?[4-5]|intel\s?(iris|uhd)|apple\s?gpu/i.test(rendererLower)) {
+                else if (
+                    /mali-g[5-7]|adreno\s?[4-5]|intel\s?(iris|uhd)|apple\s?gpu/i.test(rendererLower)
+                ) {
                     gpuTier = 'medium';
                 }
                 // High-end
@@ -103,14 +109,14 @@ export function detectDeviceProfile() {
 // @param {number}   maxLevel        inclusive cap on currentLevel (default 5)
 
 export function createFPSWatchdog(stats, onLevelChange, maxLevel = 5) {
-    const LOW_FPS          = 22;    // averaged fps below this counts as "bad"
-    const GOOD_FPS         = 32;    // averaged fps above this counts as "good"
-    const WARMUP_FRAMES    = 600;   // 10s: GPU / JIT / texture upload settle
-    const DEGRADE_TRIGGER  = 1800;  // ~30s sustained bad before stepping down
-    const RECOVER_TRIGGER  = 600;   // ~10s sustained good before stepping up
-    const PROBE_INTERVAL   = 60 * 60 * 5;   // 5 min @ 60fps = 18000 frames
-    const PROBE_DURATION   = 60 * 20;       // 20s @ 60fps = 1200 frames
-    const PROBE_REQUIRE_FPS = LOW_FPS;      // probe passes if fps stays above this
+    const LOW_FPS = 22; // averaged fps below this counts as "bad"
+    const GOOD_FPS = 32; // averaged fps above this counts as "good"
+    const WARMUP_FRAMES = 600; // 10s: GPU / JIT / texture upload settle
+    const DEGRADE_TRIGGER = 1800; // ~30s sustained bad before stepping down
+    const RECOVER_TRIGGER = 600; // ~10s sustained good before stepping up
+    const PROBE_INTERVAL = 60 * 60 * 5; // 5 min @ 60fps = 18000 frames
+    const PROBE_DURATION = 60 * 20; // 20s @ 60fps = 1200 frames
+    const PROBE_REQUIRE_FPS = LOW_FPS; // probe passes if fps stays above this
 
     let lowFPSFrames = 0;
     let goodFPSFrames = 0;
@@ -126,8 +132,11 @@ export function createFPSWatchdog(stats, onLevelChange, maxLevel = 5) {
         if (clamped === currentLevel) return;
         const prev = currentLevel;
         currentLevel = clamped;
-        try { onLevelChange(prev, clamped); }
-        catch (e) { console.error('[watchdog] onLevelChange threw', e); }
+        try {
+            onLevelChange(prev, clamped);
+        } catch (e) {
+            console.error('[watchdog] onLevelChange threw', e);
+        }
     }
 
     function check() {
@@ -150,7 +159,9 @@ export function createFPSWatchdog(stats, onLevelChange, maxLevel = 5) {
             probeFrames++;
             if (stats.fps < PROBE_REQUIRE_FPS) {
                 // Probe failed — device can't actually hold full quality. Snap back.
-                console.info(`[watchdog] 🔍 Probe failed (fps ${stats.fps}), reverting to level ${probeSavedLevel}`);
+                console.info(
+                    `[watchdog] 🔍 Probe failed (fps ${stats.fps}), reverting to level ${probeSavedLevel}`
+                );
                 probing = false;
                 lowFPSFrames = 0;
                 goodFPSFrames = 0;
@@ -159,7 +170,9 @@ export function createFPSWatchdog(stats, onLevelChange, maxLevel = 5) {
             }
             if (probeFrames >= PROBE_DURATION) {
                 // Probe succeeded — full quality is sustainable again.
-                console.info(`[watchdog] ✅ Probe succeeded (fps ${stats.fps}), staying at full quality`);
+                console.info(
+                    `[watchdog] ✅ Probe succeeded (fps ${stats.fps}), staying at full quality`
+                );
                 probing = false;
                 lowFPSFrames = 0;
                 goodFPSFrames = 0;
@@ -183,12 +196,16 @@ export function createFPSWatchdog(stats, onLevelChange, maxLevel = 5) {
         if (lowFPSFrames > DEGRADE_TRIGGER && currentLevel < maxLevel) {
             lowFPSFrames = 0;
             goodFPSFrames = 0;
-            console.warn(`[watchdog] ⚠️ Sustained low FPS (${stats.fps}), degrading ${currentLevel} → ${currentLevel + 1}`);
+            console.warn(
+                `[watchdog] ⚠️ Sustained low FPS (${stats.fps}), degrading ${currentLevel} → ${currentLevel + 1}`
+            );
             setLevel(currentLevel + 1);
         } else if (goodFPSFrames > RECOVER_TRIGGER && currentLevel > 0) {
             lowFPSFrames = 0;
             goodFPSFrames = 0;
-            console.info(`[watchdog] ✅ FPS recovered (${stats.fps}), restoring ${currentLevel} → ${currentLevel - 1}`);
+            console.info(
+                `[watchdog] ✅ FPS recovered (${stats.fps}), restoring ${currentLevel} → ${currentLevel - 1}`
+            );
             setLevel(currentLevel - 1);
         }
     }

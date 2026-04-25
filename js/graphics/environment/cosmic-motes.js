@@ -4,7 +4,7 @@
 
 let motes = [];
 let scene = null;
-let moteMaterial = null;
+const moteMaterial = null;
 
 const MOTE_COUNT = 30;
 
@@ -64,19 +64,32 @@ const MOTE_FRAGMENT = `
 function createMotePath(seed) {
     // Each mote follows a unique 3D Lissajous-like curve
     const freqX = 0.015 + seed * 0.02;
-    const freqY = 0.01 + (seed * 3.7 % 1.0) * 0.015;
-    const freqZ = 0.012 + (seed * 7.3 % 1.0) * 0.018;
+    const freqY = 0.01 + ((seed * 3.7) % 1.0) * 0.015;
+    const freqZ = 0.012 + ((seed * 7.3) % 1.0) * 0.018;
     const phaseX = seed * 6.28;
     const phaseY = seed * 4.15;
     const phaseZ = seed * 2.73;
     const ampX = 30 + seed * 50;
-    const ampY = 20 + (seed * 2.3 % 1.0) * 40;
-    const ampZ = 25 + (seed * 5.1 % 1.0) * 45;
+    const ampY = 20 + ((seed * 2.3) % 1.0) * 40;
+    const ampZ = 25 + ((seed * 5.1) % 1.0) * 45;
     const centerX = (seed - 0.5) * 60;
-    const centerY = ((seed * 3.1 % 1.0) - 0.5) * 40;
-    const centerZ = ((seed * 7.7 % 1.0) - 0.5) * 60;
+    const centerY = (((seed * 3.1) % 1.0) - 0.5) * 40;
+    const centerZ = (((seed * 7.7) % 1.0) - 0.5) * 60;
 
-    return { freqX, freqY, freqZ, phaseX, phaseY, phaseZ, ampX, ampY, ampZ, centerX, centerY, centerZ };
+    return {
+        freqX,
+        freqY,
+        freqZ,
+        phaseX,
+        phaseY,
+        phaseZ,
+        ampX,
+        ampY,
+        ampZ,
+        centerX,
+        centerY,
+        centerZ,
+    };
 }
 
 /**
@@ -95,9 +108,11 @@ export function createCosmicMotes(sceneRef) {
         // Size — most are tiny, a few slightly larger
         const sizeClass = Math.random();
         let size;
-        if (sizeClass < 0.1) size = 2.0 + Math.random() * 1.5;       // Few larger
-        else if (sizeClass < 0.35) size = 1.0 + Math.random() * 1.0;  // Medium
-        else size = 0.4 + Math.random() * 0.6;                         // Most tiny
+        if (sizeClass < 0.1)
+            size = 2.0 + Math.random() * 1.5; // Few larger
+        else if (sizeClass < 0.35)
+            size = 1.0 + Math.random() * 1.0; // Medium
+        else size = 0.4 + Math.random() * 0.6; // Most tiny
 
         // Color — mix of warm gold and cool blue
         let color;
@@ -120,21 +135,32 @@ export function createCosmicMotes(sceneRef) {
         const lifecycleDuration = 20 + Math.random() * 40; // 20-60 seconds per cycle
         const lifecycleOffset = Math.random() * lifecycleDuration;
 
-        const plane = BABYLON.MeshBuilder.CreatePlane('mote_' + i, {
-            width: size, height: size
-        }, scene);
+        const plane = BABYLON.MeshBuilder.CreatePlane(
+            'mote_' + i,
+            {
+                width: size,
+                height: size,
+            },
+            scene
+        );
 
         plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
         plane.renderingGroupId = 0;
         plane.isPickable = false;
 
-        const mat = new BABYLON.ShaderMaterial('moteMat_' + i, scene, {
-            vertex: 'cosmicMote', fragment: 'cosmicMote'
-        }, {
-            attributes: ['position', 'uv'],
-            uniforms: ['worldViewProjection', 'time', 'seed', 'life', 'moteColor'],
-            needAlphaBlending: true
-        });
+        const mat = new BABYLON.ShaderMaterial(
+            'moteMat_' + i,
+            scene,
+            {
+                vertex: 'cosmicMote',
+                fragment: 'cosmicMote',
+            },
+            {
+                attributes: ['position', 'uv'],
+                uniforms: ['worldViewProjection', 'time', 'seed', 'life', 'moteColor'],
+                needAlphaBlending: true,
+            }
+        );
 
         mat.setFloat('time', 0);
         mat.setFloat('seed', seed);
@@ -153,10 +179,9 @@ export function createCosmicMotes(sceneRef) {
             seed,
             lifecycleDuration,
             lifecycleOffset,
-            speed: 0.8 + Math.random() * 0.6
+            speed: 0.8 + Math.random() * 0.6,
         });
     }
-
 }
 
 // Wrap time for the shader pulse — long sessions would otherwise lose sin()

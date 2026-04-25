@@ -70,13 +70,14 @@ export function createAnamorphicStreak(scene, camera) {
         scene.getEngine()
     );
 
-    streakPostProcess.onApply = function (effect) {
+    streakPostProcess.onApply = (effect) => {
         const engine = scene.getEngine();
-        effect.setFloat2('texelSize',
+        effect.setFloat2(
+            'texelSize',
             1.0 / engine.getRenderWidth(),
             1.0 / engine.getRenderHeight()
         );
-        effect.setFloat('threshold', 1.2);       // Only very bright elements (accretion disk core, star glows)
+        effect.setFloat('threshold', 1.2); // Only very bright elements (accretion disk core, star glows)
         effect.setFloat('intensity', 0.15);
         effect.setFloat('streakSpread', 0.003);
     };
@@ -100,4 +101,6 @@ export function setAnamorphicStreakEnabled(enabled, scene, camera) {
         disposeAnamorphicStreak();
     }
 }
-export function isAnamorphicStreakActive() { return !!streakPostProcess; }
+export function isAnamorphicStreakActive() {
+    return !!streakPostProcess;
+}

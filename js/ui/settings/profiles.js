@@ -4,12 +4,12 @@
 // replays every setting through the store (firing apply hooks), so the timer,
 // scene, sounds all react in sync.
 
-import { snapshot, restore, set as setSetting, get as getSetting } from './store.js';
+import { get as getSetting, restore, set as setSetting, snapshot } from './store.js';
 
 const KEY = 'fu_profiles_v1';
 
 const BUILTIN = {
-    'default': {
+    default: {
         id: 'default',
         name: 'Default',
         builtin: true,
@@ -17,7 +17,7 @@ const BUILTIN = {
     },
 };
 
-let state = {
+const state = {
     active: 'default',
     profiles: { ...BUILTIN },
 };
@@ -52,7 +52,11 @@ function persist() {
 
 function notify() {
     for (const fn of subscribers) {
-        try { fn(state); } catch (e) { console.warn(e); }
+        try {
+            fn(state);
+        } catch (e) {
+            console.warn(e);
+        }
     }
 }
 
@@ -128,7 +132,11 @@ export function overwriteWithCurrent(id) {
 }
 
 function slugify(s) {
-    return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+    return String(s || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 40);
 }
 
 // ============================================================================

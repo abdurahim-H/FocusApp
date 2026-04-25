@@ -116,7 +116,7 @@ export function createStarGlows(sceneRef, camera) {
             size = 2 + Math.random() * 2;
             brightness = 0.35 + Math.random() * 0.25;
             // Warm white
-            color = new BABYLON.Vector3(1.0, 0.90, 0.78);
+            color = new BABYLON.Vector3(1.0, 0.9, 0.78);
         } else {
             // Subtle golden glow
             size = 1.5 + Math.random() * 2;
@@ -126,9 +126,14 @@ export function createStarGlows(sceneRef, camera) {
         }
 
         // Create billboard plane
-        const plane = BABYLON.MeshBuilder.CreatePlane('heroStar_' + i, {
-            width: size, height: size
-        }, scene);
+        const plane = BABYLON.MeshBuilder.CreatePlane(
+            'heroStar_' + i,
+            {
+                width: size,
+                height: size,
+            },
+            scene
+        );
 
         plane.position = new BABYLON.Vector3(x, y, z);
         plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
@@ -136,13 +141,25 @@ export function createStarGlows(sceneRef, camera) {
         plane.isPickable = false;
 
         // Individual material per star (unique seed/brightness/color)
-        const mat = new BABYLON.ShaderMaterial('starGlowMat_' + i, scene, {
-            vertex: 'starGlow', fragment: 'starGlow'
-        }, {
-            attributes: ['position', 'uv'],
-            uniforms: ['worldViewProjection', 'time', 'starSeed', 'starBrightness', 'starColor'],
-            needAlphaBlending: true
-        });
+        const mat = new BABYLON.ShaderMaterial(
+            'starGlowMat_' + i,
+            scene,
+            {
+                vertex: 'starGlow',
+                fragment: 'starGlow',
+            },
+            {
+                attributes: ['position', 'uv'],
+                uniforms: [
+                    'worldViewProjection',
+                    'time',
+                    'starSeed',
+                    'starBrightness',
+                    'starColor',
+                ],
+                needAlphaBlending: true,
+            }
+        );
 
         mat.setFloat('time', 0);
         mat.setFloat('starSeed', seed);
@@ -156,7 +173,6 @@ export function createStarGlows(sceneRef, camera) {
 
         glowMeshes.push({ mesh: plane, material: mat });
     }
-
 }
 
 // Wrap time — unbounded growth degrades sin() phase precision and makes

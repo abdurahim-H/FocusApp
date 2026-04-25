@@ -1,29 +1,61 @@
 // scene-manager.js - Cinematic Scene Orchestrator for Babylon.js
 // Coordinates all graphics modules: starfield, camera, post-processing
 
-import { initEngine, getEngine, disposeEngine, isUsingWebGPU } from '../../engine/babylon-engine.js';
-import { createCosmicSkybox, updateCosmicSkybox, disposeCosmicSkybox } from '../environment/cosmic-skybox.js';
-import { createStarField, updateStarField, disposeStarField } from '../environment/starfield.js';
-import { createNebula, updateNebula, disposeNebula } from '../environment/nebula.js';
-import { createShootingStars, updateShootingStars, disposeShootingStars } from '../environment/shooting-stars.js';
-import { createStarGlows, updateStarGlows, disposeStarGlows } from '../environment/star-glows.js';
-import { createCosmicMotes, updateCosmicMotes, disposeCosmicMotes } from '../environment/cosmic-motes.js';
-import { createEtherealPetals, updateEtherealPetals, disposeEtherealPetals } from '../environment/ethereal-petals.js';
-import { createBlackHole, updateBlackHole, disposeBlackHole } from '../blackhole/blackhole.js';
 import {
-    setupPostProcessing, disposePostProcessing,
-    setExposure, getBaseExposure, createFilmGrainEffect,
-    setBloomEnabled, setBloomKernel,
-    setFilmGrainEnabled, setChromaticAberrationEnabled,
-} from '../postprocessing/pipeline.js';
+    disposeEngine,
+    getEngine,
+    initEngine,
+    isUsingWebGPU,
+} from '../../engine/babylon-engine.js';
+import { getMasterEnergy } from '../../features/sounds.js';
+import { createFPSWatchdog, detectDeviceProfile } from '../../utils/performance-profile.js';
+import { createBlackHole, disposeBlackHole, updateBlackHole } from '../blackhole/blackhole.js';
+import { initSoundBodies, updateSoundBodies } from '../blackhole/sound-bodies.js';
 import {
-    createAnamorphicStreak, disposeAnamorphicStreak, setAnamorphicStreakEnabled,
+    createCosmicMotes,
+    disposeCosmicMotes,
+    updateCosmicMotes,
+} from '../environment/cosmic-motes.js';
+import {
+    createCosmicSkybox,
+    disposeCosmicSkybox,
+    updateCosmicSkybox,
+} from '../environment/cosmic-skybox.js';
+import {
+    createEtherealPetals,
+    disposeEtherealPetals,
+    updateEtherealPetals,
+} from '../environment/ethereal-petals.js';
+import { createNebula, disposeNebula, updateNebula } from '../environment/nebula.js';
+import {
+    createShootingStars,
+    disposeShootingStars,
+    updateShootingStars,
+} from '../environment/shooting-stars.js';
+import { createStarGlows, disposeStarGlows, updateStarGlows } from '../environment/star-glows.js';
+import { createStarField, disposeStarField, updateStarField } from '../environment/starfield.js';
+import {
+    createAnamorphicStreak,
+    disposeAnamorphicStreak,
+    setAnamorphicStreakEnabled,
 } from '../postprocessing/anamorphic-streak.js';
 import {
-    createGodRays, updateGodRays, disposeGodRays, setGodRaysEnabled,
+    createGodRays,
+    disposeGodRays,
+    setGodRaysEnabled,
+    updateGodRays,
 } from '../postprocessing/god-rays.js';
-import { detectDeviceProfile, createFPSWatchdog } from '../../utils/performance-profile.js';
-
+import {
+    createFilmGrainEffect,
+    disposePostProcessing,
+    getBaseExposure,
+    setBloomEnabled,
+    setBloomKernel,
+    setChromaticAberrationEnabled,
+    setExposure,
+    setFilmGrainEnabled,
+    setupPostProcessing,
+} from '../postprocessing/pipeline.js';
 
 // Scene globals
 let scene = null;
@@ -49,7 +81,7 @@ const clock = {
         const delta = (now - this.lastTime) / 1000;
         this.lastTime = now;
         return delta;
-    }
+    },
 };
 
 // Performance stats
@@ -57,7 +89,7 @@ const stats = {
     fps: 0,
     frameTime: 0,
     lastTime: performance.now(),
-    frameCount: 0
+    frameCount: 0,
 };
 
 /**
@@ -66,7 +98,6 @@ const stats = {
  * @returns {Promise<boolean>} Success status
  */
 export async function init3D() {
-
     try {
         // Initialize engine (handles WebGPU/WebGL2)
         const engineResult = await initEngine();
@@ -83,7 +114,9 @@ export async function init3D() {
             if (typeof densityOverride === 'number' && densityOverride > 0) {
                 deviceProfile.starMultiplier = deviceProfile.starMultiplier * densityOverride;
             }
-        } catch (_) { /* store unavailable — use defaults */ }
+        } catch (_) {
+            /* store unavailable — use defaults */
+        }
 
         // Create scene with HDR support
         scene = new BABYLON.Scene(engine);
@@ -103,7 +136,11 @@ export async function init3D() {
         createNebula(scene, camera, deviceProfile.shaderOctaves);
         createShootingStars(scene);
         createStarGlows(scene, camera);
-        createBlackHole(scene, camera);
+        const blackholeMesh = createBlackHole(scene, camera);
+        // Cosmos sound system — bodies that orbit the black hole, one per
+        // active ambient track. Doesn't spawn anything on init; ambient-ui
+        // calls summonBody() when the user starts a sound.
+        initSoundBodies(scene, camera, blackholeMesh);
         createCosmicMotes(scene);
         createEtherealPetals(scene);
 
@@ -125,9 +162,13 @@ export async function init3D() {
         // time. Hardware scaling is a last-resort fallback. Every 5 minutes
         // we probe whether full quality is sustainable again.
         const BLOOM_DEFAULT_KERNEL = 64;
-        fpsWatchdog = createFPSWatchdog(stats, (from, to) => {
-            applyQualityLevel(to, { from });
-        }, 5);
+        fpsWatchdog = createFPSWatchdog(
+            stats,
+            (from, to) => {
+                applyQualityLevel(to, { from });
+            },
+            5
+        );
 
         function applyQualityLevel(level, { from } = {}) {
             if (!scene || !camera) return;
@@ -135,23 +176,48 @@ export async function init3D() {
             // We walk the full ladder each time so recovery is symmetric.
 
             // Level 1 — cheap post-processes first (minimal visual cost).
-            const wantGrain       = level < 1;
-            const wantChromatic   = level < 1;
+            const wantGrain = level < 1;
+            const wantChromatic = level < 1;
             // Level 2 — anamorphic streak (visible on bright elements).
-            const wantStreak      = level < 2;
+            const wantStreak = level < 2;
             // Level 3 — god rays (the radial beam effect).
-            const wantGodRays     = level < 3;
+            const wantGodRays = level < 3;
             // Level 4 — shrink bloom kernel (halves the most expensive pass).
-            const targetKernel    = level < 4 ? BLOOM_DEFAULT_KERNEL : Math.floor(BLOOM_DEFAULT_KERNEL / 2);
+            const targetKernel =
+                level < 4 ? BLOOM_DEFAULT_KERNEL : Math.floor(BLOOM_DEFAULT_KERNEL / 2);
             // Level 5 — last resort: lower render resolution slightly.
-            const targetScaling   = level < 5 ? 1.0 : 1.25;
+            const targetScaling = level < 5 ? 1.0 : 1.25;
 
-            try { setFilmGrainEnabled(wantGrain); } catch (e) { /* ignore */ }
-            try { setChromaticAberrationEnabled(wantChromatic); } catch (e) { /* ignore */ }
-            try { setAnamorphicStreakEnabled(wantStreak, scene, camera); } catch (e) { /* ignore */ }
-            try { setGodRaysEnabled(wantGodRays, scene, camera); } catch (e) { /* ignore */ }
-            try { setBloomKernel(targetKernel); } catch (e) { /* ignore */ }
-            try { if (engine) engine.setHardwareScalingLevel(targetScaling); } catch (e) { /* ignore */ }
+            try {
+                setFilmGrainEnabled(wantGrain);
+            } catch (e) {
+                /* ignore */
+            }
+            try {
+                setChromaticAberrationEnabled(wantChromatic);
+            } catch (e) {
+                /* ignore */
+            }
+            try {
+                setAnamorphicStreakEnabled(wantStreak, scene, camera);
+            } catch (e) {
+                /* ignore */
+            }
+            try {
+                setGodRaysEnabled(wantGodRays, scene, camera);
+            } catch (e) {
+                /* ignore */
+            }
+            try {
+                setBloomKernel(targetKernel);
+            } catch (e) {
+                /* ignore */
+            }
+            try {
+                if (engine) engine.setHardwareScalingLevel(targetScaling);
+            } catch (e) {
+                /* ignore */
+            }
         }
 
         // Expose for debugging / settings.
@@ -176,10 +242,16 @@ export async function init3D() {
                 if (!key.startsWith('scene.') && !key.startsWith('motion.')) continue;
                 const fn = APPLY_HOOKS[key];
                 if (typeof fn === 'function') {
-                    try { fn(all[key]); } catch (_) { /* tolerate */ }
+                    try {
+                        fn(all[key]);
+                    } catch (_) {
+                        /* tolerate */
+                    }
                 }
             }
-        } catch (_) { /* optional */ }
+        } catch (_) {
+            /* optional */
+        }
 
         // Mouse parallax (desktop only)
         if (!('ontouchstart' in window)) {
@@ -193,7 +265,6 @@ export async function init3D() {
         console.log('🎬 Cinematic scene ready!');
 
         return true;
-
     } catch (error) {
         console.error('❌ Failed to initialize scene:', error);
         return false;
@@ -204,13 +275,12 @@ export async function init3D() {
  * Setup the cinematic camera with slow orbital motion
  */
 function setupCinematicCamera() {
-
     // ArcRotateCamera for smooth orbital movement
     camera = new BABYLON.ArcRotateCamera(
         'cinematicCamera',
-        Math.PI * 0.25,     // Alpha (horizontal angle)
-        Math.PI * 0.4,      // Beta (vertical angle) - slightly above horizon
-        65,                 // Radius (distance from center)
+        Math.PI * 0.25, // Alpha (horizontal angle)
+        Math.PI * 0.4, // Beta (vertical angle) - slightly above horizon
+        65, // Radius (distance from center)
         BABYLON.Vector3.Zero(),
         scene
     );
@@ -233,44 +303,29 @@ function setupCinematicCamera() {
     // Near/far planes for proper depth
     camera.minZ = 0.1;
     camera.maxZ = 2000;
-
 }
 
 /**
  * Setup subtle ambient lighting
  */
 function setupLighting() {
-
     // Very dim ambient - space is dark
-    const ambient = new BABYLON.HemisphericLight(
-        'ambient',
-        new BABYLON.Vector3(0, 1, 0),
-        scene
-    );
+    const ambient = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
     ambient.intensity = 0.05;
     ambient.diffuse = new BABYLON.Color3(0.05, 0.05, 0.1);
     ambient.groundColor = new BABYLON.Color3(0.02, 0.02, 0.05);
 
     // Subtle blue key light (from above-left)
-    const keyLight = new BABYLON.PointLight(
-        'keyLight',
-        new BABYLON.Vector3(-50, 40, 50),
-        scene
-    );
+    const keyLight = new BABYLON.PointLight('keyLight', new BABYLON.Vector3(-50, 40, 50), scene);
     keyLight.diffuse = new BABYLON.Color3(0.2, 0.25, 0.4);
     keyLight.intensity = 0.3;
     keyLight.range = 300;
 
     // Warm fill light (from below-right)
-    const fillLight = new BABYLON.PointLight(
-        'fillLight',
-        new BABYLON.Vector3(40, -20, -40),
-        scene
-    );
+    const fillLight = new BABYLON.PointLight('fillLight', new BABYLON.Vector3(40, -20, -40), scene);
     fillLight.diffuse = new BABYLON.Color3(0.4, 0.2, 0.1);
     fillLight.intensity = 0.15;
     fillLight.range = 200;
-
 }
 
 /**
@@ -286,7 +341,8 @@ function renderLoop() {
     updateStarField(elapsed);
     updateNebula(elapsed);
     updateShootingStars(elapsed);
-    updateBlackHole(elapsed);
+    updateBlackHole(elapsed, { masterEnergy: getMasterEnergy() });
+    updateSoundBodies(elapsed);
     updateStarGlows(elapsed);
     updateCosmicMotes(elapsed);
     updateEtherealPetals(elapsed, camera);
@@ -313,30 +369,30 @@ function renderLoop() {
 function updateCinematicCamera(elapsed) {
     // --- Orbital rotation: 3 layered sine waves for organic drift ---
     const baseAlpha = Math.PI * 0.25;
-    const orbitDrift = elapsed * 0.015
-        + Math.sin(elapsed * 0.023) * 0.04
-        + Math.sin(elapsed * 0.011) * 0.025
-        + Math.sin(elapsed * 0.037) * 0.015;
+    const orbitDrift =
+        elapsed * 0.015 +
+        Math.sin(elapsed * 0.023) * 0.04 +
+        Math.sin(elapsed * 0.011) * 0.025 +
+        Math.sin(elapsed * 0.037) * 0.015;
     camera.alpha = baseAlpha + orbitDrift;
 
     // --- Vertical drift: layered for smooth organic motion ---
     const baseBeta = Math.PI * 0.4;
-    const verticalDrift = Math.sin(elapsed * 0.013) * 0.06
-        + Math.sin(elapsed * 0.029) * 0.03
-        + Math.sin(elapsed * 0.007) * 0.02;
+    const verticalDrift =
+        Math.sin(elapsed * 0.013) * 0.06 +
+        Math.sin(elapsed * 0.029) * 0.03 +
+        Math.sin(elapsed * 0.007) * 0.02;
     camera.beta = Math.max(0.3, Math.min(Math.PI - 0.3, baseBeta + verticalDrift));
 
     // --- Asymmetric breathing: cube creates longer hold at extremes ---
     const baseRadius = 65;
     const breathSin = Math.sin(elapsed * 0.02);
-    const breathing = Math.pow(Math.abs(breathSin), 0.6) * Math.sign(breathSin) * 10;
+    const breathing = Math.abs(breathSin) ** 0.6 * Math.sign(breathSin) * 10;
     camera.radius = baseRadius + breathing;
 
     // --- Micro-motion: subtle film shake ---
-    let targetX = Math.sin(elapsed * 2.3) * 0.003
-        + Math.sin(elapsed * 5.7) * 0.001;
-    let targetY = Math.sin(elapsed * 1.7) * 0.002
-        + Math.sin(elapsed * 4.1) * 0.001;
+    let targetX = Math.sin(elapsed * 2.3) * 0.003 + Math.sin(elapsed * 5.7) * 0.001;
+    let targetY = Math.sin(elapsed * 1.7) * 0.002 + Math.sin(elapsed * 4.1) * 0.001;
 
     // --- Mouse parallax (desktop only) ---
     if (parallaxEnabled) {
@@ -440,7 +496,6 @@ export function getCamera() {
  * Dispose all resources and clean up
  */
 export function dispose() {
-
     window.removeEventListener('resize', handleResize);
 
     disposeGodRays();
@@ -465,8 +520,7 @@ export function dispose() {
     camera = null;
     engine = null;
     canvas = null;
-
 }
 
 // Export for external access
-export { scene, camera, stats };
+export { camera, scene, stats };

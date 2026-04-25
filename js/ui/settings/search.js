@@ -27,7 +27,7 @@ export function applyQuery(q) {
     const tokens = query.split(/\s+/).filter(Boolean);
     let visible = 0;
     for (const item of searchIndex) {
-        const match = tokens.every(t => item.haystack.includes(t));
+        const match = tokens.every((t) => item.haystack.includes(t));
         item.el.classList.toggle('sr-hidden', !match);
         if (match) visible++;
     }

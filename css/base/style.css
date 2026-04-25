@@ -14,7 +14,7 @@
     padding: 8px 16px;
     background: rgba(20, 18, 14, 0.95);
     color: rgba(240, 200, 120, 0.95);
-    border: 1px solid rgba(225, 205, 150, 0.4);
+    border: 1px solid rgba(255, 205, 115, 0.4);
     border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
@@ -238,7 +238,7 @@ a {
     /* Firefox: thin gold scrollbar (Firefox can't do reveal-on-hover or
        backdrop-filter on the scrollbar, so just keep it subtle). */
     scrollbar-width: thin;
-    scrollbar-color: rgba(225, 205, 150, 0.22) transparent;
+    scrollbar-color: rgba(255, 205, 115, 0.22) transparent;
 }
 
 /* ===== WebKit scrollbar — overlay style, reveal-on-hover =====
@@ -258,7 +258,7 @@ a {
 }
 
 .task-list::-webkit-scrollbar-thumb {
-    background: rgba(225, 205, 150, 0.18) !important;
+    background: rgba(255, 205, 115, 0.18) !important;
     backdrop-filter: blur(8px) saturate(140%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(140%) !important;
     border-radius: 999px !important;
@@ -276,19 +276,19 @@ a {
    approaches the task area, even before they touch the bar itself */
 .task-list:hover::-webkit-scrollbar-thumb {
     opacity: 1;
-    background: rgba(225, 205, 150, 0.32) !important;
+    background: rgba(255, 205, 115, 0.32) !important;
 }
 
 /* Direct bar hover — brightens further with a soft gold halo */
 .task-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(225, 205, 150, 0.5) !important;
-    box-shadow: 0 0 10px rgba(225, 205, 150, 0.35) !important;
+    background: rgba(255, 205, 115, 0.5) !important;
+    box-shadow: 0 0 10px rgba(255, 205, 115, 0.35) !important;
 }
 
 /* While actively dragging — fully bright */
 .task-list::-webkit-scrollbar-thumb:active {
-    background: rgba(225, 205, 150, 0.65) !important;
-    box-shadow: 0 0 14px rgba(225, 205, 150, 0.45) !important;
+    background: rgba(255, 205, 115, 0.65) !important;
+    box-shadow: 0 0 14px rgba(255, 205, 115, 0.45) !important;
 }
 
 .mode.active {
@@ -327,7 +327,7 @@ a {
     justify-content: center;
     gap: 28px;
     background:
-        radial-gradient(circle at center, rgba(225, 205, 150, 0.07) 0%, transparent 55%),
+        radial-gradient(circle at center, rgba(255, 205, 115, 0.07) 0%, transparent 55%),
         radial-gradient(ellipse at center, rgba(10, 8, 4, 1) 0%, #050308 70%);
     z-index: 9999;
     opacity: 1;
@@ -363,7 +363,7 @@ a {
     height: 80px;
     transform: translate(-50%, -50%) scale(1);
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(225, 205, 150, 0.22), transparent 65%);
+    background: radial-gradient(circle, rgba(255, 205, 115, 0.22), transparent 65%);
     animation: loaderHaloBreath 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     pointer-events: none;
 }
@@ -385,19 +385,19 @@ a {
 }
 .loading-orbit__track {
     fill: none;
-    stroke: rgba(225, 205, 150, 0.1);
+    stroke: rgba(255, 205, 115, 0.1);
     stroke-width: 1.5;
 }
 .loading-orbit__progress {
     fill: none;
-    stroke: rgba(225, 205, 150, 0.95);
+    stroke: rgba(255, 205, 115, 0.95);
     stroke-width: 1.5;
     stroke-linecap: round;
     /* 2π × r(52) ≈ 326.73 */
     stroke-dasharray: 326.73;
     stroke-dashoffset: calc(326.73 * (1 - var(--progress, 0) / 100));
     transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: drop-shadow(0 0 6px rgba(225, 205, 150, 0.5));
+    filter: drop-shadow(0 0 6px rgba(255, 205, 115, 0.5));
 }
 
 /* ── Centre star — echoes .settings-star so the loader feels like
@@ -406,11 +406,11 @@ a {
     position: relative;
     width: 40px;
     height: 40px;
-    color: #EFE3C9;
+    color: #FFECC2;
     fill: currentColor;
     filter:
-        drop-shadow(0 0 8px rgba(225, 205, 150, 0.65))
-        drop-shadow(0 0 22px rgba(225, 205, 150, 0.3));
+        drop-shadow(0 0 8px rgba(255, 205, 115, 0.65))
+        drop-shadow(0 0 22px rgba(255, 205, 115, 0.3));
     animation: loaderStarSpin 28s linear infinite;
     will-change: transform, filter;
 }
@@ -638,7 +638,7 @@ body::-webkit-scrollbar {
 }
 
 .mode::-webkit-scrollbar-thumb {
-    background: rgba(225, 205, 150, 0.18);
+    background: rgba(255, 205, 115, 0.18);
     backdrop-filter: blur(8px) saturate(140%);
     -webkit-backdrop-filter: blur(8px) saturate(140%);
     border-radius: 999px;
@@ -650,12 +650,12 @@ body::-webkit-scrollbar {
 
 .mode:hover::-webkit-scrollbar-thumb {
     opacity: 1;
-    background: rgba(225, 205, 150, 0.32);
+    background: rgba(255, 205, 115, 0.32);
 }
 
 .mode::-webkit-scrollbar-thumb:hover {
-    background: rgba(225, 205, 150, 0.5);
-    box-shadow: 0 0 10px rgba(225, 205, 150, 0.35);
+    background: rgba(255, 205, 115, 0.5);
+    box-shadow: 0 0 10px rgba(255, 205, 115, 0.35);
 }
 
 /* ===== Firefox scrollbar — gold theme ===== */
@@ -663,7 +663,7 @@ body::-webkit-scrollbar {
    correct gold value. This block is for .settings-modal and .mode only. */
 .settings-modal, .mode {
     scrollbar-width: thin;
-    scrollbar-color: rgba(225, 205, 150, 0.22) transparent;
+    scrollbar-color: rgba(255, 205, 115, 0.22) transparent;
 }
 
 /* ===== SCROLLBAR FADE ANIMATION ===== */

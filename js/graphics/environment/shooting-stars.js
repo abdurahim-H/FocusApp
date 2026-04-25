@@ -34,7 +34,6 @@ function createTrailTexture(sceneRef) {
 export function createShootingStars(sceneRef) {
     scene = sceneRef;
 
-
     particleSystem = new BABYLON.ParticleSystem('shootingStars', 200, scene);
     particleSystem.particleTexture = createTrailTexture(scene);
 
@@ -77,7 +76,6 @@ export function createShootingStars(sceneRef) {
 
     // Schedule first shooting star — rarer for elegance
     nextSpawnTime = 5 + Math.random() * 8;
-
 }
 
 /**

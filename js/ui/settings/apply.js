@@ -28,13 +28,27 @@ async function getModule(name) {
     if (lazy[name]) return lazy[name];
     try {
         switch (name) {
-            case 'timer':        lazy.timer        = await import('../../features/timer.js'); break;
-            case 'sounds':       lazy.sounds       = await import('../../features/sounds.js'); break;
-            case 'pipeline':     lazy.pipeline     = await import('../../graphics/postprocessing/pipeline.js'); break;
-            case 'godRays':      lazy.godRays      = await import('../../graphics/postprocessing/god-rays.js'); break;
-            case 'cameraFx':     lazy.cameraFx     = await import('../../graphics/camera/camera-effects.js'); break;
-            case 'sceneManager': lazy.sceneManager = await import('../../graphics/scene/scene-manager.js'); break;
-            case 'motion':       lazy.motion       = await import('../../core/motion.js'); break;
+            case 'timer':
+                lazy.timer = await import('../../features/timer.js');
+                break;
+            case 'sounds':
+                lazy.sounds = await import('../../features/sounds.js');
+                break;
+            case 'pipeline':
+                lazy.pipeline = await import('../../graphics/postprocessing/pipeline.js');
+                break;
+            case 'godRays':
+                lazy.godRays = await import('../../graphics/postprocessing/god-rays.js');
+                break;
+            case 'cameraFx':
+                lazy.cameraFx = await import('../../graphics/camera/camera-effects.js');
+                break;
+            case 'sceneManager':
+                lazy.sceneManager = await import('../../graphics/scene/scene-manager.js');
+                break;
+            case 'motion':
+                lazy.motion = await import('../../core/motion.js');
+                break;
         }
     } catch (e) {
         console.warn(`[settings/apply] could not load ${name}:`, e);
@@ -45,7 +59,7 @@ async function getModule(name) {
 // ============================================================================
 // Graphics preset switching
 // ============================================================================
-import { setMany, get as getSetting } from './store.js';
+import { get as getSetting, setMany } from './store.js';
 
 async function applyGraphicsPreset(presetId) {
     let resolvedId = presetId;
@@ -67,11 +81,10 @@ async function applyGraphicsPreset(presetId) {
 // Hook table
 // ============================================================================
 export const APPLY_HOOKS = {
-
     // ───────── Timer ─────────
     'timer.focusDuration': (v) => {
         state.timer.settings.focusDuration = v;
-        getModule('timer').then(mod => {
+        getModule('timer').then((mod) => {
             if (!state.timer.isRunning && !state.timer.isBreak) {
                 state.timer.minutes = v;
                 state.timer.seconds = 0;
@@ -86,7 +99,7 @@ export const APPLY_HOOKS = {
         state.timer.settings.longBreakDuration = v;
     },
     'timer.timeFormat': (v) => {
-        getModule('timer').then(mod => mod?.updateDateTime?.());
+        getModule('timer').then((mod) => mod?.updateDateTime?.());
     },
     // autoStart, autoStartDelay, longBreakInterval, pomodoroGoal:
     // Consumed directly from the store by timer.js on each completeSession tick,
@@ -94,7 +107,7 @@ export const APPLY_HOOKS = {
 
     // ───────── Sounds ─────────
     'sounds.masterVolume': (v) => {
-        getModule('sounds').then(mod => mod?.setVolume?.(v));
+        getModule('sounds').then((mod) => mod?.setVolume?.(v));
     },
 
     // ───────── Scene: quality preset ─────────
@@ -102,38 +115,38 @@ export const APPLY_HOOKS = {
 
     // ───────── Scene: individual post-processing knobs ─────────
     'scene.bloomWeight': (v) => {
-        getModule('pipeline').then(mod => mod?.setBloomIntensity?.(v));
+        getModule('pipeline').then((mod) => mod?.setBloomIntensity?.(v));
     },
     'scene.exposure': (v) => {
-        getModule('pipeline').then(mod => mod?.setBaseExposure?.(v));
+        getModule('pipeline').then((mod) => mod?.setBaseExposure?.(v));
     },
     'scene.godRayIntensity': (v) => {
-        getModule('godRays').then(mod => mod?.setGodRayExposure?.(v));
+        getModule('godRays').then((mod) => mod?.setGodRayExposure?.(v));
     },
     'scene.vignette': (v) => {
-        getModule('pipeline').then(mod => mod?.setVignetteWeight?.(v));
+        getModule('pipeline').then((mod) => mod?.setVignetteWeight?.(v));
     },
     'scene.chromaticAberration': (v) => {
-        getModule('pipeline').then(mod => mod?.setChromaticAberrationAmount?.(v));
+        getModule('pipeline').then((mod) => mod?.setChromaticAberrationAmount?.(v));
     },
     'scene.grain': (v) => {
-        getModule('pipeline').then(mod => mod?.setGrainIntensity?.(v));
+        getModule('pipeline').then((mod) => mod?.setGrainIntensity?.(v));
     },
     'scene.cameraShake': (v) => {
-        getModule('cameraFx').then(mod => mod?.setShakeMultiplier?.(v));
+        getModule('cameraFx').then((mod) => mod?.setShakeMultiplier?.(v));
     },
     'scene.dofEnabled': (v) => {
-        getModule('pipeline').then(mod => mod?.setDepthOfFieldEnabled?.(v));
+        getModule('pipeline').then((mod) => mod?.setDepthOfFieldEnabled?.(v));
     },
     // scene.starDensity: no live apply — starfield rebuild is too heavy.
     // The stored value is read by scene-manager on next init3D().
 
     // ───────── Motion ─────────
     'motion.forceReduce': (v) => {
-        getModule('motion').then(mod => mod?.setForceReducedMotion?.(v));
+        getModule('motion').then((mod) => mod?.setForceReducedMotion?.(v));
     },
     'motion.speedMultiplier': (v) => {
-        getModule('motion').then(mod => mod?.setSpeedMultiplier?.(v));
+        getModule('motion').then((mod) => mod?.setSpeedMultiplier?.(v));
     },
 
     // ───────── Greeting ─────────
@@ -163,9 +176,6 @@ function interpolateGreeting(raw) {
     if (!text.includes('{{')) return text;
     const h = new Date().getHours();
     const timeOfDay =
-        h < 5  ? 'night' :
-        h < 12 ? 'morning' :
-        h < 17 ? 'afternoon' :
-        h < 21 ? 'evening' : 'night';
+        h < 5 ? 'night' : h < 12 ? 'morning' : h < 17 ? 'afternoon' : h < 21 ? 'evening' : 'night';
     return text.replace(/\{\{\s*time\s*\}\}/g, timeOfDay);
 }

@@ -121,28 +121,36 @@ const FRAGMENT = `
 `;
 
 export function createCosmicSkybox(scene) {
-
     BABYLON.Effect.ShadersStore['cosmicSkyVertexShader'] = VERTEX;
     BABYLON.Effect.ShadersStore['cosmicSkyFragmentShader'] = FRAGMENT;
 
     // Large inverted sphere
-    skyMesh = BABYLON.MeshBuilder.CreateSphere('cosmicSky', {
-        diameter: 1800,
-        segments: 32,
-        sideOrientation: BABYLON.Mesh.BACKSIDE // Render inside faces
-    }, scene);
+    skyMesh = BABYLON.MeshBuilder.CreateSphere(
+        'cosmicSky',
+        {
+            diameter: 1800,
+            segments: 32,
+            sideOrientation: BABYLON.Mesh.BACKSIDE, // Render inside faces
+        },
+        scene
+    );
 
     skyMesh.renderingGroupId = 0;
     skyMesh.infiniteDistance = true; // Stays at camera position
     skyMesh.isPickable = false;
 
-    skyMaterial = new BABYLON.ShaderMaterial('cosmicSkyMat', scene, {
-        vertex: 'cosmicSky',
-        fragment: 'cosmicSky'
-    }, {
-        attributes: ['position', 'normal'],
-        uniforms: ['worldViewProjection', 'time']
-    });
+    skyMaterial = new BABYLON.ShaderMaterial(
+        'cosmicSkyMat',
+        scene,
+        {
+            vertex: 'cosmicSky',
+            fragment: 'cosmicSky',
+        },
+        {
+            attributes: ['position', 'normal'],
+            uniforms: ['worldViewProjection', 'time'],
+        }
+    );
 
     skyMaterial.setFloat('time', 0);
     skyMaterial.backFaceCulling = false;
@@ -158,6 +166,12 @@ export function updateCosmicSkybox(elapsed) {
 }
 
 export function disposeCosmicSkybox() {
-    if (skyMesh) { skyMesh.dispose(); skyMesh = null; }
-    if (skyMaterial) { skyMaterial.dispose(); skyMaterial = null; }
+    if (skyMesh) {
+        skyMesh.dispose();
+        skyMesh = null;
+    }
+    if (skyMaterial) {
+        skyMaterial.dispose();
+        skyMaterial = null;
+    }
 }
