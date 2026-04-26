@@ -364,6 +364,13 @@
         <button class="cosmos-tool" id="deckSleepBtn"
                 aria-label="Set a sleep timer"
                 data-tooltip="Sleep timer">
+            <!-- Countdown arc — invisible at rest, fades in when the timer
+                 is armed, depletes clockwise from 12 o'clock as time runs
+                 down. Same visual language as the mini-timer's session
+                 progress ring. -->
+            <svg class="cosmos-tool__arc" viewBox="0 0 42 42" width="42" height="42" aria-hidden="true">
+                <circle cx="21" cy="21" r="20"/>
+            </svg>
             <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M16.5 12.5 a6.5 6.5 0 0 1 -9 -9 a7.5 7.5 0 1 0 9 9z"/>
             </svg>

@@ -1754,6 +1754,93 @@
     box-shadow: 0 0 22px rgba(255, 205, 115, 0.4);
 }
 
+/* ── Sleep-timer countdown arc ────────────────────────────────────────────
+   Thin gold orbital ring around the moon button. Hidden at rest; fades
+   in when the timer is armed. The visible portion of the stroke shrinks
+   as time depletes — controlled by --arc-offset set from JS each second.
+   Final 30 seconds: the stroke pulses to echo the audio fade-out window. */
+.cosmos-tool__arc {
+    position: absolute;
+    inset: -2px;
+    pointer-events: none;
+    overflow: visible;
+    /* Rotate so the dash starts at 12 o'clock and depletes clockwise. */
+    transform: rotate(-90deg);
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cosmos-tool__arc circle {
+    fill: none;
+    stroke: rgba(255, 205, 115, 0.6);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    /* 2 * PI * 20 ≈ 125.66 — circumference of the arc circle. */
+    stroke-dasharray: 125.66;
+    stroke-dashoffset: var(--arc-offset, 0);
+    /* 1.05s smooths the once-per-second JS update without lag. */
+    transition: stroke-dashoffset 1.05s linear,
+                stroke 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 0 6px rgba(255, 205, 115, 0.35));
+}
+.cosmos-tool.is-active .cosmos-tool__arc {
+    opacity: 1;
+}
+/* Final-fade pulse — kicks in inside the audio fade-out window so the
+   button visibly "winds down" alongside what the user hears. */
+.cosmos-tool.is-fading .cosmos-tool__arc circle {
+    animation: sleepArcFade 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes sleepArcFade {
+    0%, 100% {
+        stroke: rgba(255, 205, 115, 0.55);
+        filter: drop-shadow(0 0 6px rgba(255, 205, 115, 0.3));
+    }
+    50% {
+        stroke: rgba(255, 240, 200, 0.95);
+        filter: drop-shadow(0 0 14px rgba(255, 215, 130, 0.7));
+    }
+}
+
+/* Cool the moon's tint while armed — small "winding down for night"
+   semantic shift. Echoes the timer's break-mode teal without copying it. */
+#deckSleepBtn.is-active {
+    color: rgba(218, 228, 250, 0.95);
+    border-color: rgba(180, 200, 240, 0.42);
+    background: rgba(180, 200, 240, 0.12);
+    box-shadow: 0 0 22px rgba(180, 200, 240, 0.28);
+}
+#deckSleepBtn.is-active:hover {
+    color: rgba(238, 244, 255, 1);
+    border-color: rgba(180, 200, 240, 0.6);
+    background: rgba(180, 200, 240, 0.18);
+    box-shadow: 0 0 28px rgba(180, 200, 240, 0.4);
+}
+/* While armed, the arc color also follows the cool tint so they match. */
+#deckSleepBtn.is-active .cosmos-tool__arc circle {
+    stroke: rgba(200, 215, 245, 0.7);
+    filter: drop-shadow(0 0 6px rgba(180, 200, 240, 0.45));
+}
+#deckSleepBtn.is-fading .cosmos-tool__arc circle {
+    animation: sleepArcFadeCool 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes sleepArcFadeCool {
+    0%, 100% {
+        stroke: rgba(200, 215, 245, 0.6);
+        filter: drop-shadow(0 0 6px rgba(180, 200, 240, 0.35));
+    }
+    50% {
+        stroke: rgba(235, 240, 255, 0.95);
+        filter: drop-shadow(0 0 16px rgba(200, 215, 245, 0.75));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cosmos-tool.is-fading .cosmos-tool__arc circle,
+    #deckSleepBtn.is-fading .cosmos-tool__arc circle {
+        animation: none;
+    }
+}
+
 @media (max-width: 720px) {
     .cosmos-toolbar {
         bottom: 14px;

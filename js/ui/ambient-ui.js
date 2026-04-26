@@ -1250,27 +1250,40 @@ function armSleepTick() {
     }, 1000);
 }
 
+// Circumference of the countdown arc circle in cosmos-tool__arc — must
+// match the SVG's r=20 (2 * PI * 20). Used to convert progress 0..1
+// into an SVG stroke-dashoffset value.
+const SLEEP_ARC_CIRC = 125.66;
+
 function syncSleepUI() {
     const btn = document.getElementById('deckSleepBtn');
     const t = ambientSleepTimer.value;
     if (!btn) return;
+    // Native title is killed in both branches — only the custom
+    // data-tooltip is used now, so the user never sees two labels.
+    btn.removeAttribute('title');
     if (!t) {
-        btn.classList.remove('is-active');
-        btn.removeAttribute('title');
-        // Old toolbar button had a `.deck-btn__label` child; the new
-        // cosmos icon-only button doesn't, so guard the lookup.
-        const label = btn.querySelector('.deck-btn__label');
-        if (label) label.textContent = 'Sleep';
+        btn.classList.remove('is-active', 'is-fading');
+        btn.style.removeProperty('--arc-offset');
+        btn.setAttribute('data-tooltip', 'Sleep timer');
         return;
     }
     const remainingMs = Math.max(0, t.endAt - Date.now());
     const mm = Math.floor(remainingMs / 60000);
     const ss = Math.floor((remainingMs % 60000) / 1000);
     const compact = remainingMs >= 60_000 ? `${mm}m` : `${ss}s`;
+
     btn.classList.add('is-active');
-    btn.setAttribute('title', `Sleep timer · ${compact} remaining`);
-    const label = btn.querySelector('.deck-btn__label');
-    if (label) label.textContent = `Sleep · ${compact}`;
+    // Final-fade window (last 30 s) — same trigger the audio engine uses
+    // to start its master-bus fade-out. The arc pulses in sync.
+    btn.classList.toggle('is-fading', remainingMs <= 30_000);
+    btn.setAttribute('data-tooltip', `Sleep timer · ${compact}`);
+
+    // Arc depletion: progress = elapsed / duration → 0 (just armed) … 1 (done).
+    // dashoffset = circumference * progress: 0 = full ring, circumference = empty.
+    const duration = t.duration || 1;
+    const progress = Math.max(0, Math.min(1, 1 - remainingMs / duration));
+    btn.style.setProperty('--arc-offset', (SLEEP_ARC_CIRC * progress).toFixed(2));
 }
 // Keep the sleep button updating once a second even while the user is idle.
 setInterval(() => {
