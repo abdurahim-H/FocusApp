@@ -665,22 +665,35 @@
 .auth-modal.is-open .auth-modal__card { opacity: 1; transform: scale(1) translateY(0); }
 
 /* Mode toggle (Sign in / Create account) — apple liquid-glass pill that
-   slides between the two modes. */
+   slides between the two modes. Grid 1fr 1fr forces both buttons to
+   exactly 50% so the absolutely-positioned pill (also 50%) aligns
+   perfectly at both ends. (Used to be inline-flex, which let the
+   "Create account" button claim more space than "Sign in" because of
+   their different label widths — pill spilled past the right edge.) */
 .auth-toggle {
-    display: inline-flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Explicit width + box-sizing so the pill's `width: calc(50% - 3px)`
+       lines up with each grid column down to the pixel. Centred in the
+       modal via auto margins. overflow: hidden is a safety net if any
+       math drifts. */
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+    margin: 0 auto 18px;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.14);
     background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
     padding: 3px;
-    margin-bottom: 18px;
     position: relative;
+    overflow: hidden;
 }
 .auth-toggle__btn {
     position: relative;
     z-index: 1;
-    padding: 7px 16px;
+    padding: 7px 12px;
     border: 0;
     background: transparent;
     color: rgba(255, 246, 225, 0.6);
@@ -688,6 +701,8 @@
     font-weight: 500;
     border-radius: 999px;
     cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
     transition: color 0.2s ease;
 }
 .auth-toggle__btn.is-active { color: #faf3e3; }
@@ -696,6 +711,10 @@
     top: 3px;
     bottom: 3px;
     left: 3px;
+    /* Pill spans 50% of the parent's padding box minus the 3px left
+       padding, so it covers exactly one grid column with a 3px gap on
+       each side. translateX(100%) shifts it by its own width = the
+       width of one column. */
     width: calc(50% - 3px);
     border-radius: 999px;
     background:
