@@ -175,9 +175,12 @@
 }
 
 /* ── Core — the surface ────────────────────────────────────────────────
-   Signed-out: deep obsidian with a tiny ember glow.
-   Signed-in: polished gold gradient (signet).
-   Both use the same 40×40 footprint with a subtle drop shadow + specular. */
+   Signed-out: a translucent glass orb. The cosmos leaks through; a soft
+              warm tint and a polished light-catch keep it warm rather
+              than icy. Same liquid-glass tokens the dropdown / modal /
+              OAuth buttons use, applied to a sphere.
+   Signed-in: polished gold signet.
+   Both 40×40 with a soft drop shadow that anchors them in space. */
 .account-satellite__core {
     position: absolute;
     top: 50%;
@@ -191,25 +194,34 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    /* The drop shadow that anchors the satellite in space. */
-    box-shadow:
-        0 4px 8px rgba(0, 0, 0, 0.6),
-        0 0 0 1px rgba(0, 0, 0, 0.4);
-    color: rgba(255, 230, 188, calc(0.55 + var(--glow) * 0.45));
-    transition: color 0.25s ease, box-shadow 0.4s ease;
+    color: rgba(255, 246, 225, calc(0.65 + var(--glow) * 0.35));
+    transition: color 0.25s ease, box-shadow 0.4s ease, background 0.25s ease;
 }
 
-/* Signed-out core: deep obsidian + warm interior ember. */
+/* Signed-out core — apple liquid-glass orb. White-translucent base + a
+   subtle warm tint at the lower-right echo of the accretion disk shows
+   through the back. backdrop-filter blurs the cosmos behind so the orb
+   reads as a polished glass marble, not a black hole of its own. */
 .account-satellite.is-signed-out .account-satellite__core {
     background:
-        radial-gradient(circle at 38% 38%,
-            rgba(255, 175, 80, 0.22) 0%,
-            rgba(120, 75, 30, 0.12) 28%,
-            rgba(8, 6, 3, 1) 75%),
-        linear-gradient(155deg, #14100a 0%, #07060c 100%);
+        radial-gradient(120% 120% at 28% 22%,
+            rgba(255, 255, 255, 0.22) 0%,
+            rgba(255, 250, 235, 0.1) 30%,
+            rgba(255, 220, 160, 0.06) 65%,
+            rgba(255, 200, 110, 0.04) 100%);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow:
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1.5px 0 rgba(0, 0, 0, 0.22),
+        inset 0 0 22px rgba(255, 255, 255, 0.06),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
-/* Signed-in core: polished gold gradient — light gold UL → deep amber LR. */
+/* Signed-in core — polished gold signet. Stays solid gold gradient
+   because it represents a personal mark; glass would weaken the
+   distinction between signed-out and signed-in states. */
 .account-satellite.is-signed-in .account-satellite__core {
     background:
         radial-gradient(120% 120% at 28% 22%,
@@ -219,21 +231,24 @@
             #6F4A1A 100%);
     color: rgba(20, 12, 4, 0.95);
     box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.65),
-        0 0 0 1px rgba(255, 205, 115, 0.35),
-        0 0 28px rgba(255, 205, 115, calc(0.2 + var(--glow) * 0.35));
+        inset 0 1.5px 0 rgba(255, 252, 232, 0.5),
+        0 4px 12px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 205, 115, 0.4),
+        0 0 28px rgba(255, 205, 115, calc(0.22 + var(--glow) * 0.35));
 }
 
-/* Specular highlight — small light catch in the upper-left quadrant. */
+/* Specular highlight — the polished light-catch in the upper-left.
+   Brighter on the glass orb than on the gold signet to enhance the
+   glass-marble feel. */
 .account-satellite__specular {
     position: absolute;
     top: 4px;
-    left: 5px;
-    width: 12px;
-    height: 8px;
+    left: 6px;
+    width: 14px;
+    height: 9px;
     border-radius: 50%;
     background: radial-gradient(ellipse at center,
-        rgba(255, 246, 225, 0.55) 0%,
+        rgba(255, 252, 240, 0.7) 0%,
         rgba(255, 246, 225, 0) 70%);
     pointer-events: none;
     filter: blur(1px);
