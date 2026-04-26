@@ -1,16 +1,14 @@
 // auth-config.js — Supabase project credentials.
 //
-// Replace the two placeholder strings below with your real Supabase
-// project URL and anon (public) key from
-// Supabase dashboard → Project Settings → API.
+// Both values are PUBLIC. The publishable / anon key is meant to ship
+// in the client; Row Level Security on the Supabase database is what
+// protects user data, not key secrecy. Do NOT put a `service_role`
+// or `sb_secret_*` key here — those are admin keys and must stay
+// server-side only.
 //
-// Both values are PUBLIC — the anon key is meant to ship in the client.
-// Row Level Security on Supabase is what protects your data, not key
-// secrecy. Do NOT put your service-role key here.
-//
-// While these remain placeholders, isConfigured() returns false and the
+// While these are placeholders, isConfigured() returns false and the
 // auth modal shows a "not yet configured" notice instead of a broken
-// flow. This keeps the build green even without a Supabase project.
+// flow. With real values plugged in, magic-link sign-in is live.
 
-export const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-export const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+export const SUPABASE_URL = 'https://gctgnctloknqbbqxcewu.supabase.co';
+export const SUPABASE_ANON_KEY = 'sb_publishable_JRlgFJRGSQvU1B-As8hOrw_vNKSUrt7';
