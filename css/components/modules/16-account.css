@@ -207,37 +207,57 @@
         0 4px 14px rgba(0, 0, 0, 0.42);
 }
 
-/* Signed-in core — polished gold signet, jewel-cut.
-   Built from four stacked light layers instead of a single radial:
-     1. Secondary specular at upper-right (tiny side highlight)
-     2. Primary specular at upper-left (main light catch — ellipse)
-     3. Lower-right ambient depth (recessed shadow)
-     4. Base gold gradient (rolling metal surface, cool→warm→deep)
-   Layered together they read as a real metal disc with multi-source
-   lighting, not a flat amber circle. The rim picks up a bright top
-   light + a recessed bottom inner-shadow so the disc has thickness. */
+/* Signed-in core — the SAME glass orb as signed-out, just lit.
+   Same translucent material, same backdrop-filter, same inset edges.
+   Only deltas: brighter gold rim + a stronger outer halo. No solid
+   gold disc, no recessed letter, no fake metal. The visible "you're
+   signed in" cue is a glowing pinpoint at the centre (rendered via
+   ::after below). Continuity > novelty. */
 .account-satellite.is-signed-in .account-satellite__core {
-    background:
-        /* Secondary side specular — small, upper-right */
-        radial-gradient(circle at 72% 28%, rgba(255, 246, 220, 0.4) 0%, transparent 18%),
-        /* Primary specular — ellipse, upper-left, the brightest hit */
-        radial-gradient(ellipse 40% 28% at 30% 22%, rgba(255, 254, 240, 0.7) 0%, transparent 70%),
-        /* Lower-right ambient shadow — gives the disc rounded depth */
-        radial-gradient(circle at 78% 82%, rgba(50, 28, 6, 0.55) 0%, transparent 55%),
-        /* Base gold metal — rolling surface */
-        radial-gradient(120% 120% at 50% 50%,
-            #FFE8B0 0%,
-            #FFCE7A 35%,
-            #C8901A 75%,
-            #5C3A0A 100%);
-    color: rgba(38, 22, 6, 0.92);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(30px) saturate(170%);
+    -webkit-backdrop-filter: blur(30px) saturate(170%);
+    border: 1px solid rgba(255, 215, 130, calc(0.36 + var(--glow) * 0.5));
     box-shadow:
-        inset 0 1.5px 0 rgba(255, 252, 232, 0.65),    /* rim light, top */
-        inset 0 -1.5px 1px rgba(45, 24, 4, 0.5),       /* recessed bottom */
-        inset 0 0 1px rgba(255, 246, 220, 0.35),       /* edge sheen */
-        0 0 0 1px rgba(255, 220, 150, 0.5),            /* outer hairline rim */
-        0 0 26px rgba(255, 205, 115, calc(0.22 + var(--glow) * 0.35)),
-        0 4px 14px rgba(0, 0, 0, 0.55);
+        inset 0 1px 0 rgba(255, 250, 220, 0.22),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+        inset 0 0 22px rgba(255, 220, 160, 0.06),
+        0 0 0 1px rgba(255, 215, 130, 0.18),
+        0 0 32px rgba(255, 215, 130, calc(0.26 + var(--glow) * 0.35)),
+        0 4px 14px rgba(0, 0, 0, 0.42);
+    color: rgba(255, 240, 200, 0.95);
+}
+
+/* The lit pinpoint — a bright star at the centre of the orb. Layered
+   box-shadow corona, gentle breathing scale animation. This IS the
+   signed-in marker. No serif letters, no avatar disc. */
+.account-satellite__core::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    margin-top: -2px;
+    margin-left: -2px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFF6D8 0%, #FFE19A 55%, #FFD17A 100%);
+    box-shadow:
+        0 0 4px rgba(255, 240, 200, 1),
+        0 0 10px rgba(255, 220, 160, 0.9),
+        0 0 18px rgba(255, 215, 130, 0.6),
+        0 0 28px rgba(255, 205, 115, 0.32);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+.account-satellite.is-signed-in .account-satellite__core::after {
+    opacity: 1;
+    animation: litStarBreathe 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes litStarBreathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.25); }
 }
 
 /* Specular highlight — kept only on the signed-in gold signet, where
@@ -247,22 +267,10 @@
 .account-satellite__specular {
     display: none;
 }
-/* Tighter specular for the signet — small bright pinpoint, like the
-   light catch on a polished gold dome rather than a smear. */
-.account-satellite.is-signed-in .account-satellite__specular {
-    display: block;
-    position: absolute;
-    top: 5px;
-    left: 8px;
-    width: 8px;
-    height: 5px;
-    border-radius: 50%;
-    background: radial-gradient(ellipse at center,
-        rgba(255, 254, 240, 0.85) 0%,
-        rgba(255, 246, 225, 0) 70%);
-    pointer-events: none;
-    filter: blur(0.5px);
-}
+/* Specular highlight removed for both states — the inset top
+   highlight on the core does the job without faking a polished disc.
+   The signed-in lit pinpoint is the only "live" element inside the
+   orb. */
 
 /* Glyph — visible signed-out only. */
 .account-satellite__glyph {
@@ -275,27 +283,18 @@
     display: none;
 }
 
-/* Initial — visible signed-in only. Engraved into the metal via dual
-   text-shadow: a bright highlight from above (light catching the top
-   of the recessed glyph) and a soft dark shadow below (glyph sits
-   into the surface). Reads as engraved, not stamped on top. */
+/* Initial — kept in the DOM so JS can still set textContent for
+   accessible name fallback, but hidden from view. Identity is shown
+   in the dropdown header text, NOT on the orb. */
 .account-satellite__initial {
-    position: relative;
-    z-index: 1;
-    display: none;
-    font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
-    font-size: 22px;
-    font-weight: 500;
-    color: rgba(38, 22, 6, 0.94);
-    text-shadow:
-        0 -0.5px 0 rgba(255, 254, 240, 0.55),
-        0 0.5px 0 rgba(255, 252, 232, 0.18),
-        0 1.5px 1px rgba(0, 0, 0, 0.42);
-    letter-spacing: 0.01em;
-    line-height: 1;
-}
-.account-satellite.is-signed-in:not(.has-avatar) .account-satellite__initial {
-    display: inline-block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    pointer-events: none;
 }
 
 /* Avatar image — visible signed-in with avatar. */
@@ -558,38 +557,56 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.14);
 }
 .account-dropdown__avatar {
-    /* Mirror of the satellite's signet — same multi-layer light model,
-       same engraved initial, scaled to the dropdown's chrome. */
+    /* Mirror of the lit satellite — translucent glass orb with a
+       single bright pinpoint at centre. No solid disc. The text
+       content (initial fallback) is kept hidden via font-size: 0
+       for visual purposes; identity is in the dropdown header text. */
+    position: relative;
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background:
-        radial-gradient(circle at 72% 28%, rgba(255, 246, 220, 0.4) 0%, transparent 18%),
-        radial-gradient(ellipse 40% 28% at 30% 22%, rgba(255, 254, 240, 0.7) 0%, transparent 70%),
-        radial-gradient(circle at 78% 82%, rgba(50, 28, 6, 0.55) 0%, transparent 55%),
-        radial-gradient(120% 120% at 50% 50%,
-            #FFE8B0 0%, #FFCE7A 35%, #C8901A 75%, #5C3A0A 100%);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    border: 1px solid rgba(255, 215, 130, 0.42);
     box-shadow:
-        inset 0 1.5px 0 rgba(255, 252, 232, 0.65),
-        inset 0 -1.5px 1px rgba(45, 24, 4, 0.5),
-        inset 0 0 1px rgba(255, 246, 220, 0.35),
-        0 0 0 1px rgba(255, 220, 150, 0.4),
-        0 4px 14px rgba(0, 0, 0, 0.5),
-        0 0 18px rgba(255, 205, 115, 0.2);
+        inset 0 1px 0 rgba(255, 250, 220, 0.22),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+        inset 0 0 18px rgba(255, 220, 160, 0.05),
+        0 0 24px rgba(255, 215, 130, 0.22),
+        0 4px 12px rgba(0, 0, 0, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
-    font-size: 19px;
-    font-weight: 500;
-    color: rgba(38, 22, 6, 0.94);
-    text-shadow:
-        0 -0.5px 0 rgba(255, 254, 240, 0.55),
-        0 1.5px 1px rgba(0, 0, 0, 0.42);
-    letter-spacing: 0.01em;
     flex-shrink: 0;
     overflow: hidden;
+    /* Hide the initial text fallback — kept as plain text node for
+       a11y but invisible. */
+    font-size: 0;
+    color: transparent;
 }
+.account-dropdown__avatar::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    margin-top: -2.5px;
+    margin-left: -2.5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFF6D8 0%, #FFE19A 55%, #FFD17A 100%);
+    box-shadow:
+        0 0 5px rgba(255, 240, 200, 1),
+        0 0 12px rgba(255, 220, 160, 0.9),
+        0 0 22px rgba(255, 215, 130, 0.6),
+        0 0 32px rgba(255, 205, 115, 0.32);
+    pointer-events: none;
+    animation: litStarBreathe 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+/* If the user has uploaded an avatar image, hide the lit pinpoint —
+   the photo is the whole point. */
+.account-dropdown__avatar:has(img)::after { display: none; }
 .account-dropdown__avatar img {
     width: 100%; height: 100%; object-fit: cover; display: block;
 }
