@@ -112,12 +112,10 @@
         </div>
 
         <!-- Filament — the engraved data-rail connecting nav to satellite.
-             60px wide for a tighter visual coupling between the pill and
-             the satellite. Pure visual; aria-hidden. SVG so the rivet,
-             ticks and pulse render crisply at any DPR. -->
+             40px wide so the satellite reads as locked to the pill, not
+             a separate floating object. Pure visual; aria-hidden. -->
         <div class="nav-filament" aria-hidden="true">
-            <svg class="nav-filament__svg" viewBox="0 0 60 12" preserveAspectRatio="none" width="60" height="12">
-                <!-- Baseline thread, brightening from pill end (left) to satellite end (right) -->
+            <svg class="nav-filament__svg" viewBox="0 0 40 12" preserveAspectRatio="none" width="40" height="12">
                 <defs>
                     <linearGradient id="filamentGradient" x1="0" y1="0" x2="1" y2="0">
                         <stop offset="0%"   stop-color="rgba(255, 205, 115, 0)"/>
@@ -139,21 +137,21 @@
                         <feGaussianBlur stdDeviation="1.2"/>
                     </filter>
                 </defs>
-                <!-- Hairline thread -->
-                <line class="nav-filament__thread" x1="4" y1="6" x2="58" y2="6"
+                <!-- Hairline thread, full length -->
+                <line class="nav-filament__thread" x1="3" y1="6" x2="38" y2="6"
                       stroke="url(#filamentGradient)" stroke-width="0.5"/>
-                <!-- Engraved tick marks: 3px stroke, 2px gap, full length -->
-                <line class="nav-filament__ticks" x1="8" y1="6" x2="54" y2="6"
+                <!-- Engraved tick marks -->
+                <line class="nav-filament__ticks" x1="6" y1="6" x2="34" y2="6"
                       stroke="url(#filamentTickGradient)" stroke-width="2"
                       stroke-dasharray="3 2" stroke-linecap="round" opacity="0.6"/>
                 <!-- Travelling energy pulse -->
-                <rect class="nav-filament__pulse" x="4" y="5" width="11" height="2" rx="1"
+                <rect class="nav-filament__pulse" x="3" y="5" width="9" height="2" rx="1"
                       fill="rgba(255, 246, 225, 0.95)"/>
-                <!-- Jewel rivet halo (drawn behind the rivet) -->
-                <circle class="nav-filament__rivet-halo" cx="3" cy="6" r="6"
+                <!-- Jewel rivet halo -->
+                <circle class="nav-filament__rivet-halo" cx="2.5" cy="6" r="6"
                         fill="rgba(255, 205, 115, 0.18)" filter="url(#filamentRivetBlur)"/>
-                <!-- Jewel rivet at the pill end (left) -->
-                <circle class="nav-filament__rivet" cx="3" cy="6" r="2.2"
+                <!-- Jewel rivet at the pill end -->
+                <circle class="nav-filament__rivet" cx="2.5" cy="6" r="2.2"
                         fill="url(#filamentRivet)"/>
             </svg>
         </div>

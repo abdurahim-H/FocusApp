@@ -40,14 +40,12 @@
 
 /* ── Filament — engraved data-rail ─────────────────────────────────────── */
 .nav-filament {
-    /* 60px keeps the satellite visually tethered to the pill rather than
-       drifting on its own — the eye reads them as one composed object. */
-    width: 60px;
+    /* 40px and aggressive negative margins → ~32px effective gap between
+       the pill and the satellite. Satellite reads as locked to the pill. */
+    width: 40px;
     height: 12px;
     flex-shrink: 0;
-    /* Filament sits *between* pill and satellite; its left edge meets
-       the pill, its right edge dissolves into the satellite's bezel. */
-    margin: 0 -2px 0 -2px;
+    margin: 0 -4px 0 -4px;
     pointer-events: none;
 }
 .nav-filament__svg {
@@ -66,15 +64,14 @@
     opacity: 0;
 }
 @keyframes filamentPulseTravel {
-    /* Pulse enters faintly at the rivet (left), brightens through the
-       middle, fades into the satellite (right). Tuned for the 60px rail
-       — pulse rect starts at x=4 with width=11; max travel ~44px keeps
-       the trailing edge inside the satellite's bezel before it fades. */
+    /* Tuned for the 40px rail — pulse rect starts at x=3 with width=9;
+       max travel ~26px keeps the trailing edge inside the SVG before
+       it fades into the satellite. */
     0%   { transform: translateX(0px);   opacity: 0; }
-    8%   { transform: translateX(2px);   opacity: 0.6; }
-    50%  { transform: translateX(22px);  opacity: 1; }
-    92%  { transform: translateX(40px);  opacity: 0.6; }
-    100% { transform: translateX(44px);  opacity: 0; }
+    8%   { transform: translateX(1px);   opacity: 0.6; }
+    50%  { transform: translateX(13px);  opacity: 1; }
+    92%  { transform: translateX(24px);  opacity: 0.6; }
+    100% { transform: translateX(26px);  opacity: 0; }
 }
 
 .nav-filament__rivet {
@@ -342,22 +339,26 @@
        composes them with a real <br>-style wrap via white-space:pre-line. */
     display: none;
 }
-/* Use a real DOM element for the tooltip so we can two-line it cleanly. */
+/* Apple liquid-glass tooltip — translucent surface with strong blur and
+   an inset top highlight so it reads as a floating glass pill, not a
+   solid dark chip. The cosmos behind it shows through. */
 .account-satellite__tooltip {
     position: absolute;
     top: calc(50% + 30px);
     left: 50%;
     transform: translateX(-50%) translateY(2px);
     padding: 7px 12px;
-    border-radius: 10px;
-    background: #07060c;
-    border: 1px solid rgba(255, 205, 115, 0.35);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     color: #faf3e3;
     box-shadow:
-        0 6px 18px rgba(0, 0, 0, 0.55),
-        0 0 22px rgba(255, 205, 115, 0.12);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+        0 8px 24px rgba(0, 0, 0, 0.45),
+        0 0 22px rgba(255, 205, 115, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 14px rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
     pointer-events: none;
     opacity: 0;
     white-space: nowrap;
@@ -391,7 +392,7 @@
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-bottom: 5px solid rgba(255, 205, 115, 0.35);
+    border-bottom: 5px solid rgba(255, 255, 255, 0.22);
 }
 .account-satellite:hover .account-satellite__tooltip,
 .account-satellite:focus-visible .account-satellite__tooltip {
@@ -409,21 +410,25 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 .account-dropdown {
+    /* Apple liquid-glass: translucent white-tinted surface with strong
+       saturated blur. The cosmos colour leaks through, the dropdown reads
+       as a floating glass pane rather than a solid dark panel. */
     position: fixed;
     top: 0;
     left: 0;
     z-index: 2100;
-    width: 268px;
-    border-radius: 16px;
-    background: rgba(8, 6, 3, 0.92);
-    border: 1px solid rgba(255, 205, 115, 0.28);
-    backdrop-filter: blur(22px) saturate(1.2);
-    -webkit-backdrop-filter: blur(22px) saturate(1.2);
+    width: 272px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
     box-shadow:
-        0 18px 48px rgba(0, 0, 0, 0.5),
-        0 0 36px rgba(255, 205, 115, 0.08),
-        inset 0 1px 0 rgba(255, 240, 200, 0.06);
-    color: rgba(255, 246, 225, 0.92);
+        0 20px 56px rgba(0, 0, 0, 0.55),
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 24px rgba(255, 255, 255, 0.04);
+    color: rgba(255, 246, 225, 0.94);
     opacity: 0;
     transform: translateY(-6px) scale(0.98);
     transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -441,9 +446,11 @@
     transform: translateX(-50%) rotate(45deg);
     width: 12px;
     height: 12px;
-    background: rgba(8, 6, 3, 0.92);
-    border-left: 1px solid rgba(255, 205, 115, 0.28);
-    border-top: 1px solid rgba(255, 205, 115, 0.28);
+    background: rgba(255, 255, 255, 0.07);
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
 }
 
 .account-dropdown__inner { display: flex; flex-direction: column; gap: 10px; }
@@ -464,34 +471,56 @@
     color: rgba(255, 246, 225, 0.62);
 }
 .account-dropdown__btn {
+    /* Apple liquid-glass — translucent white with backdrop blur, inset
+       top highlight for elevation. The same visual register the existing
+       liquid-glass-btn family uses. */
     width: 100%;
     padding: 10px 14px;
-    border-radius: 11px;
-    border: 1px solid rgba(255, 205, 115, 0.28);
-    background: rgba(255, 205, 115, 0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
     color: rgba(255, 246, 225, 0.95);
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.01em;
     cursor: pointer;
-    transition: background 0.18s ease, border-color 0.18s ease,
-                color 0.18s ease, box-shadow 0.2s ease, transform 0.16s ease;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 12px rgba(255, 255, 255, 0.03),
+        0 2px 8px rgba(0, 0, 0, 0.18);
+    transition: background 0.2s ease, border-color 0.2s ease,
+                color 0.2s ease, box-shadow 0.22s ease, transform 0.16s ease;
 }
 .account-dropdown__btn:hover {
-    background: rgba(255, 205, 115, 0.16);
-    border-color: rgba(255, 205, 115, 0.55);
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.32);
     color: #fff8e8;
-    box-shadow: 0 0 18px rgba(255, 205, 115, 0.18);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 0 14px rgba(255, 255, 255, 0.06),
+        0 6px 18px rgba(0, 0, 0, 0.22),
+        0 0 22px rgba(255, 205, 115, 0.12);
 }
 .account-dropdown__btn:active { transform: scale(0.97); }
+/* Primary — gold-tinted glass: same translucent base, gold accent layered
+   on top so it reads as the dominant action without losing the glass feel. */
 .account-dropdown__btn--primary {
-    background: linear-gradient(135deg, rgba(255, 205, 115, 0.32), rgba(255, 205, 115, 0.18));
-    border-color: rgba(255, 205, 115, 0.6);
+    background:
+        linear-gradient(135deg, rgba(255, 220, 160, 0.28), rgba(255, 200, 110, 0.12)),
+        rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 220, 160, 0.5);
     color: #fff8e8;
 }
 .account-dropdown__btn--primary:hover {
-    background: linear-gradient(135deg, rgba(255, 205, 115, 0.42), rgba(255, 205, 115, 0.26));
-    box-shadow: 0 8px 22px rgba(255, 205, 115, 0.2);
+    background:
+        linear-gradient(135deg, rgba(255, 220, 160, 0.4), rgba(255, 200, 110, 0.22)),
+        rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 220, 160, 0.7);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        0 8px 24px rgba(255, 205, 115, 0.22);
 }
 
 /* Signed-in header */
@@ -500,7 +529,7 @@
     align-items: center;
     gap: 12px;
     padding: 4px 4px 10px;
-    border-bottom: 1px solid rgba(255, 205, 115, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
 }
 .account-dropdown__avatar {
     width: 36px;
@@ -560,7 +589,7 @@
     transition: background 0.16s ease, color 0.16s ease;
 }
 .account-dropdown__row:hover {
-    background: rgba(255, 205, 115, 0.08);
+    background: rgba(255, 255, 255, 0.08);
     color: #faf3e3;
 }
 .account-dropdown__row svg { flex-shrink: 0; opacity: 0.8; }
@@ -578,7 +607,7 @@
 
 .account-dropdown__divider {
     height: 1px;
-    background: rgba(255, 205, 115, 0.12);
+    background: rgba(255, 255, 255, 0.14);
     margin: 4px -4px;
 }
 
@@ -608,31 +637,39 @@
 .auth-modal.is-open .auth-modal__scrim { opacity: 1; }
 
 .auth-modal__card {
+    /* Apple liquid-glass card — translucent surface, deep saturated blur,
+       inset top highlight for floating-glass elevation. The cosmos colour
+       leaks through; the card reads as a sheet of polished glass over the
+       scene rather than a solid panel. */
     position: relative;
     width: min(420px, calc(100vw - 48px));
-    border-radius: 22px;
-    background: rgba(8, 6, 3, 0.95);
-    border: 1px solid rgba(255, 205, 115, 0.32);
-    backdrop-filter: blur(22px) saturate(1.2);
-    -webkit-backdrop-filter: blur(22px) saturate(1.2);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(50px) saturate(190%);
+    -webkit-backdrop-filter: blur(50px) saturate(190%);
     box-shadow:
-        0 28px 64px rgba(0, 0, 0, 0.6),
-        0 0 56px rgba(255, 205, 115, 0.1),
-        inset 0 1px 0 rgba(255, 240, 200, 0.08);
-    color: rgba(255, 246, 225, 0.92);
-    padding: 28px;
+        0 32px 80px rgba(0, 0, 0, 0.55),
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        inset 0 0 32px rgba(255, 255, 255, 0.04);
+    color: rgba(255, 246, 225, 0.94);
+    padding: 30px;
     transform: scale(0.96) translateY(8px);
     opacity: 0;
     transition: opacity 0.32s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .auth-modal.is-open .auth-modal__card { opacity: 1; transform: scale(1) translateY(0); }
 
-/* Mode toggle (Sign in / Create account) */
+/* Mode toggle (Sign in / Create account) — apple liquid-glass pill that
+   slides between the two modes. */
 .auth-toggle {
     display: inline-flex;
     border-radius: 999px;
-    border: 1px solid rgba(255, 205, 115, 0.18);
-    background: rgba(255, 205, 115, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
     padding: 3px;
     margin-bottom: 18px;
     position: relative;
@@ -658,9 +695,12 @@
     left: 3px;
     width: calc(50% - 3px);
     border-radius: 999px;
-    background: linear-gradient(180deg, rgba(255, 205, 115, 0.22), rgba(255, 205, 115, 0.06));
-    border: 1px solid rgba(255, 205, 115, 0.4);
-    box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.12);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        0 2px 6px rgba(0, 0, 0, 0.18);
     transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
     pointer-events: none;
 }
@@ -695,40 +735,64 @@
 }
 .auth-field__input {
     width: 100%;
-    padding: 11px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 205, 115, 0.22);
-    background: rgba(255, 205, 115, 0.04);
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
     color: #faf3e3;
     font-size: 13.5px;
     font-family: inherit;
-    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 0 16px rgba(255, 255, 255, 0.02);
+    transition: border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
     box-sizing: border-box;
 }
+.auth-field__input::placeholder { color: rgba(255, 246, 225, 0.4); }
 .auth-field__input:focus {
     outline: none;
-    border-color: rgba(255, 205, 115, 0.65);
-    background: rgba(255, 205, 115, 0.08);
-    box-shadow: 0 0 0 3px rgba(255, 205, 115, 0.15);
+    border-color: rgba(255, 220, 160, 0.55);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 0 0 3px rgba(255, 205, 115, 0.18);
 }
 
 .auth-modal__primary {
+    /* Gold-tinted glass — translucent base + warm gradient on top so it
+       reads as the dominant action without losing the glass feel. */
     width: 100%;
-    padding: 12px 16px;
-    border-radius: 11px;
-    border: 1px solid rgba(255, 205, 115, 0.6);
-    background: linear-gradient(135deg, rgba(255, 205, 115, 0.36), rgba(255, 205, 115, 0.18));
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 220, 160, 0.55);
+    background:
+        linear-gradient(135deg, rgba(255, 220, 160, 0.36), rgba(255, 200, 110, 0.16)),
+        rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
     color: #fff8e8;
     font-size: 13.5px;
     font-weight: 500;
     letter-spacing: 0.01em;
     cursor: pointer;
-    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.18s ease;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 0 14px rgba(255, 240, 200, 0.08),
+        0 4px 14px rgba(255, 205, 115, 0.16);
+    transition: background 0.22s ease, box-shadow 0.22s ease,
+                border-color 0.22s ease, transform 0.18s ease;
     margin-bottom: 18px;
 }
 .auth-modal__primary:hover {
-    background: linear-gradient(135deg, rgba(255, 205, 115, 0.46), rgba(255, 205, 115, 0.26));
-    box-shadow: 0 8px 24px rgba(255, 205, 115, 0.22);
+    background:
+        linear-gradient(135deg, rgba(255, 220, 160, 0.5), rgba(255, 200, 110, 0.26)),
+        rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 220, 160, 0.78);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.36),
+        0 8px 28px rgba(255, 205, 115, 0.28);
 }
 .auth-modal__primary:active { transform: scale(0.98); }
 .auth-modal__primary:disabled { opacity: 0.5; cursor: wait; }
@@ -748,7 +812,7 @@
     content: '';
     flex: 1;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 205, 115, 0.18), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
 }
 
 .auth-oauth {
@@ -758,22 +822,32 @@
 }
 .auth-oauth__btn {
     width: 100%;
-    padding: 11px 14px;
-    border-radius: 11px;
-    border: 1px solid rgba(255, 205, 115, 0.18);
-    background: rgba(255, 246, 225, 0.04);
-    color: rgba(255, 246, 225, 0.9);
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    color: rgba(255, 246, 225, 0.92);
     font-size: 13px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.16s ease;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 12px rgba(255, 255, 255, 0.03),
+        0 2px 8px rgba(0, 0, 0, 0.18);
+    transition: background 0.22s ease, border-color 0.22s ease,
+                box-shadow 0.22s ease, transform 0.16s ease;
 }
 .auth-oauth__btn:hover {
-    background: rgba(255, 246, 225, 0.08);
-    border-color: rgba(255, 205, 115, 0.42);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.32);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        0 6px 20px rgba(0, 0, 0, 0.24);
 }
 .auth-oauth__btn:active { transform: scale(0.98); }
 .auth-oauth__icon { width: 16px; height: 16px; flex-shrink: 0; }
@@ -795,24 +869,27 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    border: 1px solid rgba(255, 205, 115, 0.2);
-    background: transparent;
-    color: rgba(255, 246, 225, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    color: rgba(255, 246, 225, 0.6);
     cursor: pointer;
     font-size: 16px;
     line-height: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
     transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 .auth-modal__close:hover {
     color: #faf3e3;
-    background: rgba(255, 205, 115, 0.12);
-    border-color: rgba(255, 205, 115, 0.5);
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* ── Magic-link confirmation morph ────────────────────────────────────── */
@@ -856,17 +933,21 @@
 }
 .auth-confirm__back {
     width: 100%;
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 205, 115, 0.22);
-    background: transparent;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
     color: rgba(255, 246, 225, 0.78);
     font-size: 12.5px;
     cursor: pointer;
-    transition: background 0.18s ease, color 0.18s ease;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 .auth-confirm__back:hover {
-    background: rgba(255, 205, 115, 0.08);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.32);
     color: #faf3e3;
 }
 
