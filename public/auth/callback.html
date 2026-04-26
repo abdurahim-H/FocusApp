@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signing in… · Cosmic Focus</title>
+<style>
+    html, body {
+        margin: 0;
+        height: 100%;
+        background: #050308;
+        color: #faf3e3;
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+            radial-gradient(circle at center, rgba(255, 205, 115, 0.07) 0%, transparent 55%),
+            radial-gradient(ellipse at center, rgba(10, 8, 4, 1) 0%, #050308 70%);
+    }
+    .wrap { text-align: center; padding: 24px; }
+    .ring {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 22px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 205, 115, 0.25);
+        border-top-color: rgba(255, 205, 115, 0.95);
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h1 {
+        font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
+        font-size: 22px;
+        font-weight: 600;
+        margin: 0 0 8px;
+    }
+    p { font-size: 13px; color: rgba(255, 246, 225, 0.6); margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="ring"></div>
+    <h1>Finishing sign-in…</h1>
+    <p>Returning you to Cosmic Focus.</p>
+</div>
+<script>
+    // Supabase puts the session in the URL fragment (#access_token=…).
+    // Returning to / re-mounts the app, which calls auth.init() and the
+    // SDK picks the session out of the URL on its own.
+    setTimeout(() => { window.location.replace('/'); }, 600);
+</script>
+</body>
+</html>

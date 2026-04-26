@@ -182,6 +182,8 @@ Anything in `public/` is copied verbatim to `dist/` root with its filename prese
 - Don't reintroduce `console.log` as a user-visible signal — it's stripped from prod. Use `console.warn` / `error` for anything meant to be seen.
 - Don't create new `*.md` files beyond the five documented above unless the user asks.
 - Don't run `git push --force`, `git reset --hard`, `rm -rf`, or `localStorage.clear()` during a debug session without confirming.
+- **Don't import `@supabase/supabase-js` from anywhere except `js/features/auth.js`.** That file is the single point of contact with the auth provider. Everything else calls the thin API it exposes (`signInWithMagicLink`, `signInWithOAuth`, `signOut`, `onChange`, `getUser`, `isConfigured`). One file changes if we ever swap providers.
+- **Don't put `position: fixed` chrome inside `.container`.** `.container` has `contain: layout style paint` which makes it the containing block for fixed descendants AND clips paint and pointer hits to its box. Settings panel, cosmos toolbar, library drawer, save-mix popover, sleep popover, account satellite, account dropdown, and auth modal all live as direct children of `<body>` for this reason. Adding a new floating overlay? It goes outside `.container`.
 
 ## Where to look first when debugging common symptoms
 

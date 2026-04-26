@@ -101,10 +101,133 @@
     <button class="help-trigger" id="helpBtn" aria-label="Help">?</button>
 
     <!-- Main Navigation — Ambient tab removed; sounds live in the cosmos
-         and are managed via the Cosmos Toolbar (top-left of viewport). -->
-    <div class="nav-buttons">
-        <button class="nav-btn active" data-mode="home">Home</button>
-        <button class="nav-btn" data-mode="focus">Focus</button>
+         and are managed via the Cosmos Toolbar (top-left of viewport).
+         The nav-cluster wraps the pill + the account satellite as a
+         single composed centred unit (per ACCOUNTS_PLAN.md / account.md).
+         The filament tethers the satellite to the right side of the pill. -->
+    <div class="nav-cluster">
+        <div class="nav-buttons">
+            <button class="nav-btn active" data-mode="home">Home</button>
+            <button class="nav-btn" data-mode="focus">Focus</button>
+        </div>
+
+        <!-- Filament — the engraved data-rail connecting nav to satellite.
+             Pure visual; aria-hidden. SVG so the rivet, ticks and pulse
+             render crisply at any DPR. -->
+        <div class="nav-filament" aria-hidden="true">
+            <svg class="nav-filament__svg" viewBox="0 0 88 12" preserveAspectRatio="none" width="88" height="12">
+                <!-- Baseline thread, brightening from pill end (left) to satellite end (right) -->
+                <defs>
+                    <linearGradient id="filamentGradient" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%"   stop-color="rgba(255, 205, 115, 0)"/>
+                        <stop offset="14%"  stop-color="rgba(255, 205, 115, 0.35)"/>
+                        <stop offset="100%" stop-color="rgba(255, 205, 115, 0.7)"/>
+                    </linearGradient>
+                    <linearGradient id="filamentTickGradient" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%"   stop-color="rgba(255, 205, 115, 0)"/>
+                        <stop offset="14%"  stop-color="rgba(255, 205, 115, 0.4)"/>
+                        <stop offset="100%" stop-color="rgba(255, 205, 115, 0.85)"/>
+                    </linearGradient>
+                    <radialGradient id="filamentRivet" cx="35%" cy="35%" r="65%">
+                        <stop offset="0%"   stop-color="#FFF6D8"/>
+                        <stop offset="35%"  stop-color="#FFD982"/>
+                        <stop offset="80%"  stop-color="#B5853A"/>
+                        <stop offset="100%" stop-color="rgba(120, 80, 30, 0.4)"/>
+                    </radialGradient>
+                </defs>
+                <!-- Hairline thread -->
+                <line class="nav-filament__thread" x1="6" y1="6" x2="86" y2="6"
+                      stroke="url(#filamentGradient)" stroke-width="0.5"/>
+                <!-- Engraved tick marks: 3px stroke, 2px gap, full length -->
+                <line class="nav-filament__ticks" x1="10" y1="6" x2="80" y2="6"
+                      stroke="url(#filamentTickGradient)" stroke-width="2"
+                      stroke-dasharray="3 2" stroke-linecap="round" opacity="0.6"/>
+                <!-- Travelling energy pulse -->
+                <rect class="nav-filament__pulse" x="6" y="5" width="14" height="2" rx="1"
+                      fill="rgba(255, 246, 225, 0.95)"/>
+                <!-- Jewel rivet at the pill end (left) -->
+                <circle class="nav-filament__rivet" cx="4" cy="6" r="2.5"
+                        fill="url(#filamentRivet)"/>
+                <circle class="nav-filament__rivet-halo" cx="4" cy="6" r="6"
+                        fill="rgba(255, 205, 115, 0.18)" filter="url(#filamentRivetBlur)"/>
+                <defs>
+                    <filter id="filamentRivetBlur" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="1.2"/>
+                    </filter>
+                </defs>
+            </svg>
+        </div>
+
+        <!-- Account Satellite — the trigger. Variant A (Orbit): two
+             counter-rotating rings with pips around a perfect 40px circle. -->
+        <button class="account-satellite is-signed-out" id="accountTrigger"
+                type="button" aria-label="Sign in" data-tooltip-name="Sign in"
+                data-tooltip-sub="save your sky">
+            <!-- Orbital rings (Variant A — Orbit). Two SVG rings rotating
+                 in opposite directions at different speeds. Each carries a
+                 small pip that travels with the ring. -->
+            <svg class="account-satellite__orbits" viewBox="0 0 84 84" width="84" height="84" aria-hidden="true">
+                <g class="account-satellite__orbit account-satellite__orbit--inner">
+                    <circle cx="42" cy="42" r="27"
+                            fill="none"
+                            stroke="rgba(255, 205, 115, 0.28)"
+                            stroke-width="0.6"
+                            stroke-dasharray="2 3"/>
+                    <circle class="account-satellite__pip" cx="42" cy="15" r="1.5"
+                            fill="rgba(255, 220, 150, 0.95)"/>
+                </g>
+                <g class="account-satellite__orbit account-satellite__orbit--outer">
+                    <circle cx="42" cy="42" r="33"
+                            fill="none"
+                            stroke="rgba(255, 205, 115, 0.13)"
+                            stroke-width="0.5"/>
+                    <circle class="account-satellite__pip" cx="75" cy="42" r="1.3"
+                            fill="rgba(255, 220, 150, 0.85)"/>
+                </g>
+            </svg>
+
+            <!-- Bezel ring — engraved metal ring 2px outside the core. -->
+            <span class="account-satellite__bezel" aria-hidden="true"></span>
+
+            <!-- Outer halo — fades in with cursor proximity. -->
+            <span class="account-satellite__halo" aria-hidden="true"></span>
+
+            <!-- Core surface — dark obsidian (signed-out) or polished gold
+                 (signed-in). The core also holds the specular highlight. -->
+            <span class="account-satellite__core" aria-hidden="true">
+                <span class="account-satellite__specular" aria-hidden="true"></span>
+                <!-- Person glyph (signed-out) -->
+                <svg class="account-satellite__glyph" viewBox="0 0 16 16" width="15" height="15"
+                     fill="none" stroke="currentColor" stroke-width="1.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="8" cy="6" r="2.6"/>
+                    <path d="M3 13.5c0-2.5 2.2-4 5-4s5 1.5 5 4"/>
+                </svg>
+                <!-- Initial (signed-in) — JS swaps in -->
+                <span class="account-satellite__initial" aria-hidden="true"></span>
+                <!-- Avatar image (signed-in with avatar) — JS swaps in -->
+                <img class="account-satellite__avatar" alt="" aria-hidden="true">
+            </span>
+
+            <!-- Status dot — sync in flight / failed. JS toggles classes. -->
+            <span class="account-satellite__status" aria-hidden="true"></span>
+        </button>
+    </div>
+
+    <!-- Account dropdown — anchored under the satellite when open. Lives
+         outside .container so position:fixed resolves to the viewport. -->
+    <div class="account-dropdown hidden" id="accountDropdown" role="dialog"
+         aria-modal="false" aria-hidden="true" aria-label="Account">
+        <div class="account-dropdown__arrow" aria-hidden="true"></div>
+        <div class="account-dropdown__inner"></div>
+    </div>
+
+    <!-- Auth modal — sign in / sign up flow. Glass card centred over the
+         cosmos, focus-trapped, Esc dismisses. -->
+    <div class="auth-modal" id="authModal" role="dialog" aria-modal="true"
+         aria-hidden="true" aria-label="Sign in to Cosmic Focus">
+        <div class="auth-modal__scrim" data-auth-close></div>
+        <div class="auth-modal__card" id="authModalCard"></div>
     </div>
 
     <!-- Main Content Container -->

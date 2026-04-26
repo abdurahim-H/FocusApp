@@ -8,6 +8,50 @@
 
 export const HELP_CATEGORIES = [
     // ═══════════════════════════════════════════════════════════════════════
+    // ACCOUNT
+    // ═══════════════════════════════════════════════════════════════════════
+    {
+        id: 'account',
+        label: 'Account',
+        // Person silhouette — matches the satellite glyph.
+        iconSvg: '<circle cx="12" cy="9" r="3.5"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/>',
+        entries: [
+            {
+                q: 'What is the account satellite?',
+                a: 'The small jewel-cut circle hanging off the right edge of the Home / Focus pill at the top of the screen. It\'s your account control. Click it to sign in or, when signed in, to see your profile menu. The thin engraved rail connecting it to the nav pill is purely decorative — it tells the eye that the satellite belongs with the nav, not floating on its own.',
+            },
+            {
+                q: 'Why would I sign in?',
+                a: 'Right now: it\'s the start of the cross-device sync feature. In the next release, signing in will keep your tasks, stats, settings, and saved constellations synced across every device you use Cosmic Focus on. Today the sign-in itself works — your data still lives in localStorage until the sync layer ships.',
+            },
+            {
+                q: 'How do I sign in or create an account?',
+                a: 'Click the satellite, then <strong>Sign in</strong> or <strong>Create account</strong>. A modal opens with three options:<br><strong>Magic link</strong> — type your email, we send a one-tap sign-in link. No password.<br><strong>Continue with Google</strong> — single click, OAuth handles it.<br><strong>Continue with Apple</strong> — same, on Apple devices and any browser that supports Sign in with Apple.',
+            },
+            {
+                q: 'Why no password?',
+                a: 'Magic links and OAuth are safer and less friction. Passwords get reused across sites, leaked in breaches, and forgotten. A link to your inbox proves you control the email; the OAuth providers prove you control your Google or Apple account. We never see a password and you never have to remember one.',
+            },
+            {
+                q: 'How do I sign out?',
+                a: 'Click the satellite while signed in. The dropdown shows your name, email, and a <strong>Sign out</strong> row at the bottom.',
+            },
+            {
+                q: 'What does the small dot on the satellite mean?',
+                a: 'A pulsing gold dot at 1 o\'clock = sync in flight. A solid red dot = sync failed; click it to retry. No dot = idle. Sync itself is Phase 2 — the dot won\'t actually appear until then.',
+            },
+            {
+                q: 'Is my data private?',
+                a: 'Yes. Until you sign in, everything stays in your browser\'s localStorage — same as before. After you sign in, the sync layer (Phase 2) will store your data in a Supabase Postgres database protected by row-level security. Auth credentials live in your browser\'s secure session storage; we never see your password (there isn\'t one).',
+            },
+            {
+                q: 'I signed in but nothing seems different',
+                a: 'That\'s expected for now. The visible difference is the satellite — it shows your initial instead of the person glyph, and goes gold instead of dark. The actual cross-device sync (where your tasks/stats/constellations follow you to a new device) is the next feature, not this one.',
+            },
+        ],
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════
     // GETTING STARTED
     // ═══════════════════════════════════════════════════════════════════════
     {

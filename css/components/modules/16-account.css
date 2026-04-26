@@ -1,0 +1,922 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCOUNT SATELLITE — top-right of the nav cluster, tethered by a filament.
+   Variant A (Orbit) per account.md — two counter-rotating rings with pips
+   around a perfect 40px circle, an engraved data-rail with a jewel rivet
+   at the pill end, and a travelling energy pulse.
+
+   Geometry recap:
+     • Pill (Home / Focus) — existing, centred at top
+     • Filament — 80px engraved rail, hairline thread + ticks + pulse + rivet
+     • Satellite — 40×40 perfect circle
+     • Orbital rings — 7px and 13px outside the core, counter-rotating
+     • Status dot — 1 o'clock on the bezel
+   The rig reads as ONE composed centred unit; the pill shifts left to
+   accommodate so the satellite ends up over screen centre's right shoulder.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Cluster: pill + filament + satellite as one centred row ──────────── */
+.nav-cluster {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    /* No background, no border — the cluster is a layout primitive. */
+}
+
+/* The pill keeps its own styling (defined in responsive.css). The cluster
+   wrapper just positions it inside the row. We strip its old fixed-position
+   so it flows inline within the cluster. */
+.nav-cluster .nav-buttons {
+    position: static !important;
+    transform: none !important;
+    /* Drop the auto-centring squash variables when sitting in the cluster
+       — the cluster owns the centring now. */
+    margin: 0;
+}
+
+/* ── Filament — engraved data-rail ─────────────────────────────────────── */
+.nav-filament {
+    width: 88px;
+    height: 12px;
+    flex-shrink: 0;
+    /* Filament sits *between* pill and satellite; its left edge meets
+       the pill, its right edge dissolves into the satellite's bezel. */
+    margin: 0 -2px 0 -2px;
+    pointer-events: none;
+}
+.nav-filament__svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+/* The travelling energy pulse — runs left→right every 3.4s. */
+.nav-filament__pulse {
+    filter: drop-shadow(0 0 4px rgba(255, 220, 150, 0.95))
+            drop-shadow(0 0 8px rgba(255, 205, 115, 0.55));
+    transform-box: fill-box;
+    animation: filamentPulseTravel 3.4s cubic-bezier(0.55, 0, 0.45, 1) infinite;
+    opacity: 0;
+}
+@keyframes filamentPulseTravel {
+    /* Pulse enters faintly at the rivet (left), brightens through the
+       middle, fades into the satellite (right). */
+    0%   { transform: translateX(0px);   opacity: 0; }
+    8%   { transform: translateX(2px);   opacity: 0.6; }
+    50%  { transform: translateX(34px);  opacity: 1; }
+    92%  { transform: translateX(64px);  opacity: 0.6; }
+    100% { transform: translateX(70px);  opacity: 0; }
+}
+
+.nav-filament__rivet {
+    filter: drop-shadow(0 0 6px rgba(255, 205, 115, 0.55));
+}
+
+/* ── Satellite — the trigger ──────────────────────────────────────────── */
+.account-satellite {
+    /* Custom property updated by JS (proximity glow 0..1). */
+    --glow: 0;
+    /* Larger box than the satellite itself so the orbital rings live
+       inside the button's bounds — keeps hover state coherent. */
+    position: relative;
+    width: 84px;
+    height: 84px;
+    flex-shrink: 0;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.account-satellite:hover { transform: scale(1.06); }
+.account-satellite:active { transform: scale(1.02); transition-duration: 0.12s; }
+
+/* Sharp keyboard focus ring — distinct from the bloomed proximity halo. */
+.account-satellite:focus-visible {
+    outline: none;
+}
+.account-satellite:focus-visible::before {
+    content: '';
+    position: absolute;
+    inset: 18px;            /* hugs the bezel + 4px outside */
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 130, 0.95);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+}
+
+/* ── Orbital rings (Variant A — Orbit) ────────────────────────────────── */
+.account-satellite__orbits {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: visible;
+}
+.account-satellite__orbit {
+    transform-origin: 42px 42px;  /* SVG centre */
+}
+.account-satellite__orbit--inner {
+    animation: orbitInner 22s linear infinite;
+}
+.account-satellite__orbit--outer {
+    animation: orbitOuter 38s linear infinite;
+}
+.account-satellite__pip {
+    filter: drop-shadow(0 0 3px rgba(255, 220, 150, 0.9));
+}
+@keyframes orbitInner {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+@keyframes orbitOuter {
+    from { transform: rotate(360deg); }
+    to   { transform: rotate(0deg); }
+}
+
+/* ── Bezel — engraved metal ring 2px outside the core ─────────────────── */
+.account-satellite__bezel {
+    position: absolute;
+    /* Core is 40×40, centred. Bezel is 44×44 (2px outside), centred. */
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+    margin-left: -22px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 205, 115, calc(0.18 + var(--glow) * 0.55));
+    pointer-events: none;
+    transition: border-color 0.25s ease;
+}
+
+/* ── Outer halo — fades in with cursor proximity ──────────────────────── */
+.account-satellite__halo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    margin-top: -30px;
+    margin-left: -30px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle,
+        rgba(255, 205, 115, calc(0.28 * var(--glow))) 0%,
+        rgba(255, 205, 115, calc(0.18 * var(--glow))) 35%,
+        transparent 70%);
+    transition: background 0.18s ease;
+}
+
+/* ── Core — the surface ────────────────────────────────────────────────
+   Signed-out: deep obsidian with a tiny ember glow.
+   Signed-in: polished gold gradient (signet).
+   Both use the same 40×40 footprint with a subtle drop shadow + specular. */
+.account-satellite__core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    margin-left: -20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    /* The drop shadow that anchors the satellite in space. */
+    box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(0, 0, 0, 0.4);
+    color: rgba(255, 230, 188, calc(0.55 + var(--glow) * 0.45));
+    transition: color 0.25s ease, box-shadow 0.4s ease;
+}
+
+/* Signed-out core: deep obsidian + warm interior ember. */
+.account-satellite.is-signed-out .account-satellite__core {
+    background:
+        radial-gradient(circle at 38% 38%,
+            rgba(255, 175, 80, 0.22) 0%,
+            rgba(120, 75, 30, 0.12) 28%,
+            rgba(8, 6, 3, 1) 75%),
+        linear-gradient(155deg, #14100a 0%, #07060c 100%);
+}
+
+/* Signed-in core: polished gold gradient — light gold UL → deep amber LR. */
+.account-satellite.is-signed-in .account-satellite__core {
+    background:
+        radial-gradient(120% 120% at 28% 22%,
+            #FFF6D8 0%,
+            #FFD982 25%,
+            #C8923A 65%,
+            #6F4A1A 100%);
+    color: rgba(20, 12, 4, 0.95);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.65),
+        0 0 0 1px rgba(255, 205, 115, 0.35),
+        0 0 28px rgba(255, 205, 115, calc(0.2 + var(--glow) * 0.35));
+}
+
+/* Specular highlight — small light catch in the upper-left quadrant. */
+.account-satellite__specular {
+    position: absolute;
+    top: 4px;
+    left: 5px;
+    width: 12px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center,
+        rgba(255, 246, 225, 0.55) 0%,
+        rgba(255, 246, 225, 0) 70%);
+    pointer-events: none;
+    filter: blur(1px);
+}
+.account-satellite.is-signed-in .account-satellite__specular {
+    background: radial-gradient(ellipse at center,
+        rgba(255, 252, 232, 0.85) 0%,
+        rgba(255, 246, 225, 0) 70%);
+}
+
+/* Glyph — visible signed-out only. */
+.account-satellite__glyph {
+    position: relative;
+    z-index: 1;
+    color: inherit;
+    transition: opacity 0.25s ease;
+}
+.account-satellite.is-signed-in .account-satellite__glyph {
+    display: none;
+}
+
+/* Initial — visible signed-in only. */
+.account-satellite__initial {
+    position: relative;
+    z-index: 1;
+    display: none;
+    font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: rgba(20, 12, 4, 0.9);
+    text-shadow: 0 0.5px 0 rgba(255, 246, 225, 0.45);
+    letter-spacing: 0;
+    line-height: 1;
+}
+.account-satellite.is-signed-in:not(.has-avatar) .account-satellite__initial {
+    display: inline-block;
+}
+
+/* Avatar image — visible signed-in with avatar. */
+.account-satellite__avatar {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: none;
+}
+.account-satellite.is-signed-in.has-avatar .account-satellite__avatar {
+    display: block;
+}
+.account-satellite.is-signed-in.has-avatar .account-satellite__initial,
+.account-satellite.is-signed-in.has-avatar .account-satellite__glyph {
+    display: none;
+}
+
+/* ── Status dot ────────────────────────────────────────────────────────── */
+.account-satellite__status {
+    position: absolute;
+    /* 1 o'clock relative to the 40×40 core, centred in the 84×84 button.
+       Core centre is at 42,42; 1 o'clock at radius 22 = (42 + sin(60°)*22, 42 - cos(60°)*22)
+       = (~61, ~31). Translate to %: 61/84 ≈ 73%, 31/84 ≈ 37%. */
+    top: 22px;
+    right: 17px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(8, 6, 3, 0.95);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.account-satellite.is-syncing .account-satellite__status {
+    opacity: 1;
+    background: rgba(255, 205, 115, 1);
+    box-shadow: 0 0 8px rgba(255, 205, 115, 0.85);
+    animation: statusPulse 1.4s ease-in-out infinite;
+}
+.account-satellite.is-sync-error .account-satellite__status {
+    opacity: 1;
+    background: #FF6B6B;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.7);
+    pointer-events: auto;
+    cursor: pointer;
+}
+@keyframes statusPulse {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(255, 205, 115, 0.85),
+                    0 0 0 0 rgba(255, 205, 115, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(255, 205, 115, 1),
+                    0 0 0 6px rgba(255, 205, 115, 0);
+    }
+}
+
+/* ── Tooltip — glass pill below the satellite ─────────────────────────── */
+.account-satellite::after {
+    content: '';
+    /* Two-line tooltip rendered via ::after + CSS variables. We put the
+       NAME text in --name and the SUB text in --sub; the rule below
+       composes them with a real <br>-style wrap via white-space:pre-line. */
+    display: none;
+}
+/* Use a real DOM element for the tooltip so we can two-line it cleanly. */
+.account-satellite__tooltip {
+    position: absolute;
+    top: calc(50% + 30px);
+    left: 50%;
+    transform: translateX(-50%) translateY(2px);
+    padding: 7px 12px;
+    border-radius: 10px;
+    background: #07060c;
+    border: 1px solid rgba(255, 205, 115, 0.35);
+    color: #faf3e3;
+    box-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.55),
+        0 0 22px rgba(255, 205, 115, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    pointer-events: none;
+    opacity: 0;
+    white-space: nowrap;
+    text-align: center;
+    transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.account-satellite__tooltip-name {
+    display: block;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: #faf3e3;
+}
+.account-satellite__tooltip-sub {
+    display: block;
+    font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
+    font-style: italic;
+    font-size: 11px;
+    color: rgba(250, 243, 227, 0.45);
+    margin-top: 1px;
+}
+/* Tooltip arrow pointing up at the satellite */
+.account-satellite__tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid rgba(255, 205, 115, 0.35);
+}
+.account-satellite:hover .account-satellite__tooltip,
+.account-satellite:focus-visible .account-satellite__tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Hide tooltip when dropdown is open — the dropdown takes over. */
+.account-satellite.is-open .account-satellite__tooltip {
+    opacity: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ACCOUNT DROPDOWN — anchored under the satellite when open.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.account-dropdown {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2100;
+    width: 268px;
+    border-radius: 16px;
+    background: rgba(8, 6, 3, 0.92);
+    border: 1px solid rgba(255, 205, 115, 0.28);
+    backdrop-filter: blur(22px) saturate(1.2);
+    -webkit-backdrop-filter: blur(22px) saturate(1.2);
+    box-shadow:
+        0 18px 48px rgba(0, 0, 0, 0.5),
+        0 0 36px rgba(255, 205, 115, 0.08),
+        inset 0 1px 0 rgba(255, 240, 200, 0.06);
+    color: rgba(255, 246, 225, 0.92);
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 14px;
+}
+.account-dropdown.hidden { display: none; }
+.account-dropdown.is-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+.account-dropdown__arrow {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: rgba(8, 6, 3, 0.92);
+    border-left: 1px solid rgba(255, 205, 115, 0.28);
+    border-top: 1px solid rgba(255, 205, 115, 0.28);
+}
+
+.account-dropdown__inner { display: flex; flex-direction: column; gap: 10px; }
+
+/* Signed-out dropdown */
+.account-dropdown__intro-title {
+    margin: 2px 4px 0;
+    font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #faf3e3;
+    letter-spacing: 0.01em;
+}
+.account-dropdown__intro-body {
+    margin: 0 4px 6px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(255, 246, 225, 0.62);
+}
+.account-dropdown__btn {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 11px;
+    border: 1px solid rgba(255, 205, 115, 0.28);
+    background: rgba(255, 205, 115, 0.08);
+    color: rgba(255, 246, 225, 0.95);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease,
+                color 0.18s ease, box-shadow 0.2s ease, transform 0.16s ease;
+}
+.account-dropdown__btn:hover {
+    background: rgba(255, 205, 115, 0.16);
+    border-color: rgba(255, 205, 115, 0.55);
+    color: #fff8e8;
+    box-shadow: 0 0 18px rgba(255, 205, 115, 0.18);
+}
+.account-dropdown__btn:active { transform: scale(0.97); }
+.account-dropdown__btn--primary {
+    background: linear-gradient(135deg, rgba(255, 205, 115, 0.32), rgba(255, 205, 115, 0.18));
+    border-color: rgba(255, 205, 115, 0.6);
+    color: #fff8e8;
+}
+.account-dropdown__btn--primary:hover {
+    background: linear-gradient(135deg, rgba(255, 205, 115, 0.42), rgba(255, 205, 115, 0.26));
+    box-shadow: 0 8px 22px rgba(255, 205, 115, 0.2);
+}
+
+/* Signed-in header */
+.account-dropdown__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 4px 10px;
+    border-bottom: 1px solid rgba(255, 205, 115, 0.12);
+}
+.account-dropdown__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background:
+        radial-gradient(120% 120% at 28% 22%, #FFF6D8 0%, #FFD982 25%, #C8923A 65%, #6F4A1A 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(20, 12, 4, 0.95);
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(255, 205, 115, 0.25);
+    overflow: hidden;
+}
+.account-dropdown__avatar img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.account-dropdown__identity { min-width: 0; }
+.account-dropdown__name {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #faf3e3;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.account-dropdown__email {
+    display: block;
+    font-size: 11px;
+    color: rgba(255, 246, 225, 0.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 2px;
+}
+
+/* Action rows */
+.account-dropdown__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 8px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.85);
+    font-size: 12.5px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.16s ease, color 0.16s ease;
+}
+.account-dropdown__row:hover {
+    background: rgba(255, 205, 115, 0.08);
+    color: #faf3e3;
+}
+.account-dropdown__row svg { flex-shrink: 0; opacity: 0.8; }
+.account-dropdown__row--danger { color: rgba(255, 170, 170, 0.9); }
+.account-dropdown__row--danger:hover {
+    background: rgba(255, 80, 80, 0.1);
+    color: rgba(255, 200, 200, 1);
+}
+.account-dropdown__sync-state {
+    margin-left: auto;
+    font-size: 10.5px;
+    color: rgba(255, 246, 225, 0.45);
+    font-variant-numeric: tabular-nums;
+}
+
+.account-dropdown__divider {
+    height: 1px;
+    background: rgba(255, 205, 115, 0.12);
+    margin: 4px -4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH MODAL — sign in / sign up flow
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.auth-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2400;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.auth-modal.is-open { display: flex; }
+.auth-modal__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 1, 4, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.28s ease;
+}
+.auth-modal.is-open .auth-modal__scrim { opacity: 1; }
+
+.auth-modal__card {
+    position: relative;
+    width: min(420px, calc(100vw - 48px));
+    border-radius: 22px;
+    background: rgba(8, 6, 3, 0.95);
+    border: 1px solid rgba(255, 205, 115, 0.32);
+    backdrop-filter: blur(22px) saturate(1.2);
+    -webkit-backdrop-filter: blur(22px) saturate(1.2);
+    box-shadow:
+        0 28px 64px rgba(0, 0, 0, 0.6),
+        0 0 56px rgba(255, 205, 115, 0.1),
+        inset 0 1px 0 rgba(255, 240, 200, 0.08);
+    color: rgba(255, 246, 225, 0.92);
+    padding: 28px;
+    transform: scale(0.96) translateY(8px);
+    opacity: 0;
+    transition: opacity 0.32s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.auth-modal.is-open .auth-modal__card { opacity: 1; transform: scale(1) translateY(0); }
+
+/* Mode toggle (Sign in / Create account) */
+.auth-toggle {
+    display: inline-flex;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 205, 115, 0.18);
+    background: rgba(255, 205, 115, 0.04);
+    padding: 3px;
+    margin-bottom: 18px;
+    position: relative;
+}
+.auth-toggle__btn {
+    position: relative;
+    z-index: 1;
+    padding: 7px 16px;
+    border: 0;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.6);
+    font-size: 12.5px;
+    font-weight: 500;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.auth-toggle__btn.is-active { color: #faf3e3; }
+.auth-toggle__pill {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 205, 115, 0.22), rgba(255, 205, 115, 0.06));
+    border: 1px solid rgba(255, 205, 115, 0.4);
+    box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.12);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    pointer-events: none;
+}
+.auth-toggle.is-signup .auth-toggle__pill { transform: translateX(100%); }
+
+.auth-modal__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #faf3e3;
+    margin: 0 0 6px;
+    letter-spacing: 0.005em;
+}
+.auth-modal__subtitle {
+    margin: 0 0 20px;
+    font-size: 12.5px;
+    color: rgba(255, 246, 225, 0.58);
+    line-height: 1.5;
+}
+
+.auth-field {
+    display: block;
+    margin-bottom: 14px;
+}
+.auth-field__label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: rgba(255, 220, 160, 0.7);
+    margin-bottom: 6px;
+}
+.auth-field__input {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 205, 115, 0.22);
+    background: rgba(255, 205, 115, 0.04);
+    color: #faf3e3;
+    font-size: 13.5px;
+    font-family: inherit;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+.auth-field__input:focus {
+    outline: none;
+    border-color: rgba(255, 205, 115, 0.65);
+    background: rgba(255, 205, 115, 0.08);
+    box-shadow: 0 0 0 3px rgba(255, 205, 115, 0.15);
+}
+
+.auth-modal__primary {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 11px;
+    border: 1px solid rgba(255, 205, 115, 0.6);
+    background: linear-gradient(135deg, rgba(255, 205, 115, 0.36), rgba(255, 205, 115, 0.18));
+    color: #fff8e8;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.18s ease;
+    margin-bottom: 18px;
+}
+.auth-modal__primary:hover {
+    background: linear-gradient(135deg, rgba(255, 205, 115, 0.46), rgba(255, 205, 115, 0.26));
+    box-shadow: 0 8px 24px rgba(255, 205, 115, 0.22);
+}
+.auth-modal__primary:active { transform: scale(0.98); }
+.auth-modal__primary:disabled { opacity: 0.5; cursor: wait; }
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 16px;
+    color: rgba(255, 246, 225, 0.4);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 205, 115, 0.18), transparent);
+}
+
+.auth-oauth {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.auth-oauth__btn {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 11px;
+    border: 1px solid rgba(255, 205, 115, 0.18);
+    background: rgba(255, 246, 225, 0.04);
+    color: rgba(255, 246, 225, 0.9);
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.16s ease;
+}
+.auth-oauth__btn:hover {
+    background: rgba(255, 246, 225, 0.08);
+    border-color: rgba(255, 205, 115, 0.42);
+}
+.auth-oauth__btn:active { transform: scale(0.98); }
+.auth-oauth__icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+.auth-modal__footnote {
+    margin: 18px 0 0;
+    font-size: 11px;
+    color: rgba(255, 246, 225, 0.4);
+    line-height: 1.5;
+    text-align: center;
+}
+.auth-modal__footnote a {
+    color: rgba(255, 220, 160, 0.78);
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(255, 205, 115, 0.45);
+}
+
+.auth-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 205, 115, 0.2);
+    background: transparent;
+    color: rgba(255, 246, 225, 0.5);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.auth-modal__close:hover {
+    color: #faf3e3;
+    background: rgba(255, 205, 115, 0.12);
+    border-color: rgba(255, 205, 115, 0.5);
+}
+
+/* ── Magic-link confirmation morph ────────────────────────────────────── */
+.auth-confirm {
+    text-align: center;
+    padding: 16px 8px 8px;
+}
+.auth-confirm__envelope {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255, 205, 115, 0.32), rgba(255, 205, 115, 0.12));
+    border: 1px solid rgba(255, 205, 115, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 36px rgba(255, 205, 115, 0.25);
+    animation: envelopeFloat 2.8s ease-in-out infinite;
+    color: rgba(255, 240, 200, 0.95);
+}
+@keyframes envelopeFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
+}
+.auth-confirm__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: #faf3e3;
+    margin: 0 0 8px;
+}
+.auth-confirm__body {
+    font-size: 12.5px;
+    color: rgba(255, 246, 225, 0.65);
+    margin: 0 0 16px;
+    line-height: 1.5;
+}
+.auth-confirm__email {
+    color: rgba(255, 220, 160, 0.95);
+    font-weight: 500;
+}
+.auth-confirm__back {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 205, 115, 0.22);
+    background: transparent;
+    color: rgba(255, 246, 225, 0.78);
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease;
+}
+.auth-confirm__back:hover {
+    background: rgba(255, 205, 115, 0.08);
+    color: #faf3e3;
+}
+
+.auth-error {
+    margin: 0 0 14px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    background: rgba(255, 80, 80, 0.1);
+    border: 1px solid rgba(255, 80, 80, 0.3);
+    color: rgba(255, 190, 190, 0.95);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* "Auth not configured" placeholder — shown if Supabase creds are missing. */
+.auth-modal__notice {
+    margin: 8px 0 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 200, 100, 0.08);
+    border: 1px solid rgba(255, 205, 115, 0.28);
+    color: rgba(255, 230, 188, 0.85);
+    font-size: 12px;
+    line-height: 1.5;
+}
+.auth-modal__notice code {
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 11px;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: rgba(255, 220, 160, 0.95);
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .account-satellite__orbit--inner,
+    .account-satellite__orbit--outer,
+    .nav-filament__pulse,
+    .auth-confirm__envelope,
+    .account-satellite.is-syncing .account-satellite__status {
+        animation: none !important;
+    }
+    .account-satellite { transition: none; }
+}
+
+/* ── Mobile ───────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    /* On narrow viewports the filament+satellite eat horizontal space —
+       collapse to just the satellite tucked next to the pill. */
+    .nav-filament { width: 24px; }
+    .nav-filament__svg { display: none; }
+    .account-satellite { width: 64px; height: 64px; }
+    .account-satellite__bezel,
+    .account-satellite__halo,
+    .account-satellite__core { transform-origin: center; }
+}

@@ -14,6 +14,7 @@ import * as statistics from '../features/statistics.js';
 import * as tasks from '../features/tasks.js';
 import * as timer from '../features/timer.js';
 import * as scene3d from '../graphics/scene/scene-manager.js';
+import * as account from '../ui/account.js';
 import * as ambientUI from '../ui/ambient-ui.js';
 import * as buttonFeel from '../ui/button-feel.js';
 import * as cosmosA11y from '../ui/cosmos-a11y.js';
@@ -48,6 +49,7 @@ const modules = {
     cosmosPointer,
     cosmosEqRing,
     cosmosA11y,
+    account,
 };
 
 /**
@@ -243,6 +245,12 @@ export async function initApp() {
         // Home mini timer
         if (loadedModules.homeMiniTimer?.initHomeMiniTimer) {
             loadedModules.homeMiniTimer.initHomeMiniTimer();
+        }
+
+        // Account — satellite trigger, dropdown, auth modal. Wires the
+        // auth provider abstraction (js/features/auth.js) to the UI.
+        if (loadedModules.account?.initAccount) {
+            loadedModules.account.initAccount();
         }
 
         // T3.5: onboarding tour — auto-show on first visit
