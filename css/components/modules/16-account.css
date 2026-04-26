@@ -207,22 +207,37 @@
         0 4px 14px rgba(0, 0, 0, 0.42);
 }
 
-/* Signed-in core — polished gold signet. Stays solid gold gradient
-   because it represents a personal mark; glass would weaken the
-   distinction between signed-out and signed-in states. */
+/* Signed-in core — polished gold signet, jewel-cut.
+   Built from four stacked light layers instead of a single radial:
+     1. Secondary specular at upper-right (tiny side highlight)
+     2. Primary specular at upper-left (main light catch — ellipse)
+     3. Lower-right ambient depth (recessed shadow)
+     4. Base gold gradient (rolling metal surface, cool→warm→deep)
+   Layered together they read as a real metal disc with multi-source
+   lighting, not a flat amber circle. The rim picks up a bright top
+   light + a recessed bottom inner-shadow so the disc has thickness. */
 .account-satellite.is-signed-in .account-satellite__core {
     background:
-        radial-gradient(120% 120% at 28% 22%,
-            #FFF6D8 0%,
-            #FFD982 25%,
-            #C8923A 65%,
-            #6F4A1A 100%);
-    color: rgba(20, 12, 4, 0.95);
+        /* Secondary side specular — small, upper-right */
+        radial-gradient(circle at 72% 28%, rgba(255, 246, 220, 0.4) 0%, transparent 18%),
+        /* Primary specular — ellipse, upper-left, the brightest hit */
+        radial-gradient(ellipse 40% 28% at 30% 22%, rgba(255, 254, 240, 0.7) 0%, transparent 70%),
+        /* Lower-right ambient shadow — gives the disc rounded depth */
+        radial-gradient(circle at 78% 82%, rgba(50, 28, 6, 0.55) 0%, transparent 55%),
+        /* Base gold metal — rolling surface */
+        radial-gradient(120% 120% at 50% 50%,
+            #FFE8B0 0%,
+            #FFCE7A 35%,
+            #C8901A 75%,
+            #5C3A0A 100%);
+    color: rgba(38, 22, 6, 0.92);
     box-shadow:
-        inset 0 1.5px 0 rgba(255, 252, 232, 0.5),
-        0 4px 12px rgba(0, 0, 0, 0.55),
-        0 0 0 1px rgba(255, 205, 115, 0.4),
-        0 0 28px rgba(255, 205, 115, calc(0.22 + var(--glow) * 0.35));
+        inset 0 1.5px 0 rgba(255, 252, 232, 0.65),    /* rim light, top */
+        inset 0 -1.5px 1px rgba(45, 24, 4, 0.5),       /* recessed bottom */
+        inset 0 0 1px rgba(255, 246, 220, 0.35),       /* edge sheen */
+        0 0 0 1px rgba(255, 220, 150, 0.5),            /* outer hairline rim */
+        0 0 26px rgba(255, 205, 115, calc(0.22 + var(--glow) * 0.35)),
+        0 4px 14px rgba(0, 0, 0, 0.55);
 }
 
 /* Specular highlight — kept only on the signed-in gold signet, where
@@ -232,19 +247,21 @@
 .account-satellite__specular {
     display: none;
 }
+/* Tighter specular for the signet — small bright pinpoint, like the
+   light catch on a polished gold dome rather than a smear. */
 .account-satellite.is-signed-in .account-satellite__specular {
     display: block;
     position: absolute;
-    top: 4px;
-    left: 6px;
-    width: 12px;
-    height: 8px;
+    top: 5px;
+    left: 8px;
+    width: 8px;
+    height: 5px;
     border-radius: 50%;
     background: radial-gradient(ellipse at center,
-        rgba(255, 252, 232, 0.85) 0%,
+        rgba(255, 254, 240, 0.85) 0%,
         rgba(255, 246, 225, 0) 70%);
     pointer-events: none;
-    filter: blur(1px);
+    filter: blur(0.5px);
 }
 
 /* Glyph — visible signed-out only. */
@@ -258,17 +275,23 @@
     display: none;
 }
 
-/* Initial — visible signed-in only. */
+/* Initial — visible signed-in only. Engraved into the metal via dual
+   text-shadow: a bright highlight from above (light catching the top
+   of the recessed glyph) and a soft dark shadow below (glyph sits
+   into the surface). Reads as engraved, not stamped on top. */
 .account-satellite__initial {
     position: relative;
     z-index: 1;
     display: none;
     font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
-    font-size: 18px;
-    font-weight: 600;
-    color: rgba(20, 12, 4, 0.9);
-    text-shadow: 0 0.5px 0 rgba(255, 246, 225, 0.45);
-    letter-spacing: 0;
+    font-size: 22px;
+    font-weight: 500;
+    color: rgba(38, 22, 6, 0.94);
+    text-shadow:
+        0 -0.5px 0 rgba(255, 254, 240, 0.55),
+        0 0.5px 0 rgba(255, 252, 232, 0.18),
+        0 1.5px 1px rgba(0, 0, 0, 0.42);
+    letter-spacing: 0.01em;
     line-height: 1;
 }
 .account-satellite.is-signed-in:not(.has-avatar) .account-satellite__initial {
@@ -535,20 +558,36 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.14);
 }
 .account-dropdown__avatar {
-    width: 36px;
-    height: 36px;
+    /* Mirror of the satellite's signet — same multi-layer light model,
+       same engraved initial, scaled to the dropdown's chrome. */
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background:
-        radial-gradient(120% 120% at 28% 22%, #FFF6D8 0%, #FFD982 25%, #C8923A 65%, #6F4A1A 100%);
+        radial-gradient(circle at 72% 28%, rgba(255, 246, 220, 0.4) 0%, transparent 18%),
+        radial-gradient(ellipse 40% 28% at 30% 22%, rgba(255, 254, 240, 0.7) 0%, transparent 70%),
+        radial-gradient(circle at 78% 82%, rgba(50, 28, 6, 0.55) 0%, transparent 55%),
+        radial-gradient(120% 120% at 50% 50%,
+            #FFE8B0 0%, #FFCE7A 35%, #C8901A 75%, #5C3A0A 100%);
+    box-shadow:
+        inset 0 1.5px 0 rgba(255, 252, 232, 0.65),
+        inset 0 -1.5px 1px rgba(45, 24, 4, 0.5),
+        inset 0 0 1px rgba(255, 246, 220, 0.35),
+        0 0 0 1px rgba(255, 220, 150, 0.4),
+        0 4px 14px rgba(0, 0, 0, 0.5),
+        0 0 18px rgba(255, 205, 115, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 16px;
-    font-weight: 600;
-    color: rgba(20, 12, 4, 0.95);
+    font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
+    font-size: 19px;
+    font-weight: 500;
+    color: rgba(38, 22, 6, 0.94);
+    text-shadow:
+        0 -0.5px 0 rgba(255, 254, 240, 0.55),
+        0 1.5px 1px rgba(0, 0, 0, 0.42);
+    letter-spacing: 0.01em;
     flex-shrink: 0;
-    box-shadow: 0 0 12px rgba(255, 205, 115, 0.25);
     overflow: hidden;
 }
 .account-dropdown__avatar img {
