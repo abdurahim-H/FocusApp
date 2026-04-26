@@ -40,7 +40,9 @@
 
 /* ── Filament — engraved data-rail ─────────────────────────────────────── */
 .nav-filament {
-    width: 88px;
+    /* 60px keeps the satellite visually tethered to the pill rather than
+       drifting on its own — the eye reads them as one composed object. */
+    width: 60px;
     height: 12px;
     flex-shrink: 0;
     /* Filament sits *between* pill and satellite; its left edge meets
@@ -65,12 +67,14 @@
 }
 @keyframes filamentPulseTravel {
     /* Pulse enters faintly at the rivet (left), brightens through the
-       middle, fades into the satellite (right). */
+       middle, fades into the satellite (right). Tuned for the 60px rail
+       — pulse rect starts at x=4 with width=11; max travel ~44px keeps
+       the trailing edge inside the satellite's bezel before it fades. */
     0%   { transform: translateX(0px);   opacity: 0; }
     8%   { transform: translateX(2px);   opacity: 0.6; }
-    50%  { transform: translateX(34px);  opacity: 1; }
-    92%  { transform: translateX(64px);  opacity: 0.6; }
-    100% { transform: translateX(70px);  opacity: 0; }
+    50%  { transform: translateX(22px);  opacity: 1; }
+    92%  { transform: translateX(40px);  opacity: 0.6; }
+    100% { transform: translateX(44px);  opacity: 0; }
 }
 
 .nav-filament__rivet {

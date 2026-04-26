@@ -142,7 +142,7 @@ function syncTooltip() {
         if (subEl) subEl.textContent = obscured;
     } else {
         if (nameEl) nameEl.textContent = 'Sign in';
-        if (subEl) subEl.textContent = 'save your sky';
+        if (subEl) subEl.textContent = 'your universe, anywhere';
     }
 }
 
@@ -213,9 +213,9 @@ function renderDropdownContent() {
 function renderSignedOutDropdown() {
     dropdownInner.innerHTML = `
         <div>
-            <h3 class="account-dropdown__intro-title">Save your sky</h3>
+            <h3 class="account-dropdown__intro-title">Your universe, anywhere</h3>
             <p class="account-dropdown__intro-body">
-                Sign in to keep your tasks, stats, and constellations across devices.
+                Sign in and your tasks, stats, and constellations travel with you across every device.
             </p>
         </div>
         <button class="account-dropdown__btn account-dropdown__btn--primary" data-action="signin">Sign in</button>
@@ -258,8 +258,8 @@ function renderSignedInDropdown() {
                 <path d="M2 8a6 6 0 1 0 1.4-3.8"/>
                 <polyline points="2 2 2 5 5 5"/>
             </svg>
-            Sync
-            <span class="account-dropdown__sync-state">phase 2</span>
+            Sync across devices
+            <span class="account-dropdown__sync-state">soon</span>
         </button>
         <div class="account-dropdown__divider"></div>
         <button class="account-dropdown__row account-dropdown__row--danger" data-action="signout">
@@ -320,10 +320,10 @@ function renderModal() {
             <button class="auth-toggle__btn ${isSignIn ? 'is-active' : ''}" data-mode="signin" role="tab">Sign in</button>
             <button class="auth-toggle__btn ${isSignIn ? '' : 'is-active'}" data-mode="signup" role="tab">Create account</button>
         </div>
-        <h2 class="auth-modal__title">${isSignIn ? 'Welcome back' : 'Save your sky'}</h2>
+        <h2 class="auth-modal__title">${isSignIn ? 'Continue your orbit' : 'Claim your universe'}</h2>
         <p class="auth-modal__subtitle">${isSignIn
-            ? 'Sign in with a magic link or a connected provider. No password required.'
-            : 'Create an account to keep your tasks, stats, and constellations across devices.'}</p>
+            ? 'Magic link or a connected provider — no password to remember.'
+            : 'Sign up and your universe — tasks, stats, constellations — follows you wherever you focus.'}</p>
 
         <div class="auth-error" id="authError" hidden></div>
 

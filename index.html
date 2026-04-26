@@ -112,10 +112,11 @@
         </div>
 
         <!-- Filament — the engraved data-rail connecting nav to satellite.
-             Pure visual; aria-hidden. SVG so the rivet, ticks and pulse
-             render crisply at any DPR. -->
+             60px wide for a tighter visual coupling between the pill and
+             the satellite. Pure visual; aria-hidden. SVG so the rivet,
+             ticks and pulse render crisply at any DPR. -->
         <div class="nav-filament" aria-hidden="true">
-            <svg class="nav-filament__svg" viewBox="0 0 88 12" preserveAspectRatio="none" width="88" height="12">
+            <svg class="nav-filament__svg" viewBox="0 0 60 12" preserveAspectRatio="none" width="60" height="12">
                 <!-- Baseline thread, brightening from pill end (left) to satellite end (right) -->
                 <defs>
                     <linearGradient id="filamentGradient" x1="0" y1="0" x2="1" y2="0">
@@ -134,35 +135,33 @@
                         <stop offset="80%"  stop-color="#B5853A"/>
                         <stop offset="100%" stop-color="rgba(120, 80, 30, 0.4)"/>
                     </radialGradient>
-                </defs>
-                <!-- Hairline thread -->
-                <line class="nav-filament__thread" x1="6" y1="6" x2="86" y2="6"
-                      stroke="url(#filamentGradient)" stroke-width="0.5"/>
-                <!-- Engraved tick marks: 3px stroke, 2px gap, full length -->
-                <line class="nav-filament__ticks" x1="10" y1="6" x2="80" y2="6"
-                      stroke="url(#filamentTickGradient)" stroke-width="2"
-                      stroke-dasharray="3 2" stroke-linecap="round" opacity="0.6"/>
-                <!-- Travelling energy pulse -->
-                <rect class="nav-filament__pulse" x="6" y="5" width="14" height="2" rx="1"
-                      fill="rgba(255, 246, 225, 0.95)"/>
-                <!-- Jewel rivet at the pill end (left) -->
-                <circle class="nav-filament__rivet" cx="4" cy="6" r="2.5"
-                        fill="url(#filamentRivet)"/>
-                <circle class="nav-filament__rivet-halo" cx="4" cy="6" r="6"
-                        fill="rgba(255, 205, 115, 0.18)" filter="url(#filamentRivetBlur)"/>
-                <defs>
                     <filter id="filamentRivetBlur" x="-50%" y="-50%" width="200%" height="200%">
                         <feGaussianBlur stdDeviation="1.2"/>
                     </filter>
                 </defs>
+                <!-- Hairline thread -->
+                <line class="nav-filament__thread" x1="4" y1="6" x2="58" y2="6"
+                      stroke="url(#filamentGradient)" stroke-width="0.5"/>
+                <!-- Engraved tick marks: 3px stroke, 2px gap, full length -->
+                <line class="nav-filament__ticks" x1="8" y1="6" x2="54" y2="6"
+                      stroke="url(#filamentTickGradient)" stroke-width="2"
+                      stroke-dasharray="3 2" stroke-linecap="round" opacity="0.6"/>
+                <!-- Travelling energy pulse -->
+                <rect class="nav-filament__pulse" x="4" y="5" width="11" height="2" rx="1"
+                      fill="rgba(255, 246, 225, 0.95)"/>
+                <!-- Jewel rivet halo (drawn behind the rivet) -->
+                <circle class="nav-filament__rivet-halo" cx="3" cy="6" r="6"
+                        fill="rgba(255, 205, 115, 0.18)" filter="url(#filamentRivetBlur)"/>
+                <!-- Jewel rivet at the pill end (left) -->
+                <circle class="nav-filament__rivet" cx="3" cy="6" r="2.2"
+                        fill="url(#filamentRivet)"/>
             </svg>
         </div>
 
         <!-- Account Satellite — the trigger. Variant A (Orbit): two
              counter-rotating rings with pips around a perfect 40px circle. -->
         <button class="account-satellite is-signed-out" id="accountTrigger"
-                type="button" aria-label="Sign in" data-tooltip-name="Sign in"
-                data-tooltip-sub="save your sky">
+                type="button" aria-label="Sign in">
             <!-- Orbital rings (Variant A — Orbit). Two SVG rings rotating
                  in opposite directions at different speeds. Each carries a
                  small pip that travels with the ring. -->
