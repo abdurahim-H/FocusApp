@@ -140,21 +140,13 @@
     to   { transform: rotate(0deg); }
 }
 
-/* ── Bezel — engraved metal ring 2px outside the core ─────────────────── */
-.account-satellite__bezel {
-    position: absolute;
-    /* Core is 40×40, centred. Bezel is 44×44 (2px outside), centred. */
-    top: 50%;
-    left: 50%;
-    width: 44px;
-    height: 44px;
-    margin-top: -22px;
-    margin-left: -22px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 205, 115, calc(0.18 + var(--glow) * 0.55));
-    pointer-events: none;
-    transition: border-color 0.25s ease;
-}
+/* ── Bezel — removed ──────────────────────────────────────────────────────
+   The original watch-face metaphor (a metal ring 2px outside the core)
+   was reading as a "button inside a button" — two concentric rings
+   competing for the eye. The core's own gold border + the proximity
+   halo do the same job without the nested feel. The element is kept in
+   the DOM but visually disabled to avoid reshuffling the markup. */
+.account-satellite__bezel { display: none; }
 
 /* ── Outer halo — fades in with cursor proximity ──────────────────────── */
 .account-satellite__halo {
@@ -198,25 +190,21 @@
     transition: color 0.25s ease, box-shadow 0.4s ease, background 0.25s ease;
 }
 
-/* Signed-out core — apple liquid-glass orb. White-translucent base + a
-   subtle warm tint at the lower-right echo of the accretion disk shows
-   through the back. backdrop-filter blurs the cosmos behind so the orb
-   reads as a polished glass marble, not a black hole of its own. */
+/* Signed-out core — apple liquid-glass orb. Uniform translucent fill
+   (no bright top-left wash, which read as a cheap "white blob"). The
+   cosmos behind it shows through the backdrop-filter; a single hairline
+   gold border matches the proximity glow. Inset top highlight + subtle
+   bottom shading give the orb sphere depth without a nested-ring feel. */
 .account-satellite.is-signed-out .account-satellite__core {
-    background:
-        radial-gradient(120% 120% at 28% 22%,
-            rgba(255, 255, 255, 0.22) 0%,
-            rgba(255, 250, 235, 0.1) 30%,
-            rgba(255, 220, 160, 0.06) 65%,
-            rgba(255, 200, 110, 0.04) 100%);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(30px) saturate(170%);
+    -webkit-backdrop-filter: blur(30px) saturate(170%);
+    border: 1px solid rgba(255, 205, 115, calc(0.18 + var(--glow) * 0.55));
     box-shadow:
-        inset 0 1.5px 0 rgba(255, 255, 255, 0.4),
-        inset 0 -1.5px 0 rgba(0, 0, 0, 0.22),
-        inset 0 0 22px rgba(255, 255, 255, 0.06),
-        0 0 0 1px rgba(255, 255, 255, 0.1),
-        0 6px 18px rgba(0, 0, 0, 0.4);
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+        inset 0 0 18px rgba(255, 255, 255, 0.03),
+        0 4px 14px rgba(0, 0, 0, 0.42);
 }
 
 /* Signed-in core — polished gold signet. Stays solid gold gradient
@@ -237,26 +225,26 @@
         0 0 28px rgba(255, 205, 115, calc(0.22 + var(--glow) * 0.35));
 }
 
-/* Specular highlight — the polished light-catch in the upper-left.
-   Brighter on the glass orb than on the gold signet to enhance the
-   glass-marble feel. */
+/* Specular highlight — kept only on the signed-in gold signet, where
+   it sells the polished-metal feel. On the signed-out glass orb it
+   was reading as a white blur on top of the orb; the inset top
+   highlight on the core now does the light-catch job more subtly. */
 .account-satellite__specular {
+    display: none;
+}
+.account-satellite.is-signed-in .account-satellite__specular {
+    display: block;
     position: absolute;
     top: 4px;
     left: 6px;
-    width: 14px;
-    height: 9px;
+    width: 12px;
+    height: 8px;
     border-radius: 50%;
-    background: radial-gradient(ellipse at center,
-        rgba(255, 252, 240, 0.7) 0%,
-        rgba(255, 246, 225, 0) 70%);
-    pointer-events: none;
-    filter: blur(1px);
-}
-.account-satellite.is-signed-in .account-satellite__specular {
     background: radial-gradient(ellipse at center,
         rgba(255, 252, 232, 0.85) 0%,
         rgba(255, 246, 225, 0) 70%);
+    pointer-events: none;
+    filter: blur(1px);
 }
 
 /* Glyph — visible signed-out only. */
