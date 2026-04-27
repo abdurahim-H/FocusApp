@@ -20,11 +20,12 @@ test('home tab renders the greeting and clock', async ({ page }) => {
     await expect(page.locator('#dateTime')).toBeVisible();
 });
 
-test('nav tabs switch via keyboard shortcuts 1 / 2 / 3', async ({ page }) => {
+test('nav tabs switch via keyboard shortcuts 1 and 2', async ({ page }) => {
+    // Ambient is no longer a top-level tab — sounds live in the cosmos
+    // toolbar on Home (see keyboard.js: the '3' binding is kept as a
+    // back-compat no-op).
     await page.keyboard.press('2');
     await expect(page.locator('.focus-content')).toBeVisible();
-    await page.keyboard.press('3');
-    await expect(page.locator('.ambient-content')).toBeVisible();
     await page.keyboard.press('1');
     await expect(page.locator('.home-content')).toBeVisible();
 });
@@ -84,13 +85,14 @@ test('Help Center opens via "?" shortcut', async ({ page }) => {
     await page.keyboard.press('Escape');
 });
 
-test('Ambient sound browser opens', async ({ page }) => {
-    await page.locator('[data-mode="ambient"]').click();
-    // Open the sound library modal.
-    const openBtn = page.locator('#openSoundLibraryBtn, button:has-text("Browse Sound Library")').first();
-    await openBtn.click();
-    // A sound card for rain should be present.
-    await expect(page.locator('[data-sound="rain"]').first()).toBeVisible();
+test('sound library opens from the home cosmos toolbar', async ({ page }) => {
+    // Sounds were lifted out of a separate Ambient tab into the cosmos
+    // on Home; the toolbar's Add-a-sound button opens a drawer with the
+    // full library.
+    await page.locator('#deckAddSoundBtn').click();
+    const drawer = page.locator('#libraryDrawer');
+    await expect(drawer).toBeVisible();
+    await expect(drawer.locator('[data-sound="rain"]').first()).toBeVisible();
 });
 
 test('page renders without console errors', async ({ page }) => {
