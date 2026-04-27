@@ -191,38 +191,60 @@
     transition: color 0.25s ease, box-shadow 0.4s ease, background 0.25s ease;
 }
 
-/* Signed-out core — apple liquid-glass orb. Uniform translucent fill
-   (no bright top-left wash, which read as a cheap "white blob"). The
-   cosmos behind it shows through the backdrop-filter; a single hairline
-   gold border matches the proximity glow. Inset top highlight + subtle
-   bottom shading give the orb sphere depth without a nested-ring feel. */
+/* Signed-out core — apple liquid-glass orb with INTERNAL depth.
+   Replaced the flat white-translucent base (rgba(255,255,255,0.05))
+   with a layered background:
+     1. Faint warm centre — the orb has its own ember even over black
+     2. Mid-tone warm-dark band — sphere shading toward the equator
+     3. Deep-dark warm rim — recessed edge for spherical depth
+     4. A subtle top sheen via linear-gradient — light from above
+   Combined with backdrop-filter the orb looks like a real glass marble:
+   it has its own optics (warm undertone + sphere depth) AND refracts
+   whatever's behind. No more pale-grey wash over dark backgrounds. */
 .account-satellite.is-signed-out .account-satellite__core {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(30px) saturate(170%);
-    -webkit-backdrop-filter: blur(30px) saturate(170%);
-    border: 1px solid rgba(255, 205, 115, calc(0.18 + var(--glow) * 0.55));
+    background:
+        /* Subtle top-edge sheen — light catches the upper rim */
+        linear-gradient(180deg,
+            rgba(255, 240, 210, 0.06) 0%,
+            rgba(255, 240, 210, 0.02) 18%,
+            transparent 36%),
+        /* Internal sphere depth: warm centre → dark rim */
+        radial-gradient(circle at 50% 42%,
+            rgba(255, 222, 168, 0.06) 0%,
+            rgba(110, 78, 38, 0.14) 50%,
+            rgba(28, 18, 8, 0.34) 100%);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255, 205, 115, calc(0.2 + var(--glow) * 0.55));
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
-        inset 0 0 18px rgba(255, 255, 255, 0.03),
+        inset 0 1px 0 rgba(255, 246, 220, 0.22),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+        inset 0 0 22px rgba(255, 220, 160, 0.04),
         0 4px 14px rgba(0, 0, 0, 0.42);
 }
 
-/* Signed-in core — the SAME glass orb as signed-out, just lit.
-   Same translucent material, same backdrop-filter, same inset edges.
-   Only deltas: brighter gold rim + a stronger outer halo. No solid
-   gold disc, no recessed letter, no fake metal. The visible "you're
-   signed in" cue is a glowing pinpoint at the centre (rendered via
-   ::after below). Continuity > novelty. */
+/* Signed-in core — same glass orb as signed-out + internal depth, but
+   with a warmer interior glow (the orb is "lit"). The radial centre
+   reads stronger; the rim still recedes into deep amber-black so the
+   sphere depth is preserved. Outer halo + brighter gold border make
+   the lit state unambiguous. */
 .account-satellite.is-signed-in .account-satellite__core {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(30px) saturate(170%);
-    -webkit-backdrop-filter: blur(30px) saturate(170%);
+    background:
+        linear-gradient(180deg,
+            rgba(255, 240, 210, 0.08) 0%,
+            rgba(255, 240, 210, 0.03) 18%,
+            transparent 36%),
+        radial-gradient(circle at 50% 42%,
+            rgba(255, 220, 160, 0.14) 0%,
+            rgba(140, 92, 38, 0.18) 50%,
+            rgba(28, 18, 8, 0.36) 100%);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
     border: 1px solid rgba(255, 215, 130, calc(0.36 + var(--glow) * 0.5));
     box-shadow:
-        inset 0 1px 0 rgba(255, 250, 220, 0.22),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
-        inset 0 0 22px rgba(255, 220, 160, 0.06),
+        inset 0 1px 0 rgba(255, 250, 220, 0.26),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+        inset 0 0 22px rgba(255, 220, 160, 0.08),
         0 0 0 1px rgba(255, 215, 130, 0.18),
         0 0 32px rgba(255, 215, 130, calc(0.26 + var(--glow) * 0.35)),
         0 4px 14px rgba(0, 0, 0, 0.42);
@@ -539,21 +561,29 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.14);
 }
 .account-dropdown__avatar {
-    /* Mirror of the lit satellite — translucent glass orb with the
-       account glyph inside. Same material, same icon, same warmth.
+    /* Mirror of the lit satellite — same internal-depth radial,
+       same backdrop blur, same gold rim, same icon, same warmth.
        If the user has uploaded an avatar image, that takes over. */
     position: relative;
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(28px) saturate(170%);
-    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    background:
+        linear-gradient(180deg,
+            rgba(255, 240, 210, 0.08) 0%,
+            rgba(255, 240, 210, 0.03) 18%,
+            transparent 36%),
+        radial-gradient(circle at 50% 42%,
+            rgba(255, 220, 160, 0.14) 0%,
+            rgba(140, 92, 38, 0.18) 50%,
+            rgba(28, 18, 8, 0.36) 100%);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
     border: 1px solid rgba(255, 215, 130, 0.42);
     box-shadow:
-        inset 0 1px 0 rgba(255, 250, 220, 0.22),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
-        inset 0 0 18px rgba(255, 220, 160, 0.05),
+        inset 0 1px 0 rgba(255, 250, 220, 0.26),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+        inset 0 0 18px rgba(255, 220, 160, 0.08),
         0 0 24px rgba(255, 215, 130, 0.22),
         0 4px 12px rgba(0, 0, 0, 0.35);
     display: flex;
