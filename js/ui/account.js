@@ -236,10 +236,18 @@ function renderSignedInDropdown() {
     const email = currentUser.email || '';
     const initial = name.trim().charAt(0).toUpperCase() || '?';
     const avatar = currentUser.user_metadata?.avatar_url;
+    // The avatar shows the user's uploaded image when present; otherwise
+    // the universal account glyph (matching the satellite). The serif-
+    // initial-on-gold approach was retired — looked like a generic SaaS
+    // VIP card, not the cosmic-focus brand.
+    const glyphSvg = `<svg class="account-dropdown__avatar-glyph" viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="8" cy="6" r="2.6"/>
+        <path d="M3 13.5c0-2.5 2.2-4 5-4s5 1.5 5 4"/>
+    </svg>`;
     dropdownInner.innerHTML = `
         <div class="account-dropdown__header">
             <div class="account-dropdown__avatar">
-                ${avatar ? `<img src="${escapeAttr(avatar)}" alt="">` : escapeHtml(initial)}
+                ${avatar ? `<img src="${escapeAttr(avatar)}" alt="">` : glyphSvg}
             </div>
             <div class="account-dropdown__identity">
                 <span class="account-dropdown__name">${escapeHtml(name)}</span>

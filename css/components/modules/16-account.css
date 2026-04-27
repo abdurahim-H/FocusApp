@@ -225,40 +225,13 @@
         0 0 0 1px rgba(255, 215, 130, 0.18),
         0 0 32px rgba(255, 215, 130, calc(0.26 + var(--glow) * 0.35)),
         0 4px 14px rgba(0, 0, 0, 0.42);
-    color: rgba(255, 240, 200, 0.95);
+    /* Warm gold-tinted glyph colour for the lit state. */
+    color: rgba(255, 224, 164, 1);
 }
 
-/* The lit pinpoint — a bright star at the centre of the orb. Layered
-   box-shadow corona, gentle breathing scale animation. This IS the
-   signed-in marker. No serif letters, no avatar disc. */
-.account-satellite__core::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 4px;
-    height: 4px;
-    margin-top: -2px;
-    margin-left: -2px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #FFF6D8 0%, #FFE19A 55%, #FFD17A 100%);
-    box-shadow:
-        0 0 4px rgba(255, 240, 200, 1),
-        0 0 10px rgba(255, 220, 160, 0.9),
-        0 0 18px rgba(255, 215, 130, 0.6),
-        0 0 28px rgba(255, 205, 115, 0.32);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
-}
-.account-satellite.is-signed-in .account-satellite__core::after {
-    opacity: 1;
-    animation: litStarBreathe 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-@keyframes litStarBreathe {
-    0%, 100% { transform: scale(1); }
-    50%      { transform: scale(1.25); }
-}
+/* (lit-pinpoint ::after removed — the glyph + outer halo + gold border
+   carry the signed-in state more clearly. A dot through the centre of
+   the glyph competed with the icon and hid the affordance.) */
 
 /* Specular highlight — kept only on the signed-in gold signet, where
    it sells the polished-metal feel. On the signed-out glass orb it
@@ -272,14 +245,22 @@
    The signed-in lit pinpoint is the only "live" element inside the
    orb. */
 
-/* Glyph — visible signed-out only. */
+/* Glyph — visible in BOTH states. The icon is the universal "account"
+   affordance; hiding it on sign-in left users guessing what the orb
+   was. Sign-in changes the icon's COLOR (gold-warm) and adds a soft
+   drop-shadow glow — the orb is "lit", same icon, more present. */
 .account-satellite__glyph {
     position: relative;
     z-index: 1;
     color: inherit;
-    transition: opacity 0.25s ease;
+    transition: filter 0.4s ease, color 0.4s ease;
 }
 .account-satellite.is-signed-in .account-satellite__glyph {
+    filter:
+        drop-shadow(0 0 4px rgba(255, 220, 160, 0.85))
+        drop-shadow(0 0 10px rgba(255, 205, 115, 0.45));
+}
+.account-satellite.is-signed-in.has-avatar .account-satellite__glyph {
     display: none;
 }
 
@@ -557,10 +538,9 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.14);
 }
 .account-dropdown__avatar {
-    /* Mirror of the lit satellite — translucent glass orb with a
-       single bright pinpoint at centre. No solid disc. The text
-       content (initial fallback) is kept hidden via font-size: 0
-       for visual purposes; identity is in the dropdown header text. */
+    /* Mirror of the lit satellite — translucent glass orb with the
+       account glyph inside. Same material, same icon, same warmth.
+       If the user has uploaded an avatar image, that takes over. */
     position: relative;
     width: 40px;
     height: 40px;
@@ -580,33 +560,13 @@
     justify-content: center;
     flex-shrink: 0;
     overflow: hidden;
-    /* Hide the initial text fallback — kept as plain text node for
-       a11y but invisible. */
-    font-size: 0;
-    color: transparent;
+    color: rgba(255, 224, 164, 1);
 }
-.account-dropdown__avatar::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 5px;
-    height: 5px;
-    margin-top: -2.5px;
-    margin-left: -2.5px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #FFF6D8 0%, #FFE19A 55%, #FFD17A 100%);
-    box-shadow:
-        0 0 5px rgba(255, 240, 200, 1),
-        0 0 12px rgba(255, 220, 160, 0.9),
-        0 0 22px rgba(255, 215, 130, 0.6),
-        0 0 32px rgba(255, 205, 115, 0.32);
-    pointer-events: none;
-    animation: litStarBreathe 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+.account-dropdown__avatar-glyph {
+    filter:
+        drop-shadow(0 0 4px rgba(255, 220, 160, 0.85))
+        drop-shadow(0 0 10px rgba(255, 205, 115, 0.45));
 }
-/* If the user has uploaded an avatar image, hide the lit pinpoint —
-   the photo is the whole point. */
-.account-dropdown__avatar:has(img)::after { display: none; }
 .account-dropdown__avatar img {
     width: 100%; height: 100%; object-fit: cover; display: block;
 }
