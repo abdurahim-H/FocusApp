@@ -7,9 +7,12 @@
 
 .session-cinematic {
     position: fixed;
-    /* Sits above the timer, below the very top — about a third of the
-       way down — so it reads like a film subtitle, not a notification. */
-    top: 26%;
+    /* Sits in the upper third — high enough to clear the focus-tab
+       timer underneath, low enough to feel composed, not banner-y.
+       We also dim the focus content while this is mounted (see
+       :root.cinematic-active rules below) so even on the densest
+       layout the type owns its space. */
+    top: 12%;
     left: 50%;
     transform: translateX(-50%) translateY(8px);
     z-index: 1850;
@@ -24,6 +27,27 @@
         opacity var(--cinematic-fade-out, 600ms) cubic-bezier(0.32, 0.72, 0, 1),
         transform var(--cinematic-fade-out, 600ms) cubic-bezier(0.32, 0.72, 0, 1);
     user-select: none;
+}
+
+/* While the cinematic is on screen, the focus-tab content (the
+   "Break Time" header, the timer digits, the Pause/Reset/Skip
+   buttons, and the stats bar) all fade to a barely-there ghost.
+   They don't disappear — the user can still see context and the
+   layout doesn't reflow — but the cinematic owns the spotlight for
+   its ~5 seconds. The mini-timer + sliver dim too so a focused user
+   on the Home tab gets the same beat. */
+:root.cinematic-active .focus-content,
+:root.cinematic-active #statsBar,
+:root.cinematic-active #homeMiniTimer,
+:root.cinematic-active #hmtSliver {
+    opacity: 0.18;
+    transition: opacity 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+}
+:root:not(.cinematic-active) .focus-content,
+:root:not(.cinematic-active) #statsBar,
+:root:not(.cinematic-active) #homeMiniTimer,
+:root:not(.cinematic-active) #hmtSliver {
+    transition: opacity 0.6s cubic-bezier(0.32, 0.72, 0, 1);
 }
 .session-cinematic.is-visible {
     opacity: 1;

@@ -44,6 +44,10 @@ export function playSessionCinematic(record) {
 
     const reduced = isReducedMotion();
     const overlay = mountOverlay(record);
+    // The dim class lets CSS fade the focus-tab timer + stats bar +
+    // mini-timer down to ~18% opacity for the duration so the
+    // cinematic doesn't compete for the centre of the screen.
+    document.documentElement.classList.add('cinematic-active');
 
     if (reduced) {
         // No camera move — just hold the text on screen for a beat,
@@ -53,6 +57,7 @@ export function playSessionCinematic(record) {
             overlay.classList.remove('is-visible');
             setTimeout(() => {
                 overlay.remove();
+                document.documentElement.classList.remove('cinematic-active');
                 active = false;
             }, TEXT_FADE_OUT_MS);
         }, 2200);
@@ -66,6 +71,7 @@ export function playSessionCinematic(record) {
     setTimeout(() => overlay.classList.remove('is-visible'), APPROACH_MS + HOLD_MS);
     setTimeout(() => {
         overlay.remove();
+        document.documentElement.classList.remove('cinematic-active');
         active = false;
     }, APPROACH_MS + HOLD_MS + RETURN_MS + TEXT_FADE_OUT_MS);
 }
