@@ -220,10 +220,6 @@ export async function init3D() {
             }
         }
 
-        // Expose for debugging / settings.
-        window.__applyQualityLevel = applyQualityLevel;
-
-        // Start render loop
         engine.runRenderLoop(renderLoop);
 
         // Handle window resize
@@ -262,11 +258,9 @@ export async function init3D() {
             });
         }
 
-        console.log('🎬 Cinematic scene ready!');
-
         return true;
     } catch (error) {
-        console.error('❌ Failed to initialize scene:', error);
+        console.error('Failed to initialize scene:', error);
         return false;
     }
 }

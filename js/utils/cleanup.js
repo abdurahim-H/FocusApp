@@ -287,28 +287,8 @@ export function trackEventListener(element, type, listener, options) {
     return element.addEventListener(type, listener, options);
 }
 
-// Memory monitoring (development only)
-export function reportMemoryUsage() {
-    if (performance.memory) {
-        const memory = performance.memory;
-        console.log('📊 Memory Usage:', {
-            used: `${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-            total: `${(memory.totalJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-            limit: `${(memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB`,
-            activeFrames: activeAnimationFrames.size,
-            activeIntervals: activeIntervals.size,
-            activeTimeouts: activeTimeouts.size,
-        });
-    }
-}
-
-// Check if animations are paused
 export function areAnimationsPaused() {
     return animationsPaused;
 }
-
-// Expose for debugging
-window.cleanupApplication = cleanupApplication;
-window.reportMemoryUsage = reportMemoryUsage;
 
 export { activeAnimationFrames, activeIntervals, activeTimeouts, eventListeners };

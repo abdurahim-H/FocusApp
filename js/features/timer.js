@@ -17,9 +17,6 @@ import {
     requestNotificationPermission,
 } from '../utils/notifications.js';
 
-// Debug flag for notification testing
-const DEBUG_NOTIFICATIONS = true;
-
 export function updateTimerDisplay() {
     const minutes = String(state.timer.minutes).padStart(2, '0');
     const seconds = String(state.timer.seconds).padStart(2, '0');
@@ -223,12 +220,6 @@ export function completeSession() {
         })
     );
 
-    if (DEBUG_NOTIFICATIONS) {
-        console.log('🔔 Session completed, checking notification status...');
-        console.log('📱 Notifications enabled:', areNotificationsEnabled());
-        console.log('📊 Current session type:', state.timer.isBreak ? 'break' : 'focus');
-    }
-
     if (state.timer.isBreak) {
         // Break completed, start new focus session
         state.timer.isBreak = false;
@@ -356,78 +347,26 @@ export function completeSession() {
     }
 }
 
-/**
- * Safely send notifications with proper error handling and debugging
- */
+/** Fire-and-forget notification dispatcher. Requests permission lazily
+ *  the first time we need to ping the user, then calls the typed
+ *  notify* helper. All failures (denied, blocked by browser, etc.) are
+ *  silent — the in-app banner is the user-visible signal of session
+ *  completion; OS notifications are a best-effort bonus. */
 function sendNotificationSafely(notificationFunction) {
     try {
-        // Check if notifications are enabled
         if (!areNotificationsEnabled()) {
-            if (DEBUG_NOTIFICATIONS) {
-                console.log('⚠️ Notifications not enabled, attempting to request permission...');
-            }
-
-            // Try to request permission if not already granted
             requestNotificationPermission()
                 .then((granted) => {
-                    if (granted) {
-                        if (DEBUG_NOTIFICATIONS) {
-                            console.log('✅ Permission granted, sending notification...');
-                        }
-                        const notification = notificationFunction();
-                        if (notification && DEBUG_NOTIFICATIONS) {
-                            console.log('📤 Notification sent successfully');
-                        }
-                    } else {
-                        if (DEBUG_NOTIFICATIONS) {
-                            console.log('❌ Permission denied, cannot send notification');
-                        }
-                    }
+                    if (granted) notificationFunction();
                 })
                 .catch((error) => {
                     console.error('Failed to request notification permission:', error);
                 });
-
             return;
         }
-
-        // Send notification immediately if permission is already granted
-        if (DEBUG_NOTIFICATIONS) {
-            console.log('📤 Sending notification...');
-        }
-
-        const notification = notificationFunction();
-
-        if (notification && DEBUG_NOTIFICATIONS) {
-            console.log('✅ Notification created successfully');
-
-            // Add additional debugging
-            notification.onerror = (error) => {
-                console.error('Notification error:', error);
-            };
-
-            notification.onshow = () => {
-                console.log('📱 Notification displayed');
-            };
-
-            notification.onclose = () => {
-                console.log('🔕 Notification closed');
-            };
-        }
+        notificationFunction();
     } catch (error) {
         console.error('Failed to send notification:', error);
-
-        // Fallback: show browser alert if notifications fail completely
-        if (DEBUG_NOTIFICATIONS) {
-            console.log('💡 Falling back to browser alert...');
-            setTimeout(() => {
-                if (state.timer.isBreak) {
-                    alert('Break time! Take a moment to rest.');
-                } else {
-                    alert('Focus session complete! Time for a break.');
-                }
-            }, 100);
-        }
     }
 }
 
@@ -584,43 +523,3 @@ export function resetSession() {
     showAchievement('Session Reset!', 'Starting fresh with a new Pomodoro cycle');
 }
 
-/**
- * Quick test function for debugging - sets timer to 5 seconds
- */
-export function quickTimerTest() {
-    console.log('🧪 Starting quick timer test (5 seconds)');
-
-    const originalFocus = state.timer.settings.focusDuration;
-    const originalBreak = state.timer.settings.shortBreakDuration;
-
-    state.timer.settings.focusDuration = 1 / 12; // 5 seconds
-    state.timer.settings.shortBreakDuration = 1 / 12; // 5 seconds for break too
-
-    state.timer.minutes = 0;
-    state.timer.seconds = 5;
-    state.timer.isBreak = false;
-    state.timer.isRunning = false;
-
-    updateTimerDisplay();
-
-    console.log('⏰ Timer set to 5 seconds. Click Start Focus to test notifications.');
-    console.log('💡 Make sure to enable notifications first!');
-
-    setTimeout(() => {
-        state.timer.settings.focusDuration = originalFocus;
-        state.timer.settings.shortBreakDuration = originalBreak;
-        console.log('🔄 Timer settings restored to normal');
-    }, 30000);
-}
-
-// Make test function available globally
-if (typeof window !== 'undefined') {
-    window.quickTimerTest = quickTimerTest;
-    window.debugNotifications = () => {
-        console.log('🔔 Notification Debug Info:');
-        console.log('- Supported:', 'Notification' in window);
-        console.log('- Permission:', Notification.permission);
-        console.log('- Enabled:', areNotificationsEnabled());
-        console.log('💡 Try: testNotification(), requestNotificationPermissionTest()');
-    };
-}

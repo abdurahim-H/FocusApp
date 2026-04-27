@@ -17,7 +17,6 @@ let shakeMultiplier = 1; // User-tunable via Settings > Scene > Advanced
 export function initCameraEffects(cam, scn) {
     camera = cam;
     scene = scn;
-    console.log('📷 Camera effects initialized');
 }
 
 /**
