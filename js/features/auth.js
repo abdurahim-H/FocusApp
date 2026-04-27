@@ -6,13 +6,16 @@
 // that changes.
 //
 // Public surface:
-//   isConfigured()                       → bool — true once URL + key are set
-//   getUser()                            → user | null
-//   getSession()                         → session | null
-//   signInWithMagicLink(email)           → Promise<void>
-//   signInWithOAuth(provider)            → Promise<void> ('google' | 'apple')
-//   signOut()                            → Promise<void>
-//   onChange(fn)                         → unsubscribe — fn({user, session})
+//   isConfigured()                              → bool
+//   getUser()                                   → user | null
+//   getSession()                                → session | null
+//   signUpWithPassword(email, password)         → Promise<{ confirmationRequired }>
+//   signInWithPassword(email, password)         → Promise<void>
+//   signInWithMagicLink(email)                  → Promise<void>
+//   signInWithOAuth(provider)                   → Promise<void>
+//   sendPasswordReset(email)                    → Promise<void>
+//   signOut()                                   → Promise<void>
+//   onChange(fn)                                → unsubscribe — fn({user, session})
 //
 // The Supabase JS SDK is loaded lazily from esm.sh on first use so the
 // initial page weight isn't paid by users who never sign in.
@@ -90,6 +93,47 @@ export async function signInWithMagicLink(email) {
         options: {
             emailRedirectTo: `${window.location.origin}/auth/callback.html`,
         },
+    });
+    if (error) throw error;
+}
+
+/** Create a new account with email + password. Sends a confirmation
+ *  email if the project requires email verification (default). Returns
+ *  { confirmationRequired: bool } so the UI can show the right next
+ *  step ("check your inbox" vs "you're signed in"). */
+export async function signUpWithPassword(email, password) {
+    const c = await getClient();
+    const { data, error } = await c.auth.signUp({
+        email,
+        password,
+        options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback.html`,
+        },
+    });
+    if (error) throw error;
+    // If the project has "Confirm email" enabled, signUp returns a
+    // user but no session — Supabase signals "please verify" by setting
+    // session: null. If confirmation is disabled (dev convenience),
+    // the user is auto-signed-in and a session is returned.
+    return { confirmationRequired: !data?.session };
+}
+
+/** Sign in with email + password. Throws on bad credentials, on
+ *  unconfirmed email, etc. — caller catches and surfaces err.message. */
+export async function signInWithPassword(email, password) {
+    const c = await getClient();
+    const { error } = await c.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+}
+
+/** Send a password-reset email. The reset link lands on
+ *  /auth/callback.html with a recovery token; the SDK handles it
+ *  via detectSessionInUrl and the user can set a new password via
+ *  c.auth.updateUser({ password }) once authenticated. */
+export async function sendPasswordReset(email) {
+    const c = await getClient();
+    const { error } = await c.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback.html`,
     });
     if (error) throw error;
 }

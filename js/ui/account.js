@@ -213,9 +213,9 @@ function renderDropdownContent() {
 function renderSignedOutDropdown() {
     dropdownInner.innerHTML = `
         <div>
-            <h3 class="account-dropdown__intro-title">Your universe, anywhere</h3>
+            <h3 class="account-dropdown__intro-title">Sign in to Cosmic Focus</h3>
             <p class="account-dropdown__intro-body">
-                Sign in and your tasks, stats, and constellations travel with you across every device.
+                Keep your tasks, stats, and constellations in sync across every device.
             </p>
         </div>
         <button class="account-dropdown__btn account-dropdown__btn--primary" data-action="signin">Sign in</button>
@@ -328,22 +328,37 @@ function renderModal() {
             <button class="auth-toggle__btn ${isSignIn ? 'is-active' : ''}" data-mode="signin" role="tab">Sign in</button>
             <button class="auth-toggle__btn ${isSignIn ? '' : 'is-active'}" data-mode="signup" role="tab">Create account</button>
         </div>
-        <h2 class="auth-modal__title">${isSignIn ? 'Continue your orbit' : 'Claim your universe'}</h2>
+        <h2 class="auth-modal__title">${isSignIn ? 'Welcome back' : 'Create your account'}</h2>
         <p class="auth-modal__subtitle">${isSignIn
-            ? 'Magic link or a connected provider — no password to remember.'
-            : 'Sign up and your universe — tasks, stats, constellations — follows you wherever you focus.'}</p>
+            ? 'Sign in to Cosmic Focus.'
+            : 'We’ll send a confirmation link to verify your email.'}</p>
 
         <div class="auth-error" id="authError" hidden></div>
 
-        <form id="authForm">
+        <form id="authForm" novalidate>
             <label class="auth-field">
                 <span class="auth-field__label">Email</span>
                 <input class="auth-field__input" type="email" id="authEmail"
-                       placeholder="you@somewhere.com" autocomplete="email" required>
+                       placeholder="you@example.com"
+                       autocomplete="email" required>
+            </label>
+            <label class="auth-field">
+                <span class="auth-field__label">Password
+                    ${isSignIn ? '' : '<span class="auth-field__hint">8+ characters</span>'}
+                </span>
+                <input class="auth-field__input" type="password" id="authPassword"
+                       placeholder="••••••••"
+                       autocomplete="${isSignIn ? 'current-password' : 'new-password'}"
+                       minlength="8" required>
             </label>
             <button class="auth-modal__primary" type="submit" id="authSubmit">
-                ${isSignIn ? 'Send magic link' : 'Send sign-up link'}
+                ${isSignIn ? 'Sign in' : 'Create account'}
             </button>
+            <div class="auth-alt">
+                ${isSignIn
+                    ? '<button type="button" class="auth-alt__link" data-action="forgot">Forgot password?</button><span class="auth-alt__dot">·</span><button type="button" class="auth-alt__link" data-action="magic">Email me a sign-in link</button>'
+                    : '<button type="button" class="auth-alt__link" data-action="magic">Or sign up with a magic link</button>'}
+            </div>
         </form>
 
         <div class="auth-divider">or</div>
@@ -409,34 +424,120 @@ function bindModalEvents() {
             renderModal();
         })
     );
-    modalCard.querySelector('#authForm')?.addEventListener('submit', handleEmailSubmit);
+    modalCard.querySelector('#authForm')?.addEventListener('submit', handlePasswordSubmit);
+    modalCard.querySelector('[data-action="magic"]')?.addEventListener('click', handleMagicLink);
+    modalCard.querySelector('[data-action="forgot"]')?.addEventListener('click', handleForgotPassword);
     modalCard.querySelectorAll('[data-oauth]').forEach((btn) =>
         btn.addEventListener('click', () => handleOAuth(btn.dataset.oauth))
     );
 }
 
-async function handleEmailSubmit(e) {
-    e.preventDefault();
-    const input = modalCard.querySelector('#authEmail');
-    const submit = modalCard.querySelector('#authSubmit');
+function readForm() {
+    return {
+        emailEl: modalCard.querySelector('#authEmail'),
+        passwordEl: modalCard.querySelector('#authPassword'),
+        submitEl: modalCard.querySelector('#authSubmit'),
+        errorEl: modalCard.querySelector('#authError'),
+    };
+}
+
+function showError(msg) {
     const errorEl = modalCard.querySelector('#authError');
-    const email = input?.value.trim();
+    if (!errorEl) return;
+    errorEl.hidden = !msg;
+    errorEl.textContent = msg || '';
+}
+
+/** Email + password — sign-in or sign-up depending on the toggle. */
+async function handlePasswordSubmit(e) {
+    e.preventDefault();
+    const { emailEl, passwordEl, submitEl } = readForm();
+    const email = emailEl?.value.trim();
+    const password = passwordEl?.value || '';
+    showError(null);
     if (!email) return;
-    if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
-    submit.disabled = true;
-    const originalText = submit.textContent;
-    submit.textContent = 'Sending…';
+    if (password.length < 8) {
+        showError('Password must be at least 8 characters.');
+        return;
+    }
+    const isSignIn = mode === 'signin';
+    submitEl.disabled = true;
+    const original = submitEl.textContent;
+    submitEl.textContent = isSignIn ? 'Signing in…' : 'Creating account…';
+    try {
+        if (isSignIn) {
+            await auth.signInWithPassword(email, password);
+            // Successful sign-in fires onAuthStateChange → trigger updates,
+            // dropdown re-renders. Close the modal here.
+            closeModal();
+        } else {
+            const { confirmationRequired } = await auth.signUpWithPassword(email, password);
+            if (confirmationRequired) {
+                renderConfirmation(email, 'signup');
+            } else {
+                // Email confirmation disabled — auto-signed-in. Close.
+                closeModal();
+            }
+        }
+    } catch (err) {
+        showError(humaniseAuthError(err, isSignIn));
+        submitEl.disabled = false;
+        submitEl.textContent = original;
+    }
+}
+
+/** Send a magic link instead of using a password. */
+async function handleMagicLink() {
+    const { emailEl } = readForm();
+    const email = emailEl?.value.trim();
+    showError(null);
+    if (!email) {
+        showError('Enter your email first.');
+        emailEl?.focus();
+        return;
+    }
     try {
         await auth.signInWithMagicLink(email);
-        renderConfirmation(email);
+        renderConfirmation(email, 'magic');
     } catch (err) {
-        if (errorEl) {
-            errorEl.hidden = false;
-            errorEl.textContent = err?.message || 'Could not send the link. Try again.';
-        }
-        submit.disabled = false;
-        submit.textContent = originalText;
+        showError(err?.message || 'Could not send the link. Try again.');
     }
+}
+
+/** Send a password-reset email. */
+async function handleForgotPassword() {
+    const { emailEl } = readForm();
+    const email = emailEl?.value.trim();
+    showError(null);
+    if (!email) {
+        showError('Enter your email so we know who to send the reset to.');
+        emailEl?.focus();
+        return;
+    }
+    try {
+        await auth.sendPasswordReset(email);
+        renderConfirmation(email, 'reset');
+    } catch (err) {
+        showError(err?.message || 'Could not send the reset email. Try again.');
+    }
+}
+
+/** Translate Supabase error messages into something friendlier. */
+function humaniseAuthError(err, isSignIn) {
+    const msg = String(err?.message || '');
+    if (/invalid login credentials/i.test(msg)) {
+        return 'Email or password is incorrect.';
+    }
+    if (/email not confirmed/i.test(msg)) {
+        return 'Please confirm your email first — check your inbox for the link we sent.';
+    }
+    if (/already registered|already exists/i.test(msg)) {
+        return 'An account with this email already exists. Try signing in instead.';
+    }
+    if (/rate limit/i.test(msg)) {
+        return 'Too many attempts. Wait a minute and try again.';
+    }
+    return msg || (isSignIn ? 'Could not sign you in. Try again.' : 'Could not create the account. Try again.');
 }
 
 async function handleOAuth(provider) {
@@ -453,7 +554,28 @@ async function handleOAuth(provider) {
     }
 }
 
-function renderConfirmation(email) {
+function renderConfirmation(email, kind /* 'signup' | 'magic' | 'reset' */) {
+    const copy = {
+        signup: {
+            title: 'Confirm your email',
+            body: 'We sent a confirmation link to',
+            tail: 'Click it to verify your account, then come back to sign in.',
+        },
+        magic: {
+            title: 'Check your inbox',
+            body: 'We sent a sign-in link to',
+            tail: 'Click it from this device to finish signing in.',
+        },
+        reset: {
+            title: 'Reset link sent',
+            body: 'We sent a password-reset link to',
+            tail: 'Click it to choose a new password.',
+        },
+    }[kind] || {
+        title: 'Check your inbox',
+        body: 'We sent a link to',
+        tail: 'Click it to continue.',
+    };
     modalCard.innerHTML = `
         <button class="auth-modal__close" type="button" aria-label="Close" data-auth-close>×</button>
         <div class="auth-confirm">
@@ -463,13 +585,13 @@ function renderConfirmation(email) {
                     <polyline points="4 10 16 18 28 10"/>
                 </svg>
             </div>
-            <h2 class="auth-confirm__title">Check your inbox</h2>
+            <h2 class="auth-confirm__title">${copy.title}</h2>
             <p class="auth-confirm__body">
-                We sent a sign-in link to
+                ${copy.body}
                 <span class="auth-confirm__email">${escapeHtml(email)}</span>.
-                Click it from this device to finish signing in.
+                ${copy.tail}
             </p>
-            <button class="auth-confirm__back" type="button" data-back>Try a different email</button>
+            <button class="auth-confirm__back" type="button" data-back>Use a different email</button>
         </div>
     `;
     modalCard.querySelectorAll('[data-auth-close]').forEach((el) =>
