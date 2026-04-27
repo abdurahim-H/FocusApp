@@ -7,6 +7,21 @@
 // Auth state flows in via auth.onChange — this module reflects that
 // state into the trigger's class set and the dropdown's contents. It
 // never owns auth state itself.
+//
+// SECURITY / ROBUSTNESS NOTES:
+//   • Every user-visible string from `currentUser.user_metadata` runs
+//     through escapeHtml before reaching innerHTML. textContent is used
+//     wherever possible.
+//   • Avatar URLs are protocol-validated (https only) before going into
+//     <img src>. javascript:/data:/file: URLs are rejected.
+//   • Submit buttons set an in-flight flag synchronously before any
+//     await — guards against double-click double-submit.
+//   • Magic-link / forgot-password are throttled to once per 4s in the
+//     UI in addition to Supabase's server-side rate limiting.
+//   • All error messages route through humaniseAuthError → typed `code`
+//     → safe copy. Raw Supabase strings never reach the user.
+//   • Modal opening sets `inert` on background containers so screen
+//     readers can't tab into the cosmos behind it.
 
 import { isReducedMotion } from '../core/motion.js';
 import * as auth from '../features/auth.js';
@@ -106,14 +121,15 @@ function renderTriggerState() {
     if (currentUser) {
         trigger.classList.remove('is-signed-out');
         trigger.classList.add('is-signed-in');
-        const initial = (currentUser.user_metadata?.name ||
-                         currentUser.email ||
-                         '?').trim().charAt(0).toUpperCase();
+        const meta = currentUser.user_metadata || {};
+        const displayName = meta.name || currentUser.email || 'Account';
+        const initial = (meta.name || currentUser.email || '?')
+            .trim().charAt(0).toUpperCase();
         const initialEl = trigger.querySelector('.account-satellite__initial');
         if (initialEl) initialEl.textContent = initial;
-        const avatar = currentUser.user_metadata?.avatar_url;
+        const safeAvatarUrl = sanitiseAvatarUrl(meta.avatar_url);
         const imgEl = trigger.querySelector('.account-satellite__avatar');
-        if (avatar && imgEl) {
+        if (safeAvatarUrl && imgEl) {
             // If the avatar URL fails to load (CSP block, expired Google
             // CDN signature, network), drop has-avatar so the glyph
             // shows instead of the broken-image placeholder.
@@ -122,19 +138,36 @@ function renderTriggerState() {
                 imgEl.removeAttribute('src');
             };
             imgEl.onload = () => trigger.classList.add('has-avatar');
-            imgEl.src = avatar;
+            imgEl.src = safeAvatarUrl;
         } else {
             trigger.classList.remove('has-avatar');
             if (imgEl) imgEl.removeAttribute('src');
         }
+        // setAttribute auto-encodes attribute values, so user-controlled
+        // displayName is safe here. Cap length so the accessible name
+        // doesn't become a paragraph.
         trigger.setAttribute('aria-label',
-            `Account — ${currentUser.user_metadata?.name || currentUser.email}`);
+            `Account — ${displayName.slice(0, 80)}`);
     } else {
         trigger.classList.remove('is-signed-in', 'has-avatar');
         trigger.classList.add('is-signed-out');
         trigger.setAttribute('aria-label', 'Sign in');
     }
     syncTooltip();
+}
+
+/** Only allow https / http URLs for avatars. Rejects javascript:/data:/
+ *  file: and any malformed URL so we never forward an attacker-supplied
+ *  string to <img src>. Returns the URL string if safe, otherwise ''. */
+function sanitiseAvatarUrl(url) {
+    if (typeof url !== 'string' || url.length === 0 || url.length > 2048) return '';
+    try {
+        const u = new URL(url, window.location.href);
+        if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
+        return u.toString();
+    } catch {
+        return '';
+    }
 }
 
 function syncTooltip() {
@@ -167,14 +200,6 @@ function syncTooltip() {
             subEl.hidden = false;
         }
     }
-}
-
-function obscureEmail(email) {
-    // "abduh@example.com" → "abduh@…com"
-    if (!email || !email.includes('@')) return email;
-    const [local, domain] = email.split('@');
-    const tld = domain.split('.').pop() || '';
-    return `${local}@…${tld}`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -255,10 +280,10 @@ function renderSignedOutDropdown() {
 }
 
 function renderSignedInDropdown() {
-    const name = currentUser.user_metadata?.name || 'Signed in';
+    const meta = currentUser.user_metadata || {};
+    const name = meta.name || 'Signed in';
     const email = currentUser.email || '';
-    const initial = name.trim().charAt(0).toUpperCase() || '?';
-    const avatar = currentUser.user_metadata?.avatar_url;
+    const safeAvatar = sanitiseAvatarUrl(meta.avatar_url);
     // The avatar shows the user's uploaded image when present; otherwise
     // the universal account glyph (matching the satellite).
     const glyphSvg = `<svg class="account-dropdown__avatar-glyph" viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -267,8 +292,8 @@ function renderSignedInDropdown() {
     </svg>`;
     // referrerpolicy + crossorigin keep Google's avatar CDN happy. Failed
     // loads fall back to the glyph via the error listener wired below.
-    const avatarSlot = avatar
-        ? `<img class="account-dropdown__avatar-img" src="${escapeAttr(avatar)}"
+    const avatarSlot = safeAvatar
+        ? `<img class="account-dropdown__avatar-img" src="${escapeAttr(safeAvatar)}"
                 alt="" referrerpolicy="no-referrer" crossorigin="anonymous">`
         : glyphSvg;
     dropdownInner.innerHTML = `
@@ -331,11 +356,16 @@ function renderSignedInDropdown() {
 
 function openModal(initialMode = 'signin') {
     if (!modal || modalOpen) return;
+    // Refuse to open the auth modal for an already-signed-in user. The
+    // dropdown handles in-session profile actions; opening sign-in/up
+    // while signed in is meaningless and risks confusing the SDK state.
+    if (currentUser) return;
     modalOpen = true;
     mode = initialMode;
     renderModal();
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
+    setBackgroundInert(true);
     if (!modalTrap) modalTrap = createFocusTrap(modal);
     modalTrap.activate(trigger);
 }
@@ -345,7 +375,28 @@ function closeModal() {
     modalOpen = false;
     modal.classList.remove('is-open');
     modal.setAttribute('aria-hidden', 'true');
+    setBackgroundInert(false);
     modalTrap?.deactivate();
+}
+
+/** When the auth modal is open, mark the rest of the app as `inert`
+ *  so screen readers and keyboard navigation can't tab into the cosmos
+ *  behind the modal. The modal itself stays interactive. */
+function setBackgroundInert(on) {
+    const targets = [
+        document.querySelector('.container'),
+        document.querySelector('.nav-cluster'),
+        document.querySelector('.cosmos-toolbar'),
+        document.querySelector('.help-trigger'),
+        document.querySelector('.settings-trigger'),
+        document.getElementById('homeMiniTimer'),
+        document.getElementById('hmtSliver'),
+    ];
+    for (const el of targets) {
+        if (!el) continue;
+        if (on) el.setAttribute('inert', '');
+        else el.removeAttribute('inert');
+    }
 }
 
 function renderModal() {
@@ -359,19 +410,23 @@ function renderModal() {
     const isSignIn = mode === 'signin';
     modalCard.innerHTML = `
         <button class="auth-modal__close" type="button" aria-label="Close" data-auth-close>×</button>
-        <div class="auth-toggle ${isSignIn ? '' : 'is-signup'}" role="tablist">
+        <div class="auth-toggle ${isSignIn ? '' : 'is-signup'}" role="tablist" aria-label="Sign in or create an account">
             <span class="auth-toggle__pill" aria-hidden="true"></span>
-            <button class="auth-toggle__btn ${isSignIn ? 'is-active' : ''}" data-mode="signin" role="tab">Sign in</button>
-            <button class="auth-toggle__btn ${isSignIn ? '' : 'is-active'}" data-mode="signup" role="tab">Create account</button>
+            <button class="auth-toggle__btn ${isSignIn ? 'is-active' : ''}"
+                    data-mode="signin" role="tab"
+                    aria-selected="${isSignIn ? 'true' : 'false'}">Sign in</button>
+            <button class="auth-toggle__btn ${isSignIn ? '' : 'is-active'}"
+                    data-mode="signup" role="tab"
+                    aria-selected="${isSignIn ? 'false' : 'true'}">Create account</button>
         </div>
         <h2 class="auth-modal__title">${isSignIn ? 'Welcome back' : 'Create your account'}</h2>
         <p class="auth-modal__subtitle">${isSignIn
             ? 'Sign in to Cosmic Focus.'
             : 'We’ll send a confirmation link to verify your email.'}</p>
 
-        <div class="auth-error" id="authError" hidden></div>
+        <div class="auth-error" id="authError" role="alert" aria-live="polite" hidden></div>
 
-        <form id="authForm" novalidate>
+        <form id="authForm" novalidate aria-describedby="authError">
             ${isSignIn ? '' : `
             <label class="auth-field">
                 <span class="auth-field__label">Name</span>
@@ -507,17 +562,33 @@ function showError(msg) {
     errorEl.textContent = msg || '';
 }
 
-/** Email + password — sign-in or sign-up depending on the toggle.
- *  Sign-up also collects display name (required) and username (optional)
- *  and stores them in Supabase user_metadata. */
+// In-flight guards. We use one async-action lock for the password form
+// and a separate per-action timestamp map for the magic-link / forgot
+// throttles (4-second cool-down each). Server-side rate limits exist
+// in Supabase already; this is a UX guard so a user can't fire ten
+// emails to themselves in rapid succession by spamming the link.
+let actionInFlight = false;
+const lastFiredAt = Object.create(null); // action → epoch ms
+const ACTION_COOLDOWN_MS = 4000;
+
+function isCoolingDown(action) {
+    const last = lastFiredAt[action];
+    return last != null && Date.now() - last < ACTION_COOLDOWN_MS;
+}
+function markFired(action) { lastFiredAt[action] = Date.now(); }
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/** Email + password — sign-in or sign-up depending on the toggle. */
 async function handlePasswordSubmit(e) {
     e.preventDefault();
+    if (actionInFlight) return; // guard against double-submit
     const { nameEl, usernameEl, emailEl, passwordEl, submitEl } = readForm();
-    const email = emailEl?.value.trim();
+    const email = (emailEl?.value || '').trim();
     const password = passwordEl?.value || '';
     showError(null);
-    if (!email) {
-        showError('Enter your email.');
+    if (!email || !EMAIL_RE.test(email)) {
+        showError('Enter a valid email address.');
         emailEl?.focus();
         return;
     }
@@ -526,24 +597,36 @@ async function handlePasswordSubmit(e) {
         passwordEl?.focus();
         return;
     }
+    if (password.length > 128) {
+        showError('Password is too long (128 characters max).');
+        passwordEl?.focus();
+        return;
+    }
     const isSignIn = mode === 'signin';
+    let name = '';
+    let username = '';
     if (!isSignIn) {
-        const name = nameEl?.value.trim();
-        if (!name) {
-            showError('Tell us your name.');
+        name = (nameEl?.value || '').trim();
+        if (!name || name.length > 60) {
+            showError(name ? 'Name is too long (60 characters max).' : 'Tell us your name.');
             nameEl?.focus();
             return;
         }
-        // Username is optional — but if provided, validate it has no spaces
-        // and is short enough. Pattern attribute on the input handles
-        // characters; we just check length here.
-        const username = normaliseUsername(usernameEl?.value);
-        if (username && (username.length < 2 || username.length > 30)) {
-            showError('Username must be between 2 and 30 characters.');
+        username = normaliseUsername(usernameEl?.value);
+        const rawHadValue = !!(usernameEl?.value || '').trim();
+        if (rawHadValue && !username) {
+            // The user typed something but it sanitised to empty — invalid.
+            showError('Username must be 2–30 characters: letters, numbers, dot, underscore or dash.');
+            usernameEl?.focus();
+            return;
+        }
+        if (username && !/^[a-z0-9._-]{2,30}$/.test(username)) {
+            showError('Username must be 2–30 characters: letters, numbers, dot, underscore or dash.');
             usernameEl?.focus();
             return;
         }
     }
+    actionInFlight = true;
     submitEl.disabled = true;
     const original = submitEl.textContent;
     submitEl.textContent = isSignIn ? 'Signing in…' : 'Creating account…';
@@ -552,91 +635,123 @@ async function handlePasswordSubmit(e) {
             await auth.signInWithPassword(email, password);
             closeModal();
         } else {
-            const name = nameEl?.value.trim();
-            const username = normaliseUsername(usernameEl?.value);
             const { confirmationRequired } = await auth.signUpWithPassword(
-                email,
-                password,
-                { name, username },
+                email, password, { name, username },
             );
-            if (confirmationRequired) {
-                renderConfirmation(email, 'signup');
-            } else {
-                closeModal();
-            }
+            if (confirmationRequired) renderConfirmation(email, 'signup');
+            else closeModal();
         }
     } catch (err) {
         showError(humaniseAuthError(err, isSignIn));
         submitEl.disabled = false;
         submitEl.textContent = original;
+    } finally {
+        actionInFlight = false;
     }
 }
 
 /** Send a magic link instead of using a password. */
 async function handleMagicLink() {
+    if (actionInFlight) return;
     const { emailEl } = readForm();
-    const email = emailEl?.value.trim();
+    const email = (emailEl?.value || '').trim();
     showError(null);
-    if (!email) {
-        showError('Enter your email first.');
+    if (!email || !EMAIL_RE.test(email)) {
+        showError('Enter a valid email first.');
         emailEl?.focus();
         return;
     }
+    if (isCoolingDown('magic')) {
+        showError('We just sent a link. Wait a few seconds before trying again.');
+        return;
+    }
+    actionInFlight = true;
     try {
         await auth.signInWithMagicLink(email);
+        markFired('magic');
         renderConfirmation(email, 'magic');
     } catch (err) {
-        showError(err?.message || 'Could not send the link. Try again.');
+        showError(humaniseAuthError(err));
+    } finally {
+        actionInFlight = false;
     }
 }
 
 /** Send a password-reset email. */
 async function handleForgotPassword() {
+    if (actionInFlight) return;
     const { emailEl } = readForm();
-    const email = emailEl?.value.trim();
+    const email = (emailEl?.value || '').trim();
     showError(null);
-    if (!email) {
-        showError('Enter your email so we know who to send the reset to.');
+    if (!email || !EMAIL_RE.test(email)) {
+        showError('Enter your email first so we know who to reset.');
         emailEl?.focus();
         return;
     }
+    if (isCoolingDown('reset')) {
+        showError('We just sent a reset email. Wait a few seconds before trying again.');
+        return;
+    }
+    actionInFlight = true;
     try {
         await auth.sendPasswordReset(email);
+        markFired('reset');
         renderConfirmation(email, 'reset');
     } catch (err) {
-        showError(err?.message || 'Could not send the reset email. Try again.');
+        showError(humaniseAuthError(err));
+    } finally {
+        actionInFlight = false;
     }
 }
 
-/** Translate Supabase error messages into something friendlier. */
+/** Map typed error codes (set in auth.js → normaliseError) to friendly
+ *  copy. Unknown errors fall back to a generic message — we never
+ *  surface the raw Supabase string to the user. */
 function humaniseAuthError(err, isSignIn) {
-    const msg = String(err?.message || '');
-    if (/invalid login credentials/i.test(msg)) {
-        return 'Email or password is incorrect.';
+    const code = err?.code || 'unknown';
+    switch (code) {
+        case 'invalid_credentials':
+            return 'Email or password is incorrect.';
+        case 'email_not_confirmed':
+            return 'Please confirm your email first — check your inbox for the link we sent.';
+        case 'already_registered':
+            return 'An account with this email already exists. Try signing in instead.';
+        case 'rate_limited':
+            return 'Too many attempts. Wait a minute and try again.';
+        case 'network':
+            return 'Network problem — check your connection and try again.';
+        case 'timeout':
+            return 'The request took too long. Check your connection and try again.';
+        case 'invalid_email':
+            return 'That email doesn’t look right.';
+        case 'weak_password':
+            return err?.message || 'Password must be at least 8 characters.';
+        case 'missing_password':
+            return 'Enter your password.';
+        case 'invalid_provider':
+            return 'That sign-in option isn’t available right now.';
+        case 'not_configured':
+            return 'Sign-in is temporarily unavailable. Try again in a moment.';
+        default:
+            return isSignIn === false
+                ? 'Could not create the account. Try again.'
+                : isSignIn === true
+                    ? 'Could not sign you in. Try again.'
+                    : 'Something went wrong. Try again.';
     }
-    if (/email not confirmed/i.test(msg)) {
-        return 'Please confirm your email first — check your inbox for the link we sent.';
-    }
-    if (/already registered|already exists/i.test(msg)) {
-        return 'An account with this email already exists. Try signing in instead.';
-    }
-    if (/rate limit/i.test(msg)) {
-        return 'Too many attempts. Wait a minute and try again.';
-    }
-    return msg || (isSignIn ? 'Could not sign you in. Try again.' : 'Could not create the account. Try again.');
 }
 
 async function handleOAuth(provider) {
-    const errorEl = modalCard.querySelector('#authError');
-    if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
+    if (actionInFlight) return;
+    showError(null);
+    actionInFlight = true;
     try {
         await auth.signInWithOAuth(provider);
-        // OAuth redirects away — nothing more to do here.
+        // OAuth redirects away — the actionInFlight flag will be reset
+        // by the page reload. No further work here.
     } catch (err) {
-        if (errorEl) {
-            errorEl.hidden = false;
-            errorEl.textContent = err?.message || 'Could not start sign-in.';
-        }
+        showError(humaniseAuthError(err));
+        actionInFlight = false;
     }
 }
 

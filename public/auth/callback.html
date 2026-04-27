@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
 <title>Signing in… · Cosmic Focus</title>
 <style>
     html, body {
@@ -10,7 +11,7 @@
         height: 100%;
         background: #050308;
         color: #faf3e3;
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
     }
     body {
         display: flex;
@@ -20,7 +21,7 @@
             radial-gradient(circle at center, rgba(255, 205, 115, 0.07) 0%, transparent 55%),
             radial-gradient(ellipse at center, rgba(10, 8, 4, 1) 0%, #050308 70%);
     }
-    .wrap { text-align: center; padding: 24px; }
+    .wrap { text-align: center; padding: 24px; max-width: 420px; }
     .ring {
         width: 64px;
         height: 64px;
@@ -32,19 +33,40 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     h1 {
-        font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
-        font-size: 22px;
+        font-size: 19px;
         font-weight: 600;
+        letter-spacing: -0.01em;
         margin: 0 0 8px;
     }
-    p { font-size: 13px; color: rgba(255, 246, 225, 0.6); margin: 0; }
+    p { font-size: 13px; color: rgba(255, 246, 225, 0.6); margin: 0; line-height: 1.5; }
+    a {
+        display: inline-block;
+        margin-top: 18px;
+        padding: 9px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 205, 115, 0.35);
+        background: rgba(255, 205, 115, 0.08);
+        color: #faf3e3;
+        font-size: 13px;
+        text-decoration: none;
+    }
+    a:hover {
+        background: rgba(255, 205, 115, 0.16);
+        border-color: rgba(255, 205, 115, 0.55);
+    }
+    .error .ring {
+        border-color: rgba(255, 100, 100, 0.45);
+        border-top-color: rgba(255, 100, 100, 0.45);
+        border-left-color: rgba(255, 100, 100, 0.95);
+        animation: none;
+    }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="wrap">
     <div class="ring"></div>
-    <h1>Finishing sign-in…</h1>
-    <p>Returning you to Cosmic Focus.</p>
+    <h1 id="title">Finishing sign-in…</h1>
+    <p id="body">Returning you to Cosmic Focus.</p>
 </div>
 <script>
     // Supabase puts the session in the URL fragment (#access_token=…)
@@ -52,11 +74,41 @@
     // OAuth flow. We MUST preserve both when redirecting back to /
     // — the SDK's detectSessionInUrl reads window.location at boot to
     // pick the session out, and a bare /-redirect throws the tokens
-    // away. ~500ms gives the loading animation a beat before the swap.
-    setTimeout(() => {
-        const dest = '/' + window.location.search + window.location.hash;
-        window.location.replace(dest);
-    }, 500);
+    // away.
+    //
+    // Supabase also appends ?error=…&error_description=… (or the same
+    // in the hash) when the auth attempt failed — we surface those
+    // here instead of looping the user back to the app silently.
+    (function () {
+        var qs = new URLSearchParams(window.location.search);
+        var hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        var error = qs.get('error') || hashParams.get('error');
+        var description =
+            qs.get('error_description') || hashParams.get('error_description');
+
+        if (error) {
+            var wrap = document.getElementById('wrap');
+            wrap.classList.add('error');
+            document.getElementById('title').textContent =
+                error === 'access_denied' ? 'Sign-in cancelled' : 'Sign-in didn’t work';
+            document.getElementById('body').textContent =
+                description
+                    ? decodeURIComponent(description.replace(/\+/g, ' '))
+                    : 'The sign-in link may have expired or been used already.';
+            var back = document.createElement('a');
+            back.href = '/';
+            back.textContent = 'Back to Cosmic Focus';
+            wrap.appendChild(back);
+            return;
+        }
+
+        // Happy path — preserve search + hash so the SDK at / can pick
+        // up the session. ~500ms gives the loading animation a beat.
+        setTimeout(function () {
+            var dest = '/' + window.location.search + window.location.hash;
+            window.location.replace(dest);
+        }, 500);
+    })();
 </script>
 </body>
 </html>
