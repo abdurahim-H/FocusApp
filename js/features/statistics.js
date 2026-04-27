@@ -12,6 +12,7 @@
 // Persisted in localStorage key `fu_stats_v1`.
 
 import { effect, signal } from '../core/state.js';
+import { getDailySessionCounts, onSessionsChange } from './sessions.js';
 
 // ============================================================================
 // Signals
@@ -175,18 +176,41 @@ function renderStatsBar() {
         const sessions = sessionsToday.value;
         const totalSec = totalFocusSeconds.value;
         const tasks = tasksCompletedToday.value;
-        const streak = currentStreak.value;
 
         const el = (id) => document.getElementById(id);
         const todayEl = el('statSessionsToday');
         const totalEl = el('statTotalMinutes');
         const tasksEl = el('statTasksToday');
-        const streakEl = el('statStreak');
 
         if (todayEl) todayEl.textContent = sessions;
         if (totalEl) totalEl.textContent = formatDuration(totalSec);
         if (tasksEl) tasksEl.textContent = tasks;
-        if (streakEl) streakEl.textContent = `${streak}d`;
+    });
+
+    renderMomentumTrail();
+    onSessionsChange(renderMomentumTrail);
+}
+
+/** Replace the old streak counter ("47d" — guilt-shaped, resets on
+ *  absence) with a 7-dot trail. Each dot's brightness is the count
+ *  of focus sessions that day, normalised against the user's own
+ *  recent peak (with a soft floor so a single session still feels
+ *  meaningful). Today is the rightmost dot; never drops to fully
+ *  invisible — it just dims. The label below stays "momentum". */
+function renderMomentumTrail() {
+    const root = document.getElementById('momentumTrail');
+    if (!root) return;
+    const dots = root.querySelectorAll('.momentum-dot');
+    if (!dots.length) return;
+    const counts = getDailySessionCounts(dots.length);
+    // Soft floor of 4 sessions — beyond that, the brightest day caps
+    // at full intensity; before it, even a single session reads as
+    // a clearly lit dot rather than a faint mark.
+    const peak = Math.max(...counts, 4);
+    dots.forEach((dot, i) => {
+        const intensity = peak === 0 ? 0 : Math.min(1, counts[i] / peak);
+        dot.style.setProperty('--intensity', intensity.toFixed(3));
+        dot.dataset.count = String(counts[i]);
     });
 }
 

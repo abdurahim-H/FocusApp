@@ -41,6 +41,55 @@
     background: rgba(255, 205, 115, 0.12);
 }
 
+/* ── Momentum trail ─────────────────────────────────────────────────────
+   Replaces the old streak counter ("47d") that punished missed days.
+   Seven dots, oldest left, today right; each dot's brightness comes
+   from a CSS custom property `--intensity` set by JS (focus-session
+   count for that day, normalised against the user's recent peak).
+   A dot at zero is still a faint outlined mark — never shames absence
+   by going invisible. */
+.stat-chip--momentum {
+    /* Pull the chip slightly to align the dot row with the other
+       chips' baselines; the dots are 6px tall vs. the ~16px of the
+       text values, so a small vertical adjustment keeps the row tidy. */
+    gap: 6px;
+}
+.momentum-trail {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 0;
+}
+.momentum-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    /* Background fades from a faint outline at intensity 0 to a warm
+       ember at 1. The two-channel mix (alpha + colour temp) lets a
+       low-intensity day still read as "here, but quiet" without
+       lighting up. */
+    background: rgba(255, 220, 160, calc(0.12 + 0.74 * var(--intensity, 0)));
+    box-shadow:
+        0 0 calc(7px * var(--intensity, 0)) rgba(255, 205, 115, calc(0.55 * var(--intensity, 0))),
+        0 0 calc(14px * var(--intensity, 0)) rgba(255, 205, 115, calc(0.22 * var(--intensity, 0)));
+    transition:
+        background 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Today's dot (rightmost) gets a subtle pulse so the user can spot
+   "now" at a glance. Suppressed when reduced motion is preferred. */
+.momentum-dot:last-child {
+    animation: momentumPulse 4s ease-in-out infinite;
+}
+@keyframes momentumPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.15); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .momentum-dot { transition: none; }
+    .momentum-dot:last-child { animation: none; }
+}
+
 /* Stats chips container — holds both the live stats and the confirm overlay */
 .stats-chips {
     display: flex;

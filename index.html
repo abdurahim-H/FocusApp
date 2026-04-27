@@ -402,9 +402,18 @@
                             <span class="stat-label">tasks done</span>
                         </div>
                         <div class="stat-divider"></div>
-                        <div class="stat-chip">
-                            <span class="stat-value" id="statStreak">0d</span>
-                            <span class="stat-label">streak</span>
+                        <div class="stat-chip stat-chip--momentum"
+                             title="Past 7 days of focus — closest light is today">
+                            <div class="momentum-trail" id="momentumTrail" aria-hidden="true">
+                                <span class="momentum-dot" style="--intensity: 0;"></span>
+                                <span class="momentum-dot" style="--intensity: 0;"></span>
+                                <span class="momentum-dot" style="--intensity: 0;"></span>
+                                <span class="momentum-dot" style="--intensity: 0;"></span>
+                                <span class="momentum-dot" style="--intensity: 0;"></span>
+                                <span class="momentum-dot" style="--intensity: 0;"></span>
+                                <span class="momentum-dot" style="--intensity: 0;"></span>
+                            </div>
+                            <span class="stat-label">momentum</span>
                         </div>
                         <div class="stat-divider"></div>
                         <button class="stat-reset-btn" id="statResetBtn" aria-label="Reset statistics" title="Reset all statistics">

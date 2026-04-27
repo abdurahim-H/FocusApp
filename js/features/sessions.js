@@ -217,6 +217,28 @@ export function getLastSession() {
     return cachedSessions.length ? cachedSessions[cachedSessions.length - 1] : null;
 }
 
+/** Daily focus-session counts for the trailing N days, oldest first.
+ *  Today is at index N-1. Used by the momentum trail in the stats bar
+ *  and (later) the personal-galaxy view. Counts focus sessions only —
+ *  break sessions never enter the table today, but the kind filter
+ *  is explicit so the contract is clear. */
+export function getDailySessionCounts(days = 7) {
+    const out = new Array(days).fill(0);
+    if (!cachedSessions.length) return out;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayMs = todayStart.getTime();
+    for (const s of cachedSessions) {
+        if (s.kind !== 'focus') continue;
+        const sessionDate = new Date(s.startedAt);
+        sessionDate.setHours(0, 0, 0, 0);
+        const daysAgo = Math.floor((todayMs - sessionDate.getTime()) / 86400_000);
+        if (daysAgo < 0 || daysAgo >= days) continue;
+        out[days - 1 - daysAgo] += 1;
+    }
+    return out;
+}
+
 /** Subscribe to changes (sessions added / hydrated). The callback fires
  *  with no arguments — readers should call getAllSessions() to pull
  *  fresh data. */
