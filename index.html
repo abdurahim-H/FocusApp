@@ -48,30 +48,12 @@
     <link rel="stylesheet" href="css/components/apple-liquid-glass.css">
     <link rel="stylesheet" href="css/base/responsive.css">
     
-    <!-- Theme Initialization Script -->
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('fu_theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            
-            // Wait for body to exist
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', function() {
-                    document.body.setAttribute('data-theme', savedTheme);
-                });
-            } else {
-                // DOM already loaded
-                document.body.setAttribute('data-theme', savedTheme);
-            }
-        })();
-    </script>
+    <!-- Theme bootstrap (external file so CSP can drop 'unsafe-inline'). -->
+    <script src="/theme-init.js"></script>
 </head>
 <body data-theme="dark">
     <!-- Skip to content link for keyboard users -->
     <a href="#home" class="skip-link">Skip to content</a>
-
-    <!-- Page start timer -->
-    <script>window.__pageStart = performance.now(); console.log('⏱️ [0ms] Page body start');</script>
 
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen" role="status" aria-live="polite" aria-label="Loading Cosmic Focus">
@@ -594,9 +576,7 @@
     <div class="settings-modal hidden" id="settingsPanel" role="dialog" aria-modal="true" aria-label="Settings"></div>
 
     <!-- Babylon.js Core — the only required dependency -->
-    <script>console.log('⏱️ [' + Math.round(performance.now() - window.__pageStart) + 'ms] Starting Babylon.js download...');</script>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script>console.log('⏱️ [' + Math.round(performance.now() - window.__pageStart) + 'ms] Babylon.js loaded');</script>
 
     <script type="module" src="/js/core/app.js"></script>
 </body>

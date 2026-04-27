@@ -229,7 +229,7 @@ function renderMixesRail() {
                         role="button" tabindex="0"
                         data-mix-id="${escapeAttr(m.id)}"
                         aria-label="Activate ${escapeAttr(m.name)} mix${isPinned ? ' (auto-starts with focus)' : ''}">
-                    <span class="mix-card__icon" aria-hidden="true">${m.icon || '♪'}</span>
+                    <span class="mix-card__icon" aria-hidden="true">${escapeHtml(m.icon || '♪')}</span>
                     <span class="mix-card__name">${escapeHtml(m.name)}</span>
                     <span class="mix-card__count">${m.active?.length || 0}</span>
                     <button class="mix-card__pin ${isPinned ? 'is-on' : ''}"
@@ -540,16 +540,50 @@ function decodeSharedMix() {
         if (!payload || !Array.isArray(payload.a)) return null;
         return {
             id: `shared:${Date.now().toString(36)}`,
-            name: payload.n || 'Shared mix',
-            icon: payload.i || '🎵',
+            // Cap the name; an attacker could otherwise put a multi-MB
+            // string in the dialog. Strip control chars defensively.
+            name: sanitiseSharedString(payload.n, 60) || 'Shared mix',
+            // Icon is rendered next to the name. We escape at render
+            // time, but defence-in-depth: enforce a tight grapheme
+            // budget here too — anything with HTML chars or longer
+            // than 4 codepoints gets the default note glyph.
+            icon: sanitiseSharedIcon(payload.i),
             builtin: false,
             shared: true,
-            active: payload.a,
-            tracks: payload.t || {},
+            // Active is an array of sound IDs; downstream code looks
+            // them up against SOUND_LIBRARY so unknown IDs are dropped
+            // safely. Cap to 32 entries to bound work.
+            active: payload.a.filter((id) => typeof id === 'string').slice(0, 32),
+            // Track state is a plain object keyed by sound ID; loading
+            // code reads only known fields (volume, eq, pan, muted).
+            tracks: payload.t && typeof payload.t === 'object' ? payload.t : {},
         };
     } catch (_) {
         return null;
     }
+}
+
+/** Constrain a string from a shared URL to a length cap, drop control
+ *  chars (incl. NUL / VT-style smuggle attempts). Returns '' for any
+ *  non-string. */
+function sanitiseSharedString(raw, maxLen) {
+    if (typeof raw !== 'string') return '';
+    // Strip C0 controls + DEL. Anything else (printable, emoji, RTL
+    // marks) survives — escapeHtml handles angle brackets / ampersands
+    // at render time.
+    const cleaned = raw.replace(/[\u0000-\u001F\u007F]/g, '');
+    return cleaned.slice(0, maxLen);
+}
+
+/** Icons are tiny visual glyphs (a single emoji in practice). Reject
+ *  anything that contains markup characters or runs longer than four
+ *  codepoints — the default '🎵' covers the rejection case. */
+function sanitiseSharedIcon(raw) {
+    if (typeof raw !== 'string' || raw.length === 0) return '🎵';
+    if (/[<>&"'`]/.test(raw)) return '🎵';
+    const codepoints = Array.from(raw);
+    if (codepoints.length > 4) return '🎵';
+    return codepoints.join('');
 }
 
 async function maybeLoadSharedMix() {

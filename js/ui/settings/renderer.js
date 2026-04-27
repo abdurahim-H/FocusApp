@@ -401,13 +401,25 @@ function renderTextInput(row) {
     el.className = 'sr sr-text';
     el.dataset.key = row.key;
     const current = getSetting(row.key) || '';
+    // Default cap of 200 chars on any free-text setting — short of an
+    // explicit per-field maxLength, this keeps a stray paste from
+    // bloating localStorage or stalling render. Per-field overrides
+    // (e.g., greeting → 80) win.
+    const maxLen = Number.isFinite(row.maxLength) ? row.maxLength : 200;
     el.innerHTML = `
         <div class="sr__label">${escapeHtml(row.label)}</div>
-        <input type="text" class="sr__text-input" value="${escapeHtml(current)}" placeholder="${escapeHtml(row.placeholder || '')}">
+        <input type="text" class="sr__text-input" maxlength="${maxLen}"
+               value="${escapeHtml(current)}" placeholder="${escapeHtml(row.placeholder || '')}">
         ${row.help ? `<div class="sr__help">${escapeHtml(row.help)}</div>` : ''}
     `;
     const input = el.querySelector('input');
-    input.addEventListener('input', () => setSetting(row.key, input.value));
+    // Defensive: also slice on the JS side in case the value arrived
+    // pre-populated from imported settings or a share link.
+    input.addEventListener('input', () => {
+        const trimmed = input.value.length > maxLen ? input.value.slice(0, maxLen) : input.value;
+        if (trimmed !== input.value) input.value = trimmed;
+        setSetting(row.key, trimmed);
+    });
     registerSearchable(el, row.label, row.help, row.key);
     applyDirtyState(el, row.key);
     return el;

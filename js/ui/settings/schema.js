@@ -473,6 +473,9 @@ export const SCHEMA = [
         label: 'Greeting',
         placeholder: 'Welcome to Your Universe!',
         default: '',
+        // Hard cap so a paste of an essay can't blow out localStorage
+        // or stall layout. The home headline only has room for ~5 words.
+        maxLength: 80,
         help: 'Use {{time}} for morning/afternoon/evening',
     },
 
