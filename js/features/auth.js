@@ -326,6 +326,73 @@ export async function claimUsername(username) {
     }
 }
 
+// ───────────────────────────────────────────────────────────────────────
+// Sessions data layer
+// ───────────────────────────────────────────────────────────────────────
+//
+// Auth.js stays the single point of contact with Supabase. Anything
+// that needs to read or write app-owned tables goes through one of
+// these typed helpers, so a future provider swap only edits this file.
+
+/** Persist a focus-session record to public.sessions. Returns the
+ *  inserted row's id on success, null on any failure (offline, RLS,
+ *  not signed in). The caller already has a local copy; this is just
+ *  the cloud mirror. */
+export async function recordSessionRemote(record) {
+    if (!cachedUser) return null;
+    try {
+        const c = await getClient();
+        const { data, error } = await withTimeout(
+            c.from('sessions')
+                .insert({
+                    user_id: cachedUser.id,
+                    started_at: new Date(record.startedAt).toISOString(),
+                    ended_at: new Date(record.endedAt).toISOString(),
+                    duration_seconds: record.durationSeconds,
+                    target_duration_seconds: record.targetDurationSeconds,
+                    completed: record.completed,
+                    kind: record.kind,
+                    distraction_count: record.distractionCount,
+                    distraction_seconds: record.distractionSeconds,
+                    focus_quality: record.focusQuality,
+                    active_sounds: record.activeSounds,
+                    task_count: record.taskCount,
+                    tasks_completed: record.tasksCompleted,
+                })
+                .select('id')
+                .single(),
+            REQUEST_TIMEOUT_MS,
+            'session-record'
+        );
+        if (error) return null;
+        return data?.id ?? null;
+    } catch (_) {
+        return null;
+    }
+}
+
+/** Pull recent session rows from cloud — used to hydrate the local
+ *  cache on first sign-in or when the local data is older than cloud.
+ *  Returns the rows newest-first, or null on any failure. */
+export async function fetchRecentSessionsRemote({ limit = 1000 } = {}) {
+    if (!cachedUser) return null;
+    try {
+        const c = await getClient();
+        const { data, error } = await withTimeout(
+            c.from('sessions')
+                .select('*')
+                .order('started_at', { ascending: false })
+                .limit(limit),
+            REQUEST_TIMEOUT_MS,
+            'sessions-fetch'
+        );
+        if (error) return null;
+        return data || [];
+    } catch (_) {
+        return null;
+    }
+}
+
 /** Best-effort: when a user signs in, sync their user_metadata.username
  *  with the public.usernames reservation. Handles the
  *  email-confirmation case where the original sign-up couldn't claim

@@ -1,8 +1,11 @@
-/**
- * FIXED Timer Management System
- * Enhanced with better notification handling and debugging
- */
-import { state } from '../core/state.js';
+// timer.js — Pomodoro state machine.
+//
+// Owns the focus / short-break / long-break loop, the visible timer
+// digits, the session-complete UI hook, and the notification dispatch.
+// Per-session analytics live in features/sessions.js, which we open at
+// start and seal at end.
+import { tasks, state } from '../core/state.js';
+import { abandonCurrentSession, beginSession, endSession } from '../features/sessions.js';
 import { recordSessionComplete } from '../features/statistics.js';
 import { get as settingsGet } from '../ui/settings/store.js';
 import { emitTimerParticles } from '../ui/timer-particles.js';
@@ -58,11 +61,26 @@ export function startTimer() {
         state.timer.interval = null;
     }
 
+    const wasPaused = state.timer.minutes < state.timer.settings.focusDuration
+        || state.timer.seconds > 0;
+
     state.timer.isRunning = true;
     state.timer.transitioning = false;
     state.timerState = 'running';
     state.currentMode = state.timer.isBreak ? 'break' : 'focus';
     state.mode = 'timer';
+
+    // Open a session record on a fresh focus block. We deliberately
+    // skip when this is a resume after pause (timer < target on entry)
+    // — that session is already open and counting against the same
+    // start time. Break blocks aren't recorded today; the column
+    // exists in Postgres for when we add them later.
+    if (!state.timer.isBreak && !wasPaused) {
+        beginSession({
+            kind: 'focus',
+            targetDurationSeconds: state.timer.settings.focusDuration * 60,
+        });
+    }
 
     // Broadcast so ambient / other features can react (auto-start a mix, etc.)
     document.dispatchEvent(
@@ -150,6 +168,10 @@ export function resetTimer() {
         clearTimeout(state.timer.autoStartTimeout);
         state.timer.autoStartTimeout = null;
     }
+
+    // Drop the in-flight session record. We don't know the user's
+    // intended end time, so synthesizing one would be dishonest data.
+    abandonCurrentSession();
 
     clearAchievementQueue();
 
@@ -257,8 +279,17 @@ export function completeSession() {
         state.universe.focusMinutes += Math.round(elapsedSeconds / 60);
         state.universe.stars += 1;
 
-        // Phase 5B: record actual elapsed seconds in statistics
+        // Aggregate counters (legacy stats UI).
         recordSessionComplete(elapsedSeconds);
+
+        // Per-session record (analytics + cinematic + cloud sync).
+        const taskList = tasks.value || [];
+        endSession({
+            elapsedSeconds,
+            completed: elapsedSeconds >= configuredSeconds,
+            taskCount: taskList.length,
+            tasksCompleted: taskList.filter((t) => t.completed).length,
+        });
 
         triggerSessionCompleteUI();
 
