@@ -67,9 +67,12 @@ test('can add, complete, and delete a task', async ({ page }) => {
 });
 
 test('stats bar is visible on Focus tab', async ({ page }) => {
+    // The streak counter was replaced with the momentum trail (a row
+    // of seven brightness-weighted dots). The container is what we
+    // assert visibility on now.
     await page.locator('[data-mode="focus"]').click();
     await expect(page.locator('#statSessionsToday')).toBeVisible();
-    await expect(page.locator('#statStreak')).toBeVisible();
+    await expect(page.locator('#momentumTrail')).toBeVisible();
 });
 
 test('Settings modal opens and closes', async ({ page }) => {
