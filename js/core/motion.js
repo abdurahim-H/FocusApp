@@ -6,9 +6,11 @@
 //   - respect prefers-reduced-motion
 //   - tune default spring physics consistently
 //
-// Loaded from esm.sh as a single static import so we never duplicate the module.
+// Bundled from node_modules so there's a single, integrity-checked
+// copy served from our origin. Use the re-exports below; never import
+// from the package directly elsewhere.
 
-import { animate, inView, spring, stagger } from 'https://esm.sh/motion@10.18.0';
+import { animate, inView, spring, stagger } from 'motion';
 
 // ============================================================================
 // Reduced motion detection — system pref + user override

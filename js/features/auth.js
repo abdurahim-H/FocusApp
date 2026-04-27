@@ -19,8 +19,8 @@
 //
 // All network-bound calls are wrapped with a 20-second timeout so a
 // stalled request can't hang the UI forever. The Supabase JS SDK is
-// loaded lazily from esm.sh on first use so the initial page weight
-// isn't paid by users who never sign in.
+// bundled from node_modules and lazy-loaded on first use, so the
+// initial page weight isn't paid by users who never sign in.
 //
 // SECURITY NOTES:
 //   • We sanitise user-controlled metadata at the boundary (length caps,
@@ -102,7 +102,11 @@ async function getClient() {
     if (client) return client;
     if (clientPromise) return clientPromise;
     clientPromise = (async () => {
-        const mod = await import('https://esm.sh/@supabase/supabase-js@2');
+        // Bundled by Vite from node_modules — served from our origin so
+        // CSP can stay tight (`script-src 'self'`) and there's no
+        // third-party CDN in the auth path. Vite chunk-splits dynamic
+        // imports, so the SDK is still lazy.
+        const mod = await import('@supabase/supabase-js');
         client = mod.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
                 persistSession: true,

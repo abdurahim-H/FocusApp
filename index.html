@@ -35,6 +35,15 @@
 
     <link rel="preconnect" href="https://cdn.babylonjs.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.babylonjs.com">
+    <!--
+        Pinned Babylon version + SRI. The /v<version>/ URL is immutable
+        on the BabylonJS CDN; recompute the integrity hash on every
+        upgrade with:
+            curl -s https://cdn.babylonjs.com/v<NEW>/babylon.js \
+                | openssl dgst -sha384 -binary | openssl base64 -A
+        The unversioned /babylon.js URL keeps shipping rolling builds —
+        we deliberately don't use it any more.
+    -->
 
     <!-- Inter variable font (wght + opsz axes) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -575,8 +584,10 @@
          js/ui/settings/renderer.js against the schema. -->
     <div class="settings-modal hidden" id="settingsPanel" role="dialog" aria-modal="true" aria-label="Settings"></div>
 
-    <!-- Babylon.js Core — the only required dependency -->
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <!-- Babylon.js Core — pinned + SRI-verified. -->
+    <script src="https://cdn.babylonjs.com/v9.4.1/babylon.js"
+            integrity="sha384-HEGohGgtXj+OSGtOn/YbHsrJ4GGPSzh6zeoRM2lTYO58/xontiDbO4JwX0H1nH5H"
+            crossorigin="anonymous"></script>
 
     <script type="module" src="/js/core/app.js"></script>
 </body>

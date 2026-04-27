@@ -6,7 +6,9 @@
 //   so existing code keeps working without modification.
 // - localStorage persistence is wired automatically via effect().
 
-import { computed, effect, signal } from 'https://esm.sh/@preact/signals-core@1.8.0';
+// Bundled by Vite from node_modules so we serve from our own origin —
+// CSP can drop esm.sh from script-src / connect-src.
+import { computed, effect, signal } from '@preact/signals-core';
 
 // ============================================================================
 // Reactive signals
