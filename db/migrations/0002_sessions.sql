@@ -53,13 +53,19 @@ create table if not exists public.sessions (
     created_at timestamptz not null default now()
 );
 
--- Most queries are "this user, recent first".
+-- Most queries are "this user, recent first" — analytics views, the
+-- patterns sheet, and the cloud-hydration on sign-in all sort by
+-- started_at desc.
 create index if not exists sessions_user_started_idx
     on public.sessions(user_id, started_at desc);
 
--- Day-bucket queries (heatmaps, streaks) hit this one.
-create index if not exists sessions_user_started_date_idx
-    on public.sessions(user_id, (started_at::date));
+-- (A second index on `(user_id, started_at::date)` was tempting for
+-- day-bucket queries, but `timestamptz::date` is timezone-dependent
+-- and Postgres rejects non-IMMUTABLE expressions in index keys. Day
+-- bucketing currently happens client-side in `getDailySessionCounts`,
+-- so the single index above is sufficient. If we later push the
+-- bucketing to SQL, use `(started_at AT TIME ZONE 'UTC')::date`
+-- which IS immutable.)
 
 alter table public.sessions enable row level security;
 
