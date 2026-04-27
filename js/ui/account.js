@@ -25,6 +25,7 @@
 
 import { isReducedMotion } from '../core/motion.js';
 import * as auth from '../features/auth.js';
+import { evaluatePassword, validatePassword } from '../features/password-policy.js';
 import { createFocusTrap } from './focus-trap.js';
 
 let initialised = false;
@@ -40,6 +41,12 @@ let modalTrap = null;
 let dropdownOpen = false;
 let modalOpen = false;
 let mode = 'signin'; // 'signin' | 'signup' inside the modal
+// When the user tries to sign UP with an email that already exists, we
+// flip mode → 'signin', prefill the email, and show a friendly banner.
+// These two values survive the renderModal() call that re-creates the DOM.
+let pendingPrefillEmail = null;
+let pendingPrefillMessage = null;
+let pendingPrefillKind = null; // 'info' | 'error' — drives the banner colour
 
 let currentUser = null;
 
@@ -451,14 +458,48 @@ function renderModal() {
                        placeholder="you@example.com"
                        autocomplete="email" required>
             </label>
-            <label class="auth-field">
+            <label class="auth-field auth-field--password">
                 <span class="auth-field__label">Password
                     ${isSignIn ? '' : '<span class="auth-field__hint">8+ characters</span>'}
                 </span>
-                <input class="auth-field__input" type="password" id="authPassword"
-                       placeholder="••••••••"
-                       autocomplete="${isSignIn ? 'current-password' : 'new-password'}"
-                       minlength="8" required>
+                <span class="auth-field__password">
+                    <input class="auth-field__input" type="password" id="authPassword"
+                           placeholder="••••••••"
+                           autocomplete="${isSignIn ? 'current-password' : 'new-password'}"
+                           minlength="8" required>
+                    <button type="button" class="auth-field__eye" id="authShowPassword"
+                            aria-label="Show password" aria-pressed="false">
+                        <svg class="auth-field__eye-icon auth-field__eye-icon--show" viewBox="0 0 16 16" width="16" height="16"
+                             fill="none" stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/>
+                            <circle cx="8" cy="8" r="2"/>
+                        </svg>
+                        <svg class="auth-field__eye-icon auth-field__eye-icon--hide" viewBox="0 0 16 16" width="16" height="16"
+                             fill="none" stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M2 2.5l11.5 11.5"/>
+                            <path d="M6.7 4.3A6.5 6.5 0 0 1 8 4.2c4.4 0 6.8 4.3 6.8 4.3a14 14 0 0 1-2 2.4"/>
+                            <path d="M3.4 5.5A14 14 0 0 0 1.2 8.5s2.4 4.3 6.8 4.3a6.4 6.4 0 0 0 2.5-.55"/>
+                            <path d="M9.4 9.4a2 2 0 0 1-2.8-2.8"/>
+                        </svg>
+                    </button>
+                </span>
+                <span class="auth-field__caps-hint" id="authCapsHint" hidden role="status">
+                    <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M6 2 L2 5.5 H4 V8.5 H8 V5.5 H10 Z"/>
+                        <path d="M4 10 H8"/>
+                    </svg>
+                    Caps Lock is on
+                </span>
+                ${isSignIn ? '' : `
+                <div class="auth-strength" id="authStrength" aria-live="polite">
+                    <div class="auth-strength__meter" id="authStrengthMeter" data-score="0" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                    <span class="auth-strength__label" id="authStrengthLabel"></span>
+                </div>
+                `}
             </label>
             <button class="auth-modal__primary" type="submit" id="authSubmit">
                 ${isSignIn ? 'Sign in' : 'Create account'}
@@ -491,8 +532,32 @@ function renderModal() {
         </p>
     `;
     bindModalEvents();
-    // Focus the first input (Name on sign-up, Email on sign-in).
-    setTimeout(() => modalCard.querySelector('.auth-field__input')?.focus(), 80);
+    // If we just bounced the user from sign-up → sign-in because their
+    // email was already registered, restore the email + show the banner
+    // explaining what happened. Done after bindModalEvents so the inputs
+    // exist; pending* are cleared so they don't replay on the next open.
+    let prefilled = false;
+    if (pendingPrefillEmail) {
+        const emailInput = modalCard.querySelector('#authEmail');
+        if (emailInput) {
+            emailInput.value = pendingPrefillEmail;
+            prefilled = true;
+        }
+        pendingPrefillEmail = null;
+    }
+    if (pendingPrefillMessage) {
+        showError(pendingPrefillMessage, pendingPrefillKind || 'info');
+        pendingPrefillMessage = null;
+        pendingPrefillKind = null;
+    }
+    // Focus the password field when email was prefilled (the next missing
+    // piece), otherwise focus the first input on the form.
+    setTimeout(() => {
+        const target = prefilled
+            ? modalCard.querySelector('#authPassword')
+            : modalCard.querySelector('.auth-field__input');
+        target?.focus();
+    }, 80);
 }
 
 function renderConfigNotice() {
@@ -534,6 +599,19 @@ function bindModalEvents() {
     modalCard.querySelectorAll('[data-oauth]').forEach((btn) =>
         btn.addEventListener('click', () => handleOAuth(btn.dataset.oauth))
     );
+    // Password field — show/hide toggle, live strength meter (sign-up
+    // only), Caps Lock detection.
+    const passwordEl = modalCard.querySelector('#authPassword');
+    if (passwordEl) {
+        passwordEl.addEventListener('input', updateStrengthMeter);
+        passwordEl.addEventListener('keydown', updateCapsLockHint);
+        passwordEl.addEventListener('keyup', updateCapsLockHint);
+        passwordEl.addEventListener('blur', () => {
+            const hint = modalCard.querySelector('#authCapsHint');
+            if (hint) hint.hidden = true;
+        });
+    }
+    modalCard.querySelector('#authShowPassword')?.addEventListener('click', toggleShowPassword);
 }
 
 function readForm() {
@@ -555,11 +633,60 @@ function normaliseUsername(raw) {
     return raw.trim().replace(/^@/, '').toLowerCase();
 }
 
-function showError(msg) {
+/** Render a banner above the form. `kind === 'info'` swaps the alarming
+ *  red palette for a warm-amber treatment, used for advisory messages
+ *  like "this email already has an account, sign in instead". */
+function showError(msg, kind = 'error') {
     const errorEl = modalCard.querySelector('#authError');
     if (!errorEl) return;
     errorEl.hidden = !msg;
     errorEl.textContent = msg || '';
+    errorEl.classList.toggle('is-info', kind === 'info');
+}
+
+/** Live strength meter — sign-up only. Mirrors the password-policy
+ *  evaluatePassword score onto a 4-bar meter via a data-score attribute,
+ *  and writes the human label ("weak" / "fair" / etc.) next to it. */
+function updateStrengthMeter() {
+    if (mode !== 'signup') return;
+    const passwordEl = modalCard.querySelector('#authPassword');
+    const meterEl = modalCard.querySelector('#authStrengthMeter');
+    const labelEl = modalCard.querySelector('#authStrengthLabel');
+    if (!passwordEl || !meterEl) return;
+    const password = passwordEl.value;
+    if (!password) {
+        meterEl.dataset.score = '0';
+        if (labelEl) labelEl.textContent = '';
+        return;
+    }
+    const { score, label } = evaluatePassword(password);
+    meterEl.dataset.score = String(score);
+    if (labelEl) labelEl.textContent = label;
+}
+
+/** Show a small "Caps Lock is on" badge next to the password field while
+ *  Caps Lock is active. Saves users from a baffling "wrong password"
+ *  rejection when their key is just stuck. */
+function updateCapsLockHint(e) {
+    const hintEl = modalCard.querySelector('#authCapsHint');
+    if (!hintEl || typeof e.getModifierState !== 'function') return;
+    hintEl.hidden = !e.getModifierState('CapsLock');
+}
+
+/** Toggle the password input between text + password types. Stops the
+ *  click from bubbling so the surrounding <label> doesn't re-focus the
+ *  input on every press. */
+function toggleShowPassword(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const passwordEl = modalCard.querySelector('#authPassword');
+    const btn = modalCard.querySelector('#authShowPassword');
+    if (!passwordEl || !btn) return;
+    const showing = passwordEl.type === 'text';
+    passwordEl.type = showing ? 'password' : 'text';
+    btn.setAttribute('aria-pressed', String(!showing));
+    btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    btn.classList.toggle('is-revealing', !showing);
 }
 
 // In-flight guards. We use one async-action lock for the password form
@@ -592,17 +719,26 @@ async function handlePasswordSubmit(e) {
         emailEl?.focus();
         return;
     }
-    if (password.length < 8) {
-        showError('Password must be at least 8 characters.');
-        passwordEl?.focus();
-        return;
-    }
-    if (password.length > 128) {
-        showError('Password is too long (128 characters max).');
-        passwordEl?.focus();
-        return;
-    }
     const isSignIn = mode === 'signin';
+    // Sign-in: just require a value. Old accounts may have passwords
+    // that wouldn't pass our current sign-up policy, so don't lock them
+    // out at the boundary. Sign-up: run the full policy locally for
+    // instant feedback (auth.js re-runs it as the canonical gate, plus
+    // an HIBP breach check the user can't bypass).
+    if (isSignIn) {
+        if (password.length === 0) {
+            showError('Enter your password.');
+            passwordEl?.focus();
+            return;
+        }
+    } else {
+        const policy = validatePassword(password);
+        if (!policy.ok) {
+            showError(policy.message);
+            passwordEl?.focus();
+            return;
+        }
+    }
     let name = '';
     let username = '';
     if (!isSignIn) {
@@ -642,6 +778,20 @@ async function handlePasswordSubmit(e) {
             else closeModal();
         }
     } catch (err) {
+        // Cross-provider conflict: the email already has an account
+        // (could be password OR a Google OAuth identity). Bounce the
+        // user into sign-in mode with the email prefilled and a friendly
+        // banner — explain BOTH paths so a Google-sign-up user knows to
+        // use the OAuth button.
+        if (err?.code === 'already_registered' && !isSignIn) {
+            pendingPrefillEmail = email;
+            pendingPrefillMessage =
+                'An account with this email already exists. Sign in below — use your password, or “Continue with Google” if that’s how you signed up.';
+            pendingPrefillKind = 'info';
+            mode = 'signin';
+            renderModal();
+            return;
+        }
         showError(humaniseAuthError(err, isSignIn));
         submitEl.disabled = false;
         submitEl.textContent = original;
@@ -711,11 +861,14 @@ function humaniseAuthError(err, isSignIn) {
     const code = err?.code || 'unknown';
     switch (code) {
         case 'invalid_credentials':
-            return 'Email or password is incorrect.';
+            // The most common silent footgun: a user signed up with
+            // Google then types their email + a guessed password into
+            // the sign-in form. Point them at the OAuth button.
+            return 'Email or password is incorrect. If you signed up with Google, use “Continue with Google” below.';
         case 'email_not_confirmed':
             return 'Please confirm your email first — check your inbox for the link we sent.';
         case 'already_registered':
-            return 'An account with this email already exists. Try signing in instead.';
+            return 'An account with this email already exists. Sign in instead, or use “Continue with Google” if that’s how you signed up.';
         case 'rate_limited':
             return 'Too many attempts. Wait a minute and try again.';
         case 'network':
@@ -726,6 +879,9 @@ function humaniseAuthError(err, isSignIn) {
             return 'That email doesn’t look right.';
         case 'weak_password':
             return err?.message || 'Password must be at least 8 characters.';
+        case 'breached_password':
+            return err?.message
+                || 'This password has appeared in a known data breach — choose a different one.';
         case 'missing_password':
             return 'Enter your password.';
         case 'invalid_provider':

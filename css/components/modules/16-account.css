@@ -1090,6 +1090,109 @@
     font-size: 12px;
     line-height: 1.4;
 }
+/* Same banner element, advisory tone — used when we redirect a
+   sign-up to sign-in because the email is already on file. Warm amber
+   so it reads as "here's a hint" rather than "you broke something". */
+.auth-error.is-info {
+    background: rgba(255, 200, 100, 0.12);
+    border-color: rgba(255, 205, 115, 0.36);
+    color: rgba(255, 230, 188, 0.95);
+}
+
+/* ── Password field affordances ──────────────────────────────────────────
+   The password input grows a small button-on-the-right for show/hide,
+   a Caps Lock notice that pops in when the modifier is on, and (sign-up
+   only) a 4-bar strength meter sourced from password-policy.js. */
+.auth-field__password {
+    position: relative;
+    display: block;
+}
+.auth-field__password .auth-field__input {
+    /* Reserve room on the right for the eye button so the bullets /
+       email body don't slide under it. */
+    padding-right: 44px;
+}
+.auth-field__eye {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.5);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.18s ease, background 0.18s ease;
+}
+.auth-field__eye:hover {
+    color: rgba(255, 246, 225, 0.92);
+    background: rgba(255, 255, 255, 0.06);
+}
+.auth-field__eye:focus-visible {
+    outline: 2px solid rgba(255, 215, 130, 0.65);
+    outline-offset: 2px;
+    color: rgba(255, 246, 225, 0.92);
+}
+/* Two icons stacked — the visible one is determined by the .is-revealing
+   class on the button. Keeps both in the DOM so the swap is instant
+   (no layout reflow). */
+.auth-field__eye-icon { display: none; }
+.auth-field__eye .auth-field__eye-icon--show { display: block; }
+.auth-field__eye.is-revealing .auth-field__eye-icon--show { display: none; }
+.auth-field__eye.is-revealing .auth-field__eye-icon--hide { display: block; }
+
+.auth-field__caps-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(255, 200, 100, 0.12);
+    border: 1px solid rgba(255, 205, 115, 0.32);
+    color: rgba(255, 224, 168, 0.95);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.auth-field__caps-hint[hidden] { display: none; }
+.auth-field__caps-hint svg { flex-shrink: 0; }
+
+.auth-strength {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+.auth-strength__meter {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+.auth-strength__meter > span {
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    transition: background 0.22s ease;
+}
+.auth-strength__meter[data-score="1"] > span:nth-child(-n+1) { background: #ff7a7a; }
+.auth-strength__meter[data-score="2"] > span:nth-child(-n+2) { background: #ffaa55; }
+.auth-strength__meter[data-score="3"] > span:nth-child(-n+3) { background: #ffd47a; }
+.auth-strength__meter[data-score="4"] > span:nth-child(-n+4) { background: #95e2a4; }
+.auth-strength__label {
+    min-width: 56px;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 246, 225, 0.55);
+    text-align: right;
+}
 
 /* "Auth not configured" placeholder — shown if Supabase creds are missing. */
 .auth-modal__notice {

@@ -35,6 +35,7 @@
 //     onAuthStateChange event. Our `onChange` subscribers see it.
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './auth-config.js';
+import { validatePassword, isPasswordBreached } from './password-policy.js';
 
 let client = null;
 let clientPromise = null;
@@ -174,12 +175,17 @@ export async function signInWithMagicLink(email) {
  *  store unbounded user-supplied strings. */
 export async function signUpWithPassword(email, password, { name, username } = {}) {
     if (!isPlausibleEmail(email)) throwTyped('invalid_email', 'That email doesn’t look right.');
-    if (typeof password !== 'string' || password.length < 8) {
-        throwTyped('weak_password', 'Password must be at least 8 characters.');
-    }
-    if (password.length > 128) {
-        // Supabase's hard limit on password length; reject early.
-        throwTyped('weak_password', 'Password is too long (128 characters max).');
+    const policy = validatePassword(password);
+    if (!policy.ok) throwTyped('weak_password', policy.message);
+    // HIBP k-anonymity check — the password itself never leaves the browser.
+    // Network failures inside isPasswordBreached resolve to false so a
+    // flaky API can't gate sign-up; the policy + common-password checks
+    // above are still enforced.
+    if (await isPasswordBreached(password)) {
+        throwTyped(
+            'breached_password',
+            'This password has appeared in a known data breach — choose a different one for safety.'
+        );
     }
     const c = await getClient();
     const data = {};
