@@ -823,6 +823,13 @@
     font-size: 10.5px;
     color: rgba(255, 246, 225, 0.4);
 }
+/* Username availability hint — drives colour off a `data-state`
+   attribute set by queueUsernameCheck. The transitions are subtle so
+   the label doesn't flicker on every keystroke. */
+.auth-field__hint[data-state='checking'] { color: rgba(255, 246, 225, 0.55); }
+.auth-field__hint[data-state='available'] { color: #95e2a4; }
+.auth-field__hint[data-state='taken'] { color: #ff8a8a; }
+.auth-field__hint[data-state='invalid'] { color: #ffaa55; }
 .auth-field__input {
     width: 100%;
     padding: 12px 14px;

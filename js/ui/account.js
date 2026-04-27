@@ -41,12 +41,6 @@ let modalTrap = null;
 let dropdownOpen = false;
 let modalOpen = false;
 let mode = 'signin'; // 'signin' | 'signup' inside the modal
-// When the user tries to sign UP with an email that already exists, we
-// flip mode → 'signin', prefill the email, and show a friendly banner.
-// These two values survive the renderModal() call that re-creates the DOM.
-let pendingPrefillEmail = null;
-let pendingPrefillMessage = null;
-let pendingPrefillKind = null; // 'info' | 'error' — drives the banner colour
 
 let currentUser = null;
 
@@ -444,7 +438,7 @@ function renderModal() {
             </label>
             <label class="auth-field">
                 <span class="auth-field__label">Username
-                    <span class="auth-field__hint">optional</span>
+                    <span class="auth-field__hint" id="authUsernameStatus">optional</span>
                 </span>
                 <input class="auth-field__input" type="text" id="authUsername"
                        placeholder="@handle (optional)"
@@ -532,32 +526,8 @@ function renderModal() {
         </p>
     `;
     bindModalEvents();
-    // If we just bounced the user from sign-up → sign-in because their
-    // email was already registered, restore the email + show the banner
-    // explaining what happened. Done after bindModalEvents so the inputs
-    // exist; pending* are cleared so they don't replay on the next open.
-    let prefilled = false;
-    if (pendingPrefillEmail) {
-        const emailInput = modalCard.querySelector('#authEmail');
-        if (emailInput) {
-            emailInput.value = pendingPrefillEmail;
-            prefilled = true;
-        }
-        pendingPrefillEmail = null;
-    }
-    if (pendingPrefillMessage) {
-        showError(pendingPrefillMessage, pendingPrefillKind || 'info');
-        pendingPrefillMessage = null;
-        pendingPrefillKind = null;
-    }
-    // Focus the password field when email was prefilled (the next missing
-    // piece), otherwise focus the first input on the form.
-    setTimeout(() => {
-        const target = prefilled
-            ? modalCard.querySelector('#authPassword')
-            : modalCard.querySelector('.auth-field__input');
-        target?.focus();
-    }, 80);
+    // Focus the first input on the form (Name on sign-up, Email on sign-in).
+    setTimeout(() => modalCard.querySelector('.auth-field__input')?.focus(), 80);
 }
 
 function renderConfigNotice() {
@@ -612,6 +582,14 @@ function bindModalEvents() {
         });
     }
     modalCard.querySelector('#authShowPassword')?.addEventListener('click', toggleShowPassword);
+    // Live username availability — debounced to avoid hammering Supabase
+    // every keystroke. The post-signup claim is the authoritative gate;
+    // this is just a UX warm-up so the user knows before they hit submit.
+    const usernameEl = modalCard.querySelector('#authUsername');
+    if (usernameEl) {
+        usernameEl.addEventListener('input', queueUsernameCheck);
+        usernameEl.addEventListener('blur', queueUsernameCheck);
+    }
 }
 
 function readForm() {
@@ -671,6 +649,45 @@ function updateCapsLockHint(e) {
     const hintEl = modalCard.querySelector('#authCapsHint');
     if (!hintEl || typeof e.getModifierState !== 'function') return;
     hintEl.hidden = !e.getModifierState('CapsLock');
+}
+
+// Username availability — debounced live check. The status hint flips
+// between optional / checking / available / taken / invalid.
+let usernameCheckTimer = null;
+let usernameCheckSeq = 0;
+const USERNAME_DEBOUNCE_MS = 380;
+
+function queueUsernameCheck() {
+    const usernameEl = modalCard.querySelector('#authUsername');
+    const statusEl = modalCard.querySelector('#authUsernameStatus');
+    if (!usernameEl || !statusEl) return;
+    const raw = (usernameEl.value || '').trim().replace(/^@+/, '').toLowerCase();
+    if (usernameCheckTimer) clearTimeout(usernameCheckTimer);
+    if (!raw) {
+        setUsernameStatus('optional', null);
+        return;
+    }
+    if (!/^[a-z0-9._-]{2,30}$/.test(raw)) {
+        setUsernameStatus('2–30 letters / numbers / . _ -', 'invalid');
+        return;
+    }
+    setUsernameStatus('checking…', 'checking');
+    const seq = ++usernameCheckSeq;
+    usernameCheckTimer = setTimeout(async () => {
+        const result = await auth.isUsernameAvailable(raw);
+        // Discard stale results — user typed more after the request fired.
+        if (seq !== usernameCheckSeq) return;
+        if (result === true) setUsernameStatus('available', 'available');
+        else if (result === false) setUsernameStatus('taken', 'taken');
+        else setUsernameStatus('optional', null); // null = couldn't check
+    }, USERNAME_DEBOUNCE_MS);
+}
+
+function setUsernameStatus(text, kind) {
+    const statusEl = modalCard.querySelector('#authUsernameStatus');
+    if (!statusEl) return;
+    statusEl.textContent = text;
+    statusEl.dataset.state = kind || '';
 }
 
 /** Toggle the password input between text + password types. Stops the
@@ -778,18 +795,23 @@ async function handlePasswordSubmit(e) {
             else closeModal();
         }
     } catch (err) {
-        // Cross-provider conflict: the email already has an account
-        // (could be password OR a Google OAuth identity). Bounce the
-        // user into sign-in mode with the email prefilled and a friendly
-        // banner — explain BOTH paths so a Google-sign-up user knows to
-        // use the OAuth button.
+        // Anti-enumeration: never reveal via the UI whether a sign-up
+        // email is already registered. If it is, Supabase returns
+        // `already_registered` and (by default) sends nothing. We
+        // silently fire a magic-link to the same address so the
+        // existing user gets a usable sign-in email, then render the
+        // same "check your email" confirmation a fresh sign-up would.
+        // From the attacker's side the response is identical for both
+        // new and existing emails.
         if (err?.code === 'already_registered' && !isSignIn) {
-            pendingPrefillEmail = email;
-            pendingPrefillMessage =
-                'An account with this email already exists. Sign in below — use your password, or “Continue with Google” if that’s how you signed up.';
-            pendingPrefillKind = 'info';
-            mode = 'signin';
-            renderModal();
+            try {
+                await auth.signInWithMagicLink(email);
+            } catch (_) {
+                // Best-effort. Rate-limit / network errors are fine —
+                // the UI still shows confirmation, and the existing
+                // user can fall back to the sign-in form directly.
+            }
+            renderConfirmation(email, 'signup');
             return;
         }
         showError(humaniseAuthError(err, isSignIn));
@@ -882,6 +904,11 @@ function humaniseAuthError(err, isSignIn) {
         case 'breached_password':
             return err?.message
                 || 'This password has appeared in a known data breach — choose a different one.';
+        case 'username_taken':
+            return err?.message || 'That username is already taken.';
+        case 'username_taken_after_signup':
+            return err?.message
+                || 'Your account was created, but that username was just taken. Pick another.';
         case 'missing_password':
             return 'Enter your password.';
         case 'invalid_provider':

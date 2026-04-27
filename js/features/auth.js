@@ -117,10 +117,17 @@ async function getClient() {
         // Bridge Supabase's auth events into our subscriber set. This
         // also bridges multi-tab sync — Supabase fires this event when
         // another tab changes the persisted session.
-        client.auth.onAuthStateChange((_event, session) => {
+        client.auth.onAuthStateChange((event, session) => {
             cachedSession = session;
             cachedUser = session?.user ?? null;
             notifySubscribers();
+            // Deferred username claim. The signup-confirmation case
+            // can't claim at signup time (no JWT until verification)
+            // so we retry on every sign-in. Idempotent — calling it
+            // for an already-claimed handle is a no-op.
+            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && cachedUser) {
+                tryClaimMetadataUsername().catch(() => {});
+            }
         });
         // Hydrate the initial session on cold start.
         try {
@@ -128,6 +135,7 @@ async function getClient() {
             cachedSession = data?.session ?? null;
             cachedUser = cachedSession?.user ?? null;
             notifySubscribers();
+            if (cachedUser) tryClaimMetadataUsername().catch(() => {});
         } catch (e) {
             // Hydrate failure shouldn't kill the client — the user can
             // still try to sign in fresh. Log and continue.
@@ -191,11 +199,22 @@ export async function signUpWithPassword(email, password, { name, username } = {
             'This password has appeared in a known data breach — choose a different one for safety.'
         );
     }
+    const cleanName = clampString(name, 60);
+    const cleanUsername = sanitiseUsername(username);
+    // Pre-check the handle so we don't burn a sign-up attempt only to
+    // discover the handle is taken. The post-signup claim is the
+    // authoritative gate (it's the one that races against PRIMARY KEY)
+    // — this just saves a round-trip in the common case.
+    if (cleanUsername) {
+        const free = await isUsernameAvailable(cleanUsername);
+        if (free === false) {
+            throwTyped('username_taken',
+                `“${cleanUsername}” is already taken. Pick another.`);
+        }
+    }
     const c = await getClient();
     const data = {};
-    const cleanName = clampString(name, 60);
     if (cleanName) data.name = cleanName;
-    const cleanUsername = sanitiseUsername(username);
     if (cleanUsername) data.username = cleanUsername;
     const { data: result, error } = await withTimeout(
         c.auth.signUp({
@@ -210,7 +229,121 @@ export async function signUpWithPassword(email, password, { name, username } = {
         'signup'
     );
     if (error) throw normaliseError(error);
+    // If a session came back (email confirmation off), claim the
+    // handle right away. With confirmation on we can't claim yet — RLS
+    // requires an authed JWT, and the user has none until they verify.
+    // The onAuthStateChange handler picks up the deferred claim on
+    // first sign-in.
+    if (cleanUsername && result?.session) {
+        const status = await claimUsername(cleanUsername);
+        if (status === 'taken') {
+            throwTyped('username_taken_after_signup',
+                `Your account was created, but “${cleanUsername}” was just taken. Choose another username from your profile.`);
+        }
+    }
     return { confirmationRequired: !result?.session };
+}
+
+/** Cheap availability probe for the sign-up form's live validation.
+ *  Calls the SECURITY DEFINER `public.is_username_taken(text)` RPC so
+ *  unauthenticated users can probe without us exposing the
+ *  username → user_id mapping. Returns:
+ *    true   — handle is free
+ *    false  — handle is taken
+ *    null   — couldn't check (offline, RPC missing, RLS issue) —
+ *             caller should show no signal rather than block. */
+export async function isUsernameAvailable(username) {
+    const cleaned = sanitiseUsername(username);
+    if (!cleaned) return false;
+    if (!isConfigured()) return null;
+    try {
+        const c = await getClient();
+        const { data, error } = await withTimeout(
+            c.rpc('is_username_taken', { uname: cleaned }),
+            REQUEST_TIMEOUT_MS,
+            'username-check'
+        );
+        if (error) return null;
+        // The RPC returns a boolean; coerce defensively.
+        return data === false;
+    } catch (_) {
+        return null;
+    }
+}
+
+/** Claim a handle for the current user. Idempotent — calling with a
+ *  handle the user already owns is a no-op success. Switching handles
+ *  is allowed (existing row is released first). Returns:
+ *    true        — claim succeeded
+ *    'taken'     — somebody else owns this handle
+ *    'invalid'   — handle didn't pass character / length check
+ *    'no-auth'   — no current user session (claim is deferred until sign-in)
+ *    'network'   — couldn't reach Supabase or unknown DB error
+ *  Also mirrors the handle into user_metadata.username so the rest of
+ *  the UI (tooltip, dropdown) sees it without a separate query. */
+export async function claimUsername(username) {
+    const cleaned = sanitiseUsername(username);
+    if (!cleaned) return 'invalid';
+    if (!cachedUser) return 'no-auth';
+    try {
+        const c = await getClient();
+        // What does this user currently own?
+        const { data: mine, error: lookupErr } = await c
+            .from('usernames')
+            .select('username')
+            .eq('user_id', cachedUser.id)
+            .maybeSingle();
+        if (lookupErr) return 'network';
+        if (mine?.username === cleaned) {
+            // Already mine. Make sure user_metadata is in sync.
+            await c.auth.updateUser({ data: { username: cleaned } }).catch(() => {});
+            return true;
+        }
+        if (mine?.username) {
+            // Switching handles — release the old reservation first.
+            const { error: delErr } = await c
+                .from('usernames')
+                .delete()
+                .eq('user_id', cachedUser.id);
+            if (delErr) return 'network';
+        }
+        const { error: insErr } = await c
+            .from('usernames')
+            .insert({ username: cleaned, user_id: cachedUser.id });
+        if (!insErr) {
+            await c.auth.updateUser({ data: { username: cleaned } }).catch(() => {});
+            return true;
+        }
+        // 23505 = unique_violation in Postgres. Some Supabase-PostgREST
+        // shapes surface this on `error.code` and others on
+        // `error.details`; check both for robustness.
+        if (insErr.code === '23505' || /duplicate key|already exists/i.test(insErr.message || '')) {
+            return 'taken';
+        }
+        return 'network';
+    } catch (_) {
+        return 'network';
+    }
+}
+
+/** Best-effort: when a user signs in, sync their user_metadata.username
+ *  with the public.usernames reservation. Handles the
+ *  email-confirmation case where the original sign-up couldn't claim
+ *  (no JWT yet). Silent on every failure mode — the user still has an
+ *  account and a tooltip handle even if the row never lands. */
+async function tryClaimMetadataUsername() {
+    const handle = cachedUser?.user_metadata?.username;
+    if (!handle) return;
+    const status = await claimUsername(handle);
+    if (status === 'taken') {
+        // Their preferred handle was taken in the gap between signup
+        // and first sign-in. Strip it from metadata so the UI doesn't
+        // imply they own a unique handle they don't.
+        try {
+            const c = await getClient();
+            await c.auth.updateUser({ data: { username: null } });
+        } catch (_) {}
+    }
 }
 
 /** Sign in with email + password. */
