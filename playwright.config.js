@@ -6,8 +6,10 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
     testDir: './tests',
     // Tests have to wait through the loading screen + 22 audio preload
-    // attempts per page load; keep a generous per-test budget.
-    timeout: 60_000,
+    // attempts per page load; keep a generous per-test budget. Bumped
+    // from 60 s as the dev-mode bundle grew (Observatory + sessions
+    // substrate add cold-load weight even though prod is bundled).
+    timeout: 120_000,
     expect: { timeout: 10_000 },
     // Tests share a single Vite dev server, so running them in parallel
     // causes flaky loading-screen timeouts. Serial is fast enough (~1 min)

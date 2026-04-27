@@ -23,7 +23,7 @@ import * as cosmosPointer from '../ui/cosmos-pointer.js';
 import * as helpCenter from '../ui/help-center.js';
 import * as homeMiniTimer from '../ui/home-mini-timer.js';
 import * as navigation from '../ui/navigation.js';
-import * as patternsView from '../ui/patterns-view.js';
+import * as observatory from '../ui/observatory.js';
 import * as settings from '../ui/settings.js';
 import * as timerParticles from '../ui/timer-particles.js';
 import * as uiEffects from '../ui/ui-effects.js';
@@ -51,7 +51,7 @@ const modules = {
     cosmosEqRing,
     cosmosA11y,
     account,
-    patternsView,
+    observatory,
 };
 
 /**
@@ -255,9 +255,11 @@ export async function initApp() {
             loadedModules.account.initAccount();
         }
 
-        // Patterns view — momentum trail clickable; 'i' opens insights.
-        if (loadedModules.patternsView?.initPatternsView) {
-            loadedModules.patternsView.initPatternsView();
+        // Observatory — profile-tied analytics surface. Entry points:
+        // momentum-trail click, the 'i' shortcut, and the account
+        // dropdown's "Open the Observatory" button.
+        if (loadedModules.observatory?.initObservatory) {
+            loadedModules.observatory.initObservatory();
         }
 
         // T3.5: onboarding tour — auto-show on first visit

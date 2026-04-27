@@ -10,8 +10,11 @@ test.beforeEach(async ({ page }) => {
         localStorage.setItem('fu_tour_seen', '1');
     });
     await page.goto('/');
-    // Wait for the loading screen to fade out.
-    await expect(page.locator('#loadingScreen')).toBeHidden({ timeout: 15_000 });
+    // Wait for the loading screen to fade out. Generous timeout because
+    // the dev server cold-loads dozens of ES modules per page before
+    // init3D resolves; 15 s wasn't always enough as the surface area
+    // grew. 30 s is comfortably above the observed boot upper bound.
+    await expect(page.locator('#loadingScreen')).toBeHidden({ timeout: 30_000 });
 });
 
 test('home tab renders the greeting and clock', async ({ page }) => {
@@ -106,7 +109,7 @@ test('page renders without console errors', async ({ page }) => {
     });
     // Navigate and exercise each tab briefly.
     await page.goto('/');
-    await expect(page.locator('#loadingScreen')).toBeHidden({ timeout: 15_000 });
+    await expect(page.locator('#loadingScreen')).toBeHidden({ timeout: 30_000 });
     await page.keyboard.press('2');
     await page.keyboard.press('3');
     await page.keyboard.press('1');
