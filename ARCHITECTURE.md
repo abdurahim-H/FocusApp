@@ -7,8 +7,8 @@ A deeper technical tour of Cosmic Focus. Complements:
 
 ## Goals & constraints
 
-1. **Static and server-free.** The whole product is HTML + ES modules + CSS. Deploying means uploading files to a CDN. No database queries happen on page load, no cold starts, no server to patch.
-2. **All state in the browser.** `localStorage` is the source of truth. This keeps the app instantly responsive and usable offline. Phase 2 adds Supabase as an optional cloud mirror.
+1. **Static and server-free for the productivity surface.** The product itself is HTML + ES modules + CSS. Deploying means uploading files to a CDN. No database queries happen on page load, no cold starts, no server to patch.
+2. **Local-first.** `localStorage` is the source of truth for tasks / settings / stats / mixes. This keeps the app instantly responsive and usable offline. The optional Supabase account adds identity (display name + unique handle today; cross-device sync later) without making it the primary store.
 3. **Premium visual quality by default.** A real WebGL/Babylon.js scene — not a stock background video. Fails gracefully on weak GPUs via an adaptive FPS watchdog.
 4. **Declarative UI where possible.** The entire Settings panel is a single schema array; the renderer walks it and produces the DOM. Add a setting = add a row. Same pattern for the Help Center and onboarding tour.
 
@@ -19,7 +19,8 @@ A deeper technical tour of Cosmic Focus. Complements:
 │ index.html                                                  │
 │   • preloads: Inter font, Babylon CDN                       │
 │   • loads: css/base + css/components (via @import tree)     │
-│   • inline: theme bootstrap script (sets data-theme ASAP)   │
+│   • /theme-init.js — sets data-theme before paint (no FOUC) │
+│   • Babylon (pinned /v9.4.1/, SHA-384 SRI, crossorigin)     │
 │   • <script type="module" src="/js/core/app.js">            │
 └─────────────────────────────────────────────────────────────┘
           │
@@ -33,13 +34,16 @@ A deeper technical tour of Cosmic Focus. Complements:
           │
           ├──▶ js/engine/babylon-engine.js (Babylon init, WebGL/WebGPU)
           ├──▶ js/graphics/scene/scene-manager.js (render loop)
-          ├──▶ js/features/timer.js   (Pomodoro state machine)
-          ├──▶ js/features/tasks.js   (reactive list + animations)
-          ├──▶ js/features/sounds.js  (HTMLAudioElement mixer)
-          ├──▶ js/features/statistics.js (streak, totals)
-          ├──▶ js/ui/navigation.js    (tab switching)
-          ├──▶ js/ui/settings/apply.js (schema → live store)
-          └──▶ js/ui/settings/renderer.js (schema → DOM)
+          ├──▶ js/features/timer.js          (Pomodoro state machine)
+          ├──▶ js/features/tasks.js          (reactive list + animations)
+          ├──▶ js/features/sounds.js         (HTMLAudioElement mixer)
+          ├──▶ js/features/statistics.js     (streak, totals)
+          ├──▶ js/features/auth.js           (Supabase wrapper, lazy-loaded)
+          ├──▶ js/features/password-policy.js (HIBP + common-password block)
+          ├──▶ js/ui/navigation.js           (tab switching)
+          ├──▶ js/ui/account.js              (signed-in/-out satellite + auth modal)
+          ├──▶ js/ui/settings/apply.js       (schema → live store)
+          └──▶ js/ui/settings/renderer.js    (schema → DOM)
 ```
 
 ## Rendering pipeline
@@ -87,7 +91,7 @@ Why: at `elapsed > ~10⁵` seconds, GLSL `fract()` loses sub-pixel precision ins
 
 ### Signals
 
-`js/core/state.js` builds tiny reactive signals on top of `@preact/signals-core` (loaded from `esm.sh`). Each piece of user-visible state (current mode, timer state, task list, settings values) lives as a signal. DOM updates are driven by `effect()` blocks that resubscribe automatically.
+`js/core/state.js` builds tiny reactive signals on top of `@preact/signals-core` (bundled from `node_modules` — Vite chunks it as part of the state module so it ships from our origin under `script-src 'self'`, no third-party CDN). Each piece of user-visible state (current mode, timer state, task list, settings values) lives as a signal. DOM updates are driven by `effect()` blocks that resubscribe automatically.
 
 ### Settings store
 
@@ -96,6 +100,23 @@ Why: at `elapsed > ~10⁵` seconds, GLSL `fract()` loses sub-pixel precision ins
 ### Schema-driven UI
 
 `js/ui/settings/schema.js` is one large declarative array. Each entry is a row: `{ section, type, key, label, ... }`. The renderer (`renderer.js`) walks the schema and produces DOM based on `type`: `slider`, `toggle`, `stepper`, `segmented`, `select`, `theme-cards`, `text`, `button`, `button-row`, `shortcut-list`, `notif-permission`, `profile-list`, `schedule-list`, `readonly`. Adding a new setting = one schema entry + (if needed) one apply hook. The Help Center and onboarding tour follow the same pattern with `help-content.js` and the `STEPS` array in `onboarding.js`.
+
+## Auth subsystem
+
+Optional sign-in lives behind a single seam: **`js/features/auth.js` is the only file allowed to import `@supabase/supabase-js`.** Everything else calls the small typed API it exports (`signInWithPassword`, `signInWithMagicLink`, `signInWithOAuth`, `signUpWithPassword`, `sendPasswordReset`, `signOut`, `onChange`, `getUser`, `isConfigured`, `isUsernameAvailable`, `claimUsername`). One file changes if we ever swap providers.
+
+The Supabase SDK is bundled (npm) and lazy-imported on first use, so the initial page weight isn't paid by users who never sign in. Vite chunk-splits the dynamic import; everything stays on our origin under `script-src 'self'`.
+
+**Sign-up policy.** `js/features/password-policy.js` enforces:
+- length 8–128, no whitespace at edges, no single-character repeats
+- a 50-entry common-password blocklist (covers the worst SecLists / NCSC top-100 entries)
+- HIBP k-anonymity breach check via `api.pwnedpasswords.com` — only the first 5 hex chars of SHA-1 leave the browser; the API is whitelisted in CSP `connect-src`. Network failure resolves to `false` so a flaky API can't gate sign-up; the structural + blocklist checks still apply.
+
+**Email enumeration.** Sign-up gives the same UI response whether the email is fresh or already on file — "Check your email." When Supabase returns `already_registered`, the client silently fires a magic-link to the same address so the existing user receives a usable email regardless of whether they originally signed up with password or Google. From an attacker's side the response is identical; they can't iterate addresses to learn which are registered.
+
+**Username uniqueness.** A separate `public.usernames` table in Supabase enforces uniqueness via `PRIMARY KEY` on the handle. Row-Level Security restricts the table to "users see / insert / delete their own row." Public availability probes go through `is_username_taken(text)`, a `SECURITY DEFINER` function that returns just a boolean — `user_id` never leaves the database. The migration SQL lives in `db/migrations/0001_usernames.sql` and is applied manually in the Supabase dashboard. If a user signs up with email confirmation enabled, the claim is deferred to first sign-in via `onAuthStateChange`.
+
+**Auth callback.** `public/auth/callback.html` (+ external `callback.js`) receives the Supabase redirect. It surfaces error params (`error`, `error_description`) inline with a friendly message and a Back link; on success it redirects to `/` while preserving the URL fragment so the SDK's `detectSessionInUrl` can finish the handshake.
 
 ## Build pipeline
 
@@ -121,31 +142,35 @@ Cache policy (in `public/_headers`):
 
 ## CSS organisation
 
-`css/components/components.css` is a thin aggregator. The 14 real CSS files live in `css/components/modules/`:
+`css/components/components.css` is a thin aggregator. The real CSS files live in `css/components/modules/`:
 
-| Module                           | Scope                              |
-|----------------------------------|------------------------------------|
-| `01-home-base.css`               | Home layout, greeting              |
-| `02-home-mini-timer.css`         | Draggable mini-timer widget        |
-| `03-preset-cards.css`            | Scene quality cards                |
-| `04-settings-star.css`           | ✦ trigger button                   |
-| `05-settings-panel.css`          | Settings modal, rail, every row    |
-| `06-notification-banner.css`     | In-app notification banner         |
-| `07-statistics-bar.css`          | Sessions / streak chips            |
-| `08-clear-all-button.css`        | Clear-All control                  |
-| `09-focus-tab.css`               | Focus-mode hero treatment          |
-| `10-task-section.css`            | Task list and checkbox             |
-| `11-settings-toast.css`          | Ephemeral settings toast           |
-| `12-onboarding-tour.css`         | Welcome tour overlay               |
-| `13-help-center.css`             | Search + Q&A overlay               |
-| `14-focus-rings.css`             | a11y `:focus-visible` styling      |
+| Module                           | Scope                                    |
+|----------------------------------|------------------------------------------|
+| `01-home-base.css`               | Home layout, greeting                    |
+| `02-home-mini-timer.css`         | Draggable mini-timer widget              |
+| `03-preset-cards.css`            | Scene quality cards                      |
+| `04-settings-star.css`           | ✦ trigger button                         |
+| `05-settings-panel.css`          | Settings modal, rail, every row          |
+| `06-notification-banner.css`     | In-app notification banner               |
+| `07-statistics-bar.css`          | Sessions / streak chips                  |
+| `08-clear-all-button.css`        | Clear-All control                        |
+| `09-focus-tab.css`               | Focus-mode hero treatment                |
+| `10-task-section.css`            | Task list and checkbox                   |
+| `11-settings-toast.css`          | Ephemeral settings toast                 |
+| `12-onboarding-tour.css`         | Welcome tour overlay                     |
+| `13-help-center.css`             | Search + Q&A overlay                     |
+| `14-focus-rings.css`             | a11y `:focus-visible` styling            |
+| `15-ambient-deck.css`            | Ambient mixer deck + mix rail            |
+| `16-account.css`                 | Account satellite, dropdown, auth modal  |
 
 Import order = cascade order; later rules win on equal specificity. `apple-liquid-glass.css` lives alongside as a cohesive third-party-style module for the liquid-glass button system.
 
 ## Security posture
 
-- **CSP** — see `public/_headers`. Tight allowlists for scripts, styles, fonts, fetches, images, media. Reviewed every time a new dependency is added.
-- **XSS** — every user-typed string escaped before innerHTML insertion. Two author-HTML sites (help-center answers, onboarding tour bodies) are flagged with in-code comments.
+- **CSP** — see `public/_headers`. `script-src` is `'self'` plus pinned Babylon CDN and Cloudflare Insights — **no `'unsafe-inline'`** (the theme bootstrap and auth callback are external files for this reason). `object-src 'none'`, narrow allowlists for fonts / images / media / fetches.
+- **Supply chain** — Babylon is pinned to `/v9.4.1/babylon.js` with a SHA-384 `integrity` attribute; the browser refuses to execute it if the bytes don't match. Supabase, signals-core, and motion are bundled from npm so they ship from our origin (no third-party CDN in the auth path).
+- **XSS** — every user-typed string escaped before innerHTML insertion. Two author-HTML sites (help-center answers, onboarding tour bodies) are flagged with in-code comments. Shared-mix import is sanitised at the boundary (icon validated, name length-capped, control chars stripped).
+- **Auth** — single import seam for Supabase (`js/features/auth.js`), HIBP-checked password policy, anti-enumeration sign-up, unique handles enforced by Postgres `PRIMARY KEY` + `SECURITY DEFINER` RPC.
 - **Privacy** — no tracking cookies. No third-party analytics beyond Cloudflare (cookieless). Local-first data model.
 
 See **[SECURITY.md](SECURITY.md)** for the full posture and the vulnerability-reporting process.
@@ -156,13 +181,17 @@ See **[SECURITY.md](SECURITY.md)** for the full posture and the vulnerability-re
 
 ## Roadmap
 
-### Phase 2 — Accounts + cloud sync (planned)
+### Phase 2a — Accounts (shipped)
 
-- Supabase project + Postgres schema for `profiles`, `settings`, `tasks`, `stats`, `sessions`.
-- Row-Level Security on every table.
-- Auth methods: email/password, Google, magic-link, Apple, GitHub.
-- Anonymous mode remains — sign-in is strictly optional.
-- New **Productivity Dashboard** view: daily/weekly focus charts, streak calendar, task completion history, export.
+- Supabase project wired in. Email/password + Google OAuth + magic-link.
+- HIBP-checked password policy, anti-enumeration sign-up, unique-handle table with Postgres RLS + `SECURITY DEFINER` availability RPC.
+- Anonymous mode remains the default — sign-in is strictly optional.
+
+### Phase 2b — Cloud sync (planned)
+
+- Postgres schema for `profiles`, `settings`, `tasks`, `stats`, `sessions` with Row-Level Security.
+- Mirror local writes through the Supabase client when authenticated; reconcile on sign-in.
+- Productivity Dashboard view: daily/weekly focus charts, streak calendar, task completion history, export.
 
 ### Phase 3 — AI features (planned)
 

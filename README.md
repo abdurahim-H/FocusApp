@@ -4,7 +4,7 @@ A cinematic Pomodoro timer set inside a real-time 3D black-hole scene.
 Live at **[universefocuses.com](https://universefocuses.com)**.
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Built with Babylon.js](https://img.shields.io/badge/Babylon.js-7+-blue)](https://babylonjs.com)
+[![Built with Babylon.js](https://img.shields.io/badge/Babylon.js-9.4-blue)](https://babylonjs.com)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF)](https://vitejs.dev)
 
 ## What it is
@@ -19,8 +19,9 @@ A browser-only productivity app:
 - **Settings** — declarative schema covering quality presets, themes, timer flow, shortcuts, notifications, profiles, motion, and data export/import/reset
 - **Onboarding tour** on first visit, replayable from Settings
 - **Help Center** (press `?`) — searchable Q&A across every feature
+- **Optional account** (Supabase) for users who want a profile + identity — email/password or Google OAuth, with HIBP-checked passwords and unique handles. Anonymous mode is still the default and fully featured.
 
-No server, no account required. Everything persists in `localStorage`.
+No server logic for the productivity surface — everything persists in `localStorage`. Sign-in is optional and adds a profile + handle today (cross-device sync is the next planned phase).
 
 ## Running locally
 
@@ -65,7 +66,7 @@ The smoke suite lives in `tests/smoke.spec.js` and exercises the real app agains
 
 ```
 js/
-  core/          app bootstrap, signal state, reduced-motion detection
+  core/          app bootstrap, signal state, motion wrapper, reduced-motion detection
   engine/        Babylon engine init (WebGL2 / WebGPU fallback)
   graphics/
     scene/       render loop, cameras, lights, FPS watchdog wiring
@@ -73,19 +74,26 @@ js/
     environment/ nebula, skybox, starfield, star-glows, cosmic-motes,
                  shooting-stars, ethereal-petals
     postprocessing/ bloom/tone-mapping pipeline, god rays, anamorphic streak
-  features/      timer, tasks, sounds, sound-mixer, statistics, keyboard
+  features/      timer, tasks, sounds, sound-mixer, statistics, keyboard,
+                 auth.js (Supabase wrapper), password-policy.js (HIBP + blocklist)
   ui/
     settings/    schema.js (declarative) + renderer.js + store/apply/io
-    home-mini-timer.js, help-center.js, help-content.js, navigation.js
+    home-mini-timer.js, help-center.js, help-content.js, navigation.js,
+    account.js (signed-in/-out satellite + auth modal)
   utils/         perf profiles, FPS watchdog, notifications, cleanup
 
 css/
   base/          style, themes, responsive
-  components/    components.css, apple-liquid-glass.css
+  components/    components.css, apple-liquid-glass.css, modules/
 
 public/
   index.html (root), 404.html, privacy.html, terms.html, sitemap.xml,
-  robots.txt, site.webmanifest, _headers (security + cache)
+  robots.txt, site.webmanifest, _headers (security + cache),
+  theme-init.js (FOUC bootstrap),
+  auth/callback.html + callback.js (OAuth/magic-link landing)
+
+db/
+  migrations/    SQL applied manually in Supabase dashboard
 
 dist/            build output (gitignored)
 ```
@@ -100,10 +108,11 @@ dist/            build output (gitignored)
 
 ## Stack
 
-- **Rendering:** Babylon.js 7+ (WebGL2 primary, WebGPU experimental)
+- **Rendering:** Babylon.js 9.4 (pinned + SHA-384 SRI; WebGL2 primary, WebGPU experimental)
 - **Bundler:** Vite 8 with `@cloudflare/vite-plugin`
 - **Hosting:** Cloudflare Workers with Static Assets
 - **File storage:** Cloudflare R2 (`cdn.universefocuses.com`) for audio
+- **Auth + DB (optional accounts):** Supabase (email/password, Google OAuth, magic-link)
 - **Lint/format:** Biome 2
 - **Tests:** Playwright (smoke / e2e)
 - **Build target:** modern evergreen browsers (Chrome 80+, Firefox 75+, Safari 14+, Edge 80+)

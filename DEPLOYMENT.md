@@ -17,7 +17,7 @@ How Cosmic Focus is deployed, and what to do when something breaks.
 - **Domain registrar:** Squarespace (domain renews 2026-12-23).
 - **DNS:** Cloudflare (nameservers `merlin.ns.cloudflare.com`, `ollie.ns.cloudflare.com`).
 - **TLS:** Cloudflare universal SSL, auto-renewed.
-- **Backend (planned Phase 2):** Supabase (auth + Postgres + edge functions).
+- **Auth + Postgres:** Supabase (live for the optional accounts feature; cloud sync of productivity data is the next planned phase).
 
 ## Normal deploy flow
 
@@ -36,7 +36,7 @@ Typical end-to-end time: **~90 seconds**.
 - Build command: `npm run build`
 - Deploy command: `npx wrangler deploy`
 - Root directory: *(blank)*
-- Environment variables: *(none currently — Phase 2 will add Supabase keys)*
+- Environment variables: *(none — the Supabase URL and anon key are checked into `js/features/auth-config.js` because they are public by design; row-level security on Supabase is what protects user data, never the anon key)*
 
 ### DNS records (Websites → universefocuses.com → DNS)
 | Type   | Name               | Content                              | Proxy   |
@@ -90,14 +90,44 @@ After editing `_headers`, commit and push. Cloudflare redeploys.
 
 Workers & Pages → focusapp → Deployments → find the last known-good deployment → three-dot menu → **Rollback**. Live in seconds.
 
-## Secrets (future)
+## Supabase configuration
 
-When Supabase goes live:
-- Supabase anon key → safe to expose client-side (RLS enforces security); keep in `vite.config.js`'s `define` or a public env var.
-- Supabase service-role key → **never** in the frontend. Only used inside Edge Functions.
-- AI API keys (Anthropic, OpenAI) → **never** in the frontend. Only inside Supabase Edge Functions.
+The Supabase project is wired in for the optional accounts feature.
 
-Cloudflare Worker env vars: set via Dashboard → focusapp → Settings → Variables and secrets, or via `wrangler secret put <NAME>`.
+- **Project URL + anon key** live in `js/features/auth-config.js` and are checked into git. Both are public by design — Supabase's Row-Level Security on the database is what protects user data, not the anon key.
+- **Service-role key** → **never** in the frontend. Only used from inside Edge Functions or the SQL editor.
+- **Future AI API keys** (Anthropic, OpenAI) → **never** in the frontend. Only inside Supabase Edge Functions.
+
+Cloudflare Worker env vars (none required today): set via Dashboard → focusapp → Settings → Variables and secrets, or via `wrangler secret put <NAME>`.
+
+### Auth providers enabled
+
+| Provider | Status | Notes |
+|----------|--------|-------|
+| Email + password | Live | HIBP-checked policy enforced client-side; Supabase enforces email format + length |
+| Google OAuth | Live | Configured in Supabase Auth → Providers; redirect URL is `https://universefocuses.com/auth/callback.html` |
+| Magic link | Live | Default rate limits (per-IP / per-recipient) untouched |
+| Apple OAuth | Disabled | Removed from the UI; Supabase config can stay enabled but the button is gone |
+
+### Email templates
+
+The default Supabase templates work fine. If you want to customise the "magic link / sign-in" email (the one sent when an existing user attempts a duplicate sign-up), that's Authentication → Email Templates → Magic Link in the Supabase dashboard.
+
+## Database migrations
+
+Schema changes for the accounts feature live in `db/migrations/NNNN_*.sql`. There is **no automatic migration runner** — they are applied manually:
+
+1. Open Supabase Dashboard → SQL editor → New query.
+2. Paste the contents of the migration file.
+3. Click Run. The output should be `Success. No rows returned.`
+4. Migrations are idempotent (`create table if not exists`, `drop policy if exists … create policy …`) so re-running them is safe.
+
+Currently applied: `db/migrations/0001_usernames.sql` — creates `public.usernames` (PRIMARY KEY on the handle, RLS-restricted, unique index per user) plus the `is_username_taken(text)` `SECURITY DEFINER` function used for live availability probes.
+
+When adding a new migration:
+- Number it sequentially (`0002_*.sql`, `0003_*.sql`).
+- Make it idempotent.
+- Document any post-deploy step (e.g., backfill, RLS policy change) inline.
 
 ## Local development
 

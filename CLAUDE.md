@@ -23,7 +23,9 @@ Do **not** create additional `*.md` files without explicit human approval. We de
 
 ## What this project is
 
-Cosmic Focus — a single-page Pomodoro app rendered on top of a real-time Babylon.js black-hole scene. Pure vanilla ES modules. Babylon is loaded from CDN in `index.html`. Sound files live in a Cloudflare R2 bucket at `cdn.universefocuses.com`. Deploys via `@cloudflare/vite-plugin` + `wrangler` to a Cloudflare Worker serving `dist/` as static assets. All user state lives in `localStorage` / `sessionStorage` today; Phase 2 adds optional Supabase cloud sync.
+Cosmic Focus — a single-page Pomodoro app rendered on top of a real-time Babylon.js black-hole scene. Pure vanilla ES modules. Babylon is loaded from CDN in `index.html` (pinned to `/v9.4.1/` with a SHA-384 SRI). Other npm deps (Supabase, signals-core, motion) are bundled from `node_modules` and served from our origin. Sound files live in a Cloudflare R2 bucket at `cdn.universefocuses.com`. Deploys via `@cloudflare/vite-plugin` + `wrangler` to a Cloudflare Worker serving `dist/` as static assets.
+
+Productivity state (tasks / settings / stats / mixes) lives in `localStorage` / `sessionStorage`. Optional Supabase accounts add identity (display name, unique handle, email-verified sign-in) but do not yet mirror productivity data — cloud sync is the next planned phase.
 
 Live at **universefocuses.com**.
 
@@ -51,17 +53,19 @@ Prefer `npm start` when debugging things that behave differently under a bundler
 
 ```
 js/
-  core/          app bootstrap, shared signal state, reduced-motion detection
+  core/          app bootstrap, shared signal state, motion wrapper, reduced-motion detection
   engine/        Babylon engine init (WebGL2 / WebGPU selection, hardware scaling)
   graphics/
     scene/       scene-manager.js — the render loop, cameras, lights, FPS watchdog wiring
     blackhole/   blackhole.js — GLSL shader for the disk, lensing, photon ring
     environment/ nebula, cosmic-skybox, starfield, star-glows, cosmic-motes, shooting-stars, ethereal-petals
     postprocessing/ pipeline.js (DefaultRenderingPipeline + film grain), god-rays, anamorphic-streak
-  features/      timer, tasks, sounds, sound-mixer, statistics, keyboard, notification-banner
+  features/      timer, tasks, sounds, sound-mixer, statistics, keyboard, notification-banner,
+                 auth.js (sole Supabase importer), password-policy.js (HIBP + blocklist), auth-config.js
   ui/
     settings/    schema.js (declarative), renderer.js, store.js, apply.js, data-io.js, onboarding.js, schedules.js, cheatsheet.js, search.js, profiles.js
-    home-mini-timer.js, help-center.js, help-content.js, navigation.js, button-feel.js, ui-effects.js, focus-trap.js
+    home-mini-timer.js, help-center.js, help-content.js, navigation.js, button-feel.js, ui-effects.js, focus-trap.js,
+    account.js (signed-in/-out satellite + auth modal), ambient-ui.js, cosmos-a11y.js
   utils/         performance-profile.js (device tiers + FPS watchdog), notifications.js, cleanup.js
 
 css/
@@ -69,11 +73,12 @@ css/
   components/
     components.css                — thin @import aggregator
     apple-liquid-glass.css        — liquid-glass button system
-    modules/                      — 14 focused CSS modules (home, mini-timer, settings panel, stats, tasks, tour, help, etc.)
+    modules/                      — 16 focused CSS modules (home, mini-timer, settings panel, stats, tasks, tour, help, ambient deck, account, etc.)
 
-public/           verbatim-copied to dist/: index assets (icon.svg, site.webmanifest), legal (privacy.html, terms.html), 404.html, robots.txt, sitemap.xml, _headers
+public/           verbatim-copied to dist/: index assets (icon.svg, site.webmanifest), legal (privacy.html, terms.html), 404.html, robots.txt, sitemap.xml, _headers, theme-init.js (FOUC bootstrap), auth/callback.html + callback.js (OAuth/magic-link landing)
+db/migrations/    SQL applied manually in Supabase dashboard (idempotent)
 tests/            Playwright smoke suite (smoke.spec.js)
-index.html        entry point; loads Babylon from CDN, then /js/core/app.js
+index.html        entry point; loads pinned+SRI Babylon, then /js/core/app.js
 wrangler.toml     Cloudflare Workers + Static Assets config
 vite.config.js    Vite + @cloudflare/vite-plugin; strips console.log in prod
 biome.json        lint + format config
@@ -144,6 +149,23 @@ Committing a Mac-only lock causes CI to fail with `Missing @emnapi/... from lock
 
 Every new runtime origin (CDN, font host, API, WebSocket, image host) must be allowlisted in the relevant CSP directive before it'll load in production. Dev works without it because Vite serves the HTML with no `_headers`. Forgetting this is the #1 reason a feature "works locally, fails in prod." See the "CSP blocked something on production" section in `DEPLOYMENT.md`.
 
+`script-src` deliberately **does not** include `'unsafe-inline'`. Every script is either `'self'`-origin or comes from a pinned external URL (Babylon CDN, Cloudflare Insights). If you need a synchronous-before-paint script, externalise it under `public/` (see `theme-init.js`) — don't paste an inline `<script>` block.
+
+### Babylon is pinned + SRI'd — recompute the hash on upgrade
+
+`index.html` loads `https://cdn.babylonjs.com/v9.4.1/babylon.js` with a `sha384-…` `integrity` attribute and `crossorigin="anonymous"`. The browser refuses to execute it if the bytes don't match. When upgrading Babylon, update both the URL version path and the integrity hash:
+
+```bash
+curl -s https://cdn.babylonjs.com/v<NEW>/babylon.js \
+    | openssl dgst -sha384 -binary | openssl base64 -A
+```
+
+Only versioned `/v<X.Y.Z>/babylon.js` URLs are immutable on the BabylonJS CDN — never use the bare `/babylon.js` (it's latest-wins and breaks SRI).
+
+### Supabase migrations live in `db/migrations/`
+
+Schema changes for the optional accounts feature go in `db/migrations/NNNN_*.sql`. They are applied manually in the Supabase SQL editor (paste-and-run) — there's no automatic migration runner. Migrations should be idempotent (`create table if not exists`, `drop policy if exists … create policy …`) so they're safe to re-run. The current state is a single migration creating `public.usernames` + the `is_username_taken()` RPC.
+
 ### Production console is silent
 
 `vite.config.js` sets `esbuild.pure: ['console.log', 'console.debug', 'console.info']` so those calls are dead-code-eliminated from the production bundle. Use `console.warn` / `console.error` for anything a user or error tracker should actually see. `vite dev` keeps every call for debugging.
@@ -154,7 +176,8 @@ Anything in `public/` is copied verbatim to `dist/` root with its filename prese
 
 ### XSS safety contract
 
-- Every user-typed string (task name, profile name, greeting text, help-center search query, schedule labels) flows through `escapeHtml()` before landing in `innerHTML`.
+- Every user-typed string (task name, profile name, greeting text, help-center search query, schedule labels, account name + username + email + avatar) flows through `escapeHtml()` / `escapeAttr()` before landing in `innerHTML`. Avatar URLs are additionally protocol-validated (https/http only).
+- Shared-mix import (`?mix=` URL param in `js/ui/ambient-ui.js`) sanitises every payload field at the boundary: `name` is length-capped + control-chars stripped, `icon` must be ≤4 codepoints with no markup characters (otherwise falls back to '🎵'), `active` is filtered to strings + capped to 32 entries.
 - Two sites intentionally render raw HTML: `help-center.js::createEntryEl` (answer bodies) and `onboarding.js` (tour step bodies). Both have in-code comments labelling this as *author-controlled HTML only*. If you ever wire user input into either, switch them to `textContent` or escape the payload.
 
 ## Collaboration rules the user cares about
@@ -182,7 +205,9 @@ Anything in `public/` is copied verbatim to `dist/` root with its filename prese
 - Don't reintroduce `console.log` as a user-visible signal — it's stripped from prod. Use `console.warn` / `error` for anything meant to be seen.
 - Don't create new `*.md` files beyond the five documented above unless the user asks.
 - Don't run `git push --force`, `git reset --hard`, `rm -rf`, or `localStorage.clear()` during a debug session without confirming.
-- **Don't import `@supabase/supabase-js` from anywhere except `js/features/auth.js`.** That file is the single point of contact with the auth provider. Everything else calls the thin API it exposes (`signInWithMagicLink`, `signInWithOAuth`, `signOut`, `onChange`, `getUser`, `isConfigured`). One file changes if we ever swap providers.
+- **Don't import `@supabase/supabase-js` from anywhere except `js/features/auth.js`.** That file is the single point of contact with the auth provider. Everything else calls the thin API it exposes (`signInWithMagicLink`, `signInWithOAuth`, `signOut`, `onChange`, `getUser`, `isConfigured`, `isUsernameAvailable`, `claimUsername`). One file changes if we ever swap providers.
+- **Don't bypass the password policy.** `js/features/auth.js → signUpWithPassword` runs `validatePassword` + `isPasswordBreached` (HIBP) before calling Supabase. New auth flows must call this same function — don't reach for `c.auth.signUp` directly.
+- **Don't paste an inline `<script>` block.** Externalise it under `public/` so CSP can keep `script-src` free of `'unsafe-inline'`. Same applies to `on*=` event-handler attributes in HTML.
 - **Don't put `position: fixed` chrome inside `.container`.** `.container` has `contain: layout style paint` which makes it the containing block for fixed descendants AND clips paint and pointer hits to its box. Settings panel, cosmos toolbar, library drawer, save-mix popover, sleep popover, account satellite, account dropdown, and auth modal all live as direct children of `<body>` for this reason. Adding a new floating overlay? It goes outside `.container`.
 
 ## Where to look first when debugging common symptoms

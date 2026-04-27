@@ -10,9 +10,25 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-- Planned: Supabase accounts + cross-device cloud sync.
-- Planned: first AI-powered feature (task breakdown via Claude).
-- Planned: Cloudflare Web Analytics + Sentry error tracking wired in.
+### Added
+- **Optional accounts** via Supabase. Email + password, Google OAuth, and magic-link sign-in. The auth surface is gated behind a satellite trigger that hangs off the right side of the nav pill, with a glass-orb dropdown when signed in.
+- **Password policy** enforced at sign-up: length 8–128, no whitespace at edges, no single-character repeats, 50-entry common-password blocklist, plus a Have-I-Been-Pwned k-anonymity breach check (only the first 5 hex chars of SHA-1 leave the browser). Live 4-bar strength meter on the form.
+- **Show / hide password toggle** and **Caps Lock hint** on the auth modal.
+- **Unique-handle reservations** backed by a Postgres `public.usernames` table with `PRIMARY KEY` enforcement. Live availability probe via a `SECURITY DEFINER` RPC; user_id never leaves the database.
+- **Cross-provider hint** on sign-in: when invalid credentials are returned, the error suggests trying "Continue with Google" since the most common silent footgun is a Google-OAuth user typing a guessed password.
+
+### Hardened
+- **CSP**: dropped `'unsafe-inline'` from `script-src` (theme bootstrap and auth-callback handler externalised to `public/theme-init.js` and `public/auth/callback.js`). Added explicit `object-src 'none'`. Removed `https://esm.sh` from both `script-src` and `connect-src` after bundling Supabase, signals-core, and Motion One via npm. Added `https://api.pwnedpasswords.com` to `connect-src` for the HIBP breach check.
+- **Babylon.js pinned** to `/v9.4.1/babylon.js` with a SHA-384 `integrity` attribute and `crossorigin="anonymous"`. The browser refuses to execute it if the bytes don't match.
+- **Anti-enumeration sign-up**: identical UI response for fresh vs. already-registered emails. When Supabase returns `already_registered`, the client silently fires a magic link to the same address so the existing user receives a usable email regardless of provider.
+- **Defence-in-depth XSS fix**: shared-mix import (`?mix=` URL param) sanitises payload fields at the boundary — name is length-capped + control chars stripped, icon must be ≤4 codepoints with no markup characters, active list is filtered to strings and capped at 32 entries. The mix-card icon is also escaped at render time.
+- **Free-text settings cap**: greeting now limited to 80 chars; default cap of 200 on any other text setting. Prevents paste-an-essay DoS via localStorage bloat or render stall.
+- Stripped dev-only debug surface: `window.testNotification`, `window.quickTimerTest`, `window.debugNotifications`, `window.reportMemoryUsage`, `window.cleanupApplication`, `window.__applyQualityLevel`, the `DEBUG_NOTIFICATIONS` flag, and ~50 emoji-prefixed `console.log` calls narrating internal flow.
+
+### Planned
+- Cross-device cloud sync (mirror productivity data through Supabase).
+- First AI-powered feature (task breakdown via Claude).
+- Cloudflare Web Analytics + Sentry error tracking wired in.
 
 ## [1.0.0] — 2026-04-19
 
@@ -43,7 +59,7 @@ First production release. Live at [universefocuses.com](https://universefocuses.
 - Shader time uniforms wrapped at 4-hour period to prevent float32 precision collapse on long sessions (was making the black hole look washed-out after hours).
 - FPS watchdog made reversible so a transient hitch can't permanently halve render resolution.
 - `console.log` / `info` / `debug` stripped from production bundles via `esbuild.pure`.
-- Strict CSP locking scripts to `'self' + cdn.babylonjs.com + esm.sh + static.cloudflareinsights.com`, styles to `'self' + fonts.googleapis.com`, media to R2 only, and similarly narrow `connect-src` / `img-src` / `font-src`.
+- Strict CSP locking scripts to `'self' + cdn.babylonjs.com + esm.sh + static.cloudflareinsights.com`, styles to `'self' + fonts.googleapis.com`, media to R2 only, and similarly narrow `connect-src` / `img-src` / `font-src`. (CSP further tightened in [Unreleased].)
 - Heavy unused assets removed: favicon SVG trimmed; 2.2 MB black-hole preview PNG replaced with an 88 KB JPG.
 - `_quarantine/` directory (37 MB of archived code) deleted from git.
 - `components.css` (3,370 lines) split into 14 focused modules aggregated via `@import`.
