@@ -40,9 +40,10 @@
 
 /* ── Filament — engraved data-rail ─────────────────────────────────────── */
 .nav-filament {
-    /* 40px and aggressive negative margins → ~32px effective gap between
-       the pill and the satellite. Satellite reads as locked to the pill. */
-    width: 40px;
+    /* 28px + -4px margins on both sides → ~20px effective gap between
+       the pill and the satellite. Tight enough that the satellite
+       reads as a directly-attached charm, not a tethered remote. */
+    width: 28px;
     height: 12px;
     flex-shrink: 0;
     margin: 0 -4px 0 -4px;
@@ -64,14 +65,14 @@
     opacity: 0;
 }
 @keyframes filamentPulseTravel {
-    /* Tuned for the 40px rail — pulse rect starts at x=3 with width=9;
-       max travel ~26px keeps the trailing edge inside the SVG before
+    /* Tuned for the 28px rail — pulse rect starts at x=3 with width=7;
+       max travel ~17px keeps the trailing edge inside the SVG before
        it fades into the satellite. */
     0%   { transform: translateX(0px);   opacity: 0; }
     8%   { transform: translateX(1px);   opacity: 0.6; }
-    50%  { transform: translateX(13px);  opacity: 1; }
-    92%  { transform: translateX(24px);  opacity: 0.6; }
-    100% { transform: translateX(26px);  opacity: 0; }
+    50%  { transform: translateX(8px);   opacity: 1; }
+    92%  { transform: translateX(15px);  opacity: 0.6; }
+    100% { transform: translateX(17px);  opacity: 0; }
 }
 
 .nav-filament__rivet {
