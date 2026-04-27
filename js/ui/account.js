@@ -135,14 +135,30 @@ function syncTooltip() {
     const nameEl = tooltipEl.querySelector('.account-satellite__tooltip-name');
     const subEl = tooltipEl.querySelector('.account-satellite__tooltip-sub');
     if (currentUser) {
-        const name = currentUser.user_metadata?.name || 'Signed in';
-        const email = currentUser.email || '';
-        const obscured = obscureEmail(email);
+        const meta = currentUser.user_metadata || {};
+        const name = meta.name || 'Signed in';
+        const username = meta.username || '';
         if (nameEl) nameEl.textContent = name;
-        if (subEl) subEl.textContent = obscured;
+        // If a username is set, the bottom line shows "@username" as a
+        // distinct identifier. If not, the bottom line is hidden — the
+        // top line (name) is enough on its own. Email is intentionally
+        // not shown in the tooltip; that's profile-detail territory and
+        // belongs in the dropdown.
+        if (subEl) {
+            if (username) {
+                subEl.textContent = `@${username}`;
+                subEl.hidden = false;
+            } else {
+                subEl.textContent = '';
+                subEl.hidden = true;
+            }
+        }
     } else {
         if (nameEl) nameEl.textContent = 'Sign in';
-        if (subEl) subEl.textContent = 'your universe, anywhere';
+        if (subEl) {
+            subEl.textContent = 'your universe, anywhere';
+            subEl.hidden = false;
+        }
     }
 }
 
@@ -336,6 +352,24 @@ function renderModal() {
         <div class="auth-error" id="authError" hidden></div>
 
         <form id="authForm" novalidate>
+            ${isSignIn ? '' : `
+            <label class="auth-field">
+                <span class="auth-field__label">Name</span>
+                <input class="auth-field__input" type="text" id="authName"
+                       placeholder="Your name"
+                       autocomplete="given-name"
+                       maxlength="60" required>
+            </label>
+            <label class="auth-field">
+                <span class="auth-field__label">Username
+                    <span class="auth-field__hint">optional</span>
+                </span>
+                <input class="auth-field__input" type="text" id="authUsername"
+                       placeholder="@handle (optional)"
+                       autocomplete="username"
+                       maxlength="30" pattern="[A-Za-z0-9._-]+">
+            </label>
+            `}
             <label class="auth-field">
                 <span class="auth-field__label">Email</span>
                 <input class="auth-field__input" type="email" id="authEmail"
@@ -388,7 +422,8 @@ function renderModal() {
         </p>
     `;
     bindModalEvents();
-    setTimeout(() => modalCard.querySelector('#authEmail')?.focus(), 80);
+    // Focus the first input (Name on sign-up, Email on sign-in).
+    setTimeout(() => modalCard.querySelector('.auth-field__input')?.focus(), 80);
 }
 
 function renderConfigNotice() {
@@ -434,11 +469,21 @@ function bindModalEvents() {
 
 function readForm() {
     return {
+        nameEl: modalCard.querySelector('#authName'),
+        usernameEl: modalCard.querySelector('#authUsername'),
         emailEl: modalCard.querySelector('#authEmail'),
         passwordEl: modalCard.querySelector('#authPassword'),
         submitEl: modalCard.querySelector('#authSubmit'),
         errorEl: modalCard.querySelector('#authError'),
     };
+}
+
+/** Strip the leading "@" if a user types it into the username field —
+ *  we display the handle with an @ prefix in the tooltip, but store
+ *  it raw. Lowercase to keep it canonical. */
+function normaliseUsername(raw) {
+    if (!raw) return '';
+    return raw.trim().replace(/^@/, '').toLowerCase();
 }
 
 function showError(msg) {
@@ -448,34 +493,61 @@ function showError(msg) {
     errorEl.textContent = msg || '';
 }
 
-/** Email + password — sign-in or sign-up depending on the toggle. */
+/** Email + password — sign-in or sign-up depending on the toggle.
+ *  Sign-up also collects display name (required) and username (optional)
+ *  and stores them in Supabase user_metadata. */
 async function handlePasswordSubmit(e) {
     e.preventDefault();
-    const { emailEl, passwordEl, submitEl } = readForm();
+    const { nameEl, usernameEl, emailEl, passwordEl, submitEl } = readForm();
     const email = emailEl?.value.trim();
     const password = passwordEl?.value || '';
     showError(null);
-    if (!email) return;
+    if (!email) {
+        showError('Enter your email.');
+        emailEl?.focus();
+        return;
+    }
     if (password.length < 8) {
         showError('Password must be at least 8 characters.');
+        passwordEl?.focus();
         return;
     }
     const isSignIn = mode === 'signin';
+    if (!isSignIn) {
+        const name = nameEl?.value.trim();
+        if (!name) {
+            showError('Tell us your name.');
+            nameEl?.focus();
+            return;
+        }
+        // Username is optional — but if provided, validate it has no spaces
+        // and is short enough. Pattern attribute on the input handles
+        // characters; we just check length here.
+        const username = normaliseUsername(usernameEl?.value);
+        if (username && (username.length < 2 || username.length > 30)) {
+            showError('Username must be between 2 and 30 characters.');
+            usernameEl?.focus();
+            return;
+        }
+    }
     submitEl.disabled = true;
     const original = submitEl.textContent;
     submitEl.textContent = isSignIn ? 'Signing in…' : 'Creating account…';
     try {
         if (isSignIn) {
             await auth.signInWithPassword(email, password);
-            // Successful sign-in fires onAuthStateChange → trigger updates,
-            // dropdown re-renders. Close the modal here.
             closeModal();
         } else {
-            const { confirmationRequired } = await auth.signUpWithPassword(email, password);
+            const name = nameEl?.value.trim();
+            const username = normaliseUsername(usernameEl?.value);
+            const { confirmationRequired } = await auth.signUpWithPassword(
+                email,
+                password,
+                { name, username },
+            );
             if (confirmationRequired) {
                 renderConfirmation(email, 'signup');
             } else {
-                // Email confirmation disabled — auto-signed-in. Close.
                 closeModal();
             }
         }

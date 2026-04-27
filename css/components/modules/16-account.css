@@ -396,20 +396,25 @@
 }
 .account-satellite__tooltip-name {
     display: block;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', 'Segoe UI', sans-serif;
     font-size: 11.5px;
     font-weight: 500;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.005em;
     color: #faf3e3;
 }
 .account-satellite__tooltip-sub {
     display: block;
-    font-family: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
-    font-style: italic;
-    font-size: 11px;
-    color: rgba(250, 243, 227, 0.45);
-    margin-top: 1px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 10.5px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: rgba(250, 243, 227, 0.55);
+    margin-top: 2px;
 }
+/* When the subtitle has no value (e.g. signed-in user without a
+   username), hide the line entirely so the tooltip collapses to the
+   name only. */
+.account-satellite__tooltip-sub[hidden] { display: none; }
 /* Tooltip arrow pointing up at the satellite */
 .account-satellite__tooltip::before {
     content: '';

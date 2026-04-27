@@ -97,25 +97,30 @@ export async function signInWithMagicLink(email) {
     if (error) throw error;
 }
 
-/** Create a new account with email + password. Sends a confirmation
- *  email if the project requires email verification (default). Returns
- *  { confirmationRequired: bool } so the UI can show the right next
- *  step ("check your inbox" vs "you're signed in"). */
-export async function signUpWithPassword(email, password) {
+/** Create a new account with email + password. Optionally attaches
+ *  display name + username to the user's metadata so the rest of the
+ *  app has identity strings without a separate profile fetch.
+ *
+ *  Sends a confirmation email if the project requires verification
+ *  (default). Returns { confirmationRequired: bool } so the UI can
+ *  show the right next step. */
+export async function signUpWithPassword(email, password, { name, username } = {}) {
     const c = await getClient();
-    const { data, error } = await c.auth.signUp({
+    // Build the user_metadata payload — only include keys the caller
+    // actually provided. Supabase merges this into auth.users.user_metadata.
+    const data = {};
+    if (name && name.trim()) data.name = name.trim();
+    if (username && username.trim()) data.username = username.trim();
+    const { data: result, error } = await c.auth.signUp({
         email,
         password,
         options: {
             emailRedirectTo: `${window.location.origin}/auth/callback.html`,
+            data,
         },
     });
     if (error) throw error;
-    // If the project has "Confirm email" enabled, signUp returns a
-    // user but no session — Supabase signals "please verify" by setting
-    // session: null. If confirmation is disabled (dev convenience),
-    // the user is auto-signed-in and a session is returned.
-    return { confirmationRequired: !data?.session };
+    return { confirmationRequired: !result?.session };
 }
 
 /** Sign in with email + password. Throws on bad credentials, on
