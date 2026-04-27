@@ -1,0 +1,90 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SESSION CINEMATIC — the moment a focus block earns.
+   Floats above everything, no chrome, type-only. The camera move in
+   scene-manager carries the visual weight; this is the line of
+   acknowledgement that fades in alongside it.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.session-cinematic {
+    position: fixed;
+    /* Sits above the timer, below the very top — about a third of the
+       way down — so it reads like a film subtitle, not a notification. */
+    top: 26%;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    z-index: 1850;
+    pointer-events: none;
+    text-align: center;
+    color: rgba(255, 246, 225, 0.95);
+    /* Geometric type rendering keeps the digits crisp at large sizes. */
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+    opacity: 0;
+    transition:
+        opacity var(--cinematic-fade-out, 600ms) cubic-bezier(0.32, 0.72, 0, 1),
+        transform var(--cinematic-fade-out, 600ms) cubic-bezier(0.32, 0.72, 0, 1);
+    user-select: none;
+}
+.session-cinematic.is-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    transition:
+        opacity var(--cinematic-fade-in, 480ms) cubic-bezier(0.16, 1, 0.3, 1),
+        transform var(--cinematic-fade-in, 480ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Primary line — large numeral with a small label-style unit beside it.
+   The numeral uses tabular figures so digit changes don't shift width;
+   the unit stays uppercase at the typographic baseline. */
+.session-cinematic__primary {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    line-height: 1;
+}
+.session-cinematic__primary-num {
+    /* SF Mono / JetBrains Mono if the user has them; falls back to
+       Inter. tnum forces tabular figures so the number doesn't wobble
+       if it changes from "9 min" to "32 min". */
+    font-family: 'JetBrains Mono', 'SF Mono', 'Menlo', 'Inter', -apple-system, monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1, 'ss01' 1;
+    font-size: clamp(56px, 8vw, 88px);
+    font-weight: 200;
+    letter-spacing: -0.025em;
+    color: #faf3e3;
+    /* Faint warm halo so the number reads as illuminated, not painted. */
+    text-shadow:
+        0 0 24px rgba(255, 215, 130, 0.32),
+        0 0 60px rgba(255, 200, 100, 0.16);
+}
+.session-cinematic__primary-unit {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: clamp(13px, 1.4vw, 17px);
+    font-weight: 400;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.66);
+    /* Pull the unit slightly down to align with the numeral's optical
+       baseline rather than its absolute one. */
+    transform: translateY(-0.6em);
+}
+
+/* Meta line — secondary detail. Small caps cadence keeps it hierarchic
+   without competing for attention. */
+.session-cinematic__meta {
+    margin-top: 18px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 11.5px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.55);
+}
+
+/* Reduced-motion: kill the rise-up transform, let the opacity carry it. */
+@media (prefers-reduced-motion: reduce) {
+    .session-cinematic,
+    .session-cinematic.is-visible {
+        transform: translateX(-50%);
+    }
+}

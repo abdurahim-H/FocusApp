@@ -69,6 +69,13 @@ let parallaxEnabled = false;
 let deviceProfile = null;
 let fpsWatchdog = null;
 
+// Cinematic offsets — short, externally-driven camera additions that
+// layer over the orbital motion. The session-end cinematic animates
+// these to pull the camera toward the event horizon for a few seconds
+// without losing the persistent orbital sway.
+let cinematicRadiusOffset = 0;
+let cinematicAlphaBoost = 0;
+
 // Animation timing
 const clock = {
     startTime: performance.now(),
@@ -368,7 +375,7 @@ function updateCinematicCamera(elapsed) {
         Math.sin(elapsed * 0.023) * 0.04 +
         Math.sin(elapsed * 0.011) * 0.025 +
         Math.sin(elapsed * 0.037) * 0.015;
-    camera.alpha = baseAlpha + orbitDrift;
+    camera.alpha = baseAlpha + orbitDrift + cinematicAlphaBoost;
 
     // --- Vertical drift: layered for smooth organic motion ---
     const baseBeta = Math.PI * 0.4;
@@ -382,7 +389,7 @@ function updateCinematicCamera(elapsed) {
     const baseRadius = 65;
     const breathSin = Math.sin(elapsed * 0.02);
     const breathing = Math.abs(breathSin) ** 0.6 * Math.sign(breathSin) * 10;
-    camera.radius = baseRadius + breathing;
+    camera.radius = baseRadius + breathing + cinematicRadiusOffset;
 
     // --- Micro-motion: subtle film shake ---
     let targetX = Math.sin(elapsed * 2.3) * 0.003 + Math.sin(elapsed * 5.7) * 0.001;
@@ -517,4 +524,15 @@ export function dispose() {
 }
 
 // Export for external access
+/** Externally-driven cinematic camera offset, applied on top of the
+ *  orbital sway each frame. Pass `{ radiusOffset, alphaBoost }` —
+ *  positive radius pushes the camera further from the black hole,
+ *  negative pulls it closer (toward the event horizon). The
+ *  session-end cinematic animates these from 0 → closest → 0 over a
+ *  few seconds. */
+export function setCinematicCameraOffset({ radiusOffset = 0, alphaBoost = 0 } = {}) {
+    cinematicRadiusOffset = Number.isFinite(radiusOffset) ? radiusOffset : 0;
+    cinematicAlphaBoost = Number.isFinite(alphaBoost) ? alphaBoost : 0;
+}
+
 export { camera, scene, stats };

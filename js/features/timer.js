@@ -7,6 +7,7 @@
 import { tasks, state } from '../core/state.js';
 import { abandonCurrentSession, beginSession, endSession } from '../features/sessions.js';
 import { recordSessionComplete } from '../features/statistics.js';
+import { playSessionCinematic } from '../ui/session-cinematic.js';
 import { get as settingsGet } from '../ui/settings/store.js';
 import { emitTimerParticles } from '../ui/timer-particles.js';
 import { triggerFocusIntensity, triggerSessionCompleteUI } from '../ui/ui-effects.js';
@@ -284,12 +285,18 @@ export function completeSession() {
 
         // Per-session record (analytics + cinematic + cloud sync).
         const taskList = tasks.value || [];
-        endSession({
+        const sessionRecord = endSession({
             elapsedSeconds,
             completed: elapsedSeconds >= configuredSeconds,
             taskCount: taskList.length,
             tasksCompleted: taskList.filter((t) => t.completed).length,
         });
+
+        // The 5-second cinematic: camera approaches the event horizon
+        // with a typed line of acknowledgement floating above. Runs in
+        // parallel with the break that's about to start — both
+        // happening simultaneously is the intent.
+        if (sessionRecord) playSessionCinematic(sessionRecord);
 
         triggerSessionCompleteUI();
 
