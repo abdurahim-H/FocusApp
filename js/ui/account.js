@@ -114,8 +114,15 @@ function renderTriggerState() {
         const avatar = currentUser.user_metadata?.avatar_url;
         const imgEl = trigger.querySelector('.account-satellite__avatar');
         if (avatar && imgEl) {
+            // If the avatar URL fails to load (CSP block, expired Google
+            // CDN signature, network), drop has-avatar so the glyph
+            // shows instead of the broken-image placeholder.
+            imgEl.onerror = () => {
+                trigger.classList.remove('has-avatar');
+                imgEl.removeAttribute('src');
+            };
+            imgEl.onload = () => trigger.classList.add('has-avatar');
             imgEl.src = avatar;
-            trigger.classList.add('has-avatar');
         } else {
             trigger.classList.remove('has-avatar');
             if (imgEl) imgEl.removeAttribute('src');
@@ -253,17 +260,21 @@ function renderSignedInDropdown() {
     const initial = name.trim().charAt(0).toUpperCase() || '?';
     const avatar = currentUser.user_metadata?.avatar_url;
     // The avatar shows the user's uploaded image when present; otherwise
-    // the universal account glyph (matching the satellite). The serif-
-    // initial-on-gold approach was retired — looked like a generic SaaS
-    // VIP card, not the cosmic-focus brand.
+    // the universal account glyph (matching the satellite).
     const glyphSvg = `<svg class="account-dropdown__avatar-glyph" viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="8" cy="6" r="2.6"/>
         <path d="M3 13.5c0-2.5 2.2-4 5-4s5 1.5 5 4"/>
     </svg>`;
+    // referrerpolicy + crossorigin keep Google's avatar CDN happy. Failed
+    // loads fall back to the glyph via the error listener wired below.
+    const avatarSlot = avatar
+        ? `<img class="account-dropdown__avatar-img" src="${escapeAttr(avatar)}"
+                alt="" referrerpolicy="no-referrer" crossorigin="anonymous">`
+        : glyphSvg;
     dropdownInner.innerHTML = `
         <div class="account-dropdown__header">
             <div class="account-dropdown__avatar">
-                ${avatar ? `<img src="${escapeAttr(avatar)}" alt="">` : glyphSvg}
+                ${avatarSlot}
             </div>
             <div class="account-dropdown__identity">
                 <span class="account-dropdown__name">${escapeHtml(name)}</span>
@@ -295,6 +306,15 @@ function renderSignedInDropdown() {
             Sign out
         </button>
     `;
+    // If the avatar image failed to load (broken / expired URL / CSP),
+    // swap it for the glyph fallback in place.
+    const avatarImg = dropdownInner.querySelector('.account-dropdown__avatar-img');
+    if (avatarImg) {
+        avatarImg.addEventListener('error', () => {
+            const slot = avatarImg.parentElement;
+            if (slot) slot.innerHTML = glyphSvg;
+        }, { once: true });
+    }
     dropdownInner.querySelector('[data-action="signout"]')?.addEventListener('click', async () => {
         try {
             await auth.signOut();
@@ -406,12 +426,6 @@ function renderModal() {
                     <path d="M8 3.2c1.2 0 2.3.4 3.1 1.2l2.3-2.3C12 .8 10.2 0 8 0 5 0 2.3 1.8 1 4.4l2.5 2C4.1 4.6 5.9 3.2 8 3.2z" fill="#EA4335"/>
                 </svg>
                 Continue with Google
-            </button>
-            <button class="auth-oauth__btn" type="button" data-oauth="apple">
-                <svg class="auth-oauth__icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                    <path d="M12.6 8.4c0-1.7 1.4-2.5 1.5-2.6-.8-1.2-2.1-1.4-2.5-1.4-1.1-.1-2.1.6-2.6.6-.5 0-1.4-.6-2.3-.6-1.2 0-2.3.7-2.9 1.8-1.2 2.2-.3 5.4.9 7.2.6.9 1.3 1.9 2.2 1.8.9 0 1.2-.6 2.3-.6s1.4.6 2.3.6c.9 0 1.6-.9 2.2-1.8.7-1 1-2.1 1-2.1s-1.9-.7-1.9-2.9zM10.7 3.3c.5-.6.9-1.5.8-2.3-.7 0-1.6.5-2.1 1.1-.5.5-.9 1.4-.8 2.3.8 0 1.6-.5 2.1-1.1z"/>
-                </svg>
-                Continue with Apple
             </button>
         </div>
 

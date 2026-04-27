@@ -201,8 +201,13 @@
                 </svg>
                 <!-- Initial (signed-in) — JS swaps in -->
                 <span class="account-satellite__initial" aria-hidden="true"></span>
-                <!-- Avatar image (signed-in with avatar) — JS swaps in -->
-                <img class="account-satellite__avatar" alt="" aria-hidden="true">
+                <!-- Avatar image (signed-in with avatar) — JS swaps in.
+                     referrerpolicy is "no-referrer" because Google's CDN
+                     (lh3.googleusercontent.com) rejects requests without
+                     a relaxed referrer policy and the browser then shows
+                     the broken-image placeholder. -->
+                <img class="account-satellite__avatar" alt="" aria-hidden="true"
+                     referrerpolicy="no-referrer" crossorigin="anonymous">
             </span>
 
             <!-- Status dot — sync in flight / failed. JS toggles classes. -->

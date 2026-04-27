@@ -26,7 +26,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How do I sign in or create an account?',
-                a: 'Click the satellite, then <strong>Sign in</strong> or <strong>Create account</strong>. The modal offers three options:<br><strong>Magic link</strong> — type your email, we send a one-tap sign-in link. No password.<br><strong>Continue with Google</strong> — single click; OAuth handles the rest.<br><strong>Continue with Apple</strong> — same flow, on Apple devices and any browser that supports Sign in with Apple.',
+                a: 'Click the satellite, then <strong>Sign in</strong> or <strong>Create account</strong>. Three options:<br><strong>Email + password</strong> — the default. Sign-up sends a confirmation link to your inbox; once verified you can sign in any time.<br><strong>Magic link</strong> — type your email, we send a one-tap sign-in link. No password to remember.<br><strong>Continue with Google</strong> — single click; OAuth handles the rest.',
             },
             {
                 q: 'Why no password?',
