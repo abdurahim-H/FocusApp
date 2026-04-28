@@ -57,6 +57,7 @@ import {
 import { getAllSessions, onSessionsChange } from '../features/sessions.js';
 import {
     barChart,
+    boxPlot,
     calendarHeatmap,
     donut,
     histogramChart,
@@ -675,6 +676,23 @@ function renderFocus(sessions) {
             })}
         </div>
 
+        ${sessions.length >= 4 ? chartCard({
+            eyebrow: 'session-length spread',
+            sub: 'box covers the middle 50% of your sessions; whiskers reach the typical extremes; dots are unusually short or long sessions',
+            chart: boxPlot({
+                values: durations,
+                width: 720,
+                height: 140,
+                unit: ' min',
+            }),
+        }) : ''}
+
+        ${last90.length >= 14 ? chartCard({
+            eyebrow: 'this week vs last week',
+            sub: 'Mon-Sun, side-by-side. Filled = this week, outlined = last week',
+            chart: renderWeekOverWeekChart(last90.slice(-14)),
+        }) : ''}
+
         ${chartCard({
             eyebrow: 'last 90 days · calendar',
             sub: 'each square is a day; the brighter it is, the more you focused',
@@ -1033,6 +1051,92 @@ function renderTime(sessions) {
         })}
 
         ${renderYearInReview(sessions, hourBuckets)}
+    `;
+}
+
+/** Week-over-week chart — last 14 daily totals split into two 7-day
+ *  series (last week + this week), rendered as overlaid bars. Filled
+ *  bars carry this week's data; outlined bars carry last week's.
+ *  Aligns Mon-Sun rather than oldest-first so each day-pair sits on
+ *  the same x. Inline SVG; the chart isn't reused elsewhere yet so it
+ *  doesn't earn a slot in charts.js. */
+function renderWeekOverWeekChart(last14) {
+    const W = 720, H = 200;
+    const M = { l: 32, r: 16, t: 22, b: 32 };
+    const innerW = W - M.l - M.r;
+    const innerH = H - M.t - M.b;
+
+    const prevWeek = last14.slice(0, 7);
+    const thisWeek = last14.slice(7);
+    const peak = Math.max(...prevWeek, ...thisWeek, 1);
+
+    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    // dailyTotals returns oldest-first; we need to rotate so the first
+    // bar is "Mon (this week)" regardless of which weekday today is.
+    const today = new Date();
+    const todayIdx = (today.getDay() + 6) % 7; // 0..6, Mon..Sun
+    const rotate = (week) => {
+        const out = new Array(7).fill(0);
+        for (let i = 0; i < 7; i++) {
+            const realIdx = todayIdx - (6 - i);
+            if (realIdx >= 0 && realIdx < 7) out[realIdx] = week[i];
+        }
+        return out;
+    };
+    const thisRotated = rotate(thisWeek);
+    const prevRotated = rotate(prevWeek);
+
+    const slot = innerW / 7;
+    const barW = Math.max(8, slot * 0.34);
+    const groupGap = 6;
+
+    const yFor = (v) => M.t + innerH - (v / peak) * innerH;
+
+    const bars = [];
+    for (let i = 0; i < 7; i++) {
+        const groupX = M.l + i * slot + slot / 2;
+        const prevX = groupX - barW - groupGap / 2;
+        const curX = groupX + groupGap / 2;
+        const prevH = (prevRotated[i] / peak) * innerH;
+        const curH = (thisRotated[i] / peak) * innerH;
+        // Last week — outlined only, faint.
+        bars.push(`
+            <rect class="chart__wow-prev"
+                  x="${prevX.toFixed(2)}" y="${yFor(prevRotated[i]).toFixed(2)}"
+                  width="${barW.toFixed(2)}" height="${Math.max(1, prevH).toFixed(2)}"
+                  rx="2" />
+        `);
+        // This week — filled.
+        bars.push(`
+            <rect class="chart__wow-cur"
+                  x="${curX.toFixed(2)}" y="${yFor(thisRotated[i]).toFixed(2)}"
+                  width="${barW.toFixed(2)}" height="${Math.max(1, curH).toFixed(2)}"
+                  rx="2" />
+        `);
+    }
+
+    const ticks = dayLabels.map((lab, i) => {
+        const tx = M.l + i * slot + slot / 2;
+        const isToday = i === todayIdx;
+        return `<text class="chart__tick chart__tick--x ${isToday ? 'is-today' : ''}"
+                       x="${tx.toFixed(2)}" y="${(H - 10).toFixed(2)}" text-anchor="middle">${lab}</text>`;
+    }).join('');
+
+    return `
+        <svg class="chart chart--wow" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet" role="img">
+            <line class="chart__grid"
+                  x1="${M.l}" x2="${(M.l + innerW).toFixed(2)}"
+                  y1="${(M.t + innerH).toFixed(2)}" y2="${(M.t + innerH).toFixed(2)}" />
+            ${bars.join('')}
+            ${ticks}
+            <!-- Inline legend bottom-right. Two small swatches + labels. -->
+            <g transform="translate(${(W - 200).toFixed(2)} ${(M.t - 4).toFixed(2)})">
+                <rect class="chart__wow-cur"  x="0"  y="-2" width="14" height="10" rx="2"/>
+                <text class="chart__tick" x="20" y="6">this week</text>
+                <rect class="chart__wow-prev" x="92" y="-2" width="14" height="10" rx="2"/>
+                <text class="chart__tick" x="112" y="6">last week</text>
+            </g>
+        </svg>
     `;
 }
 

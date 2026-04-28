@@ -34,11 +34,11 @@ Already-have data, brand-new framing. Highest UX gain per dollar of engineering 
 - [x] **1.2 Monthly summary tile on Home (M).** Sibling tile in the same row showing 30-day total, prior 30-day delta, sessions / active days / best-day stats. Tap opens Profile → Time.
 - [x] **1.3 Year-in-review surface in Profile → Time (M).** New `renderYearInReview()` renders a retrospective card at the bottom of the Time section: total hours / sessions / active days, monthly bar strip with peak month called out, "Longest day / Peak hour / Best month" highlight tiles. Hidden until ≥30 active days this calendar year.
 - [x] **1.4 Current-streak chip in stats bar (S).** New `.stat-chip--streak` chip wired to the existing `currentStreak` signal.
-- [ ] **1.5 Period-toggle in stats bar (M).** Long-press or click "Sessions today" chip to swap into "Sessions this week" / "Sessions this month" view. State persists across reloads.
+- [x] **1.5 Period toggle in stats bar (M).** New `.stat-period-toggle` pill at the leading edge cycles today → week → month → all-time on click. The "sessions / focused / tasks done" chips recompute on each cycle (data sourced from the full session history for non-today periods). Period persists in `localStorage` (`fu_stats_period`). Each period gets a tinted toggle (today amber / week green / month violet / all cream).
 - [x] **1.6 Daily goal ring (M).** New `timer.dailyGoalMinutes` setting (0-480, default 90) + matching `timer.weeklyGoalMinutes` (0-3600, default 720). The "focused" chip in the stats bar now wraps a progress ring that fills clockwise as today's minutes approach the daily goal. Ring goes green when complete.
 - [x] **1.7 Weekday vs weekend distribution chart (S).** Two-segment split bar in Profile → Time computed from the existing `bucketByDayOfWeek` data.
-- [ ] **1.8 Box-plot chart for session durations (M).** Richer than histogram for outliers; render in Profile → Focus alongside the existing histogram + KDE.
-- [ ] **1.9 Stacked-area "this week vs last week" daily breakdown (M).** Two overlaid 7-day bars / areas in Profile → Focus.
+- [x] **1.8 Box-plot chart for session durations (M).** New `boxPlot()` chart primitive in `charts.js` (Tukey-fence outlier detection, Type-7 quartile interpolation). Rendered in Profile → Focus under the histogram. Suppressed below 4 sessions where quartiles aren't meaningful.
+- [x] **1.9 "This week vs last week" daily breakdown (M).** Inline `renderWeekOverWeekChart()` in `profile.js` paints paired bars per weekday (this week filled, last week outlined) with today's weekday-label highlighted. Suppressed below 14 days of history.
 - [x] **1.10 "Best day ever" + "longest streak ever" callouts in Profile → Overview (S).** New `computeAllTimeRecords()` walks the full session history once and surfaces three callout pills: best day ever (minutes + date), longest streak ever, current streak.
 
 ---

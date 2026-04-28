@@ -541,6 +541,128 @@ export function sparkline({ values, width = 140, height = 38 } = {}) {
 }
 
 // ───────────────────────────────────────────────────────────────────────
+// Box plot — five-number summary with outliers.
+// ───────────────────────────────────────────────────────────────────────
+
+/**
+ * @param {object} opts
+ * @param {number[]} opts.values — raw numeric sample
+ * @param {number} [opts.width=520]
+ * @param {number} [opts.height=140]
+ * @param {string} [opts.unit=''] — appended to tick labels
+ *
+ * Renders a horizontal box-and-whisker plot with whiskers at the
+ * data extremes (or 1.5×IQR, whichever is closer) and points for any
+ * Tukey-fence outliers beyond. Reads way better than the histogram
+ * for spotting outlier sessions because the long-tail data isn't
+ * smeared across many bins. Returns an empty-state placeholder when
+ * fewer than 4 samples are available — quartiles aren't meaningful
+ * below that.
+ */
+export function boxPlot({
+    values,
+    width = 520,
+    height = 140,
+    unit = '',
+} = {}) {
+    if (!values || values.length < 4) return emptyChart(width, height, 'a few more sessions and the box plot lights up');
+    const sorted = values.slice().filter((v) => Number.isFinite(v)).sort((a, b) => a - b);
+    if (sorted.length < 4) return emptyChart(width, height, 'a few more sessions and the box plot lights up');
+
+    const M = { l: 28, r: 16, t: 26, b: 28 };
+    const innerW = width - M.l - M.r;
+    const innerH = height - M.t - M.b;
+
+    // Quartiles via linear interpolation between order-statistics —
+    // matches the textbook "Type 7" definition used by R / NumPy.
+    const q = (p) => {
+        const i = (sorted.length - 1) * p;
+        const lo = Math.floor(i);
+        const hi = Math.ceil(i);
+        if (lo === hi) return sorted[lo];
+        return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo);
+    };
+    const q1 = q(0.25);
+    const median = q(0.5);
+    const q3 = q(0.75);
+    const iqr = q3 - q1;
+    const lowerFence = q1 - 1.5 * iqr;
+    const upperFence = q3 + 1.5 * iqr;
+
+    // Whiskers extend to the most extreme in-fence value; outliers
+    // are everything past that. The box-plot convention.
+    const inFence = sorted.filter((v) => v >= lowerFence && v <= upperFence);
+    const outliers = sorted.filter((v) => v < lowerFence || v > upperFence);
+    const whiskerLow = inFence.length ? inFence[0] : sorted[0];
+    const whiskerHigh = inFence.length ? inFence[inFence.length - 1] : sorted[sorted.length - 1];
+
+    // X-axis spans the full data range (incl. outliers) with a small
+    // visual padding so points at the extremes don't sit on the edge.
+    const dataMin = sorted[0];
+    const dataMax = sorted[sorted.length - 1];
+    const span = dataMax - dataMin || 1;
+    const pad = span * 0.06;
+    const xMin = Math.max(0, dataMin - pad);
+    const xMax = dataMax + pad;
+    const x = (v) => M.l + ((v - xMin) / (xMax - xMin)) * innerW;
+
+    const cy = M.t + innerH / 2;
+    const boxTop = M.t + innerH * 0.18;
+    const boxBot = M.t + innerH * 0.82;
+
+    const id = uniq('bp');
+
+    const tickValues = [xMin, q1, median, q3, xMax];
+    const ticks = tickValues
+        .map((v, i) => {
+            // Skip duplicates (e.g. when all data crowds at one value).
+            const tx = x(v);
+            return `<text class="chart__tick chart__tick--x" x="${tx.toFixed(2)}" y="${(height - 6).toFixed(2)}" text-anchor="middle">${fmtTick(v)}${unit}</text>`;
+        })
+        .join('');
+
+    const outlierDots = outliers
+        .map((v) => `<circle cx="${x(v).toFixed(2)}" cy="${cy.toFixed(2)}" r="2.4" class="chart__bp-outlier" />`)
+        .join('');
+
+    return `
+        <svg class="chart chart--box" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" role="img">
+            <defs>
+                <linearGradient id="${id}_fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.32" />
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0.12" />
+                </linearGradient>
+            </defs>
+            <!-- Whisker line (low to high) -->
+            <line class="chart__bp-whisker"
+                  x1="${x(whiskerLow).toFixed(2)}" x2="${x(whiskerHigh).toFixed(2)}"
+                  y1="${cy.toFixed(2)}" y2="${cy.toFixed(2)}" />
+            <!-- Whisker caps -->
+            <line class="chart__bp-whisker-cap"
+                  x1="${x(whiskerLow).toFixed(2)}" x2="${x(whiskerLow).toFixed(2)}"
+                  y1="${(cy - 8).toFixed(2)}" y2="${(cy + 8).toFixed(2)}" />
+            <line class="chart__bp-whisker-cap"
+                  x1="${x(whiskerHigh).toFixed(2)}" x2="${x(whiskerHigh).toFixed(2)}"
+                  y1="${(cy - 8).toFixed(2)}" y2="${(cy + 8).toFixed(2)}" />
+            <!-- IQR box (Q1 → Q3) -->
+            <rect class="chart__bp-box"
+                  x="${x(q1).toFixed(2)}" y="${boxTop.toFixed(2)}"
+                  width="${(x(q3) - x(q1)).toFixed(2)}" height="${(boxBot - boxTop).toFixed(2)}"
+                  rx="2" fill="url(#${id}_fill)" />
+            <!-- Median line -->
+            <line class="chart__bp-median"
+                  x1="${x(median).toFixed(2)}" x2="${x(median).toFixed(2)}"
+                  y1="${boxTop.toFixed(2)}" y2="${boxBot.toFixed(2)}" />
+            <!-- Outliers -->
+            ${outlierDots}
+            <!-- Five-number labels above the box -->
+            <text class="chart__tick" x="${x(median).toFixed(2)}" y="${(boxTop - 8).toFixed(2)}" text-anchor="middle" opacity="0.85">median ${fmtTick(median)}${unit}</text>
+            ${ticks}
+        </svg>
+    `;
+}
+
+// ───────────────────────────────────────────────────────────────────────
 // Helpers
 // ───────────────────────────────────────────────────────────────────────
 

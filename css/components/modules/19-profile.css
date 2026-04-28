@@ -507,6 +507,49 @@
     font-size: 9.5px;
     fill: rgba(255, 246, 225, 0.7);
 }
+
+/* Week-over-week comparison bars — paired bars (this week filled,
+   last week outlined) per weekday. Today's weekday tick gains a
+   slight emphasis so the user can find it. */
+.chart__wow-cur {
+    fill: rgba(255, 220, 160, 0.8);
+}
+.chart__wow-prev {
+    fill: rgba(255, 220, 160, 0.08);
+    stroke: rgba(255, 220, 160, 0.5);
+    stroke-width: 1;
+}
+.chart__tick--x.is-today {
+    fill: rgba(255, 246, 225, 0.95);
+    font-weight: 500;
+}
+
+/* Box plot — five-number summary. Gives the eye a way to spot how
+   tight or scattered your sessions are at a glance, plus the
+   outlier dots highlight unusually short / long days. */
+.chart__bp-whisker {
+    stroke: rgba(255, 220, 160, 0.45);
+    stroke-width: 1.2;
+}
+.chart__bp-whisker-cap {
+    stroke: rgba(255, 220, 160, 0.55);
+    stroke-width: 1.2;
+}
+.chart__bp-box {
+    stroke: rgba(255, 220, 160, 0.55);
+    stroke-width: 1.1;
+    color: rgba(255, 220, 160, 1); /* drives the gradient via currentColor */
+}
+.chart__bp-median {
+    stroke: rgba(255, 246, 225, 0.95);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+}
+.chart__bp-outlier {
+    fill: rgba(255, 138, 138, 0.85);
+    stroke: rgba(255, 138, 138, 0.4);
+    stroke-width: 0.6;
+}
 .chart__cal-today {
     stroke: rgba(255, 215, 130, 0.95);
     stroke-width: 1.4;

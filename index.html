@@ -429,9 +429,16 @@
                 <div class="stats-bar" id="statsBar" aria-label="Session statistics">
                     <!-- Live stats (hidden during confirmation) -->
                     <div class="stats-chips" id="statsChips">
+                        <button class="stat-period-toggle" id="statPeriodToggle"
+                                type="button"
+                                aria-label="Switch stats period"
+                                title="Click to cycle today / this week / this month / all-time">
+                            <span class="stat-period-toggle__label" data-period-label>TODAY</span>
+                        </button>
+                        <div class="stat-divider"></div>
                         <div class="stat-chip">
                             <span class="stat-value" id="statSessionsToday">0</span>
-                            <span class="stat-label">sessions</span>
+                            <span class="stat-label" data-period-suffix="sessions">sessions</span>
                         </div>
                         <div class="stat-divider"></div>
                         <div class="stat-chip stat-chip--focused">
@@ -452,12 +459,12 @@
                                         stroke-dashoffset="100"/>
                             </svg>
                             <span class="stat-value" id="statTotalMinutes">0s</span>
-                            <span class="stat-label">focused</span>
+                            <span class="stat-label" data-period-suffix="focused">focused</span>
                         </div>
                         <div class="stat-divider"></div>
                         <div class="stat-chip">
                             <span class="stat-value" id="statTasksToday">0</span>
-                            <span class="stat-label">tasks done</span>
+                            <span class="stat-label" data-period-suffix="tasks done">tasks done</span>
                         </div>
                         <div class="stat-divider"></div>
                         <div class="stat-chip stat-chip--streak"

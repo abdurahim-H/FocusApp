@@ -13,7 +13,7 @@
 
 import { effect, signal } from '../core/state.js';
 import { get as settingsGet, subscribe as settingsSub } from '../ui/settings/store.js';
-import { getDailySessionCounts, onSessionsChange } from './sessions.js';
+import { getAllSessions, getDailySessionCounts, onSessionsChange } from './sessions.js';
 
 // ============================================================================
 // Signals
@@ -169,34 +169,151 @@ function formatDuration(totalSeconds) {
 // ============================================================================
 // UI rendering — reactive stats bar
 // ============================================================================
+// ============================================================================
+// Period toggle — chips can show today / this week / this month / all time.
+// State stored in localStorage so the user's choice persists across reloads.
+// ============================================================================
+const PERIOD_KEY = 'fu_stats_period';
+const PERIODS = ['today', 'week', 'month', 'all'];
+const PERIOD_LABELS = {
+    today: 'TODAY',
+    week: 'WEEK',
+    month: 'MONTH',
+    all: 'ALL-TIME',
+};
+const PERIOD_SUFFIX = {
+    today: '',
+    week: 'this week',
+    month: 'this month',
+    all: 'all-time',
+};
+
+function loadPeriod() {
+    const v = localStorage.getItem(PERIOD_KEY);
+    return PERIODS.includes(v) ? v : 'today';
+}
+function savePeriod(p) {
+    try { localStorage.setItem(PERIOD_KEY, p); } catch (_) {}
+}
+
+let currentPeriod = loadPeriod();
+const periodChangeSubscribers = new Set();
+
+function setPeriod(p) {
+    if (!PERIODS.includes(p) || p === currentPeriod) return;
+    currentPeriod = p;
+    savePeriod(p);
+    for (const fn of periodChangeSubscribers) fn();
+}
+
+/** Compute the lower bound (epoch ms) for a period — sessions whose
+ *  startedAt is >= this lower bound count toward the period. Returns
+ *  null for 'all' (no lower bound). */
+function periodLowerBound(p) {
+    if (p === 'all') return null;
+    if (p === 'today') {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+    }
+    if (p === 'week') {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        // Mon-first ISO week: shift back to most-recent Monday.
+        const dow = (d.getDay() + 6) % 7; // 0..6, Mon..Sun
+        d.setDate(d.getDate() - dow);
+        return d.getTime();
+    }
+    if (p === 'month') {
+        const d = new Date();
+        d.setDate(1);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+    }
+    return null;
+}
+
+/** Read the focus sessions that fall inside the active period. */
+function sessionsInActivePeriod() {
+    const lo = periodLowerBound(currentPeriod);
+    const all = getAllSessions().filter((s) => s.kind === 'focus');
+    return lo == null ? all : all.filter((s) => s.startedAt >= lo);
+}
+
 function renderStatsBar() {
     const bar = document.getElementById('statsBar');
     if (!bar) return;
 
-    effect(() => {
-        const sessions = sessionsToday.value;
-        const totalSec = totalFocusSeconds.value;
-        const tasks = tasksCompletedToday.value;
-        const streak = currentStreak.value;
+    // Period toggle button — single click cycles through today / week /
+    // month / all. Same button gets aria-pressed pseudo-state via the
+    // data-period attribute so screen readers announce the new period.
+    const toggle = document.getElementById('statPeriodToggle');
+    if (toggle) {
+        toggle.dataset.period = currentPeriod;
+        toggle.addEventListener('click', () => {
+            const i = PERIODS.indexOf(currentPeriod);
+            setPeriod(PERIODS[(i + 1) % PERIODS.length]);
+        });
+        // Keyboard parity — Enter / Space already activate <button>; nothing else needed.
+    }
 
+    const paint = () => {
         const el = (id) => document.getElementById(id);
-        const todayEl = el('statSessionsToday');
+        const sessionsEl = el('statSessionsToday');
         const totalEl = el('statTotalMinutes');
         const tasksEl = el('statTasksToday');
         const streakEl = el('statStreak');
 
-        if (todayEl) todayEl.textContent = sessions;
-        if (totalEl) totalEl.textContent = formatDuration(totalSec);
-        if (tasksEl) tasksEl.textContent = tasks;
-        if (streakEl) streakEl.textContent = streak;
+        const periodLabelEl = document.querySelector('[data-period-label]');
+        if (periodLabelEl) periodLabelEl.textContent = PERIOD_LABELS[currentPeriod];
+        if (toggle) toggle.dataset.period = currentPeriod;
+
+        // Update each chip's "this week / this month / all-time" suffix
+        // so the label is honest about which window the value reflects.
+        document.querySelectorAll('[data-period-suffix]').forEach((node) => {
+            const base = node.dataset.periodSuffix;
+            const suffix = PERIOD_SUFFIX[currentPeriod];
+            node.textContent = suffix ? `${base} ${suffix}` : base;
+        });
+
+        if (currentPeriod === 'today') {
+            // Existing signal-driven values are fine for today.
+            if (sessionsEl) sessionsEl.textContent = sessionsToday.value;
+            if (totalEl) totalEl.textContent = formatDuration(totalFocusSeconds.value);
+            if (tasksEl) tasksEl.textContent = tasksCompletedToday.value;
+        } else {
+            const periodSessions = sessionsInActivePeriod();
+            const sec = periodSessions.reduce((a, s) => a + (s.durationSeconds || 0), 0);
+            const tasks = periodSessions.reduce((a, s) => a + (s.tasksCompleted || 0), 0);
+            if (sessionsEl) sessionsEl.textContent = periodSessions.length;
+            if (totalEl) totalEl.textContent = formatDuration(sec);
+            if (tasksEl) tasksEl.textContent = tasks;
+        }
+
+        if (streakEl) streakEl.textContent = currentStreak.value;
 
         // Daily goal ring — only paints when the user has an active
         // target. The progress fill is on a 100-pathLength circle so
         // we set stroke-dashoffset = 100 - completion percent.
         renderGoalRing();
+    };
+
+    effect(() => {
+        // Touch every signal that should retrigger the paint when it
+        // changes. Keeps the deps explicit instead of relying on which
+        // ones get read inside paint() under each branch.
+        sessionsToday.value;
+        totalFocusSeconds.value;
+        tasksCompletedToday.value;
+        currentStreak.value;
+        paint();
     });
 
-    // Goal ring also reacts to setting changes (user moved the slider).
+    // Period change → repaint. Session list change → repaint (matters
+    // when the period is week / month / all).
+    periodChangeSubscribers.add(paint);
+    onSessionsChange(paint);
+
     settingsSub('timer.dailyGoalMinutes', renderGoalRing);
 
     renderMomentumTrail();

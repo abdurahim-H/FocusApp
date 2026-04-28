@@ -17,6 +17,52 @@
     gap: 2px;
 }
 
+/* Period toggle — small pill at the leading edge of the stats bar.
+   Cycles today → week → month → all-time on click. The current period
+   is mirrored to a `data-period` attribute so other CSS / screen
+   readers can react to the state. */
+.stat-period-toggle {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.18);
+    background: rgba(255, 220, 160, 0.04);
+    color: rgba(255, 220, 160, 0.78);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.stat-period-toggle:hover,
+.stat-period-toggle:focus-visible {
+    background: rgba(255, 220, 160, 0.12);
+    color: rgba(255, 246, 225, 0.95);
+    border-color: rgba(255, 220, 160, 0.4);
+    outline: none;
+}
+.stat-period-toggle[data-period="today"] {
+    color: rgba(255, 220, 160, 0.78);
+}
+.stat-period-toggle[data-period="week"] {
+    color: rgba(149, 226, 164, 0.85);
+    border-color: rgba(149, 226, 164, 0.28);
+    background: rgba(149, 226, 164, 0.06);
+}
+.stat-period-toggle[data-period="month"] {
+    color: rgba(180, 144, 232, 0.85);
+    border-color: rgba(180, 144, 232, 0.28);
+    background: rgba(180, 144, 232, 0.06);
+}
+.stat-period-toggle[data-period="all"] {
+    color: rgba(255, 246, 225, 0.85);
+    border-color: rgba(255, 246, 225, 0.32);
+    background: rgba(255, 246, 225, 0.08);
+}
+
 /* "Focused" chip wraps a small SVG goal-ring around the value. The
    chip becomes the positioning context for the absolute-positioned
    ring; the value stays in normal flow. */
