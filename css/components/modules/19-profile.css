@@ -5,6 +5,15 @@
    transparent click-catcher behind it (cosmos stays visible), the
    panel anchored just below the nav cluster, scale + translate
    animation rooted at the top of the panel.
+
+   Color palette:
+     Warm amber stays the brand — chrome, headers, default accent, KPI
+     numerals, chart strokes (so data reads consistently across
+     sections). On top of that, each section gets a quiet accent hue
+     that surfaces in three places only — the active rail dot, the
+     active rail button's background tint, and the chart-card
+     eyebrows within that section. 3 warm + 3 cool, all desaturated
+     so they read as a family with the amber, not as competitors.
    ═══════════════════════════════════════════════════════════════════════ */
 
 .profile {
@@ -13,7 +22,28 @@
     z-index: 2200;
     display: none;
     pointer-events: none;
+
+    /* Family color tokens (rgb triplets — used inside rgba()). */
+    --accent-amber:  255, 215, 143;
+    --accent-blue:   136, 184, 224;
+    --accent-green:  168, 214, 144;
+    --accent-violet: 176, 152, 224;
+    --accent-orange: 255, 168, 120;
+    --accent-rose:   224, 152, 176;
+    /* Default accent — sections override via attribute selectors below. */
+    --section-accent: var(--accent-amber);
 }
+
+/* Per-section accent assignments. Both the rendered section
+   (`.psection--<id>`) and its rail button (`[data-section="<id>"]`)
+   pick up the same accent — the rail dot's color matches the
+   section's eyebrows. */
+.psection--overview, .profile__rail-btn[data-section="overview"] { --section-accent: var(--accent-amber); }
+.psection--focus,    .profile__rail-btn[data-section="focus"]    { --section-accent: var(--accent-blue); }
+.psection--tasks,    .profile__rail-btn[data-section="tasks"]    { --section-accent: var(--accent-green); }
+.psection--sounds,   .profile__rail-btn[data-section="sounds"]   { --section-accent: var(--accent-violet); }
+.psection--time,     .profile__rail-btn[data-section="time"]     { --section-accent: var(--accent-orange); }
+.psection--insights, .profile__rail-btn[data-section="insights"] { --section-accent: var(--accent-rose); }
 .profile.is-open { display: block; pointer-events: auto; }
 
 /* Transparent click-catcher — clicking outside the panel closes it.
@@ -174,8 +204,10 @@
 }
 .profile__rail-btn.is-active {
     color: #faf3e3;
-    background: linear-gradient(180deg, rgba(255, 220, 160, 0.18), rgba(255, 200, 110, 0.04));
-    border-color: rgba(255, 220, 160, 0.28);
+    background: linear-gradient(180deg,
+        rgba(var(--section-accent), 0.20),
+        rgba(var(--section-accent), 0.04));
+    border-color: rgba(var(--section-accent), 0.32);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .profile__rail-dot {
@@ -183,13 +215,17 @@
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: rgba(255, 220, 160, 0.32);
+    background: rgba(255, 220, 160, 0.28);
     transition: background 0.22s ease, box-shadow 0.32s ease;
     flex-shrink: 0;
 }
 .profile__rail-btn.is-active .profile__rail-dot {
-    background: #faf3e3;
-    box-shadow: 0 0 8px rgba(255, 215, 130, 0.85), 0 0 18px rgba(255, 205, 115, 0.4);
+    /* Active dot lights up in the section's accent — the only place
+       hue change announces "you're in the X section" in the rail. */
+    background: rgba(var(--section-accent), 1);
+    box-shadow:
+        0 0 8px rgba(var(--section-accent), 0.85),
+        0 0 18px rgba(var(--section-accent), 0.4);
 }
 .profile__rail-label { line-height: 1; }
 
@@ -225,6 +261,23 @@
 
 .psection__head {
     margin-bottom: 4px;
+    /* Subtle leading mark — a small section-coloured square stands
+       just left of the title, the only colour-keyed identifier in
+       the section header. Tells you at a glance which section
+       you're in even when scrolled past the rail. */
+    position: relative;
+    padding-left: 14px;
+}
+.psection__head::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 11px;
+    width: 4px;
+    height: 22px;
+    border-radius: 2px;
+    background: rgba(var(--section-accent), 0.85);
+    box-shadow: 0 0 8px rgba(var(--section-accent), 0.4);
 }
 .psection__title {
     margin: 0 0 6px;
@@ -344,7 +397,10 @@
     font-weight: 500;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(255, 220, 160, 0.62);
+    /* Section-tinted — quietly tells the eye which section's chart
+       you're reading without recolouring the chart's data. Falls back
+       to amber when there's no section context. */
+    color: rgba(var(--section-accent, 255, 220, 160), 0.7);
 }
 .chart-card__sub {
     /* Was monospace-sized — that read as terminal log, not as a
@@ -382,6 +438,13 @@
 .chart {
     display: block;
     overflow: visible;
+    /* Charts inside a section pick up that section's accent through
+       `currentColor`. SVG primitives that should be section-tinted —
+       line strokes, area gradients, bar fills, heatmap cells —
+       reference currentColor; text labels keep their own neutral
+       fill via class rules below. Amber is the fallback, so charts
+       outside of a section (rare) still look right. */
+    color: rgba(var(--section-accent, 255, 220, 160), 1);
 }
 .chart__grid {
     stroke: rgba(255, 220, 160, 0.05);
@@ -401,20 +464,20 @@
 }
 .chart__line {
     fill: none;
-    stroke: rgba(255, 220, 160, 0.92);
+    stroke: rgba(var(--section-accent, 255, 220, 160), 0.92);
     stroke-width: 1.6;
     stroke-linejoin: round;
     stroke-linecap: round;
 }
 .chart__trend {
     fill: none;
-    stroke: rgba(255, 200, 110, 0.55);
+    stroke: rgba(var(--section-accent, 255, 200, 110), 0.55);
     stroke-width: 1;
     stroke-dasharray: 3 4;
 }
 .chart__dot {
     fill: rgba(255, 245, 220, 0.95);
-    stroke: rgba(255, 220, 160, 0.4);
+    stroke: rgba(var(--section-accent, 255, 220, 160), 0.5);
     stroke-width: 1;
 }
 .chart__bar {

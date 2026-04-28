@@ -74,9 +74,11 @@ export function lineChart({
     return `
         <svg class="chart chart--line" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet" role="img">
             <defs>
+                <!-- currentColor + stop-opacity lets the section accent
+                     drive the gradient via CSS color inheritance. -->
                 <linearGradient id="${id}_fill" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="rgba(255, 220, 160, 0.35)" />
-                    <stop offset="100%" stop-color="rgba(255, 220, 160, 0)" />
+                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
                 </linearGradient>
                 <filter id="${id}_glow" x="-10%" y="-10%" width="120%" height="120%">
                     <feGaussianBlur stdDeviation="1.4" />
@@ -137,9 +139,10 @@ export function barChart({
     return `
         <svg class="chart chart--bar" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" role="img">
             <defs>
+                <!-- Section-aware via currentColor inheritance. -->
                 <linearGradient id="${id}_fill" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="rgba(255, 220, 160, 0.78)" />
-                    <stop offset="100%" stop-color="rgba(255, 200, 110, 0.32)" />
+                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.82" />
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0.32" />
                 </linearGradient>
             </defs>
             ${ticks.map((t) => {
@@ -208,6 +211,7 @@ export function calendarHeatmap({
             const x = 30 + wi * (cell + gap);
             const y = 16 + di * (cell + gap);
             if (!c) {
+                // Padder cell — neutral, not section-coloured.
                 cells.push(`<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="2"
                                   fill="rgba(255, 220, 160, 0.05)" />`);
                 continue;
@@ -215,9 +219,10 @@ export function calendarHeatmap({
             const intensity = peak === 0 ? 0 : c.value / peak;
             const alpha = 0.08 + 0.78 * intensity;
             const isToday = c.date.toDateString() === new Date().toDateString();
+            // currentColor + fill-opacity → section-coloured via CSS.
             cells.push(`
                 <rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="2"
-                      fill="rgba(255, 220, 160, ${alpha.toFixed(3)})"
+                      fill="currentColor" fill-opacity="${alpha.toFixed(3)}"
                       ${isToday ? 'class="chart__cal-today"' : ''}>
                     <title>${c.date.toDateString()} · ${c.value.toFixed(0)} min</title>
                 </rect>
@@ -273,9 +278,10 @@ export function hourDayHeatmap({ matrix } = {}) {
             const alpha = 0.06 + 0.82 * intensity;
             const x = padLeft + h * (cell + gap);
             const y = padTop + d * (cell + gap);
+            // currentColor + fill-opacity → section-coloured via CSS.
             cells.push(`
                 <rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="3"
-                      fill="rgba(255, 220, 160, ${alpha.toFixed(3)})">
+                      fill="currentColor" fill-opacity="${alpha.toFixed(3)}">
                     <title>${dayLabels[d]} · ${formatHour(h)} · ${v.toFixed(0)} min</title>
                 </rect>
             `);
@@ -335,8 +341,8 @@ export function histogramChart({
         <svg class="chart chart--histogram" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" role="img">
             <defs>
                 <linearGradient id="${id}_fill" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="rgba(255, 220, 160, 0.62)" />
-                    <stop offset="100%" stop-color="rgba(255, 200, 110, 0.18)" />
+                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.66" />
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0.2" />
                 </linearGradient>
             </defs>
             <line class="chart__grid"
