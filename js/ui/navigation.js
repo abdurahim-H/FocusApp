@@ -43,22 +43,15 @@ export function switchMode(mode) {
         updateDateTime();
     }
 
-    // Phase 6: Move focus to the primary element of the new mode panel
-    // so keyboard / screen-reader users land somewhere meaningful.
-    if (previousMode !== mode) {
-        setTimeout(() => {
-            const targets = {
-                home: '#home h1',
-                focus: '#timerDisplay',
-            };
-            const el = document.querySelector(targets[mode]);
-            if (el) {
-                // Make non-interactive elements temporarily focusable
-                if (!el.getAttribute('tabindex')) el.setAttribute('tabindex', '-1');
-                el.focus({ preventScroll: true });
-            }
-        }, 120);
-    }
+    // (Removed) Programmatic focus migration to the new panel's
+    // headline. Triggering this from the global "1"/"2" keyboard
+    // shortcut made the browser paint its native focus indicator on
+    // the "Cosmic Focus" h1 / timer display, even though those aren't
+    // interactive controls. Modern WCAG guidance is to avoid forcibly
+    // moving focus on tab/state changes that the user didn't
+    // explicitly initiate via a focused control. Visible content
+    // change + the active-tab pill provide enough cue for sighted
+    // users; the panels carry their own labels for screen readers.
 }
 
 // Briefly squash the .nav-buttons container's CSS variable so the ::before
