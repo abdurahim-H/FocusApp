@@ -437,8 +437,8 @@ function renderOverview(sessions) {
 function renderOverviewEmpty() {
     return `
         <div class="psection__empty">
-            <p class="psection__empty-headline">no focus blocks yet</p>
-            <p class="psection__empty-sub">finish one focus block and the rest of your overview shows up here.</p>
+            <p class="psection__empty-headline">no focus sessions yet</p>
+            <p class="psection__empty-sub">finish one focus session and the rest of your overview shows up here.</p>
         </div>
     `;
 }
@@ -502,8 +502,8 @@ function render60DayGrid(sessions) {
 function renderFocus(sessions) {
     if (sessions.length === 0) {
         return `
-            ${sectionHeader('Focus', 'how your focus blocks have looked over time')}
-            ${emptyState('finish a focus block to start filling this in.')}
+            ${sectionHeader('Focus', 'how your focus sessions have looked over time')}
+            ${emptyState('finish a focus session to start filling this in.')}
         `;
     }
     const durations = sessions.map((s) => (s.durationSeconds || 0) / 60);
@@ -529,7 +529,7 @@ function renderFocus(sessions) {
     const z = zScore(todayTotal, last90.slice(0, -1));
 
     return `
-        ${sectionHeader('Focus', 'how your focus blocks have looked over time')}
+        ${sectionHeader('Focus', 'how your focus sessions have looked over time')}
 
         ${kpiRow([
             { label: 'total time', value: totalSec >= 3600
@@ -617,7 +617,7 @@ function renderTasks(sessions) {
     if (sessions.length === 0) {
         return `
             ${sectionHeader('Tasks', 'when you actually get tasks done')}
-            ${emptyState('finish a focus block with a task ticked off and the numbers start showing.')}
+            ${emptyState('finish a focus session with a task ticked off and the numbers start showing.')}
         `;
     }
 
@@ -732,7 +732,7 @@ function renderSounds(sessions) {
 
     if (totalSessions === 0) {
         return `
-            ${sectionHeader('Sounds', 'which ambient sounds you use and how they affect your blocks')}
+            ${sectionHeader('Sounds', 'which ambient sounds you use and how they affect your sessions')}
             ${emptyState('a few sessions and the sound numbers start to mean something.')}
         `;
     }
@@ -741,7 +741,7 @@ function renderSounds(sessions) {
     const top = ranked.slice(0, 5);
 
     return `
-        ${sectionHeader('Sounds', 'which ambient sounds you use and how they affect your blocks')}
+        ${sectionHeader('Sounds', 'which ambient sounds you use and how they affect your sessions')}
 
         ${kpiRow([
             { label: 'unique sounds tried', value: uniqueSounds, unit: '', count: true },
@@ -833,7 +833,7 @@ function renderTime(sessions) {
     if (sessions.length === 0) {
         return `
             ${sectionHeader('Time', 'when in the day and week you focus')}
-            ${emptyState('a few focus blocks and your time-of-day pattern shows up here.')}
+            ${emptyState('a few focus sessions and your time-of-day pattern shows up here.')}
         `;
     }
     const hourBuckets = bucketByHour(sessions);
@@ -960,7 +960,7 @@ function renderInsights(sessions) {
     if (sessions.length < 3) {
         return `
             ${sectionHeader('Insights', 'what we found in your own sessions — never compared against other people')}
-            ${emptyState('a handful of focus blocks and the cards start filling in.')}
+            ${emptyState('a handful of focus sessions and the cards start filling in.')}
         `;
     }
 
@@ -1090,7 +1090,7 @@ function renderInsights(sessions) {
             headline: lostHrs >= 1
                 ? `you've lost about ${lostHrs.toFixed(1)} hours to context-switching`
                 : `you've lost about ${Math.round(lostMin)} minutes to context-switching`,
-            sub: `${switches} tab-aways during your focus blocks — every switch adds ~9 minutes of getting back into it`,
+            sub: `${switches} tab-aways during your focus sessions — every switch adds ~9 minutes of getting back into it`,
             value: valueText,
             viz: vizFriction(totalFocusedMin, lostMin),
             data: { switches, lostMin, totalFocusedMin, sessionCount: sessions.length },
@@ -1155,8 +1155,8 @@ function renderInsights(sessions) {
             insights.push({
                 kind: 'patterns',
                 headline: result.k === 2
-                    ? `your focus blocks fall into 2 distinct groups`
-                    : `your focus blocks fall into ${result.k} distinct groups`,
+                    ? `your focus sessions fall into 2 distinct groups`
+                    : `your focus sessions fall into ${result.k} distinct groups`,
                 sub: `${dominantPct}% of yours look like "${dominant.label}"`,
                 value: `${result.k} groups`,
                 viz: vizClusters(features, result.assignments, clusters),
@@ -1200,9 +1200,9 @@ function renderInsights(sessions) {
             insights.push({
                 kind: 'conditions',
                 headline: matters
-                    ? `you're ${factor}× more likely to finish blocks ${top.name}`
-                    : `you're ${factor}× less likely to finish blocks ${top.name}`,
-                sub: `${Math.round(top.rate * 100)}% finish in this group · ${Math.round(top.baselineRate * 100)}% across all your blocks`,
+                    ? `you're ${factor}× more likely to finish sessions ${top.name}`
+                    : `you're ${factor}× less likely to finish sessions ${top.name}`,
+                sub: `${Math.round(top.rate * 100)}% finish in this group · ${Math.round(top.baselineRate * 100)}% across all your sessions`,
                 value: matters ? `${factor}× more` : `${factor}× less`,
                 viz: vizConditions(ranked.slice(0, 4)),
                 data: { ranked, baselineRate: ranked[0].baselineRate, totalSessions: sessions.length },
@@ -1216,14 +1216,14 @@ function renderInsights(sessions) {
         // what it means in two short clauses.
         let headline, sub;
         if (completionRate >= 0.85) {
-            headline = `you finish ${pct}% of the focus blocks you start`;
+            headline = `you finish ${pct}% of the focus sessions you start`;
             sub = `${100 - pct}% get cut short`;
         } else if (completionRate >= 0.6) {
-            headline = `you finish ${pct}% of the focus blocks you start`;
+            headline = `you finish ${pct}% of the focus sessions you start`;
             sub = `${100 - pct}% get cut short`;
         } else {
-            headline = `you finish ${pct}% of focus blocks — ${100 - pct}% get cut short`;
-            sub = `cutting more blocks short than you finish`;
+            headline = `you finish ${pct}% of focus sessions — ${100 - pct}% get cut short`;
+            sub = `cutting more sessions short than you finish`;
         }
         const completedSessions = sessions.filter((s) => s.completed);
         insights.push({
@@ -1246,7 +1246,7 @@ function renderInsights(sessions) {
     if (insights.length === 0) {
         return `
             ${sectionHeader('Insights', 'what we found in your own sessions — never compared against other people')}
-            ${emptyState('a couple more focus blocks and patterns will start showing up here.')}
+            ${emptyState('a couple more focus sessions and patterns will start showing up here.')}
         `;
     }
 
@@ -1694,22 +1694,22 @@ function detailFriction(ins) {
         : 0;
     return `
         ${detailBlock('What this is', `
-            <p>An estimate of focused time you've lost to context-switching during your blocks.</p>
+            <p>An estimate of focused time you've lost to context-switching during your sessions.</p>
         `)}
         ${detailBlock('How we found it', `
-            <p>The Page Visibility API tells us when you switch away from this tab during a focus block. Each tab-away costs about <strong>9.5 minutes</strong> of getting-back-into-it time — a conservative figure from research on attention recovery (some research cites 23 minutes).</p>
+            <p>The Page Visibility API tells us when you switch away from this tab during a focus session. Each tab-away costs about <strong>9.5 minutes</strong> of getting-back-into-it time — a conservative figure from research on attention recovery (some research cites 23 minutes).</p>
             <p>Total time lost = tab-aways × 9.5 minutes.</p>
         `)}
         ${detailBlock('Your numbers', `
             <ul class="detail-list">
-                <li><span>tab-aways during focus blocks</span><span class="num">${d.switches}</span></li>
+                <li><span>tab-aways during focus sessions</span><span class="num">${d.switches}</span></li>
                 <li><span>estimated minutes lost</span><span class="num">${Math.round(d.lostMin)} min</span></li>
                 <li><span>average tab-aways per session</span><span class="num">${avgPerSession.toFixed(1)}</span></li>
                 <li><span>focused minutes (total)</span><span class="num">${Math.round(d.totalFocusedMin)} min</span></li>
             </ul>
         `)}
         ${detailBlock('A note on this', `
-            <p>9.5 min is the conservative figure. Your real cost is likely higher. Either way, the takeaway is the same — keeping tabs out of focus blocks is high-leverage.</p>
+            <p>9.5 min is the conservative figure. Your real cost is likely higher. Either way, the takeaway is the same — keeping tabs out of focus sessions is high-leverage.</p>
         `)}
     `;
 }
@@ -1793,20 +1793,20 @@ function detailCompletion(ins) {
     }).filter(Boolean).join('');
     return `
         ${detailBlock('What this is', `
-            <p>The percentage of focus blocks you start that you actually run all the way to the target time.</p>
+            <p>The percentage of focus sessions you start that you actually run all the way to the target time.</p>
         `)}
         ${detailBlock('How it counts', `
-            <p>"Finished" means you ran the full target duration (e.g. all 25 minutes of a 25-minute block). "Cut short" means you stopped, reset, or skipped before time was up.</p>
+            <p>"Finished" means you ran the full target duration (e.g. all 25 minutes of a 25-minute session). "Cut short" means you stopped, reset, or skipped before time was up.</p>
         `)}
         ${detailBlock('Your numbers', `
             <ul class="detail-list">
-                <li><span>total blocks started</span><span class="num">${d.total}</span></li>
+                <li><span>total sessions started</span><span class="num">${d.total}</span></li>
                 <li><span>finished</span><span class="num is-good">${d.completed} (${Math.round((d.completed / d.total) * 100)}%)</span></li>
                 <li><span>cut short</span><span class="num is-flat">${d.cutShort} (${Math.round((d.cutShort / d.total) * 100)}%)</span></li>
             </ul>
         `)}
         ${byDayList ? detailBlock('By day of week', `<ul class="detail-list">${byDayList}</ul>`) : ''}
-        ${detailBlock('Your last 8 blocks', `<ul class="detail-list">${recent}</ul>`)}
+        ${detailBlock('Your last 8 sessions', `<ul class="detail-list">${recent}</ul>`)}
     `;
 }
 
@@ -1824,7 +1824,7 @@ function detailPatterns(ins) {
                 <div class="cluster-row__main">
                     <div class="cluster-row__head">
                         <span class="cluster-row__label">${escapeHtml(cl.label)}</span>
-                        <span class="cluster-row__count num">${cl.count} blocks · ${Math.round((cl.count / d.sessions.length) * 100)}%</span>
+                        <span class="cluster-row__count num">${cl.count} sessions · ${Math.round((cl.count / d.sessions.length) * 100)}%</span>
                     </div>
                     ${cl.description ? `<p class="cluster-row__desc">${escapeHtml(cl.description)}</p>` : ''}
                     <ul class="cluster-row__stats">
@@ -1838,7 +1838,7 @@ function detailPatterns(ins) {
     }).join('');
     return `
         ${detailBlock('What this is', `
-            <p>We grouped every focus block you've done into "types" based on three things about each block: how long it ran, the focus quality score, and how many times you switched tabs.</p>
+            <p>We grouped every focus session you've done into "types" based on three things about each session: how long it ran, the focus quality score, and how many times you switched tabs.</p>
             <p>Sessions that look similar in those three numbers ended up in the same group.</p>
         `)}
         ${detailBlock('How we found the groups', `
@@ -1854,7 +1854,7 @@ function detailPatterns(ins) {
         `)}
         ${detailBlock('Your groups', `<ul class="cluster-list">${clusterRows}</ul>`)}
         ${detailBlock('Reading the chart', `
-            <p>The chart above plots every session as a small dot, colored by which group it ended up in. The bigger circle of each color is that group's center — the typical block of that type.</p>
+            <p>The chart above plots every session as a small dot, colored by which group it ended up in. The bigger circle of each color is that group's center — the typical session of that type.</p>
         `)}
     `;
 }
@@ -1874,21 +1874,21 @@ function detailConditions(ins) {
                     </span>
                 </div>
                 <div class="condition-row__meta">
-                    ${r.n} blocks matched · ${Math.round(r.rate * 100)}% finish in this group · ${Math.round(r.baselineRate * 100)}% across all blocks
+                    ${r.n} sessions matched · ${Math.round(r.rate * 100)}% finish in this group · ${Math.round(r.baselineRate * 100)}% across all sessions
                 </div>
             </li>
         `;
     }).join('');
     return `
         ${detailBlock('What this is', `
-            <p>For each tested condition (time of day, sound on, weekday, etc.), we checked whether your blocks finish at a different rate than your overall average.</p>
+            <p>For each tested condition (time of day, sound on, weekday, etc.), we checked whether your sessions finish at a different rate than your overall average.</p>
         `)}
         ${detailBlock('How we found it', `
             <p>For each condition:</p>
             <ol class="detail-steps">
                 <li>Find every session matching the condition</li>
                 <li>Compute the percentage that ran to completion</li>
-                <li>Compare against your overall completion rate (${Math.round(baselineRate * 100)}% across ${totalSessions} blocks)</li>
+                <li>Compare against your overall completion rate (${Math.round(baselineRate * 100)}% across ${totalSessions} sessions)</li>
                 <li>The "lift" is the ratio between the two</li>
             </ol>
             <p>A lift of <strong>1.5×</strong> means you're 50% more likely to finish in that condition. A lift of <strong>0.7×</strong> means 30% less likely.</p>
@@ -1982,18 +1982,18 @@ function renderDayDetail(iso, focusSessions) {
 
     if (dayBlocks.length === 0) {
         return `
-            ${dayDetailHeader(dayLabel, dayShort, 'no focus blocks on this day')}
+            ${dayDetailHeader(dayLabel, dayShort, 'no focus sessions on this day')}
             <div class="day-detail__empty">
-                <p>You didn't run a focus block on ${dayLabel}.</p>
-                <p class="day-detail__empty-sub">An empty day isn't a failure — sometimes life just doesn't have a focus-block-shaped hole.</p>
+                <p>You didn't run a focus session on ${dayLabel}.</p>
+                <p class="day-detail__empty-sub">An empty day isn't a failure — sometimes life just doesn't have a focus-session-shaped hole.</p>
             </div>
         `;
     }
 
     return `
         ${dayDetailHeader(dayLabel, dayShort, dayBlocks.length === 1
-            ? '1 focus block'
-            : `${dayBlocks.length} focus blocks`)}
+            ? '1 focus session'
+            : `${dayBlocks.length} focus sessions`)}
         ${dayKpiRow(dayBlocks)}
         ${dayTimelineCard(dayBlocks, dayStart)}
         ${dayCompareCard(dayBlocks, dayStart, focusSessions)}
@@ -2080,8 +2080,8 @@ function dayTimelineCard(blocks, dayStart) {
         <section class="detail-block">
             <h4 class="detail-block__title">when you focused</h4>
             <div class="detail-block__content">
-                <p>Each band shows when a focus block ran, from that block's start time to its end. Solid bands are blocks you finished; dashed bands are ones you cut short.</p>
-                <svg class="day-timeline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="timeline of the day's focus blocks">
+                <p>Each band shows when a focus session ran, from that session's start time to its end. Solid bands are sessions you finished; dashed bands are ones you cut short.</p>
+                <svg class="day-timeline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="timeline of the day's focus sessions">
                     <rect x="${padX}" y="${trackY}" width="${innerW}" height="${trackH}" rx="3"
                           fill="rgba(255, 220, 160, 0.05)" />
                     ${ticks}
@@ -2229,7 +2229,7 @@ function dayBlocksCard(blocks) {
     }).join('');
     return `
         <section class="detail-block">
-            <h4 class="detail-block__title">every block, in order</h4>
+            <h4 class="detail-block__title">every session, in order</h4>
             <div class="detail-block__content">
                 <ul class="day-block-list">${rows}</ul>
             </div>
@@ -2255,7 +2255,7 @@ function daySoundsCard(blocks) {
                     ${ranked.map(([sound, n]) => `
                         <li>
                             <span>${escapeHtml(capitalize(sound))}</span>
-                            <span class="num">${n} of ${total} block${total === 1 ? '' : 's'}</span>
+                            <span class="num">${n} of ${total} session${total === 1 ? '' : 's'}</span>
                         </li>
                     `).join('')}
                 </ul>
@@ -2282,7 +2282,7 @@ function insightKindLabel(kind) {
 
 /** Inspect each cluster's centroid and assign a plain-English label
  *  plus a one-line description. The description spells out, in
- *  ordinary words, what makes a block "long quiet" or "rough" — so
+ *  ordinary words, what makes a session "long quiet" or "rough" — so
  *  the user doesn't have to guess. */
 function describeClusters(result, sessions) {
     return result.centroids.map((c, i) => {
@@ -2293,22 +2293,22 @@ function describeClusters(result, sessions) {
         //   quality   — low < 0.4, high > 0.6
         //   distractions — calm < 0.35, scattered > 0.55
         if (duration > 0.6 && quality > 0.55 && distractions < 0.4) {
-            label = 'long, quiet blocks';
+            label = 'long, quiet sessions';
             description = 'long sessions where you barely switched tabs and stayed focused';
         } else if (duration < 0.4 && distractions < 0.4) {
-            label = 'short, focused blocks';
+            label = 'short, focused sessions';
             description = 'shorter sessions, but you stayed on task — minimal tab-switching';
         } else if (distractions > 0.55) {
-            label = 'scattered, interrupted blocks';
+            label = 'scattered, interrupted sessions';
             description = 'sessions broken up by frequent tab-switches';
         } else if (quality > 0.55) {
-            label = 'solid medium-length blocks';
+            label = 'solid medium-length sessions';
             description = 'mid-length sessions with a strong focus-quality score — your reliable middle ground';
         } else if (quality < 0.4) {
-            label = 'rough blocks';
+            label = 'rough sessions';
             description = 'sessions that scored low on focus quality — a mix of duration and distractions worked against them';
         } else {
-            label = 'regular blocks';
+            label = 'regular sessions';
             description = 'average sessions — nothing stood out either way';
         }
         const count = result.assignments.filter((a) => a === i).length;
