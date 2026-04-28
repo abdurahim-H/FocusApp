@@ -154,7 +154,6 @@ function open() {
     panel.setAttribute('aria-hidden', 'false');
     render();
     panel.classList.add('is-open');
-    setBackgroundInert(true);
     if (!trap) trap = createFocusTrap(panel);
     trap.activate(document.activeElement);
     if (!unsubscribeSessions) {
@@ -169,28 +168,10 @@ function close() {
     isOpen = false;
     panel.classList.remove('is-open');
     panel.setAttribute('aria-hidden', 'true');
-    setBackgroundInert(false);
     trap?.deactivate();
     if (unsubscribeSessions) {
         unsubscribeSessions();
         unsubscribeSessions = null;
-    }
-}
-
-function setBackgroundInert(on) {
-    const targets = [
-        document.querySelector('.container'),
-        document.querySelector('.nav-cluster'),
-        document.querySelector('.cosmos-toolbar'),
-        document.querySelector('.help-trigger'),
-        document.querySelector('.settings-trigger'),
-        document.getElementById('homeMiniTimer'),
-        document.getElementById('hmtSliver'),
-    ];
-    for (const el of targets) {
-        if (!el) continue;
-        if (on) el.setAttribute('inert', '');
-        else el.removeAttribute('inert');
     }
 }
 

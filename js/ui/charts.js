@@ -245,27 +245,34 @@ export function calendarHeatmap({
 // ───────────────────────────────────────────────────────────────────────
 
 /**
+ * Hour × day heatmap, landscape — 24 hours along x, 7 days along y.
+ * (Was tall portrait — clipped inside chart cards because the SVG
+ * height ran past the card body. Landscape fits naturally.)
+ *
  * @param {object} opts
- * @param {number[][]} opts.matrix [24][7] — minutes per cell
+ * @param {number[][]} opts.matrix [24][7] — minutes per (hour, day)
  */
 export function hourDayHeatmap({ matrix } = {}) {
-    if (!matrix) return emptyChart(420, 360, 'no data');
-    const cell = 22;
-    const gap = 2;
-    const W = 38 + 7 * (cell + gap) + 12;
-    const H = 28 + 24 * (cell + gap) + 6;
+    if (!matrix) return emptyChart(640, 200, 'no data');
+    const cell = 18;
+    const gap = 3;
+    const padLeft = 40;   // room for day labels on the left
+    const padTop = 26;    // room for hour labels on top
+    const padRight = 8;
+    const padBottom = 6;
+    const W = padLeft + 24 * (cell + gap) + padRight;
+    const H = padTop + 7 * (cell + gap) + padBottom;
     const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     let peak = 0;
     for (const row of matrix) for (const v of row) if (v > peak) peak = v;
-    const id = uniq('hd');
     const cells = [];
     for (let h = 0; h < 24; h++) {
         for (let d = 0; d < 7; d++) {
             const v = matrix[h][d];
             const intensity = peak === 0 ? 0 : v / peak;
             const alpha = 0.06 + 0.82 * intensity;
-            const x = 38 + d * (cell + gap);
-            const y = 24 + h * (cell + gap);
+            const x = padLeft + h * (cell + gap);
+            const y = padTop + d * (cell + gap);
             cells.push(`
                 <rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="3"
                       fill="rgba(255, 220, 160, ${alpha.toFixed(3)})">
@@ -274,18 +281,28 @@ export function hourDayHeatmap({ matrix } = {}) {
             `);
         }
     }
-    const hourLabels = [0, 6, 12, 18].map((h) => `
-        <text class="chart__tick" x="32" y="${24 + h * (cell + gap) + cell - 2}"
-              text-anchor="end">${formatHour(h)}</text>
-    `).join('');
+    // Hour labels above — 12a / 6a / 12p / 6p / 12a (right edge).
+    const hourTicks = [
+        { h: 0,  label: '12a' },
+        { h: 6,  label: '6a'  },
+        { h: 12, label: '12p' },
+        { h: 18, label: '6p'  },
+    ].map(({ h, label }) => {
+        const x = padLeft + h * (cell + gap) + cell / 2;
+        return `<text class="chart__tick chart__tick--x" x="${x.toFixed(2)}" y="16"
+                       text-anchor="middle">${label}</text>`;
+    }).join('');
+    // Day labels on the left — 3-letter abbreviations vertically aligned
+    // to each row's centre.
+    const dayTicks = dayLabels.map((lab, i) => {
+        const y = padTop + i * (cell + gap) + cell - 4;
+        return `<text class="chart__tick" x="${padLeft - 8}" y="${y.toFixed(2)}"
+                       text-anchor="end">${lab}</text>`;
+    }).join('');
     return `
         <svg class="chart chart--heatmap chart--hourday" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet" role="img">
-            ${dayLabels.map((lab, i) => `
-                <text class="chart__tick chart__tick--x"
-                      x="${38 + i * (cell + gap) + cell / 2}" y="16"
-                      text-anchor="middle">${lab}</text>
-            `).join('')}
-            ${hourLabels}
+            ${hourTicks}
+            ${dayTicks}
             ${cells.join('')}
         </svg>
     `;

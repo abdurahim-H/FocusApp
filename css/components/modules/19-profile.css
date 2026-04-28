@@ -1,7 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════════
    PROFILE — full analytics destination.
-   Replaces the Observatory. Six sections, sidebar nav, dense charts +
-   stats. Apple Health calm × Linear precision × cosmic-native viz.
+   Drops down from the account satellite the same way Settings drops
+   from the ✦ star and the Help Center drops from the ? button:
+   transparent click-catcher behind it (cosmos stays visible), the
+   panel anchored just below the nav cluster, scale + translate
+   animation rooted at the top of the panel.
    ═══════════════════════════════════════════════════════════════════════ */
 
 .profile {
@@ -13,47 +16,50 @@
 }
 .profile.is-open { display: block; pointer-events: auto; }
 
+/* Transparent click-catcher — clicking outside the panel closes it.
+   Same pattern as `.settings-modal-overlay` and `.hc-click-catcher`.
+   No scrim, no backdrop blur — the cosmos remains visible behind. */
 .profile__scrim {
     position: absolute;
     inset: 0;
-    background: rgba(2, 1, 4, 0.62);
-    backdrop-filter: blur(18px) saturate(118%);
-    -webkit-backdrop-filter: blur(18px) saturate(118%);
-    opacity: 0;
-    transition: opacity 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+    background: transparent;
 }
-.profile.is-open .profile__scrim { opacity: 1; }
 
 .profile__sheet {
-    position: relative;
-    width: min(1180px, calc(100vw - 32px));
-    height: min(880px, 92vh);
-    margin: 4vh auto 0;
+    position: fixed;
+    /* Drops from the nav cluster — top: 16px + ~80px satellite +
+       8px breathing. Centered horizontally to match the cluster. */
+    top: 108px;
+    left: 50%;
+    transform-origin: top center;
+    transform: translate(-50%, -10px) scale(0.96);
+    width: min(1080px, calc(100vw - 24px));
+    max-height: calc(100vh - 128px);
     overflow: hidden;
-    border-radius: 28px;
+    border-radius: 22px;
     display: flex;
     flex-direction: column;
 
-    background: rgba(255, 255, 255, 0.045);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    backdrop-filter: blur(64px) saturate(180%);
-    -webkit-backdrop-filter: blur(64px) saturate(180%);
+    background: rgba(8, 6, 3, 0.86);
+    border: 1px solid rgba(255, 205, 115, 0.14);
+    backdrop-filter: blur(60px) saturate(180%) brightness(1.05);
+    -webkit-backdrop-filter: blur(60px) saturate(180%) brightness(1.05);
     box-shadow:
-        0 40px 96px rgba(0, 0, 0, 0.6),
-        0 12px 28px rgba(0, 0, 0, 0.32),
-        inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        inset 0 0 32px rgba(255, 255, 255, 0.025);
+        0 24px 80px rgba(0, 0, 0, 0.7),
+        0 8px 24px rgba(0, 0, 0, 0.4),
+        0 0 0 0.5px rgba(255, 246, 225, 0.06),
+        inset 0 1px 0 rgba(255, 246, 225, 0.08),
+        inset 0 -1px 0 rgba(255, 205, 115, 0.04);
 
     color: rgba(255, 246, 225, 0.94);
-    transform: translateY(18px) scale(0.985);
     opacity: 0;
     transition:
-        opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1),
-        transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .profile.is-open .profile__sheet {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate(-50%, 0) scale(1);
 }
 
 /* ── Header ──────────────────────────────────────────────────────────── */
@@ -191,7 +197,7 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 28px 36px 36px;
+    padding: 24px 28px 28px;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 220, 160, 0.32) transparent;
     min-width: 0;
@@ -319,13 +325,17 @@
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.025);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    overflow: hidden;
+    /* No `overflow: hidden` — let charts that are taller than the
+       card grow the card height instead of being clipped. */
 }
 .chart-card__head {
+    /* Stack eyebrow above sub. The previous space-between layout
+       collapsed long eyebrow text into 4-line vertical wrap when the
+       sub on the right took half the row. Stacking is calm and
+       handles every length cleanly. */
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
+    flex-direction: column;
+    gap: 4px;
     margin-bottom: 14px;
 }
 .chart-card__eyebrow {
@@ -334,25 +344,34 @@
     font-weight: 500;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(255, 220, 160, 0.55);
+    color: rgba(255, 220, 160, 0.62);
 }
 .chart-card__sub {
-    font-family: 'JetBrains Mono', 'SF Mono', monospace;
-    font-size: 10.5px;
-    color: rgba(255, 246, 225, 0.42);
-    text-align: right;
-    flex-shrink: 0;
+    /* Was monospace-sized — that read as terminal log, not as a
+       subtitle. Inter at the same scale feels softer and reads at a
+       glance. */
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', sans-serif;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(255, 246, 225, 0.55);
+    letter-spacing: 0.005em;
 }
 .chart-card__body {
     display: flex;
     gap: 18px;
     align-items: flex-start;
+    flex-wrap: wrap;
+    /* Lets the SVG choose its own width up to its natural size. */
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 .chart-card__body > svg,
 .chart-card__body > .chart-empty,
 .chart-card__body > table {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
+    max-width: 100%;
+    height: auto;
 }
 .chart-card__aside {
     flex: 0 0 auto;
@@ -555,22 +574,27 @@
     font-size: 9.5px;
     font-weight: 500;
     letter-spacing: 0.22em;
-    color: rgba(255, 220, 160, 0.5);
+    color: rgba(255, 220, 160, 0.55);
 }
 .callout__value {
-    font-family: 'JetBrains Mono', 'SF Mono', monospace;
-    font-feature-settings: 'tnum' 1;
-    font-size: 22px;
+    /* Same Inter treatment as the insight-card values — most callouts
+       mix words with numerals ("big day", "top 25%", "+14%"); mono
+       made the mixed strings look like log lines. */
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 20px;
     font-weight: 300;
     color: #faf3e3;
-    letter-spacing: -0.012em;
+    letter-spacing: -0.014em;
+    line-height: 1.15;
 }
 .callout--good .callout__value { color: #95e2a4; }
 .callout--bad  .callout__value { color: #ff8a8a; }
 .callout__hint {
-    font-size: 11px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', sans-serif;
+    font-size: 11.5px;
     color: rgba(255, 246, 225, 0.55);
-    line-height: 1.45;
+    line-height: 1.5;
 }
 
 /* ── Insights section — derived narrative grid ───────────────────────── */
@@ -615,19 +639,29 @@
 }
 .insight-card__sub {
     margin: 0;
-    font-family: 'JetBrains Mono', 'SF Mono', monospace;
-    font-size: 10.5px;
-    color: rgba(255, 246, 225, 0.42);
-    letter-spacing: 0.04em;
+    /* Inter, not mono. Mono on the sub line read like terminal output
+       below a sentence — broken register. Inter at the same scale is
+       softer and reads at a glance. */
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', sans-serif;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 246, 225, 0.5);
+    letter-spacing: 0.002em;
 }
 .insight-card__value {
-    margin: 8px 0 0;
-    font-family: 'JetBrains Mono', 'SF Mono', monospace;
-    font-feature-settings: 'tnum' 1;
-    font-size: 28px;
-    font-weight: 250;
+    margin: 12px 0 0;
+    /* Use Inter for the value too — most insight values mix numerals
+       with words ("very strong", "rare", "3.4 hours", "+14%"). The
+       mono treatment made those mixed strings look like log lines.
+       Tabular numerals via font-feature-settings keep digit widths
+       stable so the "+14%" doesn't wobble when it changes. */
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: clamp(22px, 2.6vw, 30px);
+    font-weight: 300;
     color: #faf3e3;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.018em;
+    line-height: 1.1;
 }
 .insight-card--trend::before    { background: rgba(149, 226, 164, 0.5); }
 .insight-card--anomaly::before  { background: rgba(255, 138, 138, 0.5); }
