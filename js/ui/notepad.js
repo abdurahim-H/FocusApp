@@ -99,6 +99,101 @@ function todayDailyTitle() {
     })}`;
 }
 
+// ============================================================================
+// Templates — pre-filled note bodies for common workflows. Each template
+// creates a fresh note with a populated body; the user can edit freely
+// from there. Adding a new template = one more entry in this array.
+// ============================================================================
+const TEMPLATES = [
+    {
+        id: 'daily',
+        label: 'Daily note',
+        title: () => todayDailyTitle(),
+        body: () => [
+            `# ${todayDailyTitle()}`,
+            '',
+            '## Top three for today',
+            '- ',
+            '- ',
+            '- ',
+            '',
+            '## Notes',
+            '',
+        ].join('\n'),
+    },
+    {
+        id: 'weekly',
+        label: 'Weekly review',
+        title: () => `Weekly review — ${weekIso()}`,
+        body: () => [
+            `# Weekly review — ${weekIso()}`,
+            '',
+            '## What went well',
+            '- ',
+            '',
+            '## What to change',
+            '- ',
+            '',
+            '## Next week\'s focus',
+            '- ',
+            '',
+        ].join('\n'),
+    },
+    {
+        id: 'meeting',
+        label: 'Meeting notes',
+        title: () => 'Meeting — ',
+        body: () => [
+            '# Meeting — ',
+            '',
+            '## Attendees',
+            '- ',
+            '',
+            '## Agenda',
+            '- ',
+            '',
+            '## Decisions',
+            '- ',
+            '',
+            '## Action items',
+            '- [ ] ',
+            '',
+        ].join('\n'),
+    },
+    {
+        id: 'brainstorm',
+        label: 'Brainstorm',
+        title: () => 'Brainstorm — ',
+        body: () => [
+            '# Brainstorm — ',
+            '',
+            '## The question',
+            '> ',
+            '',
+            '## Ideas (no filter)',
+            '- ',
+            '',
+            '## Promising directions',
+            '- ',
+            '',
+        ].join('\n'),
+    },
+];
+
+function weekIso() {
+    // Return a "YYYY week NN" label using ISO 8601 week numbers — Monday-
+    // first weeks, week 1 contains Jan 4. Compact but unambiguous.
+    const d = new Date();
+    const target = new Date(d);
+    target.setHours(0, 0, 0, 0);
+    target.setDate(target.getDate() + 3 - ((target.getDay() + 6) % 7));
+    const week1 = new Date(target.getFullYear(), 0, 4);
+    const weekNo = 1 + Math.round(
+        ((target - week1) / 86_400_000 - 3 + ((week1.getDay() + 6) % 7)) / 7
+    );
+    return `${target.getFullYear()} week ${String(weekNo).padStart(2, '0')}`;
+}
+
 function getActiveNote() {
     const list = notes.value;
     if (list.length === 0) return null;
@@ -217,6 +312,25 @@ function buildPanel() {
                        aria-label="Note title"
                        placeholder="Note title">
                 <span class="notepad__saved" id="notepadSaved" aria-live="polite"></span>
+                <button class="notepad__head-btn" type="button"
+                        id="notepadDictate"
+                        aria-label="Dictate with voice"
+                        title="Dictate with voice"
+                        aria-pressed="false">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="6" y="2" width="4" height="8" rx="2"/>
+                        <path d="M3.5 7.5a4.5 4.5 0 0 0 9 0M8 12v2.5M5.5 14.5h5"/>
+                    </svg>
+                </button>
+                <button class="notepad__head-btn" type="button"
+                        id="notepadExport"
+                        aria-label="Export this note"
+                        title="Export this note">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M8 2.5v8.5M5 6l3-3 3 3"/>
+                        <path d="M2.5 12.5h11"/>
+                    </svg>
+                </button>
                 <button class="notepad__close" type="button"
                         aria-label="Close notepad"
                         data-notepad-close>×</button>
@@ -229,10 +343,19 @@ function buildPanel() {
                                id="notepadSearch"
                                placeholder="Search notes…"
                                aria-label="Search notes">
-                        <button class="notepad__new-btn"
-                                type="button"
-                                id="notepadNewBtn"
-                                aria-label="Create a new note">+ New</button>
+                        <div class="notepad__new-wrap" id="notepadNewWrap">
+                            <button class="notepad__new-btn"
+                                    type="button"
+                                    id="notepadNewBtn"
+                                    aria-label="Create a new note">+ New</button>
+                            <button class="notepad__new-menu-btn"
+                                    type="button"
+                                    id="notepadNewMenuBtn"
+                                    aria-label="Choose a template"
+                                    aria-haspopup="menu"
+                                    aria-expanded="false">▾</button>
+                            <ul class="notepad__new-menu hidden" id="notepadNewMenu" role="menu"></ul>
+                        </div>
                     </div>
                     <div class="notepad__tags" id="notepadTags" role="group" aria-label="Tag filters"></div>
                     <ul class="notepad__list" id="notepadList" role="list"></ul>
@@ -286,6 +409,9 @@ function buildPanel() {
     // Sidebar wiring.
     const searchInput = panel.querySelector('#notepadSearch');
     const newBtn = panel.querySelector('#notepadNewBtn');
+    const newMenuBtn = panel.querySelector('#notepadNewMenuBtn');
+    const newMenu = panel.querySelector('#notepadNewMenu');
+    const newWrap = panel.querySelector('#notepadNewWrap');
     const listEl = panel.querySelector('#notepadList');
     const tagsEl = panel.querySelector('#notepadTags');
 
@@ -294,11 +420,40 @@ function buildPanel() {
         paintSidebar();
     });
     newBtn.addEventListener('click', () => {
-        const n = newNote({ title: 'Untitled note' });
-        notes.value = [n, ...notes.value];
-        activeNoteId.value = n.id;
-        // Focus the title field so the user can name the note immediately.
-        setTimeout(() => titleEl?.focus(), 60);
+        createBlankNote();
+    });
+
+    // Template chooser. Click ▾ → menu; pick → fresh note from template.
+    newMenu.innerHTML = TEMPLATES.map(
+        (t) => `<li role="menuitem"><button type="button" data-template="${t.id}">${esc(t.label)}</button></li>`
+    ).join('');
+    const closeTemplateMenu = () => {
+        newMenu.classList.add('hidden');
+        newMenuBtn.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('click', onTemplateOutside, true);
+    };
+    function onTemplateOutside(e) {
+        if (!newWrap.contains(e.target)) closeTemplateMenu();
+    }
+    newMenuBtn.addEventListener('click', () => {
+        const open = !newMenu.classList.contains('hidden');
+        if (open) {
+            closeTemplateMenu();
+        } else {
+            newMenu.classList.remove('hidden');
+            newMenuBtn.setAttribute('aria-expanded', 'true');
+            // Defer outside-click binding so this very click doesn't fire it.
+            setTimeout(() => document.addEventListener('click', onTemplateOutside, true));
+        }
+    });
+    newMenu.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-template]');
+        if (!btn) return;
+        const id = btn.dataset.template;
+        const tpl = TEMPLATES.find((t) => t.id === id);
+        if (!tpl) return;
+        createNoteFromTemplate(tpl);
+        closeTemplateMenu();
     });
     listEl.addEventListener('click', (e) => {
         const open = e.target.closest('[data-note-id]');
@@ -322,12 +477,254 @@ function buildPanel() {
         paintSidebar();
     });
 
-    // Re-paint when notes change (sidebar reflects every external edit).
+    // Voice dictation (Web Speech API). Transcribed text is appended
+    // at the editor's current cursor position. Browser support: all
+    // Chromium-based, plus Safari since 14.1; Firefox is the holdout
+    // — we hide the button when the API isn't available.
+    const dictateBtn = panel.querySelector('#notepadDictate');
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR) {
+        let recognizer = null;
+        let active = false;
+        const stop = () => {
+            if (recognizer) {
+                try { recognizer.stop(); } catch (_) {}
+            }
+            active = false;
+            dictateBtn.classList.remove('is-on');
+            dictateBtn.setAttribute('aria-pressed', 'false');
+        };
+        dictateBtn.addEventListener('click', () => {
+            if (active) {
+                stop();
+                return;
+            }
+            try {
+                recognizer = new SR();
+                recognizer.continuous = true;
+                recognizer.interimResults = false;
+                recognizer.lang = navigator.language || 'en-US';
+                recognizer.onresult = (event) => {
+                    // Only append final results — interim flicker is
+                    // distracting and gets corrected anyway.
+                    let text = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            text += event.results[i][0].transcript;
+                        }
+                    }
+                    if (!text) return;
+                    insertAtCursor(editorEl, text);
+                    updateActiveNote({
+                        body: editorEl.value,
+                        tags: extractTags(editorEl.value),
+                    });
+                    renderStats(editorEl.value);
+                    showSavedFlash();
+                };
+                recognizer.onerror = (e) => {
+                    console.warn('[notepad] dictation error:', e?.error);
+                    stop();
+                };
+                recognizer.onend = () => stop();
+                recognizer.start();
+                active = true;
+                dictateBtn.classList.add('is-on');
+                dictateBtn.setAttribute('aria-pressed', 'true');
+                editorEl.focus();
+            } catch (e) {
+                console.warn('[notepad] dictation unavailable:', e);
+            }
+        });
+    } else if (dictateBtn) {
+        dictateBtn.classList.add('is-unavailable');
+        dictateBtn.title = 'Voice dictation isn\'t supported in this browser';
+        dictateBtn.disabled = true;
+    }
+
+    // Export menu — Markdown / HTML / PDF (the latter via the print
+    // dialog, which is the cheapest and most universal option).
+    const exportBtn = panel.querySelector('#notepadExport');
+    exportBtn.addEventListener('click', () => {
+        const note = getActiveNote();
+        if (!note) return;
+        // Inline ad-hoc menu rendered just under the trigger button.
+        const existing = panel.querySelector('.notepad__export-menu');
+        if (existing) {
+            existing.remove();
+            return;
+        }
+        const menu = document.createElement('ul');
+        menu.className = 'notepad__export-menu';
+        menu.setAttribute('role', 'menu');
+        menu.innerHTML = `
+            <li><button type="button" data-export="md">Markdown (.md)</button></li>
+            <li><button type="button" data-export="html">HTML (.html)</button></li>
+            <li><button type="button" data-export="pdf">PDF (via print)</button></li>
+        `;
+        const close = () => {
+            menu.remove();
+            document.removeEventListener('click', onOutside, true);
+        };
+        function onOutside(e) {
+            if (!menu.contains(e.target) && e.target !== exportBtn) close();
+        }
+        menu.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-export]');
+            if (!btn) return;
+            exportNote(note, btn.dataset.export);
+            close();
+        });
+        // Position relative to the export button.
+        const rect = exportBtn.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.top = `${rect.bottom + 6}px`;
+        menu.style.left = `${rect.right - 180}px`;
+        document.body.appendChild(menu);
+        setTimeout(() => document.addEventListener('click', onOutside, true));
+    });
+
+    // Re-paint when notes change (sidebar / editor reflect every
+    // external edit — auto-prepend, signal-driven imports, etc.).
     effect(() => {
         notes.value;
         activeNoteId.value;
         if (isOpen) paint();
     });
+
+    // Pomodoro auto-prepend hook (3.9). When a focus session starts,
+    // prepend a "## H:MM AM — focus session N" header to today's
+    // daily note. The note's id is found-or-created lazily; if the
+    // panel is closed we still mutate via the same `notes` signal.
+    document.addEventListener('focus-timer:start', onFocusTimerStart);
+}
+
+function onFocusTimerStart(e) {
+    const detail = e.detail || {};
+    if (detail.isBreak) return;
+    const dailyNote = findOrCreateTodayDailyNote();
+    if (!dailyNote) return;
+    const now = new Date();
+    const hh = now.getHours();
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    const h = hh === 0 ? 12 : hh > 12 ? hh - 12 : hh;
+    // Count how many "## *focus session*" headers already exist today
+    // so we number incrementally without parsing the timer state.
+    const sessionsSoFar = (dailyNote.body.match(/^## \d{1,2}:\d{2} [AP]M — focus session/gm) || []).length;
+    const stamp = `## ${h}:${mm} ${ampm} — focus session ${sessionsSoFar + 1}\n\n`;
+    notes.value = notes.value.map((n) =>
+        n.id === dailyNote.id
+            ? { ...n, body: dailyNote.body + (dailyNote.body.endsWith('\n') ? '' : '\n') + stamp, updatedAt: Date.now() }
+            : n
+    );
+}
+
+function findOrCreateTodayDailyNote() {
+    const todayTitle = todayDailyTitle();
+    let n = notes.value.find((x) => x.title === todayTitle);
+    if (!n) {
+        n = newNote({ title: todayTitle });
+        notes.value = [n, ...notes.value];
+    }
+    return n;
+}
+
+function createBlankNote() {
+    const n = newNote({ title: 'Untitled note' });
+    notes.value = [n, ...notes.value];
+    activeNoteId.value = n.id;
+    setTimeout(() => titleEl?.focus(), 60);
+}
+
+function createNoteFromTemplate(tpl) {
+    const n = newNote({ title: tpl.title(), body: tpl.body() });
+    notes.value = [n, ...notes.value];
+    activeNoteId.value = n.id;
+    setTimeout(() => editorEl?.focus(), 60);
+}
+
+function insertAtCursor(el, text) {
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    // Add a leading space when we're not at a natural word boundary
+    // so dictation chunks merge cleanly into prose.
+    const needsLead = start > 0 && !/\s/.test(el.value[start - 1]);
+    const insertion = (needsLead ? ' ' : '') + text;
+    el.value = el.value.slice(0, start) + insertion + el.value.slice(end);
+    const cursor = start + insertion.length;
+    el.setSelectionRange(cursor, cursor);
+}
+
+/** Trigger a download for the active note in the requested format. */
+function exportNote(note, format) {
+    const safeTitle = (note.title || 'note').replace(/[^a-z0-9-_]+/gi, '-').slice(0, 80);
+    const today = new Date().toISOString().slice(0, 10);
+    const filename = `${safeTitle}-${today}`;
+    if (format === 'md') {
+        downloadBlob(note.body, `${filename}.md`, 'text/markdown');
+    } else if (format === 'html') {
+        const html = wrapHtml(note);
+        downloadBlob(html, `${filename}.html`, 'text/html');
+    } else if (format === 'pdf') {
+        printNote(note);
+    }
+}
+
+function downloadBlob(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** Minimal HTML wrapper using <pre> so the markdown source renders
+ *  visibly without a markdown parser. Preserves whitespace + newlines
+ *  verbatim. */
+function wrapHtml(note) {
+    const title = esc(note.title || 'Note');
+    const body = esc(note.body || '');
+    return `<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>${title}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; color: #222; line-height: 1.6; }
+        h1 { font-weight: 350; letter-spacing: -0.01em; }
+        pre { white-space: pre-wrap; word-wrap: break-word; font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-size: 15px; }
+        .meta { color: #888; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <h1>${title}</h1>
+    <p class="meta">Exported ${new Date().toLocaleString()}</p>
+    <pre>${body}</pre>
+</body>
+</html>`;
+}
+
+/** Open a printable window for the active note. The browser's print
+ *  dialog handles the actual PDF generation — universal across OSes
+ *  without bundling a PDF library. */
+function printNote(note) {
+    const w = window.open('', '_blank', 'width=720,height=900');
+    if (!w) {
+        // Pop-up blocked — fall back to HTML download.
+        downloadBlob(wrapHtml(note), `${(note.title || 'note').replace(/[^a-z0-9-_]+/gi, '-')}.html`, 'text/html');
+        return;
+    }
+    w.document.write(wrapHtml(note));
+    w.document.close();
+    setTimeout(() => {
+        try { w.focus(); w.print(); } catch (_) {}
+    }, 250);
 }
 
 /** Pull `#tag` tokens out of the body — first 12 unique, lowercase,

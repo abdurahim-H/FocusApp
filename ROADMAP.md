@@ -75,11 +75,11 @@ A first-class place to write. Markdown-aware, sync-ready, AI-assisted.
 - [x] **3.5 Auto-save with debounce (S).** Title and body inputs persist on every keystroke through a `requestAnimationFrame`-coalesced write to the new `fu_notes_v1` localStorage key. "Saved" pill flashes for ~1.1 s after each input as a visible confirmation.
 - [x] **3.6 Tags (S done; cross-linking deferred).** Body parser pulls `#tag` tokens (lowercase, dedup, capped at 12) on every keystroke and stores them on the note for the sidebar filter. Active filter persists during the session; click a chip to toggle. `[[note title]]` cross-linking is deferred — adds complexity with marginal v1 value.
 - [x] **3.7 Full-text search (S).** Search input filters the note list by case-insensitive substring match against title + body. Combinable with the tag filter (both apply). Sub-millisecond at any reasonable note count; no index needed yet.
-- [ ] **3.8 Voice dictation via Web Speech API (M).** Free; works in Chrome / Safari. Microphone button in the notepad toolbar.
-- [ ] **3.9 Pomodoro auto-prepend hook (S).** Optional setting: when a focus session starts, prepend "## 9:42 AM — focus session 1" to today's daily note.
-- [ ] **3.10 AI session summary at end of focus block (M).** LLM (Cloudflare Workers AI, free at our volume) reads what you wrote during the session and emits a 2-sentence recap. Recap appended to the daily note.
-- [ ] **3.11 Export — Markdown / HTML / PDF (M).** Per-note and bulk.
-- [ ] **3.12 Templates (S).** Daily-note template, weekly-review template, meeting-notes template. Configurable in Settings.
+- [x] **3.8 Voice dictation via Web Speech API (M).** Mic button in the panel header. Click to start, click to stop. Final transcripts inserted at the editor cursor with smart-spacing so chunks merge cleanly into prose. Auto-recovers on `onend`. Hidden / disabled with a tooltip when the API is missing (Firefox).
+- [x] **3.9 Pomodoro auto-prepend hook (S).** Listens for the existing `focus-timer:start` event and prepends a `## H:MM AM — focus session N` header to today's daily note. Counts existing matching headers in the body to number sessions correctly without parsing timer state. Skips break sessions.
+- [ ] **3.10 AI session summary at end of focus block (M).** LLM (Cloudflare Workers AI, free at our volume) reads what you wrote during the session and emits a 2-sentence recap. Recap appended to the daily note. (Deferred — needs the AI worker endpoint set up.)
+- [x] **3.11 Export — Markdown / HTML / PDF (M).** Per-note. Header `↑` button opens an inline menu with the three formats. Markdown downloads the raw body, HTML wraps it in a minimal print-friendly template, PDF opens a new window pre-populated with the same HTML and triggers the browser's print dialog. Pop-up-blocked PDF falls back to an HTML download. Bulk export deferred — single-note covers the 80% case.
+- [x] **3.12 Templates (S).** Sidebar "+ New" is now a split button. Click the chevron to pick from four starter templates: **Daily note**, **Weekly review**, **Meeting notes**, **Brainstorm**. Each populates a fresh note with a structured markdown skeleton.
 
 ---
 

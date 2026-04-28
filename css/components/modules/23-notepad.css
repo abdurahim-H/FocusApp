@@ -97,7 +97,8 @@
 }
 .notepad__saved.is-on { color: rgba(149, 226, 164, 0.85); }
 
-.notepad__close {
+.notepad__close,
+.notepad__head-btn {
     appearance: none;
     -webkit-appearance: none;
     border: 1px solid rgba(255, 246, 225, 0.16);
@@ -110,7 +111,31 @@
     line-height: 1;
     cursor: pointer;
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.notepad__head-btn:hover,
+.notepad__head-btn:focus-visible {
+    background: rgba(255, 246, 225, 0.06);
+    color: #faf3e3;
+    border-color: rgba(255, 246, 225, 0.32);
+    outline: none;
+}
+.notepad__head-btn.is-on {
+    background: rgba(255, 138, 138, 0.18);
+    color: #ff8a8a;
+    border-color: rgba(255, 138, 138, 0.55);
+    animation: notepad-mic-pulse 1.4s ease-in-out infinite;
+}
+@keyframes notepad-mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 138, 138, 0.32); }
+    50% { box-shadow: 0 0 0 6px rgba(255, 138, 138, 0); }
+}
+.notepad__head-btn.is-unavailable {
+    opacity: 0.32;
+    cursor: not-allowed;
 }
 .notepad__close:hover,
 .notepad__close:focus-visible {
@@ -186,7 +211,14 @@
     border-color: rgba(255, 220, 160, 0.42);
     background: rgba(255, 255, 255, 0.05);
 }
-.notepad__new-btn {
+.notepad__new-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+.notepad__new-btn,
+.notepad__new-menu-btn {
     appearance: none;
     -webkit-appearance: none;
     border: 1px solid rgba(255, 220, 160, 0.32);
@@ -199,12 +231,91 @@
     font-weight: 500;
     cursor: pointer;
     transition: background 0.18s ease, border-color 0.18s ease;
-    flex-shrink: 0;
+}
+.notepad__new-btn { border-radius: 8px 0 0 8px; }
+.notepad__new-menu-btn {
+    padding: 6px 7px;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
 }
 .notepad__new-btn:hover,
-.notepad__new-btn:focus-visible {
+.notepad__new-btn:focus-visible,
+.notepad__new-menu-btn:hover,
+.notepad__new-menu-btn:focus-visible {
     background: rgba(255, 220, 160, 0.18);
     border-color: rgba(255, 220, 160, 0.55);
+    outline: none;
+}
+.notepad__new-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 10;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    min-width: 160px;
+    background: linear-gradient(180deg, rgba(20, 16, 10, 0.98), rgba(12, 9, 5, 0.98));
+    border: 1px solid rgba(255, 220, 160, 0.18);
+    border-radius: 8px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+.notepad__new-menu.hidden { display: none; }
+.notepad__new-menu li > button {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: rgba(255, 246, 225, 0.85);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.notepad__new-menu li > button:hover,
+.notepad__new-menu li > button:focus-visible {
+    background: rgba(255, 220, 160, 0.12);
+    color: #faf3e3;
+    outline: none;
+}
+
+/* Export menu (rendered as a position:fixed list anchored under the
+   header export button; not nested under .notepad__sheet so it doesn't
+   inherit the sheet's overflow). */
+.notepad__export-menu {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    z-index: 2300;
+    min-width: 180px;
+    background: linear-gradient(180deg, rgba(20, 16, 10, 0.98), rgba(12, 9, 5, 0.98));
+    border: 1px solid rgba(255, 220, 160, 0.18);
+    border-radius: 10px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+}
+.notepad__export-menu li > button {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: rgba(255, 246, 225, 0.85);
+    padding: 9px 12px;
+    border-radius: 7px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.notepad__export-menu li > button:hover,
+.notepad__export-menu li > button:focus-visible {
+    background: rgba(255, 220, 160, 0.14);
+    color: #faf3e3;
     outline: none;
 }
 
