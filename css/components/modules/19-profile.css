@@ -523,17 +523,26 @@
     text-transform: uppercase;
 }
 
-.cosmic-signature { overflow: visible; }
-.signature-today {
-    animation: signaturePulse 3.6s ease-in-out infinite;
-    transform-origin: center;
+/* 60-day calendar grid in the Overview right card. Today gets a thin
+   amber outline so the eye spots "now" without reading copy. */
+.day-grid {
+    display: block;
+    overflow: visible;
+    color: rgba(var(--section-accent, 255, 220, 160), 1);
 }
-@keyframes signaturePulse {
-    0%, 100% { transform: scale(1); }
-    50%      { transform: scale(1.4); }
+.day-grid__today {
+    stroke: currentColor;
+    stroke-opacity: 0.92;
+    stroke-width: 1.6;
 }
-@media (prefers-reduced-motion: reduce) {
-    .signature-today { animation: none; }
+.psection__card-sub {
+    margin: 0 0 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: rgba(255, 246, 225, 0.5);
+    letter-spacing: 0.005em;
+    max-width: 240px;
 }
 
 /* ── Sound legend (donut sidekick) ───────────────────────────────────── */
@@ -736,6 +745,8 @@
 .insight-card--forecast    { --kind-color: 120, 200, 240; }
 .insight-card--completion  { --kind-color: 255, 220, 160; }
 .insight-card--wow         { --kind-color: 255, 205, 115; }
+.insight-card--patterns    { --kind-color: 200, 180, 255; }
+.insight-card--conditions  { --kind-color: 144, 232, 200; }
 
 .insight-card[class*="insight-card--"]::before {
     background: rgba(var(--kind-color, 255, 220, 160), 0.55);
@@ -771,6 +782,11 @@
     width: 90px;
     height: 90px;
     max-width: 90px;
+}
+.insight-viz--clusters,
+.insight-viz--conditions,
+.insight-viz--friction {
+    max-width: 100%;
 }
 .insight-viz__caption {
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;

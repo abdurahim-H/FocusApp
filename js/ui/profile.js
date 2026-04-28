@@ -32,9 +32,12 @@ import {
     bucketByHour,
     calendarMatrix,
     changeAcross,
+    chooseBestK,
     cohensD,
     dailyTotals,
     histogram,
+    holtWintersAdditive,
+    holtWintersForecast,
     hourDayMatrix,
     linearRegression,
     mean,
@@ -43,6 +46,7 @@ import {
     pearsonCorrelation,
     percentile,
     percentileRank,
+    rankConditions,
     soundEffects,
     stdDev,
     zScore,
@@ -298,7 +302,7 @@ function renderOverview(sessions) {
     const last7Sum = last7.reduce((a, x) => a + x, 0);
 
     return `
-        ${sectionHeader('Overview', currentUser ? 'your cosmic profile' : 'this device — sign in to bring your patterns across')}
+        ${sectionHeader('Overview', currentUser ? 'a quick look at your account' : 'this device only — sign in to bring your data across devices')}
 
         ${kpiRow([
             { label: 'hours focused', value: totalHrs >= 1 ? totalHrs.toFixed(1) : (totalSec / 60).toFixed(0), unit: totalHrs >= 1 ? 'hrs' : 'min', count: false },
@@ -324,8 +328,9 @@ function renderOverview(sessions) {
                     </div>
                 </div>
                 <div class="psection__card psection__card--signature">
-                    <div class="psection__card-eyebrow">cosmic signature</div>
-                    ${renderCosmicSignature(sessions)}
+                    <div class="psection__card-eyebrow">your last 60 days</div>
+                    <p class="psection__card-sub">each square is one day · brighter means more focused · today is the bottom-right square</p>
+                    ${render60DayGrid(sessions)}
                 </div>
             </div>
 
@@ -337,8 +342,8 @@ function renderOverview(sessions) {
 function renderOverviewEmpty() {
     return `
         <div class="psection__empty">
-            <p class="psection__empty-headline">no sessions yet</p>
-            <p class="psection__empty-sub">complete one focus block — even a single minute — and your overview takes shape.</p>
+            <p class="psection__empty-headline">no focus blocks yet</p>
+            <p class="psection__empty-sub">finish one focus block and the rest of your overview shows up here.</p>
         </div>
     `;
 }
@@ -357,39 +362,40 @@ function renderOverviewQuickLinks() {
     `;
 }
 
-function renderCosmicSignature(sessions) {
-    const days = dailyTotals(sessions, 60);
-    const SIZE = 220;
-    const CX = SIZE / 2;
-    const CY = SIZE / 2;
-    const SCALE = 9;
-    const GOLDEN = Math.PI * (3 - Math.sqrt(5));
-    const peak = Math.max(...days, 1);
-    const dots = days.map((m, i) => {
-        const reversed = days.length - 1 - i;
-        const r = Math.sqrt(reversed + 1) * SCALE;
-        const a = reversed * GOLDEN;
-        const x = CX + Math.cos(a) * r;
-        const y = CY + Math.sin(a) * r;
-        const intensity = m / peak;
-        const radius = 1.6 + intensity * 3.4;
-        const isToday = i === days.length - 1;
-        return `
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${radius.toFixed(2)}"
-                    fill="rgba(255, 220, 160, ${(0.18 + intensity * 0.78).toFixed(3)})"
-                    ${isToday ? 'class="signature-today"' : ''} />
-        `;
-    }).join('');
+/** A 60-day calendar grid: 6 rows × 10 columns, oldest top-left,
+ *  today bottom-right. Each square's brightness scales with focus
+ *  minutes that day. Today's square gets a thin outline so you can
+ *  spot it without reading copy. */
+function render60DayGrid(sessions) {
+    const days = 60;
+    const counts = dailyTotals(sessions, days);
+    const peak = Math.max(...counts, 1);
+    const COLS = 10;
+    const ROWS = 6;
+    const CELL = 18;
+    const GAP = 4;
+    const W = COLS * (CELL + GAP) - GAP + 4;
+    const H = ROWS * (CELL + GAP) - GAP + 4;
+    const cells = [];
+    for (let i = 0; i < days; i++) {
+        const row = Math.floor(i / COLS);
+        const col = i % COLS;
+        const x = 2 + col * (CELL + GAP);
+        const y = 2 + row * (CELL + GAP);
+        const minutes = counts[i] || 0;
+        const intensity = peak > 0 ? minutes / peak : 0;
+        const isToday = i === days - 1;
+        // Faint baseline so empty days stay visible — never disappear.
+        const fillOpacity = 0.05 + 0.85 * intensity;
+        cells.push(`
+            <rect x="${x}" y="${y}" width="${CELL}" height="${CELL}" rx="4"
+                  fill="currentColor" fill-opacity="${fillOpacity.toFixed(3)}"
+                  ${isToday ? 'class="day-grid__today"' : ''} />
+        `);
+    }
     return `
-        <svg class="cosmic-signature" viewBox="0 0 ${SIZE} ${SIZE}" width="${SIZE}" height="${SIZE}" aria-hidden="true">
-            <defs>
-                <radialGradient id="sigCore" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="rgba(255, 220, 160, 0.08)" />
-                    <stop offset="100%" stop-color="rgba(255, 220, 160, 0)" />
-                </radialGradient>
-            </defs>
-            <circle cx="${CX}" cy="${CY}" r="60" fill="url(#sigCore)" />
-            ${dots}
+        <svg class="day-grid" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">
+            ${cells.join('')}
         </svg>
     `;
 }
@@ -401,8 +407,8 @@ function renderCosmicSignature(sessions) {
 function renderFocus(sessions) {
     if (sessions.length === 0) {
         return `
-            ${sectionHeader('Focus', 'every focus block becomes data here')}
-            ${emptyState('begin a focus block — your trends, distributions, and anomalies will appear once data arrives.')}
+            ${sectionHeader('Focus', 'how your focus blocks have looked over time')}
+            ${emptyState('finish a focus block to start filling this in.')}
         `;
     }
     const durations = sessions.map((s) => s.durationSeconds / 60);
@@ -428,7 +434,7 @@ function renderFocus(sessions) {
     const z = zScore(todayTotal, last90.slice(0, -1));
 
     return `
-        ${sectionHeader('Focus', 'session timing, distributions, and trends')}
+        ${sectionHeader('Focus', 'how your focus blocks have looked over time')}
 
         ${kpiRow([
             { label: 'total time', value: totalSec >= 3600
@@ -515,8 +521,8 @@ function renderFocus(sessions) {
 function renderTasks(sessions) {
     if (sessions.length === 0) {
         return `
-            ${sectionHeader('Tasks', 'completion patterns, day-of-week and hour-of-day')}
-            ${emptyState('no sessions yet — task analytics derive from focus blocks where tasks were on the deck.')}
+            ${sectionHeader('Tasks', 'when you actually get tasks done')}
+            ${emptyState('finish a focus block with a task ticked off and the numbers start showing.')}
         `;
     }
 
@@ -542,7 +548,7 @@ function renderTasks(sessions) {
     const peakHourTasks = tasksHour.indexOf(Math.max(...tasksHour));
 
     return `
-        ${sectionHeader('Tasks', 'when and where you actually finish things')}
+        ${sectionHeader('Tasks', 'when you actually get tasks done')}
 
         ${kpiRow([
             { label: 'tasks done', value: totalTasks, unit: '', count: true },
@@ -631,8 +637,8 @@ function renderSounds(sessions) {
 
     if (totalSessions === 0) {
         return `
-            ${sectionHeader('Sounds', 'how ambient companions shape your focus')}
-            ${emptyState('no sessions yet — sound analytics need a few sessions to surface honest signal.')}
+            ${sectionHeader('Sounds', 'which ambient sounds you use and how they affect your blocks')}
+            ${emptyState('a few sessions and the sound numbers start to mean something.')}
         `;
     }
 
@@ -640,7 +646,7 @@ function renderSounds(sessions) {
     const top = ranked.slice(0, 5);
 
     return `
-        ${sectionHeader('Sounds', 'how ambient companions shape your focus')}
+        ${sectionHeader('Sounds', 'which ambient sounds you use and how they affect your blocks')}
 
         ${kpiRow([
             { label: 'unique sounds tried', value: uniqueSounds, unit: '', count: true },
@@ -731,8 +737,8 @@ function effectCategory(absD) {
 function renderTime(sessions) {
     if (sessions.length === 0) {
         return `
-            ${sectionHeader('Time', 'when across the week and the day')}
-            ${emptyState('once focus blocks accumulate, your time fingerprint surfaces here.')}
+            ${sectionHeader('Time', 'when in the day and week you focus')}
+            ${emptyState('a few focus blocks and your time-of-day pattern shows up here.')}
         `;
     }
     const hourBuckets = bucketByHour(sessions);
@@ -745,7 +751,7 @@ function renderTime(sessions) {
     const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return `
-        ${sectionHeader('Time', 'when across the week and the day')}
+        ${sectionHeader('Time', 'when in the day and week you focus')}
 
         ${kpiRow([
             { label: 'peak hour', value: formatHour(peakHour), unit: '', count: false },
@@ -858,8 +864,8 @@ function timeOfDayCharacter(hourBuckets) {
 function renderInsights(sessions) {
     if (sessions.length < 3) {
         return `
-            ${sectionHeader('Insights', 'patterns we notice in your own sessions — not comparisons against other people')}
-            ${emptyState('the more sessions you finish, the more patterns we can pick up. a handful of focus blocks and the cards start filling in.')}
+            ${sectionHeader('Insights', 'what we found in your own sessions — never compared against other people')}
+            ${emptyState('a handful of focus blocks and the cards start filling in.')}
         `;
     }
 
@@ -981,42 +987,126 @@ function renderInsights(sessions) {
     }
 
     if (dailyAvg > 0) {
-        const monthHrs = monthForecast / 60;
+        // Forecast — Holt-Winters additive seasonal smoothing when we
+        // have enough data (≥14 days = two full weekly seasons), else
+        // a simple flat-line projection at the trailing-7 average.
+        const past14 = last30.slice(-14);
+        const hw = holtWintersAdditive(last30, 7);
+        const projected14 = hw
+            ? holtWintersForecast(hw, 14)
+            : new Array(14).fill(dailyAvg);
+        const projectedSum = projected14.reduce((a, b) => a + b, 0);
+        // Use the HW-projected sum when available; otherwise fall back
+        // to the flat-line projection over 30 days.
+        const monthForecastReal = hw ? projectedSum * (30 / 14) : monthForecast;
+        const monthHrs = monthForecastReal / 60;
         const valueText = monthHrs >= 1
             ? `${monthHrs.toFixed(1)} hours`
-            : `${Math.round(monthForecast)} min`;
-        // Past 14 days as the historical line, then 14 days of
-        // projection at the trailing-7 daily average — gives the eye a
-        // sense of "here's where you've been, here's where you're
-        // heading if you keep this rhythm."
-        const past14 = last30.slice(-14);
-        const projected14 = new Array(14).fill(dailyAvg);
+            : `${Math.round(monthForecastReal)} min`;
+        const subBase = hw
+            ? `forecast accounts for your weekly rhythm and recent direction`
+            : `based on your last 7 days — about ${Math.round(dailyAvg)} minutes a day`;
         insights.push({
             kind: 'forecast',
             headline: monthHrs >= 1
-                ? `keep this up and you'll focus about ${monthHrs.toFixed(1)} hours in the next 30 days`
-                : `keep this up and you'll focus about ${Math.round(monthForecast)} minutes in the next 30 days`,
-            sub: `based on the last 7 days — about ${Math.round(dailyAvg)} minutes a day`,
+                ? `at this pace, you'll focus about ${monthHrs.toFixed(1)} hours over the next 30 days`
+                : `at this pace, you'll focus about ${Math.round(monthForecastReal)} minutes over the next 30 days`,
+            sub: subBase,
             value: valueText,
             viz: vizForecast(past14, projected14),
         });
     }
 
+    // ── ML insight: K-means clustering of session shapes ────────────────
+    // Cluster every focus block by [duration, focus quality,
+    // distractions], let an elbow-method search pick K in [2, 4],
+    // then describe the largest cluster in plain English.
+    if (sessions.length >= 12) {
+        const durs = sessions.map((s) => (s.durationSeconds || 0) / 60);
+        const dMin = Math.min(...durs);
+        const dMax = Math.max(...durs);
+        const xMax = Math.max(...sessions.map((s) => s.distractionCount || 0), 1);
+        const norm = (v, min, max) => max > min ? (v - min) / (max - min) : 0.5;
+        const features = sessions.map((s) => [
+            norm((s.durationSeconds || 0) / 60, dMin, dMax),
+            norm(s.focusQuality || 0, 0, 100),
+            norm(s.distractionCount || 0, 0, xMax),
+        ]);
+        const result = chooseBestK(features, { kMin: 2, kMax: 4 });
+        if (result && result.k >= 2) {
+            const clusters = describeClusters(result, sessions);
+            const dominant = clusters.reduce(
+                (best, c) => c.count > best.count ? c : best,
+                clusters[0]
+            );
+            const dominantPct = Math.round((dominant.count / sessions.length) * 100);
+            insights.push({
+                kind: 'patterns',
+                headline: result.k === 2
+                    ? `your focus blocks fall into 2 distinct groups`
+                    : `your focus blocks fall into ${result.k} distinct groups`,
+                sub: `${dominantPct}% of yours look like "${dominant.label}"`,
+                value: `${result.k} groups`,
+                viz: vizClusters(features, result.assignments, clusters),
+            });
+        }
+    }
+
+    // ── ML insight: which conditions help you finish blocks ────────────
+    // For each named condition, compute P(complete | condition) and
+    // its lift versus the overall completion rate. Surface the
+    // strongest signal in plain language.
+    if (sessions.length >= 10) {
+        const conditions = [
+            { name: 'starting before 10 AM', predicate: (s) => new Date(s.startedAt).getHours() < 10 },
+            { name: 'starting in the afternoon (12–5 PM)', predicate: (s) => {
+                const h = new Date(s.startedAt).getHours();
+                return h >= 12 && h < 17;
+            }},
+            { name: 'starting in the evening (after 5 PM)', predicate: (s) => new Date(s.startedAt).getHours() >= 17 },
+            { name: 'with a sound playing', predicate: (s) => (s.activeSounds || []).length > 0 },
+            { name: 'with no tab switches', predicate: (s) => (s.distractionCount || 0) === 0 },
+            { name: 'on a weekday', predicate: (s) => {
+                const d = new Date(s.startedAt).getDay();
+                return d >= 1 && d <= 5;
+            }},
+        ];
+        const ranked = rankConditions(sessions, conditions);
+        if (ranked.length > 0 && Math.abs(ranked[0].lift - 1) > 0.12) {
+            const top = ranked[0];
+            const matters = top.lift > 1;
+            const factor = matters ? top.lift.toFixed(1) : (1 / Math.max(0.01, top.lift)).toFixed(1);
+            insights.push({
+                kind: 'conditions',
+                headline: matters
+                    ? `you're ${factor}× more likely to finish blocks ${top.name}`
+                    : `you're ${factor}× less likely to finish blocks ${top.name}`,
+                sub: `${Math.round(top.rate * 100)}% finish in this group · ${Math.round(top.baselineRate * 100)}% across all your blocks`,
+                value: matters ? `${factor}× more` : `${factor}× less`,
+                viz: vizConditions(ranked.slice(0, 4)),
+            });
+        }
+    }
+
     if (sessions.length >= 5) {
         const pct = Math.round(completionRate * 100);
-        const headline = completionRate >= 0.85
-            ? `you finish almost every focus block you start (${pct}%)`
-            : completionRate >= 0.6
-                ? `you finish ${pct}% of the focus blocks you start`
-                : `you finish ${pct}% of focus blocks — about ${100 - pct}% get cut short`;
+        // Honest tone — no praise, no shame; just the percentage and
+        // what it means in two short clauses.
+        let headline, sub;
+        if (completionRate >= 0.85) {
+            headline = `you finish ${pct}% of the focus blocks you start`;
+            sub = `${100 - pct}% get cut short`;
+        } else if (completionRate >= 0.6) {
+            headline = `you finish ${pct}% of the focus blocks you start`;
+            sub = `${100 - pct}% get cut short`;
+        } else {
+            headline = `you finish ${pct}% of focus blocks — ${100 - pct}% get cut short`;
+            sub = `cutting more blocks short than you finish`;
+        }
         insights.push({
             kind: 'completion',
             headline,
-            sub: completionRate >= 0.85
-                ? 'rock-solid follow-through'
-                : completionRate >= 0.6
-                    ? 'solid follow-through — most blocks reach the end'
-                    : 'cutting blocks short is a habit worth watching',
+            sub,
             value: `${pct}%`,
             viz: vizCompletion(completionRate, pct),
         });
@@ -1024,13 +1114,13 @@ function renderInsights(sessions) {
 
     if (insights.length === 0) {
         return `
-            ${sectionHeader('Insights', 'patterns we notice in your own sessions — not comparisons against other people')}
-            ${emptyState('your sessions are still settling. once a couple of weeks of focus blocks pile up, the patterns sharpen and surface here.')}
+            ${sectionHeader('Insights', 'what we found in your own sessions — never compared against other people')}
+            ${emptyState('a couple more focus blocks and patterns will start showing up here.')}
         `;
     }
 
     return `
-        ${sectionHeader('Insights', 'patterns we notice in your own sessions — not comparisons against other people')}
+        ${sectionHeader('Insights', 'what we found in your own sessions — never compared against other people')}
         <div class="insight-grid">
             ${insights.map((ins) => `
                 <article class="insight-card insight-card--${ins.kind}">
@@ -1270,33 +1360,137 @@ function vizCompletion(rate, percent) {
 function insightKindLabel(kind) {
     switch (kind) {
         case 'trend':       return 'TREND';
-        case 'wow':         return 'MONTH OVER MONTH';
-        case 'anomaly':     return 'STANDOUT DAY';
-        case 'correlation': return 'WHAT MOVES WITH WHAT';
-        case 'friction':    return 'FOCUS LEAK';
-        case 'forecast':    return 'WHERE THIS LEADS';
-        case 'completion':  return 'FOLLOW-THROUGH';
+        case 'wow':         return 'VS THE MONTH BEFORE';
+        case 'anomaly':     return 'UNUSUAL DAY';
+        case 'correlation': return 'PATTERN FOUND';
+        case 'friction':    return 'TIME LOST';
+        case 'forecast':    return 'FORECAST';
+        case 'completion':  return 'FINISH RATE';
+        case 'patterns':    return 'WORK PATTERNS';
+        case 'conditions':  return 'WHAT HELPS YOU FINISH';
         default:            return kind.toUpperCase();
     }
 }
 
-/** Translate r² into plain-English confidence. We avoid using the
- *  symbol or the number — readers don't need it on the front of a
- *  card. The category captures the shape of the trend. */
-function trendConfidenceCopy(r2) {
-    if (r2 >= 0.5)  return 'a steady, clear pattern in the day-by-day numbers';
-    if (r2 >= 0.25) return 'a real trend, though some days swing more than others';
-    if (r2 >= 0.1)  return 'a soft trend — could still settle either way';
-    return 'a faint signal so far — give it a couple more weeks';
+/** Inspect each cluster's centroid and assign a plain-English label.
+ *  Returns parallel arrays of clusters with { label, count, color }. */
+function describeClusters(result, sessions) {
+    return result.centroids.map((c, i) => {
+        const [duration, quality, distractions] = c;
+        let label;
+        // The thresholds work on normalised features (0..1):
+        //   duration  — short < 0.4, long > 0.6
+        //   quality   — low < 0.4, high > 0.6
+        //   distractions — calm < 0.35, scattered > 0.55
+        if (duration > 0.6 && quality > 0.55 && distractions < 0.4) {
+            label = 'long, quiet blocks';
+        } else if (duration < 0.4 && distractions < 0.4) {
+            label = 'short, focused blocks';
+        } else if (distractions > 0.55) {
+            label = 'scattered, interrupted blocks';
+        } else if (quality > 0.55) {
+            label = 'solid medium-length blocks';
+        } else if (quality < 0.4) {
+            label = 'rough blocks';
+        } else {
+            label = 'regular blocks';
+        }
+        const count = result.assignments.filter((a) => a === i).length;
+        return { idx: i, label, count, centroid: c };
+    });
 }
 
-/** Plain-English z-score rarity. Avoids the σ symbol entirely. */
+/** Cluster scatter: sessions plotted in (duration, quality) space,
+ *  coloured by their cluster assignment, with centroids drawn larger. */
+function vizClusters(features, assignments, clusters) {
+    const W = 240, H = 90;
+    const padX = 6, padY = 6;
+    const palette = [
+        'rgba(149, 226, 164, 0.85)',  // green
+        'rgba(180, 144, 232, 0.85)',  // violet
+        'rgba(120, 200, 240, 0.85)',  // blue
+        'rgba(255, 184, 92, 0.85)',   // orange
+    ];
+    const sx = (x) => padX + x * (W - padX * 2);
+    const sy = (y) => H - padY - y * (H - padY * 2);
+    const points = features.map((f, i) => {
+        const x = sx(f[0]);
+        const y = sy(f[1]);
+        const c = palette[assignments[i] % palette.length];
+        return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.4" fill="${c}" />`;
+    }).join('');
+    const centroidDots = clusters.map((cl, i) => {
+        const cx = sx(cl.centroid[0]);
+        const cy = sy(cl.centroid[1]);
+        const fill = palette[i % palette.length];
+        return `
+            <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="${fill}"
+                    stroke="rgba(255, 255, 255, 0.5)" stroke-width="1.6" />
+        `;
+    }).join('');
+    return `
+        <svg class="insight-viz insight-viz--clusters" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <text x="${(W - 6).toFixed(1)}" y="${(H - 4).toFixed(1)}" class="insight-viz__caption"
+                  text-anchor="end">duration →</text>
+            <text x="${(padX - 2).toFixed(1)}" y="${(padY + 4).toFixed(1)}" class="insight-viz__caption"
+                  text-anchor="start">↑ quality</text>
+            ${points}
+            ${centroidDots}
+        </svg>
+    `;
+}
+
+/** Conditions rank — horizontal "above/below baseline" lift bars
+ *  with a centerline at 1×. Bars to the right = more likely; bars
+ *  to the left = less likely. */
+function vizConditions(ranked) {
+    if (!ranked || !ranked.length) return '';
+    const W = 240, H = 88;
+    const padY = 8;
+    const cx = W / 2;
+    const rowH = (H - padY * 2) / ranked.length;
+    const maxAbs = Math.max(
+        0.5,
+        ...ranked.map((r) => Math.abs((r.lift || 1) - 1))
+    );
+    const scale = (W / 2 - 12) / maxAbs;
+    const bars = ranked.map((r, i) => {
+        const y = padY + i * rowH;
+        const offset = ((r.lift || 1) - 1) * scale;
+        const barX = cx + Math.min(0, offset);
+        const barW = Math.max(2, Math.abs(offset));
+        const opacity = r.lift > 1 ? 0.78 : 0.42;
+        return `
+            <rect x="${barX.toFixed(1)}" y="${(y + 4).toFixed(1)}"
+                  width="${barW.toFixed(1)}" height="${(rowH - 8).toFixed(1)}" rx="3"
+                  fill="currentColor" fill-opacity="${opacity}" />
+        `;
+    }).join('');
+    return `
+        <svg class="insight-viz insight-viz--conditions" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <line x1="${cx}" y1="${padY}" x2="${cx}" y2="${(H - padY).toFixed(1)}"
+                  stroke="currentColor" stroke-opacity="0.32" stroke-width="0.7" />
+            ${bars}
+        </svg>
+    `;
+}
+
+/** Plain-English read on how confident the trend is, without using
+ *  r², σ, or any other symbol. */
+function trendConfidenceCopy(r2) {
+    if (r2 >= 0.5)  return 'a clear pattern day-by-day';
+    if (r2 >= 0.25) return 'a real trend, but with daily ups and downs';
+    if (r2 >= 0.1)  return 'a weak trend — could just be noise';
+    return 'not enough signal yet — keep going';
+}
+
+/** Plain-English read on how rare a day is. */
 function rarityCopy(z) {
     const abs = Math.abs(z);
-    const dir = z > 0 ? 'this strong' : 'this quiet';
-    if (abs >= 3) return `a day ${dir} happens roughly once every few months`;
-    if (abs >= 2) return `a day ${dir} happens roughly once every couple of weeks`;
-    return `a day ${dir} stands out from your normal pattern`;
+    const dir = z > 0 ? 'this big' : 'this quiet';
+    if (abs >= 3) return `a day ${dir} happens once every few months`;
+    if (abs >= 2) return `a day ${dir} happens once every couple of weeks`;
+    return `a day ${dir} stands out from your usual pattern`;
 }
 
 /** Compare two minute totals as a friendly multiplier ("about 2× of"). */

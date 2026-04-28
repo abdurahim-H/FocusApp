@@ -1,16 +1,20 @@
-// analytics.js — data-science primitives for the Profile surface.
+// analytics.js — analytics + ML primitives for the Profile surface.
 //
 // Pure functions, no DOM, no side effects. Everything here operates on
 // arrays of numbers or arrays of session-shaped records and returns
 // either summary statistics or arrays ready for chart rendering.
 //
 // Categories:
-//   • Descriptive — mean, median, stdDev, percentile, range, mode
+//   • Descriptive — mean, median, stdDev, percentile, range
 //   • Trend       — linearRegression, movingAverage, weekOverWeek
 //   • Comparison  — pearsonCorrelation, cohensD (effect size)
 //   • Distribution — histogram, zScore, anomalyFlags
 //   • Time helpers — bucketByHour, bucketByDayOfWeek, dailyTotals,
-//                    weeklyTotals, calendarMatrix
+//                    hourDayMatrix, calendarMatrix
+//   • ML          — kMeans (with k-means++ init + restarts +
+//                    elbow K selection), Holt-Winters additive
+//                    seasonal exponential smoothing, conditional
+//                    probability + lift analysis
 //
 // All thresholds and gating live in the Profile UI; this file is the
 // honest math underneath. No formatting, no narrative, no HTML.
@@ -375,5 +379,265 @@ export function soundEffects(sessions, { minSamples = 4 } = {}) {
         });
     }
     out.sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+    return out;
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// ML — K-means clustering (k-means++ init, multi-restart, elbow-K)
+// ───────────────────────────────────────────────────────────────────────
+//
+// Standard Lloyd's algorithm with two improvements that materially
+// affect the quality of the result on small datasets:
+//
+//   1. k-means++ initialisation. Picking centroids uniformly at random
+//      lands repeatedly on bad local minima; k-means++ samples each
+//      next centroid with probability proportional to its squared
+//      distance from the nearest existing centroid, which keeps the
+//      seeds spread out.
+//   2. Multi-restart. Run the whole thing N times (default 5) and keep
+//      the assignment with the lowest within-cluster sum-of-squares
+//      (inertia). On a session set of ~20 records, the difference
+//      between best and worst run is meaningful.
+//
+// chooseBestK() runs k-means for K in [2, 4] and picks the K with the
+// largest *relative* drop in inertia versus the previous K — a simple
+// elbow heuristic. Falls back to K=3 when the data doesn't show a
+// clear elbow.
+
+function squaredEuclidean(a, b) {
+    let s = 0;
+    for (let i = 0; i < a.length; i++) {
+        const d = a[i] - b[i];
+        s += d * d;
+    }
+    return s;
+}
+
+function pickWeighted(weights) {
+    const total = weights.reduce((a, b) => a + b, 0);
+    if (total <= 0) return Math.floor(Math.random() * weights.length);
+    let r = Math.random() * total;
+    for (let i = 0; i < weights.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return i;
+    }
+    return weights.length - 1;
+}
+
+function kMeansPlusPlus(points, k) {
+    const centroids = [];
+    centroids.push([...points[Math.floor(Math.random() * points.length)]]);
+    while (centroids.length < k) {
+        const dists = points.map((p) => {
+            let minD = Infinity;
+            for (const c of centroids) {
+                const d = squaredEuclidean(p, c);
+                if (d < minD) minD = d;
+            }
+            return minD;
+        });
+        const idx = pickWeighted(dists);
+        centroids.push([...points[idx]]);
+    }
+    return centroids;
+}
+
+/** k-means clustering. Returns { centroids, assignments, inertia } or
+ *  null if input is degenerate. */
+export function kMeans(points, k, { maxIter = 100, restarts = 5 } = {}) {
+    if (!points || !points.length || k <= 0 || k > points.length) return null;
+    const dim = points[0].length;
+    let best = null;
+    for (let restart = 0; restart < restarts; restart++) {
+        let centroids = kMeansPlusPlus(points, k);
+        const assignments = new Array(points.length).fill(0);
+        for (let iter = 0; iter < maxIter; iter++) {
+            let changed = false;
+            for (let i = 0; i < points.length; i++) {
+                let bestDist = Infinity, bestC = 0;
+                for (let c = 0; c < k; c++) {
+                    const d = squaredEuclidean(points[i], centroids[c]);
+                    if (d < bestDist) { bestDist = d; bestC = c; }
+                }
+                if (assignments[i] !== bestC) {
+                    assignments[i] = bestC;
+                    changed = true;
+                }
+            }
+            if (!changed && iter > 0) break;
+            const sums = Array.from({ length: k }, () => new Array(dim).fill(0));
+            const counts = new Array(k).fill(0);
+            for (let i = 0; i < points.length; i++) {
+                const c = assignments[i];
+                counts[c]++;
+                for (let d = 0; d < dim; d++) sums[c][d] += points[i][d];
+            }
+            for (let c = 0; c < k; c++) {
+                if (counts[c] === 0) {
+                    // Empty cluster — re-seed with a random point.
+                    centroids[c] = [...points[Math.floor(Math.random() * points.length)]];
+                    continue;
+                }
+                const next = new Array(dim);
+                for (let d = 0; d < dim; d++) next[d] = sums[c][d] / counts[c];
+                centroids[c] = next;
+            }
+        }
+        let inertia = 0;
+        for (let i = 0; i < points.length; i++) {
+            inertia += squaredEuclidean(points[i], centroids[assignments[i]]);
+        }
+        if (!best || inertia < best.inertia) {
+            best = { centroids: centroids.map((c) => [...c]), assignments: [...assignments], inertia, k };
+        }
+    }
+    return best;
+}
+
+/** Pick the best K in [kMin, kMax] using the elbow-method heuristic.
+ *  Returns the full kMeans result for the chosen K. */
+export function chooseBestK(points, { kMin = 2, kMax = 4 } = {}) {
+    if (!points || points.length < kMin * 2) return null;
+    const runs = [];
+    for (let k = kMin; k <= kMax && k < points.length; k++) {
+        const r = kMeans(points, k);
+        if (r) runs.push(r);
+    }
+    if (runs.length === 0) return null;
+    if (runs.length === 1) return runs[0];
+    let bestRun = runs[0];
+    let bestRelDrop = 0;
+    for (let i = 1; i < runs.length; i++) {
+        const prev = runs[i - 1].inertia;
+        const cur = runs[i].inertia;
+        if (prev <= 0) continue;
+        const drop = (prev - cur) / prev;
+        if (drop > bestRelDrop) {
+            bestRelDrop = drop;
+            bestRun = runs[i];
+        }
+    }
+    return bestRun;
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// ML — Holt-Winters additive seasonal exponential smoothing
+// ───────────────────────────────────────────────────────────────────────
+//
+// Triple exponential smoothing with three smoothing constants:
+//   α (alpha) — level
+//   β (beta)  — trend
+//   γ (gamma) — seasonality
+//
+// The additive seasonal model assumes the seasonal component stays
+// roughly constant in magnitude (vs. multiplicative which scales with
+// level). For daily focus minutes that's the safer default — your
+// Tuesday-vs-Friday gap doesn't grow proportionally with how long
+// you've been using the app.
+//
+// Returns null when there's not enough data for two full seasons; the
+// caller falls back to simple averages in that case.
+
+/** Fit a Holt-Winters additive seasonal model.
+ *  Returns { level, trend, season, fitted } or null. */
+export function holtWintersAdditive(values, period = 7, opts = {}) {
+    const { alpha = 0.3, beta = 0.1, gamma = 0.1 } = opts;
+    if (!values || values.length < period * 2) return null;
+
+    // Initial level: mean of the first season.
+    let level = 0;
+    for (let i = 0; i < period; i++) level += values[i];
+    level /= period;
+
+    // Initial trend: average rate of change between the first two seasons.
+    let s2 = 0;
+    for (let i = period; i < period * 2; i++) s2 += values[i];
+    s2 /= period;
+    let trend = (s2 - level) / period;
+
+    // Initial seasonal: detrended residual within the first season.
+    const season = new Array(period);
+    for (let i = 0; i < period; i++) season[i] = values[i] - level;
+
+    const fitted = [];
+    for (let t = 0; t < values.length; t++) {
+        const idx = t % period;
+        if (t === 0) {
+            fitted.push(level + season[idx]);
+            continue;
+        }
+        const prevLevel = level;
+        const prevTrend = trend;
+        const prevSeason = season[idx];
+        level = alpha * (values[t] - prevSeason) + (1 - alpha) * (prevLevel + prevTrend);
+        trend = beta * (level - prevLevel) + (1 - beta) * prevTrend;
+        season[idx] = gamma * (values[t] - level) + (1 - gamma) * prevSeason;
+        fitted.push(level + trend + season[idx]);
+    }
+    return { level, trend, season, fitted, alpha, beta, gamma };
+}
+
+/** Forecast `horizon` steps ahead from a fitted Holt-Winters model.
+ *  Negative predictions are clamped to 0 (focus minutes can't be
+ *  negative). */
+export function holtWintersForecast(model, horizon = 14) {
+    if (!model || !model.season) return [];
+    const out = [];
+    for (let h = 0; h < horizon; h++) {
+        const seasonalIdx = h % model.season.length;
+        const value = model.level + (h + 1) * model.trend + model.season[seasonalIdx];
+        out.push(Math.max(0, value));
+    }
+    return out;
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// ML — Conditional probability + lift analysis
+// ───────────────────────────────────────────────────────────────────────
+//
+// For each named condition (a predicate over sessions), compute:
+//   • P(target | condition)   — completion rate inside the matching set
+//   • lift = P(target | cond) / P(target)  — ratio against the baseline
+//   • absoluteDelta — straight percentage-point difference
+// Filters out conditions with too few matching samples.
+//
+// This is essentially a per-feature univariate logistic-regression
+// result. It's not a multivariate model (we'd need real gradient
+// descent and regularisation for that on small samples), but for
+// surfacing single strong relationships it's the right tool — and
+// the output is interpretable in plain English without the user
+// needing to read coefficients.
+
+/** P(targetFn = true | predicate(session) = true) and its lift over
+ *  baseline. `targetFn` defaults to checking `session.completed`.
+ *  Returns null when the matching group is too small. */
+export function conditionalLift(sessions, predicate, {
+    minSamples = 3,
+    targetFn = (s) => !!s.completed,
+} = {}) {
+    if (!sessions || !sessions.length) return null;
+    const matching = sessions.filter(predicate);
+    if (matching.length < minSamples) return null;
+    const baseRate = sessions.filter(targetFn).length / sessions.length;
+    const matchingRate = matching.filter(targetFn).length / matching.length;
+    return {
+        n: matching.length,
+        rate: matchingRate,
+        baselineRate: baseRate,
+        lift: baseRate > 0 ? matchingRate / baseRate : 1,
+        absoluteDelta: matchingRate - baseRate,
+    };
+}
+
+/** Run several named conditions and return them sorted by absolute
+ *  distance of lift from 1 (strongest signal first). */
+export function rankConditions(sessions, conditions, opts = {}) {
+    const out = [];
+    for (const cond of conditions) {
+        const result = conditionalLift(sessions, cond.predicate, opts);
+        if (!result) continue;
+        out.push({ name: cond.name, ...result });
+    }
+    out.sort((a, b) => Math.abs(b.lift - 1) - Math.abs(a.lift - 1));
     return out;
 }
