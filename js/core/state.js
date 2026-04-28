@@ -35,6 +35,10 @@ export const ambientMaster = signal({ volume: 0.5 });
 export const ambientMixes = signal([]);
 // Active sleep timer, or null. { endAt: epoch ms, duration: ms }
 export const ambientSleepTimer = signal(null);
+// Stream-theme id (Wave 5). null = 3D scene; a string id = the
+// matching curated entry in STREAM_LIBRARY or a `custom:<videoId>` /
+// `custom:soundcloud:<encodedUrl>` shorthand pasted by the user.
+export const activeStreamId = signal(null);
 
 // Re-export so other modules can subscribe without importing from CDN directly
 export { computed, effect, signal };
@@ -146,6 +150,9 @@ function loadPersisted() {
         if (data.ambientMaster && typeof data.ambientMaster === 'object')
             ambientMaster.value = data.ambientMaster;
         if (Array.isArray(data.ambientMixes)) ambientMixes.value = data.ambientMixes;
+        if (typeof data.activeStreamId === 'string' || data.activeStreamId === null) {
+            activeStreamId.value = data.activeStreamId;
+        }
         // Sleep timer is intentionally NOT restored — ambient can't resume silently
         // on a new page load before a user gesture unlocks the AudioContext.
     } catch (e) {
@@ -192,6 +199,7 @@ effect(() => {
         ambientTracks: ambientTracks.value,
         ambientMaster: ambientMaster.value,
         ambientMixes: ambientMixes.value,
+        activeStreamId: activeStreamId.value,
     };
     if (!persistInitialized) {
         persistInitialized = true;

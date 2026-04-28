@@ -101,6 +101,41 @@ export const SCHEMA = [
         ],
     },
 
+    // ───── Streams (YouTube / SoundCloud video themes) ─────
+    // The select feeds activeStreamId via apply.js. Picking "None"
+    // returns the user to the 3D theme; any other choice replaces
+    // the canvas with a curated full-viewport iframe. The custom URL
+    // text field below accepts any YouTube / SoundCloud link.
+    { section: 'scene', type: 'group', label: 'Streams', collapsible: true, collapsed: true },
+    {
+        section: 'scene',
+        type: 'select',
+        key: 'scene.streamId',
+        label: 'Live stream backdrop',
+        default: '',
+        options: [
+            { value: '', label: 'None — use 3D theme' },
+            { value: 'lofigirl', label: 'Lofi Girl — beats to focus to' },
+            { value: 'lofigirl-sleep', label: 'Lofi Girl — beats to sleep to' },
+            { value: 'chillhop', label: 'Chillhop — afternoon café' },
+            { value: 'jazzcafe', label: 'Cozy Jazz Café' },
+            { value: 'fireplace', label: 'Fireplace with crackling' },
+            { value: 'rain-window', label: 'Rain on a window' },
+            { value: 'studywithme', label: 'Study with me — Korea live' },
+            { value: 'classical', label: 'Classical study music' },
+        ],
+        help: 'Replaces the 3D scene with a YouTube / SoundCloud stream behind the focus card.',
+    },
+    {
+        section: 'scene',
+        type: 'text',
+        key: 'scene.streamCustomUrl',
+        label: 'Custom URL',
+        default: '',
+        placeholder: 'paste any youtube.com / soundcloud.com link',
+        help: 'Overrides the picker above. Clear to revert.',
+    },
+
     { section: 'scene', type: 'group', label: 'Quality' },
     {
         section: 'scene',

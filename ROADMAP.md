@@ -107,12 +107,12 @@ The biggest visual upgrade in the app. Required scaffolding for Wave 5 (YouTube 
 
 Massively-requested competitor feature (Lofi Girl-style). Blocked on the theme registry.
 
-- [ ] **5.1 CSP relaxation (S).** Add `frame-src https://www.youtube.com https://www.youtube-nocookie.com https://w.soundcloud.com` to `public/_headers`. Test in production. (after 4.1)
-- [ ] **5.2 YouTube IFrame Player API integration (M).** New theme type `youtube`. Iframe embedded as scene background, behind the focus card. Mute / unmute via the API.
-- [ ] **5.3 SoundCloud Widget integration (M).** Same shape as YouTube. Different theme type `soundcloud`.
-- [ ] **5.4 Curated starter playlist (S).** Lofi Girl, Lofi Cafe, Jazz Cafe, Chillhop, Ambient Sleep — ~12 hand-picked YouTube live-streams.
-- [ ] **5.5 Paste-your-own URL (S).** Settings → Scene → Streams → "Paste a YouTube or SoundCloud URL." Validates and saves to user-themes.
-- [ ] **5.6 Stream + ambient mixing (M).** When a YouTube theme is active, ambient sounds in our cosmos default to muted; per-toggle to layer them anyway.
+- [x] **5.1 CSP relaxation (S).** `public/_headers` now allows `frame-src https://www.youtube.com https://www.youtube-nocookie.com https://w.soundcloud.com`, plus the corresponding `script-src` for the YouTube/SoundCloud players and `img-src` for `i.ytimg.com` / `i.sndcdn.com` thumbnails.
+- [x] **5.2 YouTube iframe integration (M).** New `js/ui/stream-themes.js` mounts a youtube-nocookie iframe pinned to the four viewport edges with cover-fill sizing (`max(100vw, 177.77vh)` × `max(100vh, 56.25vw)`). The babylon canvas hides while a stream is active. `autoplay=1 mute=1` is the polite default; modern browsers block autoplay-with-sound until the user gestures.
+- [x] **5.3 SoundCloud Widget integration (M).** Same iframe-host pattern; `kind: 'soundcloud'` swaps in `https://w.soundcloud.com/player/?url=…&auto_play=true`.
+- [x] **5.4 Curated starter playlist (S).** 8 hand-picked live-streams ship with the registry: Lofi Girl, Lofi Girl Sleep, Chillhop afternoon café, Cozy Jazz Café, Fireplace, Rain on a Window, Korean Study-with-me, Classical study music.
+- [x] **5.5 Paste-your-own URL (S).** New `scene.streamCustomUrl` text input. `shortenYouTubeUrl` / `shortenSoundCloudUrl` parse any pasted link into a `custom:<videoId>` or `custom:soundcloud:<encodedUrl>` shorthand stored as the `activeStreamId`. Custom URL beats the curated select; clearing the URL falls back to the picker.
+- [ ] **5.6 Stream + ambient mixing (M).** When a YouTube theme is active, ambient sounds in our cosmos default to muted; per-toggle to layer them anyway. (Deferred — both audio sources currently play side-by-side at full volume.)
 
 ---
 

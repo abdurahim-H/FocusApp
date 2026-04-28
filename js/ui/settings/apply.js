@@ -169,6 +169,57 @@ export const APPLY_HOOKS = {
             try { m.setActiveTheme?.(v); } catch (_) {}
         });
     },
+
+    // ───────── Streams (Wave 5) ─────────
+    // The picker writes a curated id; the custom-URL field writes a
+    // shortened `custom:<videoId>` shorthand. Both feed the same
+    // activeStreamId signal via stream-themes.setActiveStream.
+    'scene.streamId': (v) => {
+        // Curated id wins unless a custom URL is also set.
+        import('../../core/state.js').then((s) => {
+            // If a custom URL is already set, leave the live signal
+            // alone — the user explicitly opted into that one.
+            const customRaw = (
+                document.documentElement.dataset?.streamCustom ?? ''
+            ).trim();
+            if (customRaw) return;
+            s.activeStreamId.value = v || null;
+        });
+    },
+    'scene.streamCustomUrl': (v) => {
+        const url = (v || '').trim();
+        if (!url) {
+            // Cleared — fall back to whatever scene.streamId is set
+            // to (could be empty / a curated id).
+            document.documentElement.dataset.streamCustom = '';
+            Promise.all([
+                import('../../core/state.js'),
+                import('./store.js'),
+            ]).then(([s, store]) => {
+                s.activeStreamId.value = store.get('scene.streamId') || null;
+            });
+            return;
+        }
+        document.documentElement.dataset.streamCustom = '1';
+        Promise.all([
+            import('../../core/state.js'),
+            import('../stream-themes.js'),
+        ]).then(([s, st]) => {
+            const yt = st.shortenYouTubeUrl(url);
+            if (yt) {
+                s.activeStreamId.value = yt;
+                return;
+            }
+            const sc = st.shortenSoundCloudUrl(url);
+            if (sc) {
+                s.activeStreamId.value = sc;
+                return;
+            }
+            // Unrecognised link — clear so the user sees no effect
+            // and can correct without a confusing partial state.
+            s.activeStreamId.value = null;
+        });
+    },
 };
 
 // ============================================================================

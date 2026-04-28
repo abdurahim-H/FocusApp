@@ -27,6 +27,7 @@ import * as navigation from '../ui/navigation.js';
 import * as profile from '../ui/profile.js';
 import * as settings from '../ui/settings.js';
 import * as notepad from '../ui/notepad.js';
+import * as streamThemes from '../ui/stream-themes.js';
 import * as taskDetail from '../ui/task-detail.js';
 import * as tasksExpand from '../ui/tasks-expand.js';
 import * as timerParticles from '../ui/timer-particles.js';
@@ -60,6 +61,7 @@ const modules = {
     tasksExpand,
     taskDetail,
     notepad,
+    streamThemes,
 };
 
 /**
@@ -397,6 +399,11 @@ function setupTaskControls(loadedModules) {
     // Notepad — `n` shortcut opens it. DOM built lazily on first open.
     if (loadedModules.notepad?.initNotepad) {
         loadedModules.notepad.initNotepad();
+    }
+    // Stream themes — listens for `activeStreamId` changes and swaps
+    // a YouTube / SoundCloud iframe in for the 3D canvas.
+    if (loadedModules.streamThemes?.initStreamThemes) {
+        loadedModules.streamThemes.initStreamThemes();
     }
 }
 
