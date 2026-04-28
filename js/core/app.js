@@ -25,6 +25,7 @@ import * as homeMiniTimer from '../ui/home-mini-timer.js';
 import * as navigation from '../ui/navigation.js';
 import * as profile from '../ui/profile.js';
 import * as settings from '../ui/settings.js';
+import * as tasksExpand from '../ui/tasks-expand.js';
 import * as timerParticles from '../ui/timer-particles.js';
 import * as uiEffects from '../ui/ui-effects.js';
 import * as cleanup from '../utils/cleanup.js';
@@ -52,6 +53,7 @@ const modules = {
     cosmosA11y,
     account,
     profile,
+    tasksExpand,
 };
 
 /**
@@ -368,6 +370,12 @@ function setupTaskControls(loadedModules) {
         if (loadedModules.tasks.initTaskRender) {
             loadedModules.tasks.initTaskRender();
         }
+    }
+    // Expand button on the home tasks header — opens the larger
+    // task surface. Lives in tasks-expand.js so its state and DOM
+    // stay separate from the inline list.
+    if (loadedModules.tasksExpand?.initTasksExpand) {
+        loadedModules.tasksExpand.initTasksExpand();
     }
 }
 

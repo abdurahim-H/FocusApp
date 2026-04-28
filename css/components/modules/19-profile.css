@@ -739,6 +739,7 @@
    `::before` spine, the visualization (via currentColor), and any
    future kind-tinted decoration all pull from a single source. */
 .insight-card--trend       { --kind-color: 149, 226, 164; }
+.insight-card--changepoint { --kind-color: 240, 180, 120; }
 .insight-card--anomaly     { --kind-color: 255, 138, 138; }
 .insight-card--friction    { --kind-color: 255, 184, 92;  }
 .insight-card--correlation { --kind-color: 180, 144, 232; }
@@ -856,6 +857,7 @@
    modifier so the back-link tint, viz glow, and accent rules all
    pull from one source. */
 .insight-detail--trend       { --kind-color: 149, 226, 164; }
+.insight-detail--changepoint { --kind-color: 240, 180, 120; }
 .insight-detail--anomaly     { --kind-color: 255, 138, 138; }
 .insight-detail--friction    { --kind-color: 255, 184, 92;  }
 .insight-detail--correlation { --kind-color: 180, 144, 232; }

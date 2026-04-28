@@ -197,7 +197,11 @@
     to   { opacity: 1; transform: scale(1); }
 }
 
-/* Task Management Section — nearly invisible, just a hairline separator */
+/* Task Management Section — nearly invisible, just a hairline separator.
+   Flex column layout so the input row + header sit at the top and the
+   list takes the remaining space, scrolling internally when overflow.
+   Without this, list items leak below the section's 220px box and get
+   visually overlapped by the floating cosmos toolbar. */
 .task-section {
     background: transparent !important;
     backdrop-filter: none !important;
@@ -214,7 +218,9 @@
     box-shadow: none !important;
     position: relative;
     z-index: 30;
-    overflow: visible !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 /* Kill the gradient pseudo-element overlay */
@@ -233,6 +239,23 @@
     z-index: 25;
     padding: 0;
     margin: 0;
+    /* Flex item — take the remaining vertical space inside the
+       220px section and scroll internally if tasks overflow. */
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 205, 115, 0.18) transparent;
+}
+.task-list::-webkit-scrollbar { width: 6px; }
+.task-list::-webkit-scrollbar-track { background: transparent; }
+.task-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 205, 115, 0.18);
+    border-radius: 3px;
+}
+.task-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 205, 115, 0.32);
 }
 
 .task-item {

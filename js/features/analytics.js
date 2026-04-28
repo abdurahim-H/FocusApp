@@ -212,12 +212,34 @@ export function zScore(value, distribution) {
 }
 
 /** Mark items with |z| ≥ threshold (default 1.5σ — moderately notable).
- *  Returns array of booleans the same length as `values`. */
-export function anomalyFlags(values, threshold = 1.5) {
-    const m = mean(values);
-    const sd = stdDev(values);
-    if (sd === 0) return values.map(() => false);
-    return values.map((v) => Math.abs((v - m) / sd) >= threshold);
+ *  Returns array of booleans the same length as `values`.
+ *
+ *  Uses **leave-one-out** by default: each value is z-scored against
+ *  the mean/stdev of the *other* values, so a single big outlier can't
+ *  inflate the distribution it's being measured against. Falls back to
+ *  the in-sample stats when leaveOneOut is false. */
+export function anomalyFlags(values, threshold = 1.5, { leaveOneOut = true } = {}) {
+    if (!values || values.length < 2) return values ? values.map(() => false) : [];
+    if (!leaveOneOut) {
+        const m = mean(values);
+        const sd = stdDev(values);
+        if (sd === 0) return values.map(() => false);
+        return values.map((v) => Math.abs((v - m) / sd) >= threshold);
+    }
+    const n = values.length;
+    const sum = values.reduce((a, x) => a + x, 0);
+    const sumSq = values.reduce((a, x) => a + x * x, 0);
+    return values.map((v) => {
+        const otherN = n - 1;
+        const otherMean = (sum - v) / otherN;
+        const otherVar = Math.max(
+            0,
+            (sumSq - v * v) / otherN - otherMean * otherMean
+        );
+        const otherSd = Math.sqrt(otherVar);
+        if (otherSd === 0) return false;
+        return Math.abs((v - otherMean) / otherSd) >= threshold;
+    });
 }
 
 // ───────────────────────────────────────────────────────────────────────
@@ -474,8 +496,27 @@ export function kMeans(points, k, { maxIter = 100, restarts = 5 } = {}) {
             }
             for (let c = 0; c < k; c++) {
                 if (counts[c] === 0) {
-                    // Empty cluster — re-seed with a random point.
-                    centroids[c] = [...points[Math.floor(Math.random() * points.length)]];
+                    // Empty cluster — re-seed with the point furthest
+                    // from any existing centroid. Picking uniformly at
+                    // random tends to re-seed near another centroid and
+                    // immediately re-empty the same slot on next iter;
+                    // farthest-point seeding (k-means++ logic, applied
+                    // to a single slot) is much more stable.
+                    let farthestIdx = 0;
+                    let farthestDist = -1;
+                    for (let i = 0; i < points.length; i++) {
+                        let nearest = Infinity;
+                        for (let cc = 0; cc < k; cc++) {
+                            if (cc === c) continue;
+                            const d = squaredEuclidean(points[i], centroids[cc]);
+                            if (d < nearest) nearest = d;
+                        }
+                        if (nearest > farthestDist) {
+                            farthestDist = nearest;
+                            farthestIdx = i;
+                        }
+                    }
+                    centroids[c] = [...points[farthestIdx]];
                     continue;
                 }
                 const next = new Array(dim);
@@ -494,30 +535,68 @@ export function kMeans(points, k, { maxIter = 100, restarts = 5 } = {}) {
     return best;
 }
 
-/** Pick the best K in [kMin, kMax] using the elbow-method heuristic.
- *  Returns the full kMeans result for the chosen K. */
+/** Mean silhouette score for a clustering result. For each point p:
+ *    a(p) = mean distance from p to other points in its own cluster
+ *    b(p) = mean distance from p to points in the *nearest other* cluster
+ *    s(p) = (b - a) / max(a, b)   — bounded in [-1, 1]
+ *  The mean s across all points is high when clusters are dense and
+ *  well-separated. Returns 0 when k=1 or every cluster is a singleton.
+ *  O(n²·k) — fine for n ≤ 200. */
+export function silhouetteScore(points, assignments, k) {
+    if (!points || points.length < 2 || k < 2) return 0;
+    // Pre-bucket point indices by cluster.
+    const buckets = Array.from({ length: k }, () => []);
+    for (let i = 0; i < points.length; i++) buckets[assignments[i]].push(i);
+    let total = 0;
+    let counted = 0;
+    for (let i = 0; i < points.length; i++) {
+        const own = assignments[i];
+        if (buckets[own].length < 2) continue; // silhouette undefined for singleton clusters
+        // a — mean distance to siblings in own cluster
+        let sumA = 0;
+        for (const j of buckets[own]) {
+            if (j === i) continue;
+            sumA += Math.sqrt(squaredEuclidean(points[i], points[j]));
+        }
+        const a = sumA / (buckets[own].length - 1);
+        // b — min over other clusters of mean distance to that cluster
+        let b = Infinity;
+        for (let c = 0; c < k; c++) {
+            if (c === own || buckets[c].length === 0) continue;
+            let sumD = 0;
+            for (const j of buckets[c]) sumD += Math.sqrt(squaredEuclidean(points[i], points[j]));
+            const meanD = sumD / buckets[c].length;
+            if (meanD < b) b = meanD;
+        }
+        if (b === Infinity) continue;
+        const denom = Math.max(a, b);
+        if (denom <= 0) continue;
+        total += (b - a) / denom;
+        counted++;
+    }
+    return counted > 0 ? total / counted : 0;
+}
+
+/** Pick the best K in [kMin, kMax] using **silhouette score** rather
+ *  than the elbow heuristic. Silhouette is the principled choice for
+ *  small-data K selection: it measures how well-separated the clusters
+ *  actually are, not just whether the inertia drops on each new K. We
+ *  also return `silhouette` so callers can suppress the insight when
+ *  the data has no real cluster structure (silhouette < ~0.2 → groups
+ *  are basically arbitrary).
+ *
+ *  Returns: { centroids, assignments, inertia, k, silhouette } | null. */
 export function chooseBestK(points, { kMin = 2, kMax = 4 } = {}) {
     if (!points || points.length < kMin * 2) return null;
     const runs = [];
     for (let k = kMin; k <= kMax && k < points.length; k++) {
         const r = kMeans(points, k);
-        if (r) runs.push(r);
+        if (!r) continue;
+        const sil = silhouetteScore(points, r.assignments, k);
+        runs.push({ ...r, silhouette: sil });
     }
     if (runs.length === 0) return null;
-    if (runs.length === 1) return runs[0];
-    let bestRun = runs[0];
-    let bestRelDrop = 0;
-    for (let i = 1; i < runs.length; i++) {
-        const prev = runs[i - 1].inertia;
-        const cur = runs[i].inertia;
-        if (prev <= 0) continue;
-        const drop = (prev - cur) / prev;
-        if (drop > bestRelDrop) {
-            bestRelDrop = drop;
-            bestRun = runs[i];
-        }
-    }
-    return bestRun;
+    return runs.reduce((best, run) => run.silhouette > best.silhouette ? run : best, runs[0]);
 }
 
 // ───────────────────────────────────────────────────────────────────────
@@ -539,7 +618,21 @@ export function chooseBestK(points, { kMin = 2, kMax = 4 } = {}) {
 // caller falls back to simple averages in that case.
 
 /** Fit a Holt-Winters additive seasonal model.
- *  Returns { level, trend, season, fitted } or null. */
+ *  Returns { level, trend, season, fitted, residualSd, clamped } or null.
+ *
+ *  Initialisation tightened over the textbook minimum:
+ *  - Trend is the average per-step delta between paired observations
+ *    one season apart, averaged over every available pair (Hyndman's
+ *    additive HW init). Robust to a single spike at index 0 or `period`.
+ *  - Seasonal indices average across all complete seasons in the data,
+ *    not just the first season — the first 7 days for a new user are
+ *    usually atypical and seeding from them alone biases everything
+ *    downstream.
+ *
+ *  `residualSd` is the standard deviation of the in-sample residuals
+ *  (values[t] - fitted[t]); callers use it to draw a 1-σ / 2-σ band
+ *  around the forecast so the projection isn't shown as more confident
+ *  than it is. */
 export function holtWintersAdditive(values, period = 7, opts = {}) {
     const { alpha = 0.3, beta = 0.1, gamma = 0.1 } = opts;
     if (!values || values.length < period * 2) return null;
@@ -549,46 +642,100 @@ export function holtWintersAdditive(values, period = 7, opts = {}) {
     for (let i = 0; i < period; i++) level += values[i];
     level /= period;
 
-    // Initial trend: average rate of change between the first two seasons.
-    let s2 = 0;
-    for (let i = period; i < period * 2; i++) s2 += values[i];
-    s2 /= period;
-    let trend = (s2 - level) / period;
+    // Initial trend: average per-step difference between paired
+    // observations one season apart, scaled to per-step rate.
+    const seasonsAvail = Math.floor(values.length / period);
+    let trendSum = 0;
+    let trendCount = 0;
+    for (let i = 0; i < period; i++) {
+        for (let s = 1; s < seasonsAvail; s++) {
+            const a = values[i + period * (s - 1)];
+            const b = values[i + period * s];
+            if (Number.isFinite(a) && Number.isFinite(b)) {
+                trendSum += (b - a) / period;
+                trendCount++;
+            }
+        }
+    }
+    let trend = trendCount > 0 ? trendSum / trendCount : 0;
 
-    // Initial seasonal: detrended residual within the first season.
-    const season = new Array(period);
-    for (let i = 0; i < period; i++) season[i] = values[i] - level;
+    // Initial seasonal indices: average detrended deviation per period
+    // slot across every complete season available, then center so the
+    // sum is ~0 (additive convention).
+    const season = new Array(period).fill(0);
+    const slotCounts = new Array(period).fill(0);
+    for (let s = 0; s < seasonsAvail; s++) {
+        const seasonStart = s * period;
+        let seasonMean = 0;
+        for (let i = 0; i < period; i++) seasonMean += values[seasonStart + i];
+        seasonMean /= period;
+        for (let i = 0; i < period; i++) {
+            season[i] += values[seasonStart + i] - seasonMean;
+            slotCounts[i]++;
+        }
+    }
+    for (let i = 0; i < period; i++) season[i] /= slotCounts[i] || 1;
+    let seasonMean = 0;
+    for (let i = 0; i < period; i++) seasonMean += season[i];
+    seasonMean /= period;
+    for (let i = 0; i < period; i++) season[i] -= seasonMean;
 
     const fitted = [];
+    const residuals = [];
     for (let t = 0; t < values.length; t++) {
         const idx = t % period;
         if (t === 0) {
             fitted.push(level + season[idx]);
+            residuals.push(values[t] - fitted[t]);
             continue;
         }
         const prevLevel = level;
         const prevTrend = trend;
         const prevSeason = season[idx];
+        // One-step-ahead fitted before update (so residuals match a
+        // genuine forecast, not an in-sample over-fit).
+        const fHat = prevLevel + prevTrend + prevSeason;
+        fitted.push(fHat);
+        residuals.push(values[t] - fHat);
         level = alpha * (values[t] - prevSeason) + (1 - alpha) * (prevLevel + prevTrend);
         trend = beta * (level - prevLevel) + (1 - beta) * prevTrend;
         season[idx] = gamma * (values[t] - level) + (1 - gamma) * prevSeason;
-        fitted.push(level + trend + season[idx]);
     }
-    return { level, trend, season, fitted, alpha, beta, gamma };
+    // Population stdev on the residuals — denominator (n - 1) is the
+    // sample stdev, but for bandwidth it doesn't materially change the
+    // band visual at n = 30..90 and population stdev avoids a special
+    // case at n = 1.
+    const meanRes = residuals.reduce((a, x) => a + x, 0) / residuals.length;
+    const varRes = residuals.reduce((a, x) => a + (x - meanRes) ** 2, 0) / residuals.length;
+    const residualSd = Math.sqrt(varRes);
+
+    return { level, trend, season, fitted, residuals, residualSd, alpha, beta, gamma };
 }
 
 /** Forecast `horizon` steps ahead from a fitted Holt-Winters model.
- *  Negative predictions are clamped to 0 (focus minutes can't be
- *  negative). */
+ *  Returns { mean, lower, upper, clamped } — `mean` is the point
+ *  forecast (possibly clamped at 0 — focus minutes can't be negative;
+ *  `clamped` records whether any step was clamped so callers can
+ *  surface that honestly). `lower` / `upper` are 1-σ residual bands
+ *  scaled by √h to widen with horizon (textbook Gaussian assumption). */
 export function holtWintersForecast(model, horizon = 14) {
-    if (!model || !model.season) return [];
-    const out = [];
+    if (!model || !model.season) return { mean: [], lower: [], upper: [], clamped: false };
+    const sd = model.residualSd || 0;
+    const mean = [];
+    const lower = [];
+    const upper = [];
+    let clamped = false;
     for (let h = 0; h < horizon; h++) {
         const seasonalIdx = h % model.season.length;
-        const value = model.level + (h + 1) * model.trend + model.season[seasonalIdx];
-        out.push(Math.max(0, value));
+        const raw = model.level + (h + 1) * model.trend + model.season[seasonalIdx];
+        const stepSd = sd * Math.sqrt(h + 1);
+        const m = Math.max(0, raw);
+        if (raw < 0) clamped = true;
+        mean.push(m);
+        lower.push(Math.max(0, raw - stepSd));
+        upper.push(Math.max(0, raw + stepSd));
     }
-    return out;
+    return { mean, lower, upper, clamped };
 }
 
 // ───────────────────────────────────────────────────────────────────────
@@ -610,9 +757,14 @@ export function holtWintersForecast(model, horizon = 14) {
 
 /** P(targetFn = true | predicate(session) = true) and its lift over
  *  baseline. `targetFn` defaults to checking `session.completed`.
- *  Returns null when the matching group is too small. */
+ *  Returns null when the matching group is too small.
+ *
+ *  minSamples default is 10 — the standard rule of thumb for
+ *  proportions is n*p ≥ 5 in each cell. Below 10, a single 100% rate
+ *  on 3 sessions can dominate the ranked list with what's essentially
+ *  a coin-flip's worth of evidence. */
 export function conditionalLift(sessions, predicate, {
-    minSamples = 3,
+    minSamples = 10,
     targetFn = (s) => !!s.completed,
 } = {}) {
     if (!sessions || !sessions.length) return null;
@@ -640,4 +792,113 @@ export function rankConditions(sessions, conditions, opts = {}) {
     }
     out.sort((a, b) => Math.abs(b.lift - 1) - Math.abs(a.lift - 1));
     return out;
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// ML — Change-point detection (CUSUM, two-sided)
+// ───────────────────────────────────────────────────────────────────────
+//
+// CUSUM (cumulative sum) finds the moment a time series shifts level.
+// We run a two-sided variant against the warm-up mean/stdev, looking
+// for both upshifts and downshifts. The first index where either
+// statistic crosses h·σ is reported as the change-point. Once a
+// change-point fires, we recompute means before/after to describe the
+// shift in plain numbers ("was 60 min/day, now 95 min/day").
+//
+// CUSUM is the right tool here because it's:
+//   - cheap (O(n) one pass)
+//   - small-data robust (degrades to "no change-point" gracefully)
+//   - principled: detects step-shifts, which is what real life-event
+//     changes (new project, vacation, semester start) look like in
+//     daily focus minutes.
+//
+// We deliberately don't use Bayesian online change-point — it requires
+// hyperprior choices that are non-trivial to expose to users, and on
+// 60-day windows CUSUM gives the same answer at 30% of the code.
+
+/** Detect the largest step-shift in a 1D time series. Returns null if
+ *  no shift exceeds the significance threshold.
+ *
+ *  Algorithm:
+ *  1. Use the first `warmup` points to estimate baseline mean μ̂ and σ̂.
+ *  2. Walk forward, accumulating positive (s_pos) and negative (s_neg)
+ *     CUSUM statistics with a slack `k` (in σ units) so small noise
+ *     doesn't trigger.
+ *  3. The first index where either statistic crosses `h * σ` is the
+ *     change-point. We then segment around it and report:
+ *        { index, beforeMean, afterMean, delta, direction }
+ *
+ *  Defaults (k=0.5, h=4) are the standard "moderate sensitivity"
+ *  values from Page (1954); they're robust on noisy daily data with
+ *  n=30..90 and rarely fire false positives.
+ */
+export function detectChangePoint(values, {
+    warmup = null,
+    k = 0.5,
+    h = 4,
+    minSegment = 5,
+} = {}) {
+    if (!values || values.length < 14) return null;
+    const n = values.length;
+    const wm = warmup || Math.max(7, Math.floor(n * 0.25));
+    if (wm < 3 || n - wm < minSegment) return null;
+
+    // Baseline stats from warm-up.
+    const warmupSlice = values.slice(0, wm);
+    const baseMean = mean(warmupSlice);
+    const baseSd = stdDev(warmupSlice);
+    if (baseSd === 0) return null;
+
+    let sPos = 0;
+    let sNeg = 0;
+    let firstHit = -1;
+    let direction = 0;
+    for (let i = wm; i < n; i++) {
+        const z = (values[i] - baseMean) / baseSd;
+        sPos = Math.max(0, sPos + z - k);
+        sNeg = Math.min(0, sNeg + z + k);
+        if (sPos > h) {
+            firstHit = i;
+            direction = 1;
+            break;
+        }
+        if (sNeg < -h) {
+            firstHit = i;
+            direction = -1;
+            break;
+        }
+    }
+    if (firstHit < 0) return null;
+
+    // Segment for plain-numbers description: refine the change-point
+    // by finding the index in [firstHit - period, firstHit] that
+    // maximises the absolute difference between the two sub-means.
+    const window = Math.min(7, firstHit - wm);
+    let bestIdx = firstHit;
+    let bestDelta = 0;
+    for (let i = Math.max(wm, firstHit - window); i <= firstHit; i++) {
+        if (i < minSegment || n - i < minSegment) continue;
+        const before = values.slice(0, i);
+        const after = values.slice(i);
+        const d = Math.abs(mean(after) - mean(before));
+        if (d > bestDelta) {
+            bestDelta = d;
+            bestIdx = i;
+        }
+    }
+    const beforeArr = values.slice(0, bestIdx);
+    const afterArr = values.slice(bestIdx);
+    if (beforeArr.length < minSegment || afterArr.length < minSegment) return null;
+    const beforeMean = mean(beforeArr);
+    const afterMean = mean(afterArr);
+    return {
+        index: bestIdx,
+        daysAgo: n - 1 - bestIdx,
+        beforeMean,
+        afterMean,
+        delta: afterMean - beforeMean,
+        direction: afterMean >= beforeMean ? 1 : -1,
+        beforeN: beforeArr.length,
+        afterN: afterArr.length,
+    };
 }

@@ -35,6 +35,7 @@ import {
     chooseBestK,
     cohensD,
     dailyTotals,
+    detectChangePoint,
     histogram,
     holtWintersAdditive,
     holtWintersForecast,
@@ -976,11 +977,17 @@ function renderInsights(sessions) {
         : 0;
     const todayTotal = last30[last30.length - 1] || 0;
     const z = zScore(todayTotal, last30.slice(0, -1));
+    // Leave-one-out flagging — each day is z-scored against the *other*
+    // days, so a single big outlier can't inflate the distribution it's
+    // being measured against.
     const flags = anomalyFlags(last30, 1.5);
     const anomalyDays = flags.filter(Boolean).length;
+    // Real Pearson r between distractions and focus-quality. A negative
+    // r is the expected case ("more switches → lower quality"); a
+    // positive r is the surprising one. We label both honestly below.
     const correlation = pearsonCorrelation(
         sessions.map((s) => (s.distractionCount || 0)),
-        sessions.map((s) => -(s.focusQuality || 0))
+        sessions.map((s) => (s.focusQuality || 0))
     );
 
     // Pace projection — at current 7-day rate, how far do we go in 30?
@@ -1008,7 +1015,34 @@ function renderInsights(sessions) {
         });
     }
 
-    if (wow && wow.delta != null && Math.abs(wow.delta) > 0.05) {
+    // ── ML insight: change-point detection on daily focus minutes ──────
+    // CUSUM finds the day when your pattern shifted level — far more
+    // informative than the wow card which just splits the window in
+    // half regardless of where the actual change happened. When CUSUM
+    // fires, the wow card is suppressed below to avoid double-counting.
+    const cp = detectChangePoint(dailyTotals(sessions, 60));
+    if (cp && Math.abs(cp.delta) >= 5) {
+        const dirWord = cp.direction > 0 ? 'jumped' : 'dropped';
+        const beforeMin = Math.round(cp.beforeMean);
+        const afterMin = Math.round(cp.afterMean);
+        const deltaMin = Math.round(Math.abs(cp.delta));
+        const daysAgoLabel = cp.daysAgo === 0 ? 'today'
+            : cp.daysAgo === 1 ? 'yesterday'
+            : `${cp.daysAgo} days ago`;
+        insights.push({
+            kind: 'changepoint',
+            headline: `your daily focus ${dirWord} about ${deltaMin} min/day around ${daysAgoLabel}`,
+            sub: `was ${beforeMin} min/day before · ${afterMin} min/day since`,
+            value: `${cp.direction > 0 ? '+' : '−'}${deltaMin} min/day`,
+            viz: vizChangePoint(dailyTotals(sessions, 60), cp),
+            data: { cp, last60: dailyTotals(sessions, 60) },
+        });
+    }
+
+    // Suppress wow when CUSUM already explained the same shift — no
+    // point showing both "you focused N% more this month" and "your
+    // daily focus jumped on day X" in the same view.
+    if (!cp && wow && wow.delta != null && Math.abs(wow.delta) > 0.05) {
         const dir = wow.delta >= 0 ? 'up' : 'down';
         insights.push({
             kind: 'wow',
@@ -1058,13 +1092,14 @@ function renderInsights(sessions) {
     }
 
     if (sessions.length >= 8 && Math.abs(correlation) > 0.2) {
-        // The pearson was computed against -(focusQuality), so positive
-        // r means more distractions → lower quality. Translate to plain
-        // language without the sign reasoning.
+        // Real Pearson r — negative is the expected case (switches
+        // hurt quality), positive is the surprising one (switches
+        // correlate with *higher* quality, which deserves its own
+        // headline rather than being swept into the "no link" bucket).
         const strength = correlationStrength(correlation);
-        const headline = correlation > 0
+        const headline = correlation < 0
             ? `the more you switch tabs in a session, the lower your focus quality goes`
-            : `tab-switches and focus quality move together — but not strongly`;
+            : `something unusual — your tab-switches go *up* when your focus quality does`;
         const corrPoints = sessions.map((s) => [
             s.distractionCount || 0,
             s.focusQuality || 0,
@@ -1100,22 +1135,24 @@ function renderInsights(sessions) {
     if (dailyAvg > 0) {
         // Forecast — Holt-Winters additive seasonal smoothing when we
         // have enough data (≥14 days = two full weekly seasons), else
-        // a simple flat-line projection at the trailing-7 average.
+        // a simple flat-line projection at the trailing-7 average. The
+        // HW result now carries a residual stdev so we can draw a 1-σ
+        // band around the projection — honest about uncertainty.
         const past14 = last30.slice(-14);
         const hw = holtWintersAdditive(last30, 7);
-        const projected14 = hw
-            ? holtWintersForecast(hw, 14)
-            : new Array(14).fill(dailyAvg);
+        const fc = hw ? holtWintersForecast(hw, 14) : null;
+        const projected14 = fc ? fc.mean : new Array(14).fill(dailyAvg);
+        const projectedLower = fc ? fc.lower : null;
+        const projectedUpper = fc ? fc.upper : null;
+        const forecastClamped = fc ? fc.clamped : false;
         const projectedSum = projected14.reduce((a, b) => a + b, 0);
-        // Use the HW-projected sum when available; otherwise fall back
-        // to the flat-line projection over 30 days.
         const monthForecastReal = hw ? projectedSum * (30 / 14) : monthForecast;
         const monthHrs = monthForecastReal / 60;
         const valueText = monthHrs >= 1
             ? `${monthHrs.toFixed(1)} hours`
             : `${Math.round(monthForecastReal)} min`;
         const subBase = hw
-            ? `forecast accounts for your weekly rhythm and recent direction`
+            ? `forecast accounts for your weekly rhythm and recent direction · shaded band shows day-to-day variation`
             : `based on your last 7 days — about ${Math.round(dailyAvg)} minutes a day`;
         insights.push({
             kind: 'forecast',
@@ -1124,15 +1161,22 @@ function renderInsights(sessions) {
                 : `at this pace, you'll focus about ${Math.round(monthForecastReal)} minutes over the next 30 days`,
             sub: subBase,
             value: valueText,
-            viz: vizForecast(past14, projected14),
-            data: { hw, dailyAvg, past14, projected14, monthForecastReal },
+            viz: vizForecast(past14, projected14, projectedLower, projectedUpper),
+            data: {
+                hw, dailyAvg, past14, projected14,
+                projectedLower, projectedUpper, forecastClamped,
+                monthForecastReal,
+            },
         });
     }
 
     // ── ML insight: K-means clustering of session shapes ────────────────
-    // Cluster every focus block by [duration, focus quality,
-    // distractions], let an elbow-method search pick K in [2, 4],
-    // then describe the largest cluster in plain English.
+    // Cluster every focus session by [duration, focus quality,
+    // distractions]. K selection is driven by **silhouette score**
+    // (replacing the broken elbow heuristic) — and we suppress the
+    // insight entirely when silhouette is low, because that's the
+    // honest signal that no real cluster structure exists in the
+    // data and any K we pick would invent groups that aren't there.
     if (sessions.length >= 12) {
         const durs = sessions.map((s) => (s.durationSeconds || 0) / 60);
         const dMin = Math.min(...durs);
@@ -1144,32 +1188,49 @@ function renderInsights(sessions) {
             norm(s.focusQuality || 0, 0, 100),
             norm(s.distractionCount || 0, 0, xMax),
         ]);
-        const result = chooseBestK(features, { kMin: 2, kMax: 4 });
-        if (result && result.k >= 2) {
-            const clusters = describeClusters(result, sessions);
-            const dominant = clusters.reduce(
-                (best, c) => c.count > best.count ? c : best,
-                clusters[0]
-            );
-            const dominantPct = Math.round((dominant.count / sessions.length) * 100);
-            insights.push({
-                kind: 'patterns',
-                headline: result.k === 2
-                    ? `your focus sessions fall into 2 distinct groups`
-                    : `your focus sessions fall into ${result.k} distinct groups`,
-                sub: `${dominantPct}% of yours look like "${dominant.label}"`,
-                value: `${result.k} groups`,
-                viz: vizClusters(features, result.assignments, clusters),
-                data: {
-                    k: result.k,
-                    inertia: result.inertia,
-                    centroids: result.centroids,
-                    assignments: result.assignments,
-                    clusters,
-                    sessions,
-                    bounds: { dMin, dMax, xMax },
-                },
-            });
+        // Refuse to cluster when any feature is constant — Otherwise
+        // that dimension contributes zero variance and the clustering
+        // is a 2D problem masquerading as 3D, plus labels that depend
+        // on the missing feature can never fire.
+        const allConstant = (
+            dMin === dMax ||
+            xMax === 0 ||
+            sessions.every((s) => (s.focusQuality || 0) === sessions[0].focusQuality)
+        );
+        if (!allConstant) {
+            const result = chooseBestK(features, { kMin: 2, kMax: 4 });
+            // Silhouette < 0.2 → no real cluster structure. Suppress.
+            if (result && result.k >= 2 && (result.silhouette || 0) >= 0.2) {
+                const clusters = describeClusters(result, sessions);
+                const dominant = clusters.reduce(
+                    (best, c) => c.count > best.count ? c : best,
+                    clusters[0]
+                );
+                const dominantPct = Math.round((dominant.count / sessions.length) * 100);
+                const sil = result.silhouette;
+                const separationCopy = sil >= 0.5 ? 'these groups are well-separated'
+                    : sil >= 0.35 ? 'the groups overlap a little — but the shape is real'
+                    : 'soft groupings — the boundaries are fuzzy';
+                insights.push({
+                    kind: 'patterns',
+                    headline: result.k === 2
+                        ? `your focus sessions fall into 2 distinct groups`
+                        : `your focus sessions fall into ${result.k} distinct groups`,
+                    sub: `${dominantPct}% of yours look like "${dominant.label}" · ${separationCopy}`,
+                    value: `${result.k} groups`,
+                    viz: vizClusters(features, result.assignments, clusters),
+                    data: {
+                        k: result.k,
+                        inertia: result.inertia,
+                        silhouette: result.silhouette,
+                        centroids: result.centroids,
+                        assignments: result.assignments,
+                        clusters,
+                        sessions,
+                        bounds: { dMin, dMax, xMax },
+                    },
+                });
+            }
         }
     }
 
@@ -1454,31 +1515,73 @@ function vizFriction(focusedMin, lostMin) {
     `;
 }
 
-/** Past 14 days line + 14 days projection at the trailing average.
- *  The vertical "now" rule separates history from projection. */
-function vizForecast(history, projected) {
+/** Past 14 days line + 14 days projection. Vertical "now" rule
+ *  separates history from projection. When `lower`/`upper` are
+ *  provided, draw a translucent confidence band so the forecast is
+ *  shown with its uncertainty, not as a single confident line. */
+function vizForecast(history, projected, lower, upper) {
     if (!history || !projected) return '';
     const W = 240, H = 64;
     const padX = 4;
-    const all = [...history, ...projected];
+    const all = [...history, ...projected, ...(upper || [])];
     const max = Math.max(...all, 1);
-    const totalLen = all.length;
+    const totalLen = history.length + projected.length;
     const x = (i) => padX + (i / (totalLen - 1)) * (W - padX * 2);
     const y = (v) => H - 6 - (v / max) * (H - 12);
     const histPts = history.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
     const projIdxOffset = history.length - 1;
     const projPts = projected.map((v, i) => `${x(projIdxOffset + i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
     const dividerX = x(history.length - 1);
+    let bandPath = '';
+    if (lower && upper && lower.length === projected.length && upper.length === projected.length) {
+        // Stitch upper-edge polyline forward + lower-edge polyline
+        // backward into a closed polygon for the shaded band.
+        const upperPts = upper.map((v, i) => `${x(projIdxOffset + i).toFixed(1)},${y(v).toFixed(1)}`);
+        const lowerPts = lower.map((v, i) => `${x(projIdxOffset + i).toFixed(1)},${y(v).toFixed(1)}`).reverse();
+        bandPath = `<polygon points="${[...upperPts, ...lowerPts].join(' ')}"
+                             fill="currentColor" fill-opacity="0.12" />`;
+    }
     return `
         <svg class="insight-viz" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+            ${bandPath}
             <polyline points="${histPts}" fill="none" stroke="currentColor"
                       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.92" />
             <polyline points="${projPts}" fill="none" stroke="currentColor"
-                      stroke-width="1.2" stroke-dasharray="3 3" stroke-opacity="0.55" />
+                      stroke-width="1.2" stroke-dasharray="3 3" stroke-opacity="0.7" />
             <line x1="${dividerX.toFixed(1)}" x2="${dividerX.toFixed(1)}" y1="2" y2="${(H - 2).toFixed(1)}"
                   stroke="currentColor" stroke-opacity="0.22" stroke-width="0.7" stroke-dasharray="2 2" />
             <text x="${dividerX.toFixed(1)}" y="${(H - 2).toFixed(1)}" class="insight-viz__caption"
                   text-anchor="middle" dx="-2" dy="-1">now</text>
+        </svg>
+    `;
+}
+
+/** Sparkline of daily totals with a vertical rule at the change-point
+ *  index. Pre-shift mean drawn as a horizontal dashed segment, same
+ *  for post-shift mean — the visual eye reads them as the two regimes
+ *  the CUSUM detected. */
+function vizChangePoint(values, cp) {
+    if (!values || values.length < 3 || !cp) return '';
+    const W = 240, H = 64;
+    const padX = 4;
+    const max = Math.max(...values, 1);
+    const x = (i) => padX + (i / (values.length - 1)) * (W - padX * 2);
+    const y = (v) => H - 6 - (v / max) * (H - 12);
+    const linePts = values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const cpX = x(cp.index);
+    const beforeY = y(cp.beforeMean);
+    const afterY = y(cp.afterMean);
+    return `
+        <svg class="insight-viz" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+            <line x1="${padX}" x2="${cpX.toFixed(1)}" y1="${beforeY.toFixed(1)}" y2="${beforeY.toFixed(1)}"
+                  stroke="currentColor" stroke-opacity="0.42" stroke-width="0.9" stroke-dasharray="3 3" />
+            <line x1="${cpX.toFixed(1)}" x2="${(W - padX).toFixed(1)}" y1="${afterY.toFixed(1)}" y2="${afterY.toFixed(1)}"
+                  stroke="currentColor" stroke-opacity="0.85" stroke-width="1.1" />
+            <polyline points="${linePts}" fill="none" stroke="currentColor"
+                      stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6" />
+            <line x1="${cpX.toFixed(1)}" x2="${cpX.toFixed(1)}" y1="2" y2="${(H - 2).toFixed(1)}"
+                  stroke="currentColor" stroke-opacity="0.85" stroke-width="0.9" stroke-dasharray="2 2" />
+            <circle cx="${cpX.toFixed(1)}" cy="${y(values[cp.index]).toFixed(1)}" r="2.6" fill="currentColor" />
         </svg>
     `;
 }
@@ -1542,6 +1645,7 @@ function detailBlock(title, content) {
 function renderInsightDetailBody(insight, sessions) {
     switch (insight.kind) {
         case 'trend':       return detailTrend(insight);
+        case 'changepoint': return detailChangePoint(insight);
         case 'wow':         return detailWow(insight);
         case 'anomaly':     return detailAnomaly(insight);
         case 'correlation': return detailCorrelation(insight);
@@ -1584,6 +1688,40 @@ function detailTrend(ins) {
             <p>Yours is ${r2.toFixed(2)} — ${fitWord}.</p>
         `)}
         ${detailBlock('Your last 7 days', `<ul class="detail-list">${last7}</ul>`)}
+    `;
+}
+
+function detailChangePoint(ins) {
+    const { cp } = ins.data;
+    const dirWord = cp.direction > 0 ? 'jumped up' : 'dropped';
+    const beforeMin = Math.round(cp.beforeMean);
+    const afterMin = Math.round(cp.afterMean);
+    const deltaMin = Math.round(Math.abs(cp.delta));
+    const pctChange = cp.beforeMean > 0
+        ? Math.round((Math.abs(cp.delta) / cp.beforeMean) * 100)
+        : null;
+    return `
+        ${detailBlock('What this is', `
+            <p>The day your daily focus pattern shifted to a different level — not a gradual slope, but a step-change in how much you typically focus per day.</p>
+        `)}
+        ${detailBlock('How we found it', `
+            <p>We use <strong>CUSUM</strong> (cumulative sum) — a classic change-point detection method. It walks forward through your daily totals, accumulating how far each day deviates from your baseline. When the running sum crosses a significance threshold, that's the day the pattern changed.</p>
+            <p>This is more honest than splitting the window in half — that approach reports the same result whether your shift happened on day 3 or day 27. CUSUM finds the actual moment.</p>
+        `)}
+        ${detailBlock('What we found', `
+            <ul class="detail-list">
+                <li><span>shift detected</span><span class="num">${cp.daysAgo === 0 ? 'today' : cp.daysAgo === 1 ? 'yesterday' : `${cp.daysAgo} days ago`}</span></li>
+                <li><span>before — daily average</span><span class="num">${beforeMin} min</span></li>
+                <li><span>after — daily average</span><span class="num">${afterMin} min</span></li>
+                <li><span>change</span><span class="num ${cp.direction > 0 ? 'is-good' : 'is-flat'}">${cp.direction > 0 ? '+' : '−'}${deltaMin} min/day${pctChange !== null ? ` (${pctChange}%)` : ''}</span></li>
+                <li><span>before window</span><span class="num">${cp.beforeN} days</span></li>
+                <li><span>after window</span><span class="num">${cp.afterN} days</span></li>
+            </ul>
+        `)}
+        ${detailBlock('A note on this', `
+            <p>A change-point doesn't say <em>why</em> — only <em>when</em>. Common causes: starting or finishing a project, vacation, schedule change, picking up a new tool. If the date matches something specific, the pattern is real; if not, it might be coincidence.</p>
+            <p>We need at least 14 days of history to call a shift; smaller datasets are too noisy to separate signal from random variation.</p>
+        `)}
     `;
 }
 
@@ -1662,6 +1800,9 @@ function detailAnomaly(ins) {
 
 function detailCorrelation(ins) {
     const { points, r, strength } = ins.data;
+    const plainDirection = r < 0
+        ? 'when one goes up, the other tends to go down — the expected case for distractions vs focus quality'
+        : 'when one goes up, the other goes up too — surprising for these two numbers';
     return `
         ${detailBlock('What this is', `
             <p>We checked whether two of your numbers move together: the count of tab-switches inside a session, and that session's focus quality score (0–100).</p>
@@ -1673,7 +1814,7 @@ function detailCorrelation(ins) {
                 <li><span>0</span><span class="num">no relationship</span></li>
                 <li><span>−1.0</span><span class="num">they move opposite perfectly</span></li>
             </ul>
-            <p>Yours is r = ${r.toFixed(2)} — ${strength.label}, ${strength.aside}.</p>
+            <p>Yours is r = ${r.toFixed(2)} — ${strength.label}, ${strength.aside}. In plain terms: ${plainDirection}.</p>
         `)}
         ${detailBlock('Sample size', `
             <ul class="detail-list">
@@ -1758,10 +1899,14 @@ function detailForecast(ins) {
                 <li><span>direction</span><span class="num">${hw.trend >= 0 ? '+' : '−'}${Math.abs(hw.trend).toFixed(2)} min/day</span></li>
                 <li><span>strongest day in your week</span><span class="num">${dayLabels[bestIdx]}</span></li>
                 <li><span>quietest day in your week</span><span class="num">${dayLabels[worstIdx]}</span></li>
+                ${hw.residualSd !== undefined ? `
+                    <li><span>day-to-day variation (1σ)</span><span class="num">±${Math.round(hw.residualSd)} min</span></li>
+                ` : ''}
             </ul>
         `)}
         ${detailBlock('A note on this', `
-            <p>Forecasts get less reliable the further out you go. The next 7 days are more trustworthy than days 8–14.</p>
+            <p>Forecasts get less reliable the further out you go. The next 7 days are more trustworthy than days 8–14. The shaded band on the chart widens with horizon to show that growing uncertainty.</p>
+            ${ins.data.forecastClamped ? '<p>Some projected days hit zero — your trend extrapolates below what the model can represent (focus minutes can\'t be negative). The point forecast is still meaningful, but treat the floor as "near-zero days" rather than literal zero.</p>' : ''}
         `)}
     `;
 }
@@ -2268,6 +2413,7 @@ function daySoundsCard(blocks) {
 function insightKindLabel(kind) {
     switch (kind) {
         case 'trend':       return 'TREND';
+        case 'changepoint': return 'YOUR PATTERN SHIFTED';
         case 'wow':         return 'VS THE MONTH BEFORE';
         case 'anomaly':     return 'UNUSUAL DAY';
         case 'correlation': return 'PATTERN FOUND';

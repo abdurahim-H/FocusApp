@@ -1604,9 +1604,11 @@
     /* Bottom-centre keeps the toolbar away from the help button
        (bottom-left), the mini-timer (bottom-right), and the timer/tasks
        (centre-vertical). Z-index above the help button so its click hits
-       are never shadowed when they do sit near each other. */
+       are never shadowed when they do sit near each other.
+       Sits low (16px) so the focus card's task list above it doesn't
+       get visually clipped by the toolbar's footprint. */
     position: fixed;
-    bottom: 28px;
+    bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 2010;
