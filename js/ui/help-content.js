@@ -29,8 +29,8 @@ export const HELP_CATEGORIES = [
                 a: 'Click the satellite, then <strong>Sign in</strong> or <strong>Create account</strong>. Three options:<br><strong>Email + password</strong> — the default. Sign-up sends a confirmation link to your inbox; once verified you can sign in any time.<br><strong>Magic link</strong> — type your email, we send a one-tap sign-in link. No password to remember.<br><strong>Continue with Google</strong> — single click; OAuth handles the rest.',
             },
             {
-                q: 'Why no password?',
-                a: 'Magic links and OAuth are safer and less friction. Passwords get reused across sites, leaked in breaches, and forgotten. A link to your inbox proves you control the email; OAuth proves you control your Google or Apple account. We never see a password and you never have to remember one.',
+                q: 'Which sign-in method should I pick?',
+                a: '<strong>Email + password</strong> works the same as anywhere else; the password is checked against a strength policy and a known-breach list (HIBP) before sign-up is allowed, so weak or compromised passwords are rejected up front. <strong>Magic link</strong> is the lower-friction option — no password to remember; we send a one-tap sign-in link to your inbox. <strong>Continue with Google</strong> is the lowest-friction option of all and is the only OAuth provider currently wired up. Whichever you pick, your session lives in the browser as a refresh token; the password (if you set one) is never stored on this device.',
             },
             {
                 q: 'How do I sign out?',
@@ -42,7 +42,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'Is my data private?',
-                a: 'Yes. Until you sign in, everything stays in your browser — same as before. Once you do, your data is stored in a Postgres database protected by row-level security; auth credentials live in your browser\'s secure session storage; we never see a password (there isn\'t one).',
+                a: 'Yes. Until you sign in, everything stays in your browser — same as before. Once you sign in, identity (email, display name, unique handle) is stored in a Postgres database protected by row-level security; productivity data still lives only in your browser today and isn\'t mirrored to the server yet (the cross-device sync layer is the next phase). Sign-in tokens live in your browser\'s session storage; passwords (if you set one) are hashed by Supabase Auth before they\'re stored — the app never reads or keeps a plaintext copy.',
             },
             {
                 q: 'I signed in but nothing seems different',
@@ -129,7 +129,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What does the Reset button do?',
-                a: 'The <strong>⟳</strong> next to Start resets the current timer to its starting time without changing the session type. Hold (or use the small <strong>Reset session</strong> icon) to reset the entire cycle back to session 1.',
+                a: 'There are two reset buttons.<br>The <strong>R</strong> shortcut and the matching toolbar control reset only the <em>current</em> timer back to its starting time — focus stays focus, break stays break, the session counter doesn\'t change.<br>The small <strong>⟳</strong> icon next to the Start row resets the <em>entire</em> Pomodoro cycle back to session 1 of focus. Useful when you want a clean slate, not just a do-over of the current session.',
             },
             {
                 q: 'Can I skip a session?',
@@ -173,7 +173,7 @@ export const HELP_CATEGORIES = [
         entries: [
             {
                 q: 'How do I add a task?',
-                a: 'In <strong>Focus</strong> mode, type into the task input at the bottom and press <strong>Enter</strong> or click <strong>Add</strong>. Tasks animate in with a spring.',
+                a: 'On the <strong>Focus</strong> tab, find the <strong>Tasks for this session</strong> card under the timer and stats bar. Type into the input field and press <strong>Enter</strong> or click <strong>Add</strong>. New tasks slide in at the top of the list. The shortcut <kbd>/</kbd> jumps your cursor straight into this field from anywhere.',
             },
             {
                 q: 'How do I mark a task done?',
@@ -274,7 +274,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How do I rename, delete, or share a constellation?',
-                a: 'In the library drawer, click the <strong>⋯</strong> on any saved constellation. Options: <strong>Rename</strong>, <strong>Share</strong> (copies a <code>/?mix=…</code> link anyone can open), <strong>Delete</strong>. Built-in constellations can be shared but not modified.',
+                a: 'In the library drawer, click the <strong>⋯</strong> on any saved constellation. Options: <strong>Rename</strong>, <strong>Copy share link</strong> (puts a <code>/?mix=…</code> URL on your clipboard — anyone who opens it sees a prompt to load your arrangement), and <strong>Delete</strong>. Built-in constellations only show <strong>Copy share link</strong>; rename / delete is hidden so you can\'t accidentally lose them.',
             },
             {
                 q: 'How do I pin a constellation as my focus-start arrangement?',
@@ -553,7 +553,7 @@ export const HELP_CATEGORIES = [
         entries: [
             {
                 q: 'What is the 3D scene?',
-                a: 'A real-time cinematic space rendering — a tilted accretion disk around a black hole, a golden nebula, a parallax starfield, drifting cosmic motes, shooting stars, god rays, and film grain. It runs on WebGL2 (with a WebGPU path if your browser supports it).',
+                a: 'A real-time cinematic space rendering — a tilted accretion disk around a black hole, a golden nebula, a parallax starfield, drifting cosmic motes, shooting stars, god rays, and film grain. Currently rendered with Babylon.js on WebGL2; a WebGPU path exists in the codebase but is disabled while we wait for upstream fixes to a post-pipeline texture-format issue.',
             },
             {
                 q: 'What themes are available?',
@@ -597,7 +597,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What is Depth of field?',
-                a: '<strong>Settings → Scene → Advanced → Depth of field</strong>. Optional focus blur — elements near the focal distance stay sharp, things in front/behind go soft. Off by default because it can make the scene feel blurry, and disabled entirely on WebGPU due to texture-format compatibility.',
+                a: '<strong>Settings → Scene → Advanced → Depth of field</strong>. Optional focus blur — elements near the focal distance stay sharp, things in front/behind go soft. Off by default because it can make the scene feel softly out of focus rather than crisp.',
             },
             {
                 q: 'Why does the scene look pixelated after hours?',
@@ -753,7 +753,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What information gets sent along with my feedback?',
-                a: "Only auto-collected technical context that helps reproduce what you're describing: app version, browser + platform string, GPU (if your browser exposes it), viewport size, language, and a timestamp. Nothing identifying or personal. You can see the exact content in the copied email.",
+                a: "Only auto-collected technical context that helps reproduce what you're describing: app version, timestamp, the URL you were on, browser user-agent string, platform, language, viewport size and pixel ratio, and the GPU renderer + vendor (if your browser exposes them via the WEBGL_debug_renderer_info extension). Nothing identifying or personal. You can see the exact content in the copied email.",
             },
             {
                 q: 'Who does my feedback go to?',
@@ -814,7 +814,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What does the About section show?',
-                a: 'Under <strong>Settings → Data & About → About</strong>: app version, detected GPU tier (used by the "Auto" quality preset), active render engine (WebGL2 / WebGPU), a live FPS readout, and your browser string. Useful when filing a bug report or verifying performance tier.',
+                a: 'Under <strong>Settings → Data & About → About</strong>: app version, detected GPU tier (used by the "Auto" quality preset), the render engine label (currently always "WebGL" — see the Scene & Visuals category for why WebGPU is paused), a live FPS readout that ticks every 800 ms while the panel is open, and your browser name. Useful when filing a bug report or verifying performance tier.',
             },
         ],
     },
