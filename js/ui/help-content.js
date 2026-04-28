@@ -34,11 +34,11 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How do I sign out?',
-                a: 'Click the satellite while signed in. The dropdown shows your name, email, and a <strong>Sign out</strong> row at the bottom.',
+                a: 'Click the satellite while signed in. The dropdown shows your name, email, an <strong>Open Profile</strong> row, an <strong>Account analytics</strong> row, a placeholder <strong>Cross-device sync</strong> row marked "soon", and a <strong>Sign out</strong> row at the bottom.',
             },
             {
                 q: 'What does the small dot on the satellite mean?',
-                a: 'A pulsing gold dot at 1 o\'clock = sync in flight. A solid red dot = sync failed; click it to retry. No dot = idle. The dot stays idle until cross-device sync goes live in the next release.',
+                a: 'A pulsing gold dot at 1 o\'clock = sync in flight. A solid red dot = sync failed. No dot = idle. The dot is wired up via <code>setSyncState()</code> as a placeholder — the cross-device sync layer it visualises hasn\'t shipped yet, so you should not see either state today.',
             },
             {
                 q: 'Is my data private?',
@@ -85,7 +85,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'Can I replay the welcome tour?',
-                a: 'Yes. <strong>Settings → Data & About → Replay welcome tour</strong>. The same 10-step walkthrough you saw on first visit runs again.',
+                a: 'Yes. <strong>Settings → Data & About → Help → Replay welcome tour</strong>. The same 10-step walkthrough you saw on first visit runs again.',
             },
             {
                 q: 'Do I need to be online?',
@@ -125,7 +125,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What is the Cycle goal?',
-                a: 'The total number of focus sessions that make up one full cycle. You see it as "N / M" in the session counter ("1 / 4" means session 1 of 4). Range 1–12, default 4. Separate from the long-break interval.',
+                a: 'The total number of focus sessions that make up one full cycle. The Focus tab shows it as <strong>Session N of M</strong>; the floating mini-timer shows the same number compactly as <strong>N / M</strong>. Range 1–12, default 4. Separate from the long-break interval.',
             },
             {
                 q: 'What does the Reset button do?',
@@ -145,7 +145,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What is the Home mini-timer?',
-                a: "A compact floating widget that appears as soon as any session is running or paused. Shows the countdown, progress arc, session label (FOCUS / BREAK), session number (1 / 4), and the dock + play/pause + skip + reset controls. The clock face is a real analogue dial — minute hand sweeps over the session, second hand ticks. Click anywhere on the timer face (the clock or the digits) to jump to the Focus tab.",
+                a: "A compact floating widget that appears as soon as any session is running or paused. Shows the countdown, progress arc, session label (FOCUS / BREAK), session number (1 / 4), and the dock + play/pause + skip + reset controls. The clock face is a real analogue dial — minute hand sweeps over the session, second hand ticks. Click the central body (label, digits, or session number) to jump to the Focus tab.",
             },
             {
                 q: 'Can I move or resize the mini-timer?',
@@ -205,7 +205,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'Where do I see how productive my tasks are?',
-                a: 'Open the <strong>Profile</strong> (account satellite at the top, or press <kbd>i</kbd>) and switch to the <strong>Tasks</strong> section. You\'ll see total tasks completed, average per session, tasks per hour, peak day-of-week, peak hour, and a 30-day trend line. See the Profile section in this Help Center for the full breakdown.',
+                a: 'Open the <strong>Profile</strong> (account satellite at the top, or press <kbd>i</kbd>) and switch to the <strong>Tasks</strong> section. The four KPIs at the top are <strong>tasks done</strong>, <strong>avg per session</strong>, <strong>tasks per hour</strong>, and <strong>sessions w/ tasks (%)</strong>. Below the KPIs sits a 30-day per-day chart with a regression trend line, plus by-day-of-week and by-hour bar charts whose subtitles call out your peak weekday and peak hour. See the Profile section in this Help Center for the full breakdown.',
             },
         ],
     },
@@ -234,7 +234,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How do I tweak EQ?',
-                a: "<strong>Click a body</strong> (without dragging) to open its EQ control ring — three concentric rings labelled <strong>Bass</strong>, <strong>Mid</strong>, and <strong>Treble</strong>. Each ring has a notch you drag to set ±12 dB for that band. The body's color shifts in real time as you adjust. Click outside the ring to close.",
+                a: "<strong>Click a body</strong> (without dragging) to open its EQ control ring — three concentric rings labelled <strong>Bass</strong>, <strong>Mid</strong>, and <strong>Treble</strong>. Each ring has a notch you drag to set ±12 dB for that band. The audio responds in real time. (The body's tint stays fixed per sound — only the audio changes.) Click another body or empty space to close the ring.",
             },
             {
                 q: 'How do I mute a sound?',
@@ -274,11 +274,11 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How do I rename, delete, or share a constellation?',
-                a: 'In the library drawer, click the <strong>⋯</strong> on any saved constellation. Options: <strong>Rename</strong>, <strong>Copy share link</strong> (puts a <code>/?mix=…</code> URL on your clipboard — anyone who opens it sees a prompt to load your arrangement), and <strong>Delete</strong>. Built-in constellations only show <strong>Copy share link</strong>; rename / delete is hidden so you can\'t accidentally lose them.',
+                a: 'Honest answer: those affordances are not currently exposed in the live library drawer — the constellation cards activate a saved arrangement when clicked, and that\'s it. The underlying <code>renameMix</code> / <code>deleteMix</code> / share-link helpers exist in the codebase but the UI hooks for a per-card menu aren\'t rendered today. If you need to remove a saved constellation in the meantime, <strong>Settings → Data & About → Reset → Clear all data</strong> wipes saved constellations along with everything else (it\'s the only nuclear lever currently available).',
             },
             {
                 q: 'How do I pin a constellation as my focus-start arrangement?',
-                a: 'Click the <strong>star</strong> on any constellation in the library. Combined with <em>Settings → Sounds → Auto-start mix on focus session</em>, this automatically loads the pinned constellation every time you start a focus session.',
+                a: 'The pin star is also part of the unrendered constellation-management UI noted above. The setting it would feed — <strong>Settings → Sounds → Behavior → Auto-start mix on focus session</strong> — is wired up and respects whichever constellation id has been pinned via <code>sounds.focusStartMixId</code>; that key just isn\'t reachable from any visible control yet.',
             },
             {
                 q: 'What is the sleep timer?',
@@ -294,7 +294,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'Can I use the keyboard or a screen reader instead of dragging bodies?',
-                a: "Yes. Press <kbd>Alt</kbd>+<kbd>L</kbd> (or <kbd>Cmd</kbd>+<kbd>L</kbd> on macOS) to open the <strong>Cosmos accessible mixer</strong> — a flat panel with every active sound as a row containing volume / pan sliders, mute, and remove. Tab between fields, Esc closes. Screen readers can always reach the same panel; it's rendered off-screen at rest, full parity with the visual surface.",
+                a: "Yes. Press <kbd>Alt</kbd>+<kbd>L</kbd> to open the <strong>Cosmos accessible mixer</strong> — a flat panel with every active sound as a row containing volume / pan sliders, mute, and remove. Tab between fields, Esc closes. Screen readers can always reach the same panel; it's rendered off-screen at rest, full parity with the visual surface. (<kbd>Cmd</kbd>+<kbd>L</kbd> is also wired up but most macOS browsers swallow it for the address bar; <kbd>Alt</kbd>+<kbd>L</kbd> is the reliable shortcut.)",
             },
             {
                 q: 'What does "Remember active sounds" do?',
@@ -302,11 +302,11 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What does "Fade out when session ends" do?',
-                a: '<strong>Settings → Sounds → Fade out when session ends</strong>. When on (default), the master volume smoothly fades to silence over ~4 s when a focus or break session completes.',
+                a: '<strong>Settings → Sounds → Behavior → Fade out when session ends</strong>. When on (default), the master volume smoothly fades to silence over ~4 s when a focus or break session completes.',
             },
             {
                 q: 'What does "Auto-start mix on focus session" do?',
-                a: '<strong>Settings → Sounds → Auto-start mix on focus session</strong>. When on, starting a focus session loads your pinned constellation (see the star icon on constellations in the library). Off by default.',
+                a: '<strong>Settings → Sounds → Behavior → Auto-start mix on focus session</strong>. When on, starting a focus session is supposed to load your pinned constellation. Off by default. As noted above, the pin-star control isn\'t currently exposed in the library drawer, so this toggle has nothing to act on until that UI lands.',
             },
             {
                 q: "Why don't my sounds play?",
@@ -344,7 +344,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How do I open the Profile?',
-                a: 'Three ways: <strong>(1)</strong> click the account satellite at the top of the screen and pick "Profile" from the dropdown, <strong>(2)</strong> click the small momentum-trail dots in the stats bar, or <strong>(3)</strong> press the <kbd>i</kbd> key from anywhere outside a text field. Press <kbd>Esc</kbd> to close.',
+                a: 'Three ways: <strong>(1)</strong> click the account satellite at the top of the screen and pick <strong>Open Profile</strong> from the dropdown, <strong>(2)</strong> click the small momentum-trail dots in the stats bar, or <strong>(3)</strong> press the <kbd>i</kbd> key from anywhere outside a text field (and outside an open Auth modal, Help Center, or Settings panel). Press <kbd>Esc</kbd> to close.',
             },
             {
                 q: 'How do I jump between Profile sections?',
@@ -362,7 +362,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What is "focus quality"?',
-                a: 'A 0–100 score the app computes for every session based on how long you ran it, how many times you switched tabs (tab-aways) during it, and whether you completed it. Higher = more uninterrupted, longer sessions; lower = short and / or scattered.',
+                a: 'A 0–100 score the app computes for every session. The formula (in <code>focusQualityScore()</code>) adds: up to 50 points for proportion of target duration completed, +15 for finishing the full target, up to +15 for completing tasks (8 per task, capped), and subtracts up to 35 for distractions (3 per tab-away plus a tab-away-time penalty). Higher = longer, finished, productive sessions with few distractions.',
             },
             {
                 q: 'Can I click a day on the 60-day grid?',
@@ -426,7 +426,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What is the "time-of-day character"?',
-                a: 'Whether you\'re a morning, afternoon, or evening person, based on which third of the day you spend the most minutes focusing. Morning = 5am–12pm, afternoon = 12pm–6pm, evening = 6pm–5am.',
+                a: 'Whether you\'re a morning, afternoon, or evening person, based on which third of the day you spend the most minutes focusing. <strong>Morning</strong> = 5 AM up until noon. <strong>Afternoon</strong> = noon up until 6 PM. <strong>Evening</strong> = 6 PM right through to 5 AM (it absorbs the late-night and pre-dawn hours).',
             },
             {
                 q: 'What is the polar best-hour curve?',
@@ -528,7 +528,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How is "session quality" different from "completion"?',
-                a: '<strong>Completion</strong> is binary — did you run the full duration or not. <strong>Quality</strong> is a 0–100 score that also accounts for how long the session was and how scattered it was (tab-switches). A 50-minute session with zero tab-aways scores higher than a 25-minute session you finished but kept switching tabs in.',
+                a: '<strong>Completion</strong> is binary — did you run the full duration or not. <strong>Quality</strong> is a 0–100 score that takes into account proportion-of-target completed, the completion bonus, the number of tasks ticked off during the session, and a distraction penalty (per tab-away plus tab-away seconds). A 50-minute session with zero tab-aways scores higher than a 25-minute session you finished but kept switching tabs in.',
             },
             {
                 q: 'How does the click-into-day feature work?',
@@ -683,7 +683,7 @@ export const HELP_CATEGORIES = [
         entries: [
             {
                 q: 'What keyboard shortcuts exist?',
-                a: '<table class="hc-shortcut-table"><tr><td><kbd>Space</kbd></td><td>Start / pause timer</td></tr><tr><td><kbd>R</kbd></td><td>Reset timer</td></tr><tr><td><kbd>1</kbd></td><td>Switch to Home</td></tr><tr><td><kbd>2</kbd></td><td>Switch to Focus</td></tr><tr><td><kbd>/</kbd></td><td>Focus the task input</td></tr><tr><td><kbd>?</kbd></td><td>Open this Help Center</td></tr><tr><td><kbd>Alt</kbd>+<kbd>L</kbd></td><td>Open the cosmos accessible mixer (flat keyboard surface for the sound bodies)</td></tr><tr><td><kbd>Esc</kbd></td><td>Close any modal / panel</td></tr></table>',
+                a: '<table class="hc-shortcut-table"><tr><td><kbd>Space</kbd></td><td>Start / pause timer</td></tr><tr><td><kbd>R</kbd></td><td>Reset timer</td></tr><tr><td><kbd>1</kbd></td><td>Switch to Home</td></tr><tr><td><kbd>2</kbd></td><td>Switch to Focus</td></tr><tr><td><kbd>/</kbd></td><td>Focus the task input (auto-switches to Focus tab if needed)</td></tr><tr><td><kbd>?</kbd></td><td>Open this Help Center</td></tr><tr><td><kbd>i</kbd></td><td>Open the Profile</td></tr><tr><td><kbd>Alt</kbd>+<kbd>L</kbd></td><td>Open the cosmos accessible mixer (flat keyboard surface for the sound bodies)</td></tr><tr><td><kbd>Esc</kbd></td><td>Close any modal / panel</td></tr></table><p style="margin-top:10px;font-size:12px;color:rgba(255,246,225,0.6);">A legacy <kbd>3</kbd> binding labelled "Ambient mode" still appears in <strong>Settings → Shortcuts</strong> for back-compat. Ambient is no longer a top-level tab, so the binding currently does nothing.</p>',
             },
             {
                 q: 'Can I rebind shortcuts?',
@@ -720,15 +720,15 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How do I create one?',
-                a: "<strong>Settings → Presets → Focus presets → New preset</strong>. Give it a name. Whatever your current Settings look like becomes the preset's snapshot.",
+                a: "<strong>Settings → Presets → Focus presets</strong>. Type a name into the input field at the bottom of the list, then click <strong>Create from current</strong>. Whatever your current Settings look like becomes the new preset's snapshot.",
             },
             {
                 q: 'How do I switch presets?',
-                a: 'In the same <strong>Settings → Presets</strong> panel, click any preset to activate it. The name of the active preset is highlighted.',
+                a: 'In the same <strong>Settings → Presets</strong> panel, click any preset name to activate it. The active preset is highlighted.',
             },
             {
-                q: 'Can I rename or delete a preset?',
-                a: 'Yes — the row has inline edit + delete controls. The built-in "Default" preset can\'t be deleted; it\'s your safe fallback.',
+                q: 'Can I update or delete a preset?',
+                a: 'Each non-default preset row has a <strong>save</strong> button (overwrites the snapshot with your current Settings) and a <strong>✕</strong> button (deletes it). There is no inline rename today — to rename a preset, recreate it under a new name and delete the old one. The built-in "Default" preset can\'t be deleted; it\'s your safe fallback.',
             },
             {
                 q: 'Difference between focus presets and constellations?',
@@ -749,7 +749,7 @@ export const HELP_CATEGORIES = [
         entries: [
             {
                 q: 'How do I report a bug or request a feature?',
-                a: 'Click <strong>Settings → Feedback</strong>. Pick <strong>Bug report</strong> or <strong>Feature request</strong> at the top, type your message, and hit <strong>Send</strong>. Your mail client opens with the subject and body pre-filled. Or click <strong>Copy as email</strong> to put the whole thing on your clipboard.',
+                a: 'Click <strong>Settings → Feedback</strong>. Pick <strong>Bug report</strong> or <strong>Feature request</strong> at the top, type your message, then click <strong>Send report</strong> (for bugs) or <strong>Send request</strong> (for features). Your mail client opens with the subject and body pre-filled. Or click <strong>Copy as email</strong> to put the whole thing on your clipboard.',
             },
             {
                 q: 'What information gets sent along with my feedback?',
@@ -794,7 +794,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What does "Reset all settings" do?',
-                a: 'Resets every section in one step — Scene, Timer, Sounds, Notifications, Shortcuts, Motion, Presets. Does NOT touch tasks or statistics.',
+                a: 'Walks every settings key in the schema and restores its default — Scene, Timer, Sounds, Notifications, Shortcuts (including the Motion sub-group), Greeting, and the rest of Data & About. Does NOT touch tasks, statistics, saved focus presets, or saved constellations — those live in separate localStorage keys.',
             },
             {
                 q: 'What does "Clear all data" do?',
@@ -806,7 +806,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'Is my data private?',
-                a: "Yes. Everything lives in your browser's <code>localStorage</code>. No server, no analytics about you personally, no account. Ambient sound files are fetched from a CDN (Cloudflare R2). The 3D library (Babylon.js) is loaded once from a CDN. None of them receive identifying information.",
+                a: "Yes. Productivity data — settings, tasks, statistics, saved constellations, focus presets — lives in your browser's <code>localStorage</code> and never leaves it today; the optional account stores only identity (email, display name, unique handle) in a Postgres database protected by row-level security. There are no analytics about you personally, no leaderboards, no anonymised peer benchmarks. Ambient sound files are fetched from our CDN (Cloudflare R2). The 3D library (Babylon.js) is loaded once from a CDN. None of them receive identifying information.",
             },
             {
                 q: 'Where can I read the privacy policy and terms?',
