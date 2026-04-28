@@ -3,10 +3,40 @@
 // Phase 1: tasks driven by the `tasks` signal in state.js (reactive + persisted).
 // Phase 2: animated add/remove via Motion One. The render is now diff-based
 // (not innerHTML batch) so individual <li> elements can play exit animations.
+// Phase 3 (Wave 2 — Tasks v2):
+//   - Each task gains optional fields: estimatedPomodoros, spentSeconds,
+//     createdAt, completedAt, dueAt, project. Old tasks loaded from
+//     localStorage without these are upgraded inline (`normalizeTask`)
+//     so the rest of the code can rely on a uniform shape.
+//   - "Bulk" operations: clearCompletedTasks + setAllTasksDone alongside
+//     the existing clearAllTasks.
 
 import { anim, isReducedMotion, springAnim } from '../core/motion.js';
 import { effect, tasks } from '../core/state.js';
 import { recordTaskToggle } from '../features/statistics.js';
+
+// ============================================================================
+// Task model
+// ============================================================================
+
+/** Fill in any missing optional fields with sensible defaults so the UI
+ *  can render uniformly regardless of whether the task was created
+ *  pre- or post-Wave-2. Cheap; called on every read path. */
+export function normalizeTask(t) {
+    if (!t || typeof t !== 'object') return t;
+    return {
+        id: t.id,
+        text: t.text || '',
+        completed: !!t.completed,
+        createdAt: t.createdAt || null,
+        completedAt: t.completedAt || null,
+        estimatedPomodoros: Number.isFinite(t.estimatedPomodoros)
+            ? Math.max(0, Math.min(20, Math.round(t.estimatedPomodoros)))
+            : 0,
+        spentSeconds: Math.max(0, Number(t.spentSeconds) || 0),
+        completedInSession: Math.max(0, Number(t.completedInSession) || 0),
+    };
+}
 
 // ============================================================================
 // Mutations (immutable — required for signals to detect changes)
@@ -17,7 +47,11 @@ export function addTask() {
     if (!input) return;
     const text = input.value.trim();
     if (!text) return;
-    tasks.value = [...tasks.value, { id: Date.now(), text, completed: false }];
+    const now = Date.now();
+    tasks.value = [
+        ...tasks.value,
+        normalizeTask({ id: now, text, completed: false, createdAt: now }),
+    ];
     input.value = '';
 }
 
@@ -29,15 +63,52 @@ export function clearAllTasks() {
     tasks.value = [];
 }
 
+/** Drop only the completed ones — the most-requested bulk op. */
+export function clearCompletedTasks() {
+    tasks.value = tasks.value.filter((t) => !t.completed);
+}
+
+/** Mark every task done (or every task not-done if all are already done). */
+export function setAllTasksDone(done = true) {
+    const target = !!done;
+    let changed = 0;
+    tasks.value = tasks.value.map((t) => {
+        if (t.completed === target) return t;
+        changed += 1;
+        return {
+            ...normalizeTask(t),
+            completed: target,
+            completedAt: target ? Date.now() : null,
+        };
+    });
+    if (changed > 0) recordTaskToggle(target);
+}
+
 export function toggleTask(id) {
     const task = tasks.value.find((t) => t.id === id);
     if (!task) return;
 
     const newCompleted = !task.completed;
-    tasks.value = tasks.value.map((t) => (t.id === id ? { ...t, completed: newCompleted } : t));
+    tasks.value = tasks.value.map((t) =>
+        t.id === id
+            ? {
+                  ...normalizeTask(t),
+                  completed: newCompleted,
+                  completedAt: newCompleted ? Date.now() : null,
+              }
+            : t
+    );
 
     // Track both directions: completing increments, uncompleting decrements
     recordTaskToggle(newCompleted);
+}
+
+/** Update the per-task estimated pomodoro count. 0 clears the estimate. */
+export function setTaskEstimate(id, estimatedPomodoros) {
+    const safe = Math.max(0, Math.min(20, Math.round(Number(estimatedPomodoros) || 0)));
+    tasks.value = tasks.value.map((t) =>
+        t.id === id ? { ...normalizeTask(t), estimatedPomodoros: safe } : t
+    );
 }
 
 // Legacy no-op — rendering is automatic now via the effect below.
@@ -66,8 +137,29 @@ export function initTaskRender() {
         return;
     }
 
-    // Single delegated click handler — handles toggle + delete (with exit anim)
+    // Single delegated click handler — handles toggle, delete, and the
+    // estimate stepper buttons. Order matters: the stepper buttons sit
+    // outside the toggle area, but their explicit short-circuits keep
+    // a click on +/- from toggling the task-done state.
     list.addEventListener('click', (e) => {
+        const decrBtn = e.target.closest('[data-estimate-decr]');
+        if (decrBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = Number(decrBtn.dataset.estimateDecr);
+            const task = tasks.value.find((t) => t.id === id);
+            setTaskEstimate(id, (task?.estimatedPomodoros || 0) - 1);
+            return;
+        }
+        const incrBtn = e.target.closest('[data-estimate-incr]');
+        if (incrBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = Number(incrBtn.dataset.estimateIncr);
+            const task = tasks.value.find((t) => t.id === id);
+            setTaskEstimate(id, (task?.estimatedPomodoros || 0) + 1);
+            return;
+        }
         const deleteBtn = e.target.closest('[data-delete-task]');
         if (deleteBtn) {
             e.preventDefault();
@@ -96,6 +188,14 @@ export function initTaskRender() {
         clearBtn.addEventListener('click', (e) => {
             e.preventDefault();
             handleClearAllWithAnimation();
+        });
+    }
+
+    const clearCompletedBtn = document.getElementById('clearCompletedBtn');
+    if (clearCompletedBtn) {
+        clearCompletedBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleClearCompletedWithAnimation();
         });
     }
 
@@ -136,6 +236,11 @@ export function initTaskRender() {
         if (clearBtn) {
             clearBtn.classList.toggle('hidden', current.length === 0);
         }
+        const completedBtn = document.getElementById('clearCompletedBtn');
+        if (completedBtn) {
+            const hasCompleted = current.some((t) => t.completed);
+            completedBtn.classList.toggle('hidden', !hasCompleted);
+        }
     });
 }
 
@@ -150,6 +255,7 @@ function createTaskElement(task) {
     // Whole content row is the toggle target — tap anywhere on the
     // task to flip done/undone. Delete button stays its own target;
     // the click handler runs the delete check first and short-circuits.
+    // The estimate stepper sits between the text and the delete button.
     li.innerHTML = `
         <div class="task-content" data-toggle-task="${task.id}" role="button" tabindex="0"
              aria-pressed="${task.completed}"
@@ -159,7 +265,9 @@ function createTaskElement(task) {
                 <span class="checkmark"></span>
             </span>
             <span class="task-text${task.completed ? ' task-completed' : ''}">${escapeHtml(task.text)}</span>
+            ${renderTaskBadge(task)}
         </div>
+        ${renderEstimateStepper(task)}
         <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--danger" data-delete-task="${task.id}" aria-label="Delete task">
             <span class="btn-icon" aria-hidden="true">✕</span>
         </button>
@@ -182,6 +290,62 @@ function updateTaskElement(el, task) {
             `${task.completed ? 'Mark not done' : 'Mark done'}: ${task.text}`
         );
     }
+    // Refresh the badge + stepper without rebuilding the whole row so
+    // the diff render's exit animations still play cleanly. We replace
+    // each fragment in place to match the new task shape.
+    const oldBadge = el.querySelector('.task-badge');
+    const newBadgeHtml = renderTaskBadge(task);
+    if (oldBadge && !newBadgeHtml) {
+        oldBadge.remove();
+    } else if (oldBadge && newBadgeHtml) {
+        oldBadge.outerHTML = newBadgeHtml;
+    } else if (!oldBadge && newBadgeHtml && content) {
+        content.insertAdjacentHTML('beforeend', newBadgeHtml);
+    }
+    const stepper = el.querySelector('.task-estimate');
+    if (stepper) stepper.outerHTML = renderEstimateStepper(task);
+}
+
+/** Inline pomodoro-count badge — shown when an estimate exists or
+ *  when actual time has been logged against the task. Compact "1 / 3"
+ *  format mirrors the timer's session counter convention. */
+function renderTaskBadge(task) {
+    const t = normalizeTask(task);
+    if (!t.estimatedPomodoros && !t.spentSeconds) return '';
+    const spentPomodoros = t.spentSeconds > 0
+        ? Math.round((t.spentSeconds / 60) / 25)
+        : 0;
+    if (t.estimatedPomodoros > 0) {
+        return `<span class="task-badge" title="estimated ${t.estimatedPomodoros} × 25-min pomodoros">${spentPomodoros} / ${t.estimatedPomodoros}</span>`;
+    }
+    if (spentPomodoros > 0) {
+        return `<span class="task-badge task-badge--no-estimate" title="${spentPomodoros} pomodoros logged so far">${spentPomodoros} 🍅</span>`;
+    }
+    return '';
+}
+
+/** Inline +/- stepper for the task's estimated pomodoro count.
+ *  Hidden by default; revealed on hover/focus of the parent row.
+ *  Buttons stop event propagation so a click here doesn't toggle the
+ *  task-done state. */
+function renderEstimateStepper(task) {
+    const t = normalizeTask(task);
+    const count = t.estimatedPomodoros;
+    return `
+        <div class="task-estimate" role="group" aria-label="Estimated pomodoros">
+            <button class="task-estimate__btn"
+                    type="button"
+                    data-estimate-decr="${task.id}"
+                    aria-label="Decrease estimate"
+                    ${count <= 0 ? 'disabled' : ''}>−</button>
+            <span class="task-estimate__val" aria-live="polite">${count}</span>
+            <button class="task-estimate__btn"
+                    type="button"
+                    data-estimate-incr="${task.id}"
+                    aria-label="Increase estimate"
+                    ${count >= 20 ? 'disabled' : ''}>+</button>
+        </div>
+    `;
 }
 
 // ============================================================================
@@ -233,6 +397,27 @@ async function handleDeleteWithAnimation(id) {
     elementsById.delete(id);
     exiting.delete(id);
     deleteTask(id);
+}
+
+async function handleClearCompletedWithAnimation() {
+    const completed = tasks.value.filter((t) => t.completed);
+    if (completed.length === 0) return;
+    const exits = completed.map((t, i) => {
+        const el = elementsById.get(t.id);
+        if (!el) return Promise.resolve();
+        exiting.add(t.id);
+        return new Promise((resolve) => {
+            setTimeout(async () => {
+                if (!isReducedMotion()) await animateExit(el);
+                el.remove();
+                elementsById.delete(t.id);
+                exiting.delete(t.id);
+                resolve();
+            }, i * 30);
+        });
+    });
+    await Promise.all(exits);
+    clearCompletedTasks();
 }
 
 async function handleClearAllWithAnimation() {

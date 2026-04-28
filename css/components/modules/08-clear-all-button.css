@@ -42,6 +42,121 @@
     pointer-events: none !important;
 }
 
+/* Bulk-action footer — sits at the bottom of the task list with the
+   existing "Clear All" plus a softer "Clear completed" sibling that
+   only renders when at least one task is checked off. */
+.task-bulk-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 4px;
+}
+.task-bulk-actions .clear-all-btn,
+.task-bulk-actions .task-bulk-btn {
+    margin-top: 0;
+}
+.task-bulk-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 246, 225, 0.55);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+.task-bulk-btn:hover,
+.task-bulk-btn:focus-visible {
+    color: rgba(255, 246, 225, 0.95);
+    background: rgba(255, 246, 225, 0.04);
+    outline: none;
+}
+.task-bulk-btn.hidden { display: none; }
+
+/* Estimate stepper + pomodoro badge on each task row. The stepper is
+   subtle by default — visible only on hover/focus — so casual users
+   who don't care about pomodoro estimates aren't visually nagged. */
+.task-estimate {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    padding: 2px 4px;
+    border-radius: 6px;
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.2s ease;
+}
+.task-item:hover .task-estimate,
+.task-item:focus-within .task-estimate,
+.task-estimate:has(.task-estimate__val:not(:empty):not([data-zero])) {
+    opacity: 1;
+}
+.task-item:has(.task-badge) .task-estimate {
+    /* When the task already shows a badge, surface the stepper too —
+       it's how the user reaches the estimate to keep editing. */
+    opacity: 1;
+}
+.task-estimate__btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.18);
+    background: rgba(255, 220, 160, 0.04);
+    color: rgba(255, 246, 225, 0.85);
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.task-estimate__btn:hover:not(:disabled),
+.task-estimate__btn:focus-visible:not(:disabled) {
+    background: rgba(255, 220, 160, 0.16);
+    color: #faf3e3;
+    border-color: rgba(255, 220, 160, 0.4);
+    outline: none;
+}
+.task-estimate__btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+.task-estimate__val {
+    min-width: 14px;
+    text-align: center;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 12px;
+    color: rgba(255, 246, 225, 0.78);
+}
+
+.task-badge {
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 220, 160, 0.12);
+    border: 1px solid rgba(255, 220, 160, 0.24);
+    color: rgba(255, 220, 160, 0.85);
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1;
+    align-self: center;
+    flex-shrink: 0;
+}
+.task-badge--no-estimate {
+    background: rgba(255, 246, 225, 0.06);
+    border-color: rgba(255, 246, 225, 0.14);
+    color: rgba(255, 246, 225, 0.7);
+}
+
 /* Ambient Mode */
 .ambient-content {
     display: flex;

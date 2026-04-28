@@ -47,18 +47,18 @@ Already-have data, brand-new framing. Highest UX gain per dollar of engineering 
 
 Tasks today are `{ id, text, completed }` and are session-scoped (they don't carry across reloads). This is the single biggest UX bug in the app.
 
-- [ ] **2.1 Persist tasks across sessions (M).** Move from session-scoped to a flat persistent list. Existing localStorage carries them already during a single page load; just stop wiping on session end.
-- [ ] **2.2 Estimated duration field per task (M).** Stored in pomodoros (so it scales with the user's focus duration). Editable inline ("·· 2 ···" stepper UI).
-- [ ] **2.3 Time spent field, auto-tracked (M).** Each focus-session records which task IDs were completed during it; sum into per-task `spentMinutes`.
+- [x] **2.1 Persist tasks across sessions (M).** Already shipped — `state.js:175-193` auto-persists the `tasks` signal to `fu_state_v1`; tasks survive reloads. The audit's "session-scoped" note was inaccurate. Marked done as-is.
+- [x] **2.2 Estimated duration field per task (M).** New `estimatedPomodoros` field on each task (0–20). Inline +/− stepper on every row; visible on hover/focus, always visible once an estimate exists. New `setTaskEstimate(id, n)` mutation.
+- [ ] **2.3 Time spent field, auto-tracked (M).** Each focus-session records which task IDs were completed during it; sum into per-task `spentMinutes`. Field exists on the task model now (`spentSeconds`); session-side auto-tracking lands with 2.14 (focus lock).
 - [ ] **2.4 ETA pill on the Tasks card header (M).** "3 tasks · ETA 4:25 PM" — computed from estimated minutes ÷ avg focus-min-per-real-hour.
 - [ ] **2.5 Due dates with overdue styling (M).** Optional. Inline date picker. Overdue tasks get a red accent + sort to the top.
 - [ ] **2.6 Subtasks (one level deep) (M).** Indented under parent; same toggle/delete behavior; parent shows "2/5 subtasks done."
 - [ ] **2.7 Drag-to-reorder (M).** HTML5 drag-and-drop on the home list and the expand panel. Persists across reloads.
 - [ ] **2.8 Recurring tasks (M).** Daily / weekdays / weekly / custom RRULE. New instance auto-spawns at midnight in the user's timezone.
 - [ ] **2.9 Project / tag grouping (L).** Tasks can carry a `project` tag; filter the list by project; project view in Profile → Tasks shows time per project.
-- [ ] **2.10 Bulk operations (S).** Mark all done / clear completed / delete completed.
+- [x] **2.10 Bulk operations (S).** New `clearCompletedTasks()` + a "Clear completed" button next to "Clear All" (only visible when at least one task is checked off). Also `setAllTasksDone(true|false)` exported for future "mark-all" UI affordances.
 - [ ] **2.11 Task detail surface (M).** Click anywhere on the row except checkbox/×/edit-icon to open a detail drawer with notes, history (every session this task touched), and time-spent breakdown.
-- [ ] **2.12 Pomodoro-count badge per task (S).** Small "1 / 3" badge showing actual vs estimated pomodoros completed.
+- [x] **2.12 Pomodoro-count badge per task (S).** Small "spent / estimated" pill rendered next to the task text whenever either side has data. No estimate yet but pomodoros logged → "N 🍅" badge.
 - [ ] **2.13 Carry-over rollover (S).** End-of-day prompt: "5 tasks not finished — carry to tomorrow?"
 - [ ] **2.14 Focus-on-this-task lock (M).** Tap a task to "make this the active task"; the timer body shows the task name; the session record links the task. Prevents tab-switching between tasks during a single Pomodoro.
 
