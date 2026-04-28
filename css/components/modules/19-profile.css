@@ -370,6 +370,23 @@
     text-transform: uppercase;
     color: rgba(255, 220, 160, 0.5);
 }
+/* Optional inline trend sparkline under a KPI tile. Only renders when
+   the renderer is given a `trend` array; absent otherwise. Sized small
+   so the headline number stays the lead element. */
+.kpi__spark {
+    margin-top: 4px;
+    color: rgba(255, 220, 160, 0.65);
+    line-height: 0;
+}
+.kpi__spark .chart--spark { display: block; }
+.kpi__spark .chart__line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-opacity: 0.9;
+}
 
 /* ── Chart card ──────────────────────────────────────────────────────── */
 

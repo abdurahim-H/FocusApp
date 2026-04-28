@@ -2,9 +2,8 @@
 //
 // Export / import / reset / about helpers used by the Data & About section.
 
+import { APP_VERSION } from '../../core/version.js';
 import { exportJSON, importJSON, resetAll, resetSection, snapshot } from './store.js';
-
-const APP_VERSION = '5.3.0';
 
 // ============================================================================
 // Export

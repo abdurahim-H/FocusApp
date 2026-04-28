@@ -5,8 +5,9 @@
 // email body (user text + auto-collected diagnostics), opening mailto,
 // and copying to clipboard as a fallback.
 
+import { APP_VERSION } from '../core/version.js';
+
 export const SUPPORT_EMAIL = 'abduh@universefocuses.com';
-const APP_VERSION = '1.0.0';
 
 /** Open the user's mail client with a pre-filled email. */
 export function sendFeedback(type, description) {

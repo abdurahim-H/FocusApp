@@ -83,9 +83,15 @@ function handleKeydown(e) {
         switchMode('focus');
         return;
     }
-    // mode.ambient kept as a no-op binding for back-compat with users
-    // who already have a key bound — Ambient is no longer a top-level
-    // tab; sounds live in the cosmos and are managed via the toolbar.
+    // The old `3 = Ambient mode` binding (when Ambient was a top-level
+    // tab) now opens the sound library drawer, which is where ambient
+    // sounds live in the cosmos era. Lazy-imported so the keyboard
+    // module doesn't pull the whole ambient bundle eagerly.
+    if (k === boundKey('library.open')) {
+        e.preventDefault();
+        import('../ui/ambient-ui.js').then((m) => m.openDrawer?.());
+        return;
+    }
     if (k === boundKey('task.focus')) {
         e.preventDefault();
         if (state.mode !== 'focus') switchMode('focus');

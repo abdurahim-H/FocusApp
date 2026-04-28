@@ -405,9 +405,9 @@ function renderOverview(sessions) {
         ${sectionHeader('Overview', currentUser ? 'a quick look at your account' : 'this device only — sign in to bring your data across devices')}
 
         ${kpiRow([
-            { label: 'hours focused', value: totalHrs >= 1 ? totalHrs.toFixed(1) : (totalSec / 60).toFixed(0), unit: totalHrs >= 1 ? 'hrs' : 'min', count: false },
+            { label: 'hours focused', value: totalHrs >= 1 ? totalHrs.toFixed(1) : (totalSec / 60).toFixed(0), unit: totalHrs >= 1 ? 'hrs' : 'min', count: false, trend: last30 },
             { label: 'sessions', value: sessionsCount, unit: '', count: true },
-            { label: 'last 7 days', value: Math.round(last7Sum), unit: 'min', count: true },
+            { label: 'last 7 days', value: Math.round(last7Sum), unit: 'min', count: true, trend: last7 },
             { label: 'avg quality', value: avgQuality, unit: '/100', count: true },
         ])}
 
@@ -584,6 +584,16 @@ function renderFocus(sessions) {
             sub: 'each square is a day; the brighter it is, the more you focused',
             chart: calendarHeatmap({ matrix: heatmap }),
         })}
+
+        ${sessions.length >= 5 ? chartCard({
+            eyebrow: 'today vs last 90 days',
+            sub: 'how today\'s focus minutes rank against the trailing 90-day window',
+            chart: percentileGauge({
+                value: percentileRank(todayTotal, last90.slice(0, -1)),
+                size: 200,
+                label: 'percentile',
+            }),
+        }) : ''}
 
         ${insightCallouts([
             wow && wow.delta != null ? {
@@ -2737,14 +2747,21 @@ function kpiRow(items) {
     `;
 }
 
-function kpi({ label, value, unit = '', count = true }) {
+function kpi({ label, value, unit = '', count = true, trend = null }) {
     const numAttr = count && Number.isFinite(Number(value)) ? `data-count="${value}"` : '';
     const display = count && Number.isFinite(Number(value)) ? '0' : escapeHtml(String(value));
+    // Optional trend: an array of recent values rendered as a tiny
+    // sparkline under the number. Lets a single KPI tile carry both
+    // the headline and the recent direction without a separate chart.
+    const spark = Array.isArray(trend) && trend.length >= 2
+        ? `<span class="kpi__spark">${sparkline({ values: trend, width: 80, height: 22 })}</span>`
+        : '';
     return `
         <div class="kpi">
             <span class="kpi__num" ${numAttr}>${display}</span>
             ${unit ? `<span class="kpi__unit">${escapeHtml(unit)}</span>` : ''}
             <span class="kpi__label">${escapeHtml(label)}</span>
+            ${spark}
         </div>
     `;
 }

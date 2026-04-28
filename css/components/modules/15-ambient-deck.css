@@ -1332,6 +1332,58 @@
 .libcat--constellations .libcat__title {
     color: rgba(255, 220, 160, 0.85);
 }
+/* Pin star + menu for constellation cards. Anchored to the corners of
+   the card; visually subdued at rest, gain prominence on hover. The
+   pin keeps a high-contrast champagne tint when on so the focus-start
+   choice is unmistakable. */
+.libcard__pin,
+.libcard__menu {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.55);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0;
+    transition: background 0.2s var(--deck-ease),
+                color 0.2s var(--deck-ease),
+                opacity 0.2s var(--deck-ease),
+                transform 0.25s var(--deck-spring);
+}
+.libcard__pin { top: 6px; left: 6px; }
+.libcard__menu { top: 6px; right: 6px; }
+.libcard:hover .libcard__pin,
+.libcard:hover .libcard__menu,
+.libcard:focus-within .libcard__pin,
+.libcard:focus-within .libcard__menu,
+.libcard__pin.is-on,
+.libcard__pin:focus-visible,
+.libcard__menu:focus-visible {
+    opacity: 1;
+}
+.libcard__pin:hover,
+.libcard__menu:hover {
+    background: rgba(255, 205, 115, 0.18);
+    color: var(--deck-cream);
+    transform: scale(1.1);
+}
+.libcard__pin.is-on {
+    color: var(--deck-gold);
+    filter: drop-shadow(0 0 6px rgba(255, 205, 115, 0.6));
+}
+.libcard.is-pinned {
+    border-color: var(--deck-gold-soft);
+    box-shadow: 0 0 0 1px var(--deck-gold-soft) inset,
+                0 0 22px rgba(255, 205, 115, 0.16);
+}
 .libcard--soon {
     cursor: not-allowed;
     opacity: 0.45;

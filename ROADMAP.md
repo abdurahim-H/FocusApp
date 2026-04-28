@@ -18,11 +18,11 @@ This roadmap is deliberately maximal — every feature I think belongs in a "bes
 
 These are real bugs the audits caught. Cheap, high-value, ship first.
 
-- [ ] **0.1 Fix dead-code constellation menu (S).** `renderMixesRail()` in `js/ui/ambient-ui.js` references `#mixesRail` which doesn't exist in `index.html`. Rename, delete, copy-share-link, and pin-as-focus-start are documented but unreachable. Wire them onto the live `libcard--constellation` cards in the library drawer.
-- [ ] **0.2 Wire the legacy `mode.ambient` shortcut (S).** `shortcuts-registry.js` still ships the `3 = Ambient mode` binding; the keyboard handler is a no-op. Either retire the entry or repurpose it (e.g. `3 = open library drawer`).
-- [ ] **0.3 Fix mini-timer click target (S).** `js/ui/home-mini-timer.js:122-131` references `.hmt-ring` which doesn't exist in DOM; only `.hmt-body` triggers the jump-to-Focus. Either add the class to the SVG or remove the dead reference.
-- [ ] **0.4 Notes app version bump consistency (S).** `data-io.js:7` says `APP_VERSION = '5.3.0'`, `feedback.js:9` says `'1.0.0'`. Single source of truth.
-- [ ] **0.5 Wire the unused chart primitives (S).** `percentileGauge` (charts.js:495) and `sparkline` (charts.js:530) are defined but unused. Light them up (sparkline as inline trend on every KPI tile; percentile gauge in the "today vs last 90" callout).
+- [x] **0.1 Fix dead-code constellation menu (S).** Wired pin-star + ⋯ menu onto `libcard--constellation` in the actual library drawer. Pin auto-enables `sounds.autoStartOnFocus`; menu opens the existing rename / share / delete popover. Built-ins get share-only.
+- [x] **0.2 Wire the legacy `mode.ambient` shortcut (S).** Repurposed as `library.open` — the `3` key now opens the sound library drawer. Legacy `storeKey` preserved so users who rebound it keep their custom binding.
+- [x] **0.3 Fix mini-timer click target (S).** Removed the dead `.hmt-ring` reference in `home-mini-timer.js`; `.hmt-body` is the documented click target and it already worked, just left an orphan `if (el)` guard hiding the issue.
+- [x] **0.4 Single source of truth for APP_VERSION (S).** New `js/core/version.js` exports `APP_VERSION`; `feedback.js` and `settings/data-io.js` both import from it. Now matches `package.json` (1.0.0).
+- [x] **0.5 Wire the unused chart primitives (S).** `kpi()` accepts an optional `trend` array → renders a sparkline beneath the number. Wired on Overview's "hours focused" + "last 7 days" KPIs. `percentileGauge` is a new chart card on Profile → Focus showing today's percentile against the trailing 90-day window.
 
 ---
 
