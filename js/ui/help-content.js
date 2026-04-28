@@ -176,8 +176,24 @@ export const HELP_CATEGORIES = [
                 a: 'In <strong>Focus</strong> mode, type into the task input at the bottom and press <strong>Enter</strong> or click <strong>Add</strong>. Tasks animate in with a spring.',
             },
             {
-                q: 'How do I complete or delete a task?',
-                a: 'Click the <strong>checkbox</strong> to mark a task complete — it gets a gold strikethrough. Click the <strong>✕</strong> to remove it with a slide-out animation. Use <strong>Clear All</strong> to wipe the whole list.',
+                q: 'How do I mark a task done?',
+                a: 'Tap anywhere on the task — the whole row is the toggle target. Tap once to mark done (the text gets a strikethrough), tap again to mark not-done. Keyboard: focus a row with <kbd>Tab</kbd> and press <kbd>Enter</kbd> or <kbd>Space</kbd>.',
+            },
+            {
+                q: 'How do I delete a task?',
+                a: 'Click the <strong>✕</strong> on the right side of the task. It slides out with an exit animation. The delete button is its own target — tapping it never accidentally toggles the task.',
+            },
+            {
+                q: 'How do I clear all tasks at once?',
+                a: 'Click <strong>Clear All</strong> below the task list. The button only appears when you have at least one task.',
+            },
+            {
+                q: 'What is the Expand button for?',
+                a: 'The small <strong>Expand</strong> pill in the "Tasks for this session" header opens the task list in a roomy full-canvas panel — same drop-down style as Settings and the Help Center. Useful when you have a lot of tasks: each row has more breathing room, open tasks are listed first with completed ones underneath, and you get count pills (open / done / total) at the top. Same data as the inline list — adding, completing, or deleting in either surface updates the other live.',
+            },
+            {
+                q: 'Why does the inline list get a scrollbar with three or more tasks?',
+                a: 'The home tab task slot is fixed at 220px tall to leave room for the timer, stats, and the cosmos toolbar below. When the list grows past that height, it scrolls inside its box rather than spilling onto other UI. Use the Expand panel above for an unconstrained view.',
             },
             {
                 q: 'Do tasks persist?',
@@ -186,6 +202,10 @@ export const HELP_CATEGORIES = [
             {
                 q: 'Is there a keyboard shortcut for the task input?',
                 a: 'Press <kbd>/</kbd> to instantly focus the task field.',
+            },
+            {
+                q: 'Where do I see how productive my tasks are?',
+                a: 'Open the <strong>Profile</strong> (account satellite at the top, or press <kbd>i</kbd>) and switch to the <strong>Tasks</strong> section. You\'ll see total tasks completed, average per session, tasks per hour, peak day-of-week, peak hour, and a 30-day trend line. See the Profile section in this Help Center for the full breakdown.',
             },
         ],
     },
@@ -307,6 +327,220 @@ export const HELP_CATEGORIES = [
             {
                 q: 'How are the bodies audio-reactive?',
                 a: "Each track has its own <code>AnalyserNode</code> tapped after its post-pan signal, feeding FFT data straight into that body's shader. The rain droplet shimmers on highs, the ocean ring swells on bass, the forest moss twists on mids — all driven by the actual frequency content of the audio coming out of <em>that</em> track, not the master bus.",
+            },
+        ],
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // PROFILE
+    // ═══════════════════════════════════════════════════════════════════════
+    {
+        id: 'profile',
+        label: 'Profile',
+        // Bar chart + line graph — analytics destination
+        iconSvg:
+            '<line x1="3" y1="20" x2="21" y2="20"/><polyline points="6 16 10 11 14 14 18 8"/><circle cx="6" cy="16" r="0.8"/><circle cx="10" cy="11" r="0.8"/><circle cx="14" cy="14" r="0.8"/><circle cx="18" cy="8" r="0.8"/>',
+        entries: [
+            // ── Overview of what the Profile is ───────────────────────────
+            {
+                q: 'What is the Profile?',
+                a: 'The full analytics surface for your focus sessions. Six sections — Overview, Focus, Tasks, Sounds, Time, Insights — built from the per-session data the app records every time you finish or cut short a focus block. Everything is computed locally in your browser; nothing is shared.',
+            },
+            {
+                q: 'How do I open the Profile?',
+                a: 'Three ways: <strong>(1)</strong> click the account satellite at the top of the screen and pick "Profile" from the dropdown, <strong>(2)</strong> click the small momentum-trail dots in the stats bar, or <strong>(3)</strong> press the <kbd>i</kbd> key from anywhere outside a text field. Press <kbd>Esc</kbd> to close.',
+            },
+            {
+                q: 'How do I jump between Profile sections?',
+                a: 'Click any item in the left rail, or press <kbd>1</kbd>–<kbd>6</kbd> while the Profile is open: 1 Overview, 2 Focus, 3 Tasks, 4 Sounds, 5 Time, 6 Insights.',
+            },
+            {
+                q: 'Do I need an account for the Profile?',
+                a: "No. Profile works entirely from your local data and is available the moment you've finished one focus session. Signing in lets the same data follow you to other devices once cloud sync ships in the next release.",
+            },
+
+            // ── Overview section ──────────────────────────────────────────
+            {
+                q: 'What\'s in the Overview section?',
+                a: 'A quick read on your account.<br><strong>Hours focused</strong> — total time spent in focus sessions, all-time.<br><strong>Sessions</strong> — total number of focus sessions started.<br><strong>Last 7 days</strong> — total minutes focused in the trailing week.<br><strong>Avg quality</strong> — average focus-quality score (0–100) across all your sessions.<br>Below the numbers: a 30-day daily-focus line chart, and a 60-day calendar grid where each square is one day, brighter = more focused, today is the bottom-right square.',
+            },
+            {
+                q: 'What is "focus quality"?',
+                a: 'A 0–100 score the app computes for every session based on how long you ran it, how many times you switched tabs (tab-aways) during it, and whether you completed it. Higher = more uninterrupted, longer sessions; lower = short and / or scattered.',
+            },
+            {
+                q: 'Can I click a day on the 60-day grid?',
+                a: 'Yes. Tap any square to jump into a full breakdown of that single day — minutes focused, sessions started/finished, tasks done, tab-switches, average quality, plus a timeline strip showing when each session ran. The same click works on the 90-day calendar (Focus section) and the 365-day calendar (Time section).',
+            },
+
+            // ── Focus section ─────────────────────────────────────────────
+            {
+                q: 'What\'s in the Focus section?',
+                a: 'Deep stats on your focus sessions.<br><strong>Total time</strong> · <strong>Sessions</strong> · <strong>Avg duration</strong> · <strong>Completion %</strong> at the top.<br>Then a 90-day daily-minutes line chart with a regression trend line, a histogram + smooth curve of your typical session length, a 7-day moving average, a 90-day calendar heatmap, and three callout pills (this week vs last week, today vs your normal, today\'s percentile rank).',
+            },
+            {
+                q: 'What does "avg duration" mean?',
+                a: 'The mean number of minutes per session across every focus session you\'ve finished. A common pattern: someone with a 25-minute target may have an avg duration of 18 because some sessions get cut short.',
+            },
+            {
+                q: 'What is the trend line on the daily-minutes chart?',
+                a: 'A linear regression fit through the last 90 days of daily focus minutes. A line going up = you\'re focusing more over time; flat = no clear direction; down = trending the other way. The subtitle text underneath says how much per week and how clear the pattern is.',
+            },
+            {
+                q: 'What is the smooth curve on the duration histogram?',
+                a: 'A Gaussian kernel density estimate (KDE). Bars show counts in 10 equal-width bins; the curve smooths over bin boundaries to show the true shape of your session-length distribution. If the curve has two peaks, you have two different "modes" of working (e.g. quick 25-minute sessions plus longer 50-minute deep-work blocks).',
+            },
+            {
+                q: 'What is the 7-day moving average?',
+                a: 'For each day, the average of that day plus the 6 days before. Short-term spikes wash out; the underlying drift becomes obvious. Use it when day-to-day numbers are noisy and you want to see whether you\'re actually moving forward.',
+            },
+
+            // ── Tasks section ─────────────────────────────────────────────
+            {
+                q: 'What\'s in the Tasks section?',
+                a: 'When you actually get tasks done.<br><strong>Tasks done</strong> · <strong>Avg per session</strong> · <strong>Tasks per hour</strong> · <strong>Sessions w/ tasks (%)</strong> at the top.<br>Then a 30-day per-day chart, a by-day-of-week bar chart, a by-hour bar chart, and an efficiency callout. Lets you spot the weekday and time of day you actually finish work.',
+            },
+            {
+                q: 'What does "tasks per hour" mean?',
+                a: 'Total tasks completed across all your history divided by total focused hours. A rough proxy for throughput. Most people land around 1–3 tasks per hour. The unit is tasks per hour of focus, not per wall-clock hour.',
+            },
+            {
+                q: 'What is the "sessions w/ tasks %" number?',
+                a: 'The percentage of focus sessions that had at least one task ticked off during them. Sessions with no tasks recorded aren\'t bad — sometimes you\'re just deep-thinking — but a low number can suggest you\'re not actively tracking what you do during focus blocks.',
+            },
+
+            // ── Sounds section ────────────────────────────────────────────
+            {
+                q: 'What\'s in the Sounds section?',
+                a: 'Which ambient sounds you use and whether they actually help.<br><strong>Unique sounds tried</strong> · <strong>Sessions with sound on (%)</strong> · <strong>Avg sounds per session</strong> · <strong>Your favourite</strong>.<br>A donut chart of your top 5 most-used sounds, plus a table showing how each sound shifts your average session length compared to sessions without it.',
+            },
+            {
+                q: 'What does the "change" column mean in the sound effects table?',
+                a: 'The percentage difference in average session length when that sound is on versus off. <strong>+15%</strong> means sessions with this sound on tend to run 15% longer than sessions without it. Negative numbers mean shorter.',
+            },
+            {
+                q: 'What does the "strength" column mean (small/medium/large)?',
+                a: 'Cohen\'s d — a standardised effect size. It accounts for how much variation you have between sessions, not just the raw average. <em>Trivial</em> = noise. <em>Small</em> = real but subtle. <em>Medium</em> = noticeable. <em>Large</em> = sound clearly changes your session shape.',
+            },
+
+            // ── Time section ──────────────────────────────────────────────
+            {
+                q: 'What\'s in the Time section?',
+                a: 'When across the day and week you focus.<br><strong>Peak hour</strong> · <strong>Peak day</strong> · <strong>Span (days)</strong> · <strong>Time-of-day character</strong> at the top.<br>An hour-by-day heatmap (24 hours × 7 weekdays, brighter cells = more minutes focused), a polar best-hour curve, a by-day bar chart, and a 365-day calendar heatmap of your full year.',
+            },
+            {
+                q: 'What is the "time-of-day character"?',
+                a: 'Whether you\'re a morning, afternoon, or evening person, based on which third of the day you spend the most minutes focusing. Morning = 5am–12pm, afternoon = 12pm–6pm, evening = 6pm–5am.',
+            },
+            {
+                q: 'What is the polar best-hour curve?',
+                a: 'A ring chart showing 24 hours arranged like a clock face. The thicker / brighter a wedge, the more minutes you\'ve focused at that hour across all your history. The peak wedge is your strongest hour.',
+            },
+
+            // ── Insights section overview ─────────────────────────────────
+            {
+                q: 'What\'s in the Insights section?',
+                a: "Up to 10 narrative cards derived from real machine-learning and statistics on your own data. Each card is a single sentence that tells you something concrete you couldn't get at a glance. The card surfaces the headline; <strong>tap any card</strong> to expand into a full breakdown — what the metric is, how it was computed, your actual numbers, and a caveat where one applies.",
+            },
+            {
+                q: 'Why are some Insights cards missing for me?',
+                a: "Each card has a sample-size requirement and a signal threshold. If you don't have enough sessions yet, or your data shows no real pattern, the card is hidden. Cards quietly appear over time as your history grows — a couple of weeks of regular use lights most of them up. We deliberately don't show cards that would require statistical hand-waving on thin data.",
+            },
+            {
+                q: 'How do I open the full breakdown for an insight?',
+                a: 'Tap the card, or focus it with <kbd>Tab</kbd> and press <kbd>Enter</kbd>. The grid swaps to a single-card detail view with sections like "What this is," "How we found it," "Your numbers," and "A note on this." Press <strong>‹ back to insights</strong> or hit <kbd>Esc</kbd> to return to the grid.',
+            },
+
+            // ── Per-insight: TREND ────────────────────────────────────────
+            {
+                q: 'What is the "Trend" insight?',
+                a: 'Whether your daily focus minutes are going up or down over the last 30 days.<br><strong>How it works:</strong> we fit a straight line through your 30 most recent days using linear regression — the line that minimises the squared distance from every point to it. The slope of that line is how many minutes per day your focus is shifting. We multiply by 7 to get the per-week change.<br><strong>How sure we are:</strong> the R² ("fit quality," 0–1). 0.50+ = clear pattern. 0.25–0.50 = real but bumpy. 0.10–0.25 = weak signal. Under 0.10 = probably just noise. Surfaced when |slope| > 0.5 min/week.',
+            },
+
+            // ── Per-insight: CHANGE-POINT ─────────────────────────────────
+            {
+                q: 'What is the "Your pattern shifted" insight?',
+                a: 'A specific day your daily focus jumped or dropped to a different level — not a gradual slope, but a step-change in how much you typically focus per day.<br><strong>How it works:</strong> CUSUM (cumulative sum) walks forward through your daily totals from the last 60 days. It accumulates how far each day deviates from your baseline. When the running sum crosses a significance threshold, that\'s the day the pattern changed. More honest than splitting the window in half — that approach reports the same result whether your shift happened on day 3 or day 27. CUSUM finds the actual moment.<br><strong>What it doesn\'t say:</strong> why. Common causes: starting or finishing a project, vacation, schedule change, picking up a new tool. If the date matches something specific in your life, the pattern is real.',
+            },
+
+            // ── Per-insight: VS THE MONTH BEFORE ──────────────────────────
+            {
+                q: 'What is the "Vs the month before" insight?',
+                a: 'How your average daily focus has changed comparing the last 30 days to the 30 days before that.<br><strong>How it works:</strong> we take the mean of your daily focus minutes for each 30-day stretch, then compute the percentage change from older to newer. Suppressed when the change is under ±5% (no signal) or when the change-point insight already explains the shift more precisely.',
+            },
+
+            // ── Per-insight: UNUSUAL DAY ──────────────────────────────────
+            {
+                q: 'What is the "Unusual day" insight?',
+                a: 'When today\'s focus minutes stand out from your last 30 days, OR when there have been one or more standout days in your last month.<br><strong>How it works:</strong> the z-score — how many standard deviations today is from your recent mean. Z ≥ 2 = top ~2.5% of recent days. Z ≥ 1.5 = notably above normal. Z ≤ −2 = bottom ~2.5%. We use leave-one-out: each day\'s z is computed against the *other* days, so a single big outlier can\'t inflate the distribution it\'s being measured against. Surfaced when |z| ≥ 1.5.',
+            },
+
+            // ── Per-insight: PATTERN FOUND (correlation) ──────────────────
+            {
+                q: 'What is the "Pattern found" insight?',
+                a: 'A relationship between two of your numbers — specifically, whether tab-switches inside a session correlate with that session\'s focus quality.<br><strong>How it works:</strong> Pearson correlation (r). Returns a value between −1 and +1. Negative r = when one goes up, the other goes down (the expected case for distractions vs quality). Positive r = both move together (the surprising case worth flagging). |r| ≥ 0.7 = very strong. ≥ 0.5 = strong. ≥ 0.3 = moderate. Under 0.2 = no insight surfaced.<br><strong>Caveat:</strong> correlation isn\'t causation. We see the pattern, but don\'t conclude that switching tabs <em>causes</em> lower quality.',
+            },
+
+            // ── Per-insight: TIME LOST ────────────────────────────────────
+            {
+                q: 'What is the "Time lost" insight?',
+                a: 'An estimate of focused time you\'ve lost to context-switching during your sessions.<br><strong>How it works:</strong> the Page Visibility API tells us when you switch away from this tab during a focus session. Each tab-away costs about <strong>9.5 minutes</strong> of getting-back-into-it time — a conservative figure from research on attention recovery (some studies cite 23 minutes). Total time lost = tab-aways × 9.5. Surfaced once you have at least 5 tab-aways in your history.',
+            },
+
+            // ── Per-insight: FORECAST ─────────────────────────────────────
+            {
+                q: 'What is the "Forecast" insight?',
+                a: 'How much you\'ll focus over the next 30 days, based on your recent pattern.<br><strong>How it works:</strong> Holt-Winters additive seasonal exponential smoothing. The model tracks three things at once — your current daily level, whether it\'s drifting up or down, and which days of the week tend to be higher or lower than your typical day. Recent days get more weight than old ones, so the forecast adjusts as you keep going.<br><strong>Confidence band:</strong> the shaded area around the projection is one standard deviation of the in-sample residuals, widened by √h with horizon. Wider band = less certain prediction.<br><strong>Fallback:</strong> with under 14 days of history, we use a simpler trailing-7-day flat-line projection (no weekly rhythm modelling).',
+            },
+
+            // ── Per-insight: WORK PATTERNS ────────────────────────────────
+            {
+                q: 'What is the "Work patterns" insight?',
+                a: 'A grouping of all your focus sessions into "types" — for example, "long, quiet sessions" or "scattered, interrupted sessions."<br><strong>How it works:</strong> k-means++ clustering. Each session becomes a 3-D point: (duration, focus quality, distractions). We try K = 2, 3, and 4, run each one 5 times with different random starts, and pick the K that produces the cleanest separation between groups (silhouette score). If no K produces meaningful separation (silhouette < 0.2), the insight is suppressed — the data simply has no clear groups.<br><strong>What you see:</strong> a small scatter where every session is a coloured dot, with the centre of each cluster drawn as a larger circle. Each cluster gets a plain-English label and description in the detail view.',
+            },
+
+            // ── Per-insight: WHAT HELPS YOU FINISH ────────────────────────
+            {
+                q: 'What is the "What helps you finish" insight?',
+                a: 'Which conditions (time of day, sound on, weekday, etc.) make you more or less likely to actually run a focus session to completion.<br><strong>How it works:</strong> for each named condition we compute P(complete | condition) — the percentage of sessions matching that condition that you finished. Then we divide by your overall completion rate to get the lift. A lift of 1.5× means you\'re 50% more likely to finish in that condition; 0.7× means 30% less likely.<br><strong>Sample-size guard:</strong> we need at least 10 sessions matching a condition before showing it. Below that, a 100%-of-3 fluke could dominate the ranked list with what\'s essentially coin-flip evidence.',
+            },
+
+            // ── Per-insight: STREAK PATTERN ───────────────────────────────
+            {
+                q: 'What is the "Streak pattern" insight?',
+                a: "Whether one finished or cut-short session predicts the next.<br><strong>How it works:</strong> a 2-state Markov chain over your sessions in chronological order. We count every back-to-back pair and compute four conditional probabilities — P(finish | finish), P(cut | finish), P(finish | cut), P(cut | cut). Then we compare each to its baseline rate (your overall finish rate). A cut-streak lift of 1.5× means after a cut-short session, you cut the next one 50% more often than baseline.<br><strong>Why this beats the completion-rate KPI:</strong> the overall percentage hides whether bad sessions cluster. Knowing that one cut predicts another is much more actionable — it tells you to be careful about the *next* session, not just to \"finish more.\"",
+            },
+
+            // ── Per-insight: FINISH RATE / COMPLETION ─────────────────────
+            {
+                q: 'What is the "Finish rate" insight?',
+                a: 'The percentage of focus sessions you start that you actually run all the way to the target time. <strong>Finished</strong> means you ran the full target duration (e.g. all 25 minutes of a 25-minute session). <strong>Cut short</strong> means you stopped, reset, or skipped before time was up. The detail view also breaks completion down by day of week and shows your last 8 sessions with their statuses.',
+            },
+
+            // ── About the data and ML ─────────────────────────────────────
+            {
+                q: 'How accurate are these insights with very few sessions?',
+                a: "Each insight has a hard sample-size threshold below which it's suppressed entirely. The trend card needs daily data over 30 days; correlation needs 8+ sessions; clustering needs 12+; lift conditions need 10+ matching the condition; the change-point insight needs at least 14 days of history. We'd rather hide a card than show you something that's mostly noise.",
+            },
+            {
+                q: 'Where can I see the actual data behind an insight?',
+                a: "Tap the card. The detail view always includes a \"Your numbers\" or \"What we found\" block with the underlying values — averages, sample sizes, conditional probabilities, etc. Nothing is computed and hidden; if a card claims a pattern, the supporting numbers are visible to you.",
+            },
+            {
+                q: 'Are my insights ever compared against other users?',
+                a: 'No. Every metric, every threshold, every trend, every cluster is computed only against your own past behaviour. There\'s no anonymised peer benchmark, no "users like you," no leaderboard — and no plan for any of those. The Profile is a mirror for your own work, not a comparison surface.',
+            },
+            {
+                q: 'How is "session quality" different from "completion"?',
+                a: '<strong>Completion</strong> is binary — did you run the full duration or not. <strong>Quality</strong> is a 0–100 score that also accounts for how long the session was and how scattered it was (tab-switches). A 50-minute session with zero tab-aways scores higher than a 25-minute session you finished but kept switching tabs in.',
+            },
+            {
+                q: 'How does the click-into-day feature work?',
+                a: "Any day cell on the 60-day Overview grid, the 90-day Focus calendar, or the 365-day Time calendar is clickable. Tapping it opens a single-day breakdown: minutes focused, sessions started/finished, tasks done, tab-switches, average quality, plus a 24-hour timeline strip showing when each session ran (solid bands for finished, dashed for cut short). Comparison block measures the day against your overall daily mean and your typical day-of-week. Empty days get an honest \"no focus sessions on this day\" card. Press <strong>‹ back</strong> or <kbd>Esc</kbd> to return.",
+            },
+            {
+                q: 'Why does the detail view sometimes show a "z-score" or "Pearson r" or "lift"?',
+                a: "We use real statistical methods rather than made-up scoring rules, and surface the raw numbers so a careful reader can verify the headline. Each detail block explains the term in plain English the first time it's used — z-score is \"how many standard deviations from the mean,\" Pearson r is \"how strongly two numbers move together (−1 to +1),\" lift is \"the ratio of one rate to the baseline rate.\" If you want the math, it's there; if you don't, the headline tells you everything that matters.",
             },
         ],
     },
