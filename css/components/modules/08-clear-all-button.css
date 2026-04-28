@@ -218,6 +218,125 @@
 }
 .tasks-eta.hidden { display: none; }
 
+/* Drag handle — small braille-dot glyph at the leading edge. Visible
+   on hover; styled so it doesn't compete with the task text. */
+.task-drag-handle {
+    color: rgba(255, 246, 225, 0.32);
+    font-size: 12px;
+    line-height: 1;
+    cursor: grab;
+    padding: 0 4px;
+    opacity: 0;
+    user-select: none;
+    transition: opacity 0.18s ease, color 0.18s ease;
+}
+.task-item:hover .task-drag-handle,
+.task-item:focus-within .task-drag-handle {
+    opacity: 0.9;
+}
+.task-item:active .task-drag-handle {
+    cursor: grabbing;
+    color: rgba(255, 220, 160, 0.85);
+}
+.task-item.is-dragging {
+    opacity: 0.55;
+    cursor: grabbing;
+}
+.task-item.is-drag-over {
+    box-shadow: inset 0 -2px 0 rgba(255, 205, 115, 0.85);
+}
+
+/* Due-date affordance. The icon is the visible cue; the underlying
+   <input type="date"> is layered on top so a tap on the icon opens
+   the picker. The icon brightens once a date is set. */
+.task-due {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    margin-left: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.18s ease, background 0.18s ease;
+}
+.task-item:hover .task-due,
+.task-item:focus-within .task-due,
+.task-due.has-date {
+    opacity: 1;
+}
+.task-due:hover,
+.task-due:focus-within {
+    background: rgba(255, 220, 160, 0.12);
+}
+.task-due__icon {
+    position: relative;
+    z-index: 1;
+    font-size: 12px;
+    pointer-events: none;
+    filter: grayscale(0.4);
+    color: rgba(255, 246, 225, 0.55);
+    transition: filter 0.18s ease, color 0.18s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+.task-due.has-date .task-due__icon {
+    filter: none;
+    color: rgba(255, 220, 160, 0.92);
+}
+.task-due__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    /* Native date inputs render their own button — hide it visually
+       but keep the field receiving the click so the picker opens. */
+    color-scheme: dark;
+}
+
+/* Due-date inline badge inside the task content row. Tone-coded:
+   overdue red, due-today amber, soon honey, later muted cream. */
+.task-due-badge {
+    margin-left: 8px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.task-due-badge--overdue {
+    color: #ff8a8a;
+    background: rgba(255, 138, 138, 0.14);
+    border: 1px solid rgba(255, 138, 138, 0.28);
+}
+.task-due-badge--today {
+    color: rgba(255, 205, 115, 0.95);
+    background: rgba(255, 205, 115, 0.14);
+    border: 1px solid rgba(255, 205, 115, 0.32);
+}
+.task-due-badge--soon {
+    color: rgba(255, 220, 160, 0.85);
+    background: rgba(255, 220, 160, 0.08);
+    border: 1px solid rgba(255, 220, 160, 0.2);
+}
+.task-due-badge--later {
+    color: rgba(255, 246, 225, 0.55);
+    background: rgba(255, 246, 225, 0.04);
+    border: 1px solid rgba(255, 246, 225, 0.1);
+}
+
 /* Ambient Mode */
 .ambient-content {
     display: flex;

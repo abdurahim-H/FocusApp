@@ -30,6 +30,7 @@ export function normalizeTask(t) {
         completed: !!t.completed,
         createdAt: t.createdAt || null,
         completedAt: t.completedAt || null,
+        dueAt: Number.isFinite(t.dueAt) ? Number(t.dueAt) : null,
         estimatedPomodoros: Number.isFinite(t.estimatedPomodoros)
             ? Math.max(0, Math.min(20, Math.round(t.estimatedPomodoros)))
             : 0,
@@ -108,6 +109,43 @@ export function setTaskEstimate(id, estimatedPomodoros) {
     const safe = Math.max(0, Math.min(20, Math.round(Number(estimatedPomodoros) || 0)));
     tasks.value = tasks.value.map((t) =>
         t.id === id ? { ...normalizeTask(t), estimatedPomodoros: safe } : t
+    );
+}
+
+/** Move a task to a new index. Used by the drag-to-reorder handler.
+ *  Both indices are clamped to the current list length so a stale
+ *  drop after another mutation can't corrupt the array. */
+export function moveTask(fromIndex, toIndex) {
+    const list = tasks.value;
+    if (!list.length) return;
+    const from = Math.max(0, Math.min(list.length - 1, fromIndex | 0));
+    const to = Math.max(0, Math.min(list.length - 1, toIndex | 0));
+    if (from === to) return;
+    const next = list.slice();
+    const [item] = next.splice(from, 1);
+    next.splice(to, 0, item);
+    tasks.value = next;
+}
+
+/** Set or clear a task's due date. Pass null to clear; pass a yyyy-mm-dd
+ *  string or a numeric epoch ms to set. Stored as epoch ms keyed off
+ *  the local-day-start so timezone changes don't shift the due date. */
+export function setTaskDueDate(id, dueAt) {
+    let normalized = null;
+    if (dueAt != null) {
+        if (typeof dueAt === 'string') {
+            // yyyy-mm-dd in local time → epoch ms at local-midnight.
+            const m = dueAt.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (m) {
+                const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0, 0);
+                normalized = d.getTime();
+            }
+        } else if (Number.isFinite(dueAt)) {
+            normalized = Number(dueAt);
+        }
+    }
+    tasks.value = tasks.value.map((t) =>
+        t.id === id ? { ...normalizeTask(t), dueAt: normalized } : t
     );
 }
 
@@ -226,6 +264,57 @@ export function initTaskRender() {
             e.preventDefault();
             toggleTask(Number(toggle.dataset.toggleTask));
         }
+    });
+
+    // Due-date input — fires `change` once the user picks (or clears)
+    // a date. Reads the input's value (yyyy-mm-dd) and feeds it to
+    // setTaskDueDate, which interprets the date in local time.
+    list.addEventListener('change', (e) => {
+        const dueInput = e.target.closest('[data-due-input]');
+        if (!dueInput) return;
+        const id = Number(dueInput.dataset.dueInput);
+        setTaskDueDate(id, dueInput.value || null);
+    });
+
+    // ── Drag-to-reorder ────────────────────────────────────────────
+    // Native HTML5 drag-and-drop. dragstart records the source id,
+    // dragover allows the drop, drop swaps. The "current dropTarget"
+    // gets a CSS class so the user sees where the drop will land.
+    let dragId = null;
+    list.addEventListener('dragstart', (e) => {
+        const li = e.target.closest('.task-item');
+        if (!li) return;
+        dragId = Number(li.dataset.taskId);
+        li.classList.add('is-dragging');
+        try { e.dataTransfer.effectAllowed = 'move'; } catch (_) {}
+    });
+    list.addEventListener('dragend', (e) => {
+        const li = e.target.closest('.task-item');
+        if (li) li.classList.remove('is-dragging');
+        list.querySelectorAll('.is-drag-over').forEach((el) => el.classList.remove('is-drag-over'));
+        dragId = null;
+    });
+    list.addEventListener('dragover', (e) => {
+        const target = e.target.closest('.task-item');
+        if (!target || dragId == null) return;
+        e.preventDefault();
+        try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
+        list.querySelectorAll('.is-drag-over').forEach((el) => {
+            if (el !== target) el.classList.remove('is-drag-over');
+        });
+        target.classList.add('is-drag-over');
+    });
+    list.addEventListener('drop', (e) => {
+        const target = e.target.closest('.task-item');
+        if (!target || dragId == null) return;
+        e.preventDefault();
+        const targetId = Number(target.dataset.taskId);
+        const current = tasks.value;
+        const fromIdx = current.findIndex((t) => t.id === dragId);
+        const toIdx = current.findIndex((t) => t.id === targetId);
+        if (fromIdx >= 0 && toIdx >= 0) moveTask(fromIdx, toIdx);
+        target.classList.remove('is-drag-over');
+        dragId = null;
     });
 
     if (clearBtn) {
@@ -358,12 +447,12 @@ function createTaskElement(task) {
     li.className = 'task-item liquid-glass-task';
     if (activeTaskId.value === task.id) li.classList.add('is-active-task');
     li.dataset.taskId = task.id;
-    // Whole content row is the toggle target — tap anywhere on the
-    // task to flip done/undone. Delete button stays its own target;
-    // the click handler runs the delete check first and short-circuits.
-    // The focus-lock pin and estimate stepper sit between the text
-    // and the delete button.
+    // Native HTML5 drag handle. The drag-handle cell sits at the start
+    // of the row; the rest of the row is plain content (so toggling
+    // works on touch without dragstart racing the click).
+    li.draggable = true;
     li.innerHTML = `
+        <span class="task-drag-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
         <div class="task-content" data-toggle-task="${task.id}" role="button" tabindex="0"
              aria-pressed="${task.completed}"
              aria-label="${task.completed ? 'Mark not done' : 'Mark done'}: ${escapeHtml(task.text)}">
@@ -373,14 +462,66 @@ function createTaskElement(task) {
             </span>
             <span class="task-text${task.completed ? ' task-completed' : ''}">${escapeHtml(task.text)}</span>
             ${renderTaskBadge(task)}
+            ${renderDueDateBadge(task)}
         </div>
         ${renderFocusLockButton(task)}
+        ${renderDueDateInput(task)}
         ${renderEstimateStepper(task)}
         <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--danger" data-delete-task="${task.id}" aria-label="Delete task">
             <span class="btn-icon" aria-hidden="true">✕</span>
         </button>
     `;
     return li;
+}
+
+/** Optional inline due-date input. Hidden behind a small calendar
+ *  icon by default; only the icon is rendered. The actual <input
+ *  type="date"> lives next to it but visually overlaid so clicking
+ *  the icon activates the picker. */
+function renderDueDateInput(task) {
+    const norm = normalizeTask(task);
+    const isoValue = norm.dueAt ? new Date(norm.dueAt).toLocaleDateString('en-CA') : '';
+    return `
+        <label class="task-due ${norm.dueAt ? 'has-date' : ''}"
+               aria-label="${norm.dueAt ? 'Edit due date' : 'Set due date'}"
+               title="${norm.dueAt ? 'Edit due date' : 'Set due date'}">
+            <span class="task-due__icon" aria-hidden="true">📅</span>
+            <input type="date" class="task-due__input"
+                   data-due-input="${task.id}"
+                   value="${escapeHtml(isoValue)}">
+        </label>
+    `;
+}
+
+/** Inline due-date badge — visible inside the task content area so
+ *  the user sees "due Tomorrow" / "overdue 3 days" without opening
+ *  the picker. Rendered only when a due date is set. */
+function renderDueDateBadge(task) {
+    const norm = normalizeTask(task);
+    if (!norm.dueAt) return '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(norm.dueAt);
+    due.setHours(0, 0, 0, 0);
+    const days = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+    let label, tone;
+    if (days < 0) {
+        label = days === -1 ? 'overdue 1 day' : `overdue ${-days} days`;
+        tone = 'overdue';
+    } else if (days === 0) {
+        label = 'due today';
+        tone = 'today';
+    } else if (days === 1) {
+        label = 'due tomorrow';
+        tone = 'soon';
+    } else if (days <= 7) {
+        label = `due in ${days} days`;
+        tone = 'soon';
+    } else {
+        label = `due ${due.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+        tone = 'later';
+    }
+    return `<span class="task-due-badge task-due-badge--${tone}">${escapeHtml(label)}</span>`;
 }
 
 /** Focus-lock button — pin / unpin the task as the active session
@@ -430,6 +571,13 @@ function updateTaskElement(el, task) {
     if (stepper) stepper.outerHTML = renderEstimateStepper(task);
     const lock = el.querySelector('.task-lock');
     if (lock) lock.outerHTML = renderFocusLockButton(task);
+    const due = el.querySelector('.task-due');
+    if (due) due.outerHTML = renderDueDateInput(task);
+    const dueBadge = el.querySelector('.task-due-badge');
+    const newDueBadge = renderDueDateBadge(task);
+    if (dueBadge && !newDueBadge) dueBadge.remove();
+    else if (dueBadge && newDueBadge) dueBadge.outerHTML = newDueBadge;
+    else if (!dueBadge && newDueBadge && content) content.insertAdjacentHTML('beforeend', newDueBadge);
     el.classList.toggle('is-active-task', activeTaskId.value === task.id);
 }
 
