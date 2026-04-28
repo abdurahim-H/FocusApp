@@ -145,7 +145,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What is the Home mini-timer?',
-                a: "A compact floating widget that appears as soon as any session is running or paused. Shows the countdown, progress arc, session number (1 / 4), and the play/pause + skip + reset controls. The clock face is a real analogue dial — minute hand sweeps over the session, second hand ticks. Click the time digits to jump to the Focus tab.",
+                a: "A compact floating widget that appears as soon as any session is running or paused. Shows the countdown, progress arc, session label (FOCUS / BREAK), session number (1 / 4), and the dock + play/pause + skip + reset controls. The clock face is a real analogue dial — minute hand sweeps over the session, second hand ticks. Click anywhere on the timer face (the clock or the digits) to jump to the Focus tab.",
             },
             {
                 q: 'Can I move or resize the mini-timer?',
@@ -250,7 +250,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What does each cosmos toolbar button do?',
-                a: 'Hover any toolbar button to see its name. From left to right:<br><strong>Add a sound</strong> (⊕) opens the sound library.<br><strong>Save constellation</strong> (★) saves the current arrangement.<br><strong>Sleep timer</strong> (☾) sets a 15/30/60/120 min fade-out.<br><strong>Surprise me</strong> (✦) drops in a random arrangement.<br><strong>Immersive mode</strong> (⌗) hides the chrome.<br><strong>Clear sky</strong> (⊝) fades out and removes every sound.',
+                a: 'The toolbar is a floating pill at the bottom-centre of the screen. Hover any button to see its name as a tooltip. From left to right:<br><strong>Add a sound</strong> (a circle with a cross inside) opens the sound library.<br><strong>Save constellation</strong> (a five-point star) saves the current arrangement under a name you choose.<br><strong>Sleep timer</strong> (a crescent moon) sets a 15 / 30 / 60 / 120-minute fade-out — the button glows around the rim while the timer is running.<br><strong>Surprise me</strong> (a four-point sparkle) picks 1–3 sounds at random with tasteful volumes and small EQ tilts.<br><strong>Immersive mode</strong> (four corner brackets) hides the nav, settings star, mini-timer, and toolbar so the scene fills the viewport.<br><strong>Clear sky</strong> (a circle with a horizontal line) fades out and removes every active sound.',
             },
             {
                 q: 'How does the master volume work?',
@@ -258,7 +258,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'What sounds are available?',
-                a: 'Today: <strong>Rain</strong> (translucent droplet-nebula, shimmer on highs), <strong>Ocean</strong> (wave-ringed gas giant, swell on bass), <strong>Forest</strong> (moss-canopy moon, twist on mids), and <strong>Café</strong> (warm hearth-star, flares on highs). Each body has a bespoke shader bound to its own audio FFT — every body breathes with its own audio, not the master. More sounds tagged "Soon" appear in the library drawer.',
+                a: 'Today four ambient sounds, each rendered in the cosmos as a tiny luminous celestial body: <strong>Rain</strong> (cool blue), <strong>Ocean</strong> (cyan), <strong>Forest</strong> (emerald green), and <strong>Café</strong> (amber/gold). The body is the same shape for every sound — a bright core wrapped in a soft halo — only the tint differs, so the four are easy to recognise without reading copy. Each one has its own resting orbital lane around the black hole. Ten more sounds (thunder, wind, stream, birds, fireplace, library, fan, white/pink/brown noise) appear in the library drawer tagged <strong>Soon</strong>.',
             },
             {
                 q: 'What is a constellation?',
@@ -279,10 +279,6 @@ export const HELP_CATEGORIES = [
             {
                 q: 'How do I pin a constellation as my focus-start arrangement?',
                 a: 'Click the <strong>star</strong> on any constellation in the library. Combined with <em>Settings → Sounds → Auto-start mix on focus session</em>, this automatically loads the pinned constellation every time you start a focus session.',
-            },
-            {
-                q: 'What does the cosmos toolbar do?',
-                a: 'Floating pill at the bottom-centre of the screen. Six tools:<br><strong>+</strong> Open the sound library<br><strong>★</strong> Save current constellation<br><strong>☾</strong> Sleep timer<br><strong>✧</strong> Surprise me — random constellation<br><strong>⛶</strong> Immersive mode — hides chrome, scene fills viewport<br><strong>⊝</strong> Clear sky — fade out all sounds',
             },
             {
                 q: 'What is the sleep timer?',
@@ -326,7 +322,7 @@ export const HELP_CATEGORIES = [
             },
             {
                 q: 'How are the bodies audio-reactive?',
-                a: "Each track has its own <code>AnalyserNode</code> tapped after its post-pan signal, feeding FFT data straight into that body's shader. The rain droplet shimmers on highs, the ocean ring swells on bass, the forest moss twists on mids — all driven by the actual frequency content of the audio coming out of <em>that</em> track, not the master bus.",
+                a: "Each track has its own <code>AnalyserNode</code> tapped after its post-pan signal. The cosmos sound-body for that track reads the analyser's overall energy every frame and uses it to gently brighten the body's core and halo when the track is loud. It's per-track, not per-master — turning one sound up makes only that one body breathe harder. The motion is intentionally subtle: the body reads as a celestial object, not as a bouncing audio meter.",
             },
         ],
     },
@@ -650,19 +646,23 @@ export const HELP_CATEGORIES = [
         entries: [
             {
                 q: 'Where can I see my stats?',
-                a: 'The <strong>stats bar</strong> sits directly under the timer controls on the Focus tab. Four live chips: sessions today, total focus time, tasks done today, current streak.',
+                a: 'The <strong>stats bar</strong> sits directly under the timer controls on the Focus tab. Four live chips: <strong>sessions today</strong>, <strong>total focus time</strong>, <strong>tasks done today</strong>, and a <strong>momentum trail</strong> — seven small dots showing the past seven days at a glance.',
             },
             {
                 q: 'What does each stat track?',
-                a: '<strong>Sessions</strong> — focus sessions completed today; resets at midnight.<br><strong>Total focus time</strong> — lifetime focus time, formatted h/m/s.<br><strong>Tasks done</strong> — tasks you checked off today; resets at midnight.<br><strong>Streak</strong> — consecutive calendar days with at least one completed focus session.',
+                a: '<strong>Sessions</strong> — focus sessions completed today; resets at midnight.<br><strong>Total focus time</strong> — lifetime focus time, formatted h/m/s.<br><strong>Tasks done</strong> — tasks you checked off today; resets at midnight.<br><strong>Momentum</strong> — seven dots, oldest on the left, today on the right. Each dot brightens with the number of focus sessions you completed that day, normalised against your recent peak.',
             },
             {
-                q: 'How does the streak work?',
-                a: 'Every day you finish at least one focus session counts as +1. Miss a day and the streak resets to zero the next time you complete a session.',
+                q: 'How does the momentum trail work?',
+                a: 'Each dot represents one day. The rightmost is today; the leftmost is six days ago. The more focus sessions you completed on a given day, the brighter that day\'s dot. Brightness is normalised against your own recent peak (with a soft floor so a single session still reads as clearly lit) and a faint baseline so empty days never disappear entirely. Replaces the old guilt-shaped streak counter that reset to zero on a missed day — the trail tells you the same story without punishing you for taking a break.',
+            },
+            {
+                q: 'Is there still a streak counter?',
+                a: 'Internally yes — the app still tracks <code>currentStreak</code> (consecutive calendar days with at least one completed focus session) and you\'ll see it in the exported CSV. The stats bar simply shows the seven-dot momentum trail instead of the bare number, which is a fairer read for most people.',
             },
             {
                 q: 'Can I export my stats?',
-                a: 'Yes. <strong>Settings → Data & About → Export → Stats (CSV)</strong>. Columns: sessions today, total focus seconds, tasks completed today, current streak, last focus date.',
+                a: 'Yes. <strong>Settings → Data & About → Export → Stats (CSV)</strong>. The file is a small two-column "metric, value" table with these rows: <code>sessionsToday</code>, <code>totalFocusSeconds</code>, <code>tasksCompletedToday</code>, <code>currentStreak</code>, <code>lastFocusDate</code>.',
             },
             {
                 q: 'Can I reset my stats?',
