@@ -23,7 +23,7 @@ import * as cosmosPointer from '../ui/cosmos-pointer.js';
 import * as helpCenter from '../ui/help-center.js';
 import * as homeMiniTimer from '../ui/home-mini-timer.js';
 import * as navigation from '../ui/navigation.js';
-import * as observatory from '../ui/observatory.js';
+import * as profile from '../ui/profile.js';
 import * as settings from '../ui/settings.js';
 import * as timerParticles from '../ui/timer-particles.js';
 import * as uiEffects from '../ui/ui-effects.js';
@@ -51,7 +51,7 @@ const modules = {
     cosmosEqRing,
     cosmosA11y,
     account,
-    observatory,
+    profile,
 };
 
 /**
@@ -75,6 +75,35 @@ export async function initApp() {
         const loadingProgress = document.getElementById('loadingProgress');
         const loadingScreen = document.getElementById('loadingScreen');
         const container = document.querySelector('.container');
+
+        // Deadline watchdog — if init3D hasn't hidden the loading screen
+        // within 7s we hide it anyway. Boot is normally ~3s; the
+        // deadline catches GPU init hangs, headless WebGL stalls, and
+        // any future regression where the .then chain doesn't reach
+        // the hide path. The app keeps booting in the background; we
+        // just stop blocking the UI behind a spinner.
+        const hideDeadline = setTimeout(() => {
+            if (loadingScreen && !loadingScreen.classList.contains('hide')) {
+                console.warn('[boot] loading screen deadline elapsed — force-hiding');
+                loadingScreen.classList.add('hide');
+                setTimeout(() => {
+                    if (loadingScreen) loadingScreen.style.display = 'none';
+                }, 300);
+            }
+            if (container) container.classList.add('loaded');
+        }, 7_000);
+        // Anyone who hides the loading screen earlier should clear the
+        // deadline. Easiest hook: watch for the `.hide` class via a
+        // MutationObserver.
+        if (loadingScreen) {
+            const obs = new MutationObserver(() => {
+                if (loadingScreen.classList.contains('hide')) {
+                    clearTimeout(hideDeadline);
+                    obs.disconnect();
+                }
+            });
+            obs.observe(loadingScreen, { attributes: true, attributeFilter: ['class'] });
+        }
 
         // The orbital progress arc is driven by a --progress custom property
         // (0-100). CSS maps that to stroke-dashoffset. See style.css.
@@ -255,11 +284,11 @@ export async function initApp() {
             loadedModules.account.initAccount();
         }
 
-        // Observatory — profile-tied analytics surface. Entry points:
+        // Profile — full analytics destination. Entry points:
         // momentum-trail click, the 'i' shortcut, and the account
-        // dropdown's "Open the Observatory" button.
-        if (loadedModules.observatory?.initObservatory) {
-            loadedModules.observatory.initObservatory();
+        // dropdown's "Profile" button.
+        if (loadedModules.profile?.initProfile) {
+            loadedModules.profile.initProfile();
         }
 
         // T3.5: onboarding tour — auto-show on first visit
