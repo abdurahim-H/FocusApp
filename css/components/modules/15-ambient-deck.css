@@ -1293,6 +1293,23 @@
     transform: scale(1.08);
     filter: drop-shadow(0 0 22px rgba(255, 205, 115, 0.45));
 }
+/* Photo portrait — the painted PNG used by the new sound art. Lives
+   inside .libcard__art so it inherits the hover-scale and drop-shadow
+   already defined above. width/height attributes on the <img> element
+   are 128 (the source); CSS shrinks to fit the 56px slot, leaving
+   retina headroom and giving us a slightly softer rendering than a
+   1:1 paint. border-radius matches the source artwork's circular
+   bezel so the soft shadow doesn't clip on rectangular bounds. */
+.libcard__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
 /* Legacy emoji icon — kept for back-compat with old card markup. */
 .libcard__icon {
     font-size: 24px;

@@ -7,7 +7,12 @@ _quarantine/
 # Screenshots and temp photos
 *.png
 !assets/*.png
+!public/sound-art/*.png
+!public/icon.svg
 temp- photos/
+
+# Source-of-truth artwork (not deployed; optimized copies live in public/sound-art/)
+pictures/
 
 # Dependencies
 node_modules/

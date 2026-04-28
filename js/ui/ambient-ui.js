@@ -967,20 +967,38 @@ function comingSoonCard(s) {
     `;
 }
 
-// Cosmic preview — a small SVG portrait of a sound's celestial body.
-// Uses the same tints / motifs that the body's shader uses so the drawer
-// preview is recognisably the same object the user will see in the scene
-// once they pick it. Generic for unknown sounds: a clean gold orb.
+// Set of sound ids that have a hand-painted PNG portrait in
+// /public/sound-art/. All four shipping sounds plus the ten "Soon"
+// teasers have art today; if a future sound id is added without art,
+// cosmicPreviewSVG falls back to the small SVG default below so the
+// card never renders a broken-image placeholder.
+const SOUND_ART_IDS = new Set([
+    'rain', 'ocean', 'forest', 'cafe',
+    'thunder', 'wind', 'stream', 'birds',
+    'fire', 'library', 'fan',
+    'whitenoise', 'pinknoise', 'brownnoise',
+]);
+
+// Cosmic preview — a small portrait shown on each library-drawer card.
+// Two render paths:
+//   1. Known sound id with artwork → an <img> pointing to a 128px
+//      lazy-loaded PNG in /public/sound-art/. The PNG is sized to the
+//      56×56 art slot via CSS (.libcard__photo). decoding="async" +
+//      loading="lazy" keep the page-load cost at zero — the drawer
+//      doesn't open until the user clicks the cosmos toolbar's + button.
+//   2. Unknown id → a tiny SVG default (single bright node + halo) so
+//      the card still has something to show.
 function cosmicPreviewSVG(id, { dim = false } = {}) {
+    const opacity = dim ? 0.55 : 1;
+    if (SOUND_ART_IDS.has(id)) {
+        return `<img class="libcard__photo" src="/sound-art/${id}.png"
+                     alt="" aria-hidden="true"
+                     width="128" height="128"
+                     loading="lazy" decoding="async"
+                     style="opacity:${opacity}">`;
+    }
     const recipe = COSMIC_PREVIEWS[id] || COSMIC_PREVIEWS.__default;
-    const opacity = dim ? 0.5 : 1;
     const motif = recipe.motif();
-    // Each sound icon now lives in the same visual language as the
-    // constellation mix cards: dots + thin lines on a transparent
-    // background, with a faint singularity halo behind the motif.
-    // Replaced the heavy radial-gradient orb that read as opaque
-    // "blob" — the motifs are now able to breathe and feel like
-    // small celestial diagrams instead of stickers.
     return `
         <svg viewBox="0 0 56 56" width="56" height="56" style="opacity:${opacity}">
             <defs>
