@@ -337,6 +337,218 @@
     border: 1px solid rgba(255, 246, 225, 0.1);
 }
 
+/* Task row → flex container so the new wrapper structure (.task-row
+   + .task-subtasks) lays out cleanly. */
+.task-item {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+}
+.task-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+/* Project tag chip on the parent row. Tight, tone-neutral, lets the
+   user spot grouping without any setup work in the data. */
+.task-project-chip {
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: rgba(180, 144, 232, 0.9);
+    background: rgba(180, 144, 232, 0.1);
+    border: 1px solid rgba(180, 144, 232, 0.22);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.task-subtask-counter {
+    margin-left: 8px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 10px;
+    color: rgba(255, 246, 225, 0.7);
+    background: rgba(255, 246, 225, 0.04);
+    border: 1px solid rgba(255, 246, 225, 0.1);
+}
+
+/* Subtasks toggle — small chevron button. Rotates on expand. */
+.task-subtasks-toggle {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.45);
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-left: 2px;
+    opacity: 0;
+    transition: opacity 0.18s ease, color 0.18s ease, transform 0.2s ease, background 0.18s ease;
+}
+.task-item:hover .task-subtasks-toggle,
+.task-item:focus-within .task-subtasks-toggle,
+.task-subtasks-toggle.has-any {
+    opacity: 1;
+}
+.task-subtasks-toggle:hover,
+.task-subtasks-toggle:focus-visible {
+    background: rgba(255, 246, 225, 0.06);
+    color: rgba(255, 246, 225, 0.95);
+    outline: none;
+}
+.task-item.is-expanded .task-subtasks-toggle {
+    transform: rotate(180deg);
+}
+
+/* Subtask drawer — collapses by default, expands when the parent
+   row is .is-expanded. Indented under the parent so the nested
+   structure reads visually. */
+.task-subtasks {
+    max-height: 0;
+    overflow: hidden;
+    padding-left: 36px;
+    transition: max-height 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+                margin 0.3s ease;
+}
+.task-item.is-expanded .task-subtasks {
+    max-height: 320px;
+    margin-top: 6px;
+}
+.subtask-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.022);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.18s ease;
+}
+.subtask-item:hover { background: rgba(255, 255, 255, 0.04); }
+.subtask-item.is-done .subtask-toggle__text {
+    text-decoration: line-through;
+    color: rgba(255, 246, 225, 0.45);
+}
+.subtask-toggle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.85);
+    text-align: left;
+    cursor: pointer;
+    padding: 4px 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12.5px;
+}
+.subtask-toggle__check {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 220, 160, 0.32);
+    color: rgba(255, 220, 160, 0.95);
+    font-size: 10px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.subtask-item.is-done .subtask-toggle__check {
+    background: rgba(255, 205, 115, 0.85);
+    border-color: rgba(255, 205, 115, 0.95);
+    color: rgba(0, 0, 0, 0.7);
+}
+.subtask-delete {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 138, 138, 0.7);
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.subtask-delete:hover,
+.subtask-delete:focus-visible {
+    background: rgba(255, 138, 138, 0.14);
+    color: rgba(255, 138, 138, 1);
+    outline: none;
+}
+
+/* Subtask add form. Sits at the bottom of the drawer. */
+.subtask-add {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+}
+.subtask-add__input {
+    flex: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.14);
+    background: rgba(255, 255, 255, 0.025);
+    color: rgba(255, 246, 225, 0.92);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12px;
+}
+.subtask-add__input:focus {
+    border-color: rgba(255, 220, 160, 0.4);
+    outline: none;
+    background: rgba(255, 255, 255, 0.04);
+}
+.subtask-add__btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.22);
+    background: rgba(255, 220, 160, 0.06);
+    color: rgba(255, 220, 160, 0.85);
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.subtask-add__btn:hover,
+.subtask-add__btn:focus-visible {
+    background: rgba(255, 220, 160, 0.16);
+    color: rgba(255, 246, 225, 0.95);
+    border-color: rgba(255, 220, 160, 0.4);
+    outline: none;
+}
+
 /* Ambient Mode */
 .ambient-content {
     display: flex;

@@ -24,6 +24,15 @@ import { recordTaskToggle } from '../features/statistics.js';
  *  pre- or post-Wave-2. Cheap; called on every read path. */
 export function normalizeTask(t) {
     if (!t || typeof t !== 'object') return t;
+    const subtasks = Array.isArray(t.subtasks)
+        ? t.subtasks
+              .filter((s) => s && typeof s === 'object')
+              .map((s) => ({
+                  id: Number(s.id) || Date.now() + Math.random(),
+                  text: s.text || '',
+                  completed: !!s.completed,
+              }))
+        : [];
     return {
         id: t.id,
         text: t.text || '',
@@ -31,11 +40,13 @@ export function normalizeTask(t) {
         createdAt: t.createdAt || null,
         completedAt: t.completedAt || null,
         dueAt: Number.isFinite(t.dueAt) ? Number(t.dueAt) : null,
+        project: typeof t.project === 'string' ? t.project.trim() : '',
         estimatedPomodoros: Number.isFinite(t.estimatedPomodoros)
             ? Math.max(0, Math.min(20, Math.round(t.estimatedPomodoros)))
             : 0,
         spentSeconds: Math.max(0, Number(t.spentSeconds) || 0),
         completedInSession: Math.max(0, Number(t.completedInSession) || 0),
+        subtasks,
     };
 }
 
@@ -125,6 +136,57 @@ export function moveTask(fromIndex, toIndex) {
     const [item] = next.splice(from, 1);
     next.splice(to, 0, item);
     tasks.value = next;
+}
+
+/** Add a subtask to a parent task. text is trimmed; empty strings ignored. */
+export function addSubtask(parentId, text) {
+    const trimmed = (text || '').trim();
+    if (!trimmed) return;
+    tasks.value = tasks.value.map((t) => {
+        if (t.id !== parentId) return t;
+        const norm = normalizeTask(t);
+        return {
+            ...norm,
+            subtasks: [
+                ...norm.subtasks,
+                { id: Date.now(), text: trimmed, completed: false },
+            ],
+        };
+    });
+}
+
+/** Toggle a subtask's completed state. */
+export function toggleSubtask(parentId, subtaskId) {
+    tasks.value = tasks.value.map((t) => {
+        if (t.id !== parentId) return t;
+        const norm = normalizeTask(t);
+        return {
+            ...norm,
+            subtasks: norm.subtasks.map((s) =>
+                s.id === subtaskId ? { ...s, completed: !s.completed } : s
+            ),
+        };
+    });
+}
+
+/** Delete a subtask by id. */
+export function deleteSubtask(parentId, subtaskId) {
+    tasks.value = tasks.value.map((t) => {
+        if (t.id !== parentId) return t;
+        const norm = normalizeTask(t);
+        return {
+            ...norm,
+            subtasks: norm.subtasks.filter((s) => s.id !== subtaskId),
+        };
+    });
+}
+
+/** Set or clear a task's project tag. Empty string clears it. */
+export function setTaskProject(id, project) {
+    const trimmed = (project || '').trim().slice(0, 32);
+    tasks.value = tasks.value.map((t) =>
+        t.id === id ? { ...normalizeTask(t), project: trimmed } : t
+    );
 }
 
 /** Set or clear a task's due date. Pass null to clear; pass a yyyy-mm-dd
@@ -217,6 +279,31 @@ export function initTaskRender() {
     // but their explicit short-circuits keep a click on them from
     // toggling the task-done state.
     list.addEventListener('click', (e) => {
+        // Subtasks toggle (chevron) — open/close the drawer.
+        const subToggleBtn = e.target.closest('[data-subtasks-toggle]');
+        if (subToggleBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const li = subToggleBtn.closest('.task-item');
+            if (li) li.classList.toggle('is-expanded');
+            return;
+        }
+        // Subtask check toggle.
+        const subTog = e.target.closest('[data-subtask-toggle]');
+        if (subTog) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSubtask(Number(subTog.dataset.parentTask), Number(subTog.dataset.subtaskToggle));
+            return;
+        }
+        // Subtask delete.
+        const subDel = e.target.closest('[data-subtask-delete]');
+        if (subDel) {
+            e.preventDefault();
+            e.stopPropagation();
+            deleteSubtask(Number(subDel.dataset.parentTask), Number(subDel.dataset.subtaskDelete));
+            return;
+        }
         const lockBtn = e.target.closest('[data-task-lock]');
         if (lockBtn) {
             e.preventDefault();
@@ -274,6 +361,24 @@ export function initTaskRender() {
         if (!dueInput) return;
         const id = Number(dueInput.dataset.dueInput);
         setTaskDueDate(id, dueInput.value || null);
+    });
+
+    // Subtask add form — Enter in the input or click on the + button
+    // submits. The form handler stops propagation so the parent row
+    // doesn't toggle its done state.
+    list.addEventListener('submit', (e) => {
+        const form = e.target.closest('[data-subtask-add]');
+        if (!form) return;
+        e.preventDefault();
+        const parentId = Number(form.dataset.subtaskAdd);
+        const input = form.querySelector('.subtask-add__input');
+        if (!input) return;
+        addSubtask(parentId, input.value);
+        input.value = '';
+        input.focus();
+        // Make sure the parent row is expanded after adding.
+        const li = form.closest('.task-item');
+        if (li) li.classList.add('is-expanded');
     });
 
     // ── Drag-to-reorder ────────────────────────────────────────────
@@ -443,35 +548,118 @@ function formatClockTime(d) {
 // ============================================================================
 
 function createTaskElement(task) {
+    const norm = normalizeTask(task);
     const li = document.createElement('li');
     li.className = 'task-item liquid-glass-task';
     if (activeTaskId.value === task.id) li.classList.add('is-active-task');
+    if (norm.subtasks.length > 0) li.classList.add('has-subtasks');
     li.dataset.taskId = task.id;
-    // Native HTML5 drag handle. The drag-handle cell sits at the start
-    // of the row; the rest of the row is plain content (so toggling
-    // works on touch without dragstart racing the click).
     li.draggable = true;
+    // Track expansion state per-row in a data attribute so re-renders
+    // don't collapse a user's open subtask drawer.
+    li.dataset.subtasksExpanded = norm.subtasks.length > 0 ? 'true' : 'false';
     li.innerHTML = `
-        <span class="task-drag-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
-        <div class="task-content" data-toggle-task="${task.id}" role="button" tabindex="0"
-             aria-pressed="${task.completed}"
-             aria-label="${task.completed ? 'Mark not done' : 'Mark done'}: ${escapeHtml(task.text)}">
-            <span class="liquid-glass-checkbox">
-                <input type="checkbox" ${task.completed ? 'checked' : ''} tabindex="-1" aria-hidden="true">
-                <span class="checkmark"></span>
-            </span>
-            <span class="task-text${task.completed ? ' task-completed' : ''}">${escapeHtml(task.text)}</span>
-            ${renderTaskBadge(task)}
-            ${renderDueDateBadge(task)}
+        <div class="task-row">
+            <span class="task-drag-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
+            <div class="task-content" data-toggle-task="${task.id}" role="button" tabindex="0"
+                 aria-pressed="${task.completed}"
+                 aria-label="${task.completed ? 'Mark not done' : 'Mark done'}: ${escapeHtml(task.text)}">
+                <span class="liquid-glass-checkbox">
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} tabindex="-1" aria-hidden="true">
+                    <span class="checkmark"></span>
+                </span>
+                <span class="task-text${task.completed ? ' task-completed' : ''}">${escapeHtml(task.text)}</span>
+                ${renderTaskBadge(task)}
+                ${renderDueDateBadge(task)}
+                ${renderProjectChip(task)}
+                ${renderSubtaskCounter(norm)}
+            </div>
+            ${renderSubtasksToggle(task)}
+            ${renderFocusLockButton(task)}
+            ${renderDueDateInput(task)}
+            ${renderEstimateStepper(task)}
+            <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--danger" data-delete-task="${task.id}" aria-label="Delete task">
+                <span class="btn-icon" aria-hidden="true">✕</span>
+            </button>
         </div>
-        ${renderFocusLockButton(task)}
-        ${renderDueDateInput(task)}
-        ${renderEstimateStepper(task)}
-        <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--danger" data-delete-task="${task.id}" aria-label="Delete task">
-            <span class="btn-icon" aria-hidden="true">✕</span>
-        </button>
+        ${renderSubtasksDrawer(task)}
     `;
     return li;
+}
+
+/** Chevron toggle that expands the subtask drawer. Always rendered so
+ *  the user can ADD a first subtask; rotates to open state when the
+ *  drawer is expanded. */
+function renderSubtasksToggle(task) {
+    const norm = normalizeTask(task);
+    const hasAny = norm.subtasks.length > 0;
+    return `
+        <button class="task-subtasks-toggle ${hasAny ? 'has-any' : ''}"
+                type="button"
+                data-subtasks-toggle="${task.id}"
+                aria-label="${hasAny ? 'Show subtasks' : 'Add a subtask'}"
+                title="${hasAny ? 'Show / hide subtasks' : 'Add a subtask'}">
+            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+                <path d="M3 4.5 L6 7.5 L9 4.5" fill="none" stroke="currentColor"
+                      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    `;
+}
+
+/** Small "n / total" pill on the parent row when subtasks exist. */
+function renderSubtaskCounter(norm) {
+    if (!norm.subtasks.length) return '';
+    const done = norm.subtasks.filter((s) => s.completed).length;
+    return `<span class="task-subtask-counter" title="subtasks done">${done}/${norm.subtasks.length}</span>`;
+}
+
+/** Optional project chip rendered next to the task text. */
+function renderProjectChip(task) {
+    const norm = normalizeTask(task);
+    if (!norm.project) return '';
+    return `<span class="task-project-chip" title="project tag">#${escapeHtml(norm.project)}</span>`;
+}
+
+/** Subtasks drawer — a collapsible nested list with an "add" input.
+ *  Rendered inside the parent <li>; the .task-item.is-expanded class
+ *  on the parent toggles its visibility. */
+function renderSubtasksDrawer(task) {
+    const norm = normalizeTask(task);
+    const items = norm.subtasks
+        .map(
+            (s) => `
+        <li class="subtask-item ${s.completed ? 'is-done' : ''}" data-subtask-id="${s.id}">
+            <button class="subtask-toggle"
+                    type="button"
+                    data-subtask-toggle="${s.id}"
+                    data-parent-task="${task.id}"
+                    aria-pressed="${s.completed}"
+                    aria-label="${s.completed ? 'Mark not done' : 'Mark done'}: ${escapeHtml(s.text)}">
+                <span class="subtask-toggle__check" aria-hidden="true">${s.completed ? '✓' : ''}</span>
+                <span class="subtask-toggle__text">${escapeHtml(s.text)}</span>
+            </button>
+            <button class="subtask-delete"
+                    type="button"
+                    data-subtask-delete="${s.id}"
+                    data-parent-task="${task.id}"
+                    aria-label="Delete subtask">×</button>
+        </li>
+    `
+        )
+        .join('');
+    return `
+        <div class="task-subtasks">
+            <ul class="subtask-list">${items}</ul>
+            <form class="subtask-add" data-subtask-add="${task.id}">
+                <input type="text" class="subtask-add__input"
+                       placeholder="Add a subtask…"
+                       maxlength="120"
+                       aria-label="New subtask text">
+                <button type="submit" class="subtask-add__btn" aria-label="Add subtask">+</button>
+            </form>
+        </div>
+    `;
 }
 
 /** Optional inline due-date input. Hidden behind a small calendar
@@ -578,6 +766,29 @@ function updateTaskElement(el, task) {
     if (dueBadge && !newDueBadge) dueBadge.remove();
     else if (dueBadge && newDueBadge) dueBadge.outerHTML = newDueBadge;
     else if (!dueBadge && newDueBadge && content) content.insertAdjacentHTML('beforeend', newDueBadge);
+
+    // Subtasks drawer + counter + project chip — replace fragments in
+    // place so the user's expanded/collapsed state on the parent row
+    // is preserved (carried via the `.is-expanded` class on the <li>).
+    const norm = normalizeTask(task);
+    const counter = el.querySelector('.task-subtask-counter');
+    const newCounter = renderSubtaskCounter(norm);
+    if (counter && !newCounter) counter.remove();
+    else if (counter && newCounter) counter.outerHTML = newCounter;
+    else if (!counter && newCounter && content) content.insertAdjacentHTML('beforeend', newCounter);
+
+    const project = el.querySelector('.task-project-chip');
+    const newProject = renderProjectChip(task);
+    if (project && !newProject) project.remove();
+    else if (project && newProject) project.outerHTML = newProject;
+    else if (!project && newProject && content) content.insertAdjacentHTML('beforeend', newProject);
+
+    const drawer = el.querySelector('.task-subtasks');
+    if (drawer) drawer.outerHTML = renderSubtasksDrawer(task);
+    const subToggle = el.querySelector('.task-subtasks-toggle');
+    if (subToggle) subToggle.outerHTML = renderSubtasksToggle(task);
+
+    el.classList.toggle('has-subtasks', norm.subtasks.length > 0);
     el.classList.toggle('is-active-task', activeTaskId.value === task.id);
 }
 
