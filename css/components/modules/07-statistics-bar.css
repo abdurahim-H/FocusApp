@@ -17,6 +17,46 @@
     gap: 2px;
 }
 
+/* "Focused" chip wraps a small SVG goal-ring around the value. The
+   chip becomes the positioning context for the absolute-positioned
+   ring; the value stays in normal flow. */
+.stat-chip--focused {
+    position: relative;
+    padding: 2px 0;
+}
+.stat-goal-ring {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 38px;
+    height: 38px;
+    transform: translate(-50%, calc(-50% - 2px)) rotate(-90deg);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.stat-goal-ring.hidden { display: none; }
+.stat-goal-ring__track {
+    stroke: rgba(255, 220, 160, 0.08);
+}
+.stat-goal-ring__fill {
+    stroke: rgba(255, 205, 115, 0.7);
+    stroke-dasharray: 100;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.32, 0.72, 0, 1),
+                stroke 0.3s ease;
+}
+.stat-goal-ring.is-complete .stat-goal-ring__fill {
+    stroke: rgba(149, 226, 164, 0.9);
+    filter: drop-shadow(0 0 6px rgba(149, 226, 164, 0.4));
+}
+.stat-chip--focused .stat-value {
+    /* Lift slightly so the ring breathes around it instead of hugging. */
+    position: relative;
+    z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stat-goal-ring__fill { transition: none; }
+}
+
 .stat-value {
     font-size: var(--text-md);
     font-weight: 500;
@@ -53,6 +93,20 @@
        chips' baselines; the dots are 6px tall vs. the ~16px of the
        text values, so a small vertical adjustment keeps the row tidy. */
     gap: 6px;
+}
+
+/* Streak chip — same shape as the other text chips. The number is the
+   live currentStreak signal value; a faint amber accent lights up the
+   value once a streak exists so the user can read "I have a streak"
+   in a glance, without making it scream-y when they don't.
+   The label "day streak" is kept short to fit the bar's width budget. */
+.stat-chip--streak .stat-value {
+    /* Default chip text colour is fine; an embedded :where() trick
+       keeps specificity flat so a future theme can override. */
+    color: var(--stat-value-color, inherit);
+}
+.stat-chip--streak:has(.stat-value:not(:empty):not([data-zero])) .stat-value {
+    color: rgba(255, 220, 160, 0.95);
 }
 .momentum-trail {
     display: inline-flex;

@@ -230,6 +230,48 @@
                 <h1>Cosmic Focus</h1>
                 <div class="greeting" id="greeting">Welcome to Your Universe!</div>
                 <div class="date-time" id="dateTime"></div>
+
+                <!-- Period summary tiles. JS in js/ui/home-period-tiles.js
+                     paints them once on first paint and re-paints whenever
+                     the focus-session signal fires. Tiles are hidden until
+                     there's at least one finished focus session so a brand
+                     new account doesn't see an empty zero-state on Home. -->
+                <div class="home-period-tiles hidden" id="homePeriodTiles" aria-label="Focus summary">
+                    <button class="home-period-tile" id="homeWeekTile"
+                            type="button"
+                            data-period="week"
+                            aria-label="Open weekly focus summary">
+                        <header class="home-period-tile__head">
+                            <span class="home-period-tile__eyebrow">this week</span>
+                            <span class="home-period-tile__delta" data-week-delta></span>
+                        </header>
+                        <div class="home-period-tile__hero">
+                            <span class="home-period-tile__value" data-week-value>0</span>
+                            <span class="home-period-tile__unit" data-week-unit>min</span>
+                        </div>
+                        <div class="home-period-tile__bars" data-week-bars aria-hidden="true"></div>
+                        <p class="home-period-tile__sub" data-week-sub></p>
+                    </button>
+                    <button class="home-period-tile" id="homeMonthTile"
+                            type="button"
+                            data-period="month"
+                            aria-label="Open monthly focus summary">
+                        <header class="home-period-tile__head">
+                            <span class="home-period-tile__eyebrow">this month</span>
+                            <span class="home-period-tile__delta" data-month-delta></span>
+                        </header>
+                        <div class="home-period-tile__hero">
+                            <span class="home-period-tile__value" data-month-value>0</span>
+                            <span class="home-period-tile__unit" data-month-unit>min</span>
+                        </div>
+                        <ul class="home-period-tile__stats">
+                            <li><span data-month-sessions>0</span> sessions</li>
+                            <li><span data-month-active-days>0</span> active days</li>
+                            <li>best <span data-month-best>0 min</span></li>
+                        </ul>
+                        <p class="home-period-tile__sub" data-month-sub></p>
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -392,7 +434,23 @@
                             <span class="stat-label">sessions</span>
                         </div>
                         <div class="stat-divider"></div>
-                        <div class="stat-chip">
+                        <div class="stat-chip stat-chip--focused">
+                            <!-- Goal ring — sits behind the value, fills
+                                 clockwise as today's focus minutes
+                                 approach timer.dailyGoalMinutes. JS
+                                 toggles visibility based on the setting. -->
+                            <svg class="stat-goal-ring hidden" id="statGoalRing"
+                                 viewBox="0 0 36 36" aria-hidden="true">
+                                <circle class="stat-goal-ring__track"
+                                        cx="18" cy="18" r="16"
+                                        fill="none" stroke-width="2.4"/>
+                                <circle class="stat-goal-ring__fill"
+                                        cx="18" cy="18" r="16"
+                                        fill="none" stroke-width="2.4"
+                                        stroke-linecap="round"
+                                        pathLength="100"
+                                        stroke-dashoffset="100"/>
+                            </svg>
                             <span class="stat-value" id="statTotalMinutes">0s</span>
                             <span class="stat-label">focused</span>
                         </div>
@@ -400,6 +458,12 @@
                         <div class="stat-chip">
                             <span class="stat-value" id="statTasksToday">0</span>
                             <span class="stat-label">tasks done</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-chip stat-chip--streak"
+                             title="Consecutive calendar days with at least one finished focus session">
+                            <span class="stat-value" id="statStreak">0</span>
+                            <span class="stat-label">day streak</span>
                         </div>
                         <div class="stat-divider"></div>
                         <div class="stat-chip stat-chip--momentum"

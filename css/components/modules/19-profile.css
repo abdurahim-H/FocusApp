@@ -1478,6 +1478,213 @@
     .day-block__stats { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ── Weekday / weekend split bar ─────────────────────────────────────────
+   Two flex children sized by their respective percentage, each labelled
+   with its own copy. Visually equivalent to a stacked-bar of length 1
+   but with each segment self-narrating, no legend required. */
+.psection__split-bar {
+    display: flex;
+    width: 100%;
+    height: 56px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.psection__split-bar > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10px 14px;
+    gap: 2px;
+    min-width: 0;
+    overflow: hidden;
+}
+.psection__split-bar__weekday {
+    background: linear-gradient(135deg, rgba(255, 205, 115, 0.32), rgba(255, 205, 115, 0.18));
+    color: rgba(255, 246, 225, 0.95);
+    border-right: 1px solid rgba(0, 0, 0, 0.18);
+}
+.psection__split-bar__weekend {
+    background: linear-gradient(135deg, rgba(180, 144, 232, 0.28), rgba(180, 144, 232, 0.14));
+    color: rgba(238, 232, 245, 0.95);
+}
+.psection__split-bar__label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.psection__split-bar__value {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 18px;
+    font-weight: 350;
+}
+
+/* ── Year in review ────────────────────────────────────────────────────
+   A single retrospective card at the bottom of Profile → Time. Bigger
+   visual weight than the regular chart cards because it's a once-a-
+   glance moment, not a chart users return to multiple times. */
+.year-review {
+    margin-top: 24px;
+    padding: 22px 24px 20px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(28, 22, 14, 0.55), rgba(16, 12, 6, 0.4));
+    border: 1px solid rgba(255, 220, 160, 0.16);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.year-review__head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.year-review__eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.6);
+}
+.year-review__title {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+    font-size: clamp(20px, 2.4vw, 26px);
+    font-weight: 350;
+    color: #faf3e3;
+    letter-spacing: -0.01em;
+}
+.year-review__hero {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+.year-review__hero-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+.year-review__hero-num {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1, 'ss01' 1;
+    font-size: clamp(36px, 4.6vw, 50px);
+    font-weight: 250;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #faf3e3;
+}
+.year-review__hero-unit {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12.5px;
+    color: rgba(255, 220, 160, 0.55);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.year-review__hero-meta {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 12px;
+    color: rgba(255, 246, 225, 0.62);
+}
+.year-review__hero-meta li > span {
+    color: #faf3e3;
+    font-weight: 500;
+}
+
+.year-review__bars {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    align-items: end;
+    gap: 6px;
+    height: 88px;
+}
+.year-review__month {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    gap: 4px;
+}
+.year-review__month-bar {
+    width: 100%;
+    height: var(--h, 6%);
+    border-radius: 3px;
+    background: rgba(255, 220, 160, 0.34);
+    transition: background 0.25s ease, transform 0.25s ease;
+    flex: 1;
+    align-self: end;
+}
+.year-review__month-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10px;
+    color: rgba(255, 246, 225, 0.45);
+    letter-spacing: 0.06em;
+}
+.year-review__month.is-peak .year-review__month-bar {
+    background: rgba(255, 205, 115, 0.85);
+    box-shadow: 0 0 8px rgba(255, 205, 115, 0.4);
+}
+.year-review__month.is-peak .year-review__month-label {
+    color: rgba(255, 220, 160, 0.85);
+    font-weight: 500;
+}
+
+.year-review__highlights {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+.year-review__highlights li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.022);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.year-review__highlight-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.55);
+}
+.year-review__highlight-value {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 22px;
+    font-weight: 300;
+    color: #faf3e3;
+    margin: 2px 0;
+}
+.year-review__highlight-sub {
+    font-size: 11.5px;
+    color: rgba(255, 246, 225, 0.5);
+}
+
 /* ── Reduced motion ──────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

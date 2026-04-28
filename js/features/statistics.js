@@ -12,6 +12,7 @@
 // Persisted in localStorage key `fu_stats_v1`.
 
 import { effect, signal } from '../core/state.js';
+import { get as settingsGet, subscribe as settingsSub } from '../ui/settings/store.js';
 import { getDailySessionCounts, onSessionsChange } from './sessions.js';
 
 // ============================================================================
@@ -176,19 +177,53 @@ function renderStatsBar() {
         const sessions = sessionsToday.value;
         const totalSec = totalFocusSeconds.value;
         const tasks = tasksCompletedToday.value;
+        const streak = currentStreak.value;
 
         const el = (id) => document.getElementById(id);
         const todayEl = el('statSessionsToday');
         const totalEl = el('statTotalMinutes');
         const tasksEl = el('statTasksToday');
+        const streakEl = el('statStreak');
 
         if (todayEl) todayEl.textContent = sessions;
         if (totalEl) totalEl.textContent = formatDuration(totalSec);
         if (tasksEl) tasksEl.textContent = tasks;
+        if (streakEl) streakEl.textContent = streak;
+
+        // Daily goal ring — only paints when the user has an active
+        // target. The progress fill is on a 100-pathLength circle so
+        // we set stroke-dashoffset = 100 - completion percent.
+        renderGoalRing();
     });
+
+    // Goal ring also reacts to setting changes (user moved the slider).
+    settingsSub('timer.dailyGoalMinutes', renderGoalRing);
 
     renderMomentumTrail();
     onSessionsChange(renderMomentumTrail);
+}
+
+function renderGoalRing() {
+    const ring = document.getElementById('statGoalRing');
+    const fill = ring?.querySelector('.stat-goal-ring__fill');
+    if (!ring || !fill) return;
+    const goalMin = Number(settingsGet('timer.dailyGoalMinutes')) || 0;
+    if (goalMin <= 0) {
+        ring.classList.add('hidden');
+        return;
+    }
+    ring.classList.remove('hidden');
+    const todayMin = totalFocusSeconds.value / 60;
+    // Cap at 1 — we don't paint past the full ring. Once the user
+    // hits the goal, the ring stays full and lights up.
+    const progress = Math.min(1, todayMin / goalMin);
+    fill.style.strokeDashoffset = String(100 - progress * 100);
+    ring.classList.toggle('is-complete', progress >= 1);
+    ring.setAttribute(
+        'aria-label',
+        `${Math.round(progress * 100)}% of daily focus goal`
+    );
+    ring.setAttribute('aria-hidden', 'false');
 }
 
 /** Replace the old streak counter ("47d" — guilt-shaped, resets on

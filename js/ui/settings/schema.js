@@ -306,6 +306,32 @@ export const SCHEMA = [
         default: 4,
     },
 
+    { section: 'timer', type: 'group', label: 'Goals' },
+    {
+        section: 'timer',
+        type: 'slider',
+        key: 'timer.dailyGoalMinutes',
+        label: 'Daily focus goal',
+        min: 0,
+        max: 480,
+        step: 5,
+        unit: 'm',
+        default: 90,
+        help: 'Progress ring shows how close today is to this target. 0 disables the ring.',
+    },
+    {
+        section: 'timer',
+        type: 'slider',
+        key: 'timer.weeklyGoalMinutes',
+        label: 'Weekly focus goal',
+        min: 0,
+        max: 3600,
+        step: 30,
+        unit: 'm',
+        default: 720,
+        help: 'Optional weekly target shown on the Home week tile. 0 hides it.',
+    },
+
     { section: 'timer', type: 'group', label: 'Display' },
     {
         section: 'timer',

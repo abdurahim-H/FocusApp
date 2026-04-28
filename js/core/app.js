@@ -22,6 +22,7 @@ import * as cosmosEqRing from '../ui/cosmos-eq-ring.js';
 import * as cosmosPointer from '../ui/cosmos-pointer.js';
 import * as helpCenter from '../ui/help-center.js';
 import * as homeMiniTimer from '../ui/home-mini-timer.js';
+import * as homePeriodTiles from '../ui/home-period-tiles.js';
 import * as navigation from '../ui/navigation.js';
 import * as profile from '../ui/profile.js';
 import * as settings from '../ui/settings.js';
@@ -47,6 +48,7 @@ const modules = {
     timerParticles,
     helpCenter,
     homeMiniTimer,
+    homePeriodTiles,
     ambientUI,
     cosmosPointer,
     cosmosEqRing,
@@ -376,6 +378,11 @@ function setupTaskControls(loadedModules) {
     // stay separate from the inline list.
     if (loadedModules.tasksExpand?.initTasksExpand) {
         loadedModules.tasksExpand.initTasksExpand();
+    }
+    // Period summary tiles (this week / this month) on Home. Hidden
+    // until at least one focus session lands; signal-driven repaint.
+    if (loadedModules.homePeriodTiles?.initHomePeriodTiles) {
+        loadedModules.homePeriodTiles.initHomePeriodTiles();
     }
 }
 

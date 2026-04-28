@@ -30,16 +30,16 @@ These are real bugs the audits caught. Cheap, high-value, ship first.
 
 Already-have data, brand-new framing. Highest UX gain per dollar of engineering on this list.
 
-- [ ] **1.1 Weekly summary tile on Home (M).** Card showing this week's total focus minutes, daily mini-bars Mon–Sun, "↑ 18% vs last week" delta, click-through to Profile → Focus.
-- [ ] **1.2 Monthly summary tile on Home (M).** Card showing this month's minutes, prior-month comparison, days-streaked-this-month, best day this month.
-- [ ] **1.3 Year-in-review surface in Profile → Time (M).** Total hours, best month, longest day, weekday vs weekend split, top 3 hours-of-day, single big "your year so far" headline.
-- [ ] **1.4 Current-streak chip in stats bar (S).** We already track `currentStreak`; just render it next to / inside the momentum trail.
+- [x] **1.1 Weekly summary tile on Home (M).** New `home-period-tiles.js` paints this week's total + Mon-Sun mini-bars + "↑ N% vs last week" delta. Tap opens Profile → Focus. Hidden until at least one finished focus session.
+- [x] **1.2 Monthly summary tile on Home (M).** Sibling tile in the same row showing 30-day total, prior 30-day delta, sessions / active days / best-day stats. Tap opens Profile → Time.
+- [x] **1.3 Year-in-review surface in Profile → Time (M).** New `renderYearInReview()` renders a retrospective card at the bottom of the Time section: total hours / sessions / active days, monthly bar strip with peak month called out, "Longest day / Peak hour / Best month" highlight tiles. Hidden until ≥30 active days this calendar year.
+- [x] **1.4 Current-streak chip in stats bar (S).** New `.stat-chip--streak` chip wired to the existing `currentStreak` signal.
 - [ ] **1.5 Period-toggle in stats bar (M).** Long-press or click "Sessions today" chip to swap into "Sessions this week" / "Sessions this month" view. State persists across reloads.
-- [ ] **1.6 Daily goal ring (M).** A target focus minutes per day, rendered as a progress ring around the today chip. Default 90 min, configurable in Settings → Timer → Goals.
-- [ ] **1.7 Weekday vs weekend distribution chart (S).** "You focus 62% on weekdays, 38% on weekends." New stacked-bar in Profile → Time.
+- [x] **1.6 Daily goal ring (M).** New `timer.dailyGoalMinutes` setting (0-480, default 90) + matching `timer.weeklyGoalMinutes` (0-3600, default 720). The "focused" chip in the stats bar now wraps a progress ring that fills clockwise as today's minutes approach the daily goal. Ring goes green when complete.
+- [x] **1.7 Weekday vs weekend distribution chart (S).** Two-segment split bar in Profile → Time computed from the existing `bucketByDayOfWeek` data.
 - [ ] **1.8 Box-plot chart for session durations (M).** Richer than histogram for outliers; render in Profile → Focus alongside the existing histogram + KDE.
 - [ ] **1.9 Stacked-area "this week vs last week" daily breakdown (M).** Two overlaid 7-day bars / areas in Profile → Focus.
-- [ ] **1.10 "Best day ever" + "longest streak ever" callouts in Profile → Overview (S).** Single-number trophies, low effort, high motivation.
+- [x] **1.10 "Best day ever" + "longest streak ever" callouts in Profile → Overview (S).** New `computeAllTimeRecords()` walks the full session history once and surfaces three callout pills: best day ever (minutes + date), longest streak ever, current streak.
 
 ---
 
