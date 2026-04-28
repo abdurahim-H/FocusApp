@@ -262,6 +262,34 @@ export const SCHEMA = [
     // ═══════════════════════════════════════════════════════════════════════
     // TIMER
     // ═══════════════════════════════════════════════════════════════════════
+    { section: 'timer', type: 'group', label: 'Cycle preset' },
+    {
+        section: 'timer',
+        type: 'select',
+        key: 'timer.cyclePreset',
+        label: 'Style',
+        default: 'pomodoro',
+        options: [
+            { value: 'pomodoro', label: 'Pomodoro (25 / 5)' },
+            { value: 'pomodoro-long', label: 'Long Pomodoro (50 / 10)' },
+            { value: '52-17', label: '52 / 17 — DeskTime' },
+            { value: '90-20', label: '90 / 20 — Ultradian rhythm' },
+            { value: 'deepwork', label: 'Deep work (180 / 30)' },
+            { value: 'open-ended', label: 'Open-ended (count up, no target)' },
+            { value: 'custom', label: 'Custom — use the sliders below' },
+        ],
+        help: 'Picks a focus / break rhythm. The sliders update to match; switch to "Custom" to set your own.',
+    },
+
+    // Hidden flag — set by the preset picker; not rendered in the UI.
+    // Drives the count-up open-ended mode in timer.js.
+    {
+        section: 'timer',
+        type: 'hidden',
+        key: 'timer.openEnded',
+        default: false,
+    },
+
     { section: 'timer', type: 'group', label: 'Durations' },
     {
         section: 'timer',
@@ -269,7 +297,7 @@ export const SCHEMA = [
         key: 'timer.focusDuration',
         label: 'Focus',
         min: 1,
-        max: 90,
+        max: 240,
         step: 1,
         unit: 'm',
         default: 25,

@@ -170,6 +170,38 @@ export const APPLY_HOOKS = {
         });
     },
 
+    // ───────── Cycle preset (Wave 17) ─────────
+    // Picking a named preset writes the matching durations + long-break
+    // interval into their own settings keys. "custom" leaves the
+    // sliders alone. "open-ended" sets a flag the timer reads to
+    // switch into count-up mode; durations don't matter then.
+    'timer.cyclePreset': (v) => {
+        if (!v || v === 'custom') return;
+        import('./store.js').then((store) => {
+            const presets = {
+                pomodoro: { focus: 25, short: 5, long: 15, every: 4, openEnded: false },
+                'pomodoro-long': { focus: 50, short: 10, long: 30, every: 4, openEnded: false },
+                '52-17': { focus: 52, short: 17, long: 30, every: 4, openEnded: false },
+                '90-20': { focus: 90, short: 20, long: 30, every: 3, openEnded: false },
+                deepwork: { focus: 180, short: 30, long: 60, every: 1, openEnded: false },
+                'open-ended': { focus: 25, short: 5, long: 15, every: 4, openEnded: true },
+            };
+            const p = presets[v];
+            if (!p) return;
+            store.set('timer.focusDuration', p.focus);
+            store.set('timer.shortBreakDuration', p.short);
+            store.set('timer.longBreakDuration', p.long);
+            store.set('timer.longBreakInterval', p.every);
+            store.set('timer.openEnded', p.openEnded);
+        });
+    },
+    // Open-ended flag is also writable directly so a future toggle can
+    // flip it without going through the preset picker.
+    'timer.openEnded': (_v) => {
+        // No DOM mutation here — timer.js reads the flag inline. The
+        // hook exists so the settings store fires the apply chain.
+    },
+
     // ───────── Streams (Wave 5) ─────────
     // The picker writes a curated id; the custom-URL field writes a
     // shortened `custom:<videoId>` shorthand. Both feed the same

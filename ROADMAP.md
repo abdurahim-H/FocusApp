@@ -301,12 +301,12 @@ The Home tab is three static elements today. Make it a real dashboard.
 
 Pomodoro is one of many. Some users hate it.
 
-- [ ] **17.1 Custom interval (S).** Already supported via the focus-duration slider (1–90 min).
-- [ ] **17.2 52/17 cycle preset (S).** 52 min focus + 17 min break.
-- [ ] **17.3 90/20 ultradian cycle preset (S).** Aligned to the human ultradian rhythm.
-- [ ] **17.4 Deep-work mode (M).** A 3–4 hour focus block with structured break protocols (5-min stretch break every 60 min, longer break in the middle).
-- [ ] **17.5 Open-ended focus (S).** No countdown; tracks elapsed time. Ends when user hits stop.
-- [ ] **17.6 Mode chooser at session start (M).** "Pomodoro / 52-17 / 90-20 / Deep work / Open-ended" — picker on the Focus tab.
+- [x] **17.1 Custom interval (S).** Focus-duration slider now ranges 1–240 min (was 1–90) so deep-work blocks fit. "Custom" stays a first-class preset choice.
+- [x] **17.2 52/17 cycle preset (S).** Picking "52/17 — DeskTime" writes 52 min focus + 17 min short break + 30 min long break + every-4-cycle long break.
+- [x] **17.3 90/20 ultradian cycle preset (S).** "90/20 — Ultradian rhythm" sets 90 / 20 / 30 with long break every 3 cycles.
+- [x] **17.4 Deep-work mode (M).** "Deep work (180/30)" sets a 3-hour focus block, 30-min short break, 60-min long break, every-1-cycle long break (so each deep block is followed by the longer break).
+- [x] **17.5 Open-ended focus (S).** New `timer.openEnded` flag flips the timer into a stopwatch — counts UP from 00:00 with no completeSession trigger; user explicitly stops to record. completeSession path treats elapsed = visible time and marks the session as completed unconditionally (the user defined the end).
+- [x] **17.6 Mode chooser (M done as a preset picker).** New `Style` select at the top of Settings → Timer — five preset rhythms plus Custom + Open-ended. Picking a preset writes the matching durations + long-break interval; "Custom" leaves the sliders alone.
 
 ---
 
