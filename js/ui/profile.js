@@ -472,13 +472,13 @@ function renderFocus(sessions) {
 
         <div class="psection__row psection__row--split">
             ${chartCard({
-                eyebrow: 'session length distribution',
-                sub: `median ${medianDur.toFixed(0)} min · σ ${sdDur.toFixed(1)} min`,
+                eyebrow: 'how long your sessions usually run',
+                sub: `most last around ${medianDur.toFixed(0)} min · they vary by ±${sdDur.toFixed(0)} min from session to session`,
                 chart: histogramChart({ bins, width: 360, height: 180, unit: 'm' }),
             })}
             ${chartCard({
-                eyebrow: '7-day moving average',
-                sub: 'how your weekly intensity has shifted',
+                eyebrow: 'your week-to-week pace',
+                sub: 'a smoothed line — the wobbles wash out, the drift shows',
                 chart: lineChart({
                     values: ma7,
                     width: 360,
@@ -492,29 +492,37 @@ function renderFocus(sessions) {
 
         ${chartCard({
             eyebrow: 'last 90 days · calendar',
-            sub: 'each cell is a day; brightness scales with focus minutes',
+            sub: 'each square is a day; the brighter it is, the more you focused',
             chart: calendarHeatmap({ matrix: heatmap }),
         })}
 
         ${insightCallouts([
             wow && wow.delta != null ? {
-                label: 'PAST 7 vs PRIOR 7',
-                value: `${wow.delta >= 0 ? '+' : ''}${(wow.delta * 100).toFixed(0)}%`,
+                label: 'THIS WEEK vs LAST WEEK',
+                value: `${wow.delta >= 0 ? '+' : '−'}${Math.abs(wow.delta * 100).toFixed(0)}%`,
                 tone: wow.delta >= 0 ? 'good' : 'flat',
-                hint: `${Math.round(wow.newer)} min/day vs ${Math.round(wow.older)} min/day`,
+                hint: `${Math.round(wow.newer)} minutes a day now · ${Math.round(wow.older)} minutes a day before`,
             } : null,
             Math.abs(z) >= 1.5 ? {
-                label: 'TODAY · Z-SCORE',
-                value: `${z >= 0 ? '+' : ''}${z.toFixed(1)}σ`,
+                label: 'TODAY',
+                value: z > 0 ? 'big day' : 'quiet day',
                 tone: z > 0 ? 'good' : 'flat',
-                hint: z > 0 ? 'notably above your usual day' : 'notably below your usual day',
+                hint: z > 0 ? 'well above your normal pace' : 'well below your normal pace',
             } : null,
-            sessions.length >= 5 ? {
-                label: 'PERCENTILE TODAY',
-                value: `${Math.round(percentileRank(todayTotal, last90.slice(0, -1)) * 100)}%`,
-                tone: 'flat',
-                hint: 'where today\'s focus minutes rank against your last 90 days',
-            } : null,
+            sessions.length >= 5 ? (() => {
+                const rankPct = Math.round(percentileRank(todayTotal, last90.slice(0, -1)) * 100);
+                const ordinal = rankPct >= 90 ? 'top 10%'
+                    : rankPct >= 75 ? 'top 25%'
+                    : rankPct >= 50 ? 'above-average day'
+                    : rankPct >= 25 ? 'below-average day'
+                    : 'quietest 25%';
+                return {
+                    label: 'TODAY vs LAST 90',
+                    value: ordinal,
+                    tone: rankPct >= 50 ? 'good' : 'flat',
+                    hint: `today\'s focus ranks higher than ${rankPct}% of your last 90 days`,
+                };
+            })() : null,
         ])}
     `;
 }
@@ -654,16 +662,16 @@ function renderSounds(sessions) {
         ${sectionHeader('Sounds', 'how ambient companions shape your focus')}
 
         ${kpiRow([
-            { label: 'unique sounds', value: uniqueSounds, unit: '', count: true },
-            { label: 'sessions with sound', value: Math.round(soundOnRate * 100), unit: '%', count: true },
-            { label: 'avg per session', value: avgSoundsPerSession.toFixed(1), unit: '', count: false },
-            { label: 'most-used', value: ranked[0]?.[0] ? capitalize(ranked[0][0]) : '—', unit: '', count: false },
+            { label: 'unique sounds tried', value: uniqueSounds, unit: '', count: true },
+            { label: 'sessions with sound on', value: Math.round(soundOnRate * 100), unit: '%', count: true },
+            { label: 'avg sounds per session', value: avgSoundsPerSession.toFixed(1), unit: '', count: false },
+            { label: 'your favourite', value: ranked[0]?.[0] ? capitalize(ranked[0][0]) : '—', unit: '', count: false },
         ])}
 
         <div class="psection__row psection__row--split">
             ${chartCard({
-                eyebrow: 'usage distribution',
-                sub: `top ${top.length} of ${ranked.length} unique sounds`,
+                eyebrow: 'what you reach for most',
+                sub: `top ${top.length} of ${ranked.length} sounds you've used`,
                 chart: donut({
                     slices: top.map(([label, value]) => ({ label, value })),
                     size: 200,
@@ -681,13 +689,20 @@ function renderSounds(sessions) {
                 `,
             })}
             ${chartCard({
-                eyebrow: 'effect on session length · last 30 days',
-                sub: effects.length === 0 ? 'more sessions needed for honest signal' : 'cohen\'s d — small (0.2) · medium (0.5) · large (0.8)',
+                eyebrow: 'how each sound shifts your sessions',
+                sub: effects.length === 0
+                    ? 'a few more sessions and patterns will show up here'
+                    : 'change in average session length when each sound is on',
                 chart: '',
                 content: effects.length > 0 ? `
                     <table class="effect-table">
                         <thead>
-                            <tr><th>sound</th><th>delta</th><th>d</th><th>n</th></tr>
+                            <tr>
+                                <th>sound</th>
+                                <th>change</th>
+                                <th>strength</th>
+                                <th>sessions</th>
+                            </tr>
                         </thead>
                         <tbody>
                             ${effects.slice(0, 6).map((e) => {
@@ -697,7 +712,7 @@ function renderSounds(sessions) {
                                     <tr>
                                         <td class="effect-table__name">${escapeHtml(e.sound)}</td>
                                         <td class="effect-table__delta ${e.delta >= 0 ? 'is-up' : 'is-down'}">${sign}${(e.delta * 100).toFixed(0)}%</td>
-                                        <td class="effect-table__d effect-table__d--${dCat.kind}">${e.d.toFixed(2)}</td>
+                                        <td class="effect-table__d effect-table__d--${dCat.kind}">${dCat.label}</td>
                                         <td class="effect-table__n">${e.withN}</td>
                                     </tr>
                                 `;
@@ -710,12 +725,12 @@ function renderSounds(sessions) {
 
         ${effects.length > 0 ? insightCallouts([
             {
-                label: 'STRONGEST COMPANION',
-                value: `${escapeHtml(effects[0].sound)} · d=${effects[0].d.toFixed(2)}`,
+                label: 'YOUR STRONGEST COMPANION',
+                value: capitalize(effects[0].sound),
                 tone: effects[0].d > 0 ? 'good' : 'flat',
                 hint: effects[0].d > 0
-                    ? `sessions with ${effects[0].sound} run ${Math.round(effects[0].delta * 100)}% longer on average`
-                    : `sessions with ${effects[0].sound} run ${Math.abs(Math.round(effects[0].delta * 100))}% shorter on average`,
+                    ? `sessions with ${effects[0].sound} on tend to run ${Math.round(effects[0].delta * 100)}% longer than sessions without it`
+                    : `sessions with ${effects[0].sound} on tend to run ${Math.abs(Math.round(effects[0].delta * 100))}% shorter than sessions without it`,
             },
         ]) : ''}
     `;
@@ -862,8 +877,8 @@ function timeOfDayCharacter(hourBuckets) {
 function renderInsights(sessions) {
     if (sessions.length < 3) {
         return `
-            ${sectionHeader('Insights', 'derived narratives — surfaced only when the data supports them')}
-            ${emptyState('insights surface after a few sessions accumulate. honest signal needs a sample size first.')}
+            ${sectionHeader('Insights', 'patterns we notice in your own sessions — not comparisons against other people')}
+            ${emptyState('the more sessions you finish, the more patterns we can pick up. a handful of focus blocks and the cards start filling in.')}
         `;
     }
 
@@ -894,91 +909,131 @@ function renderInsights(sessions) {
     const insights = [];
 
     if (reg && Math.abs(reg.slopePerWeek) > 0.5) {
+        const direction = reg.slope > 0 ? 'going up' : 'going down';
+        const verb = reg.slope > 0 ? 'gaining' : 'losing';
+        const slopeAbs = Math.abs(reg.slopePerWeek);
+        const slopeStr = slopeAbs >= 1
+            ? `${slopeAbs.toFixed(0)} ${slopeAbs >= 1.5 ? 'minutes' : 'minute'} a week`
+            : `roughly ${Math.round(slopeAbs * 4)} minutes a month`;
         insights.push({
             kind: 'trend',
-            headline: regressionNarrative(reg, 'minute'),
-            sub: `r² = ${reg.r2.toFixed(2)} · ${reg.r2 >= 0.4 ? 'meaningful fit' : reg.r2 >= 0.15 ? 'soft signal' : 'noisy'}`,
-            value: `${reg.slopePerWeek >= 0 ? '+' : ''}${Math.round(reg.slopePerWeek)}m/wk`,
+            headline: `your daily focus is ${direction} — ${verb} about ${slopeStr}`,
+            sub: trendConfidenceCopy(reg.r2),
+            value: `${reg.slopePerWeek >= 0 ? '+' : '−'}${slopeAbs.toFixed(1)} min / week`,
         });
     }
 
     if (wow && wow.delta != null && Math.abs(wow.delta) > 0.05) {
+        const dir = wow.delta >= 0 ? 'up' : 'down';
         insights.push({
             kind: 'wow',
-            headline: `last 30 days vs prior 30: ${wow.delta >= 0 ? 'up' : 'down'} ${(Math.abs(wow.delta) * 100).toFixed(0)}%`,
-            sub: `${wow.newer.toFixed(0)} min/day now vs ${wow.older.toFixed(0)} min/day before`,
-            value: `${wow.delta >= 0 ? '+' : ''}${(wow.delta * 100).toFixed(0)}%`,
+            headline: `you're focusing ${(Math.abs(wow.delta) * 100).toFixed(0)}% ${dir} compared to the month before`,
+            sub: `about ${wow.newer.toFixed(0)} minutes a day now · ${wow.older.toFixed(0)} minutes a day before`,
+            value: `${wow.delta >= 0 ? '+' : '−'}${(Math.abs(wow.delta) * 100).toFixed(0)}%`,
         });
     }
 
     if (Math.abs(z) >= 1.5) {
+        const todayMin = Math.round(todayTotal);
+        const usualMin = Math.round(mean(last30.slice(0, -1)));
+        const headline = z > 0
+            ? todayMin >= usualMin * 2
+                ? `today is way past your usual — about ${ratioCopy(todayMin, usualMin)} a normal day`
+                : `today is well above your usual focus`
+            : `today is well below your usual focus`;
         insights.push({
             kind: 'anomaly',
-            headline: z > 0 ? `today is ${z.toFixed(1)}σ above your usual` : `today is ${Math.abs(z).toFixed(1)}σ below your usual`,
-            sub: `among the ${z > 0 ? 'top' : 'bottom'} ~${z > 0 ? Math.round((1 - normalCDF(z)) * 100) : Math.round(normalCDF(z) * 100)}% of recent days`,
-            value: `${z.toFixed(1)}σ`,
+            headline,
+            sub: rarityCopy(z),
+            value: z > 0 ? `${todayMin} min today` : `${todayMin} min today`,
         });
     } else if (anomalyDays > 0) {
         insights.push({
             kind: 'anomaly',
-            headline: `${anomalyDays} unusual ${anomalyDays === 1 ? 'day' : 'days'} in the last 30`,
-            sub: '|z| ≥ 1.5σ from your local mean',
-            value: anomalyDays,
+            headline: `${anomalyDays} ${anomalyDays === 1 ? 'day' : 'days'} that broke from your normal in the last month`,
+            sub: 'days that stood out — much higher or much lower than your typical pace',
+            value: `${anomalyDays} ${anomalyDays === 1 ? 'day' : 'days'}`,
         });
     }
 
     if (sessions.length >= 8 && Math.abs(correlation) > 0.2) {
+        // The pearson was computed against -(focusQuality), so positive
+        // r means more distractions → lower quality. Translate to plain
+        // language without the sign reasoning.
+        const strength = correlationStrength(correlation);
+        const headline = correlation > 0
+            ? `the more you switch tabs in a session, the lower your focus quality goes`
+            : `tab-switches and focus quality move together — but not strongly`;
         insights.push({
             kind: 'correlation',
-            headline: `distraction count ${correlation > 0 ? 'reduces' : 'barely shifts'} focus quality (r=${correlation.toFixed(2)})`,
-            sub: 'pearson on distraction-count × inverted-quality',
-            value: `r=${correlation.toFixed(2)}`,
+            headline,
+            sub: `${strength.label} pattern — ${strength.aside}`,
+            value: strength.label,
         });
     }
 
     if (switches >= 5) {
         const lostHrs = lostMin / 60;
+        const valueText = lostHrs >= 1
+            ? `${lostHrs.toFixed(1)} hours`
+            : `${Math.round(lostMin)} min`;
         insights.push({
             kind: 'friction',
-            headline: lostHrs >= 1 ? `${lostHrs.toFixed(1)} hours lost reorienting` : `${Math.round(lostMin)} minutes lost reorienting`,
-            sub: `${switches} tab-aways · 9.5 min recovery each (conservative figure)`,
-            value: lostHrs >= 1 ? `${lostHrs.toFixed(1)}h` : `${Math.round(lostMin)}m`,
+            headline: lostHrs >= 1
+                ? `you've lost about ${lostHrs.toFixed(1)} hours to context-switching`
+                : `you've lost about ${Math.round(lostMin)} minutes to context-switching`,
+            sub: `${switches} tab-aways during your focus blocks — every switch adds ~9 minutes of getting back into it`,
+            value: valueText,
         });
     }
 
     if (dailyAvg > 0) {
+        const monthHrs = monthForecast / 60;
+        const valueText = monthHrs >= 1
+            ? `${monthHrs.toFixed(1)} hours`
+            : `${Math.round(monthForecast)} min`;
         insights.push({
             kind: 'forecast',
-            headline: `at current pace · ${Math.round(monthForecast)} min over the next 30 days`,
-            sub: `extrapolated from your trailing-7-day average (${dailyAvg.toFixed(1)} min/day)`,
-            value: `${(monthForecast / 60).toFixed(1)}h`,
+            headline: monthHrs >= 1
+                ? `keep this up and you'll focus about ${monthHrs.toFixed(1)} hours in the next 30 days`
+                : `keep this up and you'll focus about ${Math.round(monthForecast)} minutes in the next 30 days`,
+            sub: `based on the last 7 days — about ${Math.round(dailyAvg)} minutes a day`,
+            value: valueText,
         });
     }
 
     if (sessions.length >= 5) {
+        const pct = Math.round(completionRate * 100);
+        const headline = completionRate >= 0.85
+            ? `you finish almost every focus block you start (${pct}%)`
+            : completionRate >= 0.6
+                ? `you finish ${pct}% of the focus blocks you start`
+                : `you finish ${pct}% of focus blocks — about ${100 - pct}% get cut short`;
         insights.push({
             kind: 'completion',
-            headline: `you finish ${(completionRate * 100).toFixed(0)}% of the focus blocks you start`,
-            sub: completionRate >= 0.7
-                ? 'high follow-through'
-                : completionRate >= 0.5 ? 'middling — early-skip is common' : 'often cut short',
-            value: `${(completionRate * 100).toFixed(0)}%`,
+            headline,
+            sub: completionRate >= 0.85
+                ? 'rock-solid follow-through'
+                : completionRate >= 0.6
+                    ? 'solid follow-through — most blocks reach the end'
+                    : 'cutting blocks short is a habit worth watching',
+            value: `${pct}%`,
         });
     }
 
     if (insights.length === 0) {
         return `
-            ${sectionHeader('Insights', 'derived narratives — surfaced only when the data supports them')}
-            ${emptyState('your sessions are still settling — strong signals appear once a few weeks of patterns build.')}
+            ${sectionHeader('Insights', 'patterns we notice in your own sessions — not comparisons against other people')}
+            ${emptyState('your sessions are still settling. once a couple of weeks of focus blocks pile up, the patterns sharpen and surface here.')}
         `;
     }
 
     return `
-        ${sectionHeader('Insights', 'data-science narratives drawn from your own sessions, not benchmarks')}
+        ${sectionHeader('Insights', 'patterns we notice in your own sessions — not comparisons against other people')}
         <div class="insight-grid">
             ${insights.map((ins) => `
                 <article class="insight-card insight-card--${ins.kind}">
-                    <span class="insight-card__kind">${ins.kind.toUpperCase()}</span>
+                    <span class="insight-card__kind">${insightKindLabel(ins.kind)}</span>
                     <p class="insight-card__headline">${escapeHtml(ins.headline)}</p>
                     <p class="insight-card__sub">${escapeHtml(ins.sub)}</p>
                     <p class="insight-card__value">${escapeHtml(String(ins.value))}</p>
@@ -988,15 +1043,56 @@ function renderInsights(sessions) {
     `;
 }
 
-// Standard normal CDF — Abramowitz & Stegun approximation.
-function normalCDF(x) {
-    const a1 =  0.254829592, a2 = -0.284496736, a3 =  1.421413741;
-    const a4 = -1.453152027, a5 =  1.061405429, p  =  0.3275911;
-    const sign = x < 0 ? -1 : 1;
-    const ax = Math.abs(x) / Math.sqrt(2);
-    const t = 1 / (1 + p * ax);
-    const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-ax * ax);
-    return 0.5 * (1 + sign * y);
+/** Friendlier section labels than uppercased internal keys. */
+function insightKindLabel(kind) {
+    switch (kind) {
+        case 'trend':       return 'TREND';
+        case 'wow':         return 'MONTH OVER MONTH';
+        case 'anomaly':     return 'STANDOUT DAY';
+        case 'correlation': return 'WHAT MOVES WITH WHAT';
+        case 'friction':    return 'FOCUS LEAK';
+        case 'forecast':    return 'WHERE THIS LEADS';
+        case 'completion':  return 'FOLLOW-THROUGH';
+        default:            return kind.toUpperCase();
+    }
+}
+
+/** Translate r² into plain-English confidence. We avoid using the
+ *  symbol or the number — readers don't need it on the front of a
+ *  card. The category captures the shape of the trend. */
+function trendConfidenceCopy(r2) {
+    if (r2 >= 0.5)  return 'a steady, clear pattern in the day-by-day numbers';
+    if (r2 >= 0.25) return 'a real trend, though some days swing more than others';
+    if (r2 >= 0.1)  return 'a soft trend — could still settle either way';
+    return 'a faint signal so far — give it a couple more weeks';
+}
+
+/** Plain-English z-score rarity. Avoids the σ symbol entirely. */
+function rarityCopy(z) {
+    const abs = Math.abs(z);
+    const dir = z > 0 ? 'this strong' : 'this quiet';
+    if (abs >= 3) return `a day ${dir} happens roughly once every few months`;
+    if (abs >= 2) return `a day ${dir} happens roughly once every couple of weeks`;
+    return `a day ${dir} stands out from your normal pattern`;
+}
+
+/** Compare two minute totals as a friendly multiplier ("about 2× of"). */
+function ratioCopy(top, bottom) {
+    if (bottom <= 0) return 'far above';
+    const r = top / bottom;
+    if (r >= 4) return `${r.toFixed(1)}×`;
+    if (r >= 2) return `over ${Math.floor(r)}× of`;
+    if (r >= 1.4) return `about ${r.toFixed(1)}× of`;
+    return 'well above';
+}
+
+/** Translate Pearson |r| into a plain-English strength label. */
+function correlationStrength(r) {
+    const abs = Math.abs(r);
+    if (abs >= 0.7) return { label: 'very strong', aside: 'the two move together almost step-for-step' };
+    if (abs >= 0.5) return { label: 'strong',      aside: 'a clear, repeated link' };
+    if (abs >= 0.3) return { label: 'moderate',    aside: 'a real link, with some noise' };
+    return                 { label: 'mild',        aside: 'a hint of a link — not strong yet' };
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1091,11 +1187,26 @@ function regressionStats(values) {
     return { slope, intercept, r2, slopePerWeek: slope * 7 };
 }
 
+/** Plain-English summary of a daily-totals regression. We avoid r² and
+ *  any technical labels; readers get a direction, a magnitude, and a
+ *  quick read on how reliable the trend looks. */
 function regressionNarrative(reg, unitLabel) {
     if (!reg) return '';
-    const dir = reg.slope > 0 ? 'rising' : reg.slope < 0 ? 'falling' : 'flat';
-    const slopeText = `${Math.abs(reg.slopePerWeek).toFixed(1)} ${unitLabel}${Math.abs(reg.slopePerWeek) === 1 ? '' : 's'}/week`;
-    return `${dir} ${slopeText} · r²=${reg.r2.toFixed(2)}`;
+    const slopePerWeek = reg.slopePerWeek;
+    const abs = Math.abs(slopePerWeek);
+    if (abs < 0.3) {
+        return reg.r2 >= 0.1 ? 'fairly steady — small movement either way' : 'roughly flat';
+    }
+    const dir = slopePerWeek > 0 ? 'climbing' : 'easing back';
+    const verb = slopePerWeek > 0 ? 'gain' : 'drop';
+    const unitWord = abs >= 1.5 ? `${unitLabel}s` : unitLabel;
+    const slopeStr = abs >= 1
+        ? `${abs.toFixed(0)} ${unitWord} a week`
+        : `${Math.round(abs * 4)} ${unitLabel}s a month`;
+    const tail = reg.r2 >= 0.4 ? ' — a clear pattern'
+        : reg.r2 >= 0.15 ? ' — shape is real, day-to-day still bumpy'
+        : ' — soft signal so far';
+    return `${dir} — about a ${slopeStr} ${verb}${tail}`;
 }
 
 // ───────────────────────────────────────────────────────────────────────
