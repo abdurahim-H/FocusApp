@@ -804,38 +804,393 @@
     letter-spacing: -0.012em;
 }
 
-/* ── Overview — quick links ──────────────────────────────────────────── */
+/* ── Insight cards — clickable affordance ─────────────────────────────
+   Cards reveal a per-kind hover lift + the chevron in the corner so
+   they read as clickable without screaming "BUTTON". The hint above
+   the grid says the same thing in words. */
+.insight-card[data-insight-open] {
+    cursor: pointer;
+    transition:
+        transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+        background 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease;
+}
+.insight-card[data-insight-open]:hover,
+.insight-card[data-insight-open]:focus-visible {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.045);
+    border-color: rgba(var(--kind-color, 255, 220, 160), 0.28);
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.32),
+        0 0 0 0.5px rgba(var(--kind-color, 255, 220, 160), 0.18);
+    outline: none;
+}
+.insight-card__chevron {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    font-size: 22px;
+    line-height: 1;
+    color: rgba(var(--kind-color, 255, 220, 160), 0.45);
+    transition: color 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-weight: 300;
+}
+.insight-card[data-insight-open]:hover .insight-card__chevron,
+.insight-card[data-insight-open]:focus-visible .insight-card__chevron {
+    color: rgba(var(--kind-color, 255, 220, 160), 0.95);
+    transform: translateX(2px);
+}
+.insight-grid__hint {
+    margin: 0 0 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11.5px;
+    color: rgba(255, 246, 225, 0.42);
+    letter-spacing: 0.04em;
+}
 
-.psection__links {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+/* ── Insight detail view ─────────────────────────────────────────────
+   The detail surface inherits the card's `--kind-color` via a kind
+   modifier so the back-link tint, viz glow, and accent rules all
+   pull from one source. */
+.insight-detail--trend       { --kind-color: 149, 226, 164; }
+.insight-detail--anomaly     { --kind-color: 255, 138, 138; }
+.insight-detail--friction    { --kind-color: 255, 184, 92;  }
+.insight-detail--correlation { --kind-color: 180, 144, 232; }
+.insight-detail--forecast    { --kind-color: 120, 200, 240; }
+.insight-detail--completion  { --kind-color: 255, 220, 160; }
+.insight-detail--wow         { --kind-color: 255, 205, 115; }
+.insight-detail--patterns    { --kind-color: 200, 180, 255; }
+.insight-detail--conditions  { --kind-color: 144, 232, 200; }
+
+.insight-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    animation: insightDetailIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes insightDetailIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.insight-detail__back {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px 8px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--kind-color, 255, 220, 160), 0.22);
+    background: rgba(var(--kind-color, 255, 220, 160), 0.06);
+    color: rgba(var(--kind-color, 255, 220, 160), 0.85);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.insight-detail__back:hover,
+.insight-detail__back:focus-visible {
+    background: rgba(var(--kind-color, 255, 220, 160), 0.14);
+    color: rgba(var(--kind-color, 255, 220, 160), 1);
+    border-color: rgba(var(--kind-color, 255, 220, 160), 0.4);
+    outline: none;
+}
+.insight-detail__back > span {
+    font-size: 16px;
+    line-height: 1;
+    margin-right: 1px;
+    color: inherit;
+}
+.insight-detail__head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px 4px 4px;
+}
+.insight-detail__kind {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.36em;
+    color: rgba(var(--kind-color, 255, 220, 160), 0.72);
+}
+.insight-detail__headline {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+    font-size: clamp(20px, 2.2vw, 26px);
+    font-weight: 350;
+    color: #faf3e3;
+    letter-spacing: -0.012em;
+    line-height: 1.28;
+}
+.insight-detail__sub {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', sans-serif;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(255, 246, 225, 0.55);
+}
+.insight-detail__viz {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 4px 4px;
+    color: rgba(var(--kind-color, 255, 220, 160), 1);
+    filter: drop-shadow(0 0 10px rgba(var(--kind-color, 255, 220, 160), 0.22));
+}
+.insight-detail__viz .insight-viz {
+    /* In the detail view we let the viz breathe — twice the card size. */
+    max-width: 480px;
+}
+.insight-detail__viz .insight-viz--gauge {
+    width: 140px;
+    height: 140px;
+    max-width: 140px;
+}
+.insight-detail__body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.detail-block {
+    padding: 18px 20px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.detail-block__title {
+    margin: 0 0 10px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(var(--kind-color, 255, 220, 160), 0.72);
+}
+.detail-block__content {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.62;
+    color: rgba(255, 246, 225, 0.78);
+}
+.detail-block__content p {
+    margin: 0 0 10px;
+}
+.detail-block__content p:last-child { margin-bottom: 0; }
+.detail-block__content strong {
+    color: #faf3e3;
+    font-weight: 500;
+}
+.detail-block__content em {
+    color: rgba(255, 246, 225, 0.62);
+    font-style: italic;
+}
+.detail-block__note {
+    margin: 12px 0 6px;
+    font-size: 11.5px;
+    color: rgba(255, 246, 225, 0.5);
+    letter-spacing: 0.02em;
+}
+
+.detail-list {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.detail-list li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.018);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.detail-list li > span:first-child {
+    color: rgba(255, 246, 225, 0.7);
+    font-size: 12.5px;
+    flex: 1;
+    min-width: 0;
+}
+.detail-list .num {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #faf3e3;
+    text-align: right;
+    flex-shrink: 0;
+    letter-spacing: -0.005em;
+}
+.detail-list .num.is-good { color: #95e2a4; }
+.detail-list .num.is-flat { color: rgba(255, 246, 225, 0.55); }
+
+.detail-steps {
+    list-style: none;
+    counter-reset: detail-step;
+    margin: 8px 0 6px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
     gap: 8px;
 }
-.psection__link {
+.detail-steps li {
+    counter-increment: detail-step;
+    position: relative;
+    padding: 8px 12px 8px 38px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.018);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: rgba(255, 246, 225, 0.78);
+}
+.detail-steps li::before {
+    content: counter(detail-step);
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(var(--kind-color, 255, 220, 160), 0.12);
+    color: rgba(var(--kind-color, 255, 220, 160), 0.92);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 10.5px;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.02);
+    justify-content: center;
+    line-height: 1;
+}
+
+/* ── Cluster rows (patterns detail) ──────────────────────────────────── */
+.cluster-list {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.cluster-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
     border-radius: 10px;
-    color: rgba(255, 246, 225, 0.78);
+    background: rgba(255, 255, 255, 0.022);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.cluster-row__dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+    box-shadow: 0 0 8px currentColor;
+}
+.cluster-row__main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.cluster-row__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+.cluster-row__label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #faf3e3;
+}
+.cluster-row__count {
+    font-size: 11.5px;
+    color: rgba(255, 246, 225, 0.55);
+    flex-shrink: 0;
+}
+.cluster-row__stats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 4px 16px;
+}
+.cluster-row__stats li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-size: 11.5px;
+    color: rgba(255, 246, 225, 0.55);
+}
+.cluster-row__stats .num {
+    font-size: 12px;
+}
+
+/* ── Condition rows (conditions detail) ──────────────────────────────── */
+.condition-list {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.condition-list > li {
+    padding: 11px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.022);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.condition-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+.condition-row__name {
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
     font-size: 13px;
+    color: rgba(255, 246, 225, 0.86);
+    font-weight: 400;
+}
+.condition-row__lift {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 12.5px;
     font-weight: 500;
-    cursor: pointer;
-    transition: color 0.18s ease, background 0.22s ease, border-color 0.18s ease;
+    flex-shrink: 0;
 }
-.psection__link:hover {
-    color: #faf3e3;
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 220, 160, 0.28);
+.condition-row__lift.is-up   { color: #95e2a4; }
+.condition-row__lift.is-down { color: #ff8a8a; }
+.condition-row__meta {
+    font-size: 11px;
+    color: rgba(255, 246, 225, 0.45);
+    line-height: 1.4;
 }
-.psection__link-chevron {
-    font-size: 18px;
-    line-height: 1;
-    color: rgba(255, 220, 160, 0.6);
-}
+
 .psection__card {
     padding: 18px 20px 22px;
     border-radius: 16px;
@@ -895,6 +1250,11 @@
         padding: 18px 22px 14px;
     }
     .profile__identity { display: none; }
+    .insight-detail__head { padding: 10px 0 0; }
+    .insight-detail__headline { font-size: 19px; }
+    .detail-block { padding: 14px 14px; }
+    .cluster-row__stats { grid-template-columns: 1fr; }
+    .insight-detail__viz .insight-viz { max-width: 100%; }
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────────── */
@@ -909,4 +1269,8 @@
         opacity: 1;
         transform: none;
     }
+    .insight-detail { animation: none; }
+    .insight-card[data-insight-open] { transition: none; }
+    .insight-card[data-insight-open]:hover,
+    .insight-card[data-insight-open]:focus-visible { transform: none; }
 }

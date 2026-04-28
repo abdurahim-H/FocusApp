@@ -85,6 +85,9 @@ let activeSection = 'overview';
 let currentUser = null;
 let unsubscribeSessions = null;
 let unsubscribeAuth = null;
+// When the user clicks an insight card, the Insights body switches
+// to a detail view for that one card. Stays null otherwise.
+let activeInsightDetail = null;
 
 // ───────────────────────────────────────────────────────────────────────
 // Public API
@@ -183,8 +186,17 @@ function setSection(id) {
     if (!SECTIONS.some((s) => s.id === id)) return;
     if (activeSection === id) return;
     activeSection = id;
+    // Switching sections always clears the insight detail — otherwise
+    // a stale detail view would surface on next return.
+    activeInsightDetail = null;
     render();
-    // Scroll content area to top on section switch.
+    const body = panel.querySelector('#profileContent');
+    if (body) body.scrollTop = 0;
+}
+
+function setInsightDetail(kind) {
+    activeInsightDetail = kind;
+    render();
     const body = panel.querySelector('#profileContent');
     if (body) body.scrollTop = 0;
 }
@@ -223,6 +235,31 @@ function buildPanel() {
     panel.querySelectorAll('[data-profile-close]').forEach((el) =>
         el.addEventListener('click', close)
     );
+
+    // Delegated handlers — content innerHTML is rewritten on every
+    // section / detail switch, so listeners go on the stable host.
+    const content = panel.querySelector('#profileContent');
+    if (content) {
+        content.addEventListener('click', (e) => {
+            const back = e.target.closest('[data-insight-back]');
+            if (back) {
+                setInsightDetail(null);
+                return;
+            }
+            const card = e.target.closest('[data-insight-open]');
+            if (card) {
+                setInsightDetail(card.dataset.insightOpen);
+            }
+        });
+        content.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            const card = e.target.closest('[data-insight-open]');
+            if (card) {
+                e.preventDefault();
+                setInsightDetail(card.dataset.insightOpen);
+            }
+        });
+    }
 }
 
 function render() {
@@ -333,8 +370,6 @@ function renderOverview(sessions) {
                     ${render60DayGrid(sessions)}
                 </div>
             </div>
-
-            ${renderOverviewQuickLinks()}
         `}
     `;
 }
@@ -345,20 +380,6 @@ function renderOverviewEmpty() {
             <p class="psection__empty-headline">no focus blocks yet</p>
             <p class="psection__empty-sub">finish one focus block and the rest of your overview shows up here.</p>
         </div>
-    `;
-}
-
-function renderOverviewQuickLinks() {
-    const links = SECTIONS.filter((s) => s.id !== 'overview').map((s) => `
-        <button class="psection__link" type="button" data-section-jump="${s.id}">
-            <span class="psection__link-label">${s.label}</span>
-            <span class="psection__link-chevron" aria-hidden="true">›</span>
-        </button>
-    `).join('');
-    // The buttons get bound after innerHTML lands via animateCountUps's
-    // requestAnimationFrame hook. Wire them in renderContent's tail.
-    return `
-        <div class="psection__links" id="profileQuickLinks">${links}</div>
     `;
 }
 
@@ -909,6 +930,7 @@ function renderInsights(sessions) {
             sub: trendConfidenceCopy(reg.r2),
             value: `${reg.slopePerWeek >= 0 ? '+' : '−'}${slopeAbs.toFixed(1)} min / week`,
             viz: vizTrend(last30, trendVals),
+            data: { reg, days: last30, trendVals },
         });
     }
 
@@ -920,6 +942,7 @@ function renderInsights(sessions) {
             sub: `about ${wow.newer.toFixed(0)} minutes a day now · ${wow.older.toFixed(0)} minutes a day before`,
             value: `${wow.delta >= 0 ? '+' : '−'}${(Math.abs(wow.delta) * 100).toFixed(0)}%`,
             viz: vizWow(wow.older, wow.newer),
+            data: { wow, last60 },
         });
     }
 
@@ -937,6 +960,12 @@ function renderInsights(sessions) {
             sub: rarityCopy(z),
             value: z > 0 ? `${todayMin} min today` : `${todayMin} min today`,
             viz: vizAnomaly(last30.slice(0, -1), todayTotal),
+            data: {
+                kind: 'today',
+                z, todayTotal, usualMean: usualMin,
+                sd: stdDev(last30.slice(0, -1)),
+                last30, flags,
+            },
         });
     } else if (anomalyDays > 0) {
         insights.push({
@@ -945,6 +974,12 @@ function renderInsights(sessions) {
             sub: 'days that stood out — much higher or much lower than your typical pace',
             value: `${anomalyDays} ${anomalyDays === 1 ? 'day' : 'days'}`,
             viz: vizAnomalyDays(last30, flags),
+            data: {
+                kind: 'recent',
+                last30, flags,
+                mean: mean(last30),
+                sd: stdDev(last30),
+            },
         });
     }
 
@@ -966,6 +1001,7 @@ function renderInsights(sessions) {
             sub: `${strength.label} pattern — ${strength.aside}`,
             value: strength.label,
             viz: vizCorrelation(corrPoints),
+            data: { points: corrPoints, r: correlation, strength },
         });
     }
 
@@ -983,6 +1019,7 @@ function renderInsights(sessions) {
             sub: `${switches} tab-aways during your focus blocks — every switch adds ~9 minutes of getting back into it`,
             value: valueText,
             viz: vizFriction(totalFocusedMin, lostMin),
+            data: { switches, lostMin, totalFocusedMin, sessionCount: sessions.length },
         });
     }
 
@@ -1014,6 +1051,7 @@ function renderInsights(sessions) {
             sub: subBase,
             value: valueText,
             viz: vizForecast(past14, projected14),
+            data: { hw, dailyAvg, past14, projected14, monthForecastReal },
         });
     }
 
@@ -1048,6 +1086,15 @@ function renderInsights(sessions) {
                 sub: `${dominantPct}% of yours look like "${dominant.label}"`,
                 value: `${result.k} groups`,
                 viz: vizClusters(features, result.assignments, clusters),
+                data: {
+                    k: result.k,
+                    inertia: result.inertia,
+                    centroids: result.centroids,
+                    assignments: result.assignments,
+                    clusters,
+                    sessions,
+                    bounds: { dMin, dMax, xMax },
+                },
             });
         }
     }
@@ -1084,6 +1131,7 @@ function renderInsights(sessions) {
                 sub: `${Math.round(top.rate * 100)}% finish in this group · ${Math.round(top.baselineRate * 100)}% across all your blocks`,
                 value: matters ? `${factor}× more` : `${factor}× less`,
                 viz: vizConditions(ranked.slice(0, 4)),
+                data: { ranked, baselineRate: ranked[0].baselineRate, totalSessions: sessions.length },
             });
         }
     }
@@ -1103,12 +1151,21 @@ function renderInsights(sessions) {
             headline = `you finish ${pct}% of focus blocks — ${100 - pct}% get cut short`;
             sub = `cutting more blocks short than you finish`;
         }
+        const completedSessions = sessions.filter((s) => s.completed);
         insights.push({
             kind: 'completion',
             headline,
             sub,
             value: `${pct}%`,
             viz: vizCompletion(completionRate, pct),
+            data: {
+                rate: completionRate,
+                pct,
+                total: sessions.length,
+                completed: completedSessions.length,
+                cutShort: sessions.length - completedSessions.length,
+                sessions,
+            },
         });
     }
 
@@ -1119,16 +1176,34 @@ function renderInsights(sessions) {
         `;
     }
 
+    // If a card is open, show the detail view in place of the grid.
+    if (activeInsightDetail) {
+        const insight = insights.find((i) => i.kind === activeInsightDetail);
+        if (insight) {
+            return `
+                ${sectionHeader('Insights', 'what we found in your own sessions — never compared against other people')}
+                ${renderInsightDetail(insight, sessions)}
+            `;
+        }
+        // Stale kind — fall through to grid.
+        activeInsightDetail = null;
+    }
+
     return `
         ${sectionHeader('Insights', 'what we found in your own sessions — never compared against other people')}
+        <p class="insight-grid__hint">tap any card for the full breakdown</p>
         <div class="insight-grid">
             ${insights.map((ins) => `
-                <article class="insight-card insight-card--${ins.kind}">
+                <article class="insight-card insight-card--${ins.kind}"
+                         role="button" tabindex="0"
+                         data-insight-open="${ins.kind}"
+                         aria-label="${escapeHtml(insightKindLabel(ins.kind))} — open details">
                     <span class="insight-card__kind">${insightKindLabel(ins.kind)}</span>
                     <p class="insight-card__headline">${escapeHtml(ins.headline)}</p>
                     ${ins.viz ? `<div class="insight-card__viz">${ins.viz}</div>` : ''}
                     <p class="insight-card__value">${escapeHtml(String(ins.value))}</p>
                     <p class="insight-card__sub">${escapeHtml(ins.sub)}</p>
+                    <span class="insight-card__chevron" aria-hidden="true">›</span>
                 </article>
             `).join('')}
         </div>
@@ -1353,6 +1428,400 @@ function vizCompletion(rate, percent) {
                     transform="rotate(-90 ${cx} ${cy})" />
             <text x="${cx}" y="${cy + 5}" class="insight-viz__gauge-num" text-anchor="middle">${percent}</text>
         </svg>
+    `;
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Insight detail views — clicking a card opens a full breakdown of
+// what the metric is, how it was computed, and the underlying data.
+// Plain English throughout; no math notation in the headlines.
+// ───────────────────────────────────────────────────────────────────────
+
+function renderInsightDetail(insight, sessions) {
+    return `
+        <div class="insight-detail insight-detail--${insight.kind}">
+            <button class="insight-detail__back" type="button" data-insight-back>
+                <span aria-hidden="true">‹</span> back to insights
+            </button>
+            <header class="insight-detail__head">
+                <span class="insight-detail__kind">${insightKindLabel(insight.kind)}</span>
+                <h3 class="insight-detail__headline">${escapeHtml(insight.headline)}</h3>
+                <p class="insight-detail__sub">${escapeHtml(insight.sub)}</p>
+            </header>
+            ${insight.viz ? `<div class="insight-detail__viz">${insight.viz}</div>` : ''}
+            <div class="insight-detail__body">
+                ${renderInsightDetailBody(insight, sessions)}
+            </div>
+        </div>
+    `;
+}
+
+function detailBlock(title, content) {
+    return `
+        <section class="detail-block">
+            <h4 class="detail-block__title">${escapeHtml(title)}</h4>
+            <div class="detail-block__content">${content}</div>
+        </section>
+    `;
+}
+
+function renderInsightDetailBody(insight, sessions) {
+    switch (insight.kind) {
+        case 'trend':       return detailTrend(insight);
+        case 'wow':         return detailWow(insight);
+        case 'anomaly':     return detailAnomaly(insight);
+        case 'correlation': return detailCorrelation(insight);
+        case 'friction':    return detailFriction(insight);
+        case 'forecast':    return detailForecast(insight);
+        case 'completion':  return detailCompletion(insight);
+        case 'patterns':    return detailPatterns(insight);
+        case 'conditions':  return detailConditions(insight);
+        default:            return '';
+    }
+}
+
+function detailTrend(ins) {
+    const { reg, days } = ins.data;
+    const r2 = reg.r2;
+    const fitWord = r2 >= 0.5 ? 'a clear pattern'
+        : r2 >= 0.25 ? 'a real trend with day-to-day noise'
+        : r2 >= 0.1 ? 'a weak trend'
+        : 'too noisy to call a trend yet';
+    const last7 = days.slice(-7).map((v, i) => {
+        const ago = 6 - i;
+        const label = ago === 0 ? 'today' : ago === 1 ? 'yesterday' : `${ago} days ago`;
+        return `<li><span>${label}</span><span class="num">${Math.round(v)} min</span></li>`;
+    }).join('');
+    return `
+        ${detailBlock('What this is', `
+            <p>The line above shows your daily focus minutes for the past 30 days. The dashed line through them is the trend — a single straight line that best summarizes the direction your data is heading.</p>
+        `)}
+        ${detailBlock('How we found it', `
+            <p>We used <strong>linear regression</strong> — a method that finds the line minimizing the squared distance from every point to it. The slope of that line is how many minutes per day your focus is shifting. We multiply by 7 to get the per-week change.</p>
+        `)}
+        ${detailBlock('How sure are we?', `
+            <p>The fit quality is <strong>${r2.toFixed(2)}</strong> on a 0–1 scale (statisticians call this R²):</p>
+            <ul class="detail-list">
+                <li><span>0.50 or higher</span><span class="num">a clear pattern</span></li>
+                <li><span>0.25 to 0.50</span><span class="num">real but bumpy</span></li>
+                <li><span>0.10 to 0.25</span><span class="num">weak signal</span></li>
+                <li><span>under 0.10</span><span class="num">probably noise</span></li>
+            </ul>
+            <p>Yours is ${r2.toFixed(2)} — ${fitWord}.</p>
+        `)}
+        ${detailBlock('Your last 7 days', `<ul class="detail-list">${last7}</ul>`)}
+    `;
+}
+
+function detailWow(ins) {
+    const { wow } = ins.data;
+    const newer = wow.newer || 0;
+    const older = wow.older || 0;
+    const totalDelta = (newer - older) * 30;
+    const dirText = totalDelta >= 0 ? 'more' : 'less';
+    return `
+        ${detailBlock('What this is', `
+            <p>The change in your average daily focus, comparing your last 30 days to the 30 days before that.</p>
+        `)}
+        ${detailBlock('How we found it', `
+            <p>We took the mean (average) of your daily focus minutes for each 30-day stretch, then computed the percentage change from older to newer.</p>
+        `)}
+        ${detailBlock('Your numbers', `
+            <ul class="detail-list">
+                <li><span>last 30 days, mean per day</span><span class="num">${newer.toFixed(0)} min</span></li>
+                <li><span>30 days before that, mean per day</span><span class="num">${older.toFixed(0)} min</span></li>
+                <li><span>total over the month</span><span class="num">${Math.abs(Math.round(totalDelta))} min ${dirText}</span></li>
+            </ul>
+        `)}
+    `;
+}
+
+function detailAnomaly(ins) {
+    const d = ins.data;
+    if (d.kind === 'today') {
+        return `
+            ${detailBlock('What this is', `
+                <p>Today's focus minutes against the distribution of your last 30 days.</p>
+            `)}
+            ${detailBlock('How we found it', `
+                <p>We compute the <strong>z-score</strong>: how far today's number is from your recent average, measured in standard deviations.</p>
+                <ul class="detail-list">
+                    <li><span>z above +2</span><span class="num">in the top ~2.5% of recent days</span></li>
+                    <li><span>z above +1.5</span><span class="num">notably above your normal</span></li>
+                    <li><span>z below −2</span><span class="num">in the bottom ~2.5% of recent days</span></li>
+                </ul>
+            `)}
+            ${detailBlock('Your numbers', `
+                <ul class="detail-list">
+                    <li><span>average daily focus (last 30 days)</span><span class="num">${d.usualMean} min</span></li>
+                    <li><span>day-to-day variation</span><span class="num">±${Math.round(d.sd)} min</span></li>
+                    <li><span>today</span><span class="num">${Math.round(d.todayTotal)} min</span></li>
+                    <li><span>z-score</span><span class="num">${d.z.toFixed(1)}</span></li>
+                </ul>
+            `)}
+        `;
+    }
+    const flagged = d.last30
+        .map((v, i) => ({ v, i, ago: d.last30.length - 1 - i }))
+        .filter((row) => d.flags[row.i])
+        .slice(-5)
+        .reverse()
+        .map((row) => `<li><span>${row.ago === 0 ? 'today' : `${row.ago} days ago`}</span><span class="num">${Math.round(row.v)} min</span></li>`)
+        .join('');
+    return `
+        ${detailBlock('What this is', `
+            <p>Days from the last 30 that broke from your usual pattern in either direction — much higher or much lower than your typical pace.</p>
+        `)}
+        ${detailBlock('How we found them', `
+            <p>For each day, we compute its z-score (how many standard deviations it sits from your recent mean). Days with a z-score of 1.5 or more in either direction get flagged.</p>
+        `)}
+        ${detailBlock('Your numbers', `
+            <ul class="detail-list">
+                <li><span>30-day average</span><span class="num">${Math.round(d.mean)} min/day</span></li>
+                <li><span>variation</span><span class="num">±${Math.round(d.sd)} min</span></li>
+            </ul>
+            <p class="detail-block__note">unusual days flagged:</p>
+            <ul class="detail-list">${flagged || '<li><span>none in the recent slice shown</span></li>'}</ul>
+        `)}
+    `;
+}
+
+function detailCorrelation(ins) {
+    const { points, r, strength } = ins.data;
+    return `
+        ${detailBlock('What this is', `
+            <p>We checked whether two of your numbers move together: the count of tab-switches inside a session, and that session's focus quality score (0–100).</p>
+        `)}
+        ${detailBlock('How we found it', `
+            <p>We use <strong>Pearson correlation</strong>. It returns a value between −1 and +1:</p>
+            <ul class="detail-list">
+                <li><span>+1.0</span><span class="num">they move up together perfectly</span></li>
+                <li><span>0</span><span class="num">no relationship</span></li>
+                <li><span>−1.0</span><span class="num">they move opposite perfectly</span></li>
+            </ul>
+            <p>Yours is r = ${r.toFixed(2)} — ${strength.label}, ${strength.aside}.</p>
+        `)}
+        ${detailBlock('Sample size', `
+            <ul class="detail-list">
+                <li><span>sessions used</span><span class="num">${points.length}</span></li>
+            </ul>
+        `)}
+        ${detailBlock('A note on this', `
+            <p>Correlation isn't causation. We see the pattern, but it doesn't prove that switching tabs <em>causes</em> lower quality (or vice versa). They just move together in your data.</p>
+        `)}
+    `;
+}
+
+function detailFriction(ins) {
+    const d = ins.data;
+    const avgPerSession = d.sessionCount ? d.switches / d.sessionCount : 0;
+    const cleanSessionsPct = d.sessionCount
+        ? Math.round((d.sessionCount - d.switches > 0 ? 1 : 0) * 100)
+        : 0;
+    return `
+        ${detailBlock('What this is', `
+            <p>An estimate of focused time you've lost to context-switching during your blocks.</p>
+        `)}
+        ${detailBlock('How we found it', `
+            <p>The Page Visibility API tells us when you switch away from this tab during a focus block. Each tab-away costs about <strong>9.5 minutes</strong> of getting-back-into-it time — a conservative figure from research on attention recovery (some research cites 23 minutes).</p>
+            <p>Total time lost = tab-aways × 9.5 minutes.</p>
+        `)}
+        ${detailBlock('Your numbers', `
+            <ul class="detail-list">
+                <li><span>tab-aways during focus blocks</span><span class="num">${d.switches}</span></li>
+                <li><span>estimated minutes lost</span><span class="num">${Math.round(d.lostMin)} min</span></li>
+                <li><span>average tab-aways per session</span><span class="num">${avgPerSession.toFixed(1)}</span></li>
+                <li><span>focused minutes (total)</span><span class="num">${Math.round(d.totalFocusedMin)} min</span></li>
+            </ul>
+        `)}
+        ${detailBlock('A note on this', `
+            <p>9.5 min is the conservative figure. Your real cost is likely higher. Either way, the takeaway is the same — keeping tabs out of focus blocks is high-leverage.</p>
+        `)}
+    `;
+}
+
+function detailForecast(ins) {
+    const { hw, dailyAvg, monthForecastReal } = ins.data;
+    if (!hw) {
+        return `
+            ${detailBlock('What this is', `
+                <p>A simple forecast of how much you'll focus over the next 30 days, based on your last 7 days.</p>
+            `)}
+            ${detailBlock('How we found it', `
+                <p>We took your trailing-7-day daily average and projected it forward. Since you have less than two weeks of data, we can't yet model your weekly rhythm — that requires the full Holt-Winters method, which kicks in once you have 14+ days of history.</p>
+            `)}
+            ${detailBlock('Your numbers', `
+                <ul class="detail-list">
+                    <li><span>last 7 days, mean per day</span><span class="num">${Math.round(dailyAvg)} min</span></li>
+                    <li><span>projected over 30 days</span><span class="num">${Math.round(monthForecastReal)} min</span></li>
+                </ul>
+            `)}
+        `;
+    }
+    // Compute strongest / weakest day from seasonal component
+    const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    let bestIdx = 0, worstIdx = 0;
+    for (let i = 1; i < hw.season.length; i++) {
+        if (hw.season[i] > hw.season[bestIdx]) bestIdx = i;
+        if (hw.season[i] < hw.season[worstIdx]) worstIdx = i;
+    }
+    return `
+        ${detailBlock('What this is', `
+            <p>Your projected daily focus for the next 14 days, based on your recent pattern.</p>
+        `)}
+        ${detailBlock('How we found it', `
+            <p>We use <strong>Holt-Winters exponential smoothing</strong> — a time-series method that tracks three things at once:</p>
+            <ul class="detail-list">
+                <li><span>level</span><span>where you're focusing day-to-day right now</span></li>
+                <li><span>trend</span><span>whether you're gaining or losing minutes per day</span></li>
+                <li><span>weekly rhythm</span><span>which days of the week tend to be higher or lower than typical</span></li>
+            </ul>
+            <p>The model gives more weight to recent days than old ones, so the forecast adjusts as you keep going.</p>
+        `)}
+        ${detailBlock('Your model', `
+            <ul class="detail-list">
+                <li><span>current daily level</span><span class="num">${hw.level.toFixed(0)} min/day</span></li>
+                <li><span>direction</span><span class="num">${hw.trend >= 0 ? '+' : '−'}${Math.abs(hw.trend).toFixed(2)} min/day</span></li>
+                <li><span>strongest day in your week</span><span class="num">${dayLabels[bestIdx]}</span></li>
+                <li><span>quietest day in your week</span><span class="num">${dayLabels[worstIdx]}</span></li>
+            </ul>
+        `)}
+        ${detailBlock('A note on this', `
+            <p>Forecasts get less reliable the further out you go. The next 7 days are more trustworthy than days 8–14.</p>
+        `)}
+    `;
+}
+
+function detailCompletion(ins) {
+    const d = ins.data;
+    // Last 8 sessions with their status
+    const recent = d.sessions.slice(-8).reverse().map((s) => {
+        const date = new Date(s.startedAt);
+        const dayLabel = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        const min = Math.round((s.durationSeconds || 0) / 60);
+        return `<li>
+            <span>${dayLabel} · ${min} min</span>
+            <span class="num ${s.completed ? 'is-good' : 'is-flat'}">${s.completed ? 'finished' : 'cut short'}</span>
+        </li>`;
+    }).join('');
+    // Day-of-week breakdown
+    const byDay = new Array(7).fill(0).map(() => ({ total: 0, done: 0 }));
+    for (const s of d.sessions) {
+        const day = new Date(s.startedAt).getDay();
+        byDay[day].total++;
+        if (s.completed) byDay[day].done++;
+    }
+    const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const byDayList = byDay.map((row, i) => {
+        if (row.total === 0) return '';
+        const pct = Math.round((row.done / row.total) * 100);
+        return `<li><span>${dayLabels[i]}</span><span class="num">${pct}% (${row.done}/${row.total})</span></li>`;
+    }).filter(Boolean).join('');
+    return `
+        ${detailBlock('What this is', `
+            <p>The percentage of focus blocks you start that you actually run all the way to the target time.</p>
+        `)}
+        ${detailBlock('How it counts', `
+            <p>"Finished" means you ran the full target duration (e.g. all 25 minutes of a 25-minute block). "Cut short" means you stopped, reset, or skipped before time was up.</p>
+        `)}
+        ${detailBlock('Your numbers', `
+            <ul class="detail-list">
+                <li><span>total blocks started</span><span class="num">${d.total}</span></li>
+                <li><span>finished</span><span class="num is-good">${d.completed} (${Math.round((d.completed / d.total) * 100)}%)</span></li>
+                <li><span>cut short</span><span class="num is-flat">${d.cutShort} (${Math.round((d.cutShort / d.total) * 100)}%)</span></li>
+            </ul>
+        `)}
+        ${byDayList ? detailBlock('By day of week', `<ul class="detail-list">${byDayList}</ul>`) : ''}
+        ${detailBlock('Your last 8 blocks', `<ul class="detail-list">${recent}</ul>`)}
+    `;
+}
+
+function detailPatterns(ins) {
+    const d = ins.data;
+    const palette = ['rgba(149,226,164,1)', 'rgba(180,144,232,1)', 'rgba(120,200,240,1)', 'rgba(255,184,92,1)'];
+    const clusterRows = d.clusters.map((cl, i) => {
+        const members = d.sessions.filter((_, idx) => d.assignments[idx] === cl.idx);
+        const avgDur = members.length ? mean(members.map((s) => (s.durationSeconds || 0) / 60)) : 0;
+        const avgQual = members.length ? mean(members.map((s) => s.focusQuality || 0)) : 0;
+        const avgDist = members.length ? mean(members.map((s) => s.distractionCount || 0)) : 0;
+        return `
+            <li class="cluster-row">
+                <span class="cluster-row__dot" style="background:${palette[i % palette.length]}"></span>
+                <div class="cluster-row__main">
+                    <div class="cluster-row__head">
+                        <span class="cluster-row__label">${escapeHtml(cl.label)}</span>
+                        <span class="cluster-row__count num">${cl.count} blocks · ${Math.round((cl.count / d.sessions.length) * 100)}%</span>
+                    </div>
+                    <ul class="cluster-row__stats">
+                        <li><span>avg duration</span><span class="num">${avgDur.toFixed(0)} min</span></li>
+                        <li><span>avg quality</span><span class="num">${avgQual.toFixed(0)}/100</span></li>
+                        <li><span>avg tab-switches</span><span class="num">${avgDist.toFixed(1)}</span></li>
+                    </ul>
+                </div>
+            </li>
+        `;
+    }).join('');
+    return `
+        ${detailBlock('What this is', `
+            <p>We grouped every focus block you've done into "types" based on three things about each block: how long it ran, the focus quality score, and how many times you switched tabs.</p>
+            <p>Sessions that look similar in those three numbers ended up in the same group.</p>
+        `)}
+        ${detailBlock('How we found the groups', `
+            <p>We used <strong>k-means clustering</strong> — a standard machine-learning method:</p>
+            <ol class="detail-steps">
+                <li>Pick K starting points spread across your data (k-means++ seeding)</li>
+                <li>Group every session with its closest starting point</li>
+                <li>Move each starting point to the center of its group</li>
+                <li>Repeat until the groups stop changing</li>
+                <li>Restart 5 times — keep the run with the cleanest groups</li>
+            </ol>
+            <p>We tried K = 2, 3, and 4, and picked the K with the cleanest separation between groups (the "elbow" point).</p>
+        `)}
+        ${detailBlock('Your groups', `<ul class="cluster-list">${clusterRows}</ul>`)}
+        ${detailBlock('Reading the chart', `
+            <p>The chart above plots every session as a small dot, colored by which group it ended up in. The bigger circle of each color is that group's center — the typical block of that type.</p>
+        `)}
+    `;
+}
+
+function detailConditions(ins) {
+    const { ranked, baselineRate, totalSessions } = ins.data;
+    const rows = ranked.map((r) => {
+        const lift = r.lift;
+        const more = lift > 1;
+        const factor = more ? lift.toFixed(2) : (1 / Math.max(0.01, lift)).toFixed(2);
+        return `
+            <li>
+                <div class="condition-row">
+                    <span class="condition-row__name">${escapeHtml(r.name)}</span>
+                    <span class="condition-row__lift ${more ? 'is-up' : 'is-down'}">
+                        ${factor}× ${more ? 'more likely' : 'less likely'}
+                    </span>
+                </div>
+                <div class="condition-row__meta">
+                    ${r.n} blocks matched · ${Math.round(r.rate * 100)}% finish in this group · ${Math.round(r.baselineRate * 100)}% across all blocks
+                </div>
+            </li>
+        `;
+    }).join('');
+    return `
+        ${detailBlock('What this is', `
+            <p>For each tested condition (time of day, sound on, weekday, etc.), we checked whether your blocks finish at a different rate than your overall average.</p>
+        `)}
+        ${detailBlock('How we found it', `
+            <p>For each condition:</p>
+            <ol class="detail-steps">
+                <li>Find every session matching the condition</li>
+                <li>Compute the percentage that ran to completion</li>
+                <li>Compare against your overall completion rate (${Math.round(baselineRate * 100)}% across ${totalSessions} blocks)</li>
+                <li>The "lift" is the ratio between the two</li>
+            </ol>
+            <p>A lift of <strong>1.5×</strong> means you're 50% more likely to finish in that condition. A lift of <strong>0.7×</strong> means 30% less likely.</p>
+        `)}
+        ${detailBlock('All conditions, ranked', `<ul class="condition-list">${rows}</ul>`)}
+        ${detailBlock('A note on this', `
+            <p>This finds simple, single-condition patterns — not combinations (e.g. "morning AND with rain"). The strongest single signal is shown first. Lift on small samples (under 10 sessions in a group) is noisier.</p>
+        `)}
     `;
 }
 
@@ -1651,10 +2120,6 @@ function animateCountUps(root) {
             else el.textContent = String(target);
         }
         requestAnimationFrame(tick);
-    });
-    // Wire any [data-section-jump] quick-link buttons in the Overview.
-    root.querySelectorAll('[data-section-jump]').forEach((btn) => {
-        btn.addEventListener('click', () => setSection(btn.dataset.sectionJump));
     });
 }
 
