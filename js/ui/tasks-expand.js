@@ -133,6 +133,14 @@ function buildPanel() {
             toggleTask(Number(tog.dataset.xToggle));
         }
     });
+    list.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const tog = e.target.closest('[data-x-toggle]');
+        if (tog) {
+            e.preventDefault();
+            toggleTask(Number(tog.dataset.xToggle));
+        }
+    });
 
     clearBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -221,17 +229,19 @@ function render() {
     ];
     list.innerHTML = ordered.map((task) => `
         <li class="tasks-expand__item ${task.completed ? 'is-done' : ''}">
-            <button class="tasks-expand__check" type="button"
-                    data-x-toggle="${task.id}"
-                    aria-pressed="${task.completed}"
-                    aria-label="${task.completed ? 'Mark not done' : 'Mark done'}">
-                <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-                    <path d="M2.5 6.2 L5 8.6 L9.5 3.6"
-                          fill="none" stroke="currentColor"
-                          stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </button>
-            <span class="tasks-expand__text">${escapeHtml(task.text)}</span>
+            <div class="tasks-expand__row" data-x-toggle="${task.id}"
+                 role="button" tabindex="0"
+                 aria-pressed="${task.completed}"
+                 aria-label="${task.completed ? 'Mark not done' : 'Mark done'}: ${escapeHtml(task.text)}">
+                <span class="tasks-expand__check" aria-hidden="true">
+                    <svg viewBox="0 0 12 12" width="12" height="12">
+                        <path d="M2.5 6.2 L5 8.6 L9.5 3.6"
+                              fill="none" stroke="currentColor"
+                              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </span>
+                <span class="tasks-expand__text">${escapeHtml(task.text)}</span>
+            </div>
             <button class="tasks-expand__del" type="button"
                     data-x-delete="${task.id}"
                     aria-label="Delete task">×</button>

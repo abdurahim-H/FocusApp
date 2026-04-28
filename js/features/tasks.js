@@ -82,6 +82,16 @@ export function initTaskRender() {
         }
     });
 
+    // Keyboard parity — Enter/Space on a focused task row toggles it.
+    list.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const toggle = e.target.closest('[data-toggle-task]');
+        if (toggle) {
+            e.preventDefault();
+            toggleTask(Number(toggle.dataset.toggleTask));
+        }
+    });
+
     if (clearBtn) {
         clearBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -137,12 +147,17 @@ function createTaskElement(task) {
     const li = document.createElement('li');
     li.className = 'task-item liquid-glass-task';
     li.dataset.taskId = task.id;
+    // Whole content row is the toggle target — tap anywhere on the
+    // task to flip done/undone. Delete button stays its own target;
+    // the click handler runs the delete check first and short-circuits.
     li.innerHTML = `
-        <div class="task-content">
-            <label class="liquid-glass-checkbox" data-toggle-task="${task.id}">
-                <input type="checkbox" ${task.completed ? 'checked' : ''} aria-label="${escapeHtml(task.text)}">
+        <div class="task-content" data-toggle-task="${task.id}" role="button" tabindex="0"
+             aria-pressed="${task.completed}"
+             aria-label="${task.completed ? 'Mark not done' : 'Mark done'}: ${escapeHtml(task.text)}">
+            <span class="liquid-glass-checkbox">
+                <input type="checkbox" ${task.completed ? 'checked' : ''} tabindex="-1" aria-hidden="true">
                 <span class="checkmark"></span>
-            </label>
+            </span>
             <span class="task-text${task.completed ? ' task-completed' : ''}">${escapeHtml(task.text)}</span>
         </div>
         <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--danger" data-delete-task="${task.id}" aria-label="Delete task">
@@ -155,9 +170,17 @@ function createTaskElement(task) {
 function updateTaskElement(el, task) {
     const checkbox = el.querySelector('input[type="checkbox"]');
     const textEl = el.querySelector('.task-text');
+    const content = el.querySelector('[data-toggle-task]');
     if (checkbox) checkbox.checked = task.completed;
     if (textEl) {
         textEl.classList.toggle('task-completed', task.completed);
+    }
+    if (content) {
+        content.setAttribute('aria-pressed', String(task.completed));
+        content.setAttribute(
+            'aria-label',
+            `${task.completed ? 'Mark not done' : 'Mark done'}: ${task.text}`
+        );
     }
 }
 

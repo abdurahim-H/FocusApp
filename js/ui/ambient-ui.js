@@ -973,83 +973,144 @@ function comingSoonCard(s) {
 // once they pick it. Generic for unknown sounds: a clean gold orb.
 function cosmicPreviewSVG(id, { dim = false } = {}) {
     const recipe = COSMIC_PREVIEWS[id] || COSMIC_PREVIEWS.__default;
-    const opacity = dim ? 0.45 : 1;
+    const opacity = dim ? 0.5 : 1;
     const motif = recipe.motif();
+    // Each sound icon now lives in the same visual language as the
+    // constellation mix cards: dots + thin lines on a transparent
+    // background, with a faint singularity halo behind the motif.
+    // Replaced the heavy radial-gradient orb that read as opaque
+    // "blob" — the motifs are now able to breathe and feel like
+    // small celestial diagrams instead of stickers.
     return `
         <svg viewBox="0 0 56 56" width="56" height="56" style="opacity:${opacity}">
             <defs>
-                <radialGradient id="g_${id}" cx="34%" cy="32%" r="65%">
-                    <stop offset="0%"  stop-color="${recipe.accent}" stop-opacity="0.95"/>
-                    <stop offset="35%" stop-color="${recipe.tint}"   stop-opacity="0.85"/>
-                    <stop offset="100%" stop-color="${recipe.tint}"  stop-opacity="0"/>
+                <radialGradient id="halo_${id}" cx="50%" cy="50%" r="55%">
+                    <stop offset="0%"   stop-color="${recipe.tint}" stop-opacity="0.18"/>
+                    <stop offset="60%"  stop-color="${recipe.tint}" stop-opacity="0.05"/>
+                    <stop offset="100%" stop-color="${recipe.tint}" stop-opacity="0"/>
                 </radialGradient>
-                <filter id="bloom_${id}" x="-30%" y="-30%" width="160%" height="160%">
-                    <feGaussianBlur stdDeviation="1.2"/>
-                </filter>
             </defs>
-            <circle cx="28" cy="28" r="22" fill="url(#g_${id})" filter="url(#bloom_${id})"/>
+            <circle cx="28" cy="28" r="24" fill="url(#halo_${id})"/>
+            <circle cx="28" cy="28" r="22" fill="none"
+                    stroke="${recipe.tint}" stroke-opacity="0.16" stroke-width="0.7"/>
             ${motif}
         </svg>
     `;
 }
 
-// Per-sound recipe. tint / accent are CSS color strings; motif is a
-// function returning extra SVG markup overlaid on the gradient orb.
+// Per-sound recipe. Each sound is rendered as a small constellation —
+// nodes (filled dots) connected by thin lines, in a single tint that
+// matches the sound's mood. This shares the exact visual primitives
+// the constellation mix cards use, so the whole library reads as one
+// design system rather than two competing ones.
+//
+// `tint` is the constellation colour; `accent` is reserved for
+// brighter focal nodes. `motif()` returns the body of the SVG.
 const COSMIC_PREVIEWS = {
+    // RAIN — meteor shower. Three small streaks falling diagonally,
+    // each terminating in a brighter "drop" node. Suggests downward
+    // motion without resorting to literal raindrop pictograms.
     rain: {
         tint: '#8FB8E8',
         accent: '#D6E8F8',
         motif: () => `
-            <g stroke="rgba(220,235,250,0.85)" stroke-width="1.4" stroke-linecap="round">
-                <line x1="20" y1="22" x2="20" y2="32"/>
-                <line x1="28" y1="18" x2="28" y2="28"/>
-                <line x1="36" y1="22" x2="36" y2="32"/>
-                <line x1="24" y1="32" x2="24" y2="40"/>
-                <line x1="32" y1="32" x2="32" y2="40"/>
+            <g stroke="rgba(214,232,248,0.55)" stroke-width="1" stroke-linecap="round">
+                <line x1="36" y1="14" x2="22" y2="28"/>
+                <line x1="42" y1="22" x2="32" y2="32"/>
+                <line x1="32" y1="30" x2="20" y2="42"/>
+            </g>
+            <g fill="#D6E8F8">
+                <circle cx="22" cy="28" r="1.9"/>
+                <circle cx="32" cy="32" r="1.6"/>
+                <circle cx="20" cy="42" r="1.7"/>
+            </g>
+            <g fill="rgba(143,184,232,0.35)">
+                <circle cx="22" cy="28" r="3.6"/>
+                <circle cx="32" cy="32" r="3.2"/>
+                <circle cx="20" cy="42" r="3.3"/>
             </g>`,
     },
-    forest: {
-        tint: '#4FA86C',
-        accent: '#9FE69F',
-        motif: () => `
-            <g fill="rgba(180,235,180,0.7)">
-                <ellipse cx="22" cy="22" rx="6" ry="9" transform="rotate(-22 22 22)"/>
-                <ellipse cx="34" cy="20" rx="5" ry="8" transform="rotate(20 34 20)"/>
-                <ellipse cx="28" cy="34" rx="6" ry="9"/>
-            </g>`,
-    },
+
+    // OCEAN — Saturn. A tilted elliptical ring around a focal core
+    // body. Reads as "planetary" without saying "wave"; the cosmic
+    // register fits the brand better than the old wave-squiggles.
     ocean: {
         tint: '#3389C8',
         accent: '#7CD8FF',
         motif: () => `
-            <g stroke="rgba(180,225,250,0.75)" stroke-width="1.5" fill="none" stroke-linecap="round">
-                <path d="M10 26 q 4 -3, 9 0 t 9 0 t 9 0 t 9 0"/>
-                <path d="M10 32 q 4 -3, 9 0 t 9 0 t 9 0 t 9 0"/>
-                <path d="M10 38 q 4 -3, 9 0 t 9 0 t 9 0 t 9 0"/>
-            </g>`,
+            <ellipse cx="28" cy="28" rx="20" ry="5.5"
+                     fill="none" stroke="rgba(124,216,255,0.55)" stroke-width="1.1"
+                     transform="rotate(-14 28 28)"/>
+            <ellipse cx="28" cy="28" rx="13" ry="3.6"
+                     fill="none" stroke="rgba(124,216,255,0.85)" stroke-width="1.1"
+                     transform="rotate(-14 28 28)"/>
+            <circle cx="28" cy="28" r="6"   fill="rgba(51,137,200,0.32)"/>
+            <circle cx="28" cy="28" r="3.2" fill="#7CD8FF"/>`,
     },
+
+    // FOREST — branching constellation. Central node with three
+    // arms terminating in small "leaf" nodes. The shape evokes a
+    // tree without drawing a single literal leaf.
+    forest: {
+        tint: '#4FA86C',
+        accent: '#9FE69F',
+        motif: () => `
+            <g stroke="rgba(159,230,159,0.5)" stroke-width="0.9" stroke-linecap="round">
+                <line x1="28" y1="28" x2="18" y2="18"/>
+                <line x1="28" y1="28" x2="40" y2="20"/>
+                <line x1="28" y1="28" x2="28" y2="42"/>
+            </g>
+            <g fill="#9FE69F">
+                <circle cx="18" cy="18" r="2.4"/>
+                <circle cx="40" cy="20" r="2.4"/>
+                <circle cx="28" cy="42" r="2.4"/>
+            </g>
+            <g fill="rgba(79,168,108,0.32)">
+                <circle cx="18" cy="18" r="4.2"/>
+                <circle cx="40" cy="20" r="4.2"/>
+                <circle cx="28" cy="42" r="4.2"/>
+            </g>
+            <circle cx="28" cy="28" r="2.2" fill="rgba(159,230,159,0.95)"/>
+            <circle cx="28" cy="28" r="4"   fill="rgba(79,168,108,0.22)"/>`,
+    },
+
+    // CAFE — warm cluster. Five nodes in a loose arrangement with
+    // soft tethers — the social, gathered feel of a busy room
+    // rendered as a small star group.
     cafe: {
         tint: '#FBBC61',
         accent: '#FFE9A6',
         motif: () => `
-            <g fill="rgba(255,238,180,0.9)">
-                <circle cx="28" cy="28" r="4"/>
+            <g stroke="rgba(255,225,150,0.32)" stroke-width="0.8" stroke-linecap="round">
+                <line x1="20" y1="20" x2="32" y2="26"/>
+                <line x1="32" y1="26" x2="38" y2="32"/>
+                <line x1="32" y1="26" x2="22" y2="34"/>
+                <line x1="22" y1="34" x2="36" y2="38"/>
             </g>
-            <g stroke="rgba(255,225,150,0.7)" stroke-width="1.6" stroke-linecap="round">
-                <line x1="28" y1="14" x2="28" y2="20"/>
-                <line x1="28" y1="36" x2="28" y2="42"/>
-                <line x1="14" y1="28" x2="20" y2="28"/>
-                <line x1="36" y1="28" x2="42" y2="28"/>
-                <line x1="18" y1="18" x2="22" y2="22"/>
-                <line x1="34" y1="34" x2="38" y2="38"/>
-                <line x1="38" y1="18" x2="34" y2="22"/>
-                <line x1="22" y1="34" x2="18" y2="38"/>
+            <g fill="#FFE9A6">
+                <circle cx="20" cy="20" r="2.2"/>
+                <circle cx="32" cy="26" r="2.6"/>
+                <circle cx="38" cy="32" r="2"/>
+                <circle cx="22" cy="34" r="2.2"/>
+                <circle cx="36" cy="38" r="2"/>
+            </g>
+            <g fill="rgba(251,188,97,0.3)">
+                <circle cx="20" cy="20" r="3.8"/>
+                <circle cx="32" cy="26" r="4.4"/>
+                <circle cx="38" cy="32" r="3.6"/>
+                <circle cx="22" cy="34" r="3.8"/>
+                <circle cx="36" cy="38" r="3.6"/>
             </g>`,
     },
+
+    // FALLBACK — a single still-bright node. Used for "coming soon"
+    // tiles and any sound id that doesn't have a hand-tuned recipe.
     __default: {
         tint: '#EAD79B',
         accent: '#FFF1CD',
-        motif: () => '',
+        motif: () => `
+            <circle cx="28" cy="28" r="2.4" fill="#FFF1CD"/>
+            <circle cx="28" cy="28" r="5"   fill="rgba(234,215,155,0.28)"/>`,
     },
 };
 
