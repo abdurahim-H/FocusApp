@@ -23,9 +23,15 @@ export function createFocusTrap(container) {
         trigger = triggerEl || document.activeElement;
         handler = (e) => {
             if (e.key !== 'Tab') return;
+            // `offsetParent !== null` works for HTML but is *always* null
+            // on SVG elements (SVG has no offset model), which silently
+            // dropped tabbable SVG cells like the calendar heatmap day
+            // squares from the trap's wrap-around. `getClientRects()` is
+            // empty for `display:none` / detached subtrees on both HTML
+            // and SVG, so it covers both worlds correctly.
             const focusable = Array.from(container.querySelectorAll(FOCUSABLE)).filter(
-                (el) => el.offsetParent !== null
-            ); // visible only
+                (el) => el.getClientRects().length > 0
+            );
             if (focusable.length === 0) return;
 
             const first = focusable[0];

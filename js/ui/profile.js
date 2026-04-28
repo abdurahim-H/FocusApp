@@ -194,6 +194,10 @@ function close() {
     isOpen = false;
     panel.classList.remove('is-open');
     panel.setAttribute('aria-hidden', 'true');
+    // Reset drill-downs so reopening lands on the section's grid
+    // rather than a stale detail view from the prior session.
+    activeInsightDetail = null;
+    activeDayDetail = null;
     trap?.deactivate();
     if (unsubscribeSessions) {
         unsubscribeSessions();
@@ -223,6 +227,11 @@ function setInsightDetail(kind) {
 }
 
 function setDayDetail(iso) {
+    // Accept null to clear, or a well-formed yyyy-mm-dd string.
+    // Anything else (tampered DOM attr, etc.) is dropped silently.
+    if (iso !== null && (typeof iso !== 'string' || !ISO_DAY_RE.test(iso))) {
+        return;
+    }
     activeDayDetail = iso;
     activeInsightDetail = null;
     render();
@@ -497,7 +506,7 @@ function renderFocus(sessions) {
             ${emptyState('finish a focus block to start filling this in.')}
         `;
     }
-    const durations = sessions.map((s) => s.durationSeconds / 60);
+    const durations = sessions.map((s) => (s.durationSeconds || 0) / 60);
     const totalSec = sessions.reduce((a, s) => a + (s.durationSeconds || 0), 0);
     const completionRate = sessions.length
         ? sessions.filter((s) => s.completed).length / sessions.length
@@ -1897,12 +1906,22 @@ function detailConditions(ins) {
 // the day compares to the user's overall pace.
 // ───────────────────────────────────────────────────────────────────────
 
+const ISO_DAY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
 function parseIsoDay(iso) {
     // iso is yyyy-mm-dd in *local* time. new Date('yyyy-mm-dd') parses
     // as UTC and shifts by tz offset, which would land on the wrong
     // calendar day for users west of GMT. Build the date manually.
-    const [y, m, d] = iso.split('-').map(Number);
-    const date = new Date(y, m - 1, d, 0, 0, 0, 0);
+    if (typeof iso !== 'string') return null;
+    const m = iso.match(ISO_DAY_RE);
+    if (!m) return null;
+    const [, ys, ms, ds] = m;
+    const date = new Date(Number(ys), Number(ms) - 1, Number(ds), 0, 0, 0, 0);
+    // The constructor accepts wild values like month=13 (silently rolls
+    // forward); guard against that by checking the round-trip.
+    if (date.getMonth() !== Number(ms) - 1 || date.getDate() !== Number(ds)) {
+        return null;
+    }
     return date;
 }
 
@@ -1924,8 +1943,16 @@ function formatHourMin(ts) {
 
 function renderDayDetail(iso, focusSessions) {
     const dayStart = parseIsoDay(iso);
-    const dayEnd = new Date(dayStart);
-    dayEnd.setDate(dayEnd.getDate() + 1);
+    if (!dayStart || !Array.isArray(focusSessions)) {
+        // Malformed iso — fall back to a graceful empty state and
+        // surface the back button so the user isn't stuck.
+        return `
+            ${dayDetailHeader('Unknown date', '', "we couldn't read that day")}
+            <div class="day-detail__empty">
+                <p>That date didn't parse as a real day. Pick another cell from the calendar.</p>
+            </div>
+        `;
+    }
 
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -2067,53 +2094,63 @@ function dayTimelineCard(blocks, dayStart) {
 
 function dayCompareCard(blocks, dayStart, allSessions) {
     const todayMin = blocks.reduce((a, s) => a + (s.durationSeconds || 0), 0) / 60;
+    const dayKey = dayStart.getTime();
 
-    // Overall daily mean (across all days in the user's history).
+    // Build per-day minute totals across the user's whole history,
+    // keyed by local-day-start. Excluding the clicked day from the
+    // means below is what makes the comparison honest — otherwise
+    // we'd be comparing the day to a number that already contains it.
+    const dayMap = new Map();
+    const dowMap = new Map();
+    const dow = dayStart.getDay();
+    for (const s of allSessions) {
+        const d = new Date(s.startedAt);
+        d.setHours(0, 0, 0, 0);
+        const k = d.getTime();
+        if (k === dayKey) continue; // exclude the clicked day from itself
+        const min = (s.durationSeconds || 0) / 60;
+        dayMap.set(k, (dayMap.get(k) || 0) + min);
+        if (d.getDay() === dow) {
+            dowMap.set(k, (dowMap.get(k) || 0) + min);
+        }
+    }
+
+    // Overall daily mean over the calendar span (zero days included —
+    // "0 min on Tuesday" is a real datum). Span runs from the user's
+    // earliest activity through today; if the clicked day is inside
+    // that range we drop one day so we don't compare it to itself.
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
     const oldest = allSessions.length
         ? Math.min(...allSessions.map((s) => s.startedAt))
         : Date.now();
     const oldestStart = new Date(oldest);
     oldestStart.setHours(0, 0, 0, 0);
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const totalDays = Math.max(1, Math.round((todayStart - oldestStart) / 86400_000) + 1);
-    const totalMinAll = allSessions.reduce((a, s) => a + (s.durationSeconds || 0), 0) / 60;
-    const overallDailyMean = totalMinAll / totalDays;
-
-    // Day-of-week mean across the user's history (this dow only).
-    const dow = dayStart.getDay();
-    const dowDayMap = new Map();
-    for (const s of allSessions) {
-        const d = new Date(s.startedAt);
-        if (d.getDay() !== dow) continue;
-        d.setHours(0, 0, 0, 0);
-        const k = d.getTime();
-        dowDayMap.set(k, (dowDayMap.get(k) || 0) + (s.durationSeconds || 0) / 60);
+    let spanDays = Math.max(1, Math.round((todayStart - oldestStart) / 86400_000) + 1);
+    if (dayKey >= oldestStart.getTime() && dayKey <= todayStart.getTime()) {
+        spanDays = Math.max(1, spanDays - 1);
     }
-    const dowSum = [...dowDayMap.values()].reduce((a, x) => a + x, 0);
-    const dowDays = dowDayMap.size || 1;
-    const dowMean = dowSum / dowDays;
+    const totalMinExcl = [...dayMap.values()].reduce((a, x) => a + x, 0);
+    const overallDailyMean = totalMinExcl / spanDays;
 
-    // Z-score: this day's minutes against the distribution of all past
-    // active days (days where the user focused at all). We exclude
-    // today itself if it's in the set, and zero days, so the comparison
-    // is fair.
-    const distMap = new Map();
-    for (const s of allSessions) {
-        const d = new Date(s.startedAt);
-        d.setHours(0, 0, 0, 0);
-        const k = d.getTime();
-        if (k === dayStart.getTime()) continue;
-        distMap.set(k, (distMap.get(k) || 0) + (s.durationSeconds || 0) / 60);
-    }
-    const distArr = [...distMap.values()].filter((v) => v > 0);
+    // Day-of-week mean — average across all *other* same-weekday days
+    // the user was active. If this is the only such day, dowMean is
+    // null (we skip the row rather than show 0).
+    const dowSum = [...dowMap.values()].reduce((a, x) => a + x, 0);
+    const dowMean = dowMap.size > 0 ? dowSum / dowMap.size : null;
+
+    // Z-score: clicked day's minutes against the distribution of all
+    // *other* active days (days where the user focused at all).
+    const distArr = [...dayMap.values()].filter((v) => v > 0);
     const distMean = distArr.length ? mean(distArr) : 0;
     const distSd = distArr.length ? stdDev(distArr) : 0;
     const z = distSd > 0 ? (todayMin - distMean) / distSd : 0;
-    const rarity = Math.abs(z) >= 2 ? 'a standout day'
-        : Math.abs(z) >= 1.5 ? 'a notable day'
-        : Math.abs(z) >= 1 ? 'a bit above/below average'
-        : 'an ordinary day';
+    const rarity = distArr.length >= 5
+        ? Math.abs(z) >= 2 ? 'a standout day'
+            : Math.abs(z) >= 1.5 ? 'a notable day'
+            : Math.abs(z) >= 1 ? 'a bit above/below average'
+            : 'an ordinary day'
+        : '';
     const dirCmp = todayMin >= overallDailyMean ? '+' : '−';
     const cmpAmount = Math.abs(todayMin - overallDailyMean);
     const dayLabels = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -2135,10 +2172,12 @@ function dayCompareCard(blocks, dayStart, allSessions) {
                         <span>vs your overall mean</span>
                         <span class="num ${todayMin >= overallDailyMean ? 'is-good' : 'is-flat'}">${dirCmp}${Math.round(cmpAmount)} min</span>
                     </li>
-                    <li>
-                        <span>your typical ${dayLabels[dow]}</span>
-                        <span class="num">${dowMean.toFixed(0)} min</span>
-                    </li>
+                    ${dowMean !== null ? `
+                        <li>
+                            <span>your typical ${dayLabels[dow]}</span>
+                            <span class="num">${dowMean.toFixed(0)} min</span>
+                        </li>
+                    ` : ''}
                     ${distArr.length >= 5 ? `
                         <li>
                             <span>standout score (z)</span>
@@ -2181,7 +2220,7 @@ function dayBlocksCard(blocks) {
                 </ul>
                 ${sounds.length ? `
                     <div class="day-block__sounds">
-                        ${sounds.map((s) => `<span class="day-block__sound">${escapeHtml(s)}</span>`).join('')}
+                        ${sounds.map((snd) => `<span class="day-block__sound">${escapeHtml(snd)}</span>`).join('')}
                         ${(s.activeSounds || []).length > 3 ? `<span class="day-block__sound day-block__sound--more">+${(s.activeSounds || []).length - 3}</span>` : ''}
                     </div>
                 ` : ''}
