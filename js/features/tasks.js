@@ -19,6 +19,8 @@ import { recordTaskToggle } from '../features/statistics.js';
 // Task model
 // ============================================================================
 
+const RECUR_VALUES = new Set(['daily', 'weekdays', 'weekly']);
+
 /** Fill in any missing optional fields with sensible defaults so the UI
  *  can render uniformly regardless of whether the task was created
  *  pre- or post-Wave-2. Cheap; called on every read path. */
@@ -47,6 +49,7 @@ export function normalizeTask(t) {
         spentSeconds: Math.max(0, Number(t.spentSeconds) || 0),
         completedInSession: Math.max(0, Number(t.completedInSession) || 0),
         subtasks,
+        repeat: RECUR_VALUES.has(t.repeat) ? t.repeat : null,
     };
 }
 
@@ -189,6 +192,146 @@ export function setTaskProject(id, project) {
     );
 }
 
+/** Set the recurrence schedule for a task. Pass `null` to clear,
+ *  or 'daily' / 'weekdays' / 'weekly' to enable. Anything else is
+ *  ignored (no error — the UI is what gates valid values). */
+export function setTaskRecurrence(id, repeat) {
+    const next = RECUR_VALUES.has(repeat) ? repeat : null;
+    tasks.value = tasks.value.map((t) =>
+        t.id === id ? { ...normalizeTask(t), repeat: next } : t
+    );
+}
+
+/** Walk the task list and reset any completed recurring tasks that
+ *  rolled past their period boundary. "Reset" means flipping
+ *  `completed` back to false and clearing `completedAt` so the user
+ *  sees a fresh instance for the new day / weekday / week. Called
+ *  on init, on document visibility change, and from a 60s interval
+ *  while the tab is open. */
+export function resetExpiredRecurringTasks(now = Date.now()) {
+    const todayStart = startOfLocalDay(now);
+    const today = new Date(now);
+    let anyChanged = false;
+    const next = tasks.value.map((t) => {
+        const norm = normalizeTask(t);
+        if (!norm.repeat || !norm.completed) return t;
+        if (!norm.completedAt) return t;
+        const completedDayStart = startOfLocalDay(norm.completedAt);
+        if (completedDayStart >= todayStart) return t; // still same day
+        let shouldReset = false;
+        if (norm.repeat === 'daily') {
+            shouldReset = true;
+        } else if (norm.repeat === 'weekdays') {
+            const dow = today.getDay(); // 0 Sun .. 6 Sat
+            shouldReset = dow !== 0 && dow !== 6;
+        } else if (norm.repeat === 'weekly') {
+            shouldReset = now - norm.completedAt >= 7 * 86_400_000;
+        }
+        if (!shouldReset) return t;
+        anyChanged = true;
+        return {
+            ...norm,
+            completed: false,
+            completedAt: null,
+            // Subtasks reset alongside the parent — for daily habits
+            // the user expects a clean checklist each new period.
+            subtasks: norm.subtasks.map((s) => ({ ...s, completed: false })),
+        };
+    });
+    if (anyChanged) tasks.value = next;
+}
+
+function startOfLocalDay(epochMs) {
+    const d = new Date(epochMs);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+}
+
+// ============================================================================
+// Carry-over banner — surfaces incomplete non-recurring tasks that
+// were created more than 24h ago. The banner offers two responses:
+//   - Keep    → resets each stale task's `createdAt` to "now" so the
+//               banner doesn't fire again for them today, and dismisses
+//               the banner via a local flag tied to today's date.
+//   - Clear   → deletes every stale incomplete non-recurring task.
+// Recurring tasks are exempt (they self-reset on a schedule).
+// ============================================================================
+
+const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+const CARRY_DISMISS_KEY = 'fu_tasks_carry_dismissed';
+
+function staleTasks(now = Date.now()) {
+    const cutoff = now - STALE_THRESHOLD_MS;
+    return tasks.value.filter((t) => {
+        const norm = normalizeTask(t);
+        if (norm.completed || norm.repeat) return false;
+        if (!norm.createdAt) return false; // pre-Wave-2 tasks lack createdAt — leave alone
+        return norm.createdAt < cutoff;
+    });
+}
+
+function isCarryDismissedToday() {
+    try {
+        const v = localStorage.getItem(CARRY_DISMISS_KEY);
+        if (!v) return false;
+        return v === todayLocalISO();
+    } catch (_) {
+        return false;
+    }
+}
+
+function dismissCarryToday() {
+    try {
+        localStorage.setItem(CARRY_DISMISS_KEY, todayLocalISO());
+    } catch (_) {}
+}
+
+function todayLocalISO() {
+    const d = new Date();
+    return d.toLocaleDateString('en-CA'); // yyyy-mm-dd in local TZ
+}
+
+function paintCarryBanner() {
+    const banner = document.getElementById('tasksCarryBanner');
+    const copyEl = document.getElementById('tasksCarryBannerCopy');
+    if (!banner || !copyEl) return;
+    if (isCarryDismissedToday()) {
+        banner.classList.add('hidden');
+        return;
+    }
+    const stale = staleTasks();
+    if (stale.length === 0) {
+        banner.classList.add('hidden');
+        return;
+    }
+    banner.classList.remove('hidden');
+    const word = stale.length === 1 ? 'task' : 'tasks';
+    copyEl.textContent = `${stale.length} ${word} open longer than a day`;
+}
+
+function carryKeep() {
+    // Bump each stale task's createdAt forward so it ages out of the
+    // "stale" filter, then dismiss the banner for today. The user
+    // explicitly chose to keep them — they shouldn't get re-pestered.
+    const now = Date.now();
+    const staleIds = new Set(staleTasks().map((t) => t.id));
+    if (staleIds.size > 0) {
+        tasks.value = tasks.value.map((t) =>
+            staleIds.has(t.id) ? { ...normalizeTask(t), createdAt: now } : t
+        );
+    }
+    dismissCarryToday();
+    paintCarryBanner();
+}
+
+function carryClearStale() {
+    const staleIds = new Set(staleTasks().map((t) => t.id));
+    if (staleIds.size > 0) {
+        tasks.value = tasks.value.filter((t) => !staleIds.has(t.id));
+    }
+    paintCarryBanner();
+}
+
 /** Set or clear a task's due date. Pass null to clear; pass a yyyy-mm-dd
  *  string or a numeric epoch ms to set. Stored as epoch ms keyed off
  *  the local-day-start so timezone changes don't shift the due date. */
@@ -309,6 +452,16 @@ export function initTaskRender() {
             e.preventDefault();
             e.stopPropagation();
             setActiveTask(Number(lockBtn.dataset.taskLock));
+            return;
+        }
+        const infoBtn = e.target.closest('[data-task-info]');
+        if (infoBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            // Lazy-load the detail module so the home / focus tabs
+            // don't pull its bytes until a user actually opens a task.
+            const id = Number(infoBtn.dataset.taskInfo);
+            import('../ui/task-detail.js').then((m) => m.openTaskDetail?.(id));
             return;
         }
         const decrBtn = e.target.closest('[data-estimate-decr]');
@@ -437,6 +590,29 @@ export function initTaskRender() {
         });
     }
 
+    // Recurring-task reset cycle. Catches the "user kept the tab open
+    // overnight" case (interval), the "user came back from another
+    // tab/window" case (visibilitychange), and the cold-start case
+    // (immediate). Every check is a single pass over the list; cheap.
+    resetExpiredRecurringTasks();
+    paintCarryBanner();
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            resetExpiredRecurringTasks();
+            paintCarryBanner();
+        }
+    });
+    setInterval(() => {
+        resetExpiredRecurringTasks();
+        paintCarryBanner();
+    }, 60_000);
+
+    // Carry-over banner buttons.
+    const carryKeepBtn = document.getElementById('tasksCarryKeep');
+    const carryClearBtn = document.getElementById('tasksCarryClear');
+    if (carryKeepBtn) carryKeepBtn.addEventListener('click', () => carryKeep());
+    if (carryClearBtn) carryClearBtn.addEventListener('click', () => carryClearStale());
+
     // Reactive diff-based render
     effect(() => {
         // Track activeTaskId so the lock button + .is-active-task class
@@ -483,6 +659,7 @@ export function initTaskRender() {
             completedBtn.classList.toggle('hidden', !hasCompleted);
         }
         renderTasksEta(current);
+        paintCarryBanner();
     });
 }
 
@@ -571,6 +748,7 @@ function createTaskElement(task) {
                 <span class="task-text${task.completed ? ' task-completed' : ''}">${escapeHtml(task.text)}</span>
                 ${renderTaskBadge(task)}
                 ${renderDueDateBadge(task)}
+                ${renderRepeatIndicator(task)}
                 ${renderProjectChip(task)}
                 ${renderSubtaskCounter(norm)}
             </div>
@@ -578,6 +756,10 @@ function createTaskElement(task) {
             ${renderFocusLockButton(task)}
             ${renderDueDateInput(task)}
             ${renderEstimateStepper(task)}
+            <button class="task-info" type="button"
+                    data-task-info="${task.id}"
+                    aria-label="Open task detail"
+                    title="Open task detail">›</button>
             <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--danger" data-delete-task="${task.id}" aria-label="Delete task">
                 <span class="btn-icon" aria-hidden="true">✕</span>
             </button>
@@ -619,6 +801,18 @@ function renderProjectChip(task) {
     const norm = normalizeTask(task);
     if (!norm.project) return '';
     return `<span class="task-project-chip" title="project tag">#${escapeHtml(norm.project)}</span>`;
+}
+
+/** Tiny ↻ indicator when a task recurs. */
+function renderRepeatIndicator(task) {
+    const norm = normalizeTask(task);
+    if (!norm.repeat) return '';
+    const label = norm.repeat === 'daily'
+        ? 'repeats daily'
+        : norm.repeat === 'weekdays'
+            ? 'repeats Mon–Fri'
+            : 'repeats weekly';
+    return `<span class="task-repeat-chip" title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}">↻</span>`;
 }
 
 /** Subtasks drawer — a collapsible nested list with an "add" input.
@@ -782,6 +976,12 @@ function updateTaskElement(el, task) {
     if (project && !newProject) project.remove();
     else if (project && newProject) project.outerHTML = newProject;
     else if (!project && newProject && content) content.insertAdjacentHTML('beforeend', newProject);
+
+    const repeat = el.querySelector('.task-repeat-chip');
+    const newRepeat = renderRepeatIndicator(task);
+    if (repeat && !newRepeat) repeat.remove();
+    else if (repeat && newRepeat) repeat.outerHTML = newRepeat;
+    else if (!repeat && newRepeat && content) content.insertAdjacentHTML('beforeend', newRepeat);
 
     const drawer = el.querySelector('.task-subtasks');
     if (drawer) drawer.outerHTML = renderSubtasksDrawer(task);

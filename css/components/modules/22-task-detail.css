@@ -1,0 +1,557 @@
+/* ════════════════════════════════════════════════════════════════════════
+   TASK DETAIL — full-canvas editing surface for a single task.
+   Lives outside .container so position:fixed resolves to the viewport.
+   Same visual language as Settings / Help Center / Profile / Tasks expand.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.task-detail {
+    position: fixed;
+    inset: 0;
+    z-index: 2200;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.task-detail[aria-hidden='false'] { pointer-events: auto; }
+.task-detail.is-open { opacity: 1; }
+
+.task-detail__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 6, 10, 0.55);
+    backdrop-filter: blur(4px) saturate(110%);
+    -webkit-backdrop-filter: blur(4px) saturate(110%);
+}
+
+.task-detail__sheet {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translate(-50%, -16px) scale(0.96);
+    width: min(680px, calc(100vw - 32px));
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    background: linear-gradient(180deg, rgba(20, 16, 10, 0.96), rgba(12, 9, 5, 0.96));
+    border: 1px solid rgba(255, 220, 160, 0.16);
+    border-radius: 22px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55),
+                0 0 0 0.5px rgba(255, 220, 160, 0.08);
+    color: rgba(255, 246, 225, 0.92);
+    transform-origin: top center;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.task-detail.is-open .task-detail__sheet {
+    transform: translate(-50%, 0) scale(1);
+}
+
+.task-detail__head {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 22px 14px;
+    background: linear-gradient(180deg, rgba(20, 16, 10, 0.98), rgba(20, 16, 10, 0.85));
+    border-bottom: 1px solid rgba(255, 220, 160, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.task-detail__eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.36em;
+    color: rgba(255, 220, 160, 0.75);
+}
+.task-detail__close {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 246, 225, 0.16);
+    background: transparent;
+    color: rgba(255, 246, 225, 0.85);
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.task-detail__close:hover,
+.task-detail__close:focus-visible {
+    background: rgba(255, 246, 225, 0.06);
+    color: #faf3e3;
+    border-color: rgba(255, 246, 225, 0.32);
+    outline: none;
+}
+
+.task-detail__body {
+    padding: 8px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.task-detail__section {
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.task-detail__section--meta {
+    background: transparent;
+    border: none;
+    padding: 0 4px;
+    color: rgba(255, 246, 225, 0.45);
+    font-size: 11.5px;
+}
+.task-detail__section--meta p { margin: 4px 0; }
+.task-detail__section--danger {
+    background: transparent;
+    border: none;
+    padding: 8px 4px;
+}
+
+.task-detail__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.task-detail__section--grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+.task-detail__field--full { grid-column: 1 / -1; }
+.task-detail__label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.55);
+}
+
+.task-detail__text-input,
+.task-detail__project,
+.task-detail__date {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.16);
+    background: rgba(255, 255, 255, 0.03);
+    color: #faf3e3;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 14px;
+    width: 100%;
+    transition: border-color 0.18s ease, background 0.18s ease;
+}
+.task-detail__text-input { font-size: 16px; }
+.task-detail__date { color-scheme: dark; }
+.task-detail__text-input:focus,
+.task-detail__project:focus,
+.task-detail__date:focus {
+    border-color: rgba(255, 220, 160, 0.45);
+    background: rgba(255, 255, 255, 0.05);
+    outline: none;
+}
+
+.task-detail__done-toggle {
+    margin-top: 12px;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.22);
+    background: rgba(255, 220, 160, 0.05);
+    color: rgba(255, 246, 225, 0.85);
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.task-detail__done-toggle.is-on {
+    color: #95e2a4;
+    border-color: rgba(149, 226, 164, 0.42);
+    background: rgba(149, 226, 164, 0.08);
+}
+.task-detail__done-toggle:hover,
+.task-detail__done-toggle:focus-visible {
+    color: #faf3e3;
+    border-color: rgba(255, 220, 160, 0.45);
+    background: rgba(255, 220, 160, 0.12);
+    outline: none;
+}
+.task-detail__done-toggle.is-on:hover,
+.task-detail__done-toggle.is-on:focus-visible {
+    color: #b8eec1;
+    border-color: rgba(149, 226, 164, 0.6);
+    background: rgba(149, 226, 164, 0.16);
+}
+
+.task-detail__stepper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.task-detail__step-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.22);
+    background: rgba(255, 220, 160, 0.05);
+    color: rgba(255, 246, 225, 0.9);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.task-detail__step-btn:hover:not(:disabled),
+.task-detail__step-btn:focus-visible:not(:disabled) {
+    background: rgba(255, 220, 160, 0.16);
+    color: #faf3e3;
+    border-color: rgba(255, 220, 160, 0.42);
+    outline: none;
+}
+.task-detail__step-btn:disabled {
+    opacity: 0.32;
+    cursor: not-allowed;
+}
+.task-detail__stepper-val {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 13.5px;
+    color: rgba(255, 246, 225, 0.85);
+}
+
+.task-detail__date-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.task-detail__date-clear {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.55);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11.5px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+.task-detail__date-clear:hover { color: #faf3e3; }
+
+/* Recurrence selector — radio-style 4-button group. The active
+   button gains a champagne fill so the choice is unmistakable. */
+.task-detail__repeat {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+}
+.task-detail__repeat-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.16);
+    background: rgba(255, 255, 255, 0.025);
+    color: rgba(255, 246, 225, 0.8);
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    text-align: left;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.task-detail__repeat-btn:hover,
+.task-detail__repeat-btn:focus-visible {
+    background: rgba(255, 220, 160, 0.08);
+    border-color: rgba(255, 220, 160, 0.32);
+    color: #faf3e3;
+    outline: none;
+}
+.task-detail__repeat-btn.is-on {
+    background: rgba(255, 220, 160, 0.16);
+    border-color: rgba(255, 220, 160, 0.55);
+    color: #faf3e3;
+}
+.task-detail__repeat-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+}
+.task-detail__repeat-sub {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 10.5px;
+    color: rgba(255, 246, 225, 0.5);
+    letter-spacing: 0.04em;
+}
+.task-detail__repeat-btn.is-on .task-detail__repeat-sub {
+    color: rgba(255, 220, 160, 0.85);
+}
+
+.task-detail__section-title {
+    margin: 0 0 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 246, 225, 0.92);
+    letter-spacing: 0.02em;
+}
+
+.task-detail__sublist {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.task-detail__subtask {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.task-detail__subtask.is-done .task-detail__sub-toggle > span:last-child {
+    text-decoration: line-through;
+    color: rgba(255, 246, 225, 0.5);
+}
+.task-detail__sub-toggle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.92);
+    text-align: left;
+    cursor: pointer;
+    padding: 4px 0;
+    font-size: 13.5px;
+}
+.task-detail__sub-check {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 220, 160, 0.32);
+    color: rgba(0, 0, 0, 0.7);
+    background: transparent;
+    border-radius: 5px;
+    font-size: 11px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.task-detail__subtask.is-done .task-detail__sub-check {
+    background: rgba(255, 205, 115, 0.85);
+    border-color: rgba(255, 205, 115, 0.95);
+}
+.task-detail__sub-del {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 138, 138, 0.7);
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.task-detail__sub-del:hover,
+.task-detail__sub-del:focus-visible {
+    background: rgba(255, 138, 138, 0.14);
+    color: #ff8a8a;
+    outline: none;
+}
+
+.task-detail__sub-add {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.task-detail__sub-input {
+    flex: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.16);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 246, 225, 0.92);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+.task-detail__sub-input:focus {
+    border-color: rgba(255, 220, 160, 0.42);
+    background: rgba(255, 255, 255, 0.05);
+    outline: none;
+}
+.task-detail__sub-add-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.32);
+    background: rgba(255, 220, 160, 0.08);
+    color: rgba(255, 246, 225, 0.95);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+.task-detail__sub-add-btn:hover,
+.task-detail__sub-add-btn:focus-visible {
+    background: rgba(255, 220, 160, 0.18);
+    border-color: rgba(255, 220, 160, 0.55);
+    outline: none;
+}
+
+.task-detail__time-stats {
+    list-style: none;
+    margin: 0 0 10px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+.task-detail__time-stats li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.022);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.task-detail__time-num {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 18px;
+    font-weight: 350;
+    color: #faf3e3;
+}
+.task-detail__time-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.55);
+}
+.task-detail__time-note {
+    margin: 0;
+    font-size: 11.5px;
+    color: rgba(255, 246, 225, 0.5);
+    line-height: 1.5;
+}
+
+.task-detail__delete {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 138, 138, 0.32);
+    background: transparent;
+    color: rgba(255, 138, 138, 0.85);
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.task-detail__delete:hover,
+.task-detail__delete:focus-visible {
+    background: rgba(255, 138, 138, 0.1);
+    color: #ff8a8a;
+    border-color: rgba(255, 138, 138, 0.55);
+    outline: none;
+}
+.task-detail__delete.is-confirming {
+    background: rgba(255, 138, 138, 0.18);
+    color: #ff8a8a;
+    border-color: rgba(255, 138, 138, 0.7);
+    animation: task-detail-pulse 1s ease-in-out infinite;
+}
+@keyframes task-detail-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 138, 138, 0.32); }
+    50% { box-shadow: 0 0 0 8px rgba(255, 138, 138, 0); }
+}
+
+.task-detail__missing {
+    padding: 32px 22px;
+    text-align: center;
+    color: rgba(255, 246, 225, 0.62);
+}
+.task-detail__missing-headline {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 6px;
+    color: rgba(255, 246, 225, 0.92);
+}
+.task-detail__missing-sub { margin: 0; font-size: 12.5px; }
+
+/* Trigger button on each task row — small `›` chevron near the
+   trailing edge. Visible on hover/focus, always visible to keyboard. */
+.task-info {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.45);
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-left: 4px;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+.task-item:hover .task-info,
+.task-item:focus-within .task-info {
+    opacity: 1;
+}
+.task-info:hover,
+.task-info:focus-visible {
+    background: rgba(255, 220, 160, 0.12);
+    color: #faf3e3;
+    transform: translateX(2px);
+    outline: none;
+}
+
+@media (max-width: 540px) {
+    .task-detail__sheet {
+        top: 56px;
+        max-height: calc(100vh - 80px);
+        width: calc(100vw - 16px);
+        border-radius: 18px;
+    }
+    .task-detail__section--grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .task-detail,
+    .task-detail__sheet { transition: none; }
+    .task-detail__delete.is-confirming { animation: none; }
+}

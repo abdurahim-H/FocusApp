@@ -505,6 +505,18 @@
 
                 <!-- Task Management Section -->
                 <div class="task-section">
+                    <!-- Carry-over banner — populated by tasks.js when
+                         the user has incomplete non-recurring tasks
+                         created more than 24h ago. Hidden otherwise. -->
+                    <div class="tasks-carry-banner hidden" id="tasksCarryBanner" role="status">
+                        <span class="tasks-carry-banner__copy" id="tasksCarryBannerCopy"></span>
+                        <div class="tasks-carry-banner__actions">
+                            <button class="tasks-carry-banner__btn"
+                                    type="button" id="tasksCarryKeep">Keep</button>
+                            <button class="tasks-carry-banner__btn tasks-carry-banner__btn--danger"
+                                    type="button" id="tasksCarryClear">Clear stale</button>
+                        </div>
+                    </div>
                     <div class="tasks-title-row">
                         <h3 class="tasks-title">Tasks for this session</h3>
                         <span class="tasks-eta hidden" id="tasksEta"

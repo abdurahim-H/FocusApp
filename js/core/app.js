@@ -26,6 +26,7 @@ import * as homePeriodTiles from '../ui/home-period-tiles.js';
 import * as navigation from '../ui/navigation.js';
 import * as profile from '../ui/profile.js';
 import * as settings from '../ui/settings.js';
+import * as taskDetail from '../ui/task-detail.js';
 import * as tasksExpand from '../ui/tasks-expand.js';
 import * as timerParticles from '../ui/timer-particles.js';
 import * as uiEffects from '../ui/ui-effects.js';
@@ -56,6 +57,7 @@ const modules = {
     account,
     profile,
     tasksExpand,
+    taskDetail,
 };
 
 /**
@@ -383,6 +385,12 @@ function setupTaskControls(loadedModules) {
     // until at least one focus session lands; signal-driven repaint.
     if (loadedModules.homePeriodTiles?.initHomePeriodTiles) {
         loadedModules.homePeriodTiles.initHomePeriodTiles();
+    }
+    // Task detail drawer — wires its keyboard listener (Esc to close)
+    // and registers itself with the focus-trap. The actual panel DOM
+    // is built lazily on first open.
+    if (loadedModules.taskDetail?.initTaskDetail) {
+        loadedModules.taskDetail.initTaskDetail();
     }
 }
 

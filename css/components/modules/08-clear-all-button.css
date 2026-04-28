@@ -379,6 +379,86 @@
     border: 1px solid rgba(255, 246, 225, 0.1);
 }
 
+/* Recurring indicator — small ↻ glyph that sits among the row's
+   inline chips. Tone matches the project-chip family: a soft cyan
+   so it doesn't compete with the amber cluster (estimate, lock, due). */
+.task-repeat-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    padding: 0 6px;
+    height: 18px;
+    border-radius: 999px;
+    color: rgba(144, 232, 200, 0.95);
+    background: rgba(144, 232, 200, 0.1);
+    border: 1px solid rgba(144, 232, 200, 0.25);
+    font-size: 10.5px;
+    line-height: 1;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    flex-shrink: 0;
+}
+
+/* Carry-over banner — small, calm, dismissible. Appears above the
+   tasks card when the user has incomplete non-recurring tasks older
+   than 24h. Two actions: Keep (dismiss for today + bump createdAt
+   forward) or Clear stale (delete them outright). */
+.tasks-carry-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(255, 220, 160, 0.06);
+    border: 1px solid rgba(255, 220, 160, 0.2);
+    color: rgba(255, 246, 225, 0.85);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12px;
+}
+.tasks-carry-banner.hidden { display: none !important; }
+.tasks-carry-banner__copy {
+    flex: 1;
+    min-width: 0;
+}
+.tasks-carry-banner__actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.tasks-carry-banner__btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.22);
+    background: rgba(255, 220, 160, 0.06);
+    color: rgba(255, 246, 225, 0.85);
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.tasks-carry-banner__btn:hover,
+.tasks-carry-banner__btn:focus-visible {
+    background: rgba(255, 220, 160, 0.18);
+    color: #faf3e3;
+    border-color: rgba(255, 220, 160, 0.5);
+    outline: none;
+}
+.tasks-carry-banner__btn--danger {
+    color: rgba(255, 138, 138, 0.85);
+    border-color: rgba(255, 138, 138, 0.32);
+    background: transparent;
+}
+.tasks-carry-banner__btn--danger:hover,
+.tasks-carry-banner__btn--danger:focus-visible {
+    background: rgba(255, 138, 138, 0.12);
+    color: #ff8a8a;
+    border-color: rgba(255, 138, 138, 0.55);
+}
+
 /* Subtasks toggle — small chevron button. Rotates on expand. */
 .task-subtasks-toggle {
     appearance: none;
