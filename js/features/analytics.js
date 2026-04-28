@@ -795,6 +795,132 @@ export function rankConditions(sessions, conditions, opts = {}) {
 }
 
 // ───────────────────────────────────────────────────────────────────────
+// ML — Markov chain over session-completion transitions
+// ───────────────────────────────────────────────────────────────────────
+//
+// Treats the user's session history as a 2-state chain — Completed (C)
+// or Cut-short (X) — and estimates the four transition probabilities:
+//   P(C|C), P(X|C), P(C|X), P(X|X)
+// The interesting question this answers is one the completion rate
+// alone can't: do cut-short sessions cluster? If P(X|X) >> P(X), one
+// bad session predicts another, and the actionable advice changes from
+// "finish more sessions" to "watch out for the next session after a
+// cut-short one." This is a real psychological effect (consecutive
+// failures erode follow-through) that's invisible to univariate stats.
+//
+// Stationary distribution and expected cut-short streak length are
+// derived from the chain and exposed for the detail view.
+
+/** Build a 2-state Markov chain over completed/cut-short transitions.
+ *  Sessions must be sorted ascending by startedAt. Returns null when
+ *  there's not enough data (need ≥ 5 transitions). */
+export function sessionTransitionChain(sessions, { minTransitions = 5 } = {}) {
+    if (!sessions || sessions.length < minTransitions + 1) return null;
+    const sorted = [...sessions].sort((a, b) => a.startedAt - b.startedAt);
+    // counts[from][to] — 0 = cut-short, 1 = completed
+    const counts = [[0, 0], [0, 0]];
+    let total = 0;
+    for (let i = 1; i < sorted.length; i++) {
+        const from = sorted[i - 1].completed ? 1 : 0;
+        const to = sorted[i].completed ? 1 : 0;
+        counts[from][to]++;
+        total++;
+    }
+    if (total < minTransitions) return null;
+    // Marginal counts (rows) for normalising into probabilities.
+    const fromCut = counts[0][0] + counts[0][1];
+    const fromComplete = counts[1][0] + counts[1][1];
+    // P(target | source) — rows sum to 1 by construction; if a row's
+    // total is 0 (e.g. user has never cut a session) we report null
+    // for both transitions out of that state.
+    const pXgivenX = fromCut > 0 ? counts[0][0] / fromCut : null;
+    const pCgivenX = fromCut > 0 ? counts[0][1] / fromCut : null;
+    const pXgivenC = fromComplete > 0 ? counts[1][0] / fromComplete : null;
+    const pCgivenC = fromComplete > 0 ? counts[1][1] / fromComplete : null;
+    // Baseline (overall) completion rate, from the same time series.
+    const overallComplete = sorted.filter((s) => s.completed).length / sorted.length;
+    const overallCut = 1 - overallComplete;
+    // Expected cut-short streak length from a self-loop probability:
+    // E[length | started] = 1 / (1 - P(X|X)). Capped at 50 for display
+    // sanity; the formula tends to infinity as P(X|X) → 1.
+    const expectedCutStreak = pXgivenX !== null && pXgivenX < 1
+        ? Math.min(50, 1 / (1 - pXgivenX))
+        : null;
+    // Stationary distribution — solve π = π P for a 2-state chain in
+    // closed form. π_X = P(C|X) / (P(C|X) + P(X|C)) (when both rows
+    // have non-zero outflow).
+    let stationaryX = null;
+    let stationaryC = null;
+    if (pCgivenX !== null && pXgivenC !== null && (pCgivenX + pXgivenC) > 0) {
+        stationaryX = pCgivenX / (pCgivenX + pXgivenC);
+        stationaryC = 1 - stationaryX;
+    }
+    return {
+        counts,
+        total,
+        // Conditional probabilities — null when source state was never seen.
+        pXgivenX, pCgivenX, pXgivenC, pCgivenC,
+        // Baseline rates from the same series.
+        overallComplete, overallCut,
+        // "Lift" of cut-after-cut over cut-overall (>1 means the next
+        // session after a cut is more likely to be cut than baseline).
+        cutClusterLift: pXgivenX !== null && overallCut > 0
+            ? pXgivenX / overallCut
+            : null,
+        completeClusterLift: pCgivenC !== null && overallComplete > 0
+            ? pCgivenC / overallComplete
+            : null,
+        expectedCutStreak,
+        stationaryX, stationaryC,
+    };
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// ML — Kernel density estimation (Gaussian, Silverman's rule)
+// ───────────────────────────────────────────────────────────────────────
+//
+// A KDE smooths a 1-D distribution into a continuous curve, free of
+// the bin-boundary artefacts a histogram suffers from. We use a
+// Gaussian kernel with bandwidth via Silverman's rule of thumb:
+//   h = 1.06 · σ · n^(-1/5)
+// Output is { x: number[], y: number[] } evaluated at `resolution`
+// equally-spaced points across the data range. Caller renders as a
+// smooth filled area or polyline.
+
+/** Gaussian kernel density estimate of a 1-D sample. */
+export function kernelDensity(values, { resolution = 80, padFactor = 0.06 } = {}) {
+    if (!values || values.length < 2) return null;
+    const xs = values.filter((v) => Number.isFinite(v)).slice().sort((a, b) => a - b);
+    if (xs.length < 2) return null;
+    const lo = xs[0];
+    const hi = xs[xs.length - 1];
+    const span = hi - lo || 1;
+    const padding = span * padFactor;
+    const xMin = lo - padding;
+    const xMax = hi + padding;
+    const sd = stdDev(xs);
+    if (sd === 0) return null;
+    // Silverman's rule of thumb. Robust enough for most unimodal
+    // distributions; over-smooths bimodal data (which is a feature
+    // here — we'd rather under-claim a second mode than fabricate one).
+    const h = 1.06 * sd * Math.pow(xs.length, -1 / 5);
+    const denom = Math.sqrt(2 * Math.PI) * h * xs.length;
+    const x = new Array(resolution);
+    const y = new Array(resolution);
+    for (let i = 0; i < resolution; i++) {
+        const xi = xMin + (i / (resolution - 1)) * (xMax - xMin);
+        let acc = 0;
+        for (const v of xs) {
+            const u = (xi - v) / h;
+            acc += Math.exp(-0.5 * u * u);
+        }
+        x[i] = xi;
+        y[i] = acc / denom;
+    }
+    return { x, y, bandwidth: h };
+}
+
+// ───────────────────────────────────────────────────────────────────────
 // ML — Change-point detection (CUSUM, two-sided)
 // ───────────────────────────────────────────────────────────────────────
 //

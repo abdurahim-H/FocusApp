@@ -34,27 +34,33 @@
     color: rgba(255, 220, 160, 0.55);
 }
 .tasks-expand-trigger {
-    width: 26px;
     height: 26px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 205, 115, 0.14);
-    background: rgba(255, 205, 115, 0.04);
-    color: rgba(255, 230, 188, 0.55);
+    padding: 0 12px 0 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 205, 115, 0.22);
+    background: rgba(255, 205, 115, 0.07);
+    color: rgba(255, 230, 188, 0.82);
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 6px;
     cursor: pointer;
-    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
     transition:
         background 0.18s ease,
         color 0.18s ease,
         border-color 0.18s ease,
         transform 0.18s cubic-bezier(0.32, 0.72, 0, 1);
 }
+.tasks-expand-trigger__label {
+    line-height: 1;
+}
 .tasks-expand-trigger:hover {
-    background: rgba(255, 205, 115, 0.1);
-    color: rgba(255, 230, 188, 0.95);
-    border-color: rgba(255, 205, 115, 0.32);
+    background: rgba(255, 205, 115, 0.14);
+    color: #faf3e3;
+    border-color: rgba(255, 205, 115, 0.5);
     transform: translateY(-1px);
 }
 .tasks-expand-trigger:active {

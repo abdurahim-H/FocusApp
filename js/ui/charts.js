@@ -328,15 +328,21 @@ export function hourDayHeatmap({ matrix } = {}) {
 // ───────────────────────────────────────────────────────────────────────
 
 /**
+ * Histogram with optional KDE smooth-curve overlay.
  * @param {object} opts
  * @param {Array<{x0,x1,mid,count}>} opts.bins
  * @param {string} [opts.unit='']
+ * @param {{x:number[],y:number[]}} [opts.density] — optional KDE result
+ *        from analytics.kernelDensity. When provided, drawn as a
+ *        smooth curve over the bars so the eye reads the true shape
+ *        without bin-boundary artefacts.
  */
 export function histogramChart({
     bins,
     width = 520,
     height = 160,
     unit = '',
+    density = null,
 } = {}) {
     if (!bins || !bins.length) return emptyChart(width, height, 'no data');
     const M = { l: 30, r: 12, t: 12, b: 30 };
@@ -346,12 +352,51 @@ export function histogramChart({
     const slot = innerW / bins.length;
     const barW = Math.max(2, slot * 0.78);
     const id = uniq('hg');
+
+    // KDE overlay — map x → screen using the histogram's value domain
+    // so the curve sits over its bars. Scale y to fit innerH using the
+    // KDE's own peak so the curve fills the chart visually rather than
+    // collapsing to a sliver against the histogram counts.
+    let kdePath = '';
+    let kdeFillPath = '';
+    let kdeLabel = '';
+    if (density && density.x && density.y && density.x.length === density.y.length && density.x.length > 1) {
+        const xMin = bins[0].x0;
+        const xMax = bins[bins.length - 1].x1;
+        const span = xMax - xMin || 1;
+        const yPeak = Math.max(...density.y, 1e-12);
+        const sx = (v) => M.l + ((v - xMin) / span) * innerW;
+        const sy = (v) => M.t + innerH - (v / yPeak) * innerH;
+        const pts = [];
+        for (let i = 0; i < density.x.length; i++) {
+            const xi = density.x[i];
+            if (xi < xMin || xi > xMax) continue;
+            pts.push(`${sx(xi).toFixed(2)},${sy(density.y[i]).toFixed(2)}`);
+        }
+        if (pts.length >= 2) {
+            kdePath = `<polyline points="${pts.join(' ')}" fill="none"
+                                 stroke="currentColor" stroke-opacity="0.92"
+                                 stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />`;
+            kdeFillPath = `<polygon points="${sx(xMin).toFixed(2)},${(M.t + innerH).toFixed(2)}
+                                              ${pts.join(' ')}
+                                              ${sx(xMax).toFixed(2)},${(M.t + innerH).toFixed(2)}"
+                                     fill="url(#${id}_kde)" />`;
+            kdeLabel = `<text class="chart__tick chart__tick--x"
+                              x="${(M.l + innerW).toFixed(1)}" y="${(M.t + 10).toFixed(1)}"
+                              text-anchor="end" opacity="0.55">smooth shape</text>`;
+        }
+    }
+
     return `
         <svg class="chart chart--histogram" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" role="img">
             <defs>
                 <linearGradient id="${id}_fill" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.66" />
-                    <stop offset="100%" stop-color="currentColor" stop-opacity="0.2" />
+                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.42" />
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0.12" />
+                </linearGradient>
+                <linearGradient id="${id}_kde" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.36" />
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0.04" />
                 </linearGradient>
             </defs>
             <line class="chart__grid"
@@ -365,6 +410,9 @@ export function histogramChart({
                               width="${barW.toFixed(2)}" height="${Math.max(0.5, h).toFixed(2)}"
                               rx="2" fill="url(#${id}_fill)" />`;
             }).join('')}
+            ${kdeFillPath}
+            ${kdePath}
+            ${kdeLabel}
             ${[bins[0].x0, bins[bins.length - 1].x1].map((v, i) => {
                 const x = i === 0 ? M.l : M.l + innerW;
                 return `<text class="chart__tick chart__tick--x"

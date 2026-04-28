@@ -748,6 +748,7 @@
 .insight-card--wow         { --kind-color: 255, 205, 115; }
 .insight-card--patterns    { --kind-color: 200, 180, 255; }
 .insight-card--conditions  { --kind-color: 144, 232, 200; }
+.insight-card--streak      { --kind-color: 240, 144, 200; }
 
 .insight-card[class*="insight-card--"]::before {
     background: rgba(var(--kind-color, 255, 220, 160), 0.55);
@@ -866,6 +867,7 @@
 .insight-detail--wow         { --kind-color: 255, 205, 115; }
 .insight-detail--patterns    { --kind-color: 200, 180, 255; }
 .insight-detail--conditions  { --kind-color: 144, 232, 200; }
+.insight-detail--streak      { --kind-color: 240, 144, 200; }
 
 .insight-detail {
     display: flex;

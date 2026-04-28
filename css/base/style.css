@@ -155,7 +155,13 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 70px 20px 20px;
+    /* Top padding clears the nav cluster (~70px). Bottom padding
+       reserves space for the cosmos toolbar (38px tall + 16px from
+       bottom + breathing room) so the focus card's centred bottom
+       edge can never fall behind the toolbar — the previous 20px
+       value let the second task on the focus tab clip behind the
+       floating toolbar on shorter viewports. */
+    padding: 70px 20px 84px;
     position: relative;
     z-index: 10;
     width: 100%;

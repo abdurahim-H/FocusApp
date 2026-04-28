@@ -40,6 +40,7 @@ import {
     holtWintersAdditive,
     holtWintersForecast,
     hourDayMatrix,
+    kernelDensity,
     linearRegression,
     mean,
     median,
@@ -48,6 +49,7 @@ import {
     percentile,
     percentileRank,
     rankConditions,
+    sessionTransitionChain,
     soundEffects,
     stdDev,
     zScore,
@@ -521,6 +523,10 @@ function renderFocus(sessions) {
     const reg = regressionStats(last90);
     const heatmap = calendarMatrix(sessions, 90);
     const bins = histogram(durations, 10);
+    // Smooth-curve overlay on the duration histogram. Gaussian KDE
+    // with Silverman's-rule bandwidth — needs ≥ 4 sessions to be
+    // meaningful. Renders only when we have enough variance.
+    const durationKde = sessions.length >= 4 ? kernelDensity(durations) : null;
 
     // Trailing 7 vs prior 7 change.
     const wow = changeAcross(last90.slice(-14), 7);
@@ -557,7 +563,7 @@ function renderFocus(sessions) {
             ${chartCard({
                 eyebrow: 'how long your sessions usually run',
                 sub: `most last around ${medianDur.toFixed(0)} min · they vary by ±${sdDur.toFixed(0)} min from session to session`,
-                chart: histogramChart({ bins, width: 360, height: 180, unit: 'm' }),
+                chart: histogramChart({ bins, density: durationKde, width: 360, height: 180, unit: 'm' }),
             })}
             ${chartCard({
                 eyebrow: 'your week-to-week pace',
@@ -1271,6 +1277,45 @@ function renderInsights(sessions) {
         }
     }
 
+    // ── ML insight: 2-state Markov chain on completion transitions ─────
+    // Reveals a temporal pattern that the completion-rate KPI alone
+    // hides: do cut-short sessions cluster? If P(X|X) is materially
+    // above the baseline cut rate, one bad session predicts another —
+    // "the next session after a cut is N× more likely to be cut too"
+    // is much more actionable than the overall percentage.
+    const chain = sessionTransitionChain(sessions);
+    if (chain && chain.cutClusterLift !== null && chain.pXgivenX !== null) {
+        const cutLift = chain.cutClusterLift;
+        const completeLift = chain.completeClusterLift;
+        // Surface only when one of the lifts is materially away from 1.
+        // ≥ 1.25 → "20%+ deviation" — a real persistence pattern.
+        if (Math.abs(cutLift - 1) >= 0.25 || (completeLift !== null && Math.abs(completeLift - 1) >= 0.25)) {
+            const cutPct = Math.round(chain.pXgivenX * 100);
+            const cutBaselinePct = Math.round(chain.overallCut * 100);
+            const liftFactor = cutLift > 1 ? cutLift.toFixed(1) : (1 / cutLift).toFixed(1);
+            const headline = cutLift > 1.25
+                ? `after a cut-short session, you cut the next one ${cutPct}% of the time`
+                : completeLift !== null && completeLift > 1.25
+                    ? `your completed sessions tend to come in streaks — finishing one makes the next ${Math.round(chain.pCgivenC * 100)}% likely`
+                    : `your sessions break the cluster pattern — past results don't predict the next one`;
+            const sub = cutLift > 1.25
+                ? `${liftFactor}× the baseline cut rate (${cutBaselinePct}%) — momentum matters`
+                : `streak-style follow-through, not a coin-flip pattern`;
+            insights.push({
+                kind: 'streak',
+                headline,
+                sub,
+                value: cutLift > 1.25
+                    ? `${liftFactor}× cut-streak`
+                    : completeLift !== null && completeLift > 1.25
+                        ? `${completeLift.toFixed(1)}× finish-streak`
+                        : 'no streak',
+                viz: vizMarkov(chain),
+                data: { chain },
+            });
+        }
+    }
+
     if (sessions.length >= 5) {
         const pct = Math.round(completionRate * 100);
         // Honest tone — no praise, no shame; just the percentage and
@@ -1556,6 +1601,46 @@ function vizForecast(history, projected, lower, upper) {
     `;
 }
 
+/** Compact 2×2 transition heatmap. Cells are sized in proportion to
+ *  their conditional probability so the eye reads it like a flow:
+ *  a fat "cut → cut" cell means cut-short sessions persist, a fat
+ *  "complete → complete" cell means finishes do. */
+function vizMarkov(chain) {
+    if (!chain) return '';
+    const W = 240, H = 80;
+    const padX = 14;
+    const padY = 8;
+    const labelH = 14;
+    const cellSize = (H - padY * 2 - labelH);
+    const colW = (W - padX * 2) / 2;
+    const cellY = padY + labelH;
+    const tone = (p) => p === null ? 'rgba(255, 246, 225, 0.06)' : `rgba(255, 246, 225, ${0.08 + 0.74 * p})`;
+    // 2x2 cells — rows: from-state (cut on top, completed on bottom)
+    // cols: to-state (cut on left, completed on right)
+    const cells = [
+        { from: 'cut', to: 'cut',    p: chain.pXgivenX, x: padX,        y: cellY,                  fill: 'currentColor' },
+        { from: 'cut', to: 'complete', p: chain.pCgivenX, x: padX + colW, y: cellY,                  fill: 'currentColor' },
+        { from: 'complete', to: 'cut', p: chain.pXgivenC, x: padX,        y: cellY + cellSize / 2,   fill: 'currentColor' },
+        { from: 'complete', to: 'complete', p: chain.pCgivenC, x: padX + colW, y: cellY + cellSize / 2, fill: 'currentColor' },
+    ];
+    const rects = cells.map((c) => {
+        const opacity = c.p === null ? 0.08 : 0.16 + 0.7 * c.p;
+        return `<rect x="${c.x.toFixed(1)}" y="${c.y.toFixed(1)}"
+                      width="${(colW - 2).toFixed(1)}" height="${(cellSize / 2 - 2).toFixed(1)}"
+                      rx="4" fill="currentColor" fill-opacity="${opacity.toFixed(2)}" />`;
+    }).join('');
+    const labels = `
+        <text x="${(padX + colW * 0.5).toFixed(1)}" y="${(padY + 8).toFixed(1)}" class="insight-viz__caption" text-anchor="middle">→ cut</text>
+        <text x="${(padX + colW * 1.5).toFixed(1)}" y="${(padY + 8).toFixed(1)}" class="insight-viz__caption" text-anchor="middle">→ complete</text>
+    `;
+    return `
+        <svg class="insight-viz insight-viz--markov" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            ${labels}
+            ${rects}
+        </svg>
+    `;
+}
+
 /** Sparkline of daily totals with a vertical rule at the change-point
  *  index. Pre-shift mean drawn as a horizontal dashed segment, same
  *  for post-shift mean — the visual eye reads them as the two regimes
@@ -1654,6 +1739,7 @@ function renderInsightDetailBody(insight, sessions) {
         case 'completion':  return detailCompletion(insight);
         case 'patterns':    return detailPatterns(insight);
         case 'conditions':  return detailConditions(insight);
+        case 'streak':      return detailStreak(insight);
         default:            return '';
     }
 }
@@ -1688,6 +1774,52 @@ function detailTrend(ins) {
             <p>Yours is ${r2.toFixed(2)} — ${fitWord}.</p>
         `)}
         ${detailBlock('Your last 7 days', `<ul class="detail-list">${last7}</ul>`)}
+    `;
+}
+
+function detailStreak(ins) {
+    const c = ins.data.chain;
+    const fmt = (p) => p === null ? '—' : `${Math.round(p * 100)}%`;
+    const fmtLift = (l) => l === null ? '—' : `${l.toFixed(2)}×`;
+    return `
+        ${detailBlock('What this is', `
+            <p>We treat your sessions as a chain — Completed (✓) or Cut-short (✕) — and look at how often each kind follows the other. The completion rate alone hides this; we want to know whether one bad session predicts another.</p>
+        `)}
+        ${detailBlock('How we found it', `
+            <p>This is a <strong>2-state Markov chain</strong>. We count every back-to-back pair of sessions in chronological order and divide:</p>
+            <ol class="detail-steps">
+                <li>For every pair, record the "from" state and "to" state.</li>
+                <li>Tally counts in a 2×2 matrix.</li>
+                <li>Normalize each row so rows sum to 1 — that gives conditional probabilities.</li>
+                <li>Compare each transition probability to its baseline rate to compute "lift."</li>
+            </ol>
+        `)}
+        ${detailBlock('Your transitions', `
+            <ul class="detail-list">
+                <li><span>after a cut, you finish next</span><span class="num">${fmt(c.pCgivenX)}</span></li>
+                <li><span>after a cut, you cut again</span><span class="num">${fmt(c.pXgivenX)}</span></li>
+                <li><span>after a finish, you finish again</span><span class="num">${fmt(c.pCgivenC)}</span></li>
+                <li><span>after a finish, you cut next</span><span class="num">${fmt(c.pXgivenC)}</span></li>
+            </ul>
+        `)}
+        ${detailBlock('Lift over baseline', `
+            <ul class="detail-list">
+                <li><span>baseline cut rate</span><span class="num">${fmt(c.overallCut)}</span></li>
+                <li><span>cut-streak lift</span><span class="num ${c.cutClusterLift > 1 ? 'is-flat' : 'is-good'}">${fmtLift(c.cutClusterLift)}</span></li>
+                <li><span>baseline finish rate</span><span class="num">${fmt(c.overallComplete)}</span></li>
+                <li><span>finish-streak lift</span><span class="num ${c.completeClusterLift > 1 ? 'is-good' : 'is-flat'}">${fmtLift(c.completeClusterLift)}</span></li>
+            </ul>
+            <p class="detail-block__note">Lift &gt; 1 means the streak persists — one outcome predicts another. Lift = 1 means past doesn't predict future.</p>
+        `)}
+        ${c.expectedCutStreak !== null ? detailBlock('Expected cut-streak length', `
+            <p>If you cut a session, the chain says you'll average <strong>${c.expectedCutStreak.toFixed(1)} cuts in a row</strong> before bouncing back to a finish. (Calculated from the self-loop probability: 1 / (1 − P(cut|cut)).)</p>
+        `) : ''}
+        ${detailBlock('Sample size', `
+            <ul class="detail-list">
+                <li><span>transitions counted</span><span class="num">${c.total}</span></li>
+            </ul>
+            <p class="detail-block__note">More transitions tighten the estimates. Below ~20 transitions, treat the lift values as suggestive rather than firm.</p>
+        `)}
     `;
 }
 
@@ -2422,6 +2554,7 @@ function insightKindLabel(kind) {
         case 'completion':  return 'FINISH RATE';
         case 'patterns':    return 'WORK PATTERNS';
         case 'conditions':  return 'WHAT HELPS YOU FINISH';
+        case 'streak':      return 'STREAK PATTERN';
         default:            return kind.toUpperCase();
     }
 }
