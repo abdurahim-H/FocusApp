@@ -68,13 +68,13 @@ Tasks today are `{ id, text, completed }` and are session-scoped (they don't car
 
 A first-class place to write. Markdown-aware, sync-ready, AI-assisted.
 
-- [ ] **3.1 Notepad panel (M).** New drop-down panel reachable from a toolbar button and via `n` shortcut. Mirror the Help Center / Profile / Settings drop pattern.
-- [ ] **3.2 Tiptap rich-markdown editor (L).** Bold / italic / headings / lists / code / quotes / links. Live keyboard shortcuts (`Cmd+B` etc.) without buttons cluttering the surface.
-- [ ] **3.3 Word + character count + reading time (S).** Footer status bar in the notepad.
-- [ ] **3.4 Multiple notes with a sidebar (M).** Note list, search, "+ new note" button. Default note "Daily — YYYY-MM-DD" auto-created on first write each day.
-- [ ] **3.5 Auto-save with debounce (S).** 800 ms debounce, visible "saved" indicator.
-- [ ] **3.6 Tags + cross-linking (M).** `#tag` for tags, `[[note title]]` for cross-links (Obsidian-style). Sidebar can filter by tag.
-- [ ] **3.7 Full-text search (M).** Across all notes. Modifier keys to constrain search ("tag:work"). Indexed locally.
+- [x] **3.1 Notepad panel (M).** New `js/ui/notepad.js` + `css/components/modules/23-notepad.css`. Drop-down panel matching Settings / Help / Profile / Tasks-detail. Reachable via the `n` keyboard shortcut and via "Open notes" rows in both the signed-out and signed-in account dropdowns.
+- [x] **3.2 Markdown editor (M done; Tiptap deferred).** Plain `<textarea>` with source-level Cmd/Ctrl+B and +I shortcuts that wrap the selection in `**bold**` / `*italic*`. Tiptap-based rich rendering deferred — pure-textarea v1 ships fast and the markdown source is what users will sync / export.
+- [x] **3.3 Word + character + reading time (S).** Live footer: tabular-numerals stat — words / characters / reading-time-at-200wpm. `<1 min read` shown for short notes so the field never reads "0 min".
+- [x] **3.4 Multiple notes with sidebar (M).** Sidebar to the left of the editor: search input + "+ New" button + tag-filter pills + scrollable note list. Each list row shows title, last-edited date, two-line preview, and up to three tags. Click any row to switch the active note; the per-row × deletes (with the next note auto-becoming active). Default first note auto-created with a "Daily — Long Date" title; user can rename instantly.
+- [x] **3.5 Auto-save with debounce (S).** Title and body inputs persist on every keystroke through a `requestAnimationFrame`-coalesced write to the new `fu_notes_v1` localStorage key. "Saved" pill flashes for ~1.1 s after each input as a visible confirmation.
+- [x] **3.6 Tags (S done; cross-linking deferred).** Body parser pulls `#tag` tokens (lowercase, dedup, capped at 12) on every keystroke and stores them on the note for the sidebar filter. Active filter persists during the session; click a chip to toggle. `[[note title]]` cross-linking is deferred — adds complexity with marginal v1 value.
+- [x] **3.7 Full-text search (S).** Search input filters the note list by case-insensitive substring match against title + body. Combinable with the tag filter (both apply). Sub-millisecond at any reasonable note count; no index needed yet.
 - [ ] **3.8 Voice dictation via Web Speech API (M).** Free; works in Chrome / Safari. Microphone button in the notepad toolbar.
 - [ ] **3.9 Pomodoro auto-prepend hook (S).** Optional setting: when a focus session starts, prepend "## 9:42 AM — focus session 1" to today's daily note.
 - [ ] **3.10 AI session summary at end of focus block (M).** LLM (Cloudflare Workers AI, free at our volume) reads what you wrote during the session and emits a 2-sentence recap. Recap appended to the daily note.

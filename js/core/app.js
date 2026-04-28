@@ -26,6 +26,7 @@ import * as homePeriodTiles from '../ui/home-period-tiles.js';
 import * as navigation from '../ui/navigation.js';
 import * as profile from '../ui/profile.js';
 import * as settings from '../ui/settings.js';
+import * as notepad from '../ui/notepad.js';
 import * as taskDetail from '../ui/task-detail.js';
 import * as tasksExpand from '../ui/tasks-expand.js';
 import * as timerParticles from '../ui/timer-particles.js';
@@ -58,6 +59,7 @@ const modules = {
     profile,
     tasksExpand,
     taskDetail,
+    notepad,
 };
 
 /**
@@ -391,6 +393,10 @@ function setupTaskControls(loadedModules) {
     // is built lazily on first open.
     if (loadedModules.taskDetail?.initTaskDetail) {
         loadedModules.taskDetail.initTaskDetail();
+    }
+    // Notepad — `n` shortcut opens it. DOM built lazily on first open.
+    if (loadedModules.notepad?.initNotepad) {
+        loadedModules.notepad.initNotepad();
     }
 }
 
