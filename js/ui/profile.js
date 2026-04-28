@@ -88,6 +88,10 @@ let unsubscribeAuth = null;
 // When the user clicks an insight card, the Insights body switches
 // to a detail view for that one card. Stays null otherwise.
 let activeInsightDetail = null;
+// When the user clicks a day cell on any calendar heatmap (60-day,
+// 90-day, 365-day), the entire content area swaps to a full
+// breakdown of that one day. ISO yyyy-mm-dd or null.
+let activeDayDetail = null;
 
 // ───────────────────────────────────────────────────────────────────────
 // Public API
@@ -124,7 +128,22 @@ export function initProfile() {
 
     document.addEventListener('keydown', (e) => {
         if (isOpen) {
-            if (e.key === 'Escape') close();
+            if (e.key === 'Escape') {
+                // Esc backs out of the active sub-view first, then
+                // closes the panel — same pattern users have in
+                // photo viewers and modals with drill-downs.
+                if (activeDayDetail) {
+                    setDayDetail(null);
+                    e.preventDefault();
+                    return;
+                }
+                if (activeInsightDetail) {
+                    setInsightDetail(null);
+                    e.preventDefault();
+                    return;
+                }
+                close();
+            }
             else if (e.key >= '1' && e.key <= '6') {
                 const idx = parseInt(e.key, 10) - 1;
                 if (idx < SECTIONS.length) {
@@ -186,9 +205,10 @@ function setSection(id) {
     if (!SECTIONS.some((s) => s.id === id)) return;
     if (activeSection === id) return;
     activeSection = id;
-    // Switching sections always clears the insight detail — otherwise
-    // a stale detail view would surface on next return.
+    // Switching sections always clears any open detail — otherwise a
+    // stale detail view would surface on next return.
     activeInsightDetail = null;
+    activeDayDetail = null;
     render();
     const body = panel.querySelector('#profileContent');
     if (body) body.scrollTop = 0;
@@ -196,6 +216,15 @@ function setSection(id) {
 
 function setInsightDetail(kind) {
     activeInsightDetail = kind;
+    activeDayDetail = null;
+    render();
+    const body = panel.querySelector('#profileContent');
+    if (body) body.scrollTop = 0;
+}
+
+function setDayDetail(iso) {
+    activeDayDetail = iso;
+    activeInsightDetail = null;
     render();
     const body = panel.querySelector('#profileContent');
     if (body) body.scrollTop = 0;
@@ -241,14 +270,22 @@ function buildPanel() {
     const content = panel.querySelector('#profileContent');
     if (content) {
         content.addEventListener('click', (e) => {
-            const back = e.target.closest('[data-insight-back]');
-            if (back) {
+            if (e.target.closest('[data-insight-back]')) {
                 setInsightDetail(null);
+                return;
+            }
+            if (e.target.closest('[data-day-back]')) {
+                setDayDetail(null);
                 return;
             }
             const card = e.target.closest('[data-insight-open]');
             if (card) {
                 setInsightDetail(card.dataset.insightOpen);
+                return;
+            }
+            const dayCell = e.target.closest('[data-day-iso]');
+            if (dayCell) {
+                setDayDetail(dayCell.dataset.dayIso);
             }
         });
         content.addEventListener('keydown', (e) => {
@@ -257,6 +294,12 @@ function buildPanel() {
             if (card) {
                 e.preventDefault();
                 setInsightDetail(card.dataset.insightOpen);
+                return;
+            }
+            const dayCell = e.target.closest('[data-day-iso]');
+            if (dayCell) {
+                e.preventDefault();
+                setDayDetail(dayCell.dataset.dayIso);
             }
         });
     }
@@ -305,15 +348,23 @@ function renderRail() {
 function renderContent() {
     const host = panel.querySelector('#profileContent');
     if (!host) return;
-    const sessions = getAllSessions().filter((s) => s.kind === 'focus');
+    const allSessions = getAllSessions();
+    const sessions = allSessions.filter((s) => s.kind === 'focus');
     let html = '';
-    switch (activeSection) {
-        case 'overview': html = renderOverview(sessions); break;
-        case 'focus':    html = renderFocus(sessions); break;
-        case 'tasks':    html = renderTasks(sessions); break;
-        case 'sounds':   html = renderSounds(sessions); break;
-        case 'time':     html = renderTime(sessions); break;
-        case 'insights': html = renderInsights(sessions); break;
+    if (activeDayDetail) {
+        // Calendar-cell click — overrides whatever section was active.
+        // We pass the unfiltered list so per-day stats can still use
+        // the full set if we ever need non-focus data later.
+        html = renderDayDetail(activeDayDetail, sessions);
+    } else {
+        switch (activeSection) {
+            case 'overview': html = renderOverview(sessions); break;
+            case 'focus':    html = renderFocus(sessions); break;
+            case 'tasks':    html = renderTasks(sessions); break;
+            case 'sounds':   html = renderSounds(sessions); break;
+            case 'time':     html = renderTime(sessions); break;
+            case 'insights': html = renderInsights(sessions); break;
+        }
     }
     host.innerHTML = `<section class="psection psection--${activeSection}">${html}</section>`;
     requestAnimationFrame(() => {
@@ -397,6 +448,8 @@ function render60DayGrid(sessions) {
     const GAP = 4;
     const W = COLS * (CELL + GAP) - GAP + 4;
     const H = ROWS * (CELL + GAP) - GAP + 4;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const cells = [];
     for (let i = 0; i < days; i++) {
         const row = Math.floor(i / COLS);
@@ -408,14 +461,26 @@ function render60DayGrid(sessions) {
         const isToday = i === days - 1;
         // Faint baseline so empty days stay visible — never disappear.
         const fillOpacity = 0.05 + 0.85 * intensity;
+        // dailyTotals returns the trailing window oldest-first; cell i
+        // is `(days - 1 - i)` days ago.
+        const dayDate = new Date(today);
+        dayDate.setDate(dayDate.getDate() - (days - 1 - i));
+        const iso = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
+        const cls = ['day-grid__cell'];
+        if (isToday) cls.push('day-grid__today');
         cells.push(`
             <rect x="${x}" y="${y}" width="${CELL}" height="${CELL}" rx="4"
-                  fill="currentColor" fill-opacity="${fillOpacity.toFixed(3)}"
-                  ${isToday ? 'class="day-grid__today"' : ''} />
+                  class="${cls.join(' ')}"
+                  data-day-iso="${iso}"
+                  tabindex="0" role="button"
+                  aria-label="${dayDate.toDateString()}, ${Math.round(minutes)} minutes focused"
+                  fill="currentColor" fill-opacity="${fillOpacity.toFixed(3)}">
+                <title>${dayDate.toDateString()} · ${Math.round(minutes)} min — click for the full day</title>
+            </rect>
         `);
     }
     return `
-        <svg class="day-grid" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">
+        <svg class="day-grid" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
             ${cells.join('')}
         </svg>
     `;
@@ -1752,6 +1817,7 @@ function detailPatterns(ins) {
                         <span class="cluster-row__label">${escapeHtml(cl.label)}</span>
                         <span class="cluster-row__count num">${cl.count} blocks · ${Math.round((cl.count / d.sessions.length) * 100)}%</span>
                     </div>
+                    ${cl.description ? `<p class="cluster-row__desc">${escapeHtml(cl.description)}</p>` : ''}
                     <ul class="cluster-row__stats">
                         <li><span>avg duration</span><span class="num">${avgDur.toFixed(0)} min</span></li>
                         <li><span>avg quality</span><span class="num">${avgQual.toFixed(0)}/100</span></li>
@@ -1825,6 +1891,340 @@ function detailConditions(ins) {
     `;
 }
 
+// ───────────────────────────────────────────────────────────────────────
+// Day detail — clicking any calendar cell drops the section content
+// for a single-day breakdown of every block, every metric, and how
+// the day compares to the user's overall pace.
+// ───────────────────────────────────────────────────────────────────────
+
+function parseIsoDay(iso) {
+    // iso is yyyy-mm-dd in *local* time. new Date('yyyy-mm-dd') parses
+    // as UTC and shifts by tz offset, which would land on the wrong
+    // calendar day for users west of GMT. Build the date manually.
+    const [y, m, d] = iso.split('-').map(Number);
+    const date = new Date(y, m - 1, d, 0, 0, 0, 0);
+    return date;
+}
+
+function sameLocalDay(ts, dayStart) {
+    const d = new Date(ts);
+    return d.getFullYear() === dayStart.getFullYear()
+        && d.getMonth() === dayStart.getMonth()
+        && d.getDate() === dayStart.getDate();
+}
+
+function formatHourMin(ts) {
+    const d = new Date(ts);
+    const h = d.getHours();
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hh = h % 12 === 0 ? 12 : h % 12;
+    return `${hh}:${m} ${ampm}`;
+}
+
+function renderDayDetail(iso, focusSessions) {
+    const dayStart = parseIsoDay(iso);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayEnd.getDate() + 1);
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const daysAgo = Math.round((todayStart - dayStart) / 86400_000);
+    const isFuture = dayStart > todayStart;
+
+    const dayLabel = dayStart.toLocaleDateString(undefined, {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+    });
+    const dayShort = daysAgo === 0 ? 'today'
+        : daysAgo === 1 ? 'yesterday'
+        : daysAgo > 1 ? `${daysAgo} days ago`
+        : '';
+
+    const dayBlocks = focusSessions
+        .filter((s) => sameLocalDay(s.startedAt, dayStart))
+        .sort((a, b) => a.startedAt - b.startedAt);
+
+    if (isFuture) {
+        return `
+            ${dayDetailHeader(dayLabel, '', 'no data — this date is in the future')}
+            <div class="day-detail__empty">
+                <p>You can only inspect days that have already happened.</p>
+            </div>
+        `;
+    }
+
+    if (dayBlocks.length === 0) {
+        return `
+            ${dayDetailHeader(dayLabel, dayShort, 'no focus blocks on this day')}
+            <div class="day-detail__empty">
+                <p>You didn't run a focus block on ${dayLabel}.</p>
+                <p class="day-detail__empty-sub">An empty day isn't a failure — sometimes life just doesn't have a focus-block-shaped hole.</p>
+            </div>
+        `;
+    }
+
+    return `
+        ${dayDetailHeader(dayLabel, dayShort, dayBlocks.length === 1
+            ? '1 focus block'
+            : `${dayBlocks.length} focus blocks`)}
+        ${dayKpiRow(dayBlocks)}
+        ${dayTimelineCard(dayBlocks, dayStart)}
+        ${dayCompareCard(dayBlocks, dayStart, focusSessions)}
+        ${dayBlocksCard(dayBlocks)}
+        ${daySoundsCard(dayBlocks)}
+    `;
+}
+
+function dayDetailHeader(dayLabel, agoLabel, sub) {
+    return `
+        <div class="day-detail">
+            <button class="insight-detail__back" type="button" data-day-back>
+                <span aria-hidden="true">‹</span> back
+            </button>
+            <header class="day-detail__head">
+                ${agoLabel ? `<span class="day-detail__ago">${escapeHtml(agoLabel)}</span>` : ''}
+                <h3 class="day-detail__title">${escapeHtml(dayLabel)}</h3>
+                <p class="day-detail__sub">${escapeHtml(sub)}</p>
+            </header>
+        </div>
+    `;
+}
+
+function dayKpiRow(blocks) {
+    const totalSec = blocks.reduce((a, s) => a + (s.durationSeconds || 0), 0);
+    const totalMin = totalSec / 60;
+    const finished = blocks.filter((s) => s.completed).length;
+    const tasks = blocks.reduce((a, s) => a + (s.tasksCompleted || 0), 0);
+    const switches = blocks.reduce((a, s) => a + (s.distractionCount || 0), 0);
+    const avgQ = blocks.length
+        ? Math.round(mean(blocks.map((s) => s.focusQuality || 0)))
+        : 0;
+    return kpiRow([
+        { label: 'minutes focused', value: Math.round(totalMin), unit: 'min', count: true },
+        { label: 'finished', value: finished, unit: `/ ${blocks.length}`, count: true },
+        { label: 'tasks done', value: tasks, unit: '', count: true },
+        { label: 'tab-switches', value: switches, unit: '', count: true },
+        { label: 'avg quality', value: avgQ, unit: '/100', count: true },
+    ]);
+}
+
+function dayTimelineCard(blocks, dayStart) {
+    const W = 720;
+    const H = 64;
+    const padX = 28;
+    const trackY = 26;
+    const trackH = 16;
+    const innerW = W - padX * 2;
+    const dayMs = 86400_000;
+    const xFor = (ms) => padX + ((ms - dayStart.getTime()) / dayMs) * innerW;
+
+    const bars = blocks.map((s) => {
+        const start = Math.max(s.startedAt, dayStart.getTime());
+        const end = Math.min(s.startedAt + (s.durationSeconds || 0) * 1000, dayStart.getTime() + dayMs);
+        const x = xFor(start);
+        const w = Math.max(2, xFor(end) - x);
+        const finished = !!s.completed;
+        const opacity = finished ? 0.85 : 0.5;
+        return `
+            <rect x="${x.toFixed(1)}" y="${trackY}" width="${w.toFixed(1)}" height="${trackH}" rx="3"
+                  fill="currentColor" fill-opacity="${opacity}"
+                  ${finished ? '' : 'stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="2 2" stroke-width="0.8"'}>
+                <title>${formatHourMin(s.startedAt)} · ${Math.round((s.durationSeconds || 0) / 60)} min · ${finished ? 'finished' : 'cut short'}</title>
+            </rect>
+        `;
+    }).join('');
+
+    const ticks = [0, 6, 12, 18, 24].map((h) => {
+        const x = padX + (h / 24) * innerW;
+        const label = h === 0 ? '12a'
+            : h === 6 ? '6a'
+            : h === 12 ? '12p'
+            : h === 18 ? '6p'
+            : '12a';
+        return `
+            <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${trackY - 4}" y2="${trackY + trackH + 4}"
+                  stroke="rgba(255, 246, 225, 0.12)" stroke-width="0.7" />
+            <text x="${x.toFixed(1)}" y="${(H - 4).toFixed(1)}" class="day-timeline__tick"
+                  text-anchor="middle">${label}</text>
+        `;
+    }).join('');
+
+    return `
+        <section class="detail-block">
+            <h4 class="detail-block__title">when you focused</h4>
+            <div class="detail-block__content">
+                <p>Each band shows when a focus block ran, from that block's start time to its end. Solid bands are blocks you finished; dashed bands are ones you cut short.</p>
+                <svg class="day-timeline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="timeline of the day's focus blocks">
+                    <rect x="${padX}" y="${trackY}" width="${innerW}" height="${trackH}" rx="3"
+                          fill="rgba(255, 220, 160, 0.05)" />
+                    ${ticks}
+                    ${bars}
+                </svg>
+            </div>
+        </section>
+    `;
+}
+
+function dayCompareCard(blocks, dayStart, allSessions) {
+    const todayMin = blocks.reduce((a, s) => a + (s.durationSeconds || 0), 0) / 60;
+
+    // Overall daily mean (across all days in the user's history).
+    const oldest = allSessions.length
+        ? Math.min(...allSessions.map((s) => s.startedAt))
+        : Date.now();
+    const oldestStart = new Date(oldest);
+    oldestStart.setHours(0, 0, 0, 0);
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const totalDays = Math.max(1, Math.round((todayStart - oldestStart) / 86400_000) + 1);
+    const totalMinAll = allSessions.reduce((a, s) => a + (s.durationSeconds || 0), 0) / 60;
+    const overallDailyMean = totalMinAll / totalDays;
+
+    // Day-of-week mean across the user's history (this dow only).
+    const dow = dayStart.getDay();
+    const dowDayMap = new Map();
+    for (const s of allSessions) {
+        const d = new Date(s.startedAt);
+        if (d.getDay() !== dow) continue;
+        d.setHours(0, 0, 0, 0);
+        const k = d.getTime();
+        dowDayMap.set(k, (dowDayMap.get(k) || 0) + (s.durationSeconds || 0) / 60);
+    }
+    const dowSum = [...dowDayMap.values()].reduce((a, x) => a + x, 0);
+    const dowDays = dowDayMap.size || 1;
+    const dowMean = dowSum / dowDays;
+
+    // Z-score: this day's minutes against the distribution of all past
+    // active days (days where the user focused at all). We exclude
+    // today itself if it's in the set, and zero days, so the comparison
+    // is fair.
+    const distMap = new Map();
+    for (const s of allSessions) {
+        const d = new Date(s.startedAt);
+        d.setHours(0, 0, 0, 0);
+        const k = d.getTime();
+        if (k === dayStart.getTime()) continue;
+        distMap.set(k, (distMap.get(k) || 0) + (s.durationSeconds || 0) / 60);
+    }
+    const distArr = [...distMap.values()].filter((v) => v > 0);
+    const distMean = distArr.length ? mean(distArr) : 0;
+    const distSd = distArr.length ? stdDev(distArr) : 0;
+    const z = distSd > 0 ? (todayMin - distMean) / distSd : 0;
+    const rarity = Math.abs(z) >= 2 ? 'a standout day'
+        : Math.abs(z) >= 1.5 ? 'a notable day'
+        : Math.abs(z) >= 1 ? 'a bit above/below average'
+        : 'an ordinary day';
+    const dirCmp = todayMin >= overallDailyMean ? '+' : '−';
+    const cmpAmount = Math.abs(todayMin - overallDailyMean);
+    const dayLabels = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    return `
+        <section class="detail-block">
+            <h4 class="detail-block__title">how this day compares</h4>
+            <div class="detail-block__content">
+                <ul class="detail-list">
+                    <li>
+                        <span>this day</span>
+                        <span class="num">${Math.round(todayMin)} min</span>
+                    </li>
+                    <li>
+                        <span>your overall daily mean</span>
+                        <span class="num">${overallDailyMean.toFixed(0)} min</span>
+                    </li>
+                    <li>
+                        <span>vs your overall mean</span>
+                        <span class="num ${todayMin >= overallDailyMean ? 'is-good' : 'is-flat'}">${dirCmp}${Math.round(cmpAmount)} min</span>
+                    </li>
+                    <li>
+                        <span>your typical ${dayLabels[dow]}</span>
+                        <span class="num">${dowMean.toFixed(0)} min</span>
+                    </li>
+                    ${distArr.length >= 5 ? `
+                        <li>
+                            <span>standout score (z)</span>
+                            <span class="num">${z.toFixed(2)}</span>
+                        </li>
+                        <li>
+                            <span>read</span>
+                            <span class="num">${rarity}</span>
+                        </li>
+                    ` : ''}
+                </ul>
+                ${distArr.length < 5 ? `<p class="detail-block__note">we'd need at least 5 active days of history to compute a meaningful "how unusual" score.</p>` : ''}
+            </div>
+        </section>
+    `;
+}
+
+function dayBlocksCard(blocks) {
+    const rows = blocks.map((s) => {
+        const min = Math.round((s.durationSeconds || 0) / 60);
+        const startTime = formatHourMin(s.startedAt);
+        const finished = !!s.completed;
+        const tasks = s.tasksCompleted || 0;
+        const switches = s.distractionCount || 0;
+        const quality = s.focusQuality || 0;
+        const sounds = (s.activeSounds || []).slice(0, 3);
+        return `
+            <li class="day-block">
+                <div class="day-block__head">
+                    <span class="day-block__time">${escapeHtml(startTime)}</span>
+                    <span class="day-block__dur num">${min} min</span>
+                    <span class="day-block__status ${finished ? 'is-good' : 'is-flat'}">
+                        ${finished ? 'finished' : 'cut short'}
+                    </span>
+                </div>
+                <ul class="day-block__stats">
+                    <li><span>quality</span><span class="num">${quality}/100</span></li>
+                    <li><span>tasks done</span><span class="num">${tasks}</span></li>
+                    <li><span>tab-switches</span><span class="num">${switches}</span></li>
+                </ul>
+                ${sounds.length ? `
+                    <div class="day-block__sounds">
+                        ${sounds.map((s) => `<span class="day-block__sound">${escapeHtml(s)}</span>`).join('')}
+                        ${(s.activeSounds || []).length > 3 ? `<span class="day-block__sound day-block__sound--more">+${(s.activeSounds || []).length - 3}</span>` : ''}
+                    </div>
+                ` : ''}
+            </li>
+        `;
+    }).join('');
+    return `
+        <section class="detail-block">
+            <h4 class="detail-block__title">every block, in order</h4>
+            <div class="detail-block__content">
+                <ul class="day-block-list">${rows}</ul>
+            </div>
+        </section>
+    `;
+}
+
+function daySoundsCard(blocks) {
+    const counts = new Map();
+    for (const s of blocks) {
+        for (const snd of s.activeSounds || []) {
+            counts.set(snd, (counts.get(snd) || 0) + 1);
+        }
+    }
+    if (counts.size === 0) return '';
+    const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    const total = blocks.length;
+    return `
+        <section class="detail-block">
+            <h4 class="detail-block__title">sounds you used</h4>
+            <div class="detail-block__content">
+                <ul class="detail-list">
+                    ${ranked.map(([sound, n]) => `
+                        <li>
+                            <span>${escapeHtml(capitalize(sound))}</span>
+                            <span class="num">${n} of ${total} block${total === 1 ? '' : 's'}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        </section>
+    `;
+}
+
 /** Friendlier section labels than uppercased internal keys. */
 function insightKindLabel(kind) {
     switch (kind) {
@@ -1841,31 +2241,39 @@ function insightKindLabel(kind) {
     }
 }
 
-/** Inspect each cluster's centroid and assign a plain-English label.
- *  Returns parallel arrays of clusters with { label, count, color }. */
+/** Inspect each cluster's centroid and assign a plain-English label
+ *  plus a one-line description. The description spells out, in
+ *  ordinary words, what makes a block "long quiet" or "rough" — so
+ *  the user doesn't have to guess. */
 function describeClusters(result, sessions) {
     return result.centroids.map((c, i) => {
         const [duration, quality, distractions] = c;
-        let label;
+        let label, description;
         // The thresholds work on normalised features (0..1):
         //   duration  — short < 0.4, long > 0.6
         //   quality   — low < 0.4, high > 0.6
         //   distractions — calm < 0.35, scattered > 0.55
         if (duration > 0.6 && quality > 0.55 && distractions < 0.4) {
             label = 'long, quiet blocks';
+            description = 'long sessions where you barely switched tabs and stayed focused';
         } else if (duration < 0.4 && distractions < 0.4) {
             label = 'short, focused blocks';
+            description = 'shorter sessions, but you stayed on task — minimal tab-switching';
         } else if (distractions > 0.55) {
             label = 'scattered, interrupted blocks';
+            description = 'sessions broken up by frequent tab-switches';
         } else if (quality > 0.55) {
             label = 'solid medium-length blocks';
+            description = 'mid-length sessions with a strong focus-quality score — your reliable middle ground';
         } else if (quality < 0.4) {
             label = 'rough blocks';
+            description = 'sessions that scored low on focus quality — a mix of duration and distractions worked against them';
         } else {
             label = 'regular blocks';
+            description = 'average sessions — nothing stood out either way';
         }
         const count = result.assignments.filter((a) => a === i).length;
-        return { idx: i, label, count, centroid: c };
+        return { idx: i, label, description, count, centroid: c };
     });
 }
 

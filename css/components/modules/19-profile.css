@@ -1125,6 +1125,13 @@
     color: rgba(255, 246, 225, 0.55);
     flex-shrink: 0;
 }
+.cluster-row__desc {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', sans-serif;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: rgba(255, 246, 225, 0.62);
+}
 .cluster-row__stats {
     list-style: none;
     margin: 0;
@@ -1191,6 +1198,196 @@
     line-height: 1.4;
 }
 
+/* ── Clickable day cells (calendar heatmaps + 60-day grid) ───────────
+   Cells with `data-day-iso` are tab-stops; hover/focus brightens the
+   cell so users can see they're interactive without bumping the
+   default tone of the heatmap. */
+.chart__cal-cell[data-day-iso],
+.day-grid__cell[data-day-iso] {
+    cursor: pointer;
+    transition: fill-opacity 0.18s ease, stroke-width 0.18s ease, stroke-opacity 0.18s ease;
+}
+.chart__cal-cell[data-day-iso]:hover,
+.day-grid__cell[data-day-iso]:hover {
+    fill-opacity: 0.95 !important;
+}
+.chart__cal-cell[data-day-iso]:focus-visible,
+.day-grid__cell[data-day-iso]:focus-visible {
+    outline: none;
+    stroke: rgba(255, 246, 225, 0.92);
+    stroke-width: 1.4;
+    stroke-opacity: 1;
+}
+
+/* ── Day detail — full single-day breakdown ──────────────────────── */
+
+.day-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    --kind-color: 255, 220, 160;
+    animation: insightDetailIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.day-detail__head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 4px 4px;
+}
+.day-detail__ago {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.7);
+}
+.day-detail__title {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+    font-size: clamp(20px, 2.2vw, 28px);
+    font-weight: 350;
+    color: #faf3e3;
+    letter-spacing: -0.012em;
+    line-height: 1.22;
+}
+.day-detail__sub {
+    margin: 2px 0 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', sans-serif;
+    font-size: 13px;
+    color: rgba(255, 246, 225, 0.55);
+}
+.day-detail__empty {
+    padding: 24px 22px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 246, 225, 0.7);
+    font-size: 13.5px;
+    line-height: 1.55;
+}
+.day-detail__empty p { margin: 0 0 8px; }
+.day-detail__empty p:last-child { margin-bottom: 0; }
+.day-detail__empty-sub {
+    color: rgba(255, 246, 225, 0.5);
+    font-size: 12.5px;
+}
+
+/* The day detail uses the existing kpi-row, but cards are siblings
+   of the header (not wrapped in `.day-detail`), so make sure they
+   get spacing. Day-detail body lives inside the standard psection. */
+.psection .day-detail + .kpi-row {
+    margin-top: 4px;
+}
+
+/* Timeline strip — horizontal, 24-hour spread of the day's blocks. */
+.day-timeline {
+    width: 100%;
+    height: auto;
+    max-height: 80px;
+    margin-top: 10px;
+    color: rgba(255, 220, 160, 0.92);
+    filter: drop-shadow(0 0 4px rgba(255, 220, 160, 0.18));
+}
+.day-timeline__tick {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    fill: rgba(255, 246, 225, 0.4);
+}
+
+/* Per-block list — each block is its own little card. */
+.day-block-list {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.day-block {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.022);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.day-block__head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+.day-block__time {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #faf3e3;
+    flex-shrink: 0;
+}
+.day-block__dur {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 12.5px;
+    color: rgba(255, 246, 225, 0.62);
+    flex: 1;
+}
+.day-block__status {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+.day-block__status.is-good { color: #95e2a4; }
+.day-block__status.is-flat { color: rgba(255, 246, 225, 0.5); }
+.day-block__stats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px 16px;
+}
+.day-block__stats li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11.5px;
+    color: rgba(255, 246, 225, 0.55);
+}
+.day-block__stats .num {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 12px;
+    font-weight: 500;
+    color: #faf3e3;
+}
+.day-block__sounds {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.day-block__sound {
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(180, 144, 232, 0.12);
+    border: 1px solid rgba(180, 144, 232, 0.2);
+    color: rgba(220, 200, 255, 0.95);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+}
+.day-block__sound--more {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 246, 225, 0.55);
+}
+
 .psection__card {
     padding: 18px 20px 22px;
     border-radius: 16px;
@@ -1255,6 +1452,9 @@
     .detail-block { padding: 14px 14px; }
     .cluster-row__stats { grid-template-columns: 1fr; }
     .insight-detail__viz .insight-viz { max-width: 100%; }
+    .day-detail__head { padding: 10px 0 0; }
+    .day-detail__title { font-size: 20px; }
+    .day-block__stats { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────────── */
@@ -1269,8 +1469,11 @@
         opacity: 1;
         transform: none;
     }
-    .insight-detail { animation: none; }
+    .insight-detail,
+    .day-detail { animation: none; }
     .insight-card[data-insight-open] { transition: none; }
     .insight-card[data-insight-open]:hover,
     .insight-card[data-insight-open]:focus-visible { transform: none; }
+    .chart__cal-cell[data-day-iso],
+    .day-grid__cell[data-day-iso] { transition: none; }
 }

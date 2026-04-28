@@ -219,12 +219,21 @@ export function calendarHeatmap({
             const intensity = peak === 0 ? 0 : c.value / peak;
             const alpha = 0.08 + 0.78 * intensity;
             const isToday = c.date.toDateString() === new Date().toDateString();
+            // ISO yyyy-mm-dd, locked to the cell's local date so the
+            // click handler can resolve "which day did the user click"
+            // without re-deriving from screen coordinates.
+            const iso = `${c.date.getFullYear()}-${String(c.date.getMonth() + 1).padStart(2, '0')}-${String(c.date.getDate()).padStart(2, '0')}`;
+            const cls = ['chart__cal-cell'];
+            if (isToday) cls.push('chart__cal-today');
             // currentColor + fill-opacity → section-coloured via CSS.
             cells.push(`
                 <rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="2"
-                      fill="currentColor" fill-opacity="${alpha.toFixed(3)}"
-                      ${isToday ? 'class="chart__cal-today"' : ''}>
-                    <title>${c.date.toDateString()} · ${c.value.toFixed(0)} min</title>
+                      class="${cls.join(' ')}"
+                      data-day-iso="${iso}"
+                      tabindex="0" role="button"
+                      aria-label="${c.date.toDateString()}, ${c.value.toFixed(0)} minutes focused"
+                      fill="currentColor" fill-opacity="${alpha.toFixed(3)}">
+                    <title>${c.date.toDateString()} · ${c.value.toFixed(0)} min — click for the full day</title>
                 </rect>
             `);
         }
