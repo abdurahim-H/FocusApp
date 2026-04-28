@@ -87,8 +87,8 @@ A first-class place to write. Markdown-aware, sync-ready, AI-assisted.
 
 The biggest visual upgrade in the app. Required scaffolding for Wave 5 (YouTube themes) and Wave 11 (user-uploaded themes).
 
-- [ ] **4.1 Theme registry architecture (L).** Refactor `scene-manager.js` to take an explicit theme object: `{ id, label, modules: [...], palette, postfx }`. Each scene module exposes `init / update / dispose`. `setTheme(id)` tears down old, brings up new.
-- [ ] **4.2 Theme: Black Hole (existing) registered as theme #1 (S).** No visible change; just registered through the new system. (after 4.1)
+- [x] **4.1 Theme registry architecture (L).** New `js/graphics/scene/theme-registry.js` wraps every scene module in a uniform `{ id, init(ctx), update?(elapsed, dt), dispose() }` shape. Themes are arrays of modules + a palette block. `activateTheme / deactivateTheme / updateActiveTheme` orchestrate; scene-manager keeps per-frame updates as a flat sequence (the registry's update hook is reserved for non-special-args themes), but init / dispose now go through the registry. `getActiveTheme()` + `setActiveTheme(id)` are exported and the `scene.theme` settings apply hook now drives runtime swaps.
+- [x] **4.2 Theme: Black Hole (existing) registered as theme #1 (S).** Identical scene, now sourced from the registry. The eight modules (skybox / starfield / nebula / shooting-stars / star-glows / blackhole / motes / petals) bundle here in their original order. `blackholeMesh` propagates via shared ctx so cosmos sound bodies still anchor to it.
 - [ ] **4.3 Theme: Cosmic Garden (L).** Reuses `ethereal-petals.js` (already in codebase, currently unused). Greener nebula palette, soft blue-green motes, drifting petals.
 - [ ] **4.4 Theme: Liminal Library (XL).** Drifting dust shader, soft warm side-lighting, fireplace-flicker post-effect, slowly falling particles. New shader work.
 - [ ] **4.5 Theme: Storm Window (XL).** Rain-streaked plane in front of a calm cityscape, occasional lightning flash, raindrops audio-reactive to the master volume. New shader work.

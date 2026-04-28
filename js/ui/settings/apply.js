@@ -157,11 +157,17 @@ export const APPLY_HOOKS = {
         }
     },
 
-    // ───────── Scene theme (placeholder — only Black Hole exists today) ─────────
+    // ───────── Scene theme — driven by the registry in scene-manager ────
     'scene.theme': (v) => {
-        // Kept for future multi-scene support.
         document.documentElement.setAttribute('data-theme', v);
         document.body.setAttribute('data-theme', v);
+        // Lazy import so the apply hooks don't pull the whole 3D
+        // bundle eagerly. setActiveTheme is a no-op if the scene
+        // hasn't initialised yet — first paint reads the saved id
+        // directly via readSavedThemeId.
+        import('../../graphics/scene/scene-manager.js').then((m) => {
+            try { m.setActiveTheme?.(v); } catch (_) {}
+        });
     },
 };
 
