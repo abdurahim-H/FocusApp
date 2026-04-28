@@ -896,11 +896,13 @@ function renderInsights(sessions) {
         const slopeStr = slopeAbs >= 1
             ? `${slopeAbs.toFixed(0)} ${slopeAbs >= 1.5 ? 'minutes' : 'minute'} a week`
             : `roughly ${Math.round(slopeAbs * 4)} minutes a month`;
+        const trendVals = regressionLine(last30) || [];
         insights.push({
             kind: 'trend',
             headline: `your daily focus is ${direction} — ${verb} about ${slopeStr}`,
             sub: trendConfidenceCopy(reg.r2),
             value: `${reg.slopePerWeek >= 0 ? '+' : '−'}${slopeAbs.toFixed(1)} min / week`,
+            viz: vizTrend(last30, trendVals),
         });
     }
 
@@ -911,6 +913,7 @@ function renderInsights(sessions) {
             headline: `you're focusing ${(Math.abs(wow.delta) * 100).toFixed(0)}% ${dir} compared to the month before`,
             sub: `about ${wow.newer.toFixed(0)} minutes a day now · ${wow.older.toFixed(0)} minutes a day before`,
             value: `${wow.delta >= 0 ? '+' : '−'}${(Math.abs(wow.delta) * 100).toFixed(0)}%`,
+            viz: vizWow(wow.older, wow.newer),
         });
     }
 
@@ -927,6 +930,7 @@ function renderInsights(sessions) {
             headline,
             sub: rarityCopy(z),
             value: z > 0 ? `${todayMin} min today` : `${todayMin} min today`,
+            viz: vizAnomaly(last30.slice(0, -1), todayTotal),
         });
     } else if (anomalyDays > 0) {
         insights.push({
@@ -934,6 +938,7 @@ function renderInsights(sessions) {
             headline: `${anomalyDays} ${anomalyDays === 1 ? 'day' : 'days'} that broke from your normal in the last month`,
             sub: 'days that stood out — much higher or much lower than your typical pace',
             value: `${anomalyDays} ${anomalyDays === 1 ? 'day' : 'days'}`,
+            viz: vizAnomalyDays(last30, flags),
         });
     }
 
@@ -945,11 +950,16 @@ function renderInsights(sessions) {
         const headline = correlation > 0
             ? `the more you switch tabs in a session, the lower your focus quality goes`
             : `tab-switches and focus quality move together — but not strongly`;
+        const corrPoints = sessions.map((s) => [
+            s.distractionCount || 0,
+            s.focusQuality || 0,
+        ]);
         insights.push({
             kind: 'correlation',
             headline,
             sub: `${strength.label} pattern — ${strength.aside}`,
             value: strength.label,
+            viz: vizCorrelation(corrPoints),
         });
     }
 
@@ -958,6 +968,7 @@ function renderInsights(sessions) {
         const valueText = lostHrs >= 1
             ? `${lostHrs.toFixed(1)} hours`
             : `${Math.round(lostMin)} min`;
+        const totalFocusedMin = sessions.reduce((a, s) => a + (s.durationSeconds || 0), 0) / 60;
         insights.push({
             kind: 'friction',
             headline: lostHrs >= 1
@@ -965,6 +976,7 @@ function renderInsights(sessions) {
                 : `you've lost about ${Math.round(lostMin)} minutes to context-switching`,
             sub: `${switches} tab-aways during your focus blocks — every switch adds ~9 minutes of getting back into it`,
             value: valueText,
+            viz: vizFriction(totalFocusedMin, lostMin),
         });
     }
 
@@ -973,6 +985,12 @@ function renderInsights(sessions) {
         const valueText = monthHrs >= 1
             ? `${monthHrs.toFixed(1)} hours`
             : `${Math.round(monthForecast)} min`;
+        // Past 14 days as the historical line, then 14 days of
+        // projection at the trailing-7 daily average — gives the eye a
+        // sense of "here's where you've been, here's where you're
+        // heading if you keep this rhythm."
+        const past14 = last30.slice(-14);
+        const projected14 = new Array(14).fill(dailyAvg);
         insights.push({
             kind: 'forecast',
             headline: monthHrs >= 1
@@ -980,6 +998,7 @@ function renderInsights(sessions) {
                 : `keep this up and you'll focus about ${Math.round(monthForecast)} minutes in the next 30 days`,
             sub: `based on the last 7 days — about ${Math.round(dailyAvg)} minutes a day`,
             value: valueText,
+            viz: vizForecast(past14, projected14),
         });
     }
 
@@ -999,6 +1018,7 @@ function renderInsights(sessions) {
                     ? 'solid follow-through — most blocks reach the end'
                     : 'cutting blocks short is a habit worth watching',
             value: `${pct}%`,
+            viz: vizCompletion(completionRate, pct),
         });
     }
 
@@ -1016,11 +1036,233 @@ function renderInsights(sessions) {
                 <article class="insight-card insight-card--${ins.kind}">
                     <span class="insight-card__kind">${insightKindLabel(ins.kind)}</span>
                     <p class="insight-card__headline">${escapeHtml(ins.headline)}</p>
-                    <p class="insight-card__sub">${escapeHtml(ins.sub)}</p>
+                    ${ins.viz ? `<div class="insight-card__viz">${ins.viz}</div>` : ''}
                     <p class="insight-card__value">${escapeHtml(String(ins.value))}</p>
+                    <p class="insight-card__sub">${escapeHtml(ins.sub)}</p>
                 </article>
             `).join('')}
         </div>
+    `;
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Insight visualizations — each kind gets a tailored mini-chart that
+// shows what the headline says. SVG rendered with `currentColor` so
+// the per-kind palette (set via CSS on the card class) flows through
+// without any per-call colour plumbing.
+// ───────────────────────────────────────────────────────────────────────
+
+let __vizUid = 0;
+function vizUid(prefix) { return `${prefix}_${++__vizUid}`; }
+
+/** Sparkline area + line, with the regression overlay on top. */
+function vizTrend(values, trendValues) {
+    if (!values || values.length < 3) return '';
+    const W = 240, H = 64;
+    const padX = 4;
+    const max = Math.max(...values, 1);
+    const x = (i) => padX + (i / (values.length - 1)) * (W - padX * 2);
+    const y = (v) => H - 6 - (v / max) * (H - 12);
+    const linePts = values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const fillPath = `M ${x(0).toFixed(1)},${(H - 6).toFixed(1)} L ${linePts.split(' ').join(' L ')} L ${x(values.length - 1).toFixed(1)},${(H - 6).toFixed(1)} Z`;
+    const trendPts = trendValues && trendValues.length === values.length
+        ? trendValues.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')
+        : '';
+    const id = vizUid('vt');
+    return `
+        <svg class="insight-viz" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+                <linearGradient id="${id}_g" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.32" />
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+                </linearGradient>
+            </defs>
+            <path d="${fillPath}" fill="url(#${id}_g)" />
+            ${trendPts ? `<polyline points="${trendPts}" fill="none" stroke="currentColor"
+                                    stroke-width="1" stroke-opacity="0.55" stroke-dasharray="3 4" />` : ''}
+            <polyline points="${linePts}" fill="none" stroke="currentColor"
+                      stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.92" />
+        </svg>
+    `;
+}
+
+/** Two side-by-side bars — last 30 days versus the 30 days before. */
+function vizWow(prevMean, currentMean) {
+    const W = 240, H = 80;
+    const max = Math.max(prevMean, currentMean, 1);
+    const barW = 56;
+    const gap = 28;
+    const cx = W / 2;
+    const x1 = cx - barW - gap / 2;
+    const x2 = cx + gap / 2;
+    const baseline = H - 18;
+    const h1 = (prevMean / max) * (baseline - 6);
+    const h2 = (currentMean / max) * (baseline - 6);
+    return `
+        <svg class="insight-viz" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <line x1="${x1 - 6}" x2="${x2 + barW + 6}" y1="${baseline}" y2="${baseline}"
+                  stroke="rgba(255, 220, 160, 0.12)" stroke-width="0.7" />
+            <rect x="${x1}" y="${(baseline - h1).toFixed(1)}" width="${barW}" height="${h1.toFixed(1)}" rx="3"
+                  fill="currentColor" fill-opacity="0.32" />
+            <rect x="${x2}" y="${(baseline - h2).toFixed(1)}" width="${barW}" height="${h2.toFixed(1)}" rx="3"
+                  fill="currentColor" fill-opacity="0.86" />
+            <text x="${(x1 + barW / 2).toFixed(1)}" y="${(H - 4).toFixed(1)}" class="insight-viz__caption"
+                  text-anchor="middle">prev 30</text>
+            <text x="${(x2 + barW / 2).toFixed(1)}" y="${(H - 4).toFixed(1)}" class="insight-viz__caption"
+                  text-anchor="middle">last 30</text>
+        </svg>
+    `;
+}
+
+/** Distribution of recent days as a histogram + a vertical marker
+ *  showing where today's value falls. */
+function vizAnomaly(distribution, todayValue) {
+    const W = 240, H = 64;
+    if (!distribution || distribution.length < 3) return '';
+    const bins = histogram(distribution, 12);
+    const peakCount = Math.max(...bins.map((b) => b.count), 1);
+    const binW = W / bins.length;
+    const valueMin = bins[0].x0;
+    const valueMax = bins[bins.length - 1].x1;
+    const span = Math.max(1, valueMax - valueMin);
+    const todayX = ((todayValue - valueMin) / span) * W;
+    const todayClamped = Math.max(2, Math.min(W - 2, todayX));
+    return `
+        <svg class="insight-viz" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+            ${bins.map((b, i) => {
+                const h = (b.count / peakCount) * (H - 14);
+                const yTop = H - 8 - h;
+                const xLeft = i * binW + 0.4;
+                const w = Math.max(1, binW - 0.8);
+                return `<rect x="${xLeft.toFixed(2)}" y="${yTop.toFixed(2)}" width="${w.toFixed(2)}" height="${Math.max(1, h).toFixed(2)}"
+                              rx="1" fill="currentColor" fill-opacity="0.28" />`;
+            }).join('')}
+            <line x1="${todayClamped.toFixed(2)}" x2="${todayClamped.toFixed(2)}"
+                  y1="3" y2="${(H - 6).toFixed(1)}"
+                  stroke="currentColor" stroke-width="2" stroke-opacity="0.95" />
+            <circle cx="${todayClamped.toFixed(2)}" cy="3" r="3.4" fill="currentColor" />
+        </svg>
+    `;
+}
+
+/** When we don't have a single anomalous "today" but want to mark the
+ *  outlier days across the last 30 — sparkline with anomaly days
+ *  rendered as bright dots. */
+function vizAnomalyDays(values, flags) {
+    if (!values || values.length < 3) return '';
+    const W = 240, H = 64;
+    const padX = 4;
+    const max = Math.max(...values, 1);
+    const x = (i) => padX + (i / (values.length - 1)) * (W - padX * 2);
+    const y = (v) => H - 6 - (v / max) * (H - 12);
+    const linePts = values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const dots = values.map((v, i) => flags[i]
+        ? `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.8"
+                   fill="currentColor" stroke="rgba(0,0,0,0.4)" stroke-width="0.6" />`
+        : '').join('');
+    return `
+        <svg class="insight-viz" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="${linePts}" fill="none" stroke="currentColor"
+                      stroke-width="1.2" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round" />
+            ${dots}
+        </svg>
+    `;
+}
+
+/** Mini scatter — each session is a dot at (distractions, quality);
+ *  overlay the regression line. */
+function vizCorrelation(points) {
+    if (!points || points.length < 4) return '';
+    const W = 240, H = 80;
+    const padX = 6, padY = 6;
+    const xMax = Math.max(...points.map((p) => p[0]), 1);
+    const yMax = Math.max(...points.map((p) => p[1]), 1);
+    const sx = (x) => padX + (x / xMax) * (W - padX * 2);
+    const sy = (y) => H - padY - (y / yMax) * (H - padY * 2);
+    const reg = linearRegression(points);
+    const yAt0 = sy(Math.max(0, Math.min(yMax, reg.intercept)));
+    const yAtMax = sy(Math.max(0, Math.min(yMax, reg.slope * xMax + reg.intercept)));
+    const x0 = sx(0);
+    const xMaxScreen = sx(xMax);
+    const dots = points.map(([x, y]) => `
+        <circle cx="${sx(x).toFixed(2)}" cy="${sy(y).toFixed(2)}" r="2.2"
+                fill="currentColor" fill-opacity="0.75" />
+    `).join('');
+    return `
+        <svg class="insight-viz" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <line x1="${x0.toFixed(2)}" y1="${yAt0.toFixed(2)}"
+                  x2="${xMaxScreen.toFixed(2)}" y2="${yAtMax.toFixed(2)}"
+                  stroke="currentColor" stroke-width="1" stroke-opacity="0.45" stroke-dasharray="3 3" />
+            ${dots}
+        </svg>
+    `;
+}
+
+/** Horizontal stacked bar — total focused time vs total lost-to-
+ *  context-switching time. */
+function vizFriction(focusedMin, lostMin) {
+    const W = 240, H = 28;
+    const total = focusedMin + lostMin;
+    if (total <= 0) return '';
+    const focusedW = Math.max(2, (focusedMin / total) * W);
+    return `
+        <svg class="insight-viz insight-viz--friction" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+            <rect x="0" y="2" width="${W}" height="${H - 4}" rx="6"
+                  fill="currentColor" fill-opacity="0.16" />
+            <rect x="0" y="2" width="${focusedW.toFixed(2)}" height="${H - 4}" rx="6"
+                  fill="currentColor" fill-opacity="0.86" />
+        </svg>
+    `;
+}
+
+/** Past 14 days line + 14 days projection at the trailing average.
+ *  The vertical "now" rule separates history from projection. */
+function vizForecast(history, projected) {
+    if (!history || !projected) return '';
+    const W = 240, H = 64;
+    const padX = 4;
+    const all = [...history, ...projected];
+    const max = Math.max(...all, 1);
+    const totalLen = all.length;
+    const x = (i) => padX + (i / (totalLen - 1)) * (W - padX * 2);
+    const y = (v) => H - 6 - (v / max) * (H - 12);
+    const histPts = history.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const projIdxOffset = history.length - 1;
+    const projPts = projected.map((v, i) => `${x(projIdxOffset + i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const dividerX = x(history.length - 1);
+    return `
+        <svg class="insight-viz" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="${histPts}" fill="none" stroke="currentColor"
+                      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.92" />
+            <polyline points="${projPts}" fill="none" stroke="currentColor"
+                      stroke-width="1.2" stroke-dasharray="3 3" stroke-opacity="0.55" />
+            <line x1="${dividerX.toFixed(1)}" x2="${dividerX.toFixed(1)}" y1="2" y2="${(H - 2).toFixed(1)}"
+                  stroke="currentColor" stroke-opacity="0.22" stroke-width="0.7" stroke-dasharray="2 2" />
+            <text x="${dividerX.toFixed(1)}" y="${(H - 2).toFixed(1)}" class="insight-viz__caption"
+                  text-anchor="middle" dx="-2" dy="-1">now</text>
+        </svg>
+    `;
+}
+
+/** Radial gauge filling clockwise to the completion percentage. */
+function vizCompletion(rate, percent) {
+    const SIZE = 90;
+    const cx = SIZE / 2;
+    const cy = SIZE / 2;
+    const r = SIZE * 0.4;
+    const stroke = 7;
+    const circ = 2 * Math.PI * r;
+    const dashLen = circ * Math.max(0, Math.min(1, rate));
+    return `
+        <svg class="insight-viz insight-viz--gauge" viewBox="0 0 ${SIZE} ${SIZE}" aria-hidden="true">
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+                    stroke="currentColor" stroke-opacity="0.14" stroke-width="${stroke}" />
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+                    stroke="currentColor" stroke-width="${stroke}" stroke-linecap="round"
+                    stroke-dasharray="${dashLen.toFixed(2)} ${(circ - dashLen).toFixed(2)}"
+                    transform="rotate(-90 ${cx} ${cy})" />
+            <text x="${cx}" y="${cy + 5}" class="insight-viz__gauge-num" text-anchor="middle">${percent}</text>
+        </svg>
     `;
 }
 

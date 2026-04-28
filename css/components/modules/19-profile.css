@@ -726,13 +726,67 @@
     letter-spacing: -0.018em;
     line-height: 1.1;
 }
-.insight-card--trend::before    { background: rgba(149, 226, 164, 0.5); }
-.insight-card--anomaly::before  { background: rgba(255, 138, 138, 0.5); }
-.insight-card--friction::before { background: rgba(255, 184, 92, 0.6); }
-.insight-card--correlation::before { background: rgba(180, 144, 232, 0.5); }
-.insight-card--forecast::before { background: rgba(120, 200, 240, 0.5); }
-.insight-card--completion::before { background: rgba(255, 220, 160, 0.5); }
-.insight-card--wow::before { background: rgba(255, 205, 115, 0.55); }
+/* Per-kind colour tokens. Each card sets `--kind-color` so the
+   `::before` spine, the visualization (via currentColor), and any
+   future kind-tinted decoration all pull from a single source. */
+.insight-card--trend       { --kind-color: 149, 226, 164; }
+.insight-card--anomaly     { --kind-color: 255, 138, 138; }
+.insight-card--friction    { --kind-color: 255, 184, 92;  }
+.insight-card--correlation { --kind-color: 180, 144, 232; }
+.insight-card--forecast    { --kind-color: 120, 200, 240; }
+.insight-card--completion  { --kind-color: 255, 220, 160; }
+.insight-card--wow         { --kind-color: 255, 205, 115; }
+
+.insight-card[class*="insight-card--"]::before {
+    background: rgba(var(--kind-color, 255, 220, 160), 0.55);
+    box-shadow: 0 0 6px rgba(var(--kind-color), 0.32);
+}
+
+/* The viz drops in between the headline and the value. The card
+   inherits `--kind-color`; the viz inside reads it via
+   `currentColor`. SVG primitives that should be coloured (line
+   strokes, area gradients, bars, dots) reference currentColor;
+   axis labels / captions opt out via dedicated classes below. */
+.insight-card__viz {
+    margin: 10px 0 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(var(--kind-color, 255, 220, 160), 1);
+    /* A faint glow trails the viz, in the same hue, picks up the
+       cosmic register without overwhelming. */
+    filter: drop-shadow(0 0 6px rgba(var(--kind-color, 255, 220, 160), 0.18));
+}
+.insight-viz {
+    display: block;
+    width: 100%;
+    max-width: 240px;
+    height: auto;
+    overflow: visible;
+}
+.insight-viz--friction {
+    max-width: 100%;
+}
+.insight-viz--gauge {
+    width: 90px;
+    height: 90px;
+    max-width: 90px;
+}
+.insight-viz__caption {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 8.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    fill: rgba(255, 246, 225, 0.42);
+}
+.insight-viz__gauge-num {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 24px;
+    font-weight: 250;
+    fill: #faf3e3;
+    letter-spacing: -0.012em;
+}
 
 /* ── Overview — quick links ──────────────────────────────────────────── */
 
