@@ -4,7 +4,8 @@
 // digits, the session-complete UI hook, and the notification dispatch.
 // Per-session analytics live in features/sessions.js, which we open at
 // start and seal at end.
-import { tasks, state } from '../core/state.js';
+import { activeTaskId, tasks, state } from '../core/state.js';
+import { addSpentSeconds } from './tasks.js';
 import { abandonCurrentSession, beginSession, endSession } from '../features/sessions.js';
 import { recordSessionComplete } from '../features/statistics.js';
 import { get as settingsGet } from '../ui/settings/store.js';
@@ -281,6 +282,12 @@ export function completeSession() {
 
         // Aggregate counters (legacy stats UI).
         recordSessionComplete(elapsedSeconds);
+
+        // Credit elapsed time to the pinned active task — drives the
+        // per-task pomodoro badge and the upcoming Tasks-card ETA.
+        if (activeTaskId.value) {
+            addSpentSeconds(activeTaskId.value, elapsedSeconds);
+        }
 
         // Per-session record (analytics + cloud sync).
         const taskList = tasks.value || [];

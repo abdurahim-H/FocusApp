@@ -12,7 +12,7 @@
 //     the existing clearAllTasks.
 
 import { anim, isReducedMotion, springAnim } from '../core/motion.js';
-import { effect, tasks } from '../core/state.js';
+import { activeTaskId, effect, tasks } from '../core/state.js';
 import { recordTaskToggle } from '../features/statistics.js';
 
 // ============================================================================
@@ -111,6 +111,42 @@ export function setTaskEstimate(id, estimatedPomodoros) {
     );
 }
 
+/** Pin a task as the focus session's active target. Clicking the same
+ *  task again clears the pin. Sessions completed while a task is
+ *  active attribute their elapsed seconds to it (see addSpentSeconds).
+ *  Passing null directly clears the pin without toggling. */
+export function setActiveTask(id) {
+    if (id == null) {
+        activeTaskId.value = null;
+        return;
+    }
+    activeTaskId.value = activeTaskId.value === id ? null : id;
+}
+
+/** Add elapsed seconds against a specific task. Called from timer.js
+ *  when a focus session ends with `activeTaskId` set. Increments
+ *  `completedInSession` so the per-task pomodoro badge can show how
+ *  many sessions actually touched the task even if estimates change. */
+export function addSpentSeconds(id, seconds) {
+    if (!id || !Number.isFinite(seconds) || seconds <= 0) return;
+    let didTouch = false;
+    tasks.value = tasks.value.map((t) => {
+        if (t.id !== id) return t;
+        didTouch = true;
+        const norm = normalizeTask(t);
+        return {
+            ...norm,
+            spentSeconds: norm.spentSeconds + seconds,
+            completedInSession: norm.completedInSession + 1,
+        };
+    });
+    if (!didTouch) {
+        // Pinned task was deleted between session start and end —
+        // clear the dangling pin so the next session starts clean.
+        if (activeTaskId.value === id) activeTaskId.value = null;
+    }
+}
+
 // Legacy no-op — rendering is automatic now via the effect below.
 export function renderTasks() {}
 
@@ -137,11 +173,19 @@ export function initTaskRender() {
         return;
     }
 
-    // Single delegated click handler — handles toggle, delete, and the
-    // estimate stepper buttons. Order matters: the stepper buttons sit
-    // outside the toggle area, but their explicit short-circuits keep
-    // a click on +/- from toggling the task-done state.
+    // Single delegated click handler — handles toggle, delete, the
+    // estimate stepper buttons, and the focus-lock pin. Order matters:
+    // the stepper / lock / delete buttons sit outside the toggle area,
+    // but their explicit short-circuits keep a click on them from
+    // toggling the task-done state.
     list.addEventListener('click', (e) => {
+        const lockBtn = e.target.closest('[data-task-lock]');
+        if (lockBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            setActiveTask(Number(lockBtn.dataset.taskLock));
+            return;
+        }
         const decrBtn = e.target.closest('[data-estimate-decr]');
         if (decrBtn) {
             e.preventDefault();
@@ -201,6 +245,9 @@ export function initTaskRender() {
 
     // Reactive diff-based render
     effect(() => {
+        // Track activeTaskId so the lock button + .is-active-task class
+        // refresh whenever the user pins / unpins a task.
+        activeTaskId.value;
         const current = tasks.value;
         const currentIds = new Set(current.map((t) => t.id));
 
@@ -241,7 +288,65 @@ export function initTaskRender() {
             const hasCompleted = current.some((t) => t.completed);
             completedBtn.classList.toggle('hidden', !hasCompleted);
         }
+        renderTasksEta(current);
     });
+}
+
+/** Render the "ETA HH:MM" pill on the tasks header. Computes the
+ *  remaining estimated work for incomplete tasks (estimate − spent),
+ *  treats each pomodoro as 25 minutes, and projects an arrival time
+ *  by adding to the wall clock. Hidden when no incomplete task carries
+ *  an estimate — silence is better than fake numbers. */
+function renderTasksEta(taskList) {
+    const eta = document.getElementById('tasksEta');
+    if (!eta) return;
+    const incomplete = taskList.filter((t) => !t.completed);
+    let remainingMinutes = 0;
+    for (const t of incomplete) {
+        const norm = normalizeTask(t);
+        if (norm.estimatedPomodoros <= 0) continue;
+        const spentPomodoros = norm.spentSeconds > 0 ? norm.spentSeconds / 60 / 25 : 0;
+        const remainingPomos = Math.max(0, norm.estimatedPomodoros - spentPomodoros);
+        remainingMinutes += remainingPomos * 25;
+    }
+    if (remainingMinutes <= 0) {
+        eta.classList.add('hidden');
+        eta.textContent = '';
+        return;
+    }
+    eta.classList.remove('hidden');
+    const finishAt = new Date(Date.now() + remainingMinutes * 60 * 1000);
+    const totalText = remainingMinutes >= 60
+        ? `${(remainingMinutes / 60).toFixed(1)}h`
+        : `${Math.round(remainingMinutes)}m`;
+    eta.textContent = `${totalText} · ETA ${formatClockTime(finishAt)}`;
+    eta.title = `${incomplete.filter((t) => normalizeTask(t).estimatedPomodoros > 0).length} estimated task${incomplete.length === 1 ? '' : 's'} left`;
+}
+
+function formatClockTime(d) {
+    // Respects 12 / 24h based on the timer setting, but reads it
+    // lazily without importing the settings store at module-load time.
+    let format = '12h';
+    try {
+        // ESM dynamic import would force async; fall back to localStorage
+        // probe so the renderer stays sync.
+        const raw = localStorage.getItem('fu_settings_v2');
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed?.['timer.timeFormat']) format = parsed['timer.timeFormat'];
+        }
+    } catch (_) {}
+    if (format === '24h') {
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        return `${hh}:${mm}`;
+    }
+    let h = d.getHours();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    if (h === 0) h = 12;
+    else if (h > 12) h -= 12;
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${h}:${mm} ${ampm}`;
 }
 
 // ============================================================================
@@ -251,11 +356,13 @@ export function initTaskRender() {
 function createTaskElement(task) {
     const li = document.createElement('li');
     li.className = 'task-item liquid-glass-task';
+    if (activeTaskId.value === task.id) li.classList.add('is-active-task');
     li.dataset.taskId = task.id;
     // Whole content row is the toggle target — tap anywhere on the
     // task to flip done/undone. Delete button stays its own target;
     // the click handler runs the delete check first and short-circuits.
-    // The estimate stepper sits between the text and the delete button.
+    // The focus-lock pin and estimate stepper sit between the text
+    // and the delete button.
     li.innerHTML = `
         <div class="task-content" data-toggle-task="${task.id}" role="button" tabindex="0"
              aria-pressed="${task.completed}"
@@ -267,12 +374,29 @@ function createTaskElement(task) {
             <span class="task-text${task.completed ? ' task-completed' : ''}">${escapeHtml(task.text)}</span>
             ${renderTaskBadge(task)}
         </div>
+        ${renderFocusLockButton(task)}
         ${renderEstimateStepper(task)}
         <button class="liquid-glass-btn liquid-glass-btn--small liquid-glass-btn--danger" data-delete-task="${task.id}" aria-label="Delete task">
             <span class="btn-icon" aria-hidden="true">✕</span>
         </button>
     `;
     return li;
+}
+
+/** Focus-lock button — pin / unpin the task as the active session
+ *  target. Visible on hover/focus, always visible while pinned. */
+function renderFocusLockButton(task) {
+    const isActive = activeTaskId.value === task.id;
+    return `
+        <button class="task-lock ${isActive ? 'is-on' : ''}"
+                type="button"
+                data-task-lock="${task.id}"
+                aria-pressed="${isActive}"
+                aria-label="${isActive ? 'Stop focusing on this task' : 'Focus on this task'}"
+                title="${isActive ? 'Pinned — your next session credits time here' : 'Focus on this task'}">
+            ◎
+        </button>
+    `;
 }
 
 function updateTaskElement(el, task) {
@@ -290,9 +414,9 @@ function updateTaskElement(el, task) {
             `${task.completed ? 'Mark not done' : 'Mark done'}: ${task.text}`
         );
     }
-    // Refresh the badge + stepper without rebuilding the whole row so
-    // the diff render's exit animations still play cleanly. We replace
-    // each fragment in place to match the new task shape.
+    // Refresh the badge + stepper + lock without rebuilding the whole
+    // row so the diff render's exit animations still play cleanly. We
+    // replace each fragment in place to match the new task shape.
     const oldBadge = el.querySelector('.task-badge');
     const newBadgeHtml = renderTaskBadge(task);
     if (oldBadge && !newBadgeHtml) {
@@ -304,6 +428,9 @@ function updateTaskElement(el, task) {
     }
     const stepper = el.querySelector('.task-estimate');
     if (stepper) stepper.outerHTML = renderEstimateStepper(task);
+    const lock = el.querySelector('.task-lock');
+    if (lock) lock.outerHTML = renderFocusLockButton(task);
+    el.classList.toggle('is-active-task', activeTaskId.value === task.id);
 }
 
 /** Inline pomodoro-count badge — shown when an estimate exists or

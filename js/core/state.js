@@ -15,6 +15,10 @@ import { computed, effect, signal } from '@preact/signals-core';
 // ============================================================================
 
 export const tasks = signal([]);
+// The task the next focus session "logs to". Set via the focus-lock
+// affordance on a task row; cleared on completion or by the user.
+// Persisted across reloads — see loadPersisted / persistSnapshot.
+export const activeTaskId = signal(null);
 export const mode = signal('home');
 export const activeSounds = signal([]);
 export const universeStars = signal(0);
@@ -127,6 +131,9 @@ function loadPersisted() {
         if (!raw) return;
         const data = JSON.parse(raw);
         if (Array.isArray(data.tasks)) tasks.value = data.tasks;
+        if (typeof data.activeTaskId === 'number' || data.activeTaskId === null) {
+            activeTaskId.value = data.activeTaskId;
+        }
         if (typeof data.mode === 'string') mode.value = data.mode;
         if (Array.isArray(data.activeSounds)) activeSounds.value = data.activeSounds;
         if (typeof data.universeStars === 'number') universeStars.value = data.universeStars;
@@ -176,6 +183,7 @@ effect(() => {
     // Touch every persisted signal so the effect tracks them all.
     persistSnapshot = {
         tasks: tasks.value,
+        activeTaskId: activeTaskId.value,
         mode: mode.value,
         activeSounds: activeSounds.value,
         universeStars: universeStars.value,

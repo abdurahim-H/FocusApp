@@ -49,8 +49,8 @@ Tasks today are `{ id, text, completed }` and are session-scoped (they don't car
 
 - [x] **2.1 Persist tasks across sessions (M).** Already shipped — `state.js:175-193` auto-persists the `tasks` signal to `fu_state_v1`; tasks survive reloads. The audit's "session-scoped" note was inaccurate. Marked done as-is.
 - [x] **2.2 Estimated duration field per task (M).** New `estimatedPomodoros` field on each task (0–20). Inline +/− stepper on every row; visible on hover/focus, always visible once an estimate exists. New `setTaskEstimate(id, n)` mutation.
-- [ ] **2.3 Time spent field, auto-tracked (M).** Each focus-session records which task IDs were completed during it; sum into per-task `spentMinutes`. Field exists on the task model now (`spentSeconds`); session-side auto-tracking lands with 2.14 (focus lock).
-- [ ] **2.4 ETA pill on the Tasks card header (M).** "3 tasks · ETA 4:25 PM" — computed from estimated minutes ÷ avg focus-min-per-real-hour.
+- [x] **2.3 Time spent field, auto-tracked (M).** `addSpentSeconds(id, sec)` lives in `tasks.js`; `timer.js` calls it from `completeSession()` whenever an active task is pinned. Increments `spentSeconds` and `completedInSession` on the right task. The session ends → the badge updates live.
+- [x] **2.4 ETA pill on the Tasks card header (M).** New `.tasks-eta` pill renders next to "Tasks for this session". Sums remaining pomodoros across incomplete estimated tasks (estimate − spent), converts to minutes, projects an arrival time on the wall clock. Respects `timer.timeFormat` (12h / 24h). Hidden when nothing is estimated.
 - [ ] **2.5 Due dates with overdue styling (M).** Optional. Inline date picker. Overdue tasks get a red accent + sort to the top.
 - [ ] **2.6 Subtasks (one level deep) (M).** Indented under parent; same toggle/delete behavior; parent shows "2/5 subtasks done."
 - [ ] **2.7 Drag-to-reorder (M).** HTML5 drag-and-drop on the home list and the expand panel. Persists across reloads.
@@ -60,7 +60,7 @@ Tasks today are `{ id, text, completed }` and are session-scoped (they don't car
 - [ ] **2.11 Task detail surface (M).** Click anywhere on the row except checkbox/×/edit-icon to open a detail drawer with notes, history (every session this task touched), and time-spent breakdown.
 - [x] **2.12 Pomodoro-count badge per task (S).** Small "spent / estimated" pill rendered next to the task text whenever either side has data. No estimate yet but pomodoros logged → "N 🍅" badge.
 - [ ] **2.13 Carry-over rollover (S).** End-of-day prompt: "5 tasks not finished — carry to tomorrow?"
-- [ ] **2.14 Focus-on-this-task lock (M).** Tap a task to "make this the active task"; the timer body shows the task name; the session record links the task. Prevents tab-switching between tasks during a single Pomodoro.
+- [x] **2.14 Focus-on-this-task lock (M).** New `activeTaskId` signal (persisted across reloads). Each task row gains a `◎` lock pin: click to pin / unpin. The pinned row gains a left amber rail; the next focus session that completes credits its elapsed seconds to the pinned task via `addSpentSeconds()`. Pin survives reloads. Pin is automatically cleared if the active task gets deleted between session start and end. (Timer-body label override + session-record link land later.)
 
 ---
 
