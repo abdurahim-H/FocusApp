@@ -314,9 +314,9 @@ Pomodoro is one of many. Some users hate it.
 
 - [ ] **18.1 Smart break activities (M).** Stretch / breathing / eye exercise / hydration prompts during break sessions. Configurable list.
 - [ ] **18.2 Box-breathing animation (M).** During a break, an animated box-breathing guide (4 in, 4 hold, 4 out, 4 hold).
-- [ ] **18.3 Eye-rest 20-20-20 reminder (S).** Every 20 min, gentle prompt to look at something 20 ft away for 20 sec.
-- [ ] **18.4 Posture-check reminder (S).** Configurable interval; gentle full-screen reminder.
-- [ ] **18.5 Hydration reminder (S).** Configurable interval.
+- [x] **18.3 Eye-rest 20-20-20 reminder (S).** Opt-in `wellness.eyeRestEnabled` toggle. Cadence is fixed at the 20-min canon. Fires only when a focus session is actively running — break sessions and pause both stop the loop; auto-resume restarts it on the next focus start.
+- [x] **18.4 Posture-check reminder (S).** Opt-in `wellness.postureEnabled` + configurable `wellness.postureInterval` (15–120 min, default 45). Same gentle in-app toast surface as eye rest; distinct DOM id so the two don't clobber each other.
+- [x] **18.5 Hydration reminder (S).** Opt-in `wellness.hydrationEnabled` + configurable `wellness.hydrationInterval` (15–120 min, default 60). All three reminders live in `js/features/wellness-reminders.js` and listen for `focus-timer:start` / `:end` / `:pause` / `:reset` (the latter two added in `timer.js` for clean lifecycle).
 - [ ] **18.6 Mood tracker before / after sessions (M).** 5-point scale; correlate with focus quality in the Profile.
 - [ ] **18.7 Apple HealthKit integration (L).** Read step / heart-rate / sleep data; correlate with focus quality. iOS only.
 - [ ] **18.8 Fitbit integration (L).** Same shape; cross-platform.

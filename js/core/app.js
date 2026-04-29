@@ -13,6 +13,7 @@ import * as sounds from '../features/sounds.js';
 import * as statistics from '../features/statistics.js';
 import * as tasks from '../features/tasks.js';
 import * as timer from '../features/timer.js';
+import * as wellnessReminders from '../features/wellness-reminders.js';
 import * as scene3d from '../graphics/scene/scene-manager.js';
 import * as account from '../ui/account.js';
 import * as ambientUI from '../ui/ambient-ui.js';
@@ -62,6 +63,7 @@ const modules = {
     taskDetail,
     notepad,
     streamThemes,
+    wellnessReminders,
 };
 
 /**
@@ -265,6 +267,11 @@ export async function initApp() {
         // Phase 5E: notification permission banner
         if (loadedModules.notificationBanner?.initNotificationBanner) {
             loadedModules.notificationBanner.initNotificationBanner();
+        }
+
+        // Wave 18 — opt-in wellness reminders during focus sessions
+        if (loadedModules.wellnessReminders?.initWellnessReminders) {
+            loadedModules.wellnessReminders.initWellnessReminders();
         }
 
         // Phase 5C: settings panel (load saved settings + wire modal)

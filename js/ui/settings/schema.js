@@ -557,6 +557,58 @@ export const SCHEMA = [
         ],
     },
 
+    // ───── Wellness reminders during focus sessions (Wave 18) ─────
+    // All three are off by default. Each surfaces as a calm in-app
+    // toast — never an OS notification — and only fires while a focus
+    // session is actively running. Break sessions are reminder-free.
+    { section: 'notifications', type: 'group', label: 'Wellness reminders' },
+    {
+        section: 'notifications',
+        type: 'toggle',
+        key: 'wellness.eyeRestEnabled',
+        label: '20-20-20 eye rest',
+        default: false,
+        help: 'Every 20 min during focus, a gentle nudge to look 20 ft away for 20 s.',
+    },
+    {
+        section: 'notifications',
+        type: 'toggle',
+        key: 'wellness.hydrationEnabled',
+        label: 'Hydration check-in',
+        default: false,
+    },
+    {
+        section: 'notifications',
+        type: 'slider',
+        key: 'wellness.hydrationInterval',
+        label: 'Hydration every',
+        min: 15,
+        max: 120,
+        step: 5,
+        unit: 'm',
+        default: 60,
+        showIf: (s) => s.get('wellness.hydrationEnabled'),
+    },
+    {
+        section: 'notifications',
+        type: 'toggle',
+        key: 'wellness.postureEnabled',
+        label: 'Posture check-in',
+        default: false,
+    },
+    {
+        section: 'notifications',
+        type: 'slider',
+        key: 'wellness.postureInterval',
+        label: 'Posture every',
+        min: 15,
+        max: 120,
+        step: 5,
+        unit: 'm',
+        default: 45,
+        showIf: (s) => s.get('wellness.postureEnabled'),
+    },
+
     // ═══════════════════════════════════════════════════════════════════════
     // SHORTCUTS & MOTION
     // ═══════════════════════════════════════════════════════════════════════

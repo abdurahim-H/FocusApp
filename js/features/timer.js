@@ -174,6 +174,12 @@ export function pauseTimer() {
         state.timer.autoStartTimeout = null;
     }
 
+    document.dispatchEvent(
+        new CustomEvent('focus-timer:pause', {
+            detail: { isBreak: state.timer.isBreak, isLongBreak: !!state.timer.isLongBreak },
+        })
+    );
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     if (startBtn) {
@@ -196,6 +202,12 @@ export function resetTimer() {
         clearTimeout(state.timer.autoStartTimeout);
         state.timer.autoStartTimeout = null;
     }
+
+    document.dispatchEvent(
+        new CustomEvent('focus-timer:reset', {
+            detail: { isBreak: state.timer.isBreak, isLongBreak: !!state.timer.isLongBreak },
+        })
+    );
 
     // Drop the in-flight session record. We don't know the user's
     // intended end time, so synthesizing one would be dishonest data.
