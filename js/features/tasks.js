@@ -14,6 +14,7 @@
 import { anim, isReducedMotion, springAnim } from '../core/motion.js';
 import { activeTaskId, effect, tasks } from '../core/state.js';
 import { recordTaskToggle } from '../features/statistics.js';
+import { openDatePicker } from '../ui/date-picker.js';
 
 // ============================================================================
 // Task model
@@ -506,14 +507,21 @@ export function initTaskRender() {
         }
     });
 
-    // Due-date input — fires `change` once the user picks (or clears)
-    // a date. Reads the input's value (yyyy-mm-dd) and feeds it to
-    // setTaskDueDate, which interprets the date in local time.
-    list.addEventListener('change', (e) => {
-        const dueInput = e.target.closest('[data-due-input]');
-        if (!dueInput) return;
-        const id = Number(dueInput.dataset.dueInput);
-        setTaskDueDate(id, dueInput.value || null);
+    // Due-date trigger — clicking the calendar button opens the custom
+    // date picker. The picker calls back with an ISO YYYY-MM-DD string
+    // (or null on Clear). setTaskDueDate interprets the date in local
+    // time so the saved timestamp pins to local midnight regardless
+    // of the user's timezone.
+    list.addEventListener('click', (e) => {
+        const trigger = e.target.closest('[data-due-trigger]');
+        if (!trigger) return;
+        e.preventDefault();
+        const id = Number(trigger.dataset.dueTrigger);
+        openDatePicker({
+            anchor: trigger,
+            value: trigger.dataset.dueValue || null,
+            onChange: (iso) => setTaskDueDate(id, iso || null),
+        });
     });
 
     // Subtask add form — Enter in the input or click on the + button
@@ -856,22 +864,23 @@ function renderSubtasksDrawer(task) {
     `;
 }
 
-/** Optional inline due-date input. Hidden behind a small calendar
- *  icon by default; only the icon is rendered. The actual <input
- *  type="date"> lives next to it but visually overlaid so clicking
- *  the icon activates the picker. */
+/** Optional inline due-date trigger — small calendar button. Click
+ *  opens the custom date picker (js/ui/date-picker.js) which matches
+ *  the rest of the app's aesthetic. The button itself stores the
+ *  current value in a data attribute so the change handler can read
+ *  it without round-tripping through a hidden input. */
 function renderDueDateInput(task) {
     const norm = normalizeTask(task);
     const isoValue = norm.dueAt ? new Date(norm.dueAt).toLocaleDateString('en-CA') : '';
+    const label = norm.dueAt ? 'Edit due date' : 'Set due date';
     return `
-        <label class="task-due ${norm.dueAt ? 'has-date' : ''}"
-               aria-label="${norm.dueAt ? 'Edit due date' : 'Set due date'}"
-               title="${norm.dueAt ? 'Edit due date' : 'Set due date'}">
+        <button type="button" class="task-due ${norm.dueAt ? 'has-date' : ''}"
+                aria-label="${label}"
+                title="${label}"
+                data-due-trigger="${task.id}"
+                data-due-value="${escapeHtml(isoValue)}">
             <span class="task-due__icon" aria-hidden="true">📅</span>
-            <input type="date" class="task-due__input"
-                   data-due-input="${task.id}"
-                   value="${escapeHtml(isoValue)}">
-        </label>
+        </button>
     `;
 }
 

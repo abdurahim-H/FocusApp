@@ -15,6 +15,7 @@
 import { effect, tasks } from '../core/state.js';
 import { isReducedMotion } from '../core/motion.js';
 import { createFocusTrap } from './focus-trap.js';
+import { openDatePicker } from './date-picker.js';
 import {
     addSubtask,
     deleteSubtask,
@@ -112,7 +113,6 @@ function buildPanel() {
     // render, so listeners go on the stable host.
     const body = panel.querySelector('#taskDetailBody');
     body.addEventListener('click', onBodyClick);
-    body.addEventListener('change', onBodyChange);
     body.addEventListener('input', onBodyInput);
     body.addEventListener('submit', onBodySubmit);
     body.addEventListener('keydown', onBodyKeydown);
@@ -223,18 +223,25 @@ function render() {
                             ${task.estimatedPomodoros >= 20 ? 'disabled' : ''}>+</button>
                 </div>
             </div>
-            <label class="task-detail__field">
+            <div class="task-detail__field">
                 <span class="task-detail__label">Due</span>
                 <div class="task-detail__date-row">
-                    <input type="date" class="task-detail__date"
-                           data-detail-due value="${esc(dueIso)}">
+                    <button type="button" class="task-detail__date"
+                            data-detail-due
+                            data-due-value="${esc(dueIso)}">
+                        ${task.dueAt
+                            ? new Date(task.dueAt).toLocaleDateString(undefined, {
+                                weekday: 'short', month: 'short', day: 'numeric',
+                            })
+                            : 'Pick a date'}
+                    </button>
                     ${task.dueAt ? `
                         <button type="button" class="task-detail__date-clear"
                                 data-detail-due-clear
                                 aria-label="Clear due date">clear</button>
                     ` : ''}
                 </div>
-            </label>
+            </div>
             <label class="task-detail__field task-detail__field--full">
                 <span class="task-detail__label">Project</span>
                 <input type="text" class="task-detail__project"
@@ -346,6 +353,17 @@ function onBodyClick(e) {
         setTaskDueDate(activeTaskId, null);
         return;
     }
+    const dueTrigger = e.target.closest('[data-detail-due]');
+    if (dueTrigger) {
+        e.preventDefault();
+        const id = activeTaskId;
+        openDatePicker({
+            anchor: dueTrigger,
+            value: dueTrigger.dataset.dueValue || null,
+            onChange: (iso) => setTaskDueDate(id, iso || null),
+        });
+        return;
+    }
     const repeatBtn = e.target.closest('[data-detail-repeat]');
     if (repeatBtn) {
         e.preventDefault();
@@ -387,14 +405,6 @@ function onBodyClick(e) {
             btn.textContent = 'Delete this task';
         }, 2500);
         return;
-    }
-}
-
-function onBodyChange(e) {
-    if (activeTaskId == null) return;
-    if (e.target.closest('[data-detail-due]')) {
-        const v = e.target.value;
-        setTaskDueDate(activeTaskId, v || null);
     }
 }
 

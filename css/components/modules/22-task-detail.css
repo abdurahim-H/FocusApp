@@ -149,7 +149,16 @@
     transition: border-color 0.18s ease, background 0.18s ease;
 }
 .task-detail__text-input { font-size: 16px; }
-.task-detail__date { color-scheme: dark; }
+.task-detail__date {
+    /* Now a button, not a native date input — text-align ensures the
+       displayed date hugs the left edge like the surrounding fields. */
+    text-align: left;
+    cursor: pointer;
+}
+.task-detail__date:hover {
+    border-color: rgba(255, 220, 160, 0.32);
+    background: rgba(255, 255, 255, 0.05);
+}
 .task-detail__text-input:focus,
 .task-detail__project:focus,
 .task-detail__date:focus {
