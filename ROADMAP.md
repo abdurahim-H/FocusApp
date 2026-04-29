@@ -431,8 +431,8 @@ Optional layer. Off by default for the people who hate it; on for those who love
 - [ ] **24.5 Profile flair (S).** Equip up to 3 badges to display on your public profile.
 - [ ] **24.6 Constellation unlocks (S).** Some hand-tuned mixes / soundscapes / themes locked behind achievement levels for the gamification crowd.
 - [ ] **24.7 Friend leaderboards (M).** Among friends only — never global anonymous leaderboards (those break user wellbeing).
-- [ ] **24.8 Streak insurance (S).** "Use a streak freeze" — once a week, opt-in, you can take a day off without losing your streak. Compassionate gamification.
-- [ ] **24.9 Personal-best alerts (S).** "New personal record: 3.5 hrs in one day."
+- [x] **24.8 Streak insurance (S).** New `gamification.streakInsurance` toggle (opt-in, off by default). When on, the streak survives a single missed day per ISO week — `recordSessionComplete` and the load-time streak check both consult `lastFreezeUsedDate` so the forgiveness is bookkeeping-correct across reloads. Compassionate gamification, only when asked for.
+- [x] **24.9 Personal-best alerts (S).** New `gamification.personalBestAlerts` toggle (default on). Stats persistence now caches `bestDayFocusSeconds` + `bestDayFocusDate`; every completed session sums today's prior focus + just-finished elapsed and compares against the cached record. A celebratory top-right toast (`.celebrate-toast`) fires the moment today overtakes a real prior best — never on the very first record so the first-session experience stays calm.
 - [ ] **24.10 Constellation discovery garden (M).** Visualise every achievement as a star in your personal galaxy.
 
 ---

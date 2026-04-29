@@ -23,6 +23,14 @@ export const totalFocusSeconds = signal(0);
 export const tasksCompletedToday = signal(0);
 export const currentStreak = signal(0);
 export const lastFocusDate = signal('');
+// Wave 24.9 — best day on record. Surfaces a celebratory toast when a
+// session pushes today past the previous champion. Persisted alongside
+// the rest of the stats so it survives reloads.
+export const bestDayFocusSeconds = signal(0);
+export const bestDayFocusDate = signal('');
+// Wave 24.8 — streak insurance: ISO date of the day that was forgiven
+// by the most recent freeze. Used to enforce the once-per-week limit.
+export const lastFreezeUsedDate = signal('');
 
 // ============================================================================
 // Persistence
@@ -36,6 +44,22 @@ function todayISO() {
 function yesterdayISO() {
     const d = new Date();
     d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0, 10);
+}
+
+function dayBeforeYesterdayISO() {
+    const d = new Date();
+    d.setDate(d.getDate() - 2);
+    return d.toISOString().slice(0, 10);
+}
+
+// Monday-anchored week start for the streak-insurance "once per week" check.
+// Uses local time so the user's day boundary matches their wall clock.
+function startOfWeekISO() {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    const dow = (d.getDay() + 6) % 7; // Mon=0..Sun=6
+    d.setDate(d.getDate() - dow);
     return d.toISOString().slice(0, 10);
 }
 
@@ -68,13 +92,43 @@ function loadStats() {
         tasksCompletedToday.value =
             isToday && typeof data.tasksCompletedToday === 'number' ? data.tasksCompletedToday : 0;
 
-        // Streak
+        // Streak — preserved if today or yesterday saw a session. With
+        // streak insurance enabled and unused this week, allow a single
+        // gap day so the streak survives a missed yesterday too.
         if (typeof data.currentStreak === 'number') {
+            const insuranceOn = settingsGet('gamification.streakInsurance') === true;
+            const freezeUsedThisWeek =
+                typeof data.lastFreezeUsedDate === 'string' &&
+                data.lastFreezeUsedDate >= startOfWeekISO();
             if (data.lastFocusDate === today || data.lastFocusDate === yesterdayISO()) {
+                currentStreak.value = data.currentStreak;
+            } else if (
+                insuranceOn &&
+                !freezeUsedThisWeek &&
+                data.lastFocusDate === dayBeforeYesterdayISO()
+            ) {
+                // Held the streak via insurance — actual consumption of
+                // the freeze (writing lastFreezeUsedDate = yesterday)
+                // happens in recordSessionComplete when the next session
+                // lands. Keeping it lazy means a user who never returns
+                // doesn't burn an unused freeze.
                 currentStreak.value = data.currentStreak;
             } else {
                 currentStreak.value = 0;
             }
+        }
+
+        // Wave 24.9 — best-day record
+        if (typeof data.bestDayFocusSeconds === 'number') {
+            bestDayFocusSeconds.value = data.bestDayFocusSeconds;
+        }
+        if (typeof data.bestDayFocusDate === 'string') {
+            bestDayFocusDate.value = data.bestDayFocusDate;
+        }
+
+        // Wave 24.8 — streak insurance bookkeeping
+        if (typeof data.lastFreezeUsedDate === 'string') {
+            lastFreezeUsedDate.value = data.lastFreezeUsedDate;
         }
     } catch (e) {
         console.warn('[stats] failed to load:', e);
@@ -90,6 +144,9 @@ function setupPersistence() {
             tasksCompletedToday: tasksCompletedToday.value,
             currentStreak: currentStreak.value,
             lastFocusDate: lastFocusDate.value,
+            bestDayFocusSeconds: bestDayFocusSeconds.value,
+            bestDayFocusDate: bestDayFocusDate.value,
+            lastFreezeUsedDate: lastFreezeUsedDate.value,
         };
         if (!persistInitialized) {
             persistInitialized = true;
@@ -119,16 +176,67 @@ export function recordSessionComplete(elapsedSeconds) {
     // Accumulate actual elapsed seconds
     totalFocusSeconds.value = totalFocusSeconds.value + elapsedSeconds;
 
-    // Streak logic
+    // Streak logic — extended with optional once-per-week insurance.
     if (prevDate === today) {
         // Already focused today — streak unchanged
     } else if (prevDate === yesterdayISO()) {
         currentStreak.value = currentStreak.value + 1;
+    } else if (
+        settingsGet('gamification.streakInsurance') === true &&
+        prevDate === dayBeforeYesterdayISO() &&
+        (!lastFreezeUsedDate.value || lastFreezeUsedDate.value < startOfWeekISO())
+    ) {
+        // Wave 24.8 — burn the freeze. Yesterday is treated as continuous
+        // and today extends the streak. Only one freeze per ISO week.
+        currentStreak.value = currentStreak.value + 1;
+        lastFreezeUsedDate.value = yesterdayISO();
     } else {
         currentStreak.value = 1;
     }
 
     lastFocusDate.value = today;
+
+    // Wave 24.9 — personal-best detection. The session record itself is
+    // pushed into `sessions.js` *after* this function returns, so we sum
+    // prior-today sessions and add this session's elapsed time directly.
+    maybeFlagPersonalBest(elapsedSeconds);
+}
+
+function maybeFlagPersonalBest(justFinishedSeconds) {
+    const today = todayISO();
+    const oldBest = bestDayFocusSeconds.value;
+    const oldBestDate = bestDayFocusDate.value;
+    const todayTotal = sumSecondsForDate(today) + justFinishedSeconds;
+
+    if (oldBestDate === today) {
+        // Already the record-holder for the day — keep the cache fresh
+        // but don't re-fire the celebration on every subsequent session.
+        if (todayTotal > oldBest) bestDayFocusSeconds.value = todayTotal;
+        return;
+    }
+
+    if (todayTotal > oldBest && oldBest > 0) {
+        bestDayFocusSeconds.value = todayTotal;
+        bestDayFocusDate.value = today;
+        if (settingsGet('gamification.personalBestAlerts') === true) {
+            celebratePersonalBest(todayTotal);
+        }
+    } else if (todayTotal > oldBest) {
+        // First record set — adopt without alerting.
+        bestDayFocusSeconds.value = todayTotal;
+        bestDayFocusDate.value = today;
+    }
+}
+
+/** Sum focus seconds across all sessions on the given ISO date. Pulls
+ *  from the canonical sessions list; statistics' lifetime accumulator
+ *  isn't day-bucketed so it can't answer this directly. */
+function sumSecondsForDate(iso) {
+    const startMs = new Date(`${iso}T00:00:00`).getTime();
+    const endMs = startMs + 86_400_000;
+    return getAllSessions()
+        .filter((s) => s.kind === 'focus' && s.startedAt >= startMs && s.startedAt < endMs)
+        .reduce((a, s) => a + (s.durationSeconds || 0), 0);
 }
 
 /** Called from tasks.js when a task's completed state changes.
@@ -396,6 +504,9 @@ function resetAllStats() {
     tasksCompletedToday.value = 0;
     currentStreak.value = 0;
     lastFocusDate.value = '';
+    bestDayFocusSeconds.value = 0;
+    bestDayFocusDate.value = '';
+    lastFreezeUsedDate.value = '';
     localStorage.removeItem(STATS_KEY);
 }
 
@@ -451,4 +562,34 @@ export function initStatistics() {
     setupPersistence();
     renderStatsBar();
     setupResetFlow();
+}
+
+// ============================================================================
+// Wave 24.9 — celebratory toast for a new personal-best day
+// ============================================================================
+let celebrateTimeout = null;
+function celebratePersonalBest(seconds) {
+    let el = document.getElementById('celebrateToast');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'celebrateToast';
+        el.className = 'celebrate-toast';
+        el.setAttribute('role', 'status');
+        el.setAttribute('aria-live', 'polite');
+        document.body.appendChild(el);
+    }
+    el.innerHTML = `
+        <span class="celebrate-toast__icon" aria-hidden="true">🌟</span>
+        <span class="celebrate-toast__body">
+            <span class="celebrate-toast__title">New personal best</span>
+            <span class="celebrate-toast__detail">${formatDuration(seconds)} focused today</span>
+        </span>
+    `;
+    // Re-trigger the entrance animation on consecutive bests on the same
+    // day (rare, but possible if we ever soften the same-day guard).
+    el.classList.remove('is-visible');
+    void el.offsetWidth;
+    el.classList.add('is-visible');
+    clearTimeout(celebrateTimeout);
+    celebrateTimeout = setTimeout(() => el.classList.remove('is-visible'), 5400);
 }

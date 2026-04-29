@@ -419,6 +419,31 @@ export const SCHEMA = [
         help: 'Soft target — shows progress toward this number on the Home week tile.',
     },
 
+    // Optional gamification layer. Off by default for the people who hate it,
+    // on for those who love it (per the roadmap framing). Personal-best alerts
+    // are opt-in but default to on because they're a single celebratory toast
+    // when a record day is set — calm enough that most users will want them.
+    // Streak insurance is opt-in and off by default — enabling it is an
+    // affirmative choice to be allowed one missed day per week without
+    // breaking the streak.
+    { section: 'timer', type: 'group', label: 'Gamification' },
+    {
+        section: 'timer',
+        type: 'toggle',
+        key: 'gamification.personalBestAlerts',
+        label: 'Personal-best alerts',
+        default: true,
+        help: 'Celebrates when a day overtakes your previous best for total focus time.',
+    },
+    {
+        section: 'timer',
+        type: 'toggle',
+        key: 'gamification.streakInsurance',
+        label: 'Streak insurance',
+        default: false,
+        help: 'Forgives one missed day per week so the streak survives a single off-day.',
+    },
+
     { section: 'timer', type: 'group', label: 'Display' },
     {
         section: 'timer',
