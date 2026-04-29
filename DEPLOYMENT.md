@@ -36,7 +36,7 @@ Typical end-to-end time: **~90 seconds**.
 - Build command: `npm run build`
 - Deploy command: `npx wrangler deploy`
 - Root directory: *(blank)*
-- Environment variables: *(none — the Supabase URL and anon key are checked into `js/features/auth-config.js` because they are public by design; row-level security on Supabase is what protects user data, never the anon key)*
+- Environment variables: *(none — the Supabase URL and anon key are checked into `js/core/auth-config.js` because they are public by design; row-level security on Supabase is what protects user data, never the anon key)*
 
 ### DNS records (Websites → universefocuses.com → DNS)
 | Type   | Name               | Content                              | Proxy   |
@@ -94,7 +94,7 @@ Workers & Pages → focusapp → Deployments → find the last known-good deploy
 
 The Supabase project is wired in for the optional accounts feature.
 
-- **Project URL + anon key** live in `js/features/auth-config.js` and are checked into git. Both are public by design — Supabase's Row-Level Security on the database is what protects user data, not the anon key.
+- **Project URL + anon key** live in `js/core/auth-config.js` and are checked into git. Both are public by design — Supabase's Row-Level Security on the database is what protects user data, not the anon key.
 - **Service-role key** → **never** in the frontend. Only used from inside Edge Functions or the SQL editor.
 - **Future AI API keys** (Anthropic, OpenAI) → **never** in the frontend. Only inside Supabase Edge Functions.
 

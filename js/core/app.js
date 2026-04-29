@@ -7,13 +7,13 @@
 
 import { isReducedMotion } from '../core/motion.js';
 import * as keyboard from '../features/keyboard.js';
-import * as notificationBanner from '../features/notification-banner.js';
+import * as notificationBanner from '../ui/notification-banner.js';
 import * as soundMixer from '../features/sound-mixer.js';
 import * as sounds from '../features/sounds.js';
 import * as statistics from '../features/statistics.js';
 import * as tasks from '../features/tasks.js';
 import * as timer from '../features/timer.js';
-import * as wellnessReminders from '../features/wellness-reminders.js';
+import * as wellnessReminders from '../ui/wellness-reminders.js';
 import * as scene3d from '../graphics/scene/scene-manager.js';
 import * as account from '../ui/account.js';
 import * as ambientUI from '../ui/ambient-ui.js';

@@ -11,7 +11,7 @@
 // clobber each other if two are due at once.
 
 import { appState as state } from '../core/state.js';
-import { get as settingsGet, subscribe as settingsSub } from '../ui/settings/store.js';
+import { get as settingsGet, subscribe as settingsSub } from './settings/store.js';
 
 const EYE_REST_MS = 20 * 60 * 1000; // fixed per the 20-20-20 rule
 let timers = {

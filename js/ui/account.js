@@ -582,7 +582,7 @@ function renderConfigNotice() {
             needs a Supabase URL and anon key.
         </p>
         <div class="auth-modal__notice">
-            <p style="margin:0 0 6px;">Edit <code>js/features/auth-config.js</code> and set:</p>
+            <p style="margin:0 0 6px;">Edit <code>js/core/auth-config.js</code> and set:</p>
             <p style="margin:0 0 4px;"><code>SUPABASE_URL</code> — your project URL</p>
             <p style="margin:0;"><code>SUPABASE_ANON_KEY</code> — the public anon key</p>
         </div>

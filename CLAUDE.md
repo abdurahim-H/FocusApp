@@ -53,17 +53,19 @@ Prefer `npm start` when debugging things that behave differently under a bundler
 
 ```
 js/
-  core/          app bootstrap, shared signal state, motion wrapper, reduced-motion detection
+  core/          app.js (bootstrap), state.js (signals), motion.js (reduced-motion + speed wrapper),
+                 auth-config.js (Supabase URL + anon key — public, RLS-protected)
   engine/        Babylon engine init (WebGL2 / WebGPU selection, hardware scaling)
   graphics/
     scene/       scene-manager.js — the render loop, cameras, lights, FPS watchdog wiring
     blackhole/   blackhole.js — GLSL shader for the disk, lensing, photon ring
     environment/ nebula, cosmic-skybox, starfield, star-glows, cosmic-motes, shooting-stars, ethereal-petals
     postprocessing/ pipeline.js (DefaultRenderingPipeline + film grain), god-rays, anamorphic-streak
-  features/      timer, tasks, sounds, sound-mixer, statistics, keyboard, notification-banner,
-                 auth.js (sole Supabase importer), password-policy.js (HIBP + blocklist), auth-config.js
+  features/      timer, tasks, sounds, sound-mixer, statistics, sessions, analytics, keyboard,
+                 auth.js (sole Supabase importer), password-policy.js (HIBP + blocklist)
   ui/
     settings/    schema.js (declarative), renderer.js, store.js, apply.js, data-io.js, onboarding.js, schedules.js, cheatsheet.js, search.js, profiles.js
+    notification-banner.js, wellness-reminders.js (toast renderers — DOM-side reminder loops),
     home-mini-timer.js, help-center.js, help-content.js, navigation.js, button-feel.js, ui-effects.js, focus-trap.js,
     account.js (signed-in/-out satellite + auth modal), ambient-ui.js, cosmos-a11y.js
   utils/         performance-profile.js (device tiers + FPS watchdog), notifications.js, cleanup.js
