@@ -1032,14 +1032,16 @@ function renderTime(sessions) {
             content: `
                 <div class="psection__split-bar" role="img"
                      aria-label="Weekday ${weekdayPct} percent · weekend ${weekendPct} percent">
-                    <div class="psection__split-bar__weekday" style="flex:${weekdayPct};">
+                    ${weekdayPct > 0 ? `
+                    <div class="psection__split-bar__weekday" style="flex:${weekdayPct} 0 0;">
                         <span class="psection__split-bar__label">Weekdays</span>
                         <span class="psection__split-bar__value">${weekdayPct}%</span>
-                    </div>
-                    <div class="psection__split-bar__weekend" style="flex:${weekendPct};">
+                    </div>` : ''}
+                    ${weekendPct > 0 ? `
+                    <div class="psection__split-bar__weekend" style="flex:${weekendPct} 0 0;">
                         <span class="psection__split-bar__label">Weekends</span>
                         <span class="psection__split-bar__value">${weekendPct}%</span>
-                    </div>
+                    </div>` : ''}
                 </div>
             `,
         }) : ''}

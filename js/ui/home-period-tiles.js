@@ -169,7 +169,9 @@ function paintMonth(sessions) {
 
 /** Render or update a goal-progress bar inserted after `anchor`.
  *  Cap the visible fill at 100% — overshooting is shown as "150% of
- *  goal" copy rather than a glitchy bar past the right edge. */
+ *  goal" copy rather than a glitchy bar past the right edge.
+ *  Updates in place when the bar already exists so the fill animates
+ *  smoothly rather than replaying its mount transition every paint. */
 function renderGoalBar(scope, current, goal, unit, anchor) {
     const selector = `[data-goal-bar="${scope}"]`;
     const existing = root.querySelector(selector);
@@ -181,6 +183,20 @@ function renderGoalBar(scope, current, goal, unit, anchor) {
     const display = unit === 'min'
         ? `${Math.round(current)} / ${goal} min`
         : `${Math.round(current)} / ${goal} ${unit}`;
+
+    if (existing) {
+        // In-place update — preserves any CSS transition on the fill so
+        // a slider drag or session completion animates the width
+        // smoothly instead of recreating the node and snap-resetting.
+        existing.classList.toggle('is-complete', pct >= 100);
+        const fill = existing.querySelector('.home-goal-bar__fill');
+        if (fill) fill.style.width = `${pct}%`;
+        const label = existing.querySelector('.home-goal-bar__label');
+        if (label) label.textContent = display;
+        return;
+    }
+
+    if (!anchor) return;
     const html = `
         <div class="home-goal-bar ${pct >= 100 ? 'is-complete' : ''}" data-goal-bar="${scope}">
             <div class="home-goal-bar__track">
@@ -189,11 +205,7 @@ function renderGoalBar(scope, current, goal, unit, anchor) {
             <span class="home-goal-bar__label">${display}</span>
         </div>
     `;
-    if (existing) {
-        existing.outerHTML = html;
-    } else if (anchor) {
-        anchor.insertAdjacentHTML('afterend', html);
-    }
+    anchor.insertAdjacentHTML('afterend', html);
 }
 
 // ───────────────────────────────────────────────────────────────────────
