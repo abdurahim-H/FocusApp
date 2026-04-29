@@ -183,9 +183,15 @@ export const THEMES = [
 
 /** Return a theme by id, falling back to the first registered theme
  *  if the id is unknown (so a stale settings entry can't black-screen
- *  the scene). */
+ *  the scene). Logs a warning when falling back so a typo or removed
+ *  theme is debuggable instead of silent. */
 export function getTheme(id) {
-    return THEMES.find((t) => t.id === id) || THEMES[0];
+    const found = THEMES.find((t) => t.id === id);
+    if (found) return found;
+    if (id) {
+        console.warn(`[theme-registry] unknown theme id "${id}", falling back to "${THEMES[0].id}"`);
+    }
+    return THEMES[0];
 }
 
 /** Bring up every module in the theme's list. Returns the same ctx

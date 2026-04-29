@@ -157,7 +157,9 @@
 
 /* Wave 10.2 — streak target chip. Inline pill that lights up when
    the user clears their streak goal. Hidden by default; rendered
-   alongside the day-streak number, never replacing it. */
+   alongside the day-streak number, never replacing it. Fades in
+   on the moment the goal is hit instead of snapping — small
+   detail, but the goal moment deserves it. */
 .stat-streak-target {
     margin-top: 2px;
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
@@ -165,8 +167,19 @@
     color: rgba(149, 226, 164, 0.95);
     letter-spacing: 0.02em;
     line-height: 1;
+    opacity: 1;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.stat-streak-target.hidden { display: none; }
+.stat-streak-target.hidden {
+    opacity: 0;
+    pointer-events: none;
+    /* keep height in flow so neighbours don't jump when it appears;
+       use visibility:hidden after the fade has landed via CSS only. */
+    visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+    .stat-streak-target { transition: none; }
+}
 .momentum-trail {
     display: inline-flex;
     align-items: center;

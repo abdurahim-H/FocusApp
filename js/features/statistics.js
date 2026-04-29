@@ -13,6 +13,7 @@
 
 import { effect, signal } from '../core/state.js';
 import { get as settingsGet, subscribe as settingsSub } from '../ui/settings/store.js';
+import { showGentleToast } from '../utils/gentle-toast.js';
 import { getAllSessions, getDailySessionCounts, onSessionsChange } from './sessions.js';
 
 // ============================================================================
@@ -594,31 +595,14 @@ export function initStatistics() {
 }
 
 // ============================================================================
-// Wave 24.9 — celebratory toast for a new personal-best day
+// Wave 24.9 — celebratory toast for a new personal-best day. Routed
+// through the shared gentle-toast queue so it can't overlap with a
+// wellness reminder firing in the same tick.
 // ============================================================================
-let celebrateTimeout = null;
 function celebratePersonalBest(seconds) {
-    let el = document.getElementById('celebrateToast');
-    if (!el) {
-        el = document.createElement('div');
-        el.id = 'celebrateToast';
-        el.className = 'celebrate-toast';
-        el.setAttribute('role', 'status');
-        el.setAttribute('aria-live', 'polite');
-        document.body.appendChild(el);
-    }
-    el.innerHTML = `
-        <span class="celebrate-toast__icon" aria-hidden="true">🌟</span>
-        <span class="celebrate-toast__body">
-            <span class="celebrate-toast__title">New personal best</span>
-            <span class="celebrate-toast__detail">${formatDuration(seconds)} focused today</span>
-        </span>
-    `;
-    // Re-trigger the entrance animation on consecutive bests on the same
-    // day (rare, but possible if we ever soften the same-day guard).
-    el.classList.remove('is-visible');
-    void el.offsetWidth;
-    el.classList.add('is-visible');
-    clearTimeout(celebrateTimeout);
-    celebrateTimeout = setTimeout(() => el.classList.remove('is-visible'), 5400);
+    showGentleToast({
+        icon: '🌟',
+        title: 'New personal best',
+        detail: `${formatDuration(seconds)} focused today`,
+    });
 }

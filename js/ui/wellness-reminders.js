@@ -4,17 +4,17 @@
 // actively running. The 20-20-20 eye rest is fixed by definition (every
 // 20 min); posture and hydration each have a configurable interval.
 //
-// All three surface as calm, in-app toasts — never OS notifications.
-// They reuse `.celebrate-toast` chrome (top-right gentle slide, gold
-// glow) since the visual register is the same: positive, non-blocking,
-// auto-fades. Each reminder gets a distinct DOM id so they don't
-// clobber each other if two are due at once.
+// All three surface through the shared gentle-toast queue (see
+// js/utils/gentle-toast.js) — single slot, single style, one
+// reminder at a time. If eye-rest and hydration both come due in
+// the same minute, the second waits for the first to finish.
 
 import { appState as state } from '../core/state.js';
+import { showGentleToast } from '../utils/gentle-toast.js';
 import { get as settingsGet, subscribe as settingsSub } from './settings/store.js';
 
 const EYE_REST_MS = 20 * 60 * 1000; // fixed per the 20-20-20 rule
-let timers = {
+const timers = {
     eye: null,
     hydration: null,
     posture: null,
@@ -33,8 +33,7 @@ function startTimers() {
         // clears the interval entirely; the next start re-arms.
         timers.eye = setInterval(() => {
             if (!isFocusRunning()) return;
-            showWellnessToast({
-                id: 'wellnessEyeToast',
+            showGentleToast({
                 icon: '👁',
                 title: 'Eye rest',
                 detail: 'Look 20 ft away for 20 seconds',
@@ -46,8 +45,7 @@ function startTimers() {
         const min = clampMinutes(settingsGet('wellness.hydrationInterval'), 60);
         timers.hydration = setInterval(() => {
             if (!isFocusRunning()) return;
-            showWellnessToast({
-                id: 'wellnessHydrationToast',
+            showGentleToast({
                 icon: '💧',
                 title: 'Hydration check',
                 detail: 'Take a sip of water',
@@ -59,8 +57,7 @@ function startTimers() {
         const min = clampMinutes(settingsGet('wellness.postureInterval'), 45);
         timers.posture = setInterval(() => {
             if (!isFocusRunning()) return;
-            showWellnessToast({
-                id: 'wellnessPostureToast',
+            showGentleToast({
                 icon: '🧘',
                 title: 'Posture check',
                 detail: 'Roll the shoulders, lengthen the spine',
@@ -82,31 +79,6 @@ function clampMinutes(raw, fallback) {
     const n = Number(raw);
     if (!Number.isFinite(n) || n < 1) return fallback;
     return Math.min(240, Math.max(1, Math.round(n)));
-}
-
-const toastTimeouts = {};
-function showWellnessToast({ id, icon, title, detail }) {
-    let el = document.getElementById(id);
-    if (!el) {
-        el = document.createElement('div');
-        el.id = id;
-        el.className = 'celebrate-toast';
-        el.setAttribute('role', 'status');
-        el.setAttribute('aria-live', 'polite');
-        document.body.appendChild(el);
-    }
-    el.innerHTML = `
-        <span class="celebrate-toast__icon" aria-hidden="true">${icon}</span>
-        <span class="celebrate-toast__body">
-            <span class="celebrate-toast__title">${title}</span>
-            <span class="celebrate-toast__detail">${detail}</span>
-        </span>
-    `;
-    el.classList.remove('is-visible');
-    void el.offsetWidth;
-    el.classList.add('is-visible');
-    clearTimeout(toastTimeouts[id]);
-    toastTimeouts[id] = setTimeout(() => el.classList.remove('is-visible'), 6000);
 }
 
 export function initWellnessReminders() {
