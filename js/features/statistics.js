@@ -136,27 +136,49 @@ function loadStats() {
 }
 
 let persistInitialized = false;
+let persistScheduled = false;
 function setupPersistence() {
+    // recordSessionComplete and resetAllStats both touch 4-8 signals
+    // back-to-back. The naive effect would fire one localStorage write
+    // per signal mutation. Coalescing within a frame keeps that cost
+    // to a single write per event burst without losing any updates —
+    // we always re-snapshot the latest values at flush time.
     effect(() => {
-        const snapshot = {
-            sessionsToday: sessionsToday.value,
-            totalFocusSeconds: totalFocusSeconds.value,
-            tasksCompletedToday: tasksCompletedToday.value,
-            currentStreak: currentStreak.value,
-            lastFocusDate: lastFocusDate.value,
-            bestDayFocusSeconds: bestDayFocusSeconds.value,
-            bestDayFocusDate: bestDayFocusDate.value,
-            lastFreezeUsedDate: lastFreezeUsedDate.value,
-        };
+        // Touch every persisted signal so the effect re-runs whenever
+        // any of them change.
+        sessionsToday.value;
+        totalFocusSeconds.value;
+        tasksCompletedToday.value;
+        currentStreak.value;
+        lastFocusDate.value;
+        bestDayFocusSeconds.value;
+        bestDayFocusDate.value;
+        lastFreezeUsedDate.value;
+
         if (!persistInitialized) {
             persistInitialized = true;
             return;
         }
-        try {
-            localStorage.setItem(STATS_KEY, JSON.stringify(snapshot));
-        } catch (e) {
-            console.warn('[stats] failed to persist:', e);
-        }
+        if (persistScheduled) return;
+        persistScheduled = true;
+        requestAnimationFrame(() => {
+            persistScheduled = false;
+            const snapshot = {
+                sessionsToday: sessionsToday.value,
+                totalFocusSeconds: totalFocusSeconds.value,
+                tasksCompletedToday: tasksCompletedToday.value,
+                currentStreak: currentStreak.value,
+                lastFocusDate: lastFocusDate.value,
+                bestDayFocusSeconds: bestDayFocusSeconds.value,
+                bestDayFocusDate: bestDayFocusDate.value,
+                lastFreezeUsedDate: lastFreezeUsedDate.value,
+            };
+            try {
+                localStorage.setItem(STATS_KEY, JSON.stringify(snapshot));
+            } catch (e) {
+                console.warn('[stats] failed to persist:', e);
+            }
+        });
     });
 }
 
@@ -230,9 +252,16 @@ function maybeFlagPersonalBest(justFinishedSeconds) {
 
 /** Sum focus seconds across all sessions on the given ISO date. Pulls
  *  from the canonical sessions list; statistics' lifetime accumulator
- *  isn't day-bucketed so it can't answer this directly. */
+ *  isn't day-bucketed so it can't answer this directly.
+ *
+ *  The rest of this module derives "today" from `new Date().toISOString()`
+ *  (UTC), so the day window here MUST also be UTC. Earlier versions used
+ *  `new Date(\`${iso}T00:00:00\`)` which JavaScript parses as local
+ *  midnight — for users in negative-UTC timezones that pushed the
+ *  window forward by 4-12 hours, missing late-evening sessions. The
+ *  trailing `Z` pins the parse to UTC. */
 function sumSecondsForDate(iso) {
-    const startMs = new Date(`${iso}T00:00:00`).getTime();
+    const startMs = new Date(`${iso}T00:00:00.000Z`).getTime();
     const endMs = startMs + 86_400_000;
     return getAllSessions()
         .filter((s) => s.kind === 'focus' && s.startedAt >= startMs && s.startedAt < endMs)

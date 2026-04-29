@@ -11,7 +11,7 @@
 // clobber each other if two are due at once.
 
 import { appState as state } from '../core/state.js';
-import { get as settingsGet } from '../ui/settings/store.js';
+import { get as settingsGet, subscribe as settingsSub } from '../ui/settings/store.js';
 
 const EYE_REST_MS = 20 * 60 * 1000; // fixed per the 20-20-20 rule
 let timers = {
@@ -122,4 +122,22 @@ export function initWellnessReminders() {
     document.addEventListener('focus-timer:end', stopTimers);
     document.addEventListener('focus-timer:pause', stopTimers);
     document.addEventListener('focus-timer:reset', stopTimers);
+
+    // Re-arm whenever the user toggles a reminder or moves an interval
+    // slider mid-session. Without this, setInterval snapshots the
+    // duration at session start and ignores live changes — turning
+    // hydration off at minute 30 would still fire it at minute 60.
+    const reactiveKeys = [
+        'wellness.eyeRestEnabled',
+        'wellness.hydrationEnabled',
+        'wellness.hydrationInterval',
+        'wellness.postureEnabled',
+        'wellness.postureInterval',
+    ];
+    for (const k of reactiveKeys) {
+        settingsSub(k, () => {
+            if (isFocusRunning()) startTimers();
+            else stopTimers();
+        });
+    }
 }
