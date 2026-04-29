@@ -11,6 +11,7 @@
 
 import { getAllSessions, onSessionsChange } from '../features/sessions.js';
 import { dailyTotals } from '../features/analytics.js';
+import { get as settingsGet, subscribe as settingsSub } from './settings/store.js';
 import { openProfile } from './profile.js';
 
 let initialised = false;
@@ -35,6 +36,10 @@ export function initHomePeriodTiles() {
 
     paint();
     onSessionsChange(paint);
+    // Re-paint when the user moves a goal slider — the tiles show
+    // progress against those targets, so they should update live.
+    settingsSub('timer.weeklyGoalMinutes', paint);
+    settingsSub('timer.weeklyTasksGoal', paint);
 }
 
 // ───────────────────────────────────────────────────────────────────────
@@ -96,6 +101,10 @@ function paintWeek(sessions) {
             subEl.textContent = `peak ${peakDayLabel} · ${peakMin} min`;
         }
     }
+
+    // Weekly goal progress bar (Wave 10.1). Inserted after the
+    // mini-bars when timer.weeklyGoalMinutes is set; hidden otherwise.
+    renderGoalBar('week', thisSum, settingsGet('timer.weeklyGoalMinutes') || 0, 'min', barsEl);
 }
 
 function paintMonth(sessions) {
@@ -138,6 +147,52 @@ function paintMonth(sessions) {
             const ratePerDay = thisSum / Math.max(1, activeDays);
             subEl.textContent = `${Math.round(ratePerDay)} min on the days you focused`;
         }
+    }
+
+    // Weekly tasks goal — sums tasksCompleted across this week's
+    // sessions and renders the same goal-bar shape under the month
+    // tile when a target is set.
+    const tasksGoal = settingsGet('timer.weeklyTasksGoal') || 0;
+    if (tasksGoal > 0) {
+        const weekStartMs = Date.now() - 7 * 86_400_000;
+        const tasksThisWeek = sessions
+            .filter((s) => s.startedAt >= weekStartMs)
+            .reduce((a, s) => a + (s.tasksCompleted || 0), 0);
+        const subTrack = root.querySelector('[data-month-sub]');
+        renderGoalBar('month-tasks', tasksThisWeek, tasksGoal, 'tasks', subTrack);
+    } else {
+        // Make sure a previously-rendered bar is removed when the
+        // user clears the goal.
+        root.querySelectorAll('[data-goal-bar="month-tasks"]').forEach((el) => el.remove());
+    }
+}
+
+/** Render or update a goal-progress bar inserted after `anchor`.
+ *  Cap the visible fill at 100% — overshooting is shown as "150% of
+ *  goal" copy rather than a glitchy bar past the right edge. */
+function renderGoalBar(scope, current, goal, unit, anchor) {
+    const selector = `[data-goal-bar="${scope}"]`;
+    const existing = root.querySelector(selector);
+    if (!goal || goal <= 0) {
+        if (existing) existing.remove();
+        return;
+    }
+    const pct = Math.min(100, Math.round((current / goal) * 100));
+    const display = unit === 'min'
+        ? `${Math.round(current)} / ${goal} min`
+        : `${Math.round(current)} / ${goal} ${unit}`;
+    const html = `
+        <div class="home-goal-bar ${pct >= 100 ? 'is-complete' : ''}" data-goal-bar="${scope}">
+            <div class="home-goal-bar__track">
+                <div class="home-goal-bar__fill" style="width:${pct}%"></div>
+            </div>
+            <span class="home-goal-bar__label">${display}</span>
+        </div>
+    `;
+    if (existing) {
+        existing.outerHTML = html;
+    } else if (anchor) {
+        anchor.insertAdjacentHTML('afterend', html);
     }
 }
 

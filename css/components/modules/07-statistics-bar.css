@@ -154,6 +154,19 @@
 .stat-chip--streak:has(.stat-value:not(:empty):not([data-zero])) .stat-value {
     color: rgba(255, 220, 160, 0.95);
 }
+
+/* Wave 10.2 — streak target chip. Inline pill that lights up when
+   the user clears their streak goal. Hidden by default; rendered
+   alongside the day-streak number, never replacing it. */
+.stat-streak-target {
+    margin-top: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 9px;
+    color: rgba(149, 226, 164, 0.95);
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+.stat-streak-target.hidden { display: none; }
 .momentum-trail {
     display: inline-flex;
     align-items: center;

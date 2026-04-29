@@ -292,6 +292,23 @@ function renderStatsBar() {
 
         if (streakEl) streakEl.textContent = currentStreak.value;
 
+        // Streak target chip (Wave 10.2). Renders once the user reaches
+        // their configured streak goal. Hidden if no goal set or not
+        // yet reached. We deliberately only show the affirmation —
+        // not "N to go" — so the streak chip stays calm-coded.
+        const streakTargetEl = el('statStreakTarget');
+        if (streakTargetEl) {
+            const goal = Number(settingsGet('timer.streakGoal')) || 0;
+            const streak = currentStreak.value;
+            if (goal > 0 && streak >= goal) {
+                streakTargetEl.textContent = `🎯 ${goal}-day target hit`;
+                streakTargetEl.classList.remove('hidden');
+            } else {
+                streakTargetEl.classList.add('hidden');
+                streakTargetEl.textContent = '';
+            }
+        }
+
         // Daily goal ring — only paints when the user has an active
         // target. The progress fill is on a 100-pathLength circle so
         // we set stroke-dashoffset = 100 - completion percent.
@@ -315,6 +332,10 @@ function renderStatsBar() {
     onSessionsChange(paint);
 
     settingsSub('timer.dailyGoalMinutes', renderGoalRing);
+    // Streak goal lives in the same effect as the rest of the chips —
+    // when the user moves the goal slider, repaint to refresh the
+    // "target hit" indicator without waiting for the next signal tick.
+    settingsSub('timer.streakGoal', paint);
 
     renderMomentumTrail();
     onSessionsChange(renderMomentumTrail);

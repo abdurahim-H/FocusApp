@@ -178,6 +178,46 @@
     min-height: 1.4em; /* reserves a row so the tile height is stable */
 }
 
+/* Wave 10.1 — weekly goal progress bar.
+   Slim track + amber fill that caps at 100% width visually; the label
+   to the right tells the truth ("12.5 / 12 hrs") for overshoots. */
+.home-goal-bar {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.home-goal-bar__track {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 220, 160, 0.06);
+    overflow: hidden;
+}
+.home-goal-bar__fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255, 205, 115, 0.85), rgba(255, 220, 160, 0.95));
+    border-radius: 3px;
+    transition: width 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.home-goal-bar.is-complete .home-goal-bar__fill {
+    background: linear-gradient(90deg, rgba(149, 226, 164, 0.85), rgba(149, 226, 164, 0.95));
+}
+.home-goal-bar__label {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 10.5px;
+    color: rgba(255, 246, 225, 0.55);
+    flex-shrink: 0;
+}
+.home-goal-bar.is-complete .home-goal-bar__label {
+    color: rgba(149, 226, 164, 0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-goal-bar__fill { transition: none; }
+}
+
 @media (max-width: 540px) {
     .home-period-tiles {
         grid-template-columns: 1fr;

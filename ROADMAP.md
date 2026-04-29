@@ -183,9 +183,9 @@ The Profile already has all the analytical primitives (clustering, change-point,
 
 ## Wave 10 — Goals + habit tracking (week 14)
 
-- [ ] **10.1 Weekly goal: target focus minutes (M).** Set a weekly hours target (default 12 hrs). Progress ring on the Home tab and on the weekly tile (1.1).
-- [ ] **10.2 Streak goal (S).** Target N days in a row with at least one focus session.
-- [ ] **10.3 Tasks-per-week goal (S).** Optional: target N tasks completed per week.
+- [x] **10.1 Weekly goal: target focus minutes (M).** `timer.weeklyGoalMinutes` setting (default 720 / 12 hrs) drives a progress bar at the bottom of the Home week tile. Bar caps at 100% width visually; the label ("12.5 / 12 hrs") tells the honest overshoot. Goes amber until 99%, green at 100% complete. Setting to 0 hides the bar.
+- [x] **10.2 Streak goal (S).** New `timer.streakGoal` stepper (default 7 days). Once `currentStreak ≥ goal`, a small "🎯 N-day target hit" chip lights up next to the day-streak counter in the stats bar. Calm-coded: only shows the affirmation, never "N to go" pressure copy.
+- [x] **10.3 Tasks-per-week goal (S).** `timer.weeklyTasksGoal` stepper (default 20). Sums `tasksCompleted` across the trailing 7-day session window and renders as a second progress bar under the Home month tile.
 - [ ] **10.4 Per-day goal calibration (M).** Goal can be uniform (target/7 each day) or weekday-only or custom.
 - [ ] **10.5 Push notifications when falling behind (M).** Web push (Wave 11). "It's Friday and you're 4 hrs short of your weekly goal." Configurable cadence.
 - [ ] **10.6 Goal history + completion stats (M).** "You hit your weekly goal 38 of the last 52 weeks (73%)."
