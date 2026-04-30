@@ -561,6 +561,20 @@
             <header class="task-dock__head">
                 <span class="task-dock__head-eyebrow">TASKS</span>
                 <h2 class="task-dock__head-title">Tasks for this session</h2>
+                <ul class="task-dock__summary" id="taskDockSummary" aria-label="Task counts">
+                    <li class="task-dock__summary-chip task-dock__summary-chip--open">
+                        <span class="task-dock__summary-num" id="taskDockOpen">0</span>
+                        <span class="task-dock__summary-label">open</span>
+                    </li>
+                    <li class="task-dock__summary-chip task-dock__summary-chip--done">
+                        <span class="task-dock__summary-num" id="taskDockDone">0</span>
+                        <span class="task-dock__summary-label">done</span>
+                    </li>
+                    <li class="task-dock__summary-chip task-dock__summary-chip--total">
+                        <span class="task-dock__summary-num" id="taskDockTotal">0</span>
+                        <span class="task-dock__summary-label">total</span>
+                    </li>
+                </ul>
                 <span class="tasks-eta hidden" id="tasksEta"
                       aria-label="Estimated time to finish"></span>
                 <button class="task-dock__close" id="taskDockClose" type="button"

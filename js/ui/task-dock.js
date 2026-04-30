@@ -41,6 +41,9 @@ let countEl = null;
 let progressEl = null;
 let emptyEl = null;
 let listEl = null;
+let openEl = null;
+let doneEl = null;
+let totalEl = null;
 
 function readState() {
     try {
@@ -70,6 +73,9 @@ export function initTaskDock() {
     progressEl = document.getElementById('taskDockProgress');
     emptyEl = document.getElementById('taskDockEmpty');
     listEl = document.getElementById('taskList');
+    openEl = document.getElementById('taskDockOpen');
+    doneEl = document.getElementById('taskDockDone');
+    totalEl = document.getElementById('taskDockTotal');
 
     // Restore the user's last-used state. Default to collapsed so the
     // focus card (timer + controls) stays unobscured on first arrival;
@@ -215,6 +221,12 @@ function paintPreview(list, activeId) {
     countEl.textContent = total === 0
         ? 'tap to add'
         : `${remaining} of ${total}`;
+
+    // Summary chips in the expanded header — open / done / total.
+    const done = total - remaining;
+    if (openEl) openEl.textContent = remaining;
+    if (doneEl) doneEl.textContent = done;
+    if (totalEl) totalEl.textContent = total;
 
     if (progressEl) {
         if (active) {

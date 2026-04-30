@@ -109,7 +109,8 @@
     outline: none;
 }
 
-/* ── Collapsed strip (always rendered; hidden when expanded) ───────── */
+/* ── Collapsed strip (zero-height when expanded so the panel claims
+   the entire dock body — no wasted band above the header). ────── */
 .task-dock__collapsed {
     appearance: none;
     -webkit-appearance: none;
@@ -129,8 +130,12 @@
     transition: opacity 0.2s ease;
 }
 .task-dock[data-state="expanded"] .task-dock__collapsed {
+    flex: 0;
+    height: 0;
+    padding: 0;
     opacity: 0;
     pointer-events: none;
+    overflow: hidden;
 }
 
 .task-dock__active {
@@ -201,17 +206,27 @@
 }
 
 /* ── Expanded panel ────────────────────────────────────────────────── */
+/* Two siblings (.task-dock__collapsed, .task-dock__expanded) live in
+   the same flex column. Whichever isn't active has flex:0 height:0
+   so it doesn't claim layout — without that the inactive panel
+   would split the available space, leaving a wide empty band above
+   the active one. */
 .task-dock__expanded {
-    flex: 1 1 auto;
+    flex: 0 0 0;
+    height: 0;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    padding: 0 22px 18px;
+    padding: 0 22px;
     opacity: 0;
+    overflow: hidden;
     transition: opacity 0.3s ease;
     pointer-events: none;
 }
 .task-dock[data-state="expanded"] .task-dock__expanded {
+    flex: 1 1 auto;
+    height: auto;
+    padding: 0 22px 18px;
     opacity: 1;
     pointer-events: auto;
     /* Slight delay so the height transition starts first; the content
@@ -240,8 +255,58 @@
     font-size: 16px;
     font-weight: 400;
     color: #faf3e3;
+    min-width: 0;
+}
+
+/* Summary chips — three pills (open / done / total) painted live by
+   the dock's paintPreview. Tone-matched: open in warm gold, done in
+   the same green family used by .home-goal-bar.is-complete, total
+   muted neutral. Kept compact so they live alongside the title in a
+   single row. */
+.task-dock__summary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     flex: 1 1 auto;
     min-width: 0;
+    flex-wrap: wrap;
+}
+.task-dock__summary-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    border: 1px solid transparent;
+    line-height: 1;
+    white-space: nowrap;
+}
+.task-dock__summary-num {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-weight: 500;
+}
+.task-dock__summary-label { opacity: 0.78; }
+.task-dock__summary-chip--open {
+    background: rgba(255, 205, 115, 0.10);
+    border-color: rgba(255, 220, 160, 0.32);
+    color: rgba(255, 220, 160, 0.95);
+}
+.task-dock__summary-chip--done {
+    background: rgba(149, 226, 164, 0.08);
+    border-color: rgba(149, 226, 164, 0.28);
+    color: rgba(149, 226, 164, 0.92);
+}
+.task-dock__summary-chip--total {
+    background: rgba(255, 246, 225, 0.04);
+    border-color: rgba(255, 246, 225, 0.14);
+    color: rgba(255, 246, 225, 0.7);
 }
 .task-dock__close {
     appearance: none;
@@ -342,27 +407,11 @@
 }
 
 /* ── Cosmos toolbar coexistence ────────────────────────────────────── */
-/* When the dock is mounted the cosmos toolbar lifts above its
-   collapsed footprint so the two pinned surfaces don't overlap. The
-   expanded dock takes a much larger band, so the toolbar slides
-   higher still — but only in collapsed-toolbar dimming territory,
-   it stays interactive. */
-body.has-task-dock .cosmos-toolbar {
-    bottom: calc(var(--task-dock-bottom-margin) + var(--task-dock-collapsed-h) + 12px);
-    transition:
-        bottom 0.4s var(--task-dock-ease),
-        opacity 0.3s ease,
-        background 0.3s ease,
-        border-color 0.3s ease,
-        box-shadow 0.3s ease;
-}
-body.is-task-dock-expanded .cosmos-toolbar {
-    bottom: calc(var(--task-dock-bottom-margin) + var(--task-dock-expanded-h) + 12px);
-    opacity: 0.55;
-}
-body.is-task-dock-expanded .cosmos-toolbar:hover {
-    opacity: 1;
-}
+/* The toolbar stays pinned at its default bottom position. The dock
+   has a higher z-index, so it visually covers the toolbar when
+   expanded. Lifting the toolbar made it follow the dock around,
+   which the user found busier than the toolbar simply tucking
+   behind. */
 
 /* ── Mobile breakpoint ─────────────────────────────────────────────── */
 @media (max-width: 540px) {

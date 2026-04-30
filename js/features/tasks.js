@@ -524,9 +524,28 @@ export function initTaskRender() {
         });
     });
 
-    // Subtask add form — Enter in the input or click on the + button
-    // submits. The form handler stops propagation so the parent row
-    // doesn't toggle its done state.
+    // Subtask add — the form is hidden by default; the user clicks
+    // the "+ Add a subtask" trigger to reveal it. Submitting hides
+    // the form again so adding more requires another deliberate
+    // click (no auto-revealed second input row).
+    list.addEventListener('click', (e) => {
+        const trigger = e.target.closest('[data-subtask-add-trigger]');
+        if (!trigger) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const drawer = trigger.closest('.task-subtasks');
+        if (!drawer) return;
+        const form = drawer.querySelector('.subtask-add');
+        if (!form) return;
+        trigger.classList.add('hidden');
+        form.classList.remove('hidden');
+        const input = form.querySelector('.subtask-add__input');
+        if (input) input.focus();
+        // Make sure the parent row is expanded.
+        const li = drawer.closest('.task-item');
+        if (li) li.classList.add('is-expanded');
+    });
+
     list.addEventListener('submit', (e) => {
         const form = e.target.closest('[data-subtask-add]');
         if (!form) return;
@@ -534,12 +553,36 @@ export function initTaskRender() {
         const parentId = Number(form.dataset.subtaskAdd);
         const input = form.querySelector('.subtask-add__input');
         if (!input) return;
-        addSubtask(parentId, input.value);
+        const text = input.value.trim();
+        if (text) addSubtask(parentId, text);
         input.value = '';
-        input.focus();
-        // Make sure the parent row is expanded after adding.
+        // Hide the form again — adding another subtask requires
+        // another deliberate click on the trigger.
+        const drawer = form.closest('.task-subtasks');
+        if (drawer) {
+            form.classList.add('hidden');
+            const trigger = drawer.querySelector('[data-subtask-add-trigger]');
+            if (trigger) trigger.classList.remove('hidden');
+        }
         const li = form.closest('.task-item');
         if (li) li.classList.add('is-expanded');
+    });
+
+    // Esc inside the subtask input dismisses the form back to its
+    // trigger without saving (parity with the standard escape-cancel
+    // pattern used elsewhere in the app).
+    list.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const input = e.target.closest('.subtask-add__input');
+        if (!input) return;
+        const form = input.closest('.subtask-add');
+        const drawer = input.closest('.task-subtasks');
+        if (!form || !drawer) return;
+        e.preventDefault();
+        input.value = '';
+        form.classList.add('hidden');
+        const trigger = drawer.querySelector('[data-subtask-add-trigger]');
+        if (trigger) trigger.classList.remove('hidden');
     });
 
     // ── Drag-to-reorder ────────────────────────────────────────────
@@ -736,6 +779,7 @@ function createTaskElement(task) {
     const norm = normalizeTask(task);
     const li = document.createElement('li');
     li.className = 'task-item liquid-glass-task';
+    if (task.completed) li.classList.add('is-completed');
     if (activeTaskId.value === task.id) li.classList.add('is-active-task');
     if (norm.subtasks.length > 0) li.classList.add('has-subtasks');
     li.dataset.taskId = task.id;
@@ -823,9 +867,13 @@ function renderRepeatIndicator(task) {
     return `<span class="task-repeat-chip" title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}">↻</span>`;
 }
 
-/** Subtasks drawer — a collapsible nested list with an "add" input.
- *  Rendered inside the parent <li>; the .task-item.is-expanded class
- *  on the parent toggles its visibility. */
+/** Subtasks drawer — a collapsible nested list with an on-demand
+ *  "add" input. The form is hidden by default behind a small
+ *  "+ Add subtask" trigger so the drawer doesn't grow extra empty
+ *  rows just because subtasks exist. The trigger is replaced by the
+ *  form when clicked; submitting the form reverts to the trigger
+ *  (so adding a third subtask requires another deliberate click,
+ *  not an auto-revealed input). */
 function renderSubtasksDrawer(task) {
     const norm = normalizeTask(task);
     const items = norm.subtasks
@@ -853,9 +901,15 @@ function renderSubtasksDrawer(task) {
     return `
         <div class="task-subtasks">
             <ul class="subtask-list">${items}</ul>
-            <form class="subtask-add" data-subtask-add="${task.id}">
+            <button type="button" class="subtask-add-trigger"
+                    data-subtask-add-trigger="${task.id}"
+                    aria-label="Add a subtask">
+                <span class="subtask-add-trigger__plus" aria-hidden="true">+</span>
+                <span class="subtask-add-trigger__label">Add a subtask</span>
+            </button>
+            <form class="subtask-add hidden" data-subtask-add="${task.id}">
                 <input type="text" class="subtask-add__input"
-                       placeholder="Add a subtask…"
+                       placeholder="Subtask name…"
                        maxlength="120"
                        aria-label="New subtask text">
                 <button type="submit" class="subtask-add__btn" aria-label="Add subtask">+</button>
@@ -868,7 +922,12 @@ function renderSubtasksDrawer(task) {
  *  opens the custom date picker (js/ui/date-picker.js) which matches
  *  the rest of the app's aesthetic. The button itself stores the
  *  current value in a data attribute so the change handler can read
- *  it without round-tripping through a hidden input. */
+ *  it without round-tripping through a hidden input.
+ *
+ *  The icon is an inline feather-style SVG rather than the 📅 emoji —
+ *  emoji glyphs render very differently across macOS / Windows /
+ *  Linux (macOS draws a fixed "17" calendar; others show a generic
+ *  one) and broke the cosmic visual register. */
 function renderDueDateInput(task) {
     const norm = normalizeTask(task);
     const isoValue = norm.dueAt ? new Date(norm.dueAt).toLocaleDateString('en-CA') : '';
@@ -879,7 +938,16 @@ function renderDueDateInput(task) {
                 title="${label}"
                 data-due-trigger="${task.id}"
                 data-due-value="${escapeHtml(isoValue)}">
-            <span class="task-due__icon" aria-hidden="true">📅</span>
+            <span class="task-due__icon" aria-hidden="true">
+                <svg viewBox="0 0 16 16" width="13" height="13"
+                     fill="none" stroke="currentColor" stroke-width="1.4"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2.4" y="3.4" width="11.2" height="10.2" rx="1.6"/>
+                    <line x1="2.4" y1="6.6" x2="13.6" y2="6.6"/>
+                    <line x1="5.6" y1="2" x2="5.6" y2="4.6"/>
+                    <line x1="10.4" y1="2" x2="10.4" y2="4.6"/>
+                </svg>
+            </span>
         </button>
     `;
 }
@@ -939,6 +1007,11 @@ function updateTaskElement(el, task) {
     if (textEl) {
         textEl.classList.toggle('task-completed', task.completed);
     }
+    // Mirror the completed flag on the <li> so descendant rules
+    // (subtask strikethrough) can react via parent state — `:has()`
+    // would also work, but we keep the class for broader browser
+    // support and easier specificity tweaks.
+    el.classList.toggle('is-completed', !!task.completed);
     if (content) {
         content.setAttribute('aria-pressed', String(task.completed));
         content.setAttribute(
