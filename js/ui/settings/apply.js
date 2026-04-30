@@ -59,7 +59,7 @@ async function getModule(name) {
 // ============================================================================
 // Graphics preset switching
 // ============================================================================
-import { get as getSetting, setMany } from './store.js';
+import { get as getSetting, set as setSetting, setMany } from './store.js';
 
 async function applyGraphicsPreset(presetId) {
     let resolvedId = presetId;
@@ -159,6 +159,16 @@ export const APPLY_HOOKS = {
 
     // ───────── Scene theme — driven by the registry in scene-manager ────
     'scene.theme': (v) => {
+        // Aurora Plain is held back; if a user has it saved (from a
+        // prior build or manual edit) migrate them back to Black
+        // Hole so the disabled "Coming soon" card doesn't render as
+        // the active selection. setSetting recurses through the same
+        // hook, but the early-return check on the second pass means
+        // we land cleanly on the blackhole branch below.
+        if (v === 'aurora-plain') {
+            setSetting('scene.theme', 'blackhole');
+            return;
+        }
         document.documentElement.setAttribute('data-theme', v);
         document.body.setAttribute('data-theme', v);
         // Lazy import so the apply hooks don't pull the whole 3D

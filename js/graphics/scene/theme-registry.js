@@ -20,16 +20,13 @@
 // `setTheme(id)` infrastructure exists for the future swap; not used
 // from any UI surface yet.
 
-// Aurora Plain — pre-rendered video loop overlaid on the scene
-// container with CSS colour grading + grain + vignette. Replaces
-// the original shader-based sky / terrain / mountain / ribbon /
-// snow stack; those source files remain in /aurora as reference
-// for a future shader-driven re-rebuild.
-import {
-    createAuroraVideo,
-    disposeAuroraVideo,
-    updateAuroraVideo,
-} from '../aurora/aurora-video.js';
+// Sakura + Aurora Plain are pre-rendered video loops painted onto
+// the scene container with CSS colour grading + grain + vignette.
+// Both themes share the makeVideoTheme factory below; only the src
+// + filter config differs.  The original shader-based aurora stack
+// (sky / terrain / mountains / ribbons / snow) lives untouched in
+// /aurora as reference for a future shader rebuild.
+import { makeVideoTheme } from './video-backdrop.js';
 import { createBlackHole, disposeBlackHole, updateBlackHole } from '../blackhole/blackhole.js';
 import {
     createCosmicMotes,
@@ -157,19 +154,30 @@ const MODULES = {
         },
     },
 
-    // ── Aurora Plain — video-backed ────────────────────────
-    auroraVideo: {
+    // ── Sakura — video-backed cherry-blossom theme ─────────
+    sakuraVideo: makeVideoTheme({
+        id: 'sakuraVideo',
+        src: '/sakura/sakura-loop.mp4',
+        // Soft daylight cherry-blossom palette: gentle saturation
+        // bump, micro contrast, no brightness pull-down (the source
+        // is already pastel-bright by design).
+        filter: 'saturate(1.10) contrast(1.04)',
+        fallback: '#150d12',
+        // Lighter vignette than aurora — the sakura source has
+        // soft cloudy edges already, no need for a strong corner
+        // darken.
+        vignette:
+            'radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.30) 100%)',
+        grainOpacity: 0.05,
+    }),
+
+    // ── Aurora Plain — video-backed (held back via schema) ──
+    auroraVideo: makeVideoTheme({
         id: 'auroraVideo',
-        init() {
-            createAuroraVideo();
-        },
-        update() {
-            updateAuroraVideo();
-        },
-        dispose() {
-            disposeAuroraVideo();
-        },
-    },
+        src: '/aurora/aurora-loop.mp4',
+        filter: 'saturate(1.18) contrast(1.06) brightness(0.92)',
+        fallback: '#02050d',
+    }),
 };
 
 // ───────────────────────────────────────────────────────────────────────
@@ -204,11 +212,25 @@ export const THEMES = [
         },
     },
     {
+        id: 'sakura',
+        label: 'Sakura',
+        // Cherry-blossom video theme. Same single-module shape as
+        // Aurora Plain — the makeVideoTheme factory wraps DOM
+        // construction + canvas hide + dispose teardown.
+        modules: [MODULES.sakuraVideo],
+        palette: {
+            primary: [255, 196, 220], // soft blossom pink
+            secondary: [255, 235, 245], // pale blush
+            accentWarm: [255, 168, 198], // hot pink kiss
+            accentCool: [192, 215, 230], // sky blue between branches
+        },
+    },
+    {
         id: 'aurora-plain',
         label: 'Aurora Plain',
-        // Single-module theme: a video loop with CSS colour grading
-        // and an overlay grain/vignette stack. Hides the Babylon
-        // canvas while active and restores it on switch-out.
+        // Held back from the user-facing surface (schema marks the
+        // card "Coming soon"); kept registered so dev work + manual
+        // theme overrides keep working. Single-module video theme.
         modules: [MODULES.auroraVideo],
         palette: {
             primary: [128, 232, 178],
