@@ -15,6 +15,10 @@ import { computed, effect, signal } from '@preact/signals-core';
 // ============================================================================
 
 export const tasks = signal([]);
+// The task the next focus session "logs to". Set via the focus-lock
+// affordance on a task row; cleared on completion or by the user.
+// Persisted across reloads — see loadPersisted / persistSnapshot.
+export const activeTaskId = signal(null);
 export const mode = signal('home');
 export const activeSounds = signal([]);
 export const universeStars = signal(0);
@@ -31,6 +35,10 @@ export const ambientMaster = signal({ volume: 0.5 });
 export const ambientMixes = signal([]);
 // Active sleep timer, or null. { endAt: epoch ms, duration: ms }
 export const ambientSleepTimer = signal(null);
+// Stream-theme id (Wave 5). null = 3D scene; a string id = the
+// matching curated entry in STREAM_LIBRARY or a `custom:<videoId>` /
+// `custom:soundcloud:<encodedUrl>` shorthand pasted by the user.
+export const activeStreamId = signal(null);
 
 // Re-export so other modules can subscribe without importing from CDN directly
 export { computed, effect, signal };
@@ -127,6 +135,9 @@ function loadPersisted() {
         if (!raw) return;
         const data = JSON.parse(raw);
         if (Array.isArray(data.tasks)) tasks.value = data.tasks;
+        if (typeof data.activeTaskId === 'number' || data.activeTaskId === null) {
+            activeTaskId.value = data.activeTaskId;
+        }
         if (typeof data.mode === 'string') mode.value = data.mode;
         if (Array.isArray(data.activeSounds)) activeSounds.value = data.activeSounds;
         if (typeof data.universeStars === 'number') universeStars.value = data.universeStars;
@@ -139,6 +150,9 @@ function loadPersisted() {
         if (data.ambientMaster && typeof data.ambientMaster === 'object')
             ambientMaster.value = data.ambientMaster;
         if (Array.isArray(data.ambientMixes)) ambientMixes.value = data.ambientMixes;
+        if (typeof data.activeStreamId === 'string' || data.activeStreamId === null) {
+            activeStreamId.value = data.activeStreamId;
+        }
         // Sleep timer is intentionally NOT restored — ambient can't resume silently
         // on a new page load before a user gesture unlocks the AudioContext.
     } catch (e) {
@@ -176,6 +190,7 @@ effect(() => {
     // Touch every persisted signal so the effect tracks them all.
     persistSnapshot = {
         tasks: tasks.value,
+        activeTaskId: activeTaskId.value,
         mode: mode.value,
         activeSounds: activeSounds.value,
         universeStars: universeStars.value,
@@ -184,6 +199,7 @@ effect(() => {
         ambientTracks: ambientTracks.value,
         ambientMaster: ambientMaster.value,
         ambientMixes: ambientMixes.value,
+        activeStreamId: activeStreamId.value,
     };
     if (!persistInitialized) {
         persistInitialized = true;

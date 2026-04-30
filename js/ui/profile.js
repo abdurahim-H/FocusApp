@@ -57,6 +57,7 @@ import {
 import { getAllSessions, onSessionsChange } from '../features/sessions.js';
 import {
     barChart,
+    boxPlot,
     calendarHeatmap,
     donut,
     histogramChart,
@@ -401,13 +402,17 @@ function renderOverview(sessions) {
     const last7 = last30.slice(-7);
     const last7Sum = last7.reduce((a, x) => a + x, 0);
 
+    // All-time records — only compute when sessions exist; below the
+    // threshold we'd be celebrating a single first session.
+    const trophies = sessionsCount >= 5 ? computeAllTimeRecords(sessions) : null;
+
     return `
         ${sectionHeader('Overview', currentUser ? 'a quick look at your account' : 'this device only — sign in to bring your data across devices')}
 
         ${kpiRow([
-            { label: 'hours focused', value: totalHrs >= 1 ? totalHrs.toFixed(1) : (totalSec / 60).toFixed(0), unit: totalHrs >= 1 ? 'hrs' : 'min', count: false },
+            { label: 'hours focused', value: totalHrs >= 1 ? totalHrs.toFixed(1) : (totalSec / 60).toFixed(0), unit: totalHrs >= 1 ? 'hrs' : 'min', count: false, trend: last30 },
             { label: 'sessions', value: sessionsCount, unit: '', count: true },
-            { label: 'last 7 days', value: Math.round(last7Sum), unit: 'min', count: true },
+            { label: 'last 7 days', value: Math.round(last7Sum), unit: 'min', count: true, trend: last7 },
             { label: 'avg quality', value: avgQuality, unit: '/100', count: true },
         ])}
 
@@ -433,8 +438,100 @@ function renderOverview(sessions) {
                     ${render60DayGrid(sessions)}
                 </div>
             </div>
+
+            ${trophies ? insightCallouts([
+                {
+                    label: 'BEST DAY EVER',
+                    value: `${Math.round(trophies.bestDayMin)} min`,
+                    tone: 'good',
+                    hint: trophies.bestDayDateLabel,
+                },
+                {
+                    label: 'LONGEST STREAK',
+                    value: `${trophies.longestStreak} day${trophies.longestStreak === 1 ? '' : 's'}`,
+                    tone: 'good',
+                    hint: trophies.longestStreak === trophies.currentStreak
+                        ? 'and going — this is your current streak'
+                        : 'across your full history',
+                },
+                {
+                    label: 'CURRENT STREAK',
+                    value: `${trophies.currentStreak} day${trophies.currentStreak === 1 ? '' : 's'}`,
+                    tone: trophies.currentStreak > 0 ? 'good' : 'flat',
+                    hint: trophies.currentStreak > 0
+                        ? 'consecutive calendar days with focus'
+                        : 'finish a session today to start a new streak',
+                },
+            ]) : ''}
         `}
     `;
+}
+
+/** Walk the user's full history once to find all-time records.
+ *  Returns max-day (minutes + a friendly date label) and the longest
+ *  consecutive run of focus-days plus the current run. Linear in the
+ *  number of session-days; cheap even at thousands of sessions. */
+function computeAllTimeRecords(sessions) {
+    if (!sessions.length) {
+        return { bestDayMin: 0, bestDayDateLabel: '', longestStreak: 0, currentStreak: 0 };
+    }
+    // Bucket every session by local-day-start (ms epoch). Sum minutes
+    // per day. Same approach as the day-detail builder, kept inline
+    // so the analytics module stays focused on derivations.
+    const dayMap = new Map();
+    for (const s of sessions) {
+        const d = new Date(s.startedAt);
+        d.setHours(0, 0, 0, 0);
+        const k = d.getTime();
+        const min = (s.durationSeconds || 0) / 60;
+        dayMap.set(k, (dayMap.get(k) || 0) + min);
+    }
+    const dayKeys = [...dayMap.keys()].sort((a, b) => a - b);
+    let bestDayMin = 0;
+    let bestDayKey = dayKeys[0];
+    for (const k of dayKeys) {
+        const v = dayMap.get(k) || 0;
+        if (v > bestDayMin) {
+            bestDayMin = v;
+            bestDayKey = k;
+        }
+    }
+    // Longest run: walk the sorted keys, count consecutive days, reset
+    // on any gap > 1 day. Current run: walk back from today, stop on
+    // any gap.
+    const ONE_DAY = 86_400_000;
+    let longestStreak = 0;
+    let run = 0;
+    let prev = null;
+    for (const k of dayKeys) {
+        if (prev === null || k - prev === ONE_DAY) {
+            run += 1;
+        } else {
+            run = 1;
+        }
+        if (run > longestStreak) longestStreak = run;
+        prev = k;
+    }
+    // Current streak: starts today (or yesterday — a session yesterday
+    // and none today still counts as an active streak the user can
+    // extend); walks back as long as each prior day has activity.
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    let cur = todayStart.getTime();
+    let currentStreak = 0;
+    if (!dayMap.has(cur)) cur -= ONE_DAY; // give yesterday's session a chance
+    while (dayMap.has(cur)) {
+        currentStreak += 1;
+        cur -= ONE_DAY;
+    }
+    const bestDate = new Date(bestDayKey);
+    const bestDayDateLabel = bestDate.toLocaleDateString(undefined, {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
+    return { bestDayMin, bestDayDateLabel, longestStreak, currentStreak };
 }
 
 function renderOverviewEmpty() {
@@ -579,11 +676,38 @@ function renderFocus(sessions) {
             })}
         </div>
 
+        ${sessions.length >= 4 ? chartCard({
+            eyebrow: 'session-length spread',
+            sub: 'box covers the middle 50% of your sessions; whiskers reach the typical extremes; dots are unusually short or long sessions',
+            chart: boxPlot({
+                values: durations,
+                width: 720,
+                height: 140,
+                unit: ' min',
+            }),
+        }) : ''}
+
+        ${last90.length >= 14 ? chartCard({
+            eyebrow: 'this week vs last week',
+            sub: 'Mon-Sun, side-by-side. Filled = this week, outlined = last week',
+            chart: renderWeekOverWeekChart(last90.slice(-14)),
+        }) : ''}
+
         ${chartCard({
             eyebrow: 'last 90 days · calendar',
             sub: 'each square is a day; the brighter it is, the more you focused',
             chart: calendarHeatmap({ matrix: heatmap }),
         })}
+
+        ${sessions.length >= 5 ? chartCard({
+            eyebrow: 'today vs last 90 days',
+            sub: 'how today\'s focus minutes rank against the trailing 90-day window',
+            chart: percentileGauge({
+                value: percentileRank(todayTotal, last90.slice(0, -1)),
+                size: 200,
+                label: 'percentile',
+            }),
+        }) : ''}
 
         ${insightCallouts([
             wow && wow.delta != null ? {
@@ -852,6 +976,18 @@ function renderTime(sessions) {
     const peakDay = dayBuckets.indexOf(Math.max(...dayBuckets));
     const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+    // Weekday vs weekend split — sums across all of the user's history.
+    // dayBuckets[0] is Sunday, [6] is Saturday; the middle 5 are
+    // weekdays. We render two side-by-side bars so the visual weight
+    // matches the proportion at a glance.
+    const weekendSec = (dayBuckets[0] || 0) + (dayBuckets[6] || 0);
+    const weekdaySec = dayBuckets.slice(1, 6).reduce((a, x) => a + x, 0);
+    const totalDayBucketSec = weekendSec + weekdaySec;
+    const weekdayPct = totalDayBucketSec > 0
+        ? Math.round((weekdaySec / totalDayBucketSec) * 100)
+        : 0;
+    const weekendPct = totalDayBucketSec > 0 ? 100 - weekdayPct : 0;
+
     return `
         ${sectionHeader('Time', 'when in the day and week you focus')}
 
@@ -886,11 +1022,223 @@ function renderTime(sessions) {
             })}
         </div>
 
+        ${totalDayBucketSec > 0 ? chartCard({
+            eyebrow: 'weekday vs weekend',
+            sub: weekdayPct >= 60
+                ? 'most of your focus happens during the work week'
+                : weekendPct >= 60
+                    ? 'most of your focus happens on the weekend'
+                    : 'fairly balanced across the week',
+            content: `
+                <div class="psection__split-bar" role="img"
+                     aria-label="Weekday ${weekdayPct} percent · weekend ${weekendPct} percent">
+                    ${weekdayPct > 0 ? `
+                    <div class="psection__split-bar__weekday" style="flex:${weekdayPct} 0 0;">
+                        <span class="psection__split-bar__label">Weekdays</span>
+                        <span class="psection__split-bar__value">${weekdayPct}%</span>
+                    </div>` : ''}
+                    ${weekendPct > 0 ? `
+                    <div class="psection__split-bar__weekend" style="flex:${weekendPct} 0 0;">
+                        <span class="psection__split-bar__label">Weekends</span>
+                        <span class="psection__split-bar__value">${weekendPct}%</span>
+                    </div>` : ''}
+                </div>
+            `,
+        }) : ''}
+
         ${chartCard({
             eyebrow: 'last 365 days',
             sub: 'your year so far',
             chart: calendarHeatmap({ matrix: cal365, cell: 11, gap: 2 }),
         })}
+
+        ${renderYearInReview(sessions, hourBuckets)}
+    `;
+}
+
+/** Week-over-week chart — last 14 daily totals split into two 7-day
+ *  series (last week + this week), rendered as overlaid bars. Filled
+ *  bars carry this week's data; outlined bars carry last week's.
+ *  Aligns Mon-Sun rather than oldest-first so each day-pair sits on
+ *  the same x. Inline SVG; the chart isn't reused elsewhere yet so it
+ *  doesn't earn a slot in charts.js. */
+function renderWeekOverWeekChart(last14) {
+    const W = 720, H = 200;
+    const M = { l: 32, r: 16, t: 22, b: 32 };
+    const innerW = W - M.l - M.r;
+    const innerH = H - M.t - M.b;
+
+    const prevWeek = last14.slice(0, 7);
+    const thisWeek = last14.slice(7);
+    const peak = Math.max(...prevWeek, ...thisWeek, 1);
+
+    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    // dailyTotals returns oldest-first; we need to rotate so the first
+    // bar is "Mon (this week)" regardless of which weekday today is.
+    const today = new Date();
+    const todayIdx = (today.getDay() + 6) % 7; // 0..6, Mon..Sun
+    const rotate = (week) => {
+        const out = new Array(7).fill(0);
+        for (let i = 0; i < 7; i++) {
+            const realIdx = todayIdx - (6 - i);
+            if (realIdx >= 0 && realIdx < 7) out[realIdx] = week[i];
+        }
+        return out;
+    };
+    const thisRotated = rotate(thisWeek);
+    const prevRotated = rotate(prevWeek);
+
+    const slot = innerW / 7;
+    const barW = Math.max(8, slot * 0.34);
+    const groupGap = 6;
+
+    const yFor = (v) => M.t + innerH - (v / peak) * innerH;
+
+    const bars = [];
+    for (let i = 0; i < 7; i++) {
+        const groupX = M.l + i * slot + slot / 2;
+        const prevX = groupX - barW - groupGap / 2;
+        const curX = groupX + groupGap / 2;
+        const prevH = (prevRotated[i] / peak) * innerH;
+        const curH = (thisRotated[i] / peak) * innerH;
+        // Last week — outlined only, faint.
+        bars.push(`
+            <rect class="chart__wow-prev"
+                  x="${prevX.toFixed(2)}" y="${yFor(prevRotated[i]).toFixed(2)}"
+                  width="${barW.toFixed(2)}" height="${Math.max(1, prevH).toFixed(2)}"
+                  rx="2" />
+        `);
+        // This week — filled.
+        bars.push(`
+            <rect class="chart__wow-cur"
+                  x="${curX.toFixed(2)}" y="${yFor(thisRotated[i]).toFixed(2)}"
+                  width="${barW.toFixed(2)}" height="${Math.max(1, curH).toFixed(2)}"
+                  rx="2" />
+        `);
+    }
+
+    const ticks = dayLabels.map((lab, i) => {
+        const tx = M.l + i * slot + slot / 2;
+        const isToday = i === todayIdx;
+        return `<text class="chart__tick chart__tick--x ${isToday ? 'is-today' : ''}"
+                       x="${tx.toFixed(2)}" y="${(H - 10).toFixed(2)}" text-anchor="middle">${lab}</text>`;
+    }).join('');
+
+    return `
+        <svg class="chart chart--wow" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet" role="img">
+            <line class="chart__grid"
+                  x1="${M.l}" x2="${(M.l + innerW).toFixed(2)}"
+                  y1="${(M.t + innerH).toFixed(2)}" y2="${(M.t + innerH).toFixed(2)}" />
+            ${bars.join('')}
+            ${ticks}
+            <!-- Inline legend bottom-right. Two small swatches + labels. -->
+            <g transform="translate(${(W - 200).toFixed(2)} ${(M.t - 4).toFixed(2)})">
+                <rect class="chart__wow-cur"  x="0"  y="-2" width="14" height="10" rx="2"/>
+                <text class="chart__tick" x="20" y="6">this week</text>
+                <rect class="chart__wow-prev" x="92" y="-2" width="14" height="10" rx="2"/>
+                <text class="chart__tick" x="112" y="6">last week</text>
+            </g>
+        </svg>
+    `;
+}
+
+/** Year-in-review surface — single big retrospective card for the
+ *  current calendar year. Bucketed by month for the bar strip; the
+ *  copy walks through the year's headlines (total hours, best month,
+ *  longest day, top hour). Hidden when the user has fewer than 30
+ *  active days because the numbers are misleading at small samples. */
+function renderYearInReview(sessions, hourBuckets) {
+    if (!sessions.length) return '';
+    const now = new Date();
+    const yearStart = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
+    const yearSessions = sessions.filter((s) => s.startedAt >= yearStart.getTime());
+    if (yearSessions.length === 0) return '';
+
+    const totalSec = yearSessions.reduce((a, s) => a + (s.durationSeconds || 0), 0);
+    const totalHrs = totalSec / 3600;
+
+    // Per-month minutes for the year — index 0..11, Jan..Dec.
+    const monthMin = new Array(12).fill(0);
+    const monthSessions = new Array(12).fill(0);
+    for (const s of yearSessions) {
+        const m = new Date(s.startedAt).getMonth();
+        monthMin[m] += (s.durationSeconds || 0) / 60;
+        monthSessions[m] += 1;
+    }
+    const peakMonthIdx = monthMin.indexOf(Math.max(...monthMin));
+    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    // Best (longest) day this year.
+    const dayMap = new Map();
+    for (const s of yearSessions) {
+        const d = new Date(s.startedAt);
+        d.setHours(0, 0, 0, 0);
+        const k = d.getTime();
+        dayMap.set(k, (dayMap.get(k) || 0) + (s.durationSeconds || 0) / 60);
+    }
+    let bestDayKey = 0;
+    let bestDayMin = 0;
+    for (const [k, v] of dayMap.entries()) {
+        if (v > bestDayMin) { bestDayMin = v; bestDayKey = k; }
+    }
+    const activeDays = dayMap.size;
+    if (activeDays < 30) return ''; // not enough data to retrospect on
+
+    const peakHour = hourBuckets.indexOf(Math.max(...hourBuckets));
+    const bestDayLabel = new Date(bestDayKey).toLocaleDateString(undefined, {
+        weekday: 'long', month: 'short', day: 'numeric',
+    });
+
+    const peakBar = Math.max(...monthMin, 1);
+    const monthBars = monthMin.map((min, i) => {
+        const intensity = min / peakBar;
+        const isPeak = i === peakMonthIdx;
+        return `
+            <div class="year-review__month ${isPeak ? 'is-peak' : ''}">
+                <div class="year-review__month-bar"
+                     style="--h:${(Math.max(0.04, intensity) * 100).toFixed(1)}%"
+                     title="${monthLabels[i]} · ${Math.round(min)} min · ${monthSessions[i]} sessions"></div>
+                <span class="year-review__month-label">${monthLabels[i]}</span>
+            </div>
+        `;
+    }).join('');
+
+    return `
+        <section class="year-review">
+            <header class="year-review__head">
+                <span class="year-review__eyebrow">${now.getFullYear()} so far</span>
+                <h3 class="year-review__title">Your year in focus</h3>
+            </header>
+            <div class="year-review__hero">
+                <div class="year-review__hero-stat">
+                    <span class="year-review__hero-num">${totalHrs >= 1 ? totalHrs.toFixed(1) : Math.round(totalSec / 60)}</span>
+                    <span class="year-review__hero-unit">${totalHrs >= 1 ? 'hours focused' : 'minutes focused'}</span>
+                </div>
+                <ul class="year-review__hero-meta">
+                    <li><span>${yearSessions.length}</span> sessions</li>
+                    <li><span>${activeDays}</span> active days</li>
+                    <li><span>${monthLabels[peakMonthIdx]}</span> best month</li>
+                </ul>
+            </div>
+            <div class="year-review__bars" aria-label="Monthly focus minutes">${monthBars}</div>
+            <ul class="year-review__highlights">
+                <li>
+                    <span class="year-review__highlight-label">Longest day</span>
+                    <span class="year-review__highlight-value">${Math.round(bestDayMin)} min</span>
+                    <span class="year-review__highlight-sub">${escapeHtml(bestDayLabel)}</span>
+                </li>
+                <li>
+                    <span class="year-review__highlight-label">Peak hour</span>
+                    <span class="year-review__highlight-value">${escapeHtml(formatHour(peakHour))}</span>
+                    <span class="year-review__highlight-sub">across the whole year</span>
+                </li>
+                <li>
+                    <span class="year-review__highlight-label">Best month</span>
+                    <span class="year-review__highlight-value">${escapeHtml(monthLabels[peakMonthIdx])}</span>
+                    <span class="year-review__highlight-sub">${Math.round(monthMin[peakMonthIdx])} min · ${monthSessions[peakMonthIdx]} sessions</span>
+                </li>
+            </ul>
+        </section>
     `;
 }
 
@@ -2737,14 +3085,21 @@ function kpiRow(items) {
     `;
 }
 
-function kpi({ label, value, unit = '', count = true }) {
+function kpi({ label, value, unit = '', count = true, trend = null }) {
     const numAttr = count && Number.isFinite(Number(value)) ? `data-count="${value}"` : '';
     const display = count && Number.isFinite(Number(value)) ? '0' : escapeHtml(String(value));
+    // Optional trend: an array of recent values rendered as a tiny
+    // sparkline under the number. Lets a single KPI tile carry both
+    // the headline and the recent direction without a separate chart.
+    const spark = Array.isArray(trend) && trend.length >= 2
+        ? `<span class="kpi__spark">${sparkline({ values: trend, width: 80, height: 22 })}</span>`
+        : '';
     return `
         <div class="kpi">
             <span class="kpi__num" ${numAttr}>${display}</span>
             ${unit ? `<span class="kpi__unit">${escapeHtml(unit)}</span>` : ''}
             <span class="kpi__label">${escapeHtml(label)}</span>
+            ${spark}
         </div>
     `;
 }

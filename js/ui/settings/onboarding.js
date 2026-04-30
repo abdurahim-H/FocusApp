@@ -46,8 +46,8 @@ const STEPS = [
     },
     {
         title: 'Tasks',
-        body: 'Track what you’re working on. Tasks persist across refreshes.',
-        target: '.task-section',
+        body: 'A bottom dock holds your task list on the Focus tab. Tap the pull-rail to expand it; tap any task to mark it done. Tasks persist across refreshes.',
+        target: '#taskDock',
     },
     {
         title: 'Settings',

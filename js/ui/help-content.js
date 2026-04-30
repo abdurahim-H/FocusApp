@@ -188,12 +188,12 @@ export const HELP_CATEGORIES = [
                 a: 'Click <strong>Clear All</strong> below the task list. The button only appears when you have at least one task.',
             },
             {
-                q: 'What is the Expand button for?',
-                a: 'The small <strong>Expand</strong> pill in the "Tasks for this session" header opens the task list in a roomy full-canvas panel — same drop-down style as Settings and the Help Center. Useful when you have a lot of tasks: each row has more breathing room, open tasks are listed first with completed ones underneath, and you get count pills (open / done / total) at the top. Same data as the inline list — adding, completing, or deleting in either surface updates the other live.',
+                q: 'Where do tasks live now?',
+                a: 'Tasks live in a <strong>bottom dock</strong> on the Focus tab — slim by default so the timer stays uncluttered, expanded into a tall panel when you tap the pull-rail at the top. Open tasks come first in the list, completed ones underneath. The header shows count pills (open / done / total). Your collapsed-vs-expanded preference is remembered across reloads.',
             },
             {
-                q: 'Why does the inline list get a scrollbar with three or more tasks?',
-                a: 'The home tab task slot is fixed at 220px tall to leave room for the timer, stats, and the cosmos toolbar below. When the list grows past that height, it scrolls inside its box rather than spilling onto other UI. Use the Expand panel above for an unconstrained view.',
+                q: 'How do I see more than one task at once?',
+                a: 'Tap the small handle at the top of the dock to expand it. The expanded panel grows to about 60% of the viewport height — plenty of room for a long list, with internal scrolling when content overflows. Esc or clicking outside collapses it back.',
             },
             {
                 q: 'Do tasks persist?',
@@ -683,7 +683,7 @@ export const HELP_CATEGORIES = [
         entries: [
             {
                 q: 'What keyboard shortcuts exist?',
-                a: '<table class="hc-shortcut-table"><tr><td><kbd>Space</kbd></td><td>Start / pause timer</td></tr><tr><td><kbd>R</kbd></td><td>Reset timer</td></tr><tr><td><kbd>1</kbd></td><td>Switch to Home</td></tr><tr><td><kbd>2</kbd></td><td>Switch to Focus</td></tr><tr><td><kbd>/</kbd></td><td>Focus the task input (auto-switches to Focus tab if needed)</td></tr><tr><td><kbd>?</kbd></td><td>Open this Help Center</td></tr><tr><td><kbd>i</kbd></td><td>Open the Profile</td></tr><tr><td><kbd>Alt</kbd>+<kbd>L</kbd></td><td>Open the cosmos accessible mixer (flat keyboard surface for the sound bodies)</td></tr><tr><td><kbd>Esc</kbd></td><td>Close any modal / panel</td></tr></table><p style="margin-top:10px;font-size:12px;color:rgba(255,246,225,0.6);">A legacy <kbd>3</kbd> binding labelled "Ambient mode" still appears in <strong>Settings → Shortcuts</strong> for back-compat. Ambient is no longer a top-level tab, so the binding currently does nothing.</p>',
+                a: '<table class="hc-shortcut-table"><tr><td><kbd>Space</kbd></td><td>Start / pause timer</td></tr><tr><td><kbd>R</kbd></td><td>Reset timer</td></tr><tr><td><kbd>1</kbd></td><td>Switch to Home</td></tr><tr><td><kbd>2</kbd></td><td>Switch to Focus</td></tr><tr><td><kbd>3</kbd></td><td>Open the sound library</td></tr><tr><td><kbd>/</kbd></td><td>Focus the task input (auto-switches to Focus tab if needed)</td></tr><tr><td><kbd>?</kbd></td><td>Open this Help Center</td></tr><tr><td><kbd>i</kbd></td><td>Open the Profile</td></tr><tr><td><kbd>Alt</kbd>+<kbd>L</kbd></td><td>Open the cosmos accessible mixer (flat keyboard surface for the sound bodies)</td></tr><tr><td><kbd>Esc</kbd></td><td>Close any modal / panel</td></tr></table>',
             },
             {
                 q: 'Can I rebind shortcuts?',

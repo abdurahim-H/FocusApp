@@ -1,0 +1,203 @@
+/* ════════════════════════════════════════════════════════════════════════
+   DATE PICKER — custom calendar popover used by task due dates.
+   ════════════════════════════════════════════════════════════════════════
+   Replaces the native <input type="date"> popup so the calendar matches
+   the rest of the app's warm-gold cosmic aesthetic instead of the bare
+   browser-default surface. Anchored to a trigger button with viewport-
+   edge flipping in JS. */
+
+.date-picker {
+    position: fixed;
+    z-index: 2400;
+    width: 296px;
+    padding: 14px 16px 14px;
+    border-radius: 16px;
+    background: linear-gradient(
+        180deg,
+        rgba(28, 22, 14, 0.94),
+        rgba(18, 14, 8, 0.94)
+    );
+    border: 1px solid rgba(255, 220, 160, 0.22);
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.55),
+        0 0 24px rgba(255, 205, 115, 0.12),
+        0 0 0 0.5px rgba(255, 220, 160, 0.08);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    color: rgba(255, 246, 225, 0.92);
+    user-select: none;
+    animation: date-picker-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes date-picker-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header row ─────────────────────────────────────────────────────── */
+.date-picker__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.date-picker__title {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: #faf3e3;
+}
+.date-picker__nav {
+    display: flex;
+    gap: 4px;
+}
+.date-picker__nav-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(255, 220, 160, 0.06);
+    border: 1px solid rgba(255, 220, 160, 0.14);
+    border-radius: 8px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255, 246, 225, 0.78);
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.date-picker__nav-btn:hover,
+.date-picker__nav-btn:focus-visible {
+    background: rgba(255, 220, 160, 0.16);
+    border-color: rgba(255, 220, 160, 0.36);
+    color: #faf3e3;
+    outline: none;
+}
+
+/* ── Weekday header (M T W T F S S) ─────────────────────────────────── */
+.date-picker__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 4px;
+}
+.date-picker__weekdays > span {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-align: center;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.5);
+    padding: 6px 0 4px;
+}
+
+/* ── Day grid ───────────────────────────────────────────────────────── */
+.date-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+.date-picker__day {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 12.5px;
+    font-weight: 350;
+    color: rgba(255, 246, 225, 0.85);
+    height: 32px;
+    padding: 0;
+    position: relative;
+    cursor: pointer;
+    transition:
+        background 0.16s ease,
+        border-color 0.16s ease,
+        color 0.16s ease,
+        transform 0.18s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.date-picker__day:hover,
+.date-picker__day:focus-visible {
+    background: rgba(255, 220, 160, 0.12);
+    border-color: rgba(255, 220, 160, 0.32);
+    outline: none;
+}
+.date-picker__day:active {
+    transform: scale(0.96);
+}
+.date-picker__day.is-outside {
+    color: rgba(255, 246, 225, 0.28);
+}
+.date-picker__day.is-today {
+    color: #ffd07a;
+    font-weight: 500;
+}
+.date-picker__day.is-today::after {
+    /* Subtle dot under today's number — readable cue without
+       overloading the cell with a full ring. */
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #ffd07a;
+}
+.date-picker__day.is-selected {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 205, 115, 0.32),
+        rgba(255, 205, 115, 0.18)
+    );
+    border-color: rgba(255, 220, 160, 0.55);
+    color: #faf3e3;
+    box-shadow: inset 0 0 0 0.5px rgba(255, 220, 160, 0.4);
+}
+
+/* ── Footer (Clear · Today) ─────────────────────────────────────────── */
+.date-picker__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 220, 160, 0.08);
+}
+.date-picker__foot-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: rgba(255, 220, 160, 0.78);
+    cursor: pointer;
+    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+.date-picker__foot-btn:hover,
+.date-picker__foot-btn:focus-visible {
+    background: rgba(255, 220, 160, 0.12);
+    border-color: rgba(255, 220, 160, 0.28);
+    color: #faf3e3;
+    outline: none;
+}
+.date-picker__foot-btn--ghost {
+    color: rgba(255, 246, 225, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .date-picker { animation: none; }
+    .date-picker__day,
+    .date-picker__nav-btn,
+    .date-picker__foot-btn { transition: none; }
+}

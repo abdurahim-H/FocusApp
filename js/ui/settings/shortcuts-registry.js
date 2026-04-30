@@ -34,10 +34,13 @@ export const SHORTCUTS = [
         storeKey: 'shortcuts.mode.focus',
     },
     {
-        id: 'mode.ambient',
-        label: 'Ambient mode',
+        id: 'library.open',
+        label: 'Open sound library',
         defaultKey: '3',
         displayDefault: '3',
+        // storeKey kept as `shortcuts.mode.ambient` so users who rebound
+        // the legacy "Ambient mode" key (when Ambient was a top-level
+        // tab) keep their custom binding without a migration step.
         storeKey: 'shortcuts.mode.ambient',
     },
     {

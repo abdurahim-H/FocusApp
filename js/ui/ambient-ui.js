@@ -870,25 +870,52 @@ function renderLibrary() {
     let html = '';
 
     // ── Constellations (saved + built-in mixes) above the raw sounds ───
-    // These activate a whole arrangement of bodies at once.
+    // These activate a whole arrangement of bodies at once. Each card
+    // hosts two embedded controls — a pin star (focus-start mix) and a
+    // menu (rename / share / delete for user mixes; share-only for
+    // built-ins). Outer container is a <div role="button"> rather than
+    // <button> because nested buttons are invalid HTML and browsers
+    // silently relocate the inner ones at parse time.
     const mixes = getAllMixes();
+    const pinnedMixId = settingsGet('sounds.focusStartMixId');
     if (mixes.length) {
         html += `<section class="libcat libcat--constellations">
             <h3 class="libcat__title">Constellations</h3>
             <div class="libcat__grid">
                 ${mixes
-                    .map(
-                        (m) => `
-                    <button class="libcard libcard--constellation" data-mix="${escapeAttr(m.id)}"
-                            aria-label="Activate ${escapeAttr(m.name)} constellation"
+                    .map((m) => {
+                        const isPinned = pinnedMixId === m.id;
+                        const menuTitle = m.builtin
+                            ? 'Share constellation'
+                            : 'Rename, share, or delete';
+                        return `
+                    <div class="libcard libcard--constellation ${isPinned ? 'is-pinned' : ''}"
+                            role="button" tabindex="0"
+                            data-mix="${escapeAttr(m.id)}"
+                            aria-label="Activate ${escapeAttr(m.name)} constellation${isPinned ? ' (auto-starts with focus)' : ''}"
                             data-sound-name="${escapeAttr(m.name)}"
                             data-sound-category="constellation ${m.builtin ? 'built-in' : 'saved'}">
                         <span class="libcard__art" aria-hidden="true">${constellationPreviewSVG(m)}</span>
                         <span class="libcard__name">${escapeHtml(m.name)}</span>
                         <span class="libcard__sub">${m.active?.length || 0} sound${(m.active?.length || 0) === 1 ? '' : 's'}</span>
-                    </button>
-                `
-                    )
+                        <button class="libcard__pin ${isPinned ? 'is-on' : ''}"
+                                type="button"
+                                data-mix-pin="${escapeAttr(m.id)}"
+                                aria-label="${isPinned ? 'Unpin from focus start' : 'Pin as focus-start constellation'}"
+                                title="${isPinned ? 'Pinned as focus-start constellation' : 'Pin as focus-start constellation'}">
+                            ${isPinned ? '★' : '☆'}
+                        </button>
+                        <button class="libcard__menu" type="button"
+                                data-mix-menu="${escapeAttr(m.id)}"
+                                aria-label="Constellation options"
+                                title="${menuTitle}">
+                            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
+                                <circle cx="3" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="13" cy="8" r="1.4"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                    })
                     .join('')}
             </div>
         </section>`;
@@ -929,9 +956,44 @@ function renderLibrary() {
     body.innerHTML = html;
 
     body.querySelectorAll('.libcard[data-mix]').forEach((el) => {
-        el.addEventListener('click', async () => {
+        const activate = async (e) => {
+            // Embedded pin and menu buttons short-circuit out so a
+            // tap on them doesn't also trigger the mix activation.
+            if (e.target.closest('[data-mix-pin]') || e.target.closest('[data-mix-menu]')) return;
             await ensureAudio();
             await activateMix(el.dataset.mix);
+        };
+        el.addEventListener('click', activate);
+        el.addEventListener('keydown', (e) => {
+            // Match native button semantics — Enter or Space activates.
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            if (e.target.closest('[data-mix-pin]') || e.target.closest('[data-mix-menu]')) return;
+            e.preventDefault();
+            activate(e);
+        });
+    });
+
+    // Pin star — toggles focus-start mix and auto-enables the
+    // auto-start-on-focus setting the first time you pin one.
+    body.querySelectorAll('[data-mix-pin]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.mixPin;
+            const current = settingsGet('sounds.focusStartMixId');
+            if (current === id) {
+                settingsSet('sounds.focusStartMixId', null);
+            } else {
+                settingsSet('sounds.focusStartMixId', id);
+                settingsSet('sounds.autoStartOnFocus', true);
+            }
+        });
+    });
+
+    // Menu (⋯) — opens the rename / share / delete popover.
+    body.querySelectorAll('[data-mix-menu]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openMixMenu(btn, btn.dataset.mixMenu);
         });
     });
 
@@ -1195,7 +1257,7 @@ function wireDrawer() {
     });
 }
 
-async function openDrawer() {
+export async function openDrawer() {
     const drawer = document.getElementById('libraryDrawer');
     if (!drawer) return;
     await ensureAudio();

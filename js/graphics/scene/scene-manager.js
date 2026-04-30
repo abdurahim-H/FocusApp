@@ -9,31 +9,20 @@ import {
 } from '../../engine/babylon-engine.js';
 import { getMasterEnergy } from '../../features/sounds.js';
 import { createFPSWatchdog, detectDeviceProfile } from '../../utils/performance-profile.js';
-import { createBlackHole, disposeBlackHole, updateBlackHole } from '../blackhole/blackhole.js';
 import { initSoundBodies, updateSoundBodies } from '../blackhole/sound-bodies.js';
-import {
-    createCosmicMotes,
-    disposeCosmicMotes,
-    updateCosmicMotes,
-} from '../environment/cosmic-motes.js';
-import {
-    createCosmicSkybox,
-    disposeCosmicSkybox,
-    updateCosmicSkybox,
-} from '../environment/cosmic-skybox.js';
-import {
-    createEtherealPetals,
-    disposeEtherealPetals,
-    updateEtherealPetals,
-} from '../environment/ethereal-petals.js';
-import { createNebula, disposeNebula, updateNebula } from '../environment/nebula.js';
-import {
-    createShootingStars,
-    disposeShootingStars,
-    updateShootingStars,
-} from '../environment/shooting-stars.js';
-import { createStarGlows, disposeStarGlows, updateStarGlows } from '../environment/star-glows.js';
-import { createStarField, disposeStarField, updateStarField } from '../environment/starfield.js';
+// Update functions are still imported here (not via the registry) so
+// the render loop's hot path stays a flat sequence of direct calls —
+// the registry handles theme init / dispose, scene-manager drives
+// per-frame updates.
+import { updateBlackHole } from '../blackhole/blackhole.js';
+import { updateCosmicMotes } from '../environment/cosmic-motes.js';
+import { updateCosmicSkybox } from '../environment/cosmic-skybox.js';
+import { updateEtherealPetals } from '../environment/ethereal-petals.js';
+import { updateNebula } from '../environment/nebula.js';
+import { updateShootingStars } from '../environment/shooting-stars.js';
+import { updateStarGlows } from '../environment/star-glows.js';
+import { updateStarField } from '../environment/starfield.js';
+import { activateTheme, deactivateTheme, getTheme } from './theme-registry.js';
 import {
     createAnamorphicStreak,
     disposeAnamorphicStreak,
@@ -62,6 +51,12 @@ let scene = null;
 let camera = null;
 let engine = null;
 let canvas = null;
+// The active theme + the shared ctx the registry uses to thread
+// scene / camera / blackholeMesh through every module's init.
+// Exposed via getActiveTheme() for future UI surfaces that want to
+// reflect / override the current theme at runtime.
+let activeTheme = null;
+let activeCtx = null;
 
 // Mouse parallax state (desktop only)
 const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
@@ -130,19 +125,28 @@ export async function init3D() {
         // Setup cinematic camera first
         setupCinematicCamera();
 
-        // Create scene elements
-        createCosmicSkybox(scene);
-        createStarField(scene, camera, deviceProfile.starMultiplier);
-        createNebula(scene, camera, deviceProfile.shaderOctaves);
-        createShootingStars(scene);
-        createStarGlows(scene, camera);
-        const blackholeMesh = createBlackHole(scene, camera);
+        // Bring up the active theme. The theme registry knows which
+        // modules to init and in what order; today only Black Hole is
+        // registered, so this is a one-line drop-in for the historical
+        // hard-coded init sequence. Future themes (Cosmic Garden,
+        // Liminal Library, etc.) plug in via theme-registry.js without
+        // touching this file.
+        activeTheme = getTheme(await readSavedThemeId());
+        activeCtx = activateTheme(activeTheme, {
+            scene,
+            camera,
+            deviceProfile,
+            blackholeMesh: null,
+        });
+
         // Cosmos sound system — bodies that orbit the black hole, one per
         // active ambient track. Doesn't spawn anything on init; ambient-ui
-        // calls summonBody() when the user starts a sound.
-        initSoundBodies(scene, camera, blackholeMesh);
-        createCosmicMotes(scene);
-        createEtherealPetals(scene);
+        // calls summonBody() when the user starts a sound. The blackhole
+        // module is responsible for stashing its mesh on the ctx so we
+        // can pass it through here. Themes without a blackhole skip this.
+        if (activeCtx.blackholeMesh) {
+            initSoundBodies(scene, camera, activeCtx.blackholeMesh);
+        }
 
         // Setup ambient lighting
         setupLighting();
@@ -320,6 +324,48 @@ function setupLighting() {
     fillLight.diffuse = new BABYLON.Color3(0.4, 0.2, 0.1);
     fillLight.intensity = 0.15;
     fillLight.range = 200;
+}
+
+/** Pull the user's saved theme id from settings. Falls back to null
+ *  (which `getTheme` resolves to the first registered theme). Wrapped
+ *  in a try because the settings store is loaded async at scene init
+ *  and may not be ready on the very first paint. */
+async function readSavedThemeId() {
+    try {
+        const store = await import('../../ui/settings/store.js');
+        return store.get('scene.theme') ?? null;
+    } catch (_) {
+        return null;
+    }
+}
+
+/** Public — current theme metadata. UI surfaces (e.g. settings)
+ *  can read this without coupling to the registry directly. */
+export function getActiveTheme() {
+    return activeTheme;
+}
+
+/** Swap the active theme at runtime. Tears down the old module set,
+ *  brings up the new one through the registry, and reattaches the
+ *  cosmos sound bodies to the new black-hole mesh (if any). Cheap
+ *  per-call: each module disposes its own resources. Safe to spam
+ *  through a settings slider. */
+export function setActiveTheme(id) {
+    if (!scene || !camera) return;
+    if (activeTheme && activeTheme.id === id) return;
+    const next = getTheme(id);
+    if (!next) return;
+    if (activeTheme) deactivateTheme(activeTheme);
+    activeTheme = next;
+    activeCtx = activateTheme(activeTheme, {
+        scene,
+        camera,
+        deviceProfile,
+        blackholeMesh: null,
+    });
+    if (activeCtx.blackholeMesh) {
+        initSoundBodies(scene, camera, activeCtx.blackholeMesh);
+    }
 }
 
 /**

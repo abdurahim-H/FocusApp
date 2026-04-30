@@ -101,6 +101,41 @@ export const SCHEMA = [
         ],
     },
 
+    // ───── Streams (YouTube / SoundCloud video themes) ─────
+    // The select feeds activeStreamId via apply.js. Picking "None"
+    // returns the user to the 3D theme; any other choice replaces
+    // the canvas with a curated full-viewport iframe. The custom URL
+    // text field below accepts any YouTube / SoundCloud link.
+    { section: 'scene', type: 'group', label: 'Streams', collapsible: true, collapsed: true },
+    {
+        section: 'scene',
+        type: 'select',
+        key: 'scene.streamId',
+        label: 'Live stream backdrop',
+        default: '',
+        options: [
+            { value: '', label: 'None — use 3D theme' },
+            { value: 'lofigirl', label: 'Lofi Girl — beats to focus to' },
+            { value: 'lofigirl-sleep', label: 'Lofi Girl — beats to sleep to' },
+            { value: 'chillhop', label: 'Chillhop — afternoon café' },
+            { value: 'jazzcafe', label: 'Cozy Jazz Café' },
+            { value: 'fireplace', label: 'Fireplace with crackling' },
+            { value: 'rain-window', label: 'Rain on a window' },
+            { value: 'studywithme', label: 'Study with me — Korea live' },
+            { value: 'classical', label: 'Classical study music' },
+        ],
+        help: 'Replaces the 3D scene with a YouTube / SoundCloud stream behind the focus card.',
+    },
+    {
+        section: 'scene',
+        type: 'text',
+        key: 'scene.streamCustomUrl',
+        label: 'Custom URL',
+        default: '',
+        placeholder: 'paste any youtube.com / soundcloud.com link',
+        help: 'Overrides the picker above. Clear to revert.',
+    },
+
     { section: 'scene', type: 'group', label: 'Quality' },
     {
         section: 'scene',
@@ -227,6 +262,34 @@ export const SCHEMA = [
     // ═══════════════════════════════════════════════════════════════════════
     // TIMER
     // ═══════════════════════════════════════════════════════════════════════
+    { section: 'timer', type: 'group', label: 'Cycle preset' },
+    {
+        section: 'timer',
+        type: 'select',
+        key: 'timer.cyclePreset',
+        label: 'Style',
+        default: 'pomodoro',
+        options: [
+            { value: 'pomodoro', label: 'Pomodoro (25 / 5)' },
+            { value: 'pomodoro-long', label: 'Long Pomodoro (50 / 10)' },
+            { value: '52-17', label: '52 / 17 — DeskTime' },
+            { value: '90-20', label: '90 / 20 — Ultradian rhythm' },
+            { value: 'deepwork', label: 'Deep work (180 / 30)' },
+            { value: 'open-ended', label: 'Open-ended (count up, no target)' },
+            { value: 'custom', label: 'Custom — use the sliders below' },
+        ],
+        help: 'Picks a focus / break rhythm. The sliders update to match; switch to "Custom" to set your own.',
+    },
+
+    // Hidden flag — set by the preset picker; not rendered in the UI.
+    // Drives the count-up open-ended mode in timer.js.
+    {
+        section: 'timer',
+        type: 'hidden',
+        key: 'timer.openEnded',
+        default: false,
+    },
+
     { section: 'timer', type: 'group', label: 'Durations' },
     {
         section: 'timer',
@@ -234,7 +297,7 @@ export const SCHEMA = [
         key: 'timer.focusDuration',
         label: 'Focus',
         min: 1,
-        max: 90,
+        max: 240,
         step: 1,
         unit: 'm',
         default: 25,
@@ -306,6 +369,81 @@ export const SCHEMA = [
         default: 4,
     },
 
+    { section: 'timer', type: 'group', label: 'Goals' },
+    {
+        section: 'timer',
+        type: 'slider',
+        key: 'timer.dailyGoalMinutes',
+        label: 'Daily focus goal',
+        min: 0,
+        max: 480,
+        step: 5,
+        unit: 'm',
+        default: 90,
+        help: 'Progress ring shows how close today is to this target. 0 disables the ring.',
+    },
+    {
+        section: 'timer',
+        type: 'slider',
+        key: 'timer.weeklyGoalMinutes',
+        label: 'Weekly focus goal',
+        min: 0,
+        max: 3600,
+        step: 30,
+        unit: 'm',
+        default: 720,
+        help: 'Optional weekly target shown on the Home week tile. 0 hides it.',
+    },
+    {
+        section: 'timer',
+        type: 'stepper',
+        key: 'timer.streakGoal',
+        label: 'Streak target',
+        min: 0,
+        max: 365,
+        step: 1,
+        suffix: 'days',
+        default: 7,
+        help: 'Surfaces a chip next to the day-streak counter once you reach this run.',
+    },
+    {
+        section: 'timer',
+        type: 'stepper',
+        key: 'timer.weeklyTasksGoal',
+        label: 'Weekly tasks goal',
+        min: 0,
+        max: 200,
+        step: 1,
+        suffix: 'tasks',
+        default: 20,
+        help: 'Soft target — shows progress toward this number on the Home week tile.',
+    },
+
+    // Optional gamification layer. Off by default for the people who hate it,
+    // on for those who love it (per the roadmap framing). Personal-best alerts
+    // are opt-in but default to on because they're a single celebratory toast
+    // when a record day is set — calm enough that most users will want them.
+    // Streak insurance is opt-in and off by default — enabling it is an
+    // affirmative choice to be allowed one missed day per week without
+    // breaking the streak.
+    { section: 'timer', type: 'group', label: 'Gamification' },
+    {
+        section: 'timer',
+        type: 'toggle',
+        key: 'gamification.personalBestAlerts',
+        label: 'Personal-best alerts',
+        default: true,
+        help: 'Celebrates when a day overtakes your previous best for total focus time.',
+    },
+    {
+        section: 'timer',
+        type: 'toggle',
+        key: 'gamification.streakInsurance',
+        label: 'Streak insurance',
+        default: false,
+        help: 'Forgives one missed day per week so the streak survives a single off-day.',
+    },
+
     { section: 'timer', type: 'group', label: 'Display' },
     {
         section: 'timer',
@@ -375,6 +513,14 @@ export const SCHEMA = [
         default: false,
         help: 'When a focus session begins, play the mix pinned as your focus-start mix',
     },
+    {
+        section: 'sounds',
+        type: 'toggle',
+        key: 'sounds.muteOnStream',
+        label: 'Mute cosmos sounds during a stream theme',
+        default: true,
+        help: 'When a YouTube or SoundCloud backdrop is active, fade the cosmos ambient mix to silence so the two audio sources don\'t fight. Turn off to layer them.',
+    },
 
     // ═══════════════════════════════════════════════════════════════════════
     // NOTIFICATIONS
@@ -417,6 +563,58 @@ export const SCHEMA = [
             { value: 30, label: '30s' },
             { value: 0, label: 'Never' },
         ],
+    },
+
+    // ───── Wellness reminders during focus sessions (Wave 18) ─────
+    // All three are off by default. Each surfaces as a calm in-app
+    // toast — never an OS notification — and only fires while a focus
+    // session is actively running. Break sessions are reminder-free.
+    { section: 'notifications', type: 'group', label: 'Wellness reminders' },
+    {
+        section: 'notifications',
+        type: 'toggle',
+        key: 'wellness.eyeRestEnabled',
+        label: '20-20-20 eye rest',
+        default: false,
+        help: 'Every 20 min during focus, a gentle nudge to look 20 ft away for 20 s.',
+    },
+    {
+        section: 'notifications',
+        type: 'toggle',
+        key: 'wellness.hydrationEnabled',
+        label: 'Hydration check-in',
+        default: false,
+    },
+    {
+        section: 'notifications',
+        type: 'slider',
+        key: 'wellness.hydrationInterval',
+        label: 'Hydration every',
+        min: 15,
+        max: 120,
+        step: 5,
+        unit: 'm',
+        default: 60,
+        showIf: (s) => s.get('wellness.hydrationEnabled'),
+    },
+    {
+        section: 'notifications',
+        type: 'toggle',
+        key: 'wellness.postureEnabled',
+        label: 'Posture check-in',
+        default: false,
+    },
+    {
+        section: 'notifications',
+        type: 'slider',
+        key: 'wellness.postureInterval',
+        label: 'Posture every',
+        min: 15,
+        max: 120,
+        step: 5,
+        unit: 'm',
+        default: 45,
+        showIf: (s) => s.get('wellness.postureEnabled'),
     },
 
     // ═══════════════════════════════════════════════════════════════════════

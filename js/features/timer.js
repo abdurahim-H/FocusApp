@@ -4,7 +4,8 @@
 // digits, the session-complete UI hook, and the notification dispatch.
 // Per-session analytics live in features/sessions.js, which we open at
 // start and seal at end.
-import { tasks, state } from '../core/state.js';
+import { activeTaskId, tasks, state } from '../core/state.js';
+import { addSpentSeconds } from './tasks.js';
 import { abandonCurrentSession, beginSession, endSession } from '../features/sessions.js';
 import { recordSessionComplete } from '../features/statistics.js';
 import { get as settingsGet } from '../ui/settings/store.js';
@@ -113,6 +114,33 @@ export function startTimer() {
     updateSessionDisplay();
     updateTimerDisplay();
 
+    // Open-ended mode (Wave 17) — flips the timer into a stopwatch
+    // that counts up from 00:00 instead of down to zero. No
+    // completeSession trigger — the user explicitly stops the timer
+    // when they're done, and `pauseTimer()` / `resetTimer()` handle
+    // recording elapsed time. Break sessions are still countdown-based
+    // (a break with no end isn't a break).
+    const openEnded = !state.timer.isBreak && !!settingsGet('timer.openEnded');
+    if (openEnded) {
+        // Re-anchor display to 0:00 on the very first tick so a fresh
+        // start doesn't briefly show the old 25:00 leftover.
+        if (!wasPaused) {
+            state.timer.minutes = 0;
+            state.timer.seconds = 0;
+            updateTimerDisplay();
+        }
+        state.timer.interval = trackSetInterval(() => {
+            state.timer.seconds++;
+            if (state.timer.seconds >= 60) {
+                state.timer.seconds = 0;
+                state.timer.minutes++;
+            }
+            updateTimerDisplay();
+            emitTimerParticles();
+        }, 1000);
+        return;
+    }
+
     // Tick once per second. The interval is created NOW, so the first
     // callback fires after exactly 1000ms — which is correct: the user just
     // started at 25:00, the first decrement should land at the 1-second mark.
@@ -146,6 +174,12 @@ export function pauseTimer() {
         state.timer.autoStartTimeout = null;
     }
 
+    document.dispatchEvent(
+        new CustomEvent('focus-timer:pause', {
+            detail: { isBreak: state.timer.isBreak, isLongBreak: !!state.timer.isLongBreak },
+        })
+    );
+
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     if (startBtn) {
@@ -169,6 +203,12 @@ export function resetTimer() {
         state.timer.autoStartTimeout = null;
     }
 
+    document.dispatchEvent(
+        new CustomEvent('focus-timer:reset', {
+            detail: { isBreak: state.timer.isBreak, isLongBreak: !!state.timer.isLongBreak },
+        })
+    );
+
     // Drop the in-flight session record. We don't know the user's
     // intended end time, so synthesizing one would be dishonest data.
     abandonCurrentSession();
@@ -181,6 +221,9 @@ export function resetTimer() {
         } else {
             state.timer.minutes = state.timer.settings.shortBreakDuration;
         }
+    } else if (settingsGet('timer.openEnded')) {
+        // Open-ended mode reset = back to 00:00 ready to count up.
+        state.timer.minutes = 0;
     } else {
         state.timer.minutes = state.timer.settings.focusDuration;
     }
@@ -269,12 +312,16 @@ export function completeSession() {
         // Focus session completed
         state.timer.pomodoroCount++;
 
-        // Calculate ACTUAL elapsed seconds (not configured duration).
-        // If user skipped at 24:45, remaining = 24*60+45 = 1485s,
-        // configured = 25*60 = 1500s, elapsed = 15s.
+        // Calculate ACTUAL elapsed seconds. Two paths:
+        //   - Countdown: elapsed = configured − remaining
+        //   - Open-ended (Wave 17): the timer counted UP, so the
+        //     visible minutes/seconds IS the elapsed time.
+        const openEnded = !!settingsGet('timer.openEnded');
         const configuredSeconds = state.timer.settings.focusDuration * 60;
         const remainingSeconds = state.timer.minutes * 60 + state.timer.seconds;
-        const elapsedSeconds = configuredSeconds - remainingSeconds;
+        const elapsedSeconds = openEnded
+            ? state.timer.minutes * 60 + state.timer.seconds
+            : configuredSeconds - remainingSeconds;
 
         state.universe.focusMinutes += Math.round(elapsedSeconds / 60);
         state.universe.stars += 1;
@@ -282,11 +329,19 @@ export function completeSession() {
         // Aggregate counters (legacy stats UI).
         recordSessionComplete(elapsedSeconds);
 
-        // Per-session record (analytics + cloud sync).
+        // Credit elapsed time to the pinned active task — drives the
+        // per-task pomodoro badge and the upcoming Tasks-card ETA.
+        if (activeTaskId.value) {
+            addSpentSeconds(activeTaskId.value, elapsedSeconds);
+        }
+
+        // Per-session record (analytics + cloud sync). Open-ended
+        // sessions are always "completed" — the user defined the end
+        // by stopping; there's no target to compare against.
         const taskList = tasks.value || [];
         endSession({
             elapsedSeconds,
-            completed: elapsedSeconds >= configuredSeconds,
+            completed: openEnded ? true : elapsedSeconds >= configuredSeconds,
             taskCount: taskList.length,
             tasksCompleted: taskList.filter((t) => t.completed).length,
         });

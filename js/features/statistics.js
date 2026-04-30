@@ -12,7 +12,9 @@
 // Persisted in localStorage key `fu_stats_v1`.
 
 import { effect, signal } from '../core/state.js';
-import { getDailySessionCounts, onSessionsChange } from './sessions.js';
+import { get as settingsGet, subscribe as settingsSub } from '../ui/settings/store.js';
+import { showGentleToast } from '../utils/gentle-toast.js';
+import { getAllSessions, getDailySessionCounts, onSessionsChange } from './sessions.js';
 
 // ============================================================================
 // Signals
@@ -22,6 +24,14 @@ export const totalFocusSeconds = signal(0);
 export const tasksCompletedToday = signal(0);
 export const currentStreak = signal(0);
 export const lastFocusDate = signal('');
+// Wave 24.9 — best day on record. Surfaces a celebratory toast when a
+// session pushes today past the previous champion. Persisted alongside
+// the rest of the stats so it survives reloads.
+export const bestDayFocusSeconds = signal(0);
+export const bestDayFocusDate = signal('');
+// Wave 24.8 — streak insurance: ISO date of the day that was forgiven
+// by the most recent freeze. Used to enforce the once-per-week limit.
+export const lastFreezeUsedDate = signal('');
 
 // ============================================================================
 // Persistence
@@ -35,6 +45,22 @@ function todayISO() {
 function yesterdayISO() {
     const d = new Date();
     d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0, 10);
+}
+
+function dayBeforeYesterdayISO() {
+    const d = new Date();
+    d.setDate(d.getDate() - 2);
+    return d.toISOString().slice(0, 10);
+}
+
+// Monday-anchored week start for the streak-insurance "once per week" check.
+// Uses local time so the user's day boundary matches their wall clock.
+function startOfWeekISO() {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    const dow = (d.getDay() + 6) % 7; // Mon=0..Sun=6
+    d.setDate(d.getDate() - dow);
     return d.toISOString().slice(0, 10);
 }
 
@@ -67,13 +93,43 @@ function loadStats() {
         tasksCompletedToday.value =
             isToday && typeof data.tasksCompletedToday === 'number' ? data.tasksCompletedToday : 0;
 
-        // Streak
+        // Streak — preserved if today or yesterday saw a session. With
+        // streak insurance enabled and unused this week, allow a single
+        // gap day so the streak survives a missed yesterday too.
         if (typeof data.currentStreak === 'number') {
+            const insuranceOn = settingsGet('gamification.streakInsurance') === true;
+            const freezeUsedThisWeek =
+                typeof data.lastFreezeUsedDate === 'string' &&
+                data.lastFreezeUsedDate >= startOfWeekISO();
             if (data.lastFocusDate === today || data.lastFocusDate === yesterdayISO()) {
+                currentStreak.value = data.currentStreak;
+            } else if (
+                insuranceOn &&
+                !freezeUsedThisWeek &&
+                data.lastFocusDate === dayBeforeYesterdayISO()
+            ) {
+                // Held the streak via insurance — actual consumption of
+                // the freeze (writing lastFreezeUsedDate = yesterday)
+                // happens in recordSessionComplete when the next session
+                // lands. Keeping it lazy means a user who never returns
+                // doesn't burn an unused freeze.
                 currentStreak.value = data.currentStreak;
             } else {
                 currentStreak.value = 0;
             }
+        }
+
+        // Wave 24.9 — best-day record
+        if (typeof data.bestDayFocusSeconds === 'number') {
+            bestDayFocusSeconds.value = data.bestDayFocusSeconds;
+        }
+        if (typeof data.bestDayFocusDate === 'string') {
+            bestDayFocusDate.value = data.bestDayFocusDate;
+        }
+
+        // Wave 24.8 — streak insurance bookkeeping
+        if (typeof data.lastFreezeUsedDate === 'string') {
+            lastFreezeUsedDate.value = data.lastFreezeUsedDate;
         }
     } catch (e) {
         console.warn('[stats] failed to load:', e);
@@ -81,24 +137,49 @@ function loadStats() {
 }
 
 let persistInitialized = false;
+let persistScheduled = false;
 function setupPersistence() {
+    // recordSessionComplete and resetAllStats both touch 4-8 signals
+    // back-to-back. The naive effect would fire one localStorage write
+    // per signal mutation. Coalescing within a frame keeps that cost
+    // to a single write per event burst without losing any updates —
+    // we always re-snapshot the latest values at flush time.
     effect(() => {
-        const snapshot = {
-            sessionsToday: sessionsToday.value,
-            totalFocusSeconds: totalFocusSeconds.value,
-            tasksCompletedToday: tasksCompletedToday.value,
-            currentStreak: currentStreak.value,
-            lastFocusDate: lastFocusDate.value,
-        };
+        // Touch every persisted signal so the effect re-runs whenever
+        // any of them change.
+        sessionsToday.value;
+        totalFocusSeconds.value;
+        tasksCompletedToday.value;
+        currentStreak.value;
+        lastFocusDate.value;
+        bestDayFocusSeconds.value;
+        bestDayFocusDate.value;
+        lastFreezeUsedDate.value;
+
         if (!persistInitialized) {
             persistInitialized = true;
             return;
         }
-        try {
-            localStorage.setItem(STATS_KEY, JSON.stringify(snapshot));
-        } catch (e) {
-            console.warn('[stats] failed to persist:', e);
-        }
+        if (persistScheduled) return;
+        persistScheduled = true;
+        requestAnimationFrame(() => {
+            persistScheduled = false;
+            const snapshot = {
+                sessionsToday: sessionsToday.value,
+                totalFocusSeconds: totalFocusSeconds.value,
+                tasksCompletedToday: tasksCompletedToday.value,
+                currentStreak: currentStreak.value,
+                lastFocusDate: lastFocusDate.value,
+                bestDayFocusSeconds: bestDayFocusSeconds.value,
+                bestDayFocusDate: bestDayFocusDate.value,
+                lastFreezeUsedDate: lastFreezeUsedDate.value,
+            };
+            try {
+                localStorage.setItem(STATS_KEY, JSON.stringify(snapshot));
+            } catch (e) {
+                console.warn('[stats] failed to persist:', e);
+            }
+        });
     });
 }
 
@@ -118,16 +199,74 @@ export function recordSessionComplete(elapsedSeconds) {
     // Accumulate actual elapsed seconds
     totalFocusSeconds.value = totalFocusSeconds.value + elapsedSeconds;
 
-    // Streak logic
+    // Streak logic — extended with optional once-per-week insurance.
     if (prevDate === today) {
         // Already focused today — streak unchanged
     } else if (prevDate === yesterdayISO()) {
         currentStreak.value = currentStreak.value + 1;
+    } else if (
+        settingsGet('gamification.streakInsurance') === true &&
+        prevDate === dayBeforeYesterdayISO() &&
+        (!lastFreezeUsedDate.value || lastFreezeUsedDate.value < startOfWeekISO())
+    ) {
+        // Wave 24.8 — burn the freeze. Yesterday is treated as continuous
+        // and today extends the streak. Only one freeze per ISO week.
+        currentStreak.value = currentStreak.value + 1;
+        lastFreezeUsedDate.value = yesterdayISO();
     } else {
         currentStreak.value = 1;
     }
 
     lastFocusDate.value = today;
+
+    // Wave 24.9 — personal-best detection. The session record itself is
+    // pushed into `sessions.js` *after* this function returns, so we sum
+    // prior-today sessions and add this session's elapsed time directly.
+    maybeFlagPersonalBest(elapsedSeconds);
+}
+
+function maybeFlagPersonalBest(justFinishedSeconds) {
+    const today = todayISO();
+    const oldBest = bestDayFocusSeconds.value;
+    const oldBestDate = bestDayFocusDate.value;
+    const todayTotal = sumSecondsForDate(today) + justFinishedSeconds;
+
+    if (oldBestDate === today) {
+        // Already the record-holder for the day — keep the cache fresh
+        // but don't re-fire the celebration on every subsequent session.
+        if (todayTotal > oldBest) bestDayFocusSeconds.value = todayTotal;
+        return;
+    }
+
+    if (todayTotal > oldBest && oldBest > 0) {
+        bestDayFocusSeconds.value = todayTotal;
+        bestDayFocusDate.value = today;
+        if (settingsGet('gamification.personalBestAlerts') === true) {
+            celebratePersonalBest(todayTotal);
+        }
+    } else if (todayTotal > oldBest) {
+        // First record set — adopt without alerting.
+        bestDayFocusSeconds.value = todayTotal;
+        bestDayFocusDate.value = today;
+    }
+}
+
+/** Sum focus seconds across all sessions on the given ISO date. Pulls
+ *  from the canonical sessions list; statistics' lifetime accumulator
+ *  isn't day-bucketed so it can't answer this directly.
+ *
+ *  The rest of this module derives "today" from `new Date().toISOString()`
+ *  (UTC), so the day window here MUST also be UTC. Earlier versions used
+ *  `new Date(\`${iso}T00:00:00\`)` which JavaScript parses as local
+ *  midnight — for users in negative-UTC timezones that pushed the
+ *  window forward by 4-12 hours, missing late-evening sessions. The
+ *  trailing `Z` pins the parse to UTC. */
+function sumSecondsForDate(iso) {
+    const startMs = new Date(`${iso}T00:00:00.000Z`).getTime();
+    const endMs = startMs + 86_400_000;
+    return getAllSessions()
+        .filter((s) => s.kind === 'focus' && s.startedAt >= startMs && s.startedAt < endMs)
+        .reduce((a, s) => a + (s.durationSeconds || 0), 0);
 }
 
 /** Called from tasks.js when a task's completed state changes.
@@ -168,27 +307,199 @@ function formatDuration(totalSeconds) {
 // ============================================================================
 // UI rendering — reactive stats bar
 // ============================================================================
+// ============================================================================
+// Period toggle — chips can show today / this week / this month / all time.
+// State stored in localStorage so the user's choice persists across reloads.
+// ============================================================================
+const PERIOD_KEY = 'fu_stats_period';
+const PERIODS = ['today', 'week', 'month', 'all'];
+const PERIOD_LABELS = {
+    today: 'TODAY',
+    week: 'WEEK',
+    month: 'MONTH',
+    all: 'ALL-TIME',
+};
+const PERIOD_SUFFIX = {
+    today: '',
+    week: 'this week',
+    month: 'this month',
+    all: 'all-time',
+};
+
+function loadPeriod() {
+    const v = localStorage.getItem(PERIOD_KEY);
+    return PERIODS.includes(v) ? v : 'today';
+}
+function savePeriod(p) {
+    try { localStorage.setItem(PERIOD_KEY, p); } catch (_) {}
+}
+
+let currentPeriod = loadPeriod();
+const periodChangeSubscribers = new Set();
+
+function setPeriod(p) {
+    if (!PERIODS.includes(p) || p === currentPeriod) return;
+    currentPeriod = p;
+    savePeriod(p);
+    for (const fn of periodChangeSubscribers) fn();
+}
+
+/** Compute the lower bound (epoch ms) for a period — sessions whose
+ *  startedAt is >= this lower bound count toward the period. Returns
+ *  null for 'all' (no lower bound). */
+function periodLowerBound(p) {
+    if (p === 'all') return null;
+    if (p === 'today') {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+    }
+    if (p === 'week') {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        // Mon-first ISO week: shift back to most-recent Monday.
+        const dow = (d.getDay() + 6) % 7; // 0..6, Mon..Sun
+        d.setDate(d.getDate() - dow);
+        return d.getTime();
+    }
+    if (p === 'month') {
+        const d = new Date();
+        d.setDate(1);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+    }
+    return null;
+}
+
+/** Read the focus sessions that fall inside the active period. */
+function sessionsInActivePeriod() {
+    const lo = periodLowerBound(currentPeriod);
+    const all = getAllSessions().filter((s) => s.kind === 'focus');
+    return lo == null ? all : all.filter((s) => s.startedAt >= lo);
+}
+
 function renderStatsBar() {
     const bar = document.getElementById('statsBar');
     if (!bar) return;
 
-    effect(() => {
-        const sessions = sessionsToday.value;
-        const totalSec = totalFocusSeconds.value;
-        const tasks = tasksCompletedToday.value;
+    // Period toggle button — single click cycles through today / week /
+    // month / all. Same button gets aria-pressed pseudo-state via the
+    // data-period attribute so screen readers announce the new period.
+    const toggle = document.getElementById('statPeriodToggle');
+    if (toggle) {
+        toggle.dataset.period = currentPeriod;
+        toggle.addEventListener('click', () => {
+            const i = PERIODS.indexOf(currentPeriod);
+            setPeriod(PERIODS[(i + 1) % PERIODS.length]);
+        });
+        // Keyboard parity — Enter / Space already activate <button>; nothing else needed.
+    }
 
+    const paint = () => {
         const el = (id) => document.getElementById(id);
-        const todayEl = el('statSessionsToday');
+        const sessionsEl = el('statSessionsToday');
         const totalEl = el('statTotalMinutes');
         const tasksEl = el('statTasksToday');
+        const streakEl = el('statStreak');
 
-        if (todayEl) todayEl.textContent = sessions;
-        if (totalEl) totalEl.textContent = formatDuration(totalSec);
-        if (tasksEl) tasksEl.textContent = tasks;
+        const periodLabelEl = document.querySelector('[data-period-label]');
+        if (periodLabelEl) periodLabelEl.textContent = PERIOD_LABELS[currentPeriod];
+        if (toggle) toggle.dataset.period = currentPeriod;
+
+        // Update each chip's "this week / this month / all-time" suffix
+        // so the label is honest about which window the value reflects.
+        document.querySelectorAll('[data-period-suffix]').forEach((node) => {
+            const base = node.dataset.periodSuffix;
+            const suffix = PERIOD_SUFFIX[currentPeriod];
+            node.textContent = suffix ? `${base} ${suffix}` : base;
+        });
+
+        if (currentPeriod === 'today') {
+            // Existing signal-driven values are fine for today.
+            if (sessionsEl) sessionsEl.textContent = sessionsToday.value;
+            if (totalEl) totalEl.textContent = formatDuration(totalFocusSeconds.value);
+            if (tasksEl) tasksEl.textContent = tasksCompletedToday.value;
+        } else {
+            const periodSessions = sessionsInActivePeriod();
+            const sec = periodSessions.reduce((a, s) => a + (s.durationSeconds || 0), 0);
+            const tasks = periodSessions.reduce((a, s) => a + (s.tasksCompleted || 0), 0);
+            if (sessionsEl) sessionsEl.textContent = periodSessions.length;
+            if (totalEl) totalEl.textContent = formatDuration(sec);
+            if (tasksEl) tasksEl.textContent = tasks;
+        }
+
+        if (streakEl) streakEl.textContent = currentStreak.value;
+
+        // Streak target chip (Wave 10.2). Renders once the user reaches
+        // their configured streak goal. Hidden if no goal set or not
+        // yet reached. We deliberately only show the affirmation —
+        // not "N to go" — so the streak chip stays calm-coded.
+        const streakTargetEl = el('statStreakTarget');
+        if (streakTargetEl) {
+            const goal = Number(settingsGet('timer.streakGoal')) || 0;
+            const streak = currentStreak.value;
+            if (goal > 0 && streak >= goal) {
+                streakTargetEl.textContent = `🎯 ${goal}-day target hit`;
+                streakTargetEl.classList.remove('hidden');
+            } else {
+                streakTargetEl.classList.add('hidden');
+                streakTargetEl.textContent = '';
+            }
+        }
+
+        // Daily goal ring — only paints when the user has an active
+        // target. The progress fill is on a 100-pathLength circle so
+        // we set stroke-dashoffset = 100 - completion percent.
+        renderGoalRing();
+    };
+
+    effect(() => {
+        // Touch every signal that should retrigger the paint when it
+        // changes. Keeps the deps explicit instead of relying on which
+        // ones get read inside paint() under each branch.
+        sessionsToday.value;
+        totalFocusSeconds.value;
+        tasksCompletedToday.value;
+        currentStreak.value;
+        paint();
     });
+
+    // Period change → repaint. Session list change → repaint (matters
+    // when the period is week / month / all).
+    periodChangeSubscribers.add(paint);
+    onSessionsChange(paint);
+
+    settingsSub('timer.dailyGoalMinutes', renderGoalRing);
+    // Streak goal lives in the same effect as the rest of the chips —
+    // when the user moves the goal slider, repaint to refresh the
+    // "target hit" indicator without waiting for the next signal tick.
+    settingsSub('timer.streakGoal', paint);
 
     renderMomentumTrail();
     onSessionsChange(renderMomentumTrail);
+}
+
+function renderGoalRing() {
+    const ring = document.getElementById('statGoalRing');
+    const fill = ring?.querySelector('.stat-goal-ring__fill');
+    if (!ring || !fill) return;
+    const goalMin = Number(settingsGet('timer.dailyGoalMinutes')) || 0;
+    if (goalMin <= 0) {
+        ring.classList.add('hidden');
+        return;
+    }
+    ring.classList.remove('hidden');
+    const todayMin = totalFocusSeconds.value / 60;
+    // Cap at 1 — we don't paint past the full ring. Once the user
+    // hits the goal, the ring stays full and lights up.
+    const progress = Math.min(1, todayMin / goalMin);
+    fill.style.strokeDashoffset = String(100 - progress * 100);
+    ring.classList.toggle('is-complete', progress >= 1);
+    ring.setAttribute(
+        'aria-label',
+        `${Math.round(progress * 100)}% of daily focus goal`
+    );
+    ring.setAttribute('aria-hidden', 'false');
 }
 
 /** Replace the old streak counter ("47d" — guilt-shaped, resets on
@@ -223,6 +534,9 @@ function resetAllStats() {
     tasksCompletedToday.value = 0;
     currentStreak.value = 0;
     lastFocusDate.value = '';
+    bestDayFocusSeconds.value = 0;
+    bestDayFocusDate.value = '';
+    lastFreezeUsedDate.value = '';
     localStorage.removeItem(STATS_KEY);
 }
 
@@ -278,4 +592,17 @@ export function initStatistics() {
     setupPersistence();
     renderStatsBar();
     setupResetFlow();
+}
+
+// ============================================================================
+// Wave 24.9 — celebratory toast for a new personal-best day. Routed
+// through the shared gentle-toast queue so it can't overlap with a
+// wellness reminder firing in the same tick.
+// ============================================================================
+function celebratePersonalBest(seconds) {
+    showGentleToast({
+        icon: '🌟',
+        title: 'New personal best',
+        detail: `${formatDuration(seconds)} focused today`,
+    });
 }

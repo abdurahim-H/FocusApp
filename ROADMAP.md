@@ -18,11 +18,11 @@ This roadmap is deliberately maximal — every feature I think belongs in a "bes
 
 These are real bugs the audits caught. Cheap, high-value, ship first.
 
-- [ ] **0.1 Fix dead-code constellation menu (S).** `renderMixesRail()` in `js/ui/ambient-ui.js` references `#mixesRail` which doesn't exist in `index.html`. Rename, delete, copy-share-link, and pin-as-focus-start are documented but unreachable. Wire them onto the live `libcard--constellation` cards in the library drawer.
-- [ ] **0.2 Wire the legacy `mode.ambient` shortcut (S).** `shortcuts-registry.js` still ships the `3 = Ambient mode` binding; the keyboard handler is a no-op. Either retire the entry or repurpose it (e.g. `3 = open library drawer`).
-- [ ] **0.3 Fix mini-timer click target (S).** `js/ui/home-mini-timer.js:122-131` references `.hmt-ring` which doesn't exist in DOM; only `.hmt-body` triggers the jump-to-Focus. Either add the class to the SVG or remove the dead reference.
-- [ ] **0.4 Notes app version bump consistency (S).** `data-io.js:7` says `APP_VERSION = '5.3.0'`, `feedback.js:9` says `'1.0.0'`. Single source of truth.
-- [ ] **0.5 Wire the unused chart primitives (S).** `percentileGauge` (charts.js:495) and `sparkline` (charts.js:530) are defined but unused. Light them up (sparkline as inline trend on every KPI tile; percentile gauge in the "today vs last 90" callout).
+- [x] **0.1 Fix dead-code constellation menu (S).** Wired pin-star + ⋯ menu onto `libcard--constellation` in the actual library drawer. Pin auto-enables `sounds.autoStartOnFocus`; menu opens the existing rename / share / delete popover. Built-ins get share-only.
+- [x] **0.2 Wire the legacy `mode.ambient` shortcut (S).** Repurposed as `library.open` — the `3` key now opens the sound library drawer. Legacy `storeKey` preserved so users who rebound it keep their custom binding.
+- [x] **0.3 Fix mini-timer click target (S).** Removed the dead `.hmt-ring` reference in `home-mini-timer.js`; `.hmt-body` is the documented click target and it already worked, just left an orphan `if (el)` guard hiding the issue.
+- [x] **0.4 Single source of truth for APP_VERSION (S).** New `js/core/version.js` exports `APP_VERSION`; `feedback.js` and `settings/data-io.js` both import from it. Now matches `package.json` (1.0.0).
+- [x] **0.5 Wire the unused chart primitives (S).** `kpi()` accepts an optional `trend` array → renders a sparkline beneath the number. Wired on Overview's "hours focused" + "last 7 days" KPIs. `percentileGauge` is a new chart card on Profile → Focus showing today's percentile against the trailing 90-day window.
 
 ---
 
@@ -30,16 +30,16 @@ These are real bugs the audits caught. Cheap, high-value, ship first.
 
 Already-have data, brand-new framing. Highest UX gain per dollar of engineering on this list.
 
-- [ ] **1.1 Weekly summary tile on Home (M).** Card showing this week's total focus minutes, daily mini-bars Mon–Sun, "↑ 18% vs last week" delta, click-through to Profile → Focus.
-- [ ] **1.2 Monthly summary tile on Home (M).** Card showing this month's minutes, prior-month comparison, days-streaked-this-month, best day this month.
-- [ ] **1.3 Year-in-review surface in Profile → Time (M).** Total hours, best month, longest day, weekday vs weekend split, top 3 hours-of-day, single big "your year so far" headline.
-- [ ] **1.4 Current-streak chip in stats bar (S).** We already track `currentStreak`; just render it next to / inside the momentum trail.
-- [ ] **1.5 Period-toggle in stats bar (M).** Long-press or click "Sessions today" chip to swap into "Sessions this week" / "Sessions this month" view. State persists across reloads.
-- [ ] **1.6 Daily goal ring (M).** A target focus minutes per day, rendered as a progress ring around the today chip. Default 90 min, configurable in Settings → Timer → Goals.
-- [ ] **1.7 Weekday vs weekend distribution chart (S).** "You focus 62% on weekdays, 38% on weekends." New stacked-bar in Profile → Time.
-- [ ] **1.8 Box-plot chart for session durations (M).** Richer than histogram for outliers; render in Profile → Focus alongside the existing histogram + KDE.
-- [ ] **1.9 Stacked-area "this week vs last week" daily breakdown (M).** Two overlaid 7-day bars / areas in Profile → Focus.
-- [ ] **1.10 "Best day ever" + "longest streak ever" callouts in Profile → Overview (S).** Single-number trophies, low effort, high motivation.
+- [x] **1.1 Weekly summary tile on Home (M).** New `home-period-tiles.js` paints this week's total + Mon-Sun mini-bars + "↑ N% vs last week" delta. Tap opens Profile → Focus. Hidden until at least one finished focus session.
+- [x] **1.2 Monthly summary tile on Home (M).** Sibling tile in the same row showing 30-day total, prior 30-day delta, sessions / active days / best-day stats. Tap opens Profile → Time.
+- [x] **1.3 Year-in-review surface in Profile → Time (M).** New `renderYearInReview()` renders a retrospective card at the bottom of the Time section: total hours / sessions / active days, monthly bar strip with peak month called out, "Longest day / Peak hour / Best month" highlight tiles. Hidden until ≥30 active days this calendar year.
+- [x] **1.4 Current-streak chip in stats bar (S).** New `.stat-chip--streak` chip wired to the existing `currentStreak` signal.
+- [x] **1.5 Period toggle in stats bar (M).** New `.stat-period-toggle` pill at the leading edge cycles today → week → month → all-time on click. The "sessions / focused / tasks done" chips recompute on each cycle (data sourced from the full session history for non-today periods). Period persists in `localStorage` (`fu_stats_period`). Each period gets a tinted toggle (today amber / week green / month violet / all cream).
+- [x] **1.6 Daily goal ring (M).** New `timer.dailyGoalMinutes` setting (0-480, default 90) + matching `timer.weeklyGoalMinutes` (0-3600, default 720). The "focused" chip in the stats bar now wraps a progress ring that fills clockwise as today's minutes approach the daily goal. Ring goes green when complete.
+- [x] **1.7 Weekday vs weekend distribution chart (S).** Two-segment split bar in Profile → Time computed from the existing `bucketByDayOfWeek` data.
+- [x] **1.8 Box-plot chart for session durations (M).** New `boxPlot()` chart primitive in `charts.js` (Tukey-fence outlier detection, Type-7 quartile interpolation). Rendered in Profile → Focus under the histogram. Suppressed below 4 sessions where quartiles aren't meaningful.
+- [x] **1.9 "This week vs last week" daily breakdown (M).** Inline `renderWeekOverWeekChart()` in `profile.js` paints paired bars per weekday (this week filled, last week outlined) with today's weekday-label highlighted. Suppressed below 14 days of history.
+- [x] **1.10 "Best day ever" + "longest streak ever" callouts in Profile → Overview (S).** New `computeAllTimeRecords()` walks the full session history once and surfaces three callout pills: best day ever (minutes + date), longest streak ever, current streak.
 
 ---
 
@@ -47,20 +47,20 @@ Already-have data, brand-new framing. Highest UX gain per dollar of engineering 
 
 Tasks today are `{ id, text, completed }` and are session-scoped (they don't carry across reloads). This is the single biggest UX bug in the app.
 
-- [ ] **2.1 Persist tasks across sessions (M).** Move from session-scoped to a flat persistent list. Existing localStorage carries them already during a single page load; just stop wiping on session end.
-- [ ] **2.2 Estimated duration field per task (M).** Stored in pomodoros (so it scales with the user's focus duration). Editable inline ("·· 2 ···" stepper UI).
-- [ ] **2.3 Time spent field, auto-tracked (M).** Each focus-session records which task IDs were completed during it; sum into per-task `spentMinutes`.
-- [ ] **2.4 ETA pill on the Tasks card header (M).** "3 tasks · ETA 4:25 PM" — computed from estimated minutes ÷ avg focus-min-per-real-hour.
-- [ ] **2.5 Due dates with overdue styling (M).** Optional. Inline date picker. Overdue tasks get a red accent + sort to the top.
-- [ ] **2.6 Subtasks (one level deep) (M).** Indented under parent; same toggle/delete behavior; parent shows "2/5 subtasks done."
-- [ ] **2.7 Drag-to-reorder (M).** HTML5 drag-and-drop on the home list and the expand panel. Persists across reloads.
-- [ ] **2.8 Recurring tasks (M).** Daily / weekdays / weekly / custom RRULE. New instance auto-spawns at midnight in the user's timezone.
-- [ ] **2.9 Project / tag grouping (L).** Tasks can carry a `project` tag; filter the list by project; project view in Profile → Tasks shows time per project.
-- [ ] **2.10 Bulk operations (S).** Mark all done / clear completed / delete completed.
-- [ ] **2.11 Task detail surface (M).** Click anywhere on the row except checkbox/×/edit-icon to open a detail drawer with notes, history (every session this task touched), and time-spent breakdown.
-- [ ] **2.12 Pomodoro-count badge per task (S).** Small "1 / 3" badge showing actual vs estimated pomodoros completed.
-- [ ] **2.13 Carry-over rollover (S).** End-of-day prompt: "5 tasks not finished — carry to tomorrow?"
-- [ ] **2.14 Focus-on-this-task lock (M).** Tap a task to "make this the active task"; the timer body shows the task name; the session record links the task. Prevents tab-switching between tasks during a single Pomodoro.
+- [x] **2.1 Persist tasks across sessions (M).** Already shipped — `state.js:175-193` auto-persists the `tasks` signal to `fu_state_v1`; tasks survive reloads. The audit's "session-scoped" note was inaccurate. Marked done as-is.
+- [x] **2.2 Estimated duration field per task (M).** New `estimatedPomodoros` field on each task (0–20). Inline +/− stepper on every row; visible on hover/focus, always visible once an estimate exists. New `setTaskEstimate(id, n)` mutation.
+- [x] **2.3 Time spent field, auto-tracked (M).** `addSpentSeconds(id, sec)` lives in `tasks.js`; `timer.js` calls it from `completeSession()` whenever an active task is pinned. Increments `spentSeconds` and `completedInSession` on the right task. The session ends → the badge updates live.
+- [x] **2.4 ETA pill on the Tasks card header (M).** New `.tasks-eta` pill renders next to "Tasks for this session". Sums remaining pomodoros across incomplete estimated tasks (estimate − spent), converts to minutes, projects an arrival time on the wall clock. Respects `timer.timeFormat` (12h / 24h). Hidden when nothing is estimated.
+- [x] **2.5 Due dates with overdue styling (M).** New `dueAt` field + `setTaskDueDate()` mutation. Each row gets a small 📅 affordance that opens a native date picker on click; the underlying `<input type="date">` is overlaid invisibly on the icon. Inline pill in the task content surfaces the relative date — "due today", "due tomorrow", "due in 3 days", "overdue 2 days" — tone-coded red / amber / honey / muted. (Auto-sort overdue-to-top is left for a future PR; for now they sort by hand-order alongside drag-reorder.)
+- [x] **2.6 Subtasks (one level deep) (M).** New `subtasks: [{id, text, completed}]` field on the task model. Each parent row gains a chevron toggle that reveals an indented drawer with the subtask list and an inline "+ Add subtask" form. Subtasks toggle / delete with their own buttons. Parent row shows a "2/5" counter chip when subtasks exist. New mutations: `addSubtask`, `toggleSubtask`, `deleteSubtask`.
+- [x] **2.7 Drag-to-reorder (M).** HTML5 native drag handle (⋮⋮) at the leading edge of every task row. New `moveTask(from, to)` mutation reorders the array; the persisted signal carries the new order across reloads. Dragging-over a task row gets a champagne underline so the drop target is unmistakable. Home list complete; the expand panel still uses the same data signal so its order updates live too — its handle wiring lands with the next pass.
+- [x] **2.8 Recurring tasks (M).** New `repeat: 'daily' | 'weekdays' | 'weekly' | null` field on the task model + `setTaskRecurrence()`. The detail drawer hosts the editor (radio-style 4-button group). `resetExpiredRecurringTasks()` runs at init, on `visibilitychange`, and every 60 s — flips completed recurring tasks back to uncompleted (and resets their subtasks) when the local-day boundary has rolled over and the cycle applies. Daily resets every day, weekdays skips Sat/Sun, weekly waits for 7+ days since completion. Each row gets a small ↻ chip when recurrence is set. Custom RRULE is intentionally not in scope — covers the 95% case.
+- [x] **2.9 Project / tag grouping (M done; L deferred).** Data side complete (`project` field on task model, `setTaskProject()`, inline `#project` chip on every row). The editor input lives in the new task detail drawer (2.11). The per-project view in **Profile → Tasks** and a list-level filter are deferred to a follow-up — neither blocks the rest of Wave 3.
+- [x] **2.10 Bulk operations (S).** New `clearCompletedTasks()` + a "Clear completed" button next to "Clear All" (only visible when at least one task is checked off). Also `setAllTasksDone(true|false)` exported for future "mark-all" UI affordances.
+- [x] **2.11 Task detail surface (M).** New `js/ui/task-detail.js` + `css/components/modules/22-task-detail.css`. A small `›` button on each row opens the drawer (lazy-loaded). Drawer hosts: editable text, estimate stepper, due-date picker with clear-button, project tag editor, recurrence radio group, subtask list + add form, time-on-this-task block (total focused / sessions touched / % of estimate), created / completed timestamps, and a two-step delete confirm. Drops down with the same animation pattern as Settings / Help / Profile.
+- [x] **2.12 Pomodoro-count badge per task (S).** Small "spent / estimated" pill rendered next to the task text whenever either side has data. No estimate yet but pomodoros logged → "N 🍅" badge.
+- [x] **2.13 Carry-over rollover (S).** Reframed as "stale-task banner". When the user has incomplete non-recurring tasks created more than 24 h ago, a small banner above the task list announces "N tasks open longer than a day" with two actions: **Keep** (bumps each stale task's `createdAt` forward to "now" and dismisses the banner for today) or **Clear stale** (deletes them outright). Dismissal flag lives in `localStorage` keyed to `today's local date` so the banner re-arms each day. Recurring tasks are exempt — they have their own reset cycle.
+- [x] **2.14 Focus-on-this-task lock (M).** New `activeTaskId` signal (persisted across reloads). Each task row gains a `◎` lock pin: click to pin / unpin. The pinned row gains a left amber rail; the next focus session that completes credits its elapsed seconds to the pinned task via `addSpentSeconds()`. Pin survives reloads. Pin is automatically cleared if the active task gets deleted between session start and end. (Timer-body label override + session-record link land later.)
 
 ---
 
@@ -68,18 +68,18 @@ Tasks today are `{ id, text, completed }` and are session-scoped (they don't car
 
 A first-class place to write. Markdown-aware, sync-ready, AI-assisted.
 
-- [ ] **3.1 Notepad panel (M).** New drop-down panel reachable from a toolbar button and via `n` shortcut. Mirror the Help Center / Profile / Settings drop pattern.
-- [ ] **3.2 Tiptap rich-markdown editor (L).** Bold / italic / headings / lists / code / quotes / links. Live keyboard shortcuts (`Cmd+B` etc.) without buttons cluttering the surface.
-- [ ] **3.3 Word + character count + reading time (S).** Footer status bar in the notepad.
-- [ ] **3.4 Multiple notes with a sidebar (M).** Note list, search, "+ new note" button. Default note "Daily — YYYY-MM-DD" auto-created on first write each day.
-- [ ] **3.5 Auto-save with debounce (S).** 800 ms debounce, visible "saved" indicator.
-- [ ] **3.6 Tags + cross-linking (M).** `#tag` for tags, `[[note title]]` for cross-links (Obsidian-style). Sidebar can filter by tag.
-- [ ] **3.7 Full-text search (M).** Across all notes. Modifier keys to constrain search ("tag:work"). Indexed locally.
-- [ ] **3.8 Voice dictation via Web Speech API (M).** Free; works in Chrome / Safari. Microphone button in the notepad toolbar.
-- [ ] **3.9 Pomodoro auto-prepend hook (S).** Optional setting: when a focus session starts, prepend "## 9:42 AM — focus session 1" to today's daily note.
-- [ ] **3.10 AI session summary at end of focus block (M).** LLM (Cloudflare Workers AI, free at our volume) reads what you wrote during the session and emits a 2-sentence recap. Recap appended to the daily note.
-- [ ] **3.11 Export — Markdown / HTML / PDF (M).** Per-note and bulk.
-- [ ] **3.12 Templates (S).** Daily-note template, weekly-review template, meeting-notes template. Configurable in Settings.
+- [x] **3.1 Notepad panel (M).** New `js/ui/notepad.js` + `css/components/modules/23-notepad.css`. Drop-down panel matching Settings / Help / Profile / Tasks-detail. Reachable via the `n` keyboard shortcut and via "Open notes" rows in both the signed-out and signed-in account dropdowns.
+- [x] **3.2 Markdown editor (M done; Tiptap deferred).** Plain `<textarea>` with source-level Cmd/Ctrl+B and +I shortcuts that wrap the selection in `**bold**` / `*italic*`. Tiptap-based rich rendering deferred — pure-textarea v1 ships fast and the markdown source is what users will sync / export.
+- [x] **3.3 Word + character + reading time (S).** Live footer: tabular-numerals stat — words / characters / reading-time-at-200wpm. `<1 min read` shown for short notes so the field never reads "0 min".
+- [x] **3.4 Multiple notes with sidebar (M).** Sidebar to the left of the editor: search input + "+ New" button + tag-filter pills + scrollable note list. Each list row shows title, last-edited date, two-line preview, and up to three tags. Click any row to switch the active note; the per-row × deletes (with the next note auto-becoming active). Default first note auto-created with a "Daily — Long Date" title; user can rename instantly.
+- [x] **3.5 Auto-save with debounce (S).** Title and body inputs persist on every keystroke through a `requestAnimationFrame`-coalesced write to the new `fu_notes_v1` localStorage key. "Saved" pill flashes for ~1.1 s after each input as a visible confirmation.
+- [x] **3.6 Tags (S done; cross-linking deferred).** Body parser pulls `#tag` tokens (lowercase, dedup, capped at 12) on every keystroke and stores them on the note for the sidebar filter. Active filter persists during the session; click a chip to toggle. `[[note title]]` cross-linking is deferred — adds complexity with marginal v1 value.
+- [x] **3.7 Full-text search (S).** Search input filters the note list by case-insensitive substring match against title + body. Combinable with the tag filter (both apply). Sub-millisecond at any reasonable note count; no index needed yet.
+- [x] **3.8 Voice dictation via Web Speech API (M).** Mic button in the panel header. Click to start, click to stop. Final transcripts inserted at the editor cursor with smart-spacing so chunks merge cleanly into prose. Auto-recovers on `onend`. Hidden / disabled with a tooltip when the API is missing (Firefox).
+- [x] **3.9 Pomodoro auto-prepend hook (S).** Listens for the existing `focus-timer:start` event and prepends a `## H:MM AM — focus session N` header to today's daily note. Counts existing matching headers in the body to number sessions correctly without parsing timer state. Skips break sessions.
+- [ ] **3.10 AI session summary at end of focus block (M).** LLM (Cloudflare Workers AI, free at our volume) reads what you wrote during the session and emits a 2-sentence recap. Recap appended to the daily note. (Deferred — needs the AI worker endpoint set up.)
+- [x] **3.11 Export — Markdown / HTML / PDF (M).** Per-note. Header `↑` button opens an inline menu with the three formats. Markdown downloads the raw body, HTML wraps it in a minimal print-friendly template, PDF opens a new window pre-populated with the same HTML and triggers the browser's print dialog. Pop-up-blocked PDF falls back to an HTML download. Bulk export deferred — single-note covers the 80% case.
+- [x] **3.12 Templates (S).** Sidebar "+ New" is now a split button. Click the chevron to pick from four starter templates: **Daily note**, **Weekly review**, **Meeting notes**, **Brainstorm**. Each populates a fresh note with a structured markdown skeleton.
 
 ---
 
@@ -87,8 +87,8 @@ A first-class place to write. Markdown-aware, sync-ready, AI-assisted.
 
 The biggest visual upgrade in the app. Required scaffolding for Wave 5 (YouTube themes) and Wave 11 (user-uploaded themes).
 
-- [ ] **4.1 Theme registry architecture (L).** Refactor `scene-manager.js` to take an explicit theme object: `{ id, label, modules: [...], palette, postfx }`. Each scene module exposes `init / update / dispose`. `setTheme(id)` tears down old, brings up new.
-- [ ] **4.2 Theme: Black Hole (existing) registered as theme #1 (S).** No visible change; just registered through the new system. (after 4.1)
+- [x] **4.1 Theme registry architecture (L).** New `js/graphics/scene/theme-registry.js` wraps every scene module in a uniform `{ id, init(ctx), update?(elapsed, dt), dispose() }` shape. Themes are arrays of modules + a palette block. `activateTheme / deactivateTheme / updateActiveTheme` orchestrate; scene-manager keeps per-frame updates as a flat sequence (the registry's update hook is reserved for non-special-args themes), but init / dispose now go through the registry. `getActiveTheme()` + `setActiveTheme(id)` are exported and the `scene.theme` settings apply hook now drives runtime swaps.
+- [x] **4.2 Theme: Black Hole (existing) registered as theme #1 (S).** Identical scene, now sourced from the registry. The eight modules (skybox / starfield / nebula / shooting-stars / star-glows / blackhole / motes / petals) bundle here in their original order. `blackholeMesh` propagates via shared ctx so cosmos sound bodies still anchor to it.
 - [ ] **4.3 Theme: Cosmic Garden (L).** Reuses `ethereal-petals.js` (already in codebase, currently unused). Greener nebula palette, soft blue-green motes, drifting petals.
 - [ ] **4.4 Theme: Liminal Library (XL).** Drifting dust shader, soft warm side-lighting, fireplace-flicker post-effect, slowly falling particles. New shader work.
 - [ ] **4.5 Theme: Storm Window (XL).** Rain-streaked plane in front of a calm cityscape, occasional lightning flash, raindrops audio-reactive to the master volume. New shader work.
@@ -107,13 +107,13 @@ The biggest visual upgrade in the app. Required scaffolding for Wave 5 (YouTube 
 
 Massively-requested competitor feature (Lofi Girl-style). Blocked on the theme registry.
 
-- [ ] **5.1 CSP relaxation (S).** Add `frame-src https://www.youtube.com https://www.youtube-nocookie.com https://w.soundcloud.com` to `public/_headers`. Test in production. (after 4.1)
-- [ ] **5.2 YouTube IFrame Player API integration (M).** New theme type `youtube`. Iframe embedded as scene background, behind the focus card. Mute / unmute via the API.
-- [ ] **5.3 SoundCloud Widget integration (M).** Same shape as YouTube. Different theme type `soundcloud`.
-- [ ] **5.4 Curated starter playlist (S).** Lofi Girl, Lofi Cafe, Jazz Cafe, Chillhop, Ambient Sleep — ~12 hand-picked YouTube live-streams.
-- [ ] **5.5 Paste-your-own URL (S).** Settings → Scene → Streams → "Paste a YouTube or SoundCloud URL." Validates and saves to user-themes.
-- [ ] **5.6 Stream + ambient mixing (M).** When a YouTube theme is active, ambient sounds in our cosmos default to muted; per-toggle to layer them anyway.
-
+- [x] **5.1 CSP relaxation (S).** `public/_headers` now allows `frame-src https://www.youtube.com https://www.youtube-nocookie.com https://w.soundcloud.com`, plus the corresponding `script-src` for the YouTube/SoundCloud players and `img-src` for `i.ytimg.com` / `i.sndcdn.com` thumbnails.
+- [x] **5.2 YouTube iframe integration (M).** New `js/ui/stream-themes.js` mounts a youtube-nocookie iframe pinned to the four viewport edges with cover-fill sizing (`max(100vw, 177.77vh)` × `max(100vh, 56.25vw)`). The babylon canvas hides while a stream is active. `autoplay=1 mute=1` is the polite default; modern browsers block autoplay-with-sound until the user gestures.
+- [x] **5.3 SoundCloud Widget integration (M).** Same iframe-host pattern; `kind: 'soundcloud'` swaps in `https://w.soundcloud.com/player/?url=…&auto_play=true`.
+- [x] **5.4 Curated starter playlist (S).** 8 hand-picked live-streams ship with the registry: Lofi Girl, Lofi Girl Sleep, Chillhop afternoon café, Cozy Jazz Café, Fireplace, Rain on a Window, Korean Study-with-me, Classical study music.
+- [x] **5.5 Paste-your-own URL (S).** New `scene.streamCustomUrl` text input. `shortenYouTubeUrl` / `shortenSoundCloudUrl` parse any pasted link into a `custom:<videoId>` or `custom:soundcloud:<encodedUrl>` shorthand stored as the `activeStreamId`. Custom URL beats the curated select; clearing the URL falls back to the picker.
+- [x] **5.6 Stream + ambient mixing (M).** New `sounds.muteOnStream` toggle (default on). `sounds.js` exposes `setStreamDucking(bool)` which fades the master gain to 0 without touching the user's stored volume; turning the setting off — or switching streams off — restores the saved level immediately. `stream-themes.js` runs `syncDucking()` on every `activeStreamId` change and on every `sounds.muteOnStream` flip so live toggling responds without bouncing the stream. Fallback `<audio>` tracks share the same duck multiplier via `fallbackTargetFor`. 
+ 
 ---
 
 ## Wave 6 — Soundscapes (week 8–10)
@@ -183,9 +183,9 @@ The Profile already has all the analytical primitives (clustering, change-point,
 
 ## Wave 10 — Goals + habit tracking (week 14)
 
-- [ ] **10.1 Weekly goal: target focus minutes (M).** Set a weekly hours target (default 12 hrs). Progress ring on the Home tab and on the weekly tile (1.1).
-- [ ] **10.2 Streak goal (S).** Target N days in a row with at least one focus session.
-- [ ] **10.3 Tasks-per-week goal (S).** Optional: target N tasks completed per week.
+- [x] **10.1 Weekly goal: target focus minutes (M).** `timer.weeklyGoalMinutes` setting (default 720 / 12 hrs) drives a progress bar at the bottom of the Home week tile. Bar caps at 100% width visually; the label ("12.5 / 12 hrs") tells the honest overshoot. Goes amber until 99%, green at 100% complete. Setting to 0 hides the bar.
+- [x] **10.2 Streak goal (S).** New `timer.streakGoal` stepper (default 7 days). Once `currentStreak ≥ goal`, a small "🎯 N-day target hit" chip lights up next to the day-streak counter in the stats bar. Calm-coded: only shows the affirmation, never "N to go" pressure copy.
+- [x] **10.3 Tasks-per-week goal (S).** `timer.weeklyTasksGoal` stepper (default 20). Sums `tasksCompleted` across the trailing 7-day session window and renders as a second progress bar under the Home month tile.
 - [ ] **10.4 Per-day goal calibration (M).** Goal can be uniform (target/7 each day) or weekday-only or custom.
 - [ ] **10.5 Push notifications when falling behind (M).** Web push (Wave 11). "It's Friday and you're 4 hrs short of your weekly goal." Configurable cadence.
 - [ ] **10.6 Goal history + completion stats (M).** "You hit your weekly goal 38 of the last 52 weeks (73%)."
@@ -301,12 +301,12 @@ The Home tab is three static elements today. Make it a real dashboard.
 
 Pomodoro is one of many. Some users hate it.
 
-- [ ] **17.1 Custom interval (S).** Already supported via the focus-duration slider (1–90 min).
-- [ ] **17.2 52/17 cycle preset (S).** 52 min focus + 17 min break.
-- [ ] **17.3 90/20 ultradian cycle preset (S).** Aligned to the human ultradian rhythm.
-- [ ] **17.4 Deep-work mode (M).** A 3–4 hour focus block with structured break protocols (5-min stretch break every 60 min, longer break in the middle).
-- [ ] **17.5 Open-ended focus (S).** No countdown; tracks elapsed time. Ends when user hits stop.
-- [ ] **17.6 Mode chooser at session start (M).** "Pomodoro / 52-17 / 90-20 / Deep work / Open-ended" — picker on the Focus tab.
+- [x] **17.1 Custom interval (S).** Focus-duration slider now ranges 1–240 min (was 1–90) so deep-work blocks fit. "Custom" stays a first-class preset choice.
+- [x] **17.2 52/17 cycle preset (S).** Picking "52/17 — DeskTime" writes 52 min focus + 17 min short break + 30 min long break + every-4-cycle long break.
+- [x] **17.3 90/20 ultradian cycle preset (S).** "90/20 — Ultradian rhythm" sets 90 / 20 / 30 with long break every 3 cycles.
+- [x] **17.4 Deep-work mode (M).** "Deep work (180/30)" sets a 3-hour focus block, 30-min short break, 60-min long break, every-1-cycle long break (so each deep block is followed by the longer break).
+- [x] **17.5 Open-ended focus (S).** New `timer.openEnded` flag flips the timer into a stopwatch — counts UP from 00:00 with no completeSession trigger; user explicitly stops to record. completeSession path treats elapsed = visible time and marks the session as completed unconditionally (the user defined the end).
+- [x] **17.6 Mode chooser (M done as a preset picker).** New `Style` select at the top of Settings → Timer — five preset rhythms plus Custom + Open-ended. Picking a preset writes the matching durations + long-break interval; "Custom" leaves the sliders alone.
 
 ---
 
@@ -314,9 +314,9 @@ Pomodoro is one of many. Some users hate it.
 
 - [ ] **18.1 Smart break activities (M).** Stretch / breathing / eye exercise / hydration prompts during break sessions. Configurable list.
 - [ ] **18.2 Box-breathing animation (M).** During a break, an animated box-breathing guide (4 in, 4 hold, 4 out, 4 hold).
-- [ ] **18.3 Eye-rest 20-20-20 reminder (S).** Every 20 min, gentle prompt to look at something 20 ft away for 20 sec.
-- [ ] **18.4 Posture-check reminder (S).** Configurable interval; gentle full-screen reminder.
-- [ ] **18.5 Hydration reminder (S).** Configurable interval.
+- [x] **18.3 Eye-rest 20-20-20 reminder (S).** Opt-in `wellness.eyeRestEnabled` toggle. Cadence is fixed at the 20-min canon. Fires only when a focus session is actively running — break sessions and pause both stop the loop; auto-resume restarts it on the next focus start.
+- [x] **18.4 Posture-check reminder (S).** Opt-in `wellness.postureEnabled` + configurable `wellness.postureInterval` (15–120 min, default 45). Same gentle in-app toast surface as eye rest; distinct DOM id so the two don't clobber each other.
+- [x] **18.5 Hydration reminder (S).** Opt-in `wellness.hydrationEnabled` + configurable `wellness.hydrationInterval` (15–120 min, default 60). All three reminders live in `js/features/wellness-reminders.js` and listen for `focus-timer:start` / `:end` / `:pause` / `:reset` (the latter two added in `timer.js` for clean lifecycle).
 - [ ] **18.6 Mood tracker before / after sessions (M).** 5-point scale; correlate with focus quality in the Profile.
 - [ ] **18.7 Apple HealthKit integration (L).** Read step / heart-rate / sleep data; correlate with focus quality. iOS only.
 - [ ] **18.8 Fitbit integration (L).** Same shape; cross-platform.
@@ -431,8 +431,8 @@ Optional layer. Off by default for the people who hate it; on for those who love
 - [ ] **24.5 Profile flair (S).** Equip up to 3 badges to display on your public profile.
 - [ ] **24.6 Constellation unlocks (S).** Some hand-tuned mixes / soundscapes / themes locked behind achievement levels for the gamification crowd.
 - [ ] **24.7 Friend leaderboards (M).** Among friends only — never global anonymous leaderboards (those break user wellbeing).
-- [ ] **24.8 Streak insurance (S).** "Use a streak freeze" — once a week, opt-in, you can take a day off without losing your streak. Compassionate gamification.
-- [ ] **24.9 Personal-best alerts (S).** "New personal record: 3.5 hrs in one day."
+- [x] **24.8 Streak insurance (S).** New `gamification.streakInsurance` toggle (opt-in, off by default). When on, the streak survives a single missed day per ISO week — `recordSessionComplete` and the load-time streak check both consult `lastFreezeUsedDate` so the forgiveness is bookkeeping-correct across reloads. Compassionate gamification, only when asked for.
+- [x] **24.9 Personal-best alerts (S).** New `gamification.personalBestAlerts` toggle (default on). Stats persistence now caches `bestDayFocusSeconds` + `bestDayFocusDate`; every completed session sums today's prior focus + just-finished elapsed and compares against the cached record. A celebratory top-right toast (`.celebrate-toast`) fires the moment today overtakes a real prior best — never on the very first record so the first-session experience stays calm.
 - [ ] **24.10 Constellation discovery garden (M).** Visualise every achievement as a star in your personal galaxy.
 
 ---

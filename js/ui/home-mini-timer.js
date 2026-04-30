@@ -118,17 +118,19 @@ export function initHomeMiniTimer() {
         });
     }
 
-    // Click on body area (not buttons) → navigate to Focus tab
+    // Click on body area (label / digits / session number) → navigate
+    // to the Focus tab. The analog clock SVG and the controls keep
+    // their own behaviour. (.hmt-ring used to be referenced here for a
+    // larger hit-area, but no element with that class exists in the
+    // DOM — the body already covers the natural target.)
     const bodyArea = container.querySelector('.hmt-body');
-    const ringArea = container.querySelector('.hmt-ring');
-    [bodyArea, ringArea].forEach((el) => {
-        if (el)
-            el.addEventListener('click', (e) => {
-                if (isDragging) return;
-                e.stopPropagation();
-                switchMode('focus');
-            });
-    });
+    if (bodyArea) {
+        bodyArea.addEventListener('click', (e) => {
+            if (isDragging) return;
+            e.stopPropagation();
+            switchMode('focus');
+        });
+    }
 
     // Stop container-level click from doing anything
     container.addEventListener('click', (e) => {

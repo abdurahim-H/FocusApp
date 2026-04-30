@@ -7,12 +7,13 @@
 
 import { isReducedMotion } from '../core/motion.js';
 import * as keyboard from '../features/keyboard.js';
-import * as notificationBanner from '../features/notification-banner.js';
+import * as notificationBanner from '../ui/notification-banner.js';
 import * as soundMixer from '../features/sound-mixer.js';
 import * as sounds from '../features/sounds.js';
 import * as statistics from '../features/statistics.js';
 import * as tasks from '../features/tasks.js';
 import * as timer from '../features/timer.js';
+import * as wellnessReminders from '../ui/wellness-reminders.js';
 import * as scene3d from '../graphics/scene/scene-manager.js';
 import * as account from '../ui/account.js';
 import * as ambientUI from '../ui/ambient-ui.js';
@@ -22,10 +23,14 @@ import * as cosmosEqRing from '../ui/cosmos-eq-ring.js';
 import * as cosmosPointer from '../ui/cosmos-pointer.js';
 import * as helpCenter from '../ui/help-center.js';
 import * as homeMiniTimer from '../ui/home-mini-timer.js';
+import * as homePeriodTiles from '../ui/home-period-tiles.js';
 import * as navigation from '../ui/navigation.js';
 import * as profile from '../ui/profile.js';
 import * as settings from '../ui/settings.js';
-import * as tasksExpand from '../ui/tasks-expand.js';
+import * as notepad from '../ui/notepad.js';
+import * as streamThemes from '../ui/stream-themes.js';
+import * as taskDetail from '../ui/task-detail.js';
+import * as taskDock from '../ui/task-dock.js';
 import * as timerParticles from '../ui/timer-particles.js';
 import * as uiEffects from '../ui/ui-effects.js';
 import * as cleanup from '../utils/cleanup.js';
@@ -47,13 +52,18 @@ const modules = {
     timerParticles,
     helpCenter,
     homeMiniTimer,
+    homePeriodTiles,
     ambientUI,
     cosmosPointer,
     cosmosEqRing,
     cosmosA11y,
     account,
     profile,
-    tasksExpand,
+    taskDock,
+    taskDetail,
+    notepad,
+    streamThemes,
+    wellnessReminders,
 };
 
 /**
@@ -259,6 +269,11 @@ export async function initApp() {
             loadedModules.notificationBanner.initNotificationBanner();
         }
 
+        // Wave 18 — opt-in wellness reminders during focus sessions
+        if (loadedModules.wellnessReminders?.initWellnessReminders) {
+            loadedModules.wellnessReminders.initWellnessReminders();
+        }
+
         // Phase 5C: settings panel (load saved settings + wire modal)
         if (loadedModules.settings?.loadSettings) {
             loadedModules.settings.loadSettings();
@@ -371,11 +386,31 @@ function setupTaskControls(loadedModules) {
             loadedModules.tasks.initTaskRender();
         }
     }
-    // Expand button on the home tasks header — opens the larger
-    // task surface. Lives in tasks-expand.js so its state and DOM
-    // stay separate from the inline list.
-    if (loadedModules.tasksExpand?.initTasksExpand) {
-        loadedModules.tasksExpand.initTasksExpand();
+    // Bottom task dock — slim collapsed strip that expands into a
+    // 60vh task panel on the Focus tab. Replaces the old in-card
+    // task-section + tasks-expand fullscreen.
+    if (loadedModules.taskDock?.initTaskDock) {
+        loadedModules.taskDock.initTaskDock();
+    }
+    // Period summary tiles (this week / this month) on Home. Hidden
+    // until at least one focus session lands; signal-driven repaint.
+    if (loadedModules.homePeriodTiles?.initHomePeriodTiles) {
+        loadedModules.homePeriodTiles.initHomePeriodTiles();
+    }
+    // Task detail drawer — wires its keyboard listener (Esc to close)
+    // and registers itself with the focus-trap. The actual panel DOM
+    // is built lazily on first open.
+    if (loadedModules.taskDetail?.initTaskDetail) {
+        loadedModules.taskDetail.initTaskDetail();
+    }
+    // Notepad — `n` shortcut opens it. DOM built lazily on first open.
+    if (loadedModules.notepad?.initNotepad) {
+        loadedModules.notepad.initNotepad();
+    }
+    // Stream themes — listens for `activeStreamId` changes and swaps
+    // a YouTube / SoundCloud iframe in for the 3D canvas.
+    if (loadedModules.streamThemes?.initStreamThemes) {
+        loadedModules.streamThemes.initStreamThemes();
     }
 }
 

@@ -157,11 +157,100 @@ export const APPLY_HOOKS = {
         }
     },
 
-    // ───────── Scene theme (placeholder — only Black Hole exists today) ─────────
+    // ───────── Scene theme — driven by the registry in scene-manager ────
     'scene.theme': (v) => {
-        // Kept for future multi-scene support.
         document.documentElement.setAttribute('data-theme', v);
         document.body.setAttribute('data-theme', v);
+        // Lazy import so the apply hooks don't pull the whole 3D
+        // bundle eagerly. setActiveTheme is a no-op if the scene
+        // hasn't initialised yet — first paint reads the saved id
+        // directly via readSavedThemeId.
+        import('../../graphics/scene/scene-manager.js').then((m) => {
+            try { m.setActiveTheme?.(v); } catch (_) {}
+        });
+    },
+
+    // ───────── Cycle preset (Wave 17) ─────────
+    // Picking a named preset writes the matching durations + long-break
+    // interval into their own settings keys. "custom" leaves the
+    // sliders alone. "open-ended" sets a flag the timer reads to
+    // switch into count-up mode; durations don't matter then.
+    'timer.cyclePreset': (v) => {
+        if (!v || v === 'custom') return;
+        import('./store.js').then((store) => {
+            const presets = {
+                pomodoro: { focus: 25, short: 5, long: 15, every: 4, openEnded: false },
+                'pomodoro-long': { focus: 50, short: 10, long: 30, every: 4, openEnded: false },
+                '52-17': { focus: 52, short: 17, long: 30, every: 4, openEnded: false },
+                '90-20': { focus: 90, short: 20, long: 30, every: 3, openEnded: false },
+                deepwork: { focus: 180, short: 30, long: 60, every: 1, openEnded: false },
+                'open-ended': { focus: 25, short: 5, long: 15, every: 4, openEnded: true },
+            };
+            const p = presets[v];
+            if (!p) return;
+            store.set('timer.focusDuration', p.focus);
+            store.set('timer.shortBreakDuration', p.short);
+            store.set('timer.longBreakDuration', p.long);
+            store.set('timer.longBreakInterval', p.every);
+            store.set('timer.openEnded', p.openEnded);
+        });
+    },
+    // Open-ended flag is also writable directly so a future toggle can
+    // flip it without going through the preset picker.
+    'timer.openEnded': (_v) => {
+        // No DOM mutation here — timer.js reads the flag inline. The
+        // hook exists so the settings store fires the apply chain.
+    },
+
+    // ───────── Streams (Wave 5) ─────────
+    // The picker writes a curated id; the custom-URL field writes a
+    // shortened `custom:<videoId>` shorthand. Both feed the same
+    // activeStreamId signal via stream-themes.setActiveStream.
+    'scene.streamId': (v) => {
+        // Curated id wins unless a custom URL is also set.
+        import('../../core/state.js').then((s) => {
+            // If a custom URL is already set, leave the live signal
+            // alone — the user explicitly opted into that one.
+            const customRaw = (
+                document.documentElement.dataset?.streamCustom ?? ''
+            ).trim();
+            if (customRaw) return;
+            s.activeStreamId.value = v || null;
+        });
+    },
+    'scene.streamCustomUrl': (v) => {
+        const url = (v || '').trim();
+        if (!url) {
+            // Cleared — fall back to whatever scene.streamId is set
+            // to (could be empty / a curated id).
+            document.documentElement.dataset.streamCustom = '';
+            Promise.all([
+                import('../../core/state.js'),
+                import('./store.js'),
+            ]).then(([s, store]) => {
+                s.activeStreamId.value = store.get('scene.streamId') || null;
+            });
+            return;
+        }
+        document.documentElement.dataset.streamCustom = '1';
+        Promise.all([
+            import('../../core/state.js'),
+            import('../stream-themes.js'),
+        ]).then(([s, st]) => {
+            const yt = st.shortenYouTubeUrl(url);
+            if (yt) {
+                s.activeStreamId.value = yt;
+                return;
+            }
+            const sc = st.shortenSoundCloudUrl(url);
+            if (sc) {
+                s.activeStreamId.value = sc;
+                return;
+            }
+            // Unrecognised link — clear so the user sees no effect
+            // and can correct without a confusing partial state.
+            s.activeStreamId.value = null;
+        });
     },
 };
 

@@ -34,7 +34,7 @@
 //     bridge: when one tab signs in/out, others receive an
 //     onAuthStateChange event. Our `onChange` subscribers see it.
 
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './auth-config.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../core/auth-config.js';
 import { validatePassword, isPasswordBreached } from './password-policy.js';
 
 let client = null;
@@ -95,7 +95,7 @@ export function isConfigured() {
 /** Lazily import supabase-js and create the client on first use. */
 async function getClient() {
     if (!isConfigured()) {
-        const err = new Error('Auth not configured. Fill in js/features/auth-config.js.');
+        const err = new Error('Auth not configured. Fill in js/core/auth-config.js.');
         err.code = 'not_configured';
         throw err;
     }

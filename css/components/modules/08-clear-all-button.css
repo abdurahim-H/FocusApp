@@ -42,6 +42,638 @@
     pointer-events: none !important;
 }
 
+/* Bulk-action footer — sits at the bottom of the task list with the
+   existing "Clear All" plus a softer "Clear completed" sibling that
+   only renders when at least one task is checked off. */
+.task-bulk-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 4px;
+}
+.task-bulk-actions .clear-all-btn,
+.task-bulk-actions .task-bulk-btn {
+    margin-top: 0;
+}
+.task-bulk-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 246, 225, 0.55);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+.task-bulk-btn:hover,
+.task-bulk-btn:focus-visible {
+    color: rgba(255, 246, 225, 0.95);
+    background: rgba(255, 246, 225, 0.04);
+    outline: none;
+}
+.task-bulk-btn.hidden { display: none; }
+
+/* Estimate stepper + pomodoro badge on each task row. The stepper is
+   subtle by default — visible only on hover/focus — so casual users
+   who don't care about pomodoro estimates aren't visually nagged. */
+.task-estimate {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    padding: 2px 4px;
+    border-radius: 6px;
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.2s ease;
+}
+.task-item:hover .task-estimate,
+.task-item:focus-within .task-estimate,
+.task-estimate:has(.task-estimate__val:not(:empty):not([data-zero])) {
+    opacity: 1;
+}
+.task-item:has(.task-badge) .task-estimate {
+    /* When the task already shows a badge, surface the stepper too —
+       it's how the user reaches the estimate to keep editing. */
+    opacity: 1;
+}
+.task-estimate__btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.18);
+    background: rgba(255, 220, 160, 0.04);
+    color: rgba(255, 246, 225, 0.85);
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.task-estimate__btn:hover:not(:disabled),
+.task-estimate__btn:focus-visible:not(:disabled) {
+    background: rgba(255, 220, 160, 0.16);
+    color: #faf3e3;
+    border-color: rgba(255, 220, 160, 0.4);
+    outline: none;
+}
+.task-estimate__btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+.task-estimate__val {
+    min-width: 14px;
+    text-align: center;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 12px;
+    color: rgba(255, 246, 225, 0.78);
+}
+
+.task-badge {
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 220, 160, 0.12);
+    border: 1px solid rgba(255, 220, 160, 0.24);
+    color: rgba(255, 220, 160, 0.85);
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1;
+    align-self: center;
+    flex-shrink: 0;
+}
+.task-badge--no-estimate {
+    background: rgba(255, 246, 225, 0.06);
+    border-color: rgba(255, 246, 225, 0.14);
+    color: rgba(255, 246, 225, 0.7);
+}
+
+/* Focus-lock pin — circle-target glyph that pins a task as the
+   current session's "active" task. Subtle by default; lights up when
+   pinned so the user can see at a glance which task gets credited. */
+.task-lock {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.45);
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    margin-left: 6px;
+    opacity: 0;
+    transition: background 0.18s ease, color 0.18s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+.task-item:hover .task-lock,
+.task-item:focus-within .task-lock,
+.task-lock.is-on {
+    opacity: 1;
+}
+.task-lock:hover,
+.task-lock:focus-visible {
+    background: rgba(255, 220, 160, 0.14);
+    color: rgba(255, 246, 225, 0.95);
+    outline: none;
+    transform: scale(1.05);
+}
+.task-lock.is-on {
+    color: rgba(255, 220, 160, 0.95);
+    background: rgba(255, 220, 160, 0.16);
+}
+
+/* Active-task row gains a soft amber rail on the leading edge so the
+   pinned task is unmistakable in the list — mirrors the pinned
+   constellation card pattern. */
+.task-item.is-active-task {
+    box-shadow: inset 3px 0 0 rgba(255, 205, 115, 0.65);
+}
+
+/* ETA pill on the Tasks card header. Sits between the title and the
+   Expand button, hidden when no incomplete task carries an estimate. */
+.tasks-eta {
+    margin-left: 10px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(255, 220, 160, 0.1);
+    border: 1px solid rgba(255, 220, 160, 0.22);
+    color: rgba(255, 220, 160, 0.85);
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+.tasks-eta.hidden { display: none; }
+
+/* Drag handle — small braille-dot glyph at the leading edge. Visible
+   on hover; styled so it doesn't compete with the task text. */
+.task-drag-handle {
+    color: rgba(255, 246, 225, 0.32);
+    font-size: 12px;
+    line-height: 1;
+    cursor: grab;
+    padding: 0 4px;
+    opacity: 0;
+    user-select: none;
+    transition: opacity 0.18s ease, color 0.18s ease;
+}
+.task-item:hover .task-drag-handle,
+.task-item:focus-within .task-drag-handle {
+    opacity: 0.9;
+}
+.task-item:active .task-drag-handle {
+    cursor: grabbing;
+    color: rgba(255, 220, 160, 0.85);
+}
+.task-item.is-dragging {
+    opacity: 0.55;
+    cursor: grabbing;
+}
+.task-item.is-drag-over {
+    box-shadow: inset 0 -2px 0 rgba(255, 205, 115, 0.85);
+}
+
+/* Due-date affordance. Small calendar button — clicking it opens
+   the custom date picker (js/ui/date-picker.js). The icon brightens
+   once a date is set. */
+.task-due {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    margin-left: 4px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.18s ease, background 0.18s ease;
+}
+.task-item:hover .task-due,
+.task-item:focus-within .task-due,
+.task-due.has-date {
+    opacity: 1;
+}
+.task-due:hover,
+.task-due:focus-visible {
+    background: rgba(255, 220, 160, 0.12);
+    outline: none;
+}
+.task-due__icon {
+    position: relative;
+    z-index: 1;
+    font-size: 12px;
+    pointer-events: none;
+    filter: grayscale(0.4);
+    color: rgba(255, 246, 225, 0.55);
+    transition: filter 0.18s ease, color 0.18s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+.task-due.has-date .task-due__icon {
+    filter: none;
+    color: rgba(255, 220, 160, 0.92);
+}
+
+/* Due-date inline badge inside the task content row. Tone-coded:
+   overdue red, due-today amber, soon honey, later muted cream. */
+.task-due-badge {
+    margin-left: 8px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.task-due-badge--overdue {
+    color: #ff8a8a;
+    background: rgba(255, 138, 138, 0.14);
+    border: 1px solid rgba(255, 138, 138, 0.28);
+}
+.task-due-badge--today {
+    color: rgba(255, 205, 115, 0.95);
+    background: rgba(255, 205, 115, 0.14);
+    border: 1px solid rgba(255, 205, 115, 0.32);
+}
+.task-due-badge--soon {
+    color: rgba(255, 220, 160, 0.85);
+    background: rgba(255, 220, 160, 0.08);
+    border: 1px solid rgba(255, 220, 160, 0.2);
+}
+.task-due-badge--later {
+    color: rgba(255, 246, 225, 0.55);
+    background: rgba(255, 246, 225, 0.04);
+    border: 1px solid rgba(255, 246, 225, 0.1);
+}
+
+/* Task row → flex container so the new wrapper structure (.task-row
+   + .task-subtasks) lays out cleanly. */
+.task-item {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+}
+.task-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+/* Project tag chip on the parent row. Tight, tone-neutral, lets the
+   user spot grouping without any setup work in the data. */
+.task-project-chip {
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: rgba(180, 144, 232, 0.9);
+    background: rgba(180, 144, 232, 0.1);
+    border: 1px solid rgba(180, 144, 232, 0.22);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.task-subtask-counter {
+    margin-left: 8px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 10px;
+    color: rgba(255, 246, 225, 0.7);
+    background: rgba(255, 246, 225, 0.04);
+    border: 1px solid rgba(255, 246, 225, 0.1);
+}
+
+/* Recurring indicator — small ↻ glyph that sits among the row's
+   inline chips. Tone matches the project-chip family: a soft cyan
+   so it doesn't compete with the amber cluster (estimate, lock, due). */
+.task-repeat-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    padding: 0 6px;
+    height: 18px;
+    border-radius: 999px;
+    color: rgba(144, 232, 200, 0.95);
+    background: rgba(144, 232, 200, 0.1);
+    border: 1px solid rgba(144, 232, 200, 0.25);
+    font-size: 10.5px;
+    line-height: 1;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    flex-shrink: 0;
+}
+
+/* Carry-over banner — small, calm, dismissible. Appears above the
+   tasks card when the user has incomplete non-recurring tasks older
+   than 24h. Two actions: Keep (dismiss for today + bump createdAt
+   forward) or Clear stale (delete them outright). */
+.tasks-carry-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(255, 220, 160, 0.06);
+    border: 1px solid rgba(255, 220, 160, 0.2);
+    color: rgba(255, 246, 225, 0.85);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12px;
+}
+.tasks-carry-banner.hidden { display: none !important; }
+.tasks-carry-banner__copy {
+    flex: 1;
+    min-width: 0;
+}
+.tasks-carry-banner__actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.tasks-carry-banner__btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.22);
+    background: rgba(255, 220, 160, 0.06);
+    color: rgba(255, 246, 225, 0.85);
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.tasks-carry-banner__btn:hover,
+.tasks-carry-banner__btn:focus-visible {
+    background: rgba(255, 220, 160, 0.18);
+    color: #faf3e3;
+    border-color: rgba(255, 220, 160, 0.5);
+    outline: none;
+}
+.tasks-carry-banner__btn--danger {
+    color: rgba(255, 138, 138, 0.85);
+    border-color: rgba(255, 138, 138, 0.32);
+    background: transparent;
+}
+.tasks-carry-banner__btn--danger:hover,
+.tasks-carry-banner__btn--danger:focus-visible {
+    background: rgba(255, 138, 138, 0.12);
+    color: #ff8a8a;
+    border-color: rgba(255, 138, 138, 0.55);
+}
+
+/* Subtasks toggle — small chevron button. Rotates on expand. */
+.task-subtasks-toggle {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.45);
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-left: 2px;
+    opacity: 0;
+    transition: opacity 0.18s ease, color 0.18s ease, transform 0.2s ease, background 0.18s ease;
+}
+.task-item:hover .task-subtasks-toggle,
+.task-item:focus-within .task-subtasks-toggle,
+.task-subtasks-toggle.has-any {
+    opacity: 1;
+}
+.task-subtasks-toggle:hover,
+.task-subtasks-toggle:focus-visible {
+    background: rgba(255, 246, 225, 0.06);
+    color: rgba(255, 246, 225, 0.95);
+    outline: none;
+}
+.task-item.is-expanded .task-subtasks-toggle {
+    transform: rotate(180deg);
+}
+
+/* Subtask drawer — collapses by default, expands when the parent
+   row is .is-expanded. Indented under the parent so the nested
+   structure reads visually. */
+.task-subtasks {
+    max-height: 0;
+    overflow: hidden;
+    padding-left: 36px;
+    transition: max-height 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+                margin 0.3s ease;
+}
+.task-item.is-expanded .task-subtasks {
+    max-height: 320px;
+    margin-top: 6px;
+}
+.subtask-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.022);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.18s ease;
+}
+.subtask-item:hover { background: rgba(255, 255, 255, 0.04); }
+.subtask-item.is-done .subtask-toggle__text {
+    text-decoration: line-through;
+    color: rgba(255, 246, 225, 0.45);
+}
+/* When the parent task is checked off, every subtask reads as
+   crossed-out too — completing the parent is a definitive "all of
+   this is finished" statement, even if individual subtasks were
+   never explicitly toggled. Keeps the UI honest at a glance. */
+.task-item.is-completed .subtask-toggle__text {
+    text-decoration: line-through;
+    color: rgba(255, 246, 225, 0.4);
+}
+.task-item.is-completed .subtask-toggle__check {
+    border-color: rgba(255, 220, 160, 0.18);
+    opacity: 0.55;
+}
+.subtask-toggle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 246, 225, 0.85);
+    text-align: left;
+    cursor: pointer;
+    padding: 4px 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12.5px;
+}
+.subtask-toggle__check {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 220, 160, 0.32);
+    color: rgba(255, 220, 160, 0.95);
+    font-size: 10px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.subtask-item.is-done .subtask-toggle__check {
+    background: rgba(255, 205, 115, 0.85);
+    border-color: rgba(255, 205, 115, 0.95);
+    color: rgba(0, 0, 0, 0.7);
+}
+.subtask-delete {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 138, 138, 0.7);
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.subtask-delete:hover,
+.subtask-delete:focus-visible {
+    background: rgba(255, 138, 138, 0.14);
+    color: rgba(255, 138, 138, 1);
+    outline: none;
+}
+
+/* On-demand "+ Add a subtask" trigger. Visible by default; hides
+   itself when clicked and reveals the input form (.subtask-add).
+   Submitting or pressing Esc hides the form again. Keeps the
+   drawer compact when the user isn't actively adding. */
+.subtask-add-trigger {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 5px 12px 5px 10px;
+    border-radius: 999px;
+    border: 1px dashed rgba(255, 220, 160, 0.24);
+    background: transparent;
+    color: rgba(255, 220, 160, 0.7);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.subtask-add-trigger.hidden { display: none; }
+.subtask-add-trigger:hover,
+.subtask-add-trigger:focus-visible {
+    background: rgba(255, 220, 160, 0.08);
+    color: #faf3e3;
+    border-color: rgba(255, 220, 160, 0.42);
+    outline: none;
+}
+.subtask-add-trigger__plus {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 13px;
+    line-height: 1;
+}
+
+/* Subtask add form. Sits at the bottom of the drawer when the
+   trigger has been clicked. */
+.subtask-add {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+}
+.subtask-add.hidden { display: none; }
+.subtask-add__input {
+    flex: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.14);
+    background: rgba(255, 255, 255, 0.025);
+    color: rgba(255, 246, 225, 0.92);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12px;
+}
+.subtask-add__input:focus {
+    border-color: rgba(255, 220, 160, 0.4);
+    outline: none;
+    background: rgba(255, 255, 255, 0.04);
+}
+.subtask-add__btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.22);
+    background: rgba(255, 220, 160, 0.06);
+    color: rgba(255, 220, 160, 0.85);
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.subtask-add__btn:hover,
+.subtask-add__btn:focus-visible {
+    background: rgba(255, 220, 160, 0.16);
+    color: rgba(255, 246, 225, 0.95);
+    border-color: rgba(255, 220, 160, 0.4);
+    outline: none;
+}
+
 /* Ambient Mode */
 .ambient-content {
     display: flex;

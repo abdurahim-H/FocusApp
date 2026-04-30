@@ -1,0 +1,88 @@
+/* ════════════════════════════════════════════════════════════════════════
+   CELEBRATE TOAST — Wave 24.9, personal-best alert.
+   ════════════════════════════════════════════════════════════════════════
+   Anchored top-right. Dim by default; slides in with a soft glow when a
+   focus day overtakes the user's prior record. Distinct from the
+   error-only `.ambient-toast` (top-left, red-edged) so the visual
+   register reads as a positive event rather than a problem. Fades out
+   after ~5s; the chip is purely informational and never blocks input. */
+
+.celebrate-toast {
+    position: fixed;
+    top: 28px;
+    right: 28px;
+    transform: translateY(-12px);
+    padding: 12px 16px;
+    max-width: 320px;
+    border-radius: 14px;
+    background: linear-gradient(
+        180deg,
+        rgba(28, 22, 14, 0.92),
+        rgba(18, 14, 8, 0.92)
+    );
+    border: 1px solid rgba(255, 220, 160, 0.35);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow:
+        0 14px 32px rgba(0, 0, 0, 0.45),
+        0 0 24px rgba(255, 205, 115, 0.18);
+    color: rgba(255, 246, 225, 1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2300;
+    transition:
+        transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.32s ease,
+        box-shadow 0.4s ease;
+}
+.celebrate-toast.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.celebrate-toast__icon {
+    font-size: 22px;
+    line-height: 1;
+    filter: drop-shadow(0 0 6px rgba(255, 205, 115, 0.45));
+}
+
+.celebrate-toast__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.celebrate-toast__title {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #faf3e3;
+}
+.celebrate-toast__detail {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 11.5px;
+    color: rgba(255, 220, 160, 0.78);
+}
+
+@media (max-width: 540px) {
+    .celebrate-toast {
+        top: auto;
+        bottom: 92px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .celebrate-toast {
+        transition: opacity 0.2s ease;
+        transform: none;
+    }
+}

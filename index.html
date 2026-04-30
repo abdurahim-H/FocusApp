@@ -230,6 +230,48 @@
                 <h1>Cosmic Focus</h1>
                 <div class="greeting" id="greeting">Welcome to Your Universe!</div>
                 <div class="date-time" id="dateTime"></div>
+
+                <!-- Period summary tiles. JS in js/ui/home-period-tiles.js
+                     paints them once on first paint and re-paints whenever
+                     the focus-session signal fires. Tiles are hidden until
+                     there's at least one finished focus session so a brand
+                     new account doesn't see an empty zero-state on Home. -->
+                <div class="home-period-tiles hidden" id="homePeriodTiles" aria-label="Focus summary">
+                    <button class="home-period-tile" id="homeWeekTile"
+                            type="button"
+                            data-period="week"
+                            aria-label="Open weekly focus summary">
+                        <header class="home-period-tile__head">
+                            <span class="home-period-tile__eyebrow">this week</span>
+                            <span class="home-period-tile__delta" data-week-delta></span>
+                        </header>
+                        <div class="home-period-tile__hero">
+                            <span class="home-period-tile__value" data-week-value>0</span>
+                            <span class="home-period-tile__unit" data-week-unit>min</span>
+                        </div>
+                        <div class="home-period-tile__bars" data-week-bars aria-hidden="true"></div>
+                        <p class="home-period-tile__sub" data-week-sub></p>
+                    </button>
+                    <button class="home-period-tile" id="homeMonthTile"
+                            type="button"
+                            data-period="month"
+                            aria-label="Open monthly focus summary">
+                        <header class="home-period-tile__head">
+                            <span class="home-period-tile__eyebrow">this month</span>
+                            <span class="home-period-tile__delta" data-month-delta></span>
+                        </header>
+                        <div class="home-period-tile__hero">
+                            <span class="home-period-tile__value" data-month-value>0</span>
+                            <span class="home-period-tile__unit" data-month-unit>min</span>
+                        </div>
+                        <ul class="home-period-tile__stats">
+                            <li><span data-month-sessions>0</span> sessions</li>
+                            <li><span data-month-active-days>0</span> active days</li>
+                            <li>best <span data-month-best>0 min</span></li>
+                        </ul>
+                        <p class="home-period-tile__sub" data-month-sub></p>
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -387,19 +429,49 @@
                 <div class="stats-bar" id="statsBar" aria-label="Session statistics">
                     <!-- Live stats (hidden during confirmation) -->
                     <div class="stats-chips" id="statsChips">
-                        <div class="stat-chip">
-                            <span class="stat-value" id="statSessionsToday">0</span>
-                            <span class="stat-label">sessions</span>
-                        </div>
+                        <button class="stat-period-toggle" id="statPeriodToggle"
+                                type="button"
+                                aria-label="Switch stats period"
+                                title="Click to cycle today / this week / this month / all-time">
+                            <span class="stat-period-toggle__label" data-period-label>TODAY</span>
+                        </button>
                         <div class="stat-divider"></div>
                         <div class="stat-chip">
+                            <span class="stat-value" id="statSessionsToday">0</span>
+                            <span class="stat-label" data-period-suffix="sessions">sessions</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-chip stat-chip--focused">
+                            <!-- Goal ring — sits behind the value, fills
+                                 clockwise as today's focus minutes
+                                 approach timer.dailyGoalMinutes. JS
+                                 toggles visibility based on the setting. -->
+                            <svg class="stat-goal-ring hidden" id="statGoalRing"
+                                 viewBox="0 0 36 36" aria-hidden="true">
+                                <circle class="stat-goal-ring__track"
+                                        cx="18" cy="18" r="16"
+                                        fill="none" stroke-width="2.4"/>
+                                <circle class="stat-goal-ring__fill"
+                                        cx="18" cy="18" r="16"
+                                        fill="none" stroke-width="2.4"
+                                        stroke-linecap="round"
+                                        pathLength="100"
+                                        stroke-dashoffset="100"/>
+                            </svg>
                             <span class="stat-value" id="statTotalMinutes">0s</span>
-                            <span class="stat-label">focused</span>
+                            <span class="stat-label" data-period-suffix="focused">focused</span>
                         </div>
                         <div class="stat-divider"></div>
                         <div class="stat-chip">
                             <span class="stat-value" id="statTasksToday">0</span>
-                            <span class="stat-label">tasks done</span>
+                            <span class="stat-label" data-period-suffix="tasks done">tasks done</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-chip stat-chip--streak"
+                             title="Consecutive calendar days with at least one finished focus session">
+                            <span class="stat-value" id="statStreak">0</span>
+                            <span class="stat-label">day streak</span>
+                            <span class="stat-streak-target hidden" id="statStreakTarget" aria-live="polite"></span>
                         </div>
                         <div class="stat-divider"></div>
                         <div class="stat-chip stat-chip--momentum"
@@ -432,37 +504,11 @@
                     </div>
                 </div>
 
-                <!-- Task Management Section -->
-                <div class="task-section">
-                    <div class="tasks-title-row">
-                        <h3 class="tasks-title">Tasks for this session</h3>
-                        <button class="tasks-expand-trigger" id="tasksExpandTrigger"
-                                type="button"
-                                aria-label="Open the expanded task view"
-                                title="Open the expanded task view">
-                            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M3 9.5V13h3.5"/>
-                                <path d="M13 6.5V3H9.5"/>
-                                <path d="M3 13l4.5-4.5"/>
-                                <path d="M13 3l-4.5 4.5"/>
-                            </svg>
-                            <span class="tasks-expand-trigger__label">Expand</span>
-                        </button>
-                    </div>
-                    <div class="task-input-group">
-                        <input type="text" class="task-input" id="taskInput" placeholder="What are you working on?">
-                        <button class="liquid-glass-btn liquid-glass-btn--success liquid-glass-btn--small liquid-glass-btn--lens-flare" id="addTaskBtn">
-                            <span class="btn-text">Add</span>
-                        </button>
-                    </div>
-                    <ul class="task-list" id="taskList"></ul>
-                    <button class="clear-all-btn hidden" id="clearAllBtn" aria-label="Clear all tasks">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M2.5 4L6 7.5L9.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <span>Clear All</span>
-                    </button>
-                </div>
+                <!-- Task management lives in the bottom dock (#taskDock,
+                     direct child of <body>). It's hoisted out of the
+                     focus mode container so it can pin to the viewport
+                     bottom — `.container` has `contain: layout` which
+                     would otherwise trap it. -->
             </div>
         </div>
 
@@ -477,6 +523,116 @@
               paint` which makes it the containing block for fixed
               descendants and clips paint to its box. Putting fixed
               overlays inside makes them non-clickable / clipped. -->
+
+    <!-- Task Dock — bottom-anchored task surface for the Focus tab.
+         Slim collapsed strip shows the active pinned task and total
+         count; clicking expands the dock upward into a 60vh task panel.
+         Outside .container so it can pin cleanly to the viewport. -->
+    <aside class="task-dock hidden" id="taskDock"
+           data-state="collapsed"
+           aria-label="Tasks">
+        <button class="task-dock__rail" id="taskDockRail" type="button"
+                aria-expanded="false"
+                aria-controls="taskDockExpanded"
+                aria-label="Toggle task dock">
+            <span class="task-dock__rail-handle" aria-hidden="true"></span>
+        </button>
+
+        <button class="task-dock__collapsed" id="taskDockCollapsed" type="button"
+                aria-label="Open task list">
+            <div class="task-dock__active">
+                <span class="task-dock__eyebrow" id="taskDockEyebrow">NOW</span>
+                <span class="task-dock__active-name" id="taskDockActiveName">— no active task —</span>
+            </div>
+            <div class="task-dock__meta">
+                <span class="task-dock__progress hidden" id="taskDockProgress" aria-hidden="true"></span>
+                <span class="task-dock__count" id="taskDockCount">0 tasks</span>
+                <span class="task-dock__chevron" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" width="14" height="14"
+                         fill="none" stroke="currentColor" stroke-width="1.6"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 10 8 5 13 10"/>
+                    </svg>
+                </span>
+            </div>
+        </button>
+
+        <div class="task-dock__expanded" id="taskDockExpanded" aria-hidden="true">
+            <header class="task-dock__head">
+                <span class="task-dock__head-eyebrow">TASKS</span>
+                <h2 class="task-dock__head-title">Tasks for this session</h2>
+                <ul class="task-dock__summary" id="taskDockSummary" aria-label="Task counts">
+                    <li class="task-dock__summary-chip task-dock__summary-chip--open">
+                        <span class="task-dock__summary-num" id="taskDockOpen">0</span>
+                        <span class="task-dock__summary-label">open</span>
+                    </li>
+                    <li class="task-dock__summary-chip task-dock__summary-chip--done">
+                        <span class="task-dock__summary-num" id="taskDockDone">0</span>
+                        <span class="task-dock__summary-label">done</span>
+                    </li>
+                    <li class="task-dock__summary-chip task-dock__summary-chip--total">
+                        <span class="task-dock__summary-num" id="taskDockTotal">0</span>
+                        <span class="task-dock__summary-label">total</span>
+                    </li>
+                </ul>
+                <span class="tasks-eta hidden" id="tasksEta"
+                      aria-label="Estimated time to finish"></span>
+                <button class="task-dock__close" id="taskDockClose" type="button"
+                        aria-label="Collapse the task dock">
+                    <svg viewBox="0 0 16 16" width="14" height="14"
+                         fill="none" stroke="currentColor" stroke-width="1.6"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3.5" y1="3.5" x2="12.5" y2="12.5"/>
+                        <line x1="12.5" y1="3.5" x2="3.5" y2="12.5"/>
+                    </svg>
+                </button>
+            </header>
+
+            <!-- Carry-over banner — populated by tasks.js when the user
+                 has incomplete non-recurring tasks created more than 24h
+                 ago. Hidden otherwise. -->
+            <div class="tasks-carry-banner hidden" id="tasksCarryBanner" role="status">
+                <span class="tasks-carry-banner__copy" id="tasksCarryBannerCopy"></span>
+                <div class="tasks-carry-banner__actions">
+                    <button class="tasks-carry-banner__btn"
+                            type="button" id="tasksCarryKeep">Keep</button>
+                    <button class="tasks-carry-banner__btn tasks-carry-banner__btn--danger"
+                            type="button" id="tasksCarryClear">Clear stale</button>
+                </div>
+            </div>
+
+            <div class="task-dock__add task-input-group">
+                <input type="text" class="task-input" id="taskInput"
+                       placeholder="What are you working on?">
+                <button class="liquid-glass-btn liquid-glass-btn--success liquid-glass-btn--small liquid-glass-btn--lens-flare"
+                        id="addTaskBtn">
+                    <span class="btn-text">Add</span>
+                </button>
+            </div>
+
+            <div class="task-dock__body">
+                <ul class="task-list" id="taskList"></ul>
+                <div class="task-dock__empty hidden" id="taskDockEmpty">
+                    <p class="task-dock__empty-headline">no tasks yet</p>
+                    <p class="task-dock__empty-sub">add one above and it shows up across every focus session.</p>
+                </div>
+            </div>
+
+            <footer class="task-dock__foot">
+                <button class="task-bulk-btn hidden" id="clearCompletedBtn" type="button"
+                        aria-label="Remove only completed tasks">
+                    Clear completed
+                </button>
+                <button class="clear-all-btn hidden" id="clearAllBtn" aria-label="Clear all tasks">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2.5 4L6 7.5L9.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Clear All</span>
+                </button>
+                <span class="task-dock__hint">esc to close · tap any task to mark it done</span>
+            </footer>
+        </div>
+    </aside>
 
     <!-- Cosmos Toolbar — bottom-centre floating control surface. Outside
          .container so it isn't trapped by `contain: layout`. Each button

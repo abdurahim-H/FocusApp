@@ -1,0 +1,64 @@
+/* ════════════════════════════════════════════════════════════════════════
+   STREAM THEMES — full-viewport YouTube / SoundCloud iframe that
+   replaces the 3D black-hole scene as the user's "scene background".
+   ════════════════════════════════════════════════════════════════════════
+   Pinned to the four edges with a small negative z-index so the focus
+   card / nav / mini-timer / cosmos toolbar all overlay cleanly. The
+   3D canvas hides while a stream is active (handled in stream-themes.js
+   via `.hidden`). */
+
+.stream-theme-host {
+    position: fixed;
+    inset: 0;
+    z-index: 1; /* sits above the body bg, below all UI chrome */
+    pointer-events: auto;
+    background: #000;
+    overflow: hidden;
+}
+.stream-theme-host.hidden { display: none; }
+
+.stream-theme-host iframe {
+    /* Cover-fill: the iframe is 16:9 by default; we expand it past the
+       viewport edges so any aspect ratio fully fills, similar to a
+       background-size: cover image. */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* 177.77vh = 16/9 ratio of viewport height for landscape coverage,
+       100vw is the floor for portrait. The browser picks whichever is
+       larger via min(). Same for height with 56.25vw = 9/16 of width. */
+    width: max(100vw, 177.77vh);
+    height: max(100vh, 56.25vw);
+    transform: translate(-50%, -50%);
+    border: 0;
+    pointer-events: auto;
+}
+
+/* Hide the 3D canvas when stream theme is active. The `hidden`
+   class is added by stream-themes.js paint(). */
+#babylon-canvas.hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* When stream theme is active, dim the canvas-side overlays slightly
+   to let the video read more clearly. The .container chrome stays
+   crisp for usability. */
+.stream-theme-host:not(.hidden) ~ .container {
+    backdrop-filter: brightness(0.92);
+}
+
+/* Soft vignette overlay so the focus card / nav / mini-timer don't
+   compete with high-contrast video frames. Sits between the iframe
+   and the chrome. */
+.stream-theme-host::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 50%,
+        rgba(0, 0, 0, 0.35) 100%
+    );
+}

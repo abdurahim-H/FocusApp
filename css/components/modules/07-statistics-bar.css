@@ -17,6 +17,92 @@
     gap: 2px;
 }
 
+/* Period toggle — small pill at the leading edge of the stats bar.
+   Cycles today → week → month → all-time on click. The current period
+   is mirrored to a `data-period` attribute so other CSS / screen
+   readers can react to the state. */
+.stat-period-toggle {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.18);
+    background: rgba(255, 220, 160, 0.04);
+    color: rgba(255, 220, 160, 0.78);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.stat-period-toggle:hover,
+.stat-period-toggle:focus-visible {
+    background: rgba(255, 220, 160, 0.12);
+    color: rgba(255, 246, 225, 0.95);
+    border-color: rgba(255, 220, 160, 0.4);
+    outline: none;
+}
+.stat-period-toggle[data-period="today"] {
+    color: rgba(255, 220, 160, 0.78);
+}
+.stat-period-toggle[data-period="week"] {
+    color: rgba(149, 226, 164, 0.85);
+    border-color: rgba(149, 226, 164, 0.28);
+    background: rgba(149, 226, 164, 0.06);
+}
+.stat-period-toggle[data-period="month"] {
+    color: rgba(180, 144, 232, 0.85);
+    border-color: rgba(180, 144, 232, 0.28);
+    background: rgba(180, 144, 232, 0.06);
+}
+.stat-period-toggle[data-period="all"] {
+    color: rgba(255, 246, 225, 0.85);
+    border-color: rgba(255, 246, 225, 0.32);
+    background: rgba(255, 246, 225, 0.08);
+}
+
+/* "Focused" chip wraps a small SVG goal-ring around the value. The
+   chip becomes the positioning context for the absolute-positioned
+   ring; the value stays in normal flow. */
+.stat-chip--focused {
+    position: relative;
+    padding: 2px 0;
+}
+.stat-goal-ring {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 38px;
+    height: 38px;
+    transform: translate(-50%, calc(-50% - 2px)) rotate(-90deg);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.stat-goal-ring.hidden { display: none; }
+.stat-goal-ring__track {
+    stroke: rgba(255, 220, 160, 0.08);
+}
+.stat-goal-ring__fill {
+    stroke: rgba(255, 205, 115, 0.7);
+    stroke-dasharray: 100;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.32, 0.72, 0, 1),
+                stroke 0.3s ease;
+}
+.stat-goal-ring.is-complete .stat-goal-ring__fill {
+    stroke: rgba(149, 226, 164, 0.9);
+    filter: drop-shadow(0 0 6px rgba(149, 226, 164, 0.4));
+}
+.stat-chip--focused .stat-value {
+    /* Lift slightly so the ring breathes around it instead of hugging. */
+    position: relative;
+    z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stat-goal-ring__fill { transition: none; }
+}
+
 .stat-value {
     font-size: var(--text-md);
     font-weight: 500;
@@ -53,6 +139,46 @@
        chips' baselines; the dots are 6px tall vs. the ~16px of the
        text values, so a small vertical adjustment keeps the row tidy. */
     gap: 6px;
+}
+
+/* Streak chip — same shape as the other text chips. The number is the
+   live currentStreak signal value; a faint amber accent lights up the
+   value once a streak exists so the user can read "I have a streak"
+   in a glance, without making it scream-y when they don't.
+   The label "day streak" is kept short to fit the bar's width budget. */
+.stat-chip--streak .stat-value {
+    /* Default chip text colour is fine; an embedded :where() trick
+       keeps specificity flat so a future theme can override. */
+    color: var(--stat-value-color, inherit);
+}
+.stat-chip--streak:has(.stat-value:not(:empty):not([data-zero])) .stat-value {
+    color: rgba(255, 220, 160, 0.95);
+}
+
+/* Wave 10.2 — streak target chip. Inline pill that lights up when
+   the user clears their streak goal. Hidden by default; rendered
+   alongside the day-streak number, never replacing it. Fades in
+   on the moment the goal is hit instead of snapping — small
+   detail, but the goal moment deserves it. */
+.stat-streak-target {
+    margin-top: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 9px;
+    color: rgba(149, 226, 164, 0.95);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    opacity: 1;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.stat-streak-target.hidden {
+    opacity: 0;
+    pointer-events: none;
+    /* keep height in flow so neighbours don't jump when it appears;
+       use visibility:hidden after the fade has landed via CSS only. */
+    visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+    .stat-streak-target { transition: none; }
 }
 .momentum-trail {
     display: inline-flex;
@@ -197,41 +323,9 @@
     to   { opacity: 1; transform: scale(1); }
 }
 
-/* Task Management Section — nearly invisible, just a hairline separator.
-   Flex column layout so the input row + header sit at the top and the
-   list takes the remaining space, scrolling internally when overflow.
-   Without this, list items leak below the section's 220px box and get
-   visually overlapped by the floating cosmos toolbar. */
-.task-section {
-    background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: none !important;
-    border-top: 1px solid rgba(255, 205, 115, 0.08) !important;
-    border-radius: 0 !important;
-    padding: 12px 0 0 0 !important;
-    margin-top: 10px;
-    height: 220px !important;
-    min-height: 220px !important;
-    max-height: 220px !important;
-    box-sizing: border-box !important;
-    box-shadow: none !important;
-    position: relative;
-    z-index: 30;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-/* Kill the gradient pseudo-element overlay */
-.task-section::before {
-    display: none !important;
-}
-
-/* Task input styles moved to liquid-glass-buttons.css for consistency */
-/* Keeping only the legacy z-index overrides if needed */
-
-/* #addTaskBtn styles moved to liquid-glass-buttons.css */
+/* The old in-card .task-section was retired when tasks moved into the
+   bottom dock (see 27-task-dock.css). The dock owns its own scroll
+   container; .task-list now just handles the per-row layout. */
 
 .task-list {
     list-style: none;
@@ -239,23 +333,13 @@
     z-index: 25;
     padding: 0;
     margin: 0;
-    /* Flex item — take the remaining vertical space inside the
-       220px section and scroll internally if tasks overflow. */
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 205, 115, 0.18) transparent;
-}
-.task-list::-webkit-scrollbar { width: 6px; }
-.task-list::-webkit-scrollbar-track { background: transparent; }
-.task-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 205, 115, 0.18);
-    border-radius: 3px;
-}
-.task-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 205, 115, 0.32);
+    /* Size to content — the parent .task-dock__body owns the
+       scroller. With the old `flex: 1 1 auto + overflow: auto` the
+       list filled the body's full height, then scrolled internally,
+       so a second task at the natural-content end of the list was
+       hidden below the list's own scroll viewport even when the
+       dock had visible empty space. Letting the list grow naturally
+       puts every item in the same scrollable parent. */
 }
 
 .task-item {

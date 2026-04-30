@@ -1,0 +1,238 @@
+/* ════════════════════════════════════════════════════════════════════════
+   HOME PERIOD TILES — week + month summary cards on the Home tab.
+   ════════════════════════════════════════════════════════════════════════
+   Two tiles in a row, each clickable, each opens the relevant Profile
+   section. Tiles fade in once there's at least one focus session in the
+   user's history (.hidden is removed by JS). Visual register sits between
+   the calm typography of the greeting and the dense data of the Profile —
+   readable at a glance, never shouty. */
+
+.home-period-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    width: 100%;
+    max-width: 720px;
+    margin: 28px auto 0;
+    padding: 0 12px;
+    /* Smooth fade-in when tiles first appear (after the user's first
+       finished focus session). Reduced-motion users skip the animation
+       via the @media block below. */
+    animation: hpt-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.home-period-tiles.hidden { display: none !important; }
+@keyframes hpt-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.home-period-tile {
+    appearance: none;
+    -webkit-appearance: none;
+    text-align: left;
+    cursor: pointer;
+    color: rgba(255, 246, 225, 0.92);
+    background: linear-gradient(
+        180deg,
+        rgba(20, 16, 10, 0.55),
+        rgba(12, 9, 5, 0.35)
+    );
+    border: 1px solid rgba(255, 220, 160, 0.12);
+    border-radius: 18px;
+    padding: 18px 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition:
+        transform 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+        background 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+.home-period-tile:hover,
+.home-period-tile:focus-visible {
+    transform: translateY(-2px);
+    background: linear-gradient(
+        180deg,
+        rgba(28, 22, 14, 0.7),
+        rgba(16, 12, 6, 0.5)
+    );
+    border-color: rgba(255, 220, 160, 0.32);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.38),
+                0 0 0 0.5px rgba(255, 220, 160, 0.18);
+    outline: none;
+}
+.home-period-tile:active { transform: translateY(0); }
+
+.home-period-tile__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.home-period-tile__eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.6);
+}
+.home-period-tile__delta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: rgba(255, 246, 225, 0.55);
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(255, 246, 225, 0.06);
+}
+.home-period-tile__delta.is-up {
+    color: #95e2a4;
+    background: rgba(149, 226, 164, 0.12);
+}
+.home-period-tile__delta.is-down {
+    color: #ff8a8a;
+    background: rgba(255, 138, 138, 0.12);
+}
+.home-period-tile__delta:empty { display: none; }
+
+/* Hero number — uses the same monospace tabular numerals as the
+   Profile KPI tiles so the whole stat surface reads as one family. */
+.home-period-tile__hero {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 2px;
+}
+.home-period-tile__value {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Menlo', 'Inter', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1, 'ss01' 1;
+    font-size: clamp(30px, 4.4vw, 42px);
+    font-weight: 250;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #faf3e3;
+}
+.home-period-tile__unit {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 12px;
+    color: rgba(255, 220, 160, 0.55);
+}
+
+/* Mon..Sun mini-bars on the week tile. Each bar's height is set via
+   the --h custom property by the JS renderer. The "today" bar has a
+   slightly brighter fill so the user can spot which day they're on. */
+.home-period-tile__bars {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    align-items: end;
+    gap: 4px;
+    height: 36px;
+    margin-top: 2px;
+}
+.home-period-tile__bar {
+    width: 100%;
+    min-width: 6px;
+    height: var(--h, 6%);
+    border-radius: 2px;
+    background: rgba(255, 220, 160, 0.32);
+    transition: background 0.25s ease;
+}
+.home-period-tile:hover .home-period-tile__bar {
+    background: rgba(255, 220, 160, 0.5);
+}
+.home-period-tile__bar.is-today {
+    background: rgba(255, 220, 160, 0.85);
+    box-shadow: 0 0 6px rgba(255, 205, 115, 0.35);
+}
+
+/* Stats list on the month tile — three pill-style fragments
+   (sessions / active days / best). Single-row, wraps on narrow. */
+.home-period-tile__stats {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 11.5px;
+    color: rgba(255, 246, 225, 0.62);
+}
+.home-period-tile__stats li > span {
+    color: #faf3e3;
+    font-weight: 500;
+}
+
+.home-period-tile__sub {
+    margin: 4px 0 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12px;
+    color: rgba(255, 246, 225, 0.5);
+    line-height: 1.4;
+    min-height: 1.4em; /* reserves a row so the tile height is stable */
+}
+
+/* Wave 10.1 — weekly goal progress bar.
+   Slim track + amber fill that caps at 100% width visually; the label
+   to the right tells the truth ("12.5 / 12 hrs") for overshoots. */
+.home-goal-bar {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.home-goal-bar__track {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 220, 160, 0.06);
+    overflow: hidden;
+}
+.home-goal-bar__fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255, 205, 115, 0.85), rgba(255, 220, 160, 0.95));
+    border-radius: 3px;
+    transition: width 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.home-goal-bar.is-complete .home-goal-bar__fill {
+    background: linear-gradient(90deg, rgba(149, 226, 164, 0.85), rgba(149, 226, 164, 0.95));
+}
+.home-goal-bar__label {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 10.5px;
+    color: rgba(255, 246, 225, 0.55);
+    flex-shrink: 0;
+}
+.home-goal-bar.is-complete .home-goal-bar__label {
+    color: rgba(149, 226, 164, 0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-goal-bar__fill { transition: none; }
+}
+
+@media (max-width: 540px) {
+    .home-period-tiles {
+        grid-template-columns: 1fr;
+        max-width: 360px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-period-tiles { animation: none; }
+    .home-period-tile,
+    .home-period-tile__bar {
+        transition: none;
+    }
+    .home-period-tile:hover,
+    .home-period-tile:focus-visible {
+        transform: none;
+    }
+}
