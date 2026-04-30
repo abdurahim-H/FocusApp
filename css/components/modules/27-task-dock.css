@@ -40,9 +40,12 @@
     left: var(--task-dock-side-margin);
     right: var(--task-dock-side-margin);
     margin: 0 auto;
-    /* Narrower than before so the dock reads as a focused control
-       surface, not an environmental band. Centered horizontally;
-       the cosmos toolbar sits below it, not behind it. */
+    /* Slim 540px while collapsed (focused, doesn't dominate the
+       focus card), grows to 760px when expanded so all the per-row
+       action chips (chevron · pomodoro · calendar · stepper · info ·
+       delete) fit on a single line next to a normal-length task
+       title. The width transition is animated alongside the height
+       so the expand reads as one coherent gesture. */
     max-width: 540px;
     z-index: 2050;
     height: var(--task-dock-collapsed-h);
@@ -65,6 +68,7 @@
     overflow: hidden;
     transition:
         height 0.4s var(--task-dock-ease),
+        max-width 0.4s var(--task-dock-ease),
         border-color 0.3s ease,
         box-shadow 0.3s ease,
         transform 0.4s var(--task-dock-ease),
@@ -80,6 +84,9 @@
 }
 .task-dock[data-state="expanded"] {
     height: var(--task-dock-expanded-h);
+    /* Wider when expanded so each task row has comfortable space for
+       its action chips alongside the title. */
+    max-width: 760px;
     border-color: rgba(255, 220, 160, 0.32);
     box-shadow:
         0 -2px 0 rgba(255, 220, 160, 0.06) inset,
@@ -149,7 +156,13 @@
     height: 0;
     padding: 0;
     opacity: 0;
-    pointer-events: none;
+    /* !important needed because css/base/style.css ships a global
+       `button { pointer-events: auto !important }` rule that would
+       otherwise leave this hidden strip click-catching on top of the
+       expanded panel — clicks anywhere in the dock body would land
+       on the invisible collapsed button and toggle the dock back
+       to its slim state mid-edit. */
+    pointer-events: none !important;
     overflow: hidden;
 }
 

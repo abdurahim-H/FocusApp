@@ -106,6 +106,17 @@ function buildPanel() {
         <div class="task-detail__scrim" data-detail-close></div>
         <div class="task-detail__sheet">
             <header class="task-detail__head">
+                <button class="task-detail__back" type="button"
+                        aria-label="Back to task list"
+                        data-detail-close>
+                    <svg viewBox="0 0 16 16" width="14" height="14"
+                         fill="none" stroke="currentColor" stroke-width="1.6"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                        <polyline points="9.5 3 4.5 8 9.5 13"/>
+                    </svg>
+                    <span class="task-detail__back-label">Back to tasks</span>
+                </button>
                 <span class="task-detail__eyebrow">TASK</span>
                 <button class="task-detail__close" type="button"
                         aria-label="Close detail view"

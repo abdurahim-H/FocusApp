@@ -1006,6 +1006,14 @@ function updateTaskElement(el, task) {
     if (checkbox) checkbox.checked = task.completed;
     if (textEl) {
         textEl.classList.toggle('task-completed', task.completed);
+        // Keep the visible text in sync — without this the detail
+        // drawer's text edit would update tasks.value but the row's
+        // displayed name would stay stale until a full re-render
+        // (next add/delete). textContent + the unchanged DOM around
+        // it preserves the existing strikethrough pseudo-element.
+        if (textEl.textContent !== task.text) {
+            textEl.textContent = task.text;
+        }
     }
     // Mirror the completed flag on the <li> so descendant rules
     // (subtask strikethrough) can react via parent state — `:has()`
