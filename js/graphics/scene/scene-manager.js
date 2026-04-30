@@ -352,10 +352,19 @@ export function getActiveTheme() {
  *  through a settings slider. */
 export function setActiveTheme(id) {
     if (!scene || !camera) return;
-    if (activeTheme && activeTheme.id === id) return;
+    // Boot race: loadSettings() replays apply hooks synchronously, which
+    // calls setActiveTheme via the scene.theme hook *while* init3D() is
+    // still mid-await. At that point scene + camera are set but
+    // activeTheme is null — so the early-return below didn't fire and we
+    // ended up activating modules a second time once init3D resumed.
+    // The orphan first-set meshes never got disposed (the module's local
+    // ref pointed only at the second set), which read on screen as
+    // "previous theme leaks through after a switch."
+    if (!activeTheme) return;
+    if (activeTheme.id === id) return;
     const next = getTheme(id);
     if (!next) return;
-    if (activeTheme) deactivateTheme(activeTheme);
+    deactivateTheme(activeTheme);
     activeTheme = next;
     activeCtx = activateTheme(activeTheme, {
         scene,
