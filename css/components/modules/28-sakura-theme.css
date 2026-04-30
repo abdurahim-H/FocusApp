@@ -149,20 +149,29 @@
 
 /* ──────────────────────────────────────────────────────────────────────
    4. ACCOUNT DROPDOWN — auth menu under the satellite
-   ────────────────────────────────────────────────────────────────────── */
-[data-scene-theme="sakura"] .account-dropdown__inner {
-    background: rgba(var(--sk-plum-rgb), 0.86);
-    border: 1px solid rgba(var(--sk-blossom-rgb), 0.20);
+   The original is apple liquid-glass (`rgba(255,255,255,0.07)` over a
+   strong saturated blur).  Keep the same liquid-glass quality with a
+   whisper of warm pink so the surface reads as part of the Sakura
+   palette — never as an opaque plum slab.  The inner flex container
+   stays transparent; the floating glass pane is `.account-dropdown`
+   itself. */
+[data-scene-theme="sakura"] .account-dropdown {
+    background: rgba(var(--sk-blossom-rgb), 0.10);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
     box-shadow:
-        0 24px 60px rgba(var(--sk-plum-rgb), 0.6),
-        0 8px 18px rgba(var(--sk-plum-rgb), 0.4),
-        0 0 0 0.5px rgba(var(--sk-blossom-rgb), 0.10),
-        inset 0 1px 0 rgba(var(--sk-cream-rgb), 0.06);
+        0 24px 60px rgba(var(--sk-plum-rgb), 0.45),
+        0 8px 18px rgba(var(--sk-plum-rgb), 0.30),
+        inset 0 1px 0 rgba(var(--sk-cream-rgb), 0.10);
+}
+[data-scene-theme="sakura"] .account-dropdown__inner {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
 }
 [data-scene-theme="sakura"] .account-dropdown__arrow {
-    background: rgba(var(--sk-plum-rgb), 0.86);
-    border-left: 1px solid rgba(var(--sk-blossom-rgb), 0.20);
-    border-top: 1px solid rgba(var(--sk-blossom-rgb), 0.20);
+    background: rgba(var(--sk-blossom-rgb), 0.10);
+    border-left: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
+    border-top: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
 }
 [data-scene-theme="sakura"] .account-dropdown__intro-title,
 [data-scene-theme="sakura"] .account-dropdown__name {
@@ -207,6 +216,31 @@
     background: rgba(255, 90, 110, 0.12);
     border-color: rgba(255, 90, 110, 0.4);
     color: #ffb1c2;
+}
+/* Avatar bubble — mirror of the satellite core but in blossom-pink. */
+[data-scene-theme="sakura"] .account-dropdown__avatar {
+    background:
+        linear-gradient(180deg,
+            rgba(var(--sk-cream-rgb), 0.10) 0%,
+            rgba(var(--sk-cream-rgb), 0.03) 18%,
+            transparent 36%),
+        radial-gradient(circle at 50% 42%,
+            rgba(var(--sk-blossom-soft-rgb), 0.20) 0%,
+            rgba(var(--sk-blossom-deep-rgb), 0.22) 50%,
+            rgba(var(--sk-plum-rgb), 0.45) 100%);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.55);
+    box-shadow:
+        inset 0 1px 0 rgba(var(--sk-cream-rgb), 0.32),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+        inset 0 0 18px rgba(var(--sk-blossom-rgb), 0.12),
+        0 0 24px rgba(var(--sk-blossom-rgb), 0.32),
+        0 4px 12px rgba(var(--sk-plum-rgb), 0.5);
+    color: rgba(var(--sk-cream-rgb), 1);
+}
+[data-scene-theme="sakura"] .account-dropdown__avatar-glyph {
+    filter:
+        drop-shadow(0 0 4px rgba(var(--sk-blossom-soft-rgb), 0.9))
+        drop-shadow(0 0 10px rgba(var(--sk-blossom-rgb), 0.55));
 }
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -274,7 +308,7 @@
     color: rgba(var(--sk-cream-rgb), 0.6);
 }
 [data-scene-theme="sakura"] .settings-search,
-[data-scene-theme="sakura"] .settings-search input,
+[data-scene-theme="sakura"] .settings-search__input,
 [data-scene-theme="sakura"] .settings-input,
 [data-scene-theme="sakura"] .settings-textarea,
 [data-scene-theme="sakura"] .settings-select,
@@ -287,7 +321,7 @@
 [data-scene-theme="sakura"] .settings-textarea:focus,
 [data-scene-theme="sakura"] .settings-select:focus,
 [data-scene-theme="sakura"] .settings-number:focus,
-[data-scene-theme="sakura"] .settings-search input:focus {
+[data-scene-theme="sakura"] .settings-search__input:focus {
     border-color: rgba(var(--sk-blossom-rgb), 0.55);
     box-shadow: 0 0 0 3px rgba(var(--sk-blossom-rgb), 0.18);
     outline: none;
@@ -966,13 +1000,15 @@
 [data-scene-theme="sakura"] .timer-controls .liquid-glass-btn:active {
     background: rgba(var(--sk-blossom-rgb), 0.10) !important;
 }
+/* Focus card stays transparent — earlier rule painted a plum veil over
+   the whole card which read as a heavy rectangle floating over the
+   blossoms.  Letting the cosmos show through keeps the timer page
+   feeling open and matches the Black Hole register. */
 [data-scene-theme="sakura"] .focus-content,
 [data-scene-theme="sakura"] .focus-card,
 [data-scene-theme="sakura"] .task-section {
-    background: linear-gradient(135deg,
-        rgba(var(--sk-blossom-rgb), 0.06) 0%,
-        rgba(var(--sk-plum-rgb), 0.55) 100%) !important;
-    border-color: rgba(var(--sk-blossom-rgb), 0.20) !important;
+    background: transparent !important;
+    border-color: transparent !important;
 }
 [data-scene-theme="sakura"] .timer-display,
 [data-scene-theme="sakura"] .timer-text {
@@ -998,8 +1034,251 @@
 }
 
 /* ──────────────────────────────────────────────────────────────────────
+   24. HOME PERIOD TILES — preserved geometry / transparency, hint of pink
+   The user wanted these tiles kept as-is, with just a touch of pink
+   warmth so they read as part of the Sakura family without losing the
+   transparent glass register that makes the cherry-blossom video read
+   through them.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="sakura"] .home-period-tile {
+    border-color: rgba(var(--sk-blossom-rgb), 0.20);
+}
+[data-scene-theme="sakura"] .home-period-tile:hover,
+[data-scene-theme="sakura"] .home-period-tile:focus-visible {
+    border-color: rgba(var(--sk-blossom-rgb), 0.40);
+    box-shadow: 0 14px 30px rgba(var(--sk-plum-rgb), 0.42),
+                0 0 0 0.5px rgba(var(--sk-blossom-rgb), 0.22);
+}
+[data-scene-theme="sakura"] .home-period-tile__eyebrow {
+    color: rgba(var(--sk-blossom-rgb), 0.78);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   25. NOTEPAD — drawer chrome + transparent scrim
+   The scrim used to dim the cosmos with a `rgba(4,6,10,0.6)` veil and a
+   blur. The user wants the cherry-blossom backdrop visible while the
+   notepad is open, so the scrim becomes a transparent click-catcher.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="sakura"] .notepad__scrim {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+[data-scene-theme="sakura"] .notepad__sheet {
+    background: linear-gradient(180deg,
+        rgba(var(--sk-plum-rgb), 0.78),
+        rgba(var(--sk-plum-rgb), 0.88));
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
+    box-shadow: 0 30px 80px rgba(var(--sk-plum-rgb), 0.6),
+                0 0 0 0.5px rgba(var(--sk-blossom-rgb), 0.10);
+    color: rgba(var(--sk-cream-rgb), 0.95);
+}
+[data-scene-theme="sakura"] .notepad__head {
+    background: linear-gradient(180deg,
+        rgba(var(--sk-plum-rgb), 0.95),
+        rgba(var(--sk-plum-rgb), 0.82));
+    border-bottom: 1px solid rgba(var(--sk-blossom-rgb), 0.14);
+}
+[data-scene-theme="sakura"] .notepad__eyebrow {
+    color: rgba(var(--sk-blossom-rgb), 0.85);
+}
+[data-scene-theme="sakura"] .notepad__title-input {
+    color: var(--sk-cream);
+}
+[data-scene-theme="sakura"] .notepad__sidebar {
+    border-right: 1px solid rgba(var(--sk-blossom-rgb), 0.10);
+    background: rgba(var(--sk-plum-rgb), 0.30);
+}
+[data-scene-theme="sakura"] .notepad__search,
+[data-scene-theme="sakura"] .notepad__search input {
+    background: rgba(var(--sk-blossom-rgb), 0.06);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.20);
+    color: var(--sk-cream);
+}
+[data-scene-theme="sakura"] .notepad__search input:focus {
+    border-color: rgba(var(--sk-blossom-rgb), 0.55);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--sk-blossom-rgb), 0.18);
+}
+[data-scene-theme="sakura"] .notepad__new-btn,
+[data-scene-theme="sakura"] .notepad__new-menu-btn,
+[data-scene-theme="sakura"] .notepad__head-btn,
+[data-scene-theme="sakura"] .notepad__close {
+    background: rgba(var(--sk-blossom-rgb), 0.08);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.28);
+    color: rgba(var(--sk-cream-rgb), 0.92);
+}
+[data-scene-theme="sakura"] .notepad__new-btn:hover,
+[data-scene-theme="sakura"] .notepad__new-menu-btn:hover,
+[data-scene-theme="sakura"] .notepad__head-btn:hover,
+[data-scene-theme="sakura"] .notepad__close:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.18);
+    border-color: rgba(var(--sk-blossom-rgb), 0.55);
+    color: var(--sk-blossom-soft);
+}
+[data-scene-theme="sakura"] .notepad__list-item {
+    background: rgba(var(--sk-plum-rgb), 0.40);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.10);
+}
+[data-scene-theme="sakura"] .notepad__list-item:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.10);
+    border-color: rgba(var(--sk-blossom-rgb), 0.30);
+}
+[data-scene-theme="sakura"] .notepad__list-item.is-active {
+    background: rgba(var(--sk-blossom-rgb), 0.16);
+    border-color: rgba(var(--sk-blossom-rgb), 0.45);
+}
+[data-scene-theme="sakura"] .notepad__list-item-title {
+    color: var(--sk-cream);
+}
+[data-scene-theme="sakura"] .notepad__list-item-preview,
+[data-scene-theme="sakura"] .notepad__list-item-meta {
+    color: rgba(var(--sk-cream-rgb), 0.55);
+}
+[data-scene-theme="sakura"] .notepad__tag,
+[data-scene-theme="sakura"] .notepad__tag-chip {
+    background: rgba(var(--sk-blossom-rgb), 0.12);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.30);
+    color: var(--sk-blossom-soft);
+}
+[data-scene-theme="sakura"] .notepad__tag:hover,
+[data-scene-theme="sakura"] .notepad__tag-chip:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.22);
+    border-color: rgba(var(--sk-blossom-rgb), 0.55);
+}
+[data-scene-theme="sakura"] .notepad__tag.is-active,
+[data-scene-theme="sakura"] .notepad__tag-chip.is-active {
+    background: rgba(var(--sk-blossom-rgb), 0.30);
+    border-color: rgba(var(--sk-blossom-rgb), 0.70);
+    color: var(--sk-blossom-pale);
+}
+[data-scene-theme="sakura"] .notepad__textarea,
+[data-scene-theme="sakura"] .notepad__editor textarea {
+    background: transparent;
+    color: var(--sk-cream);
+}
+[data-scene-theme="sakura"] .notepad__footer,
+[data-scene-theme="sakura"] .notepad__stats,
+[data-scene-theme="sakura"] .notepad__hint {
+    color: rgba(var(--sk-cream-rgb), 0.55);
+    border-top-color: rgba(var(--sk-blossom-rgb), 0.10);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   26. TASK DETAIL DRAWER — transparent scrim + sakura chrome
+   Same treatment as the notepad: the scrim no longer dims the cosmos,
+   the panel itself carries the warm plum glass with blossom borders.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="sakura"] .task-detail__scrim {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+[data-scene-theme="sakura"] .task-detail__sheet {
+    background: linear-gradient(180deg,
+        rgba(var(--sk-plum-rgb), 0.82),
+        rgba(var(--sk-plum-rgb), 0.92));
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
+    box-shadow: 0 30px 80px rgba(var(--sk-plum-rgb), 0.6),
+                0 0 0 0.5px rgba(var(--sk-blossom-rgb), 0.10);
+    color: rgba(var(--sk-cream-rgb), 0.95);
+}
+[data-scene-theme="sakura"] .task-detail__head {
+    background: linear-gradient(180deg,
+        rgba(var(--sk-plum-rgb), 0.95),
+        rgba(var(--sk-plum-rgb), 0.82));
+    border-bottom: 1px solid rgba(var(--sk-blossom-rgb), 0.14);
+}
+[data-scene-theme="sakura"] .task-detail__section {
+    border-color: rgba(var(--sk-blossom-rgb), 0.14);
+    background: rgba(var(--sk-plum-rgb), 0.32);
+}
+[data-scene-theme="sakura"] .task-detail__label {
+    color: rgba(var(--sk-blossom-rgb), 0.80);
+}
+[data-scene-theme="sakura"] .task-detail__text-input,
+[data-scene-theme="sakura"] .task-detail input,
+[data-scene-theme="sakura"] .task-detail textarea,
+[data-scene-theme="sakura"] .task-detail select {
+    background: rgba(var(--sk-blossom-rgb), 0.06);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
+    color: var(--sk-cream);
+}
+[data-scene-theme="sakura"] .task-detail__text-input:focus,
+[data-scene-theme="sakura"] .task-detail input:focus,
+[data-scene-theme="sakura"] .task-detail textarea:focus,
+[data-scene-theme="sakura"] .task-detail select:focus {
+    border-color: rgba(var(--sk-blossom-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--sk-blossom-rgb), 0.18);
+    outline: none;
+}
+/* Stepper +/- buttons, repeat radios, date pill, done toggle, subtask
+   input + Add — all the small chrome controls inside the drawer. */
+[data-scene-theme="sakura"] .task-detail__step-btn,
+[data-scene-theme="sakura"] .task-detail__date,
+[data-scene-theme="sakura"] .task-detail__date-clear,
+[data-scene-theme="sakura"] .task-detail__repeat-btn,
+[data-scene-theme="sakura"] .task-detail__done-toggle,
+[data-scene-theme="sakura"] .task-detail__sub-add-btn,
+[data-scene-theme="sakura"] .task-detail__sub-toggle {
+    background: rgba(var(--sk-blossom-rgb), 0.08);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
+    color: rgba(var(--sk-cream-rgb), 0.92);
+}
+[data-scene-theme="sakura"] .task-detail__step-btn:hover,
+[data-scene-theme="sakura"] .task-detail__date:hover,
+[data-scene-theme="sakura"] .task-detail__date-clear:hover,
+[data-scene-theme="sakura"] .task-detail__repeat-btn:hover,
+[data-scene-theme="sakura"] .task-detail__done-toggle:hover,
+[data-scene-theme="sakura"] .task-detail__sub-add-btn:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.18);
+    border-color: rgba(var(--sk-blossom-rgb), 0.55);
+    color: var(--sk-blossom-soft);
+}
+/* Active "is-on" recurrence option + completed done-toggle. */
+[data-scene-theme="sakura"] .task-detail__repeat-btn.is-on,
+[data-scene-theme="sakura"] .task-detail__done-toggle.is-on {
+    background: rgba(var(--sk-blossom-rgb), 0.22);
+    border-color: rgba(var(--sk-blossom-rgb), 0.62);
+    color: var(--sk-blossom-pale);
+}
+[data-scene-theme="sakura"] .task-detail__stepper-val {
+    color: var(--sk-cream);
+}
+[data-scene-theme="sakura"] .task-detail__project,
+[data-scene-theme="sakura"] .task-detail__sub-input {
+    background: rgba(var(--sk-blossom-rgb), 0.06);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
+    color: var(--sk-cream);
+}
+[data-scene-theme="sakura"] .task-detail__project:focus,
+[data-scene-theme="sakura"] .task-detail__sub-input:focus {
+    border-color: rgba(var(--sk-blossom-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--sk-blossom-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="sakura"] .task-detail__time-num {
+    color: var(--sk-blossom-soft);
+}
+[data-scene-theme="sakura"] .task-detail__time-label,
+[data-scene-theme="sakura"] .task-detail__section-title {
+    color: rgba(var(--sk-cream-rgb), 0.78);
+}
+[data-scene-theme="sakura"] .task-detail__sub-del {
+    color: rgba(255, 130, 150, 0.8);
+}
+[data-scene-theme="sakura"] .task-detail__subtask {
+    background: rgba(var(--sk-plum-rgb), 0.32);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.12);
+}
+[data-scene-theme="sakura"] .task-detail__subtask:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.06);
+    border-color: rgba(var(--sk-blossom-rgb), 0.28);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
    PRESERVED — explicitly do NOT touch these
-   .nav-buttons / .home-period-tiles keep their existing chrome so the
-   tabs the user singled out stay identical between Black Hole and Sakura.
+   .nav-buttons keeps its existing chrome so the tab the user singled out
+   stays identical between Black Hole and Sakura.
    This block exists as an audit trail; no rules.
    ────────────────────────────────────────────────────────────────────── */

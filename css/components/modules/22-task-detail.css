@@ -15,12 +15,12 @@
 .task-detail[aria-hidden='false'] { pointer-events: auto; }
 .task-detail.is-open { opacity: 1; }
 
+/* Transparent click-catcher so the cosmos / video backdrop stays
+   fully visible while the drawer is open. */
 .task-detail__scrim {
     position: absolute;
     inset: 0;
-    background: rgba(4, 6, 10, 0.55);
-    backdrop-filter: blur(4px) saturate(110%);
-    -webkit-backdrop-filter: blur(4px) saturate(110%);
+    background: transparent;
 }
 
 .task-detail__sheet {

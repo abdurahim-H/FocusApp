@@ -584,6 +584,12 @@ function buildPanel() {
         setTimeout(() => document.addEventListener('click', onOutside, true));
     });
 
+    // Drag the sheet by its header. The header is the grip; buttons /
+    // inputs inside it keep their own affordances (we exclude them via
+    // a closest() check). Once dragged, the sheet pins to viewport
+    // coordinates and we drop the auto-centring transform.
+    wireSheetDrag(panel);
+
     // Re-paint when notes change (sidebar / editor reflect every
     // external edit — auto-prepend, signal-driven imports, etc.).
     effect(() => {
@@ -597,6 +603,103 @@ function buildPanel() {
     // daily note. The note's id is found-or-created lazily; if the
     // panel is closed we still mutate via the same `notes` signal.
     document.addEventListener('focus-timer:start', onFocusTimerStart);
+}
+
+/** Make the sheet draggable by its header. Drag starts on any
+ *  pointerdown within the header — including over the title input —
+ *  but only promotes to a real drag once the cursor moves past a
+ *  small threshold. Below the threshold the click passes through to
+ *  the input/button as a normal focus/activation, so editing the
+ *  title still works exactly as before. */
+function wireSheetDrag(panelEl) {
+    const sheet = panelEl.querySelector('.notepad__sheet');
+    if (!sheet) return;
+
+    const DRAG_THRESHOLD = 5;
+    let armed = false;
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let originLeft = 0;
+    let originTop = 0;
+    let pointerId = null;
+
+    function startDrag() {
+        const rect = sheet.getBoundingClientRect();
+        sheet.classList.add('is-dragged');
+        sheet.style.left = `${rect.left}px`;
+        sheet.style.top = `${rect.top}px`;
+        originLeft = rect.left;
+        originTop = rect.top;
+        dragging = true;
+    }
+
+    function onPointerDown(e) {
+        if (e.button !== undefined && e.button !== 0) return;
+        const head = e.target.closest('.notepad__head');
+        if (!head) return;
+        // Skip explicit interactive controls — the close X, the
+        // dictate / export buttons. Their clicks must not arm a
+        // drag at all (otherwise a tiny tracking jitter could
+        // hijack them).
+        if (e.target.closest('button, select, a, [contenteditable="true"]')) return;
+        startX = e.clientX;
+        startY = e.clientY;
+        pointerId = e.pointerId ?? null;
+        armed = true;
+        dragging = false;
+    }
+
+    function onPointerMove(e) {
+        if (!armed && !dragging) return;
+        if (!dragging) {
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            if (Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
+            startDrag();
+            // Once we know it's a drag, take over so the input
+            // doesn't get a stray text selection from the move.
+            try {
+                if (pointerId !== null && sheet.setPointerCapture) {
+                    sheet.setPointerCapture(pointerId);
+                }
+            } catch (_) { /* tolerate */ }
+            // Drop any text-selection that may have started before
+            // the drag was promoted.
+            try { window.getSelection()?.removeAllRanges(); } catch (_) {}
+            // Pull focus off any input the press may have focused
+            // so we don't end up dragging while typing into it.
+            const a = document.activeElement;
+            if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) {
+                if (panelEl.contains(a)) a.blur();
+            }
+        }
+        if (dragging) {
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            const w = sheet.offsetWidth;
+            // Clamp so the sheet can't be dragged completely off-screen —
+            // keep at least 60px of the header reachable on every edge.
+            const maxLeft = window.innerWidth - 60;
+            const maxTop = window.innerHeight - 60;
+            const minLeft = 60 - w;
+            const minTop = 0;
+            sheet.style.left = `${Math.min(maxLeft, Math.max(minLeft, originLeft + dx))}px`;
+            sheet.style.top  = `${Math.min(maxTop,  Math.max(minTop,  originTop + dy))}px`;
+            e.preventDefault();
+        }
+    }
+
+    function onPointerUp() {
+        armed = false;
+        dragging = false;
+        pointerId = null;
+    }
+
+    panelEl.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointercancel', onPointerUp);
 }
 
 function onFocusTimerStart(e) {

@@ -21,12 +21,14 @@
 .notepad[aria-hidden='false'] { pointer-events: auto; }
 .notepad.is-open { opacity: 1; }
 
+/* Transparent click-catcher — clicking outside the sheet still closes
+   it, but the cosmos / video backdrop stays fully visible behind the
+   panel.  No tint, no blur — the sheet's own backdrop blur supplies
+   the focus separation. */
 .notepad__scrim {
     position: absolute;
     inset: 0;
-    background: rgba(4, 6, 10, 0.6);
-    backdrop-filter: blur(6px) saturate(110%);
-    -webkit-backdrop-filter: blur(6px) saturate(110%);
+    background: transparent;
 }
 
 .notepad__sheet {
@@ -49,6 +51,20 @@
     flex-direction: column;
 }
 .notepad.is-open .notepad__sheet { transform: translate(-50%, 0) scale(1); }
+
+/* Once the user has dragged the sheet by its header, drop the
+   centring transform and the sliding entry animation so the inline
+   `left` / `top` we wrote on the element actually pin it where the
+   user dropped it. */
+.notepad__sheet.is-dragged {
+    transform: none !important;
+    transition: none !important;
+}
+.notepad__head { cursor: move; }
+.notepad__head input,
+.notepad__head button { cursor: text; }
+.notepad__head .notepad__head-btn,
+.notepad__head .notepad__close { cursor: pointer; }
 
 .notepad__head {
     display: flex;
