@@ -333,23 +333,13 @@
     z-index: 25;
     padding: 0;
     margin: 0;
-    /* Flex item — fill the available column inside the dock body so
-       overflow scrolls cleanly under the soft mask. */
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 205, 115, 0.18) transparent;
-}
-.task-list::-webkit-scrollbar { width: 6px; }
-.task-list::-webkit-scrollbar-track { background: transparent; }
-.task-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 205, 115, 0.18);
-    border-radius: 3px;
-}
-.task-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 205, 115, 0.32);
+    /* Size to content — the parent .task-dock__body owns the
+       scroller. With the old `flex: 1 1 auto + overflow: auto` the
+       list filled the body's full height, then scrolled internally,
+       so a second task at the natural-content end of the list was
+       hidden below the list's own scroll viewport even when the
+       dock had visible empty space. Letting the list grow naturally
+       puts every item in the same scrollable parent. */
 }
 
 .task-item {

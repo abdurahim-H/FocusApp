@@ -353,10 +353,11 @@
     overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 220, 160, 0.22) transparent;
-    /* Soft top fade so list scrolls out of view gracefully under the
-       sticky header, instead of butting against it with a hard line. */
-    mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 12px), transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 12px), transparent 100%);
+    /* No mask gradient — the previous fade made content near the
+       bottom edge appear washed out even when the list was short
+       enough to fit without scrolling. The soft border-radius on
+       the dock + the footer divider already separate the list
+       from the chrome cleanly. */
 }
 .task-dock__body::-webkit-scrollbar { width: 6px; }
 .task-dock__body::-webkit-scrollbar-thumb {
