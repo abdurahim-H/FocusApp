@@ -256,7 +256,7 @@ export function initNotepad() {
         if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable)) return;
         if (
             document.querySelector(
-                '.auth-modal.is-open, .help-center-overlay.is-open, #settingsPanel.is-open, .profile.is-open, .task-detail.is-open, .tasks-expand.is-open'
+                '.auth-modal.is-open, .help-center-overlay.is-open, #settingsPanel.is-open, .profile.is-open, .task-detail.is-open, .task-dock[data-state="expanded"]'
             )
         ) return;
         e.preventDefault();

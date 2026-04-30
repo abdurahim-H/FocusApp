@@ -323,41 +323,9 @@
     to   { opacity: 1; transform: scale(1); }
 }
 
-/* Task Management Section — nearly invisible, just a hairline separator.
-   Flex column layout so the input row + header sit at the top and the
-   list takes the remaining space, scrolling internally when overflow.
-   Without this, list items leak below the section's 220px box and get
-   visually overlapped by the floating cosmos toolbar. */
-.task-section {
-    background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: none !important;
-    border-top: 1px solid rgba(255, 205, 115, 0.08) !important;
-    border-radius: 0 !important;
-    padding: 12px 0 0 0 !important;
-    margin-top: 10px;
-    height: 220px !important;
-    min-height: 220px !important;
-    max-height: 220px !important;
-    box-sizing: border-box !important;
-    box-shadow: none !important;
-    position: relative;
-    z-index: 30;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-/* Kill the gradient pseudo-element overlay */
-.task-section::before {
-    display: none !important;
-}
-
-/* Task input styles moved to liquid-glass-buttons.css for consistency */
-/* Keeping only the legacy z-index overrides if needed */
-
-/* #addTaskBtn styles moved to liquid-glass-buttons.css */
+/* The old in-card .task-section was retired when tasks moved into the
+   bottom dock (see 27-task-dock.css). The dock owns its own scroll
+   container; .task-list now just handles the per-row layout. */
 
 .task-list {
     list-style: none;
@@ -365,8 +333,8 @@
     z-index: 25;
     padding: 0;
     margin: 0;
-    /* Flex item — take the remaining vertical space inside the
-       220px section and scroll internally if tasks overflow. */
+    /* Flex item — fill the available column inside the dock body so
+       overflow scrolls cleanly under the soft mask. */
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;

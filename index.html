@@ -504,57 +504,11 @@
                     </div>
                 </div>
 
-                <!-- Task Management Section -->
-                <div class="task-section">
-                    <!-- Carry-over banner — populated by tasks.js when
-                         the user has incomplete non-recurring tasks
-                         created more than 24h ago. Hidden otherwise. -->
-                    <div class="tasks-carry-banner hidden" id="tasksCarryBanner" role="status">
-                        <span class="tasks-carry-banner__copy" id="tasksCarryBannerCopy"></span>
-                        <div class="tasks-carry-banner__actions">
-                            <button class="tasks-carry-banner__btn"
-                                    type="button" id="tasksCarryKeep">Keep</button>
-                            <button class="tasks-carry-banner__btn tasks-carry-banner__btn--danger"
-                                    type="button" id="tasksCarryClear">Clear stale</button>
-                        </div>
-                    </div>
-                    <div class="tasks-title-row">
-                        <h3 class="tasks-title">Tasks for this session</h3>
-                        <span class="tasks-eta hidden" id="tasksEta"
-                              aria-label="Estimated time to finish"></span>
-                        <button class="tasks-expand-trigger" id="tasksExpandTrigger"
-                                type="button"
-                                aria-label="Open the expanded task view"
-                                title="Open the expanded task view">
-                            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M3 9.5V13h3.5"/>
-                                <path d="M13 6.5V3H9.5"/>
-                                <path d="M3 13l4.5-4.5"/>
-                                <path d="M13 3l-4.5 4.5"/>
-                            </svg>
-                            <span class="tasks-expand-trigger__label">Expand</span>
-                        </button>
-                    </div>
-                    <div class="task-input-group">
-                        <input type="text" class="task-input" id="taskInput" placeholder="What are you working on?">
-                        <button class="liquid-glass-btn liquid-glass-btn--success liquid-glass-btn--small liquid-glass-btn--lens-flare" id="addTaskBtn">
-                            <span class="btn-text">Add</span>
-                        </button>
-                    </div>
-                    <ul class="task-list" id="taskList"></ul>
-                    <div class="task-bulk-actions">
-                        <button class="task-bulk-btn hidden" id="clearCompletedBtn" type="button"
-                                aria-label="Remove only completed tasks">
-                            Clear completed
-                        </button>
-                        <button class="clear-all-btn hidden" id="clearAllBtn" aria-label="Clear all tasks">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                <path d="M2.5 4L6 7.5L9.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span>Clear All</span>
-                        </button>
-                    </div>
-                </div>
+                <!-- Task management lives in the bottom dock (#taskDock,
+                     direct child of <body>). It's hoisted out of the
+                     focus mode container so it can pin to the viewport
+                     bottom — `.container` has `contain: layout` which
+                     would otherwise trap it. -->
             </div>
         </div>
 
@@ -569,6 +523,102 @@
               paint` which makes it the containing block for fixed
               descendants and clips paint to its box. Putting fixed
               overlays inside makes them non-clickable / clipped. -->
+
+    <!-- Task Dock — bottom-anchored task surface for the Focus tab.
+         Slim collapsed strip shows the active pinned task and total
+         count; clicking expands the dock upward into a 60vh task panel.
+         Outside .container so it can pin cleanly to the viewport. -->
+    <aside class="task-dock hidden" id="taskDock"
+           data-state="collapsed"
+           aria-label="Tasks">
+        <button class="task-dock__rail" id="taskDockRail" type="button"
+                aria-expanded="false"
+                aria-controls="taskDockExpanded"
+                aria-label="Toggle task dock">
+            <span class="task-dock__rail-handle" aria-hidden="true"></span>
+        </button>
+
+        <button class="task-dock__collapsed" id="taskDockCollapsed" type="button"
+                aria-label="Open task list">
+            <div class="task-dock__active">
+                <span class="task-dock__eyebrow" id="taskDockEyebrow">NOW</span>
+                <span class="task-dock__active-name" id="taskDockActiveName">— no active task —</span>
+            </div>
+            <div class="task-dock__meta">
+                <span class="task-dock__progress hidden" id="taskDockProgress" aria-hidden="true"></span>
+                <span class="task-dock__count" id="taskDockCount">0 tasks</span>
+                <span class="task-dock__chevron" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" width="14" height="14"
+                         fill="none" stroke="currentColor" stroke-width="1.6"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 10 8 5 13 10"/>
+                    </svg>
+                </span>
+            </div>
+        </button>
+
+        <div class="task-dock__expanded" id="taskDockExpanded" aria-hidden="true">
+            <header class="task-dock__head">
+                <span class="task-dock__head-eyebrow">TASKS</span>
+                <h2 class="task-dock__head-title">Tasks for this session</h2>
+                <span class="tasks-eta hidden" id="tasksEta"
+                      aria-label="Estimated time to finish"></span>
+                <button class="task-dock__close" id="taskDockClose" type="button"
+                        aria-label="Collapse the task dock">
+                    <svg viewBox="0 0 16 16" width="14" height="14"
+                         fill="none" stroke="currentColor" stroke-width="1.6"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3.5" y1="3.5" x2="12.5" y2="12.5"/>
+                        <line x1="12.5" y1="3.5" x2="3.5" y2="12.5"/>
+                    </svg>
+                </button>
+            </header>
+
+            <!-- Carry-over banner — populated by tasks.js when the user
+                 has incomplete non-recurring tasks created more than 24h
+                 ago. Hidden otherwise. -->
+            <div class="tasks-carry-banner hidden" id="tasksCarryBanner" role="status">
+                <span class="tasks-carry-banner__copy" id="tasksCarryBannerCopy"></span>
+                <div class="tasks-carry-banner__actions">
+                    <button class="tasks-carry-banner__btn"
+                            type="button" id="tasksCarryKeep">Keep</button>
+                    <button class="tasks-carry-banner__btn tasks-carry-banner__btn--danger"
+                            type="button" id="tasksCarryClear">Clear stale</button>
+                </div>
+            </div>
+
+            <div class="task-dock__add task-input-group">
+                <input type="text" class="task-input" id="taskInput"
+                       placeholder="What are you working on?">
+                <button class="liquid-glass-btn liquid-glass-btn--success liquid-glass-btn--small liquid-glass-btn--lens-flare"
+                        id="addTaskBtn">
+                    <span class="btn-text">Add</span>
+                </button>
+            </div>
+
+            <div class="task-dock__body">
+                <ul class="task-list" id="taskList"></ul>
+                <div class="task-dock__empty hidden" id="taskDockEmpty">
+                    <p class="task-dock__empty-headline">no tasks yet</p>
+                    <p class="task-dock__empty-sub">add one above and it shows up across every focus session.</p>
+                </div>
+            </div>
+
+            <footer class="task-dock__foot">
+                <button class="task-bulk-btn hidden" id="clearCompletedBtn" type="button"
+                        aria-label="Remove only completed tasks">
+                    Clear completed
+                </button>
+                <button class="clear-all-btn hidden" id="clearAllBtn" aria-label="Clear all tasks">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2.5 4L6 7.5L9.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Clear All</span>
+                </button>
+                <span class="task-dock__hint">esc to close · tap any task to mark it done</span>
+            </footer>
+        </div>
+    </aside>
 
     <!-- Cosmos Toolbar — bottom-centre floating control surface. Outside
          .container so it isn't trapped by `contain: layout`. Each button

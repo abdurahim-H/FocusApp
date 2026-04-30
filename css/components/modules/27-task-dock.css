@@ -1,0 +1,389 @@
+/* ════════════════════════════════════════════════════════════════════════
+   TASK DOCK — bottom-anchored task surface for the Focus tab.
+   ════════════════════════════════════════════════════════════════════════
+   Slim by default (~64px tall): shows the pinned active task on the
+   left and a count chip on the right. Clicking the strip — or the
+   pull-rail at the top — expands the dock upward into a 60vh task
+   panel with the full add input, list, and bulk actions.
+
+   Lives at body level (outside .container) so it pins to the viewport
+   without being clipped by .container's `contain: layout`. The cosmos
+   toolbar lifts upward via a body class so the two surfaces don't
+   compete for the same band of pixels.
+
+   Visual register matches the rest of the cosmic UI: dark frosted
+   glass with warm gold accents, JetBrains Mono numerals, gentle
+   cubic-bezier easing. */
+
+:root {
+    --task-dock-collapsed-h: 64px;
+    --task-dock-expanded-h: min(60vh, 560px);
+    --task-dock-side-margin: 16px;
+    --task-dock-bottom-margin: 16px;
+    --task-dock-radius: 18px;
+    --task-dock-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.task-dock {
+    position: fixed;
+    bottom: var(--task-dock-bottom-margin);
+    left: var(--task-dock-side-margin);
+    right: var(--task-dock-side-margin);
+    margin: 0 auto;
+    max-width: 760px;
+    z-index: 2050;
+    height: var(--task-dock-collapsed-h);
+    border-radius: var(--task-dock-radius);
+    background: linear-gradient(
+        180deg,
+        rgba(28, 22, 14, 0.78),
+        rgba(14, 10, 6, 0.84)
+    );
+    border: 1px solid rgba(255, 220, 160, 0.18);
+    backdrop-filter: blur(24px) saturate(1.15);
+    -webkit-backdrop-filter: blur(24px) saturate(1.15);
+    box-shadow:
+        0 -2px 0 rgba(255, 220, 160, 0.04) inset,
+        0 18px 40px rgba(0, 0, 0, 0.5),
+        0 0 28px rgba(255, 205, 115, 0.08);
+    color: rgba(255, 246, 225, 0.92);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition:
+        height 0.4s var(--task-dock-ease),
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        transform 0.4s var(--task-dock-ease),
+        opacity 0.3s ease;
+}
+.task-dock.hidden {
+    /* Override the global utility .hidden so the dock smoothly slides
+       off-screen on tab change instead of snapping to display:none. */
+    display: flex !important;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(calc(100% + var(--task-dock-bottom-margin) + 16px));
+}
+.task-dock[data-state="expanded"] {
+    height: var(--task-dock-expanded-h);
+    border-color: rgba(255, 220, 160, 0.32);
+    box-shadow:
+        0 -2px 0 rgba(255, 220, 160, 0.06) inset,
+        0 24px 56px rgba(0, 0, 0, 0.62),
+        0 0 38px rgba(255, 205, 115, 0.14);
+}
+
+/* ── Pull-rail (top edge) ──────────────────────────────────────────── */
+.task-dock__rail {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: 0;
+    width: 100%;
+    height: 18px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+}
+.task-dock__rail-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 220, 160, 0.28);
+    transition: background 0.2s ease, width 0.3s var(--task-dock-ease);
+}
+.task-dock__rail:hover .task-dock__rail-handle,
+.task-dock__rail:focus-visible .task-dock__rail-handle {
+    background: rgba(255, 220, 160, 0.55);
+    width: 48px;
+}
+.task-dock__rail:focus-visible {
+    outline: none;
+}
+
+/* ── Collapsed strip (always rendered; hidden when expanded) ───────── */
+.task-dock__collapsed {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: 0;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0 18px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    text-align: left;
+    cursor: pointer;
+    color: inherit;
+    transition: opacity 0.2s ease;
+}
+.task-dock[data-state="expanded"] .task-dock__collapsed {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.task-dock__active {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.task-dock__eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.6);
+    line-height: 1;
+}
+.task-dock__active-name {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #faf3e3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    line-height: 1.2;
+}
+.task-dock--no-active .task-dock__active-name {
+    color: rgba(255, 246, 225, 0.5);
+    font-style: italic;
+}
+
+.task-dock__meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+.task-dock__progress {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-size: 11px;
+    color: rgba(255, 220, 160, 0.78);
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(255, 220, 160, 0.08);
+    border: 1px solid rgba(255, 220, 160, 0.16);
+}
+.task-dock__progress.hidden { display: none; }
+.task-dock__count {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: rgba(255, 246, 225, 0.62);
+}
+.task-dock__chevron {
+    color: rgba(255, 220, 160, 0.62);
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease, transform 0.3s var(--task-dock-ease);
+}
+.task-dock__collapsed:hover .task-dock__chevron,
+.task-dock__rail:hover ~ * .task-dock__chevron {
+    color: #ffd07a;
+}
+
+/* ── Expanded panel ────────────────────────────────────────────────── */
+.task-dock__expanded {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0 22px 18px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+.task-dock[data-state="expanded"] .task-dock__expanded {
+    opacity: 1;
+    pointer-events: auto;
+    /* Slight delay so the height transition starts first; the content
+       fades in only once there's room to show it. */
+    transition-delay: 0.12s;
+}
+
+.task-dock__head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-shrink: 0;
+    margin-bottom: 14px;
+}
+.task-dock__head-eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 160, 0.5);
+}
+.task-dock__head-title {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #faf3e3;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.task-dock__close {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(255, 220, 160, 0.06);
+    border: 1px solid rgba(255, 220, 160, 0.14);
+    color: rgba(255, 246, 225, 0.78);
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.task-dock__close:hover,
+.task-dock__close:focus-visible {
+    background: rgba(255, 220, 160, 0.16);
+    border-color: rgba(255, 220, 160, 0.36);
+    color: #faf3e3;
+    outline: none;
+}
+
+/* ── Add input row ─────────────────────────────────────────────────── */
+.task-dock__add {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+    margin-bottom: 12px;
+}
+.task-dock__add .task-input {
+    flex: 1 1 auto;
+    /* Inherits global .task-input styling — already matches the
+       app's input register (frosted, gold-bordered on focus). */
+}
+
+/* ── Body (scrollable list area) ───────────────────────────────────── */
+.task-dock__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 220, 160, 0.22) transparent;
+    /* Soft top fade so list scrolls out of view gracefully under the
+       sticky header, instead of butting against it with a hard line. */
+    mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 12px), transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 12px), transparent 100%);
+}
+.task-dock__body::-webkit-scrollbar { width: 6px; }
+.task-dock__body::-webkit-scrollbar-thumb {
+    background: rgba(255, 220, 160, 0.22);
+    border-radius: 3px;
+}
+.task-dock__body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 220, 160, 0.4);
+}
+
+.task-dock__empty {
+    text-align: center;
+    padding: 32px 12px;
+    color: rgba(255, 246, 225, 0.55);
+}
+.task-dock__empty.hidden { display: none; }
+.task-dock__empty-headline {
+    margin: 0 0 6px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 220, 160, 0.7);
+    letter-spacing: 0.04em;
+}
+.task-dock__empty-sub {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 12px;
+    color: rgba(255, 246, 225, 0.45);
+}
+
+/* ── Footer (bulk actions + hint) ───────────────────────────────────── */
+.task-dock__foot {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 1px solid rgba(255, 220, 160, 0.08);
+}
+.task-dock__hint {
+    margin-left: auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 10.5px;
+    color: rgba(255, 246, 225, 0.42);
+    letter-spacing: 0.03em;
+}
+
+/* ── Cosmos toolbar coexistence ────────────────────────────────────── */
+/* When the dock is mounted the cosmos toolbar lifts above its
+   collapsed footprint so the two pinned surfaces don't overlap. The
+   expanded dock takes a much larger band, so the toolbar slides
+   higher still — but only in collapsed-toolbar dimming territory,
+   it stays interactive. */
+body.has-task-dock .cosmos-toolbar {
+    bottom: calc(var(--task-dock-bottom-margin) + var(--task-dock-collapsed-h) + 12px);
+    transition:
+        bottom 0.4s var(--task-dock-ease),
+        opacity 0.3s ease,
+        background 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+body.is-task-dock-expanded .cosmos-toolbar {
+    bottom: calc(var(--task-dock-bottom-margin) + var(--task-dock-expanded-h) + 12px);
+    opacity: 0.55;
+}
+body.is-task-dock-expanded .cosmos-toolbar:hover {
+    opacity: 1;
+}
+
+/* ── Mobile breakpoint ─────────────────────────────────────────────── */
+@media (max-width: 540px) {
+    :root {
+        --task-dock-side-margin: 8px;
+        --task-dock-bottom-margin: 8px;
+        --task-dock-collapsed-h: 60px;
+        --task-dock-expanded-h: 70vh;
+    }
+    .task-dock__collapsed { padding: 0 14px 10px; }
+    .task-dock__expanded { padding: 0 16px 14px; }
+    .task-dock__hint { display: none; }
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .task-dock,
+    .task-dock__rail-handle,
+    .task-dock__chevron,
+    .task-dock__expanded,
+    body.has-task-dock .cosmos-toolbar {
+        transition: none;
+    }
+}

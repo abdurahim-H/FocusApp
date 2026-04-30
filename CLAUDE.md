@@ -66,9 +66,12 @@ js/
   ui/
     settings/    schema.js (declarative), renderer.js, store.js, apply.js, data-io.js, onboarding.js, schedules.js, cheatsheet.js, search.js, profiles.js
     notification-banner.js, wellness-reminders.js (toast renderers — DOM-side reminder loops),
-    home-mini-timer.js, help-center.js, help-content.js, navigation.js, button-feel.js, ui-effects.js, focus-trap.js,
+    task-dock.js (bottom-anchored task surface — slim/expanded states for the Focus tab),
+    task-detail.js (per-task drawer), date-picker.js (custom calendar popover), notepad.js,
+    home-mini-timer.js, home-period-tiles.js, help-center.js, help-content.js, navigation.js,
+    button-feel.js, ui-effects.js, focus-trap.js, profile.js, stream-themes.js, timer-particles.js,
     account.js (signed-in/-out satellite + auth modal), ambient-ui.js, cosmos-a11y.js
-  utils/         performance-profile.js (device tiers + FPS watchdog), notifications.js, cleanup.js
+  utils/         performance-profile.js (device tiers + FPS watchdog), notifications.js, cleanup.js, gentle-toast.js (shared toast queue)
 
 css/
   base/          style, themes, responsive

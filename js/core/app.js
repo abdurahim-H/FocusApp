@@ -30,7 +30,7 @@ import * as settings from '../ui/settings.js';
 import * as notepad from '../ui/notepad.js';
 import * as streamThemes from '../ui/stream-themes.js';
 import * as taskDetail from '../ui/task-detail.js';
-import * as tasksExpand from '../ui/tasks-expand.js';
+import * as taskDock from '../ui/task-dock.js';
 import * as timerParticles from '../ui/timer-particles.js';
 import * as uiEffects from '../ui/ui-effects.js';
 import * as cleanup from '../utils/cleanup.js';
@@ -59,7 +59,7 @@ const modules = {
     cosmosA11y,
     account,
     profile,
-    tasksExpand,
+    taskDock,
     taskDetail,
     notepad,
     streamThemes,
@@ -386,11 +386,11 @@ function setupTaskControls(loadedModules) {
             loadedModules.tasks.initTaskRender();
         }
     }
-    // Expand button on the home tasks header — opens the larger
-    // task surface. Lives in tasks-expand.js so its state and DOM
-    // stay separate from the inline list.
-    if (loadedModules.tasksExpand?.initTasksExpand) {
-        loadedModules.tasksExpand.initTasksExpand();
+    // Bottom task dock — slim collapsed strip that expands into a
+    // 60vh task panel on the Focus tab. Replaces the old in-card
+    // task-section + tasks-expand fullscreen.
+    if (loadedModules.taskDock?.initTaskDock) {
+        loadedModules.taskDock.initTaskDock();
     }
     // Period summary tiles (this week / this month) on Home. Hidden
     // until at least one focus session lands; signal-driven repaint.

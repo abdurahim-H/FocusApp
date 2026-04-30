@@ -51,6 +51,10 @@ test('focus timer starts and pauses', async ({ page }) => {
 
 test('can add, complete, and delete a task', async ({ page }) => {
     await page.locator('[data-mode="focus"]').click();
+    // Tasks live in the bottom dock now — collapsed by default so the
+    // timer card is uncluttered. Expand it before interacting with the
+    // input or list (the rail at the top edge toggles the state).
+    await page.locator('#taskDockRail').click();
     const input = page.locator('#taskInput');
     await input.fill('Audit-generated smoke task');
     await input.press('Enter');
