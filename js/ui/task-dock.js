@@ -179,11 +179,16 @@ function onOutside(e) {
     // the (off-screen) dock.
     if (dock.classList.contains('hidden')) return;
     if (dock.contains(e.target)) return;
-    // Don't collapse when the click lands on a body-level overlay that
-    // the dock itself launched (date picker, etc) — they're not part
-    // of the dock subtree but interacting with them shouldn't dismiss
-    // the dock.
-    if (e.target.closest('.date-picker, .ambient-toast, #celebrateToast, #gentleToast')) return;
+    // Don't collapse when the click lands on a body-level overlay
+    // that the dock itself launched. These live outside the dock's
+    // DOM subtree (so dock.contains() misses them) but they're part
+    // of the same task-management session — collapsing the dock when
+    // the user clicks the task-detail's "Back to tasks" button or
+    // edits a field there would defeat the whole flow. Add new
+    // dock-launched overlays here when they ship.
+    if (e.target.closest(
+        '.task-detail, .date-picker, .ambient-toast, #celebrateToast, #gentleToast'
+    )) return;
     collapse();
 }
 
