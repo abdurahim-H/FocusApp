@@ -140,71 +140,93 @@ const FRAGMENT = `
         float v = vUV.y;
 
         // ── Vertical envelope ────────────────────────────
-        // Tighter band than a real curtain — most of the brightness
-        // sits in the lower third of the ribbon (the high-energy zone
-        // where 557 nm green emits) and tapers fast above. Without
-        // this taper the additive blend dominates the whole upper sky.
-        float baseFade = smoothstep(0.0, 0.12, v);
-        float topFade  = smoothstep(0.98, 0.40, v);
+        // Strip is 800 units tall — most of it sits in the visible
+        // upper sky. Bright PLATEAU between v=0.20 and v=0.55 covers
+        // elevations ~16°-32° (the band above the mountain ridge that
+        // fills the upper third of the frame). Soft fade below
+        // (v < 0.20) carries the curtain bottom into the mountain-
+        // occluded region; soft fade above (v > 0.55) tapers the
+        // violet/magenta tip toward zenith.
+        float baseFade = smoothstep(0.0, 0.20, v);
+        float topFade  = smoothstep(1.0, 0.55, v);
         float vertEnv = baseFade * topFade;
 
         // ── Path-end feathering ─────────────────────────
-        float endFade = smoothstep(0.0, 0.06, u) * smoothstep(1.0, 0.94, u);
+        float endFade = smoothstep(0.0, 0.08, u) * smoothstep(1.0, 0.92, u);
 
         // ── Curtain folds (slow, large) ─────────────────
-        // Lateral undulation in brightness — gives the curtain visible
-        // "knees" where folds catch more light. Reads as macro structure
-        // when the eye scans across the aurora.
-        float folds = fbm(vec2(u * 5.5 + seed * 0.3, time * 0.045));
-        float foldBoost = 0.35 + folds * 1.05;
+        // Lateral undulation gives the curtain visible "knees" where
+        // folds catch more light. Higher fold contrast pushes the
+        // dramatic sweeping look from the reference.
+        float folds = fbm(vec2(u * 4.5 + seed * 0.3, time * 0.045));
+        float foldBoost = 0.45 + folds * 1.40;
 
         // ── Vertical rays (the signature feature) ───────
-        // Two scales of high-frequency vertical noise scrolled fast in
-        // the v direction. Sharp pow falloff carves only the noise
-        // peaks into visible streaks — between streaks, the curtain is
-        // dim. That contrast is what makes a curtain READ as a curtain.
-        float rayHigh = fbm(vec2(u * 36.0 + seed * 5.7, v * 9.0 - time * 0.55 + seed));
-        float coreStreak = pow(rayHigh, 5.5);
+        // Aurora rays appear as thin vertical streaks descending from
+        // the green band. HIGH u frequency = fine horizontal detail
+        // between adjacent rays; MEDIUM v frequency = each ray
+        // brightens and fades along its length so they don't read as
+        // uniform vertical bars. Slow time scroll moves the rays
+        // sideways so the curtain breathes across the sky over
+        // minutes of viewing.
+        float rayHigh = fbm(vec2(u * 130.0 + seed * 5.7 + time * 0.04, v * 3.5 + seed));
+        float coreStreak = smoothstep(0.42, 0.88, rayHigh);
 
-        float rayMid = fbm(vec2(u * 18.0 - seed * 3.1, v * 6.5 - time * 0.32 + seed * 2.1));
-        float midStreak = pow(rayMid, 3.0);
+        float rayMid  = fbm(vec2(u * 65.0 - seed * 3.1 + time * 0.025, v * 2.8 + seed * 2.1));
+        float midStreak = smoothstep(0.38, 0.82, rayMid);
+
+        float rayLow  = fbm(vec2(u * 28.0 + seed * 1.7 + time * 0.015, v * 2.0 + seed * 0.5));
+        float lowWash  = smoothstep(0.30, 0.78, rayLow);
 
         // ── Brightness composition ──────────────────────
-        // Body is FAINT — the curtain is mostly dark glass with bright
-        // streaks running through it. Coefficients deliberately low
-        // because the bloom post-process amplifies bright pixels and
-        // bleeds them across the screen; if the body is too bright,
-        // bloom paints the whole ground cyan.
-        float body = vertEnv * 0.08 * (0.5 + folds * 0.8);
-        float streaks = (coreStreak * 0.95 + midStreak * 0.32) * vertEnv * foldBoost;
+        // Body is the broad glow that establishes the curtain shape;
+        // streaks paint the dramatic vertical structure on top. Six
+        // ribbons can overlap so per-ribbon coefficients are kept
+        // modest — the bloom kernel will spread overlap into white
+        // blobs otherwise.
+        float body = vertEnv * (0.10 + lowWash * 0.32) * foldBoost;
+        float streaks = (coreStreak * 0.70 + midStreak * 0.40) * vertEnv * foldBoost;
 
         // Audio kick.
-        float bright = (body + streaks) * (1.0 + energy * 0.18) * endFade;
+        float bright = (body + streaks) * (1.0 + energy * 0.22) * endFade;
 
         // ── Colour ──────────────────────────────────────
-        // Vertical hue gradient: vivid lime at base (557 nm), through
-        // teal/cyan to violet at the tip. Slow time drift cycles the
-        // dominant hue across all ribbons in lockstep.
-        float hueShift = time * 0.013 + seed * 0.04;
-        vec3 col = auroraPalette(v * 0.85 + 0.04, hueShift);
+        // Vertical hue gradient: green at base (557 nm O₂), teal/cyan
+        // mid (N₂ blue), violet/magenta at tip (N₂-ion 427 nm + 630 nm
+        // O red). The palette samples 60% of its full range so each
+        // curtain reads as predominantly green with a violet tip
+        // rather than a rainbow stripe. Slow hue drift cycles the
+        // dominant cast over time.
+        float hueShift = time * 0.010 + seed * 0.04;
+        vec3 col = auroraPalette(v * 0.62 + 0.04, hueShift);
 
-        // Magenta kiss on the brightest core pixels (630 nm red O — the
-        // rare high-altitude tint that gives auroras their pink tips).
-        col += vec3(0.40, 0.10, 0.45) * smoothstep(0.65, 0.95, rayHigh) * vertEnv * 0.55;
+        // Bright magenta kiss on the highest-density ray pixels.
+        col += vec3(0.55, 0.18, 0.75) * smoothstep(0.62, 0.95, rayHigh) * vertEnv * 0.85;
 
-        // Slight cyan boost in the mid streaks where N₂ ions emit blue.
-        col += vec3(0.05, 0.15, 0.30) * smoothstep(0.55, 0.85, rayMid) * vertEnv * 0.3;
+        // Cyan/teal boost in the mid-altitude rays.
+        col += vec3(0.10, 0.30, 0.45) * smoothstep(0.50, 0.85, rayMid) * vertEnv * 0.55;
+
+        // Strong green pulse at the base — drives home the 557 nm
+        // dominance that real auroras have.
+        col += vec3(0.20, 0.85, 0.35) * smoothstep(0.30, 0.0, v) * (0.55 + folds * 0.5);
 
         col *= bright;
 
-        // Cap output magnitude so bloom can't blow out the scene.
-        // The aurora is meant to be the prettiest thing on screen but
-        // not the only thing — bloom kernel 64 will spread bright
-        // pixels into adjacent ones if we let RGB exceed ~0.9.
-        col = min(col, vec3(0.85));
+        // Solid green base band — the dominant 557 nm O₂ emission.
+        // Vivid saturation but balanced against bloom: G/B are kept
+        // close so the band reads as warm green-teal rather than the
+        // pure-green that overwhelms after bloom; R is suppressed.
+        float greenBand = exp(-pow((v - 0.26) * 7.0, 2.0));
+        col += vec3(0.05, 0.42, 0.18) * greenBand * vertEnv * (0.55 + folds * 0.45) * endFade;
 
-        // Alpha gates the additive blend so background doesn't smear.
-        float alpha = clamp(bright * 1.05, 0.0, 0.72);
+        // Per-channel cap. Three ribbons can stack from a single
+        // camera pose; with cap 0.32 the worst-case stacked sum is
+        // 0.96 — bright but ACES tone-maps cleanly without a white
+        // blowout. The aurora theme also raises the bloom threshold
+        // to 0.95 so only the rare overlap peak gets bloomed.
+        col = min(col, vec3(0.32));
+
+        float alpha = clamp(bright * 1.05 + greenBand * vertEnv * 0.30 * endFade, 0.0, 0.85);
 
         gl_FragColor = vec4(col, alpha);
     }
@@ -275,44 +297,98 @@ export function createAuroraRibbons(scene) {
     BABYLON.Effect.ShadersStore['auroraRibbonsVertexShader'] = VERTEX;
     BABYLON.Effect.ShadersStore['auroraRibbonsFragmentShader'] = FRAGMENT;
 
-    // Three ribbons spread across the sky — the camera yaws slowly
-    // through 360° so it always frames at least one curtain. Heights
-    // staggered (72/86/95) and distances varied (290/330/380) so they
-    // don't read as a single flat band when two are visible together.
-    // Thinner than the previous build so the aurora doesn't dominate
-    // every pixel of upper sky.
+    // SIX tall ribbons spread across the sky. Each curtain is now a
+    // full vertical sheet (halfThickness 140-200) descending from high
+    // zenith almost to the horizon, so the camera frames a wall of
+    // aurora rather than a thin horizontal stripe. Distances 480-820
+    // place them BEYOND the far mountain ring so the silhouette reads
+    // against bright aurora. Heights center around 220-300 so the
+    // curtain top reaches near zenith and the bottom dips below
+    // the mountain peaks (where it gets occluded — that's correct,
+    // matches the reference where aurora "hides" behind the ridge).
+    // Two layers per ~third of the sky — a near + far pair so two
+    // ribbon depths overlap when the camera looks that direction
+    // (the reference's "stacked curtain" look). Bottoms reach down to
+    // y ≈ 40-60 so the curtains extend toward the mountain ridge,
+    // tops to y ≈ 420-500 so they sweep up into near-zenith.
+    // Ribbons positioned so the bright zone (~ v=0.18 of strip) sits
+    // around 22-28° elevation — comfortably above the tallest
+    // mountain peaks (~18°) so the silhouette reads cleanly against
+    // bright aurora. Strip extends from ~12° (lower fade) to ~42°
+    // (upper fade) elevation, filling the upper third of frame the
+    // way the reference does.
+    // Six tall vertical curtains, spaced at 60° azimuth intervals
+    // and each spanning ~70° so adjacent ribbons share a small
+    // 10° overlap (gives a soft seam, never a hard tile boundary).
+    // Strip is ~800 units tall (halfThickness 400) centred ~y=480-
+    // 560 so the bright zone sits above the mountain ridge and
+    // extends up to near zenith.
+    const baseSpan = Math.PI * 0.34; // ~61° — almost no overlap
     buildRibbon(scene, 'auroraRibbonA', {
-        centerYaw: Math.PI * 0.1,
-        span: Math.PI * 0.85,
-        segments: 110,
-        distance: 320,
-        height: 105,
+        centerYaw: 0,
+        span: baseSpan,
+        segments: 130,
+        distance: 760,
+        height: 470,
         foldFreq: 5,
-        foldAmp: 12,
-        halfThickness: 26,
+        foldAmp: 60,
+        halfThickness: 400,
         seed: 3.71,
     });
     buildRibbon(scene, 'auroraRibbonB', {
-        centerYaw: Math.PI * 0.78,
-        span: Math.PI * 0.78,
-        segments: 96,
-        distance: 360,
-        height: 130,
+        centerYaw: Math.PI * (1 / 3),
+        span: baseSpan,
+        segments: 116,
+        distance: 880,
+        height: 520,
         foldFreq: 4,
-        foldAmp: 14,
-        halfThickness: 22,
+        foldAmp: 70,
+        halfThickness: 440,
         seed: 11.3,
     });
     buildRibbon(scene, 'auroraRibbonC', {
-        centerYaw: Math.PI * 1.42,
-        span: Math.PI * 0.92,
-        segments: 100,
-        distance: 410,
-        height: 145,
+        centerYaw: Math.PI * (2 / 3),
+        span: baseSpan,
+        segments: 120,
+        distance: 950,
+        height: 555,
         foldFreq: 6,
-        foldAmp: 9,
-        halfThickness: 24,
+        foldAmp: 52,
+        halfThickness: 460,
         seed: 27.7,
+    });
+    buildRibbon(scene, 'auroraRibbonD', {
+        centerYaw: Math.PI,
+        span: baseSpan,
+        segments: 124,
+        distance: 1020,
+        height: 600,
+        foldFreq: 5,
+        foldAmp: 56,
+        halfThickness: 430,
+        seed: 41.2,
+    });
+    buildRibbon(scene, 'auroraRibbonE', {
+        centerYaw: Math.PI * (4 / 3),
+        span: baseSpan,
+        segments: 120,
+        distance: 820,
+        height: 490,
+        foldFreq: 4,
+        foldAmp: 64,
+        halfThickness: 410,
+        seed: 53.9,
+    });
+    buildRibbon(scene, 'auroraRibbonF', {
+        centerYaw: Math.PI * (5 / 3),
+        span: baseSpan,
+        segments: 120,
+        distance: 920,
+        height: 540,
+        foldFreq: 5,
+        foldAmp: 56,
+        halfThickness: 450,
+        seed: 67.4,
     });
 }
 

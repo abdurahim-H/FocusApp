@@ -18,6 +18,7 @@
 // set β = π/2 (horizontal), α = π + yaw, and target = (r cos yaw, 5, r sin yaw).
 
 import { getCamera } from '../scene/scene-manager.js';
+import { getBloomThreshold, setBloomThreshold } from '../postprocessing/pipeline.js';
 
 const stash = {
     alpha: null,
@@ -31,6 +32,7 @@ const stash = {
     upperRadiusLimit: null,
     lowerBetaLimit: null,
     upperBetaLimit: null,
+    bloomThreshold: null,
 };
 
 let active = false;
@@ -52,16 +54,38 @@ export function createAuroraCamera() {
     stash.lowerBetaLimit = cam.lowerBetaLimit;
     stash.upperBetaLimit = cam.upperBetaLimit;
 
-    // Aurora-specific framing.
-    cam.fov = 1.05; // ~60° — landscape feel, captures mountains + sky
+    // Aurora-specific framing. Wide cinematic FOV (~80°) gives the
+    // curtains and mountains a vast-landscape feel matching the
+    // reference. Goes wider than Black Hole's 0.9 rad on purpose —
+    // the aurora is meant to fill the upper half of frame.
+    cam.fov = 1.4;
     cam.minZ = 0.1;
-    cam.maxZ = 8000; // distant mountains + sky dome
+    cam.maxZ = 8000;
 
     // Loosen limits so our overrides aren't clamped.
     cam.lowerRadiusLimit = 0.001;
     cam.upperRadiusLimit = 5000;
     cam.lowerBetaLimit = 0.001;
     cam.upperBetaLimit = Math.PI - 0.001;
+
+    // Aurora curtains are the primary glowing element — they
+    // already render with additive blend, so the default bloom
+    // threshold (0.65) catches every overlapping ribbon pixel and
+    // smears it into white. Raise the threshold so only the
+    // brightest streak peaks bloom; the body of the curtain glows
+    // from the additive blend itself, no bloom needed.
+    //
+    // setupPostProcessing() runs AFTER the theme registry's
+    // activateTheme() at boot, so the pipeline doesn't exist yet
+    // when this init runs from init3D(). Defer the threshold tweak
+    // to next-frame so by the time it lands, the pipeline is up.
+    // (At runtime theme switches the pipeline already exists, so
+    // requestAnimationFrame still works there too — just an extra
+    // frame's delay before the threshold lifts.)
+    stash.bloomThreshold = getBloomThreshold();
+    requestAnimationFrame(() => {
+        if (active) setBloomThreshold(0.95);
+    });
 
     active = true;
 }
@@ -85,10 +109,12 @@ export function updateAuroraCamera(elapsed) {
     // Tiny downTilt (~3°) ensures the foreground terrain reads as 3D
     // rather than a flat horizon strip.
     const radius = 50;
-    // Subtle nose-down so the foreground reads as ground we're standing
-    // ON, but most of the frame is sky + aurora + mountains.
-    const downTilt = 0.025; // ~1.4° — barely perceptible tilt
-    const sinB = Math.cos(downTilt); // sin(π/2 - downTilt) = cos(downTilt)
+    // Modest downward tilt — horizon lands a touch above mid-frame,
+    // aurora fills the upper half, mountains and reflective ice
+    // ground share the lower half. Matches the postcard composition
+    // of the reference.
+    const downTilt = 0.04;
+    const sinB = Math.cos(downTilt);
     const eyeY = 5;
 
     cam.alpha = Math.PI + yaw;
@@ -117,6 +143,7 @@ export function disposeAuroraCamera() {
     cam.upperRadiusLimit = stash.upperRadiusLimit;
     cam.lowerBetaLimit = stash.lowerBetaLimit;
     cam.upperBetaLimit = stash.upperBetaLimit;
+    if (stash.bloomThreshold != null) setBloomThreshold(stash.bloomThreshold);
 
     active = false;
 }

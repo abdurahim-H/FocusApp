@@ -291,6 +291,20 @@ export function setBloomKernel(size) {
     if (pipeline) pipeline.bloomKernel = Math.max(8, Math.min(128, size | 0));
 }
 
+/** Adjust the bloom luminance threshold. The pipeline's default
+ *  catches hero stars + bright nebula at 0.65; themes whose primary
+ *  visual element is already a glowing additive layer (Aurora Plain)
+ *  bump this up so bloom doesn't smear the curtain into white blobs. */
+export function setBloomThreshold(threshold) {
+    if (pipeline) pipeline.bloomThreshold = Math.max(0, Math.min(2, threshold));
+}
+
+/** Read the current bloom threshold (default 0.65). Used by themes
+ *  that override + restore on activate / dispose. */
+export function getBloomThreshold() {
+    return pipeline?.bloomThreshold ?? 0.65;
+}
+
 /** Gate the film-grain post-process without disposing it. The onApply
  *  callback is swapped to a no-op, which keeps the pipeline intact. */
 let _grainOnApplySaved = null;

@@ -106,12 +106,13 @@ const FRAGMENT = `
         col += auroraColor * snowMask * pow(upDot, 2.0) * reflectGain;
 
         // ── Ridge rim ───────────────────────────────────
-        // A thin band right at the silhouette top — backlight tint,
-        // simulating the curtain glow catching the very tip of the
-        // ridge from above. Pulses gently with time.
-        float ridgeRim = smoothstep(0.86, 1.00, h);
+        // Bright band right at the silhouette top — aurora glow
+        // catching the very tip of the ridge from above. Stronger
+        // than the previous build so the silhouette has a clear
+        // bright outline that reads against the curtain behind.
+        float ridgeRim = smoothstep(0.78, 1.00, h);
         float rimPulse = 0.7 + 0.3 * sin(time * 0.15 + vUV.x * 9.0);
-        col += backlight * ridgeRim * rimPulse * 0.55;
+        col += backlight * ridgeRim * rimPulse * 0.95;
 
         // ── Atmospheric haze ────────────────────────────
         // Distance fog tints far mountains toward the deep-navy
@@ -264,20 +265,24 @@ export function createAuroraMountains(scene) {
     BABYLON.Effect.ShadersStore['auroraMountainsFragmentShader'] = FRAGMENT;
 
     // ── Far ring — dramatic skyline ────────────────────
+    // Taller peaks rise clearly into the aurora's bright zone.
+    // Silhouette is dark but not black so the ridge reads against
+    // bloom-spread aurora; snow caps are pale-blue (cool nighttime
+    // snow under aurora light, matching the reference).
     const farMat = buildRidgeMaterial(scene, {
         name: 'auroraMountainsFarMat',
-        silhouette: new BABYLON.Color3(0.012, 0.026, 0.052),
-        snowCap: new BABYLON.Color3(0.025, 0.042, 0.075),
-        backlight: new BABYLON.Color3(0.05, 0.38, 0.3),
+        silhouette: new BABYLON.Color3(0.020, 0.032, 0.058),
+        snowCap: new BABYLON.Color3(0.140, 0.180, 0.245),
+        backlight: new BABYLON.Color3(0.10, 0.55, 0.40),
         layerDepth: 0.0,
     });
     const farMesh = buildRingMesh(scene, 'auroraMountainsFar', {
-        radius: 620,
+        radius: 540,
         segments: 384,
         seed: 13.7,
         freq: 4.0,
-        peak: 145,
-        baseDepth: 14,
+        peak: 185,
+        baseDepth: 18,
     });
     farMesh.material = farMat;
     farMesh.renderingGroupId = 0;
@@ -286,22 +291,20 @@ export function createAuroraMountains(scene) {
     materials.push(farMat);
 
     // ── Mid ring — between near + far ───────────────────
-    // Provides proper mountain layering: near ridge in front, mid
-    // ridge behind, far peaks dramatic on the horizon.
     const midMat = buildRidgeMaterial(scene, {
         name: 'auroraMountainsMidMat',
-        silhouette: new BABYLON.Color3(0.018, 0.034, 0.062),
-        snowCap: new BABYLON.Color3(0.045, 0.068, 0.105),
-        backlight: new BABYLON.Color3(0.08, 0.5, 0.36),
+        silhouette: new BABYLON.Color3(0.028, 0.042, 0.072),
+        snowCap: new BABYLON.Color3(0.165, 0.205, 0.270),
+        backlight: new BABYLON.Color3(0.13, 0.62, 0.46),
         layerDepth: 0.45,
     });
     const midMesh = buildRingMesh(scene, 'auroraMountainsMid', {
-        radius: 380,
+        radius: 340,
         segments: 320,
         seed: 41.7,
         freq: 5.0,
-        peak: 80,
-        baseDepth: 14,
+        peak: 110,
+        baseDepth: 18,
     });
     midMesh.material = midMat;
     midMesh.renderingGroupId = 0;
@@ -310,22 +313,20 @@ export function createAuroraMountains(scene) {
     materials.push(midMat);
 
     // ── Near ring — short foothills ─────────────────────
-    // Snow cap deliberately dim — bright cap + aurora reflection
-    // adds to a single bright patch that reads as artificial.
     const nearMat = buildRidgeMaterial(scene, {
         name: 'auroraMountainsNearMat',
-        silhouette: new BABYLON.Color3(0.024, 0.044, 0.072),
-        snowCap: new BABYLON.Color3(0.058, 0.082, 0.125),
-        backlight: new BABYLON.Color3(0.14, 0.62, 0.42),
+        silhouette: new BABYLON.Color3(0.036, 0.056, 0.090),
+        snowCap: new BABYLON.Color3(0.190, 0.230, 0.290),
+        backlight: new BABYLON.Color3(0.18, 0.72, 0.52),
         layerDepth: 1.0,
     });
     const nearMesh = buildRingMesh(scene, 'auroraMountainsNear', {
-        radius: 200,
+        radius: 180,
         segments: 256,
         seed: 27.31,
         freq: 6.5,
-        peak: 35,
-        baseDepth: 14,
+        peak: 50,
+        baseDepth: 18,
     });
     nearMesh.material = nearMat;
     nearMesh.renderingGroupId = 0;

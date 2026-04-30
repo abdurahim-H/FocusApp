@@ -111,37 +111,30 @@ const FRAGMENT = `
             sky += s4col * s4 * 1.0 * starGate;
         }
 
-        // ── Low moon glow behind the mountain ridge ──────────
-        // Very small disc + soft halo. The aurora is the showpiece;
-        // the moon is just a quiet anchor so the sky isn't featureless.
-        // Dimmed substantially from the previous build where it
-        // competed with the curtain for visual weight.
-        float moonAng = 0.62; // azimuth offset (radians)
-        vec3 moonDir = normalize(vec3(cos(moonAng), 0.04, sin(moonAng)));
-        float moonDot = max(0.0, dot(d, moonDir));
-        float moonHalo = pow(moonDot, 320.0) * 0.40
-                       + pow(moonDot, 48.0)  * 0.025
-                       + pow(moonDot, 10.0)  * 0.005;
-        sky += vec3(0.92, 0.92, 0.88) * moonHalo;
+        // No moon — the previous build's huge yellow halo at the horizon
+        // read as a fake spotlight and competed with the curtain for
+        // visual weight. The aurora is the showpiece; the sky stays
+        // dark between curtains so they punch.
 
-        // Very faint horizon glow band — barely-there teal whisper
-        // right at the horizon line. Stronger and bloom would bleed
-        // cyan everywhere; this just adds a subtle hint of aurora's
-        // atmospheric scattering.
-        float horizonBand = smoothstep(0.08, 0.0, abs(yUp - 0.012));
-        sky += vec3(0.020, 0.060, 0.075) * horizonBand * 0.30;
+        // Horizon glow — tight teal whisper at the horizon line.
+        // Kept subtle — bloom amplifies small bright additions, and
+        // the brighter aurora curtain above is the showpiece.
+        float horizonBand = smoothstep(0.10, 0.0, abs(yUp - 0.005));
+        sky += vec3(0.025, 0.075, 0.085) * horizonBand * 0.55;
 
         // ── Wide aurora glow ────────────────────────────────
-        // Soft wash of green-teal at the altitude band where the
-        // curtains live. Tells the eye "the whole upper atmosphere is
-        // aurora-suffused", not just three discrete ribbons. Modulated
-        // by slow noise so it isn't a flat horizontal stripe.
+        // Just enough atmospheric tint behind the mountain silhouette
+        // that mountains read as silhouettes against tinted sky, not
+        // as black-on-black. Per-channel contribution capped so the
+        // sky pixel never gets close to the bloom threshold even
+        // before any aurora ribbon adds on top.
         if (yUp > 0.0) {
-            // Centre at ~yUp 0.20 (12° above horizon), gaussian falloff.
-            float band = exp(-pow((yUp - 0.20) * 3.6, 2.0));
-            float glowNoise = 0.5 + 0.5 * sin(uv.x * 18.0 + time * 0.04)
-                                  * cos(uv.x * 7.0 - time * 0.03);
-            sky += vec3(0.018, 0.060, 0.045) * band * (0.55 + glowNoise * 0.5);
+            float lowBand = exp(-pow((yUp - 0.20) * 2.4, 2.0));
+            float highBand = exp(-pow((yUp - 0.55) * 1.6, 2.0));
+            float glowNoise = 0.5 + 0.5 * sin(uv.x * 12.0 + time * 0.04)
+                                  * cos(uv.x * 5.0 - time * 0.03);
+            sky += vec3(0.022, 0.080, 0.062) * lowBand * (0.55 + glowNoise * 0.45);
+            sky += vec3(0.045, 0.018, 0.060) * highBand * (0.45 + glowNoise * 0.40);
         }
 
         gl_FragColor = vec4(sky, 1.0);

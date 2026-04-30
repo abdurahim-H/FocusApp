@@ -139,52 +139,63 @@ const FRAGMENT = `
         vec3 N = normalize(vNormal);
         float upDot = clamp(N.y, 0.0, 1.0);
 
-        // ── Snow palette ───────────────────────────────────
-        // Night-snow under aurora reads as a deep blue surface, NOT
-        // white. The previous build's bright palette competed with
-        // the aurora curtain. These values are tuned for the bloom +
-        // ACES tone-map pipeline — they look right *after* tone-map.
-        vec3 snowShadow = vec3(0.008, 0.014, 0.030);     // valley / steep slope
-        vec3 snowMid    = vec3(0.020, 0.038, 0.068);     // typical surface
-        vec3 snowLit    = vec3(0.045, 0.075, 0.118);     // crests catching aurora
+        // ── Ice palette ────────────────────────────────────
+        // Reflective frozen surface under aurora light — slightly
+        // brighter than the previous nighttime palette so the
+        // aurora wash has somewhere to register. Still firmly
+        // nighttime (no white anywhere) but brings the foreground
+        // into the same luminance range as the upper sky.
+        vec3 iceShadow = vec3(0.018, 0.030, 0.060);
+        vec3 iceMid    = vec3(0.035, 0.062, 0.108);
+        vec3 iceLit    = vec3(0.080, 0.128, 0.185);
 
-        vec3 snow = mix(snowShadow, snowMid, smoothstep(0.4, 0.85, upDot));
-        snow = mix(snow, snowLit, smoothstep(0.85, 0.99, upDot));
+        vec3 ice = mix(iceShadow, iceMid, smoothstep(0.35, 0.80, upDot));
+        ice = mix(ice, iceLit, smoothstep(0.80, 0.99, upDot));
 
-        // ── Aurora reflection ──────────────────────────────
-        // Only the actual dune CRESTS catch detectable aurora light,
-        // and only within ~80 units of the eye — past that, distance
-        // fog has already blended the ground toward the horizon
-        // colour, so reflection adds nothing but bloom artefacts.
-        float crestNoise = fbm(vWorld.xz * 0.13);
-        float crestMask = smoothstep(0.66, 0.86, crestNoise) * pow(upDot, 3.5);
-        // Distance gate: reflect strongly only nearby; falls to zero
-        // by 90 units (where mountains start to dominate the view).
-        float nearGate = 1.0 - smoothstep(20.0, 90.0, vDistFromEye);
-        vec3 reflect = auroraColor * crestMask * nearGate * 0.16;
+        // ── Broad aurora wash ──────────────────────────────
+        // The ice picks up a clear aurora cast like reflective water
+        // mirroring the sky overhead. Stronger than the previous
+        // build so the foreground reads as brighter ice rather than
+        // dim navy snow. Modulated by mid-frequency noise for a
+        // varied "wet" surface look.
+        float washNoise = 0.5 + 0.5 * fbm(vWorld.xz * 0.025);
+        float washNear = 1.0 - smoothstep(0.0, 280.0, vDistFromEye);
+        vec3 broadWash = auroraColor * washNear * washNoise * 0.18 * pow(upDot, 1.0);
+
+        // ── Streak reflection ──────────────────────────────
+        // Vertical-ish noise pattern mimicking the aurora's ray
+        // structure being reflected onto the ice. Sampled with HIGH
+        // u (cross-foreground) frequency and LOW v (depth) frequency
+        // so features run away from the eye as a "mirror" shimmer.
+        // A bare hint compared to the curtain itself but enough to
+        // sell the reflective foreground.
+        vec2 streakUV = vWorld.xz * 0.045 + vec2(0.0, time * 0.04);
+        float streak = fbm(vec2(streakUV.x * 4.0, streakUV.y * 0.8));
+        float streakMask = smoothstep(0.42, 0.78, streak) * pow(upDot, 1.4);
+        float streakNear = 1.0 - smoothstep(0.0, 200.0, vDistFromEye);
+        vec3 streakReflect = auroraColor * streakMask * streakNear * 0.18;
+
+        // ── Crest reflection ───────────────────────────────
+        // Dune ridges catch the strongest aurora light — read as
+        // bright "ribs" running across the foreground.
+        float crestNoise = fbm(vWorld.xz * 0.12);
+        float crestMask = smoothstep(0.55, 0.85, crestNoise) * pow(upDot, 2.4);
+        float crestNear = 1.0 - smoothstep(15.0, 170.0, vDistFromEye);
+        vec3 crestReflect = auroraColor * crestMask * crestNear * 0.42;
 
         // ── Sparkle ────────────────────────────────────────
-        // Rare bright glints on actual crests, near-eye only.
         vec2 sparklePos = vWorld.xz * 9.0 + vec2(time * 0.04, 0.0);
-        float sparkle = step(0.996, hash(floor(sparklePos)));
-        sparkle *= crestMask * nearGate * (0.9 + 0.4 * sin(time * 3.0 + hash(floor(sparklePos)) * 6.28));
+        float sparkle = step(0.990, hash(floor(sparklePos)));
+        sparkle *= crestMask * crestNear * (0.9 + 0.4 * sin(time * 3.0 + hash(floor(sparklePos)) * 6.28));
 
         // ── Distance fog ───────────────────────────────────
-        // Soft haze that pulls the far plain toward the deep-navy
-        // horizon line. Fog colour deliberately VERY dark — bloom
-        // amplifies bright pixels, so a teal fog colour would bleed
-        // cyan across the whole lower half of the screen. A near-
-        // black horizon makes the aurora curtain visually dominant.
-        float fog = 1.0 - exp(-vDistFromEye * 0.0058);
+        float fog = 1.0 - exp(-vDistFromEye * 0.0048);
         fog = clamp(fog, 0.0, 0.92);
 
-        // Compose
-        vec3 col = snow + reflect;
-        col += vec3(sparkle * 0.5, sparkle * 0.65, sparkle * 0.85);
+        vec3 col = ice + broadWash + streakReflect + crestReflect;
+        col += vec3(sparkle * 0.85, sparkle * 1.10, sparkle * 1.30);
 
-        // Fog blends to deep navy — same colour the sky shader uses
-        // at the horizon line, so no visible seam.
-        vec3 fogColor = vec3(0.006, 0.014, 0.028);
+        vec3 fogColor = vec3(0.012, 0.026, 0.048);
         col = mix(col, fogColor, fog);
 
         gl_FragColor = vec4(col, 1.0);
