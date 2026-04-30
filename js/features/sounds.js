@@ -65,7 +65,13 @@ export async function ensureAudio() {
         ctx = new Ctx({ latencyHint: 'playback' });
 
         masterGain = ctx.createGain();
-        masterGain.gain.value = clamp01(ambientMaster.value?.volume ?? 0.5);
+        // If a stream theme is already active when audio inits (page
+        // reload with stream restored from settings), respect the
+        // duck immediately. Otherwise the user would briefly hear
+        // the cosmos at full volume before the duck syncs.
+        masterGain.gain.value = streamDuckActive
+            ? 0
+            : clamp01(ambientMaster.value?.volume ?? 0.5);
 
         masterLimiter = ctx.createDynamicsCompressor();
         // Transparent limiter: only catches true peaks, doesn't colour the sound.

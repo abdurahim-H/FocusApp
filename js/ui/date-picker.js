@@ -108,7 +108,7 @@ export function openDatePicker({ anchor, value, onChange, onClose }) {
     const initial = fromISO(value) || todayLocal();
     let cursor = new Date(initial);
     cursor.setDate(1);
-    let selected = fromISO(value);
+    const selected = fromISO(value);
 
     const root = document.createElement('div');
     root.className = 'date-picker';
@@ -210,7 +210,7 @@ export function openDatePicker({ anchor, value, onChange, onClose }) {
 
     function onOutside(e) {
         if (root.contains(e.target)) return;
-        if (e.target === anchor || (anchor && anchor.contains(e.target))) return;
+        if (e.target === anchor || anchor?.contains(e.target)) return;
         close();
     }
 
@@ -222,7 +222,7 @@ export function openDatePicker({ anchor, value, onChange, onClose }) {
         }
         // Arrow keys move the day cursor — only when focus is on a day.
         const focused = document.activeElement;
-        if (!focused || !focused.classList.contains('date-picker__day')) return;
+        if (!focused?.classList.contains('date-picker__day')) return;
         const iso = focused.dataset.iso;
         const d = fromISO(iso);
         if (!d) return;

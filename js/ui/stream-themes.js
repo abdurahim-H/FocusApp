@@ -12,7 +12,7 @@
 // just don't render visually until the user switches back to a 3D
 // theme.
 
-import { activeStreamId, signal, effect } from '../core/state.js';
+import { activeStreamId, effect } from '../core/state.js';
 import { setStreamDucking } from '../features/sounds.js';
 import { get as settingsGet, subscribe as settingsSub } from './settings/store.js';
 
