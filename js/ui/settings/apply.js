@@ -159,6 +159,16 @@ export const APPLY_HOOKS = {
 
     // ───────── Scene theme — driven by the registry in scene-manager ────
     'scene.theme': (v) => {
+        // Aurora Plain is held back from master; if a user has it
+        // saved (from a prior build or manual edit), migrate them
+        // back to Black Hole so the disabled "Coming soon" card
+        // doesn't render as the active selection.
+        if (v === 'aurora-plain') {
+            import('./store.js').then((s) => {
+                try { s.set?.('scene.theme', 'blackhole'); } catch (_) {}
+            });
+            return;
+        }
         document.documentElement.setAttribute('data-theme', v);
         document.body.setAttribute('data-theme', v);
         // Lazy import so the apply hooks don't pull the whole 3D
