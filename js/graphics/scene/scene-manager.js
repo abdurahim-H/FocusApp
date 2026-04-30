@@ -22,7 +22,7 @@ import { updateNebula } from '../environment/nebula.js';
 import { updateShootingStars } from '../environment/shooting-stars.js';
 import { updateStarGlows } from '../environment/star-glows.js';
 import { updateStarField } from '../environment/starfield.js';
-import { activateTheme, deactivateTheme, getTheme } from './theme-registry.js';
+import { activateTheme, deactivateTheme, getTheme, updateActiveTheme } from './theme-registry.js';
 import {
     createAnamorphicStreak,
     disposeAnamorphicStreak,
@@ -375,7 +375,13 @@ function renderLoop() {
     const elapsed = clock.getElapsedTime();
     const delta = clock.getDeltaTime();
 
-    // Update all systems
+    // Update all systems. The Black Hole theme's modules are driven by
+    // these direct calls (legacy hot path, kept for clarity); they
+    // safely no-op when their material/mesh is null (i.e. when a
+    // different theme is active). Themes registered AFTER Black Hole
+    // (Aurora Plain, future themes) update via updateActiveTheme()
+    // below — that walks the active theme's module list and runs
+    // each module's update hook.
     updateCinematicCamera(elapsed);
     updateCosmicSkybox(elapsed);
     updateStarField(elapsed);
@@ -386,6 +392,14 @@ function renderLoop() {
     updateStarGlows(elapsed);
     updateCosmicMotes(elapsed);
     updateEtherealPetals(elapsed, camera);
+    // Theme-registry-driven updates. The Black Hole theme's modules
+    // wouldn't double-fire because the registry's update hooks call
+    // the same update functions — but those functions are safe to call
+    // multiple times per frame (idempotent setFloat). For Aurora
+    // Plain and future themes, this is the only update path.
+    if (activeTheme && activeTheme.id !== 'blackhole') {
+        updateActiveTheme(activeTheme, elapsed, delta);
+    }
     updateGodRays(scene, camera);
 
     // Update exposure based on camera position (auto-exposure simulation)

@@ -44,6 +44,22 @@ import {
 } from '../environment/shooting-stars.js';
 import { createStarGlows, disposeStarGlows, updateStarGlows } from '../environment/star-glows.js';
 import { createStarField, disposeStarField, updateStarField } from '../environment/starfield.js';
+// Aurora Plain (Wave 4.6) — six-module composition for a different
+// visual register: a vast frozen plain under living curtains of light.
+import { createAuroraSky, disposeAuroraSky, updateAuroraSky } from '../aurora/aurora-sky.js';
+import {
+    createAuroraCurtains,
+    disposeAuroraCurtains,
+    updateAuroraCurtains,
+} from '../aurora/aurora-curtains.js';
+import {
+    createAuroraMountains,
+    disposeAuroraMountains,
+    updateAuroraMountains,
+} from '../aurora/aurora-mountains.js';
+import { createAuroraPlain, disposeAuroraPlain, updateAuroraPlain } from '../aurora/aurora-plain.js';
+import { createAuroraSnow, disposeAuroraSnow, updateAuroraSnow } from '../aurora/aurora-snow.js';
+import { createAuroraGlow, disposeAuroraGlow, updateAuroraGlow } from '../aurora/aurora-glow.js';
 
 /** Each named module wraps its raw create / update / dispose triple
  *  in the standard registry shape. ctx is passed through to create()
@@ -146,6 +162,44 @@ const MODULES = {
             disposeEtherealPetals?.();
         },
     },
+
+    // ── Aurora Plain modules (Wave 4.6) ────────────────────
+    auroraSky: {
+        id: 'auroraSky',
+        init(ctx) { createAuroraSky(ctx.scene); },
+        update(elapsed) { updateAuroraSky?.(elapsed); },
+        dispose() { disposeAuroraSky?.(); },
+    },
+    auroraPlain: {
+        id: 'auroraPlain',
+        init(ctx) { createAuroraPlain(ctx.scene); },
+        update(elapsed) { updateAuroraPlain?.(elapsed); },
+        dispose() { disposeAuroraPlain?.(); },
+    },
+    auroraMountains: {
+        id: 'auroraMountains',
+        init(ctx) { createAuroraMountains(ctx.scene); },
+        update(elapsed) { updateAuroraMountains?.(elapsed); },
+        dispose() { disposeAuroraMountains?.(); },
+    },
+    auroraGlow: {
+        id: 'auroraGlow',
+        init(ctx) { createAuroraGlow(ctx.scene); },
+        update(elapsed) { updateAuroraGlow?.(elapsed); },
+        dispose() { disposeAuroraGlow?.(); },
+    },
+    auroraCurtains: {
+        id: 'auroraCurtains',
+        init(ctx) { createAuroraCurtains(ctx.scene); },
+        update(elapsed) { updateAuroraCurtains?.(elapsed); },
+        dispose() { disposeAuroraCurtains?.(); },
+    },
+    auroraSnow: {
+        id: 'auroraSnow',
+        init(ctx) { createAuroraSnow(ctx.scene); },
+        update(elapsed) { updateAuroraSnow?.(elapsed); },
+        dispose() { disposeAuroraSnow?.(); },
+    },
 };
 
 // ───────────────────────────────────────────────────────────────────────
@@ -177,6 +231,29 @@ export const THEMES = [
             secondary: [180, 144, 232],
             accentWarm: [255, 205, 115],
             accentCool: [144, 232, 200],
+        },
+    },
+    {
+        id: 'aurora-plain',
+        label: 'Aurora Plain',
+        // Wave 4.6 — a vast icy plain under living curtains of light.
+        // Six modules, layered back-to-front: sky dome → plain disc →
+        // mountain ridges → atmospheric glow → curtains → snow.
+        // Order matters: opaque ground / ridges before additive
+        // curtain + glow surfaces, particles last on top.
+        modules: [
+            MODULES.auroraSky,
+            MODULES.auroraPlain,
+            MODULES.auroraMountains,
+            MODULES.auroraGlow,
+            MODULES.auroraCurtains,
+            MODULES.auroraSnow,
+        ],
+        palette: {
+            primary: [128, 232, 178],     // aurora green
+            secondary: [180, 144, 232],   // violet upper aurora
+            accentWarm: [255, 200, 230],  // magenta tip
+            accentCool: [80, 180, 215],   // ice blue
         },
     },
 ];
