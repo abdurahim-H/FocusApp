@@ -69,8 +69,8 @@ export function createAuroraSnow(scene) {
     particles.gravity = new BABYLON.Vector3(0, -1.2, 0);
 
     // Initial velocity — nearly zero plus a faint wind drift.
-    particles.direction1 = new BABYLON.Vector3(-0.15, -0.4, -0.10);
-    particles.direction2 = new BABYLON.Vector3(0.15, -0.7, 0.10);
+    particles.direction1 = new BABYLON.Vector3(-0.15, -0.4, -0.1);
+    particles.direction2 = new BABYLON.Vector3(0.15, -0.7, 0.1);
 
     particles.minAngularSpeed = -0.4;
     particles.maxAngularSpeed = 0.4;

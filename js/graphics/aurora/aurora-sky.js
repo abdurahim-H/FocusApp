@@ -69,12 +69,14 @@ const FRAGMENT = `
         float yUp = d.y;
 
         // ── Base sky gradient ─────────────────────────────────────
-        // Cold deep-navy zenith → indigo mid → soft teal where the aurora
-        // bleeds into the air just above the horizon.
-        vec3 zenith     = vec3(0.005, 0.012, 0.038);
-        vec3 mid        = vec3(0.012, 0.030, 0.075);
-        vec3 horizonHi  = vec3(0.018, 0.075, 0.115);
-        vec3 horizonLo  = vec3(0.020, 0.090, 0.085); // teal kiss from the aurora
+        // Cold deep-navy throughout. Horizon stays dark so the aurora
+        // curtain is the only bright thing in the upper half — bloom
+        // bleeds bright pixels, so a bright horizon would wash the
+        // composition.
+        vec3 zenith     = vec3(0.003, 0.008, 0.025);
+        vec3 mid        = vec3(0.005, 0.014, 0.040);
+        vec3 horizonHi  = vec3(0.008, 0.022, 0.052);
+        vec3 horizonLo  = vec3(0.012, 0.028, 0.055); // sits flush with mountain/terrain fog
 
         // Map elevation 0..1 (horizon..zenith) to the gradient.
         float h = clamp((yUp + 0.05) / 1.05, 0.0, 1.0);
@@ -82,9 +84,9 @@ const FRAGMENT = `
         sky = mix(sky, mid,    smoothstep(0.18, 0.55, h));
         sky = mix(sky, zenith, smoothstep(0.55, 1.0, h));
 
-        // ── Below-horizon: deep cold navy fading toward black ──
+        // ── Below-horizon: occluded by terrain. Black-ish to be safe. ──
         if (yUp < 0.0) {
-            sky = mix(vec3(0.012, 0.018, 0.035), vec3(0.0, 0.0, 0.0), clamp(-yUp * 1.5, 0.0, 1.0));
+            sky = mix(vec3(0.012, 0.028, 0.055), vec3(0.0, 0.0, 0.0), clamp(-yUp * 2.0, 0.0, 1.0));
         }
 
         // ── Star layers (only above horizon) ──────────────────
@@ -92,34 +94,55 @@ const FRAGMENT = `
             // Star count fades to nothing at the very horizon so haze hides them.
             float starGate = smoothstep(0.02, 0.18, h);
 
-            // Three densities for parallax / brightness variety.
-            sky += vec3(0.30, 0.35, 0.45)
-                 * starLayer(uv, 1800.0, vec2(73.1, 419.3),  0.997, 800.0, 0.0)
-                 * 0.30 * starGate;
-            sky += vec3(0.55, 0.62, 0.78)
-                 * starLayer(uv, 1100.0, vec2(0.0, 0.0),     0.9975, 500.0, 0.4)
-                 * 0.50 * starGate;
+            // Four densities for rich, varied star field. Thresholds
+            // tuned so denser layers have more stars overall.
+            sky += vec3(0.28, 0.32, 0.40)
+                 * starLayer(uv, 2200.0, vec2(73.1, 419.3),  0.994, 900.0, 0.0)
+                 * 0.32 * starGate;
+            sky += vec3(0.42, 0.48, 0.62)
+                 * starLayer(uv, 1500.0, vec2(127.7, 31.5),  0.996, 700.0, 0.25)
+                 * 0.44 * starGate;
+            sky += vec3(0.65, 0.72, 0.88)
+                 * starLayer(uv, 950.0,  vec2(0.0, 0.0),     0.9975, 480.0, 0.45)
+                 * 0.62 * starGate;
             // The bright few — slightly warm cast on a fraction of them.
-            float s3 = starLayer(uv, 600.0, vec2(269.5, 183.3), 0.9985, 250.0, 0.55);
-            vec3 s3col = mix(vec3(0.85, 0.92, 1.0), vec3(1.0, 0.92, 0.78), starHash(floor(uv * 600.0) + vec2(50.0)));
-            sky += s3col * s3 * 0.85 * starGate;
+            float s4 = starLayer(uv, 520.0, vec2(269.5, 183.3), 0.9985, 230.0, 0.6);
+            vec3 s4col = mix(vec3(0.85, 0.92, 1.0), vec3(1.0, 0.92, 0.78), starHash(floor(uv * 520.0) + vec2(50.0)));
+            sky += s4col * s4 * 1.0 * starGate;
         }
 
         // ── Low moon glow behind the mountain ridge ──────────
-        // A soft halo just above the horizon, slightly off-centre, to
-        // anchor the composition. The aurora is the showpiece, not the
-        // moon, so we keep the disc very small and rely on its halo.
+        // Very small disc + soft halo. The aurora is the showpiece;
+        // the moon is just a quiet anchor so the sky isn't featureless.
+        // Dimmed substantially from the previous build where it
+        // competed with the curtain for visual weight.
         float moonAng = 0.62; // azimuth offset (radians)
         vec3 moonDir = normalize(vec3(cos(moonAng), 0.04, sin(moonAng)));
         float moonDot = max(0.0, dot(d, moonDir));
-        float moonHalo = pow(moonDot, 220.0) * 0.65
-                       + pow(moonDot, 32.0)  * 0.06
-                       + pow(moonDot, 8.0)   * 0.012;
-        sky += vec3(0.95, 0.92, 0.85) * moonHalo;
+        float moonHalo = pow(moonDot, 320.0) * 0.40
+                       + pow(moonDot, 48.0)  * 0.025
+                       + pow(moonDot, 10.0)  * 0.005;
+        sky += vec3(0.92, 0.92, 0.88) * moonHalo;
 
-        // Faint horizon glow band — broadens where the aurora is high.
-        float horizonBand = smoothstep(0.1, 0.0, abs(yUp - 0.02));
-        sky += vec3(0.04, 0.16, 0.22) * horizonBand * 0.45;
+        // Very faint horizon glow band — barely-there teal whisper
+        // right at the horizon line. Stronger and bloom would bleed
+        // cyan everywhere; this just adds a subtle hint of aurora's
+        // atmospheric scattering.
+        float horizonBand = smoothstep(0.08, 0.0, abs(yUp - 0.012));
+        sky += vec3(0.020, 0.060, 0.075) * horizonBand * 0.30;
+
+        // ── Wide aurora glow ────────────────────────────────
+        // Soft wash of green-teal at the altitude band where the
+        // curtains live. Tells the eye "the whole upper atmosphere is
+        // aurora-suffused", not just three discrete ribbons. Modulated
+        // by slow noise so it isn't a flat horizontal stripe.
+        if (yUp > 0.0) {
+            // Centre at ~yUp 0.20 (12° above horizon), gaussian falloff.
+            float band = exp(-pow((yUp - 0.20) * 3.6, 2.0));
+            float glowNoise = 0.5 + 0.5 * sin(uv.x * 18.0 + time * 0.04)
+                                  * cos(uv.x * 7.0 - time * 0.03);
+            sky += vec3(0.018, 0.060, 0.045) * band * (0.55 + glowNoise * 0.5);
+        }
 
         gl_FragColor = vec4(sky, 1.0);
     }
@@ -159,6 +182,12 @@ export function updateAuroraSky(elapsed) {
 }
 
 export function disposeAuroraSky() {
-    if (skyMesh) { skyMesh.dispose(); skyMesh = null; }
-    if (skyMaterial) { skyMaterial.dispose(); skyMaterial = null; }
+    if (skyMesh) {
+        skyMesh.dispose();
+        skyMesh = null;
+    }
+    if (skyMaterial) {
+        skyMaterial.dispose();
+        skyMaterial = null;
+    }
 }

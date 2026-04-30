@@ -20,6 +20,34 @@
 // `setTheme(id)` infrastructure exists for the future swap; not used
 // from any UI surface yet.
 
+// Aurora Plain (Wave 4.6) — landscape composition built from real 3D
+// geometry: a low-eye camera, displaced ground mesh, ring-mesh
+// mountains with carved silhouettes, ribbon-mesh aurora curtains, and
+// drifting snow particles. The camera module is essential — without
+// it, the default Black-Hole orbit puts the eye AMONG the geometry
+// instead of viewing a landscape, which kills the depth.
+import {
+    createAuroraCamera,
+    disposeAuroraCamera,
+    updateAuroraCamera,
+} from '../aurora/aurora-camera.js';
+import {
+    createAuroraMountains,
+    disposeAuroraMountains,
+    updateAuroraMountains,
+} from '../aurora/aurora-mountains.js';
+import {
+    createAuroraRibbons,
+    disposeAuroraRibbons,
+    updateAuroraRibbons,
+} from '../aurora/aurora-ribbons.js';
+import { createAuroraSky, disposeAuroraSky, updateAuroraSky } from '../aurora/aurora-sky.js';
+import { createAuroraSnow, disposeAuroraSnow, updateAuroraSnow } from '../aurora/aurora-snow.js';
+import {
+    createAuroraTerrain,
+    disposeAuroraTerrain,
+    updateAuroraTerrain,
+} from '../aurora/aurora-terrain.js';
 import { createBlackHole, disposeBlackHole, updateBlackHole } from '../blackhole/blackhole.js';
 import {
     createCosmicMotes,
@@ -44,22 +72,6 @@ import {
 } from '../environment/shooting-stars.js';
 import { createStarGlows, disposeStarGlows, updateStarGlows } from '../environment/star-glows.js';
 import { createStarField, disposeStarField, updateStarField } from '../environment/starfield.js';
-// Aurora Plain (Wave 4.6) — six-module composition for a different
-// visual register: a vast frozen plain under living curtains of light.
-import { createAuroraSky, disposeAuroraSky, updateAuroraSky } from '../aurora/aurora-sky.js';
-import {
-    createAuroraCurtains,
-    disposeAuroraCurtains,
-    updateAuroraCurtains,
-} from '../aurora/aurora-curtains.js';
-import {
-    createAuroraMountains,
-    disposeAuroraMountains,
-    updateAuroraMountains,
-} from '../aurora/aurora-mountains.js';
-import { createAuroraPlain, disposeAuroraPlain, updateAuroraPlain } from '../aurora/aurora-plain.js';
-import { createAuroraSnow, disposeAuroraSnow, updateAuroraSnow } from '../aurora/aurora-snow.js';
-import { createAuroraGlow, disposeAuroraGlow, updateAuroraGlow } from '../aurora/aurora-glow.js';
 
 /** Each named module wraps its raw create / update / dispose triple
  *  in the standard registry shape. ctx is passed through to create()
@@ -164,41 +176,77 @@ const MODULES = {
     },
 
     // ── Aurora Plain modules (Wave 4.6) ────────────────────
+    auroraCamera: {
+        id: 'auroraCamera',
+        init() {
+            createAuroraCamera();
+        },
+        update(elapsed) {
+            updateAuroraCamera?.(elapsed);
+        },
+        dispose() {
+            disposeAuroraCamera?.();
+        },
+    },
     auroraSky: {
         id: 'auroraSky',
-        init(ctx) { createAuroraSky(ctx.scene); },
-        update(elapsed) { updateAuroraSky?.(elapsed); },
-        dispose() { disposeAuroraSky?.(); },
+        init(ctx) {
+            createAuroraSky(ctx.scene);
+        },
+        update(elapsed) {
+            updateAuroraSky?.(elapsed);
+        },
+        dispose() {
+            disposeAuroraSky?.();
+        },
     },
-    auroraPlain: {
-        id: 'auroraPlain',
-        init(ctx) { createAuroraPlain(ctx.scene); },
-        update(elapsed) { updateAuroraPlain?.(elapsed); },
-        dispose() { disposeAuroraPlain?.(); },
+    auroraTerrain: {
+        id: 'auroraTerrain',
+        init(ctx) {
+            createAuroraTerrain(ctx.scene);
+        },
+        update(elapsed) {
+            updateAuroraTerrain?.(elapsed);
+        },
+        dispose() {
+            disposeAuroraTerrain?.();
+        },
     },
     auroraMountains: {
         id: 'auroraMountains',
-        init(ctx) { createAuroraMountains(ctx.scene); },
-        update(elapsed) { updateAuroraMountains?.(elapsed); },
-        dispose() { disposeAuroraMountains?.(); },
+        init(ctx) {
+            createAuroraMountains(ctx.scene);
+        },
+        update(elapsed) {
+            updateAuroraMountains?.(elapsed);
+        },
+        dispose() {
+            disposeAuroraMountains?.();
+        },
     },
-    auroraGlow: {
-        id: 'auroraGlow',
-        init(ctx) { createAuroraGlow(ctx.scene); },
-        update(elapsed) { updateAuroraGlow?.(elapsed); },
-        dispose() { disposeAuroraGlow?.(); },
-    },
-    auroraCurtains: {
-        id: 'auroraCurtains',
-        init(ctx) { createAuroraCurtains(ctx.scene); },
-        update(elapsed) { updateAuroraCurtains?.(elapsed); },
-        dispose() { disposeAuroraCurtains?.(); },
+    auroraRibbons: {
+        id: 'auroraRibbons',
+        init(ctx) {
+            createAuroraRibbons(ctx.scene);
+        },
+        update(elapsed) {
+            updateAuroraRibbons?.(elapsed);
+        },
+        dispose() {
+            disposeAuroraRibbons?.();
+        },
     },
     auroraSnow: {
         id: 'auroraSnow',
-        init(ctx) { createAuroraSnow(ctx.scene); },
-        update(elapsed) { updateAuroraSnow?.(elapsed); },
-        dispose() { disposeAuroraSnow?.(); },
+        init(ctx) {
+            createAuroraSnow(ctx.scene);
+        },
+        update(elapsed) {
+            updateAuroraSnow?.(elapsed);
+        },
+        dispose() {
+            disposeAuroraSnow?.();
+        },
     },
 };
 
@@ -236,24 +284,24 @@ export const THEMES = [
     {
         id: 'aurora-plain',
         label: 'Aurora Plain',
-        // Wave 4.6 — a vast icy plain under living curtains of light.
-        // Six modules, layered back-to-front: sky dome → plain disc →
-        // mountain ridges → atmospheric glow → curtains → snow.
-        // Order matters: opaque ground / ridges before additive
-        // curtain + glow surfaces, particles last on top.
+        // Wave 4.6 — landscape composition. Camera module FIRST so it
+        // overrides the default orbital framing before any geometry
+        // builds (and re-applies its target each frame). Then opaque
+        // background → ground → mountains, additive ribbons over them,
+        // particles last on top.
         modules: [
+            MODULES.auroraCamera,
             MODULES.auroraSky,
-            MODULES.auroraPlain,
+            MODULES.auroraTerrain,
             MODULES.auroraMountains,
-            MODULES.auroraGlow,
-            MODULES.auroraCurtains,
+            MODULES.auroraRibbons,
             MODULES.auroraSnow,
         ],
         palette: {
-            primary: [128, 232, 178],     // aurora green
-            secondary: [180, 144, 232],   // violet upper aurora
-            accentWarm: [255, 200, 230],  // magenta tip
-            accentCool: [80, 180, 215],   // ice blue
+            primary: [128, 232, 178], // aurora green
+            secondary: [180, 144, 232], // violet upper aurora
+            accentWarm: [255, 200, 230], // magenta tip
+            accentCool: [80, 180, 215], // ice blue
         },
     },
 ];
@@ -266,7 +314,9 @@ export function getTheme(id) {
     const found = THEMES.find((t) => t.id === id);
     if (found) return found;
     if (id) {
-        console.warn(`[theme-registry] unknown theme id "${id}", falling back to "${THEMES[0].id}"`);
+        console.warn(
+            `[theme-registry] unknown theme id "${id}", falling back to "${THEMES[0].id}"`
+        );
     }
     return THEMES[0];
 }
