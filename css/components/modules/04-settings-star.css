@@ -25,7 +25,9 @@
     filter: drop-shadow(0 0 calc(2px + var(--glow, 0) * 16px) rgba(255, 248, 235, calc(0.15 + var(--glow, 0) * 0.6)));
     transition: filter 0.1s ease, transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
     will-change: filter, transform;
+    pointer-events: none;
 }
+.settings-star * { pointer-events: none; }
 
 /* Click press */
 .settings-trigger:active .settings-star {

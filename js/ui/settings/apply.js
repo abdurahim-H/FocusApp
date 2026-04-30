@@ -169,8 +169,12 @@ export const APPLY_HOOKS = {
             setSetting('scene.theme', 'blackhole');
             return;
         }
-        document.documentElement.setAttribute('data-theme', v);
-        document.body.setAttribute('data-theme', v);
+        // Scene theme writes to its own attribute so it doesn't fight
+        // the color theme system (theme-init.js owns `data-theme` for
+        // dark / light / cosmos). CSS scopes chrome overrides via
+        // `[data-scene-theme="sakura"]` etc.
+        document.documentElement.setAttribute('data-scene-theme', v);
+        document.body.setAttribute('data-scene-theme', v);
         // Lazy import so the apply hooks don't pull the whole 3D
         // bundle eagerly. setActiveTheme is a no-op if the scene
         // hasn't initialised yet — first paint reads the saved id

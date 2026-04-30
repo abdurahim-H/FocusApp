@@ -114,10 +114,17 @@
 }
 
 /* ── Orbital rings (Variant A — Orbit) ────────────────────────────────── */
+/* SVG defaults child elements to `pointer-events: visiblePainted` even when
+   the SVG root is `pointer-events: none` — `circle` and `g` ignore inherited
+   none and become hit targets again. Cascade `none` down to every descendant
+   so clicks always reach the button below. */
+.account-satellite__orbits,
+.account-satellite__orbits * {
+    pointer-events: none;
+}
 .account-satellite__orbits {
     position: absolute;
     inset: 0;
-    pointer-events: none;
     overflow: visible;
 }
 .account-satellite__orbit {

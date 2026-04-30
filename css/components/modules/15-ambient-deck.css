@@ -2412,16 +2412,36 @@
 
 /* ── Immersive mode ─────────────────────────────────────────────────────── */
 
+/* `!important` defeats style.css's
+   `.container > *, button, input, ... { pointer-events: auto !important }`
+   which would otherwise leave invisible chrome still receiving clicks.
+   The cosmos-toolbar stays visible because that's where the user finds
+   the toggle to exit; Esc also exits but the toolbar is the obvious path. */
 body.is-immersive .settings-trigger,
 body.is-immersive .help-trigger,
+body.is-immersive .nav-cluster,
 body.is-immersive .nav-buttons,
+body.is-immersive .account-satellite,
 body.is-immersive .home-mini-timer,
 body.is-immersive .mode:not(#ambient),
 body.is-immersive .mixes-rail,
-body.is-immersive .deck-empty {
-    opacity: 0;
-    pointer-events: none;
+body.is-immersive .deck-empty,
+body.is-immersive .task-dock,
+body.is-immersive .account-dropdown,
+body.is-immersive .profile {
+    opacity: 0 !important;
+    pointer-events: none !important;
     transition: opacity 0.5s var(--deck-ease);
+}
+/* Also disable pointer-events on every descendant of the hidden chrome
+   so the global `button { pointer-events: auto !important }` rule can't
+   resurrect any nested control as a phantom click target. */
+body.is-immersive .nav-cluster *,
+body.is-immersive .task-dock *,
+body.is-immersive .home-mini-timer *,
+body.is-immersive .account-dropdown *,
+body.is-immersive .profile * {
+    pointer-events: none !important;
 }
 body.is-immersive .ambient-content.deck {
     position: fixed;
