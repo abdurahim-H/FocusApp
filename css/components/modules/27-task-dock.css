@@ -18,12 +18,18 @@
 :root {
     /* Slim collapsed strip (44px) keeps the focus tab uncluttered;
        expanded panel still claims its full 60vh / 560px ceiling.
-       The collapsed height includes the 18px pull-rail + a single
-       row of preview text. */
+       The collapsed height includes the 14px pull-rail + a single
+       row of preview text.
+
+       The dock floats ABOVE the cosmos toolbar (not full-width
+       across the bottom) so the toolbar stays cleanly visible and
+       reachable. --task-dock-bottom-margin is sized to clear the
+       toolbar (16px from viewport bottom + ~50px toolbar + 12px
+       breathing room). */
     --task-dock-collapsed-h: 44px;
     --task-dock-expanded-h: min(60vh, 560px);
     --task-dock-side-margin: 16px;
-    --task-dock-bottom-margin: 16px;
+    --task-dock-bottom-margin: 80px;
     --task-dock-radius: 16px;
     --task-dock-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -34,7 +40,10 @@
     left: var(--task-dock-side-margin);
     right: var(--task-dock-side-margin);
     margin: 0 auto;
-    max-width: 760px;
+    /* Narrower than before so the dock reads as a focused control
+       surface, not an environmental band. Centered horizontally;
+       the cosmos toolbar sits below it, not behind it. */
+    max-width: 540px;
     z-index: 2050;
     height: var(--task-dock-collapsed-h);
     border-radius: var(--task-dock-radius);
@@ -429,12 +438,14 @@
 @media (max-width: 540px) {
     :root {
         --task-dock-side-margin: 8px;
-        --task-dock-bottom-margin: 8px;
+        /* Phone: clear the toolbar (16 + ~46 + 10 = 72) */
+        --task-dock-bottom-margin: 72px;
         --task-dock-collapsed-h: 44px;
         /* Phone viewport: claim more vertical real estate when expanded
            since the focus card is also smaller down here. */
         --task-dock-expanded-h: min(72vh, 540px);
     }
+    .task-dock { max-width: none; }
     .task-dock__collapsed { padding: 0 12px 4px; gap: 10px; }
     .task-dock[data-state="expanded"] .task-dock__expanded { padding: 0 14px 12px; }
     .task-dock__head { gap: 8px; margin-bottom: 10px; }
@@ -450,6 +461,7 @@
 @media (min-width: 541px) and (max-width: 880px) {
     :root {
         --task-dock-side-margin: 12px;
+        --task-dock-bottom-margin: 80px;
         --task-dock-expanded-h: min(64vh, 540px);
     }
 }

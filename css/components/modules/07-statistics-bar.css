@@ -466,15 +466,25 @@
 
 /* Task text — base. The strikethrough is a pseudo-element so we can animate
    its width from 0% → 100% (text-decoration can't be animated). Sized
-   to fill remaining row width with proper truncation so a wall-of-text
-   task title can't bulldoze the calendar / stepper / delete buttons. */
+   to fill remaining row width and WRAP to a second/third line when a
+   title is long, instead of truncating with ellipsis. Capped at 3
+   lines via line-clamp so a runaway paste can't grow the row past
+   reading length; word-break ensures unbreakable strings still wrap
+   instead of overflowing horizontally and bulldozing the action
+   buttons next to the row. */
 .task-item .task-text {
     position: relative;
     flex: 1 1 auto;
     min-width: 0;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     transition: color 0.4s ease;
 }
 

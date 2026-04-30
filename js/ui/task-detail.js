@@ -63,10 +63,22 @@ export function openTaskDetail(id) {
     if (!unsubscribe) {
         // Re-render whenever the underlying tasks signal changes —
         // covers external edits (drag reorder, completion toggle from
-        // another surface, etc.).
+        // another surface, etc.). BUT skip re-render while the user
+        // is actively typing into a field inside this panel: every
+        // keystroke updates tasks.value, which would re-fire the
+        // effect, which would replace innerHTML, which would destroy
+        // the input element and drop focus + selection. The skipped
+        // render still settles correctly when the user blurs (next
+        // signal change re-runs the effect with focus elsewhere).
         unsubscribe = effect(() => {
             tasks.value;
-            if (isOpen) render();
+            if (!isOpen) return;
+            const focused = document.activeElement;
+            const isEditingInPanel = panel?.contains(focused) && (
+                focused?.tagName === 'INPUT' || focused?.tagName === 'TEXTAREA'
+            );
+            if (isEditingInPanel) return;
+            render();
         });
     } else {
         render();
