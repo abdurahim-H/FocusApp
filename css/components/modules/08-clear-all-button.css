@@ -343,6 +343,17 @@
     align-items: center;
     gap: 8px;
     width: 100%;
+    /* Min-width: 0 so .task-content (flex: 1) can shrink below its
+       intrinsic min-content width, letting the .task-text inside
+       ellipsis-truncate. Without this the row reflows past its
+       container instead of clipping. */
+    min-width: 0;
+}
+/* Action buttons / chips that follow .task-content all stay at their
+   natural size — they should NEVER be the thing that shrinks when a
+   long task title runs out of room. The text truncates first. */
+.task-row > :not(.task-content) {
+    flex-shrink: 0;
 }
 
 /* Project tag chip on the parent row. Tight, tone-neutral, lets the

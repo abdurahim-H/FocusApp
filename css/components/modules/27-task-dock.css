@@ -16,11 +16,15 @@
    cubic-bezier easing. */
 
 :root {
-    --task-dock-collapsed-h: 64px;
+    /* Slim collapsed strip (44px) keeps the focus tab uncluttered;
+       expanded panel still claims its full 60vh / 560px ceiling.
+       The collapsed height includes the 18px pull-rail + a single
+       row of preview text. */
+    --task-dock-collapsed-h: 44px;
     --task-dock-expanded-h: min(60vh, 560px);
     --task-dock-side-margin: 16px;
     --task-dock-bottom-margin: 16px;
-    --task-dock-radius: 18px;
+    --task-dock-radius: 16px;
     --task-dock-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -81,7 +85,7 @@
     background: transparent;
     border: 0;
     width: 100%;
-    height: 18px;
+    height: 14px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -119,11 +123,13 @@
     width: 100%;
     flex: 1 1 auto;
     min-height: 0;
-    padding: 0 18px 12px;
+    /* Trimmed padding so the slim 44px strip stays single-row with
+       eyebrow and preview text on one line. */
+    padding: 0 16px 6px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 14px;
     text-align: left;
     cursor: pointer;
     color: inherit;
@@ -139,9 +145,12 @@
 }
 
 .task-dock__active {
+    /* Single-row in the slim collapsed strip — eyebrow tag sits to
+       the left of the preview text, both on one baseline. */
     display: flex;
-    flex-direction: column;
-    gap: 3px;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
     min-width: 0;
     flex: 1 1 auto;
 }
@@ -153,7 +162,9 @@
     text-transform: uppercase;
     color: rgba(255, 220, 160, 0.6);
     line-height: 1;
+    flex-shrink: 0;
 }
+.task-dock__eyebrow:empty { display: none; }
 .task-dock__active-name {
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
     font-size: 14px;
@@ -419,12 +430,28 @@
     :root {
         --task-dock-side-margin: 8px;
         --task-dock-bottom-margin: 8px;
-        --task-dock-collapsed-h: 60px;
-        --task-dock-expanded-h: 70vh;
+        --task-dock-collapsed-h: 44px;
+        /* Phone viewport: claim more vertical real estate when expanded
+           since the focus card is also smaller down here. */
+        --task-dock-expanded-h: min(72vh, 540px);
     }
-    .task-dock__collapsed { padding: 0 14px 10px; }
-    .task-dock__expanded { padding: 0 16px 14px; }
+    .task-dock__collapsed { padding: 0 12px 4px; gap: 10px; }
+    .task-dock[data-state="expanded"] .task-dock__expanded { padding: 0 14px 12px; }
+    .task-dock__head { gap: 8px; margin-bottom: 10px; }
+    .task-dock__head-title { font-size: 14px; }
+    .task-dock__head-eyebrow { font-size: 8px; letter-spacing: 0.28em; }
+    .task-dock__summary { gap: 6px; }
+    .task-dock__summary-chip { padding: 3px 8px; font-size: 10px; }
+    .task-dock__add { gap: 6px; margin-bottom: 8px; }
     .task-dock__hint { display: none; }
+}
+
+/* ── Tablet / small laptop ─────────────────────────────────────────── */
+@media (min-width: 541px) and (max-width: 880px) {
+    :root {
+        --task-dock-side-margin: 12px;
+        --task-dock-expanded-h: min(64vh, 540px);
+    }
 }
 
 /* ── Reduced motion ────────────────────────────────────────────────── */

@@ -96,9 +96,15 @@ export function initTaskDock() {
     document.addEventListener('keydown', onKey);
 
     // Reactive: visibility follows the current top-level mode signal.
+    // The mode signal carries both navigation values ('home' / 'focus' /
+    // 'ambient') and a legacy 'timer' value that startTimer() in
+    // timer.js writes when a session begins. Both 'focus' and 'timer'
+    // mean "the focus tab is the visible panel" — the timer panel
+    // never re-activates a different .mode element. Without 'timer'
+    // in the show set, clicking Start hid the dock immediately.
     effect(() => {
         const m = mode.value;
-        if (m === 'focus') {
+        if (m === 'focus' || m === 'timer') {
             show();
         } else {
             hide();
@@ -202,19 +208,31 @@ function paintPreview(list, activeId) {
     const remaining = all.filter((t) => !t.completed).length;
     const total = all.length;
 
+    // Eyebrow text reflects what the preview is showing: NOW for the
+    // pinned active task, NEXT for the first open task in the list,
+    // DONE when the list is finished, blank when empty.
+    const eyebrowEl = document.getElementById('taskDockEyebrow');
     if (active) {
         const norm = normalizeTask(active);
         activeNameEl.textContent = norm.text || '— untitled task —';
+        if (eyebrowEl) eyebrowEl.textContent = 'NOW';
         dock?.classList.remove('task-dock--no-active');
     } else if (remaining > 0) {
-        activeNameEl.textContent = `${remaining} task${remaining === 1 ? '' : 's'} ready — pick one to focus on`;
-        dock?.classList.add('task-dock--no-active');
+        // Show the first open task as the preview — the user can jump
+        // straight into it. Picking the topmost open task matches the
+        // "next up" mental model of an ordered list.
+        const next = all.find((t) => !t.completed);
+        const norm = next ? normalizeTask(next) : null;
+        activeNameEl.textContent = norm?.text || '— untitled task —';
+        if (eyebrowEl) eyebrowEl.textContent = 'NEXT';
+        dock?.classList.remove('task-dock--no-active');
     } else if (total > 0) {
-        // Everything done.
         activeNameEl.textContent = 'all tasks done';
+        if (eyebrowEl) eyebrowEl.textContent = 'DONE';
         dock?.classList.add('task-dock--no-active');
     } else {
         activeNameEl.textContent = 'add your first task';
+        if (eyebrowEl) eyebrowEl.textContent = '';
         dock?.classList.add('task-dock--no-active');
     }
 

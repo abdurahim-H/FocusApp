@@ -465,10 +465,16 @@
 }
 
 /* Task text — base. The strikethrough is a pseudo-element so we can animate
-   its width from 0% → 100% (text-decoration can't be animated). */
+   its width from 0% → 100% (text-decoration can't be animated). Sized
+   to fill remaining row width with proper truncation so a wall-of-text
+   task title can't bulldoze the calendar / stepper / delete buttons. */
 .task-item .task-text {
     position: relative;
-    display: inline-block;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     transition: color 0.4s ease;
 }
 

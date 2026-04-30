@@ -138,7 +138,14 @@ function loadPersisted() {
         if (typeof data.activeTaskId === 'number' || data.activeTaskId === null) {
             activeTaskId.value = data.activeTaskId;
         }
-        if (typeof data.mode === 'string') mode.value = data.mode;
+        // The `mode` signal is intentionally NOT restored from
+        // localStorage. The HTML always boots with `.mode#home.active`,
+        // so restoring a different mode would leave the signal out of
+        // sync with the visible panel — surfacing the task dock on
+        // Home, the notification banner in the wrong tab, etc. The
+        // user-friendly default is "fresh visit always lands on Home";
+        // any persisted mode is ignored on boot. The signal updates
+        // normally as soon as the user clicks a nav tab.
         if (Array.isArray(data.activeSounds)) activeSounds.value = data.activeSounds;
         if (typeof data.universeStars === 'number') universeStars.value = data.universeStars;
         if (typeof data.universeFocusMinutes === 'number')
