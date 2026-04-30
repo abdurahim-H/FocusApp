@@ -235,16 +235,13 @@ a {
 }
 
 .task-list {
-    /* Phase 4 fix: max-height only (not fixed) so the list grows naturally
-       up to ~2.5 task heights, then scrolls when there are 3+ tasks. */
-    max-height: 108px;
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    /* Firefox: thin gold scrollbar (Firefox can't do reveal-on-hover or
-       backdrop-filter on the scrollbar, so just keep it subtle). */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 205, 115, 0.22) transparent;
+    /* Tasks live in the bottom dock now (see 27-task-dock.css). The
+       dock body owns scrolling; the list itself sizes to its content
+       so all tasks pack visibly until the dock overflows. The old
+       max-height: 108px / overflow-y: auto here capped the list at
+       ~2.5 tasks tall — a hangover from the in-card .task-section
+       slot that no longer exists. Removing it lets the dock body
+       see the list's full natural height. */
 }
 
 /* ===== WebKit scrollbar — overlay style, reveal-on-hover =====
