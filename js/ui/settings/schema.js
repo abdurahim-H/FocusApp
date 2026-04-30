@@ -513,6 +513,14 @@ export const SCHEMA = [
         default: false,
         help: 'When a focus session begins, play the mix pinned as your focus-start mix',
     },
+    {
+        section: 'sounds',
+        type: 'toggle',
+        key: 'sounds.muteOnStream',
+        label: 'Mute cosmos sounds during a stream theme',
+        default: true,
+        help: 'When a YouTube or SoundCloud backdrop is active, fade the cosmos ambient mix to silence so the two audio sources don\'t fight. Turn off to layer them.',
+    },
 
     // ═══════════════════════════════════════════════════════════════════════
     // NOTIFICATIONS

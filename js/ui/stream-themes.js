@@ -13,6 +13,8 @@
 // theme.
 
 import { activeStreamId, signal, effect } from '../core/state.js';
+import { setStreamDucking } from '../features/sounds.js';
+import { get as settingsGet, subscribe as settingsSub } from './settings/store.js';
 
 const HOST_ID = 'streamThemeHost';
 const FRAME_ID = 'streamThemeFrame';
@@ -170,9 +172,25 @@ export function initStreamThemes() {
     initialised = true;
     // Start with whatever the user last had active.
     paint(activeStreamId.value);
+    syncDucking();
     effect(() => {
         paint(activeStreamId.value);
+        syncDucking();
     });
+    // Wave 5.6 — toggling the setting mid-session updates the duck
+    // immediately. Without this listener the user would have to
+    // bounce the stream off and on again to apply their preference.
+    settingsSub('sounds.muteOnStream', syncDucking);
+}
+
+/** Apply the duck based on the combined state of `activeStreamId`
+ *  and the `sounds.muteOnStream` setting. Both must be true for
+ *  the cosmos master to fade out; any other combination restores
+ *  the user's stored volume. */
+function syncDucking() {
+    const streamActive = !!findStream(activeStreamId.value);
+    const muteOn = settingsGet('sounds.muteOnStream') !== false;
+    setStreamDucking(streamActive && muteOn);
 }
 
 /** Set the active stream by id. `null` clears it (returns to 3D). */

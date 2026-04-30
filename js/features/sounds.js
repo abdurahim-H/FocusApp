@@ -48,6 +48,14 @@ let masterLimiter = null;
 let masterAnalyser = null;
 let masterReady = false;
 
+// Wave 5.6 — stream-mode ducking. When a YouTube / SoundCloud theme
+// is active and `sounds.muteOnStream` is on, the cosmos master fades
+// to silence so the two sources don't fight. The user's stored
+// master volume is preserved (still in `ambientMaster.value`); we
+// only override the gain. Toggling the setting off — or switching
+// the stream off — restores the stored volume immediately.
+let streamDuckActive = false;
+
 /** Ensure the AudioContext is created and running. Safe to call repeatedly.
  *  Must be invoked from a user gesture (click / key) to avoid autoplay block. */
 export async function ensureAudio() {
@@ -371,7 +379,8 @@ function playFallback(id, { fadeMs = FADE_IN_MS } = {}) {
 function fallbackTargetFor(id) {
     const t = getTrackState(id);
     const master = ambientMaster.value?.volume ?? 0.5;
-    return t.muted ? 0 : master * t.volume;
+    const duck = streamDuckActive ? 0 : 1;
+    return t.muted ? 0 : master * t.volume * duck;
 }
 
 function applyFallbackVolume(id) {
@@ -563,7 +572,7 @@ export function setSoundMuted(id, muted) {
 export function setMasterVolume(value01, { fadeMs = 200 } = {}) {
     const v = clamp01(value01);
     ambientMaster.value = { ...ambientMaster.value, volume: v };
-    if (masterGain) {
+    if (masterGain && !streamDuckActive) {
         const now = ctx.currentTime;
         masterGain.gain.cancelScheduledValues(now);
         masterGain.gain.linearRampToValueAtTime(v, now + fadeMs / 1000);
@@ -573,6 +582,23 @@ export function setMasterVolume(value01, { fadeMs = 200 } = {}) {
 
 export function getMasterVolume() {
     return ambientMaster.value?.volume ?? 0.5;
+}
+
+/** Wave 5.6 — duck the cosmos master when a stream theme is active.
+ *  Idempotent: repeated calls with the same value are a no-op. The
+ *  stored master volume in `ambientMaster` isn't touched, so toggling
+ *  off the duck restores the user's last preference. */
+export function setStreamDucking(ducked) {
+    const next = !!ducked;
+    if (streamDuckActive === next) return;
+    streamDuckActive = next;
+    if (masterGain) {
+        const now = ctx.currentTime;
+        const target = next ? 0 : (ambientMaster.value?.volume ?? 0.5);
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.linearRampToValueAtTime(target, now + 0.4);
+    }
+    refreshAllFallbackVolumes();
 }
 
 /** Fade master to 0 over `durationMs`, then stop all tracks. */

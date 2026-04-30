@@ -112,7 +112,7 @@ Massively-requested competitor feature (Lofi Girl-style). Blocked on the theme r
 - [x] **5.3 SoundCloud Widget integration (M).** Same iframe-host pattern; `kind: 'soundcloud'` swaps in `https://w.soundcloud.com/player/?url=…&auto_play=true`.
 - [x] **5.4 Curated starter playlist (S).** 8 hand-picked live-streams ship with the registry: Lofi Girl, Lofi Girl Sleep, Chillhop afternoon café, Cozy Jazz Café, Fireplace, Rain on a Window, Korean Study-with-me, Classical study music.
 - [x] **5.5 Paste-your-own URL (S).** New `scene.streamCustomUrl` text input. `shortenYouTubeUrl` / `shortenSoundCloudUrl` parse any pasted link into a `custom:<videoId>` or `custom:soundcloud:<encodedUrl>` shorthand stored as the `activeStreamId`. Custom URL beats the curated select; clearing the URL falls back to the picker.
-- [ ] **5.6 Stream + ambient mixing (M).** When a YouTube theme is active, ambient sounds in our cosmos default to muted; per-toggle to layer them anyway. (Deferred — both audio sources currently play side-by-side at full volume.)
+- [x] **5.6 Stream + ambient mixing (M).** New `sounds.muteOnStream` toggle (default on). `sounds.js` exposes `setStreamDucking(bool)` which fades the master gain to 0 without touching the user's stored volume; turning the setting off — or switching streams off — restores the saved level immediately. `stream-themes.js` runs `syncDucking()` on every `activeStreamId` change and on every `sounds.muteOnStream` flip so live toggling responds without bouncing the stream. Fallback `<audio>` tracks share the same duck multiplier via `fallbackTargetFor`. 
 
 ---
 
