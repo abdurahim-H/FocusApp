@@ -48,12 +48,14 @@
    1. SETTINGS STAR — replace warm-white star with blossom-pink
    ────────────────────────────────────────────────────────────────────── */
 [data-scene-theme="sakura"] .settings-trigger {
-    color: rgba(var(--sk-blossom-rgb), calc(0.45 + var(--glow, 0) * 0.55));
+    /* Bump the resting alpha — the bright cherry-blossom video washes
+       out a low-alpha pink, so the star wasn't readable until hovered. */
+    color: rgba(var(--sk-blossom-rgb), calc(0.78 + var(--glow, 0) * 0.22));
 }
 [data-scene-theme="sakura"] .settings-star {
     filter: drop-shadow(
-        0 0 calc(2px + var(--glow, 0) * 16px)
-        rgba(var(--sk-blossom-rgb), calc(0.18 + var(--glow, 0) * 0.6))
+        0 0 calc(4px + var(--glow, 0) * 18px)
+        rgba(var(--sk-blossom-rgb), calc(0.45 + var(--glow, 0) * 0.55))
     );
 }
 
@@ -298,6 +300,145 @@
 }
 [data-scene-theme="sakura"] .settings-row:hover {
     background: rgba(var(--sk-blossom-rgb), 0.04);
+}
+/* Strip the encapsulating frames the user flagged in image #63/#64.
+   Settings rows previously read as "cards" because the segmented
+   options + steppers + text inputs each had a boxed background under
+   sakura. Drop the boxes; the controls themselves carry the visual
+   weight (thumb, fill, swatch). */
+[data-scene-theme="sakura"] .sr-segmented .sr__segmented {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    gap: 4px;
+}
+[data-scene-theme="sakura"] .sr-segmented .sr__seg-btn {
+    background: transparent;
+    color: rgba(var(--sk-cream-rgb), 0.55);
+}
+[data-scene-theme="sakura"] .sr-segmented .sr__seg-btn:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.08);
+    color: rgba(var(--sk-cream-rgb), 0.95);
+}
+[data-scene-theme="sakura"] .sr-segmented .sr__seg-btn.is-active {
+    /* No box-shadow ring — the user explicitly disliked the framed
+       rectangle around the active option. Just a soft fill carries
+       the active state. */
+    background: rgba(var(--sk-blossom-rgb), 0.16);
+    color: var(--sk-blossom-pale);
+    box-shadow: none;
+}
+/* Slider — base CSS uses a gold fill gradient; recolour to blossom
+   pink under sakura so the timer/sound sliders match the rest of
+   the chrome the user chose. */
+[data-scene-theme="sakura"] .sr-slider .sr__range {
+    background: linear-gradient(
+        to right,
+        rgba(var(--sk-blossom-rgb), 0.65) 0%,
+        rgba(var(--sk-blossom-deep-rgb), 0.75) var(--fill),
+        rgba(var(--sk-cream-rgb), 0.06) var(--fill),
+        rgba(var(--sk-cream-rgb), 0.06) 100%
+    );
+}
+[data-scene-theme="sakura"] .sr-slider .sr__range::-webkit-slider-thumb {
+    background: radial-gradient(circle at 40% 35%,
+        rgba(var(--sk-blossom-soft-rgb), 1),
+        rgba(var(--sk-blossom-rgb), 0.95));
+    border-color: rgba(var(--sk-blossom-soft-rgb), 0.50);
+    box-shadow:
+        0 0 10px rgba(var(--sk-blossom-rgb), 0.55),
+        0 2px 6px rgba(var(--sk-plum-rgb), 0.35);
+}
+[data-scene-theme="sakura"] .sr-slider .sr__range::-webkit-slider-thumb:hover {
+    box-shadow:
+        0 0 22px rgba(var(--sk-blossom-rgb), 0.75),
+        0 2px 8px rgba(var(--sk-plum-rgb), 0.4);
+}
+[data-scene-theme="sakura"] .sr-slider .sr__range::-moz-range-thumb {
+    background: radial-gradient(circle at 40% 35%,
+        rgba(var(--sk-blossom-soft-rgb), 1),
+        rgba(var(--sk-blossom-rgb), 0.95));
+    border-color: rgba(var(--sk-blossom-soft-rgb), 0.50);
+    box-shadow: 0 0 10px rgba(var(--sk-blossom-rgb), 0.55);
+}
+[data-scene-theme="sakura"] .sr-slider .sr__range::-moz-range-progress {
+    background: rgba(var(--sk-blossom-rgb), 0.65);
+}
+/* Dirty-state indicator — base CSS pulses a gold dot next to the
+   row label whenever the value differs from default. Recolour to
+   blossom pink so it stops fighting the cherry-blossom palette. */
+[data-scene-theme="sakura"] .sr.is-dirty .sr__label::after {
+    background: rgba(var(--sk-blossom-rgb), 0.9);
+    box-shadow: 0 0 6px rgba(var(--sk-blossom-rgb), 0.55);
+    animation-name: sakuraDirtyPulse;
+}
+@keyframes sakuraDirtyPulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(247, 168, 194, 0.40); }
+    50%      { box-shadow: 0 0 10px rgba(247, 168, 194, 0.80); }
+}
+/* Stepper button hover — base CSS used a gold tint, which read as
+   off-palette under sakura. */
+[data-scene-theme="sakura"] .sr-stepper .sr__step-btn:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.10);
+    color: rgba(var(--sk-cream-rgb), 0.95);
+}
+/* Switch (toggle) — already pink in active state via the round-2
+   override; harmonise the inactive state too so the unfilled track
+   doesn't look like a leftover gray pill. */
+[data-scene-theme="sakura"] .sr-toggle .sr__switch:not(.is-on) {
+    background: rgba(var(--sk-cream-rgb), 0.04);
+    border-color: rgba(var(--sk-cream-rgb), 0.18);
+}
+/* Settings buttons — Reset section, Permission grant, etc. Recolour
+   the gold hover state to blossom pink so the buttons sit in the
+   sakura family. */
+[data-scene-theme="sakura"] .sr-button,
+[data-scene-theme="sakura"] .sr__btn,
+[data-scene-theme="sakura"] .sr-button-row button {
+    border-color: rgba(var(--sk-blossom-rgb), 0.18);
+    background: rgba(var(--sk-blossom-rgb), 0.04);
+    color: rgba(var(--sk-cream-rgb), 0.85);
+}
+[data-scene-theme="sakura"] .sr-button:hover,
+[data-scene-theme="sakura"] .sr__btn:hover,
+[data-scene-theme="sakura"] .sr-button-row button:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.14);
+    border-color: rgba(var(--sk-blossom-rgb), 0.50);
+    color: var(--sk-blossom-pale);
+    box-shadow: 0 0 16px rgba(var(--sk-blossom-rgb), 0.18);
+}
+[data-scene-theme="sakura"] .sr-button:active,
+[data-scene-theme="sakura"] .sr__btn:active,
+[data-scene-theme="sakura"] .sr-button-row button:active {
+    background: rgba(var(--sk-blossom-rgb), 0.20);
+}
+[data-scene-theme="sakura"] .sr-button.is-confirmed,
+[data-scene-theme="sakura"] .sr__btn.is-confirmed {
+    background: rgba(var(--sk-blossom-rgb), 0.20);
+    border-color: rgba(var(--sk-blossom-rgb), 0.62);
+    color: var(--sk-blossom-pale);
+    box-shadow: 0 0 22px rgba(var(--sk-blossom-rgb), 0.22);
+}
+/* Stepper +/- pair — the user's screenshot showed this with a
+   visible boxed frame; strip it so the buttons read as standalone. */
+[data-scene-theme="sakura"] .sr-stepper .sr__stepper {
+    background: transparent;
+    border: 0;
+}
+[data-scene-theme="sakura"] .sr__text-input,
+[data-scene-theme="sakura"] .sr-text .sr__text-input {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(var(--sk-blossom-rgb), 0.18);
+    border-radius: 0;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+[data-scene-theme="sakura"] .sr__text-input:focus,
+[data-scene-theme="sakura"] .sr-text .sr__text-input:focus {
+    border-bottom-color: rgba(var(--sk-blossom-rgb), 0.65);
+    box-shadow: none;
+    background: transparent;
 }
 [data-scene-theme="sakura"] .settings-section__title,
 [data-scene-theme="sakura"] .settings-eyebrow,

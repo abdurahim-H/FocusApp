@@ -368,10 +368,13 @@ function renderThemeCards(row) {
         .map((o, i) => {
             const active = o.value === getSetting(row.key);
             const blackhole = o.value === 'blackhole';
+            const sakura = o.value === 'sakura';
+            const hero = blackhole || sakura;
             const disabled = o.disabled ? 'disabled' : '';
             const classes = [
                 'theme-card',
                 blackhole ? 'theme-card--blackhole' : '',
+                sakura ? 'theme-card--sakura' : '',
                 o.disabled ? 'theme-card--coming-soon' : '',
                 active ? 'active' : '',
             ]
@@ -379,7 +382,7 @@ function renderThemeCards(row) {
                 .join(' ');
             return `
             <button type="button" class="${classes}" data-value="${o.value}" ${disabled}>
-                ${blackhole ? '' : '<span class="theme-card-preview"><span class="theme-card-dot"></span></span>'}
+                ${hero ? '' : '<span class="theme-card-preview"><span class="theme-card-dot"></span></span>'}
                 <span class="theme-card-name">${escapeHtml(o.label)}</span>
             </button>
         `;

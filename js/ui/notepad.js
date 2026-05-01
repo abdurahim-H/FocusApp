@@ -509,17 +509,22 @@ function buildPanel() {
         closeTemplateMenu();
     });
     listEl.addEventListener('click', (e) => {
-        const open = e.target.closest('[data-note-id]');
-        if (open) {
-            const id = Number(open.dataset.noteId);
-            activeNoteId.value = id;
-            return;
-        }
+        // Check delete FIRST — the delete button lives inside the note
+        // list item (which carries data-note-id), so a click on the X
+        // bubbles up. Without this ordering the closest() lookup would
+        // hit the parent note row first and switch the active note
+        // instead of removing it.
         const del = e.target.closest('[data-note-delete]');
         if (del) {
             e.preventDefault();
             e.stopPropagation();
             deleteNoteById(Number(del.dataset.noteDelete));
+            return;
+        }
+        const open = e.target.closest('[data-note-id]');
+        if (open) {
+            const id = Number(open.dataset.noteId);
+            activeNoteId.value = id;
         }
     });
     tagsEl.addEventListener('click', (e) => {
@@ -684,7 +689,14 @@ function wireSheetDrag(panelEl) {
 
     function startDrag() {
         const rect = sheet.getBoundingClientRect();
+        // `is-dragged` defeats the centring transform; `is-pill-positioned`
+        // tells the minimized-pill CSS to use inline coords instead of
+        // the default bottom-right anchor.
         sheet.classList.add('is-dragged');
+        if (sheet.parentElement?.classList.contains('is-minimized')
+            || panelEl.classList.contains('is-minimized')) {
+            sheet.classList.add('is-pill-positioned');
+        }
         sheet.style.left = `${rect.left}px`;
         sheet.style.top = `${rect.top}px`;
         originLeft = rect.left;

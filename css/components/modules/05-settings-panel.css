@@ -1119,21 +1119,31 @@
 .theme-card--coming-soon {
     cursor: default;
     opacity: 0.3;
+    aspect-ratio: 4 / 3;
 }
 .theme-card--coming-soon::after { display: none; }
 .theme-card--coming-soon .theme-card-dot { border-style: dashed; }
 
-/* Black Hole hero card — full-width image fill */
-.theme-card--blackhole {
-    grid-column: 1 / -1;
+/* Theme hero cards — image fills with overlay caption. Both Black Hole
+   and Sakura sit in the 2-column grid as same-size posters; "Coming
+   soon" stays in the third grid cell below. */
+.theme-card--blackhole,
+.theme-card--sakura {
     padding: 0;
     gap: 0;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 3;
     justify-content: flex-end;
-    background: #050308 url('../../../assets/images/blackhole.jpg') center/cover no-repeat;
     border-color: rgba(255, 205, 115, 0.2);
 }
-.theme-card--blackhole::after {
+.theme-card--blackhole {
+    background: #050308 url('../../../assets/images/blackhole.jpg') center/cover no-repeat;
+}
+.theme-card--sakura {
+    background: #2a1825 url('../../../assets/images/sakura.jpg') center/cover no-repeat;
+    border-color: rgba(247, 168, 194, 0.28);
+}
+.theme-card--blackhole::after,
+.theme-card--sakura::after {
     background: linear-gradient(
         105deg,
         transparent 35%,
@@ -1146,13 +1156,40 @@
     border-color: rgba(255, 205, 115, 0.4);
     box-shadow: 0 4px 24px rgba(255, 205, 115, 0.12);
 }
+.theme-card--sakura:hover {
+    background: #2a1825 url('../../../assets/images/sakura.jpg') center/cover no-repeat;
+    border-color: rgba(247, 168, 194, 0.55);
+    box-shadow: 0 4px 24px rgba(247, 168, 194, 0.18);
+}
 .theme-card--blackhole.active,
 .theme-card--blackhole.btn-primary {
     background: #050308 url('../../../assets/images/blackhole.jpg') center/cover no-repeat;
     border-color: rgba(255, 205, 115, 0.6);
     box-shadow: 0 0 32px rgba(255, 205, 115, 0.25), 0 4px 20px rgba(0, 0, 0, 0.4);
 }
-.theme-card--blackhole .theme-card-preview { display: none; }
+.theme-card--sakura.active,
+.theme-card--sakura.btn-primary {
+    background: #2a1825 url('../../../assets/images/sakura.jpg') center/cover no-repeat;
+    border-color: rgba(247, 168, 194, 0.78);
+    box-shadow: 0 0 32px rgba(247, 168, 194, 0.30), 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+.theme-card--blackhole .theme-card-preview,
+.theme-card--sakura .theme-card-preview { display: none; }
+.theme-card--sakura .theme-card-name {
+    width: 100%;
+    padding: 16px 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: rgba(255, 232, 230, 0.98);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
+    background: linear-gradient(
+        to top,
+        rgba(20, 8, 16, 0.9) 0%,
+        rgba(20, 8, 16, 0.6) 55%,
+        rgba(20, 8, 16, 0) 100%
+    );
+}
 .theme-card--blackhole .theme-card-name {
     width: 100%;
     padding: 16px 0 12px;

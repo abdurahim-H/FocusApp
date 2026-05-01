@@ -109,28 +109,42 @@
 .notepad__head .notepad__head-btn,
 .notepad__head .notepad__close { cursor: pointer; }
 
-/* Minimized state — the sheet collapses to a pill anchored at the
-   bottom-right of the viewport. Body + foot hide; only the head row
-   stays visible so the user can read the active note title and click
-   the bar to restore. The previous drag/resize position is kept on
-   the inline style attribute so restoring puts the sheet back where
-   it was — minimize is genuinely a "tuck away" toggle, not a reset. */
+/* Minimized state — the sheet collapses to a refined pill that floats
+   wherever the user has dragged it. Body + foot + sidebar splitter
+   hide; only the head row stays visible. Default position is bottom-
+   right but the user can drag the pill anywhere via the same head-bar
+   grip the full sheet uses. The full-sheet drag/resize position is
+   preserved so restoring lands the panel exactly where it was. */
 .notepad.is-minimized .notepad__sheet {
-    width: 280px !important;
-    min-width: 280px;
-    height: 52px !important;
-    min-height: 52px;
+    width: 260px !important;
+    min-width: 260px;
+    height: 48px !important;
+    min-height: 48px;
+    /* If the user hasn't dragged the pill yet, anchor to bottom-right.
+       The drag handler removes these by switching to inline left/top. */
+    transform: none !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                width 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                height 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                border-radius 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    resize: none;
+    overflow: hidden;
+    border-radius: 999px;
+    /* A more refined floating-pill chrome — tighter shadow, softer
+       border, blossom-tinted glow ring. */
+    box-shadow:
+        0 8px 28px rgba(0, 0, 0, 0.45),
+        0 0 0 0.5px rgba(255, 220, 160, 0.10),
+        0 0 24px rgba(0, 0, 0, 0.20);
+}
+/* Default anchor ONLY when the user hasn't dragged the pill — JS
+   adds .is-pill-positioned the moment a drag begins, removing this
+   default so the inline left/top wins. */
+.notepad.is-minimized .notepad__sheet:not(.is-pill-positioned) {
     top: auto !important;
     bottom: 24px;
     right: 24px;
     left: auto !important;
-    transform: none !important;
-    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-                width 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-                height 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-    resize: none;
-    overflow: hidden;
-    cursor: pointer;
 }
 .notepad.is-minimized .notepad__body,
 .notepad.is-minimized .notepad__foot,
@@ -139,19 +153,38 @@
 }
 .notepad.is-minimized .notepad__head {
     border-bottom: none;
-    padding: 12px 16px;
-    cursor: pointer;
+    padding: 0 14px 0 16px;
+    height: 100%;
+    cursor: grab;
+    gap: 8px;
+    background: transparent;
+}
+.notepad.is-minimized .notepad__head:active {
+    cursor: grabbing;
 }
 /* Tighten the head row when minimized — drop the dictate + export
-   buttons so the title fits and the bar doesn't read busy. */
+   buttons so the title fits and the bar doesn't read busy. The
+   eyebrow ("NOTES") also goes since the pill itself reads as the
+   notes app. */
 .notepad.is-minimized #notepadDictate,
 .notepad.is-minimized #notepadExport,
-.notepad.is-minimized .notepad__saved {
+.notepad.is-minimized .notepad__saved,
+.notepad.is-minimized .notepad__eyebrow {
     display: none;
 }
 .notepad.is-minimized .notepad__title-input {
     pointer-events: none;
     background: transparent !important;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 0;
+}
+/* Compact button sizes inside the pill so the row reads tidy. */
+.notepad.is-minimized .notepad__head-btn,
+.notepad.is-minimized .notepad__close {
+    width: 24px;
+    height: 24px;
+    font-size: 13px;
 }
 /* Swap the minimize icon to a chevron-up when collapsed so the
    affordance reads as "expand again". */
@@ -160,7 +193,7 @@
 }
 .notepad.is-minimized #notepadMinimize::before {
     content: '⌃';
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1;
 }
 

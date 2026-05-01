@@ -1680,7 +1680,11 @@
     bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 2010;
+    /* Above the task dock (z 2050) so the per-tool tooltips ("Immersive
+       mode", "Add a sound", etc.) — which render above the toolbar via
+       a `::after` — aren't clipped behind the dock when the two
+       overlap at the bottom of the viewport. */
+    z-index: 2060;
     display: flex;
     align-items: center;
     gap: 4px;

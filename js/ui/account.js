@@ -277,7 +277,7 @@ function renderSignedOutDropdown() {
                 <path d="M2 8h12M8 2v12M3.5 3.5l9 9M12.5 3.5l-9 9"/>
             </svg>
             Open Profile
-            <span class="account-dropdown__sync-state">your analytics</span>
+            <span class="account-dropdown__sync-state">press i</span>
         </button>
         <button class="account-dropdown__row" data-action="notepad">
             <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -339,7 +339,7 @@ function renderSignedInDropdown() {
                 <path d="M2 8h12M8 2v12M3.5 3.5l9 9M12.5 3.5l-9 9"/>
             </svg>
             Open Profile
-            <span class="account-dropdown__sync-state">your analytics</span>
+            <span class="account-dropdown__sync-state">press i</span>
         </button>
         <button class="account-dropdown__row" data-action="notepad">
             <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
