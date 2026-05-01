@@ -559,16 +559,9 @@
 
 /* ──────────────────────────────────────────────────────────────────────
    9. TASK DETAIL DRAWER
-   ────────────────────────────────────────────────────────────────────── */
-[data-scene-theme="sakura"] .task-detail__panel,
-[data-scene-theme="sakura"] .task-detail {
-    background: rgba(var(--sk-plum-rgb), 0.86);
-    border: 1px solid rgba(var(--sk-blossom-rgb), 0.20);
-    box-shadow:
-        0 24px 60px rgba(var(--sk-plum-rgb), 0.6),
-        0 0 0 0.5px rgba(var(--sk-blossom-rgb), 0.10);
-    color: rgba(var(--sk-cream-rgb), 0.92);
-}
+   The container `.task-detail` is `position:fixed; inset:0` so any
+   background on it tints the entire viewport. The chrome lives on
+   .task-detail__sheet — keep the container transparent. */
 [data-scene-theme="sakura"] .task-detail__back,
 [data-scene-theme="sakura"] .task-detail__close {
     border-color: rgba(var(--sk-blossom-rgb), 0.22);
@@ -769,13 +762,12 @@
 
 /* ──────────────────────────────────────────────────────────────────────
    13. NOTEPAD — notes drawer
-   ────────────────────────────────────────────────────────────────────── */
-[data-scene-theme="sakura"] .notepad,
-[data-scene-theme="sakura"] .notepad__panel {
-    background: rgba(var(--sk-plum-rgb), 0.88);
-    border: 1px solid rgba(var(--sk-blossom-rgb), 0.20);
-    color: rgba(var(--sk-cream-rgb), 0.95);
-}
+   The container `.notepad` is `position:fixed; inset:0` so it covers
+   the whole viewport. Painting a background on it (an earlier round
+   set rgba(plum, 0.88) here, plus the legacy `.notepad__panel` that
+   never existed in the markup) dimmed the cherry-blossom backdrop
+   the user explicitly asked to keep visible. The chrome lives on
+   .notepad__sheet — leave the container transparent. */
 [data-scene-theme="sakura"] .notepad__title {
     color: var(--sk-cream);
 }
