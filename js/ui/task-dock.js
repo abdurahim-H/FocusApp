@@ -95,16 +95,15 @@ export function initTaskDock() {
     document.addEventListener('mousedown', onOutside, true);
     document.addEventListener('keydown', onKey);
 
-    // Reactive: visibility follows the current top-level mode signal.
-    // The mode signal carries both navigation values ('home' / 'focus' /
-    // 'ambient') and a legacy 'timer' value that startTimer() in
-    // timer.js writes when a session begins. Both 'focus' and 'timer'
-    // mean "the focus tab is the visible panel" — the timer panel
-    // never re-activates a different .mode element. Without 'timer'
-    // in the show set, clicking Start hid the dock immediately.
+    // Reactive: visibility follows the current top-level navigation
+    // tab. The user explicitly didn't want the dock to appear on the
+    // Home tab — including while a timer is running — so we drop the
+    // legacy 'timer' mode value (which timer.js still writes for its
+    // own state machine) and only show on 'focus'. Tasks remain
+    // accessible from Home via the cosmos toolbar's tasks button.
     effect(() => {
         const m = mode.value;
-        if (m === 'focus' || m === 'timer') {
+        if (m === 'focus') {
             show();
         } else {
             hide();
@@ -148,6 +147,19 @@ function toggle() {
     if (!dock) return;
     if (dock.dataset.state === 'expanded') collapse();
     else expand();
+}
+
+/** Public entry — opened by the cosmos toolbar's tasks button. The
+ *  dock only renders on the Focus tab, so we run the full nav switch
+ *  (which updates both the mode signal and the active-tab pill) and
+ *  expand once the focus panel has settled. */
+export function openTaskDock() {
+    import('./navigation.js').then(({ switchMode }) => {
+        switchMode('focus');
+        // Mode change → visibility effect runs → show() wires up the
+        // dock; expand on the next frame.
+        requestAnimationFrame(() => expand());
+    });
 }
 
 function expand() {

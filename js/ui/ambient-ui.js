@@ -159,6 +159,9 @@ function wireDeckControls() {
     document.getElementById('deckNotesBtn')?.addEventListener('click', () => {
         import('./notepad.js').then((m) => m.openNotepad?.());
     });
+    document.getElementById('deckTasksBtn')?.addEventListener('click', () => {
+        import('./task-dock.js').then((m) => m.openTaskDock?.());
+    });
 }
 
 // Stop-all and Save-mix only make sense when there are active tracks. Disable

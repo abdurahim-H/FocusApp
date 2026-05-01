@@ -698,9 +698,19 @@
                 <line x1="6.5" y1="10" x2="13.5" y2="10"/>
             </svg>
         </button>
-        <!-- Visual gap so the notes button reads as its own group, not
-             part of the sound-control cluster. -->
+        <!-- Visual gap so the notes + tasks buttons read as their own
+             group, not part of the sound-control cluster. -->
         <span class="cosmos-toolbar__divider" aria-hidden="true"></span>
+        <button class="cosmos-tool" id="deckTasksBtn"
+                aria-label="Open the task list"
+                data-tooltip="Tasks">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="4 6 6 8 9 5"/>
+                <line x1="11" y1="6.5" x2="16" y2="6.5"/>
+                <polyline points="4 12 6 14 9 11"/>
+                <line x1="11" y1="12.5" x2="16" y2="12.5"/>
+            </svg>
+        </button>
         <button class="cosmos-tool" id="deckNotesBtn"
                 aria-label="Open the notepad"
                 data-tooltip="Notes">
