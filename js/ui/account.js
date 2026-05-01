@@ -279,14 +279,6 @@ function renderSignedOutDropdown() {
             Open Profile
             <span class="account-dropdown__sync-state">press i</span>
         </button>
-        <button class="account-dropdown__row" data-action="notepad">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 2.5h7l3 3V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1z"/>
-                <path d="M9.5 2.5v3h3M5 8h6M5 10.5h6M5 5.5h2"/>
-            </svg>
-            Open notes
-            <span class="account-dropdown__sync-state">press n</span>
-        </button>
     `;
     dropdownInner.querySelector('[data-action="signin"]')?.addEventListener('click', () => {
         closeDropdown();
@@ -299,10 +291,6 @@ function renderSignedOutDropdown() {
     dropdownInner.querySelector('[data-action="profile"]')?.addEventListener('click', () => {
         closeDropdown();
         openProfile();
-    });
-    dropdownInner.querySelector('[data-action="notepad"]')?.addEventListener('click', () => {
-        closeDropdown();
-        import('./notepad.js').then((m) => m.openNotepad?.());
     });
 }
 
@@ -341,14 +329,6 @@ function renderSignedInDropdown() {
             Open Profile
             <span class="account-dropdown__sync-state">press i</span>
         </button>
-        <button class="account-dropdown__row" data-action="notepad">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 2.5h7l3 3V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1z"/>
-                <path d="M9.5 2.5v3h3M5 8h6M5 10.5h6M5 5.5h2"/>
-            </svg>
-            Open notes
-            <span class="account-dropdown__sync-state">press n</span>
-        </button>
         <button class="account-dropdown__row" data-action="sync" disabled style="opacity:.65;cursor:default;">
             <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M2 8a6 6 0 1 0 1.4-3.8"/>
@@ -379,10 +359,6 @@ function renderSignedInDropdown() {
     dropdownInner.querySelector('[data-action="profile"]')?.addEventListener('click', () => {
         closeDropdown();
         openProfile();
-    });
-    dropdownInner.querySelector('[data-action="notepad"]')?.addEventListener('click', () => {
-        closeDropdown();
-        import('./notepad.js').then((m) => m.openNotepad?.());
     });
     dropdownInner.querySelector('[data-action="signout"]')?.addEventListener('click', async () => {
         try {

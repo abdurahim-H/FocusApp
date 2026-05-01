@@ -78,11 +78,19 @@
    3. ACCOUNT SATELLITE — replace gold orbs with cherry pink
    ────────────────────────────────────────────────────────────────────── */
 [data-scene-theme="sakura"] .account-satellite__orbits circle[stroke] {
-    stroke: rgba(var(--sk-blossom-rgb), 0.32);
+    /* Bumped from 0.32 — that alpha vanished against the bright
+       cherry-blossom backdrop; 0.55 + a soft drop-shadow keeps the
+       orbits subtle but visible without competing with the avatar. */
+    stroke: rgba(var(--sk-blossom-rgb), 0.55);
+    stroke-width: 1.1;
+    filter: drop-shadow(0 0 4px rgba(var(--sk-blossom-rgb), 0.45));
 }
 [data-scene-theme="sakura"] .account-satellite__pip {
-    fill: rgba(var(--sk-blossom-soft-rgb), 0.95);
-    filter: drop-shadow(0 0 3px rgba(var(--sk-blossom-rgb), 0.9));
+    fill: rgba(var(--sk-blossom-soft-rgb), 1);
+    filter: drop-shadow(0 0 5px rgba(var(--sk-blossom-rgb), 1));
+}
+[data-scene-theme="sakura"] .cosmos-toolbar__divider {
+    background: rgba(var(--sk-blossom-rgb), 0.22);
 }
 [data-scene-theme="sakura"] .account-satellite.is-signed-out .account-satellite__core {
     background:
@@ -328,17 +336,21 @@
     color: var(--sk-blossom-pale);
     box-shadow: none;
 }
-/* Slider — base CSS uses a gold fill gradient; recolour to blossom
-   pink under sakura so the timer/sound sliders match the rest of
-   the chrome the user chose. */
+/* Slider — base CSS painted a thick gold/pink track that read as a
+   rectangular fill. The user explicitly disliked the "rectangular
+   bar" — drop the fill to a thin 2px line with low-alpha blossom on
+   the filled side and an almost-invisible cream rail on the empty
+   side. The thumb remains the visual anchor. */
 [data-scene-theme="sakura"] .sr-slider .sr__range {
+    height: 2px;
     background: linear-gradient(
         to right,
-        rgba(var(--sk-blossom-rgb), 0.65) 0%,
-        rgba(var(--sk-blossom-deep-rgb), 0.75) var(--fill),
-        rgba(var(--sk-cream-rgb), 0.06) var(--fill),
-        rgba(var(--sk-cream-rgb), 0.06) 100%
+        rgba(var(--sk-blossom-rgb), 0.45) 0%,
+        rgba(var(--sk-blossom-rgb), 0.45) var(--fill),
+        rgba(var(--sk-cream-rgb), 0.10) var(--fill),
+        rgba(var(--sk-cream-rgb), 0.10) 100%
     );
+    border-radius: 1px;
 }
 [data-scene-theme="sakura"] .sr-slider .sr__range::-webkit-slider-thumb {
     background: radial-gradient(circle at 40% 35%,
@@ -1177,7 +1189,32 @@
 }
 [data-scene-theme="sakura"] .timer-display,
 [data-scene-theme="sakura"] .timer-text {
+    /* Elegant serif stack to suit the cherry-blossom register —
+       starts with high-quality system serifs (Hoefler Text on Apple,
+       Iowan Old Style as a fallback, Baskerville / Cormorant /
+       Garamond / Palatino across older systems) before any generic
+       serif. The numerals already use tabular-nums so the digits
+       still don't jitter as seconds tick. */
+    font-family: 'Hoefler Text', 'Iowan Old Style', 'Baskerville',
+                 'Cormorant Garamond', 'Garamond', 'Palatino',
+                 'Times New Roman', serif;
+    font-weight: 300;
+    letter-spacing: 0.01em;
     text-shadow: 0 0 40px rgba(var(--sk-blossom-rgb), 0.32);
+}
+/* Same elegant register on the focus-tab "Focus Time" eyebrow,
+   "Session 1 of 4" subtitle, and the Start/Reset buttons — the
+   timer surface reads as one curated typographic family. */
+[data-scene-theme="sakura"] .focus-eyebrow,
+[data-scene-theme="sakura"] .session-eyebrow,
+[data-scene-theme="sakura"] .timer-controls .liquid-glass-btn,
+[data-scene-theme="sakura"] .home-mini-timer__time,
+[data-scene-theme="sakura"] .home-mini-timer__label {
+    font-family: 'Hoefler Text', 'Iowan Old Style', 'Baskerville',
+                 'Cormorant Garamond', 'Garamond', 'Palatino',
+                 'Times New Roman', serif;
+    font-weight: 400;
+    letter-spacing: 0.04em;
 }
 [data-scene-theme="sakura"] .session-eyebrow,
 [data-scene-theme="sakura"] .round-counter,

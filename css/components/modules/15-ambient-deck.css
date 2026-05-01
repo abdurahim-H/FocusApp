@@ -1712,6 +1712,18 @@
         0 0 48px rgba(255, 205, 115, 0.12);
 }
 
+/* Visual divider between the sound-control cluster and the notes
+   button at the right end of the toolbar. A short faint line + an
+   extra 4px of horizontal margin so the notes pill reads as its own
+   group, not part of the sound buttons. */
+.cosmos-toolbar__divider {
+    flex-shrink: 0;
+    width: 1px;
+    height: 22px;
+    margin: 0 6px;
+    background: rgba(255, 220, 160, 0.18);
+}
+
 .cosmos-tool {
     /* Position relative so the ::after tooltip can anchor to it. */
     position: relative;
