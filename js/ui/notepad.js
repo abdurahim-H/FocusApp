@@ -401,6 +401,11 @@ function buildPanel() {
                     <div class="notepad__tags" id="notepadTags" role="group" aria-label="Tag filters"></div>
                     <ul class="notepad__list" id="notepadList" role="list"></ul>
                 </aside>
+                <div class="notepad__col-resizer" id="notepadColResizer"
+                     role="separator"
+                     aria-orientation="vertical"
+                     aria-label="Resize note list panel"
+                     tabindex="0"></div>
                 <div class="notepad__editor-wrap">
                     <textarea class="notepad__editor"
                               id="notepadEditor"
@@ -638,6 +643,11 @@ function buildPanel() {
     // coordinates and we drop the auto-centring transform.
     wireSheetDrag(panel);
 
+    // Drag the column splitter to resize the sidebar independently of
+    // the whole notepad. Bounds clamp the sidebar between 160px and
+    // half the sheet width so the editor always has working space.
+    wireColumnResizer(panel);
+
     // Re-paint when notes change (sidebar / editor reflect every
     // external edit — auto-prepend, signal-driven imports, etc.).
     effect(() => {
@@ -748,6 +758,82 @@ function wireSheetDrag(panelEl) {
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
     document.addEventListener('pointercancel', onPointerUp);
+}
+
+/** Drag the column resizer handle to set the sidebar's width. The
+ *  width is stored on the sidebar inline so persistence is automatic
+ *  for the lifetime of the page; further sessions pick up the
+ *  saved value via localStorage. */
+function wireColumnResizer(panelEl) {
+    const handle = panelEl.querySelector('.notepad__col-resizer');
+    const sidebar = panelEl.querySelector('.notepad__sidebar');
+    const sheet = panelEl.querySelector('.notepad__sheet');
+    if (!handle || !sidebar || !sheet) return;
+
+    // Restore previously-set width if the user has dragged before.
+    try {
+        const saved = Number(localStorage.getItem('fu_notes_sidebar_w'));
+        if (Number.isFinite(saved) && saved >= 160 && saved <= 600) {
+            sidebar.style.width = `${saved}px`;
+        }
+    } catch (_) {}
+
+    let dragging = false;
+    let pointerId = null;
+
+    function onPointerDown(e) {
+        if (e.button !== undefined && e.button !== 0) return;
+        dragging = true;
+        pointerId = e.pointerId ?? null;
+        try { handle.setPointerCapture(pointerId); } catch (_) {}
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    }
+    function onPointerMove(e) {
+        if (!dragging) return;
+        const sheetRect = sheet.getBoundingClientRect();
+        const next = e.clientX - sheetRect.left;
+        // Clamp: sidebar must keep at least 160px and may grow up to
+        // half the sheet width minus the editor's minimum (200px) so
+        // the editor doesn't collapse to nothing.
+        const minW = 160;
+        const maxW = Math.max(minW, sheetRect.width - 240);
+        const clamped = Math.max(minW, Math.min(maxW, next));
+        sidebar.style.width = `${clamped}px`;
+    }
+    function onPointerUp() {
+        if (!dragging) return;
+        dragging = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        try {
+            const w = parseInt(sidebar.style.width, 10);
+            if (Number.isFinite(w)) localStorage.setItem('fu_notes_sidebar_w', String(w));
+        } catch (_) {}
+        if (pointerId !== null) {
+            try { handle.releasePointerCapture(pointerId); } catch (_) {}
+            pointerId = null;
+        }
+    }
+
+    handle.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointercancel', onPointerUp);
+
+    // Keyboard accessibility — left/right arrows nudge the column.
+    handle.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        const cur = sidebar.getBoundingClientRect().width;
+        const sheetRect = sheet.getBoundingClientRect();
+        const step = e.shiftKey ? 32 : 8;
+        const delta = e.key === 'ArrowLeft' ? -step : step;
+        const next = Math.max(160, Math.min(sheetRect.width - 240, cur + delta));
+        sidebar.style.width = `${next}px`;
+        try { localStorage.setItem('fu_notes_sidebar_w', String(Math.round(next))); } catch (_) {}
+        e.preventDefault();
+    });
 }
 
 function onFocusTimerStart(e) {

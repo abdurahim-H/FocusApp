@@ -43,8 +43,12 @@
     transform: translate(-50%, -16px) scale(0.96);
     width: min(820px, calc(100vw - 32px));
     height: min(760px, calc(100vh - 120px));
-    min-width: 360px;
-    min-height: 320px;
+    /* min-width keeps the sidebar (160px+) and the editor (240px+)
+       both viable. Below this the inner two-pane layout collapses
+       awkwardly — text wraps to nonsense and the note list squashes
+       to one card per row. */
+    min-width: 540px;
+    min-height: 360px;
     max-width: calc(100vw - 32px);
     max-height: calc(100vh - 80px);
     /* Solid app-window register — the user wants the notepad to behave
@@ -129,7 +133,8 @@
     cursor: pointer;
 }
 .notepad.is-minimized .notepad__body,
-.notepad.is-minimized .notepad__foot {
+.notepad.is-minimized .notepad__foot,
+.notepad.is-minimized .notepad__col-resizer {
     display: none;
 }
 .notepad.is-minimized .notepad__head {
@@ -290,11 +295,47 @@
 .notepad__sidebar {
     width: 240px;
     flex-shrink: 0;
-    border-right: 1px solid rgba(255, 220, 160, 0.08);
+    border-right: none;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    min-width: 160px;
     background: rgba(255, 246, 225, 0.015);
+}
+
+/* Column resizer — slim vertical strip between sidebar and editor.
+   Wider hit-area (8px) on hover so dragging feels positive; default
+   render is a 2px tinted line that doesn't compete with content. */
+.notepad__col-resizer {
+    flex-shrink: 0;
+    width: 6px;
+    cursor: col-resize;
+    background: rgba(255, 220, 160, 0.08);
+    border-left: 1px solid rgba(255, 220, 160, 0.12);
+    border-right: 1px solid rgba(255, 220, 160, 0.04);
+    position: relative;
+    transition: background 0.15s ease;
+}
+.notepad__col-resizer:hover,
+.notepad__col-resizer:focus-visible {
+    background: rgba(255, 220, 160, 0.22);
+    outline: none;
+}
+.notepad__col-resizer::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 28px;
+    transform: translate(-50%, -50%);
+    border-radius: 1px;
+    background: rgba(255, 220, 160, 0.45);
+    transition: background 0.15s ease, height 0.15s ease;
+}
+.notepad__col-resizer:hover::before {
+    background: rgba(255, 220, 160, 0.85);
+    height: 40px;
 }
 .notepad__sidebar-toolbar {
     display: flex;
@@ -600,14 +641,28 @@
     background: rgba(20, 16, 10, 0.92);
     color: rgba(255, 246, 225, 0.55);
     font-size: 11.5px;
-    flex-wrap: wrap;
+    /* No wrap: at narrow widths the helper text simply truncates with
+       ellipsis instead of bouncing onto a second line and pushing the
+       resize grip into the editor. */
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow: hidden;
+    /* Pad bottom-right by the resize-grip footprint so the grip never
+       sits on top of the helper text. */
+    padding-right: 28px;
 }
 .notepad__stats {
+    flex-shrink: 0;
     font-family: 'JetBrains Mono', 'SF Mono', monospace;
     font-feature-settings: 'tnum' 1, 'lnum' 1;
     color: rgba(255, 246, 225, 0.78);
 }
 .notepad__hint {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
     color: rgba(255, 246, 225, 0.4);
 }
