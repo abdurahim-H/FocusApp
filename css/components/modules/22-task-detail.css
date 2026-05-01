@@ -45,7 +45,12 @@
     color: rgba(255, 246, 225, 0.92);
     transform-origin: top center;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: auto;
+    /* Closed state needs to forfeit pointer-events too — the sheet is
+       still in the DOM with layout, opacity:0 only hides it visually.
+       Without this, clicks landing on the sheet's last position get
+       swallowed even after the drawer closes (the user's repro:
+       open task detail → close → can't click the task dock under it). */
+    pointer-events: none;
     /* Slim, theme-tinted scrollbar — replaces the stark default OS
        scrollbar that was breaking the warm aesthetic on long task
        drawers. WebKit + Firefox properties cover the major engines. */
@@ -70,6 +75,18 @@
 }
 .task-detail.is-open .task-detail__sheet {
     transform: translate(-50%, 0) scale(1);
+    pointer-events: auto;
+}
+/* Defeat the global `button, input, textarea, select, a {
+   pointer-events: auto !important }` rule from base/style.css while
+   the drawer is closed — otherwise every form control inside the
+   (visually hidden) sheet still catches clicks landing on its rect. */
+.task-detail:not(.is-open) button,
+.task-detail:not(.is-open) input,
+.task-detail:not(.is-open) textarea,
+.task-detail:not(.is-open) select,
+.task-detail:not(.is-open) a {
+    pointer-events: none !important;
 }
 
 .task-detail__head {

@@ -65,7 +65,29 @@
        handle their own scrolling so clipping at the sheet edge is fine. */
     overflow: hidden;
     resize: both;
+    /* Closed state: visually hidden by opacity but the sheet still has
+       layout + position. Without explicit pointer-events:none it would
+       silently swallow clicks landing wherever it last sat (centred
+       drawer over the focus tab, dragged-to-position notepad over the
+       account satellite). The :not selector keeps it interactive only
+       while the panel is actually open. */
+    pointer-events: none;
+}
+.notepad.is-open .notepad__sheet {
     pointer-events: auto;
+}
+/* base/style.css promotes every button / input / textarea / select / a
+   to `pointer-events: auto !important` globally so the immersive-mode
+   chrome stays clickable. That same rule kept the notepad's textarea
+   + buttons hittable after the drawer was closed — a click landing
+   inside the (invisible but still laid-out) sheet got swallowed. Force
+   the interactive descendants back to none while the panel is closed. */
+.notepad:not(.is-open) button,
+.notepad:not(.is-open) input,
+.notepad:not(.is-open) textarea,
+.notepad:not(.is-open) select,
+.notepad:not(.is-open) a {
+    pointer-events: none !important;
 }
 .notepad.is-open .notepad__sheet { transform: translate(-50%, 0) scale(1); }
 
