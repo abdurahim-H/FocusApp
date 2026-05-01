@@ -239,8 +239,10 @@ function renderDelta(el, current, previous) {
         return;
     }
     if (previous === 0) {
-        el.textContent = 'new';
-        el.className = 'home-period-tile__delta is-up';
+        // No prior data to compare against — show nothing (the user
+        // didn't want a "new" badge cluttering the tile head).
+        el.textContent = '';
+        el.className = 'home-period-tile__delta';
         return;
     }
     const pct = Math.round(((current - previous) / previous) * 100);

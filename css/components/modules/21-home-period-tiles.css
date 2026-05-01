@@ -15,6 +15,15 @@
     max-width: 720px;
     margin: 28px auto 0;
     padding: 0 12px;
+    /* Bottom breathing room so the tiles never sit underneath the
+       task-dock when a focus session is running. The dock is 44px
+       tall and floats 80px above the viewport bottom; 140px clears
+       both with a comfortable gap. Only applied when the dock is
+       active (body.has-task-dock) so the tiles still hug the bottom
+       edge on the empty-task state. */
+}
+body.has-task-dock .home-period-tiles {
+    margin-bottom: 140px;
     /* Smooth fade-in when tiles first appear (after the user's first
        finished focus session). Reduced-motion users skip the animation
        via the @media block below. */
