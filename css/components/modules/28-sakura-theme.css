@@ -342,36 +342,69 @@
    the filled side and an almost-invisible cream rail on the empty
    side. The thumb remains the visual anchor. */
 [data-scene-theme="sakura"] .sr-slider .sr__range {
+    /* Track is now fully transparent. The .sr-slider::after guide
+       line below provides the visual rail; the thumb is the only
+       coloured element. The user repeatedly flagged the gradient
+       fill as "a rectangular pink bar"; with no fill there's no
+       rectangle. */
     height: 2px;
-    background: linear-gradient(
-        to right,
-        rgba(var(--sk-blossom-rgb), 0.45) 0%,
-        rgba(var(--sk-blossom-rgb), 0.45) var(--fill),
-        rgba(var(--sk-cream-rgb), 0.10) var(--fill),
-        rgba(var(--sk-cream-rgb), 0.10) 100%
-    );
+    background: transparent;
     border-radius: 1px;
+    /* Explicit zeros: some user-agent stylesheets (especially Firefox)
+       paint a default border + outline + box-shadow on <input type="range">.
+       The "rectangular outline around the entire input" the user kept
+       reporting is one of those falling through. */
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+    padding: 0;
 }
+/* Faint guide line behind the slider — drawn as a thin div via the
+   row's ::before so it's NOT part of the input element (no UA chrome
+   risk). 1px tall, 8% cream, sits at the same vertical centre as the
+   2px track. Lets users see the slider extent without the input
+   itself painting a wide horizontal rectangle. */
+[data-scene-theme="sakura"] .sr-slider .sr__range {
+    position: relative;
+    z-index: 1;
+}
+[data-scene-theme="sakura"] .sr-slider {
+    position: relative;
+}
+[data-scene-theme="sakura"] .sr-slider::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 13px;
+    height: 1px;
+    background: rgba(var(--sk-cream-rgb), 0.08);
+    pointer-events: none;
+    z-index: 0;
+}
+/* Thumb shadow used to be 0 0 10px → that 10px halo, when stretched
+   along the track at full opacity, read as a rectangular pink fill
+   surrounding the track. Drop the shadow to a tight 4px circle. */
 [data-scene-theme="sakura"] .sr-slider .sr__range::-webkit-slider-thumb {
     background: radial-gradient(circle at 40% 35%,
         rgba(var(--sk-blossom-soft-rgb), 1),
         rgba(var(--sk-blossom-rgb), 0.95));
     border-color: rgba(var(--sk-blossom-soft-rgb), 0.50);
     box-shadow:
-        0 0 10px rgba(var(--sk-blossom-rgb), 0.55),
-        0 2px 6px rgba(var(--sk-plum-rgb), 0.35);
+        0 0 4px rgba(var(--sk-blossom-rgb), 0.45),
+        0 1px 3px rgba(var(--sk-plum-rgb), 0.35);
 }
 [data-scene-theme="sakura"] .sr-slider .sr__range::-webkit-slider-thumb:hover {
     box-shadow:
-        0 0 22px rgba(var(--sk-blossom-rgb), 0.75),
-        0 2px 8px rgba(var(--sk-plum-rgb), 0.4);
+        0 0 8px rgba(var(--sk-blossom-rgb), 0.65),
+        0 1px 4px rgba(var(--sk-plum-rgb), 0.40);
 }
 [data-scene-theme="sakura"] .sr-slider .sr__range::-moz-range-thumb {
     background: radial-gradient(circle at 40% 35%,
         rgba(var(--sk-blossom-soft-rgb), 1),
         rgba(var(--sk-blossom-rgb), 0.95));
     border-color: rgba(var(--sk-blossom-soft-rgb), 0.50);
-    box-shadow: 0 0 10px rgba(var(--sk-blossom-rgb), 0.55);
+    box-shadow: 0 0 4px rgba(var(--sk-blossom-rgb), 0.45);
 }
 [data-scene-theme="sakura"] .sr-slider .sr__range::-moz-range-progress {
     background: rgba(var(--sk-blossom-rgb), 0.65);
@@ -893,13 +926,18 @@
 [data-scene-theme="sakura"] .hc-category-title {
     color: var(--sk-cream);
 }
-[data-scene-theme="sakura"] .hc-search,
-[data-scene-theme="sakura"] .hc-search input {
+/* Same wrapper-vs-input bug as the settings search — the .hc-search
+   div is just a relative positioning shell with no border-radius, so
+   painting it the same rectangle as the rounded input produced a
+   square outline overlaid on the rounded one. Drop the wrapper. */
+[data-scene-theme="sakura"] .hc-search input,
+[data-scene-theme="sakura"] .hc-search__input {
     background: rgba(var(--sk-blossom-rgb), 0.06);
     border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
     color: var(--sk-cream);
 }
-[data-scene-theme="sakura"] .hc-search input:focus {
+[data-scene-theme="sakura"] .hc-search input:focus,
+[data-scene-theme="sakura"] .hc-search__input:focus {
     border-color: rgba(var(--sk-blossom-rgb), 0.55);
     box-shadow: 0 0 0 3px rgba(var(--sk-blossom-rgb), 0.18);
     outline: none;
@@ -915,6 +953,71 @@
 }
 [data-scene-theme="sakura"] .hc-entry__a {
     color: rgba(var(--sk-cream-rgb), 0.78);
+}
+/* Help Center category grid — replace the gold "warm inner edge" with
+   blossom pink. Also recolour the icon stroke and the count pill. */
+[data-scene-theme="sakura"] .hc-cat-card {
+    border-color: rgba(var(--sk-blossom-rgb), 0.14);
+    background: linear-gradient(
+        165deg,
+        rgba(var(--sk-blossom-rgb), 0.06) 0%,
+        rgba(var(--sk-blossom-rgb), 0.02) 100%
+    );
+}
+[data-scene-theme="sakura"] .hc-cat-card::before {
+    background: linear-gradient(
+        165deg,
+        rgba(var(--sk-blossom-rgb), 0.10) 0%,
+        rgba(var(--sk-blossom-rgb), 0.04) 100%
+    );
+}
+[data-scene-theme="sakura"] .hc-cat-card:hover {
+    background: linear-gradient(
+        165deg,
+        rgba(var(--sk-blossom-rgb), 0.14) 0%,
+        rgba(var(--sk-blossom-rgb), 0.06) 100%
+    );
+    border-color: rgba(var(--sk-blossom-rgb), 0.38);
+    box-shadow: 0 6px 22px rgba(var(--sk-blossom-rgb), 0.14);
+}
+[data-scene-theme="sakura"] .hc-cat-card__icon {
+    color: rgba(var(--sk-blossom-rgb), 0.78);
+}
+[data-scene-theme="sakura"] .hc-cat-card:hover .hc-cat-card__icon {
+    color: var(--sk-blossom-pale);
+}
+[data-scene-theme="sakura"] .hc-cat-card__label {
+    color: var(--sk-cream);
+}
+[data-scene-theme="sakura"] .hc-cat-card__count {
+    color: rgba(var(--sk-cream-rgb), 0.55);
+}
+/* Help Center close + back chrome buttons */
+[data-scene-theme="sakura"] .hc-close,
+[data-scene-theme="sakura"] .hc-back {
+    color: rgba(var(--sk-cream-rgb), 0.55);
+}
+[data-scene-theme="sakura"] .hc-close:hover,
+[data-scene-theme="sakura"] .hc-back:hover {
+    color: var(--sk-cream);
+    background: rgba(var(--sk-blossom-rgb), 0.10);
+}
+/* Footer hint + every kbd badge inside Help Center / Settings — the
+   default amber-on-charcoal didn't sit in the cherry palette. */
+[data-scene-theme="sakura"] .hc-panel__footer {
+    color: rgba(var(--sk-cream-rgb), 0.55);
+    border-top-color: rgba(var(--sk-blossom-rgb), 0.10);
+}
+[data-scene-theme="sakura"] .hc-panel__footer kbd,
+[data-scene-theme="sakura"] .hc-entry__body kbd,
+[data-scene-theme="sakura"] .shortcut-row__key,
+[data-scene-theme="sakura"] .settings-footer-hint kbd,
+[data-scene-theme="sakura"] .shortcut-cheatsheet__row kbd,
+[data-scene-theme="sakura"] .shortcut-cheatsheet__footer kbd {
+    background: rgba(var(--sk-plum-rgb), 0.55);
+    border: 1px solid rgba(var(--sk-blossom-rgb), 0.28);
+    border-bottom-color: rgba(var(--sk-plum-rgb), 0.85);
+    color: var(--sk-blossom-soft);
 }
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -1141,6 +1244,56 @@
 }
 [data-scene-theme="sakura"] .home-mini-timer__label {
     color: rgba(var(--sk-blossom-rgb), 0.85);
+}
+/* Vertical mini-timer sliver — the collapsed-state pill that sits as
+   a thin column on the right edge with `<` chevron, MM/SS digits, and
+   tiny play/reset buttons. The base styles paint everything in gold
+   (chevron, sep, button borders, focus rings); recolour the whole
+   register to blossom pink under sakura. */
+[data-scene-theme="sakura"] .hmt-sliver__chev {
+    color: rgba(var(--sk-blossom-rgb), 0.55);
+}
+[data-scene-theme="sakura"] .hmt-sliver:hover .hmt-sliver__chev,
+[data-scene-theme="sakura"] .hmt-sliver__expand:hover .hmt-sliver__chev {
+    color: var(--sk-blossom-pale);
+}
+[data-scene-theme="sakura"] .hmt-sliver__time {
+    color: var(--sk-cream);
+    text-shadow: 0 0 12px rgba(var(--sk-blossom-rgb), 0.45);
+}
+[data-scene-theme="sakura"] .hmt-sliver__sep {
+    color: rgba(var(--sk-blossom-rgb), 0.65);
+}
+[data-scene-theme="sakura"] .hmt-sliver__btn {
+    color: rgba(var(--sk-blossom-rgb), 0.65);
+}
+[data-scene-theme="sakura"] .hmt-sliver__btn:hover {
+    color: var(--sk-cream);
+    border-color: rgba(var(--sk-blossom-rgb), 0.45);
+    background: rgba(var(--sk-blossom-rgb), 0.12);
+}
+[data-scene-theme="sakura"] .hmt-sliver__btn--play {
+    color: rgba(var(--sk-blossom-soft-rgb), 0.85);
+    border-color: rgba(var(--sk-blossom-rgb), 0.28);
+    background: rgba(var(--sk-blossom-rgb), 0.08);
+}
+[data-scene-theme="sakura"] .hmt-sliver__btn--play:hover {
+    color: var(--sk-cream);
+    border-color: rgba(var(--sk-blossom-rgb), 0.55);
+    background: rgba(var(--sk-blossom-rgb), 0.18);
+    box-shadow: 0 0 14px rgba(var(--sk-blossom-rgb), 0.22);
+}
+[data-scene-theme="sakura"] .hmt-sliver__btn:focus-visible,
+[data-scene-theme="sakura"] .hmt-sliver__expand:focus-visible {
+    outline: 2px solid rgba(var(--sk-blossom-rgb), 0.65);
+}
+[data-scene-theme="sakura"] .hmt-sliver__expand:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.12);
+}
+[data-scene-theme="sakura"] .hmt-sliver__pulse {
+    background: radial-gradient(ellipse at 0% 50%,
+        rgba(var(--sk-blossom-rgb), 0.22) 0%,
+        rgba(var(--sk-blossom-rgb), 0) 70%);
 }
 
 /* ──────────────────────────────────────────────────────────────────────

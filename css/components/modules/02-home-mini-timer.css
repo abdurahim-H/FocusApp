@@ -709,8 +709,14 @@
 /* ── Expand hitbox at the top — the only click target that re-opens
    the full mini-timer. A button wrapping the chevron. ── */
 .hmt-sliver__expand {
-    width: 100%;
+    /* The expand button used to span the full sliver width with only
+       the top-left corner rounded — its hover background painted as
+       a sharp-cornered rectangle around the small `<` chevron, which
+       didn't match the rounded sliver chrome. Confine the hover to a
+       small centred pill that fits the chevron itself. */
+    width: 30px;
     height: 30px;
+    margin: 4px auto 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -718,17 +724,17 @@
     border: none;
     background: transparent;
     cursor: pointer;
-    border-top-left-radius: 22px;
-    border-top-right-radius: 0;
-    transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 999px;
+    transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .hmt-sliver__expand:hover {
-    background: rgba(255, 205, 115, 0.06);
+    background: rgba(255, 205, 115, 0.10);
 }
 .hmt-sliver__expand:focus-visible {
     outline: 2px solid rgba(255, 205, 115, 0.6);
-    outline-offset: -4px;
-    border-radius: 10px;
+    outline-offset: 2px;
+    border-radius: 999px;
 }
 .hmt-sliver__chev {
     color: rgba(255, 230, 188, 0.5);
