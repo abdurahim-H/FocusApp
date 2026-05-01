@@ -448,7 +448,11 @@
 [data-scene-theme="sakura"] .settings-row__hint {
     color: rgba(var(--sk-cream-rgb), 0.6);
 }
-[data-scene-theme="sakura"] .settings-search,
+/* The chrome lives on .settings-search__input itself; .settings-search
+   is just an unstyled relative wrapper. Earlier rounds painted both
+   with the same border, which produced a square outer outline (the
+   wrapper has no border-radius) overlaid on the rounded input — the
+   "rectangle inside a rounded rectangle" mismatch the user flagged. */
 [data-scene-theme="sakura"] .settings-search__input,
 [data-scene-theme="sakura"] .settings-input,
 [data-scene-theme="sakura"] .settings-textarea,
