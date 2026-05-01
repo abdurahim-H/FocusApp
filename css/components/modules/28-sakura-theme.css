@@ -1248,8 +1248,37 @@
 /* Vertical mini-timer sliver — the collapsed-state pill that sits as
    a thin column on the right edge with `<` chevron, MM/SS digits, and
    tiny play/reset buttons. The base styles paint everything in gold
-   (chevron, sep, button borders, focus rings); recolour the whole
-   register to blossom pink under sakura. */
+   (sliver background, light-leak, border, glow shadow, chevron, sep,
+   button borders, focus rings); recolour the whole register — outer
+   pill + inner elements — to blossom pink under sakura. */
+[data-scene-theme="sakura"] .hmt-sliver {
+    /* Plum dark gradient with a blossom light-leak on the left edge
+       (matching the warm-champagne light-leak of the base theme but
+       in the cherry palette). */
+    background:
+        linear-gradient(90deg, rgba(var(--sk-blossom-rgb), 0.10) 0%, rgba(var(--sk-blossom-rgb), 0) 50%),
+        linear-gradient(180deg, rgba(var(--sk-plum-rgb), 0.94) 0%, rgba(var(--sk-plum-rgb), 0.97) 100%);
+    border-color: rgba(var(--sk-blossom-rgb), 0.28);
+    box-shadow:
+        inset 1px 0 0 rgba(var(--sk-blossom-soft-rgb), 0.10),
+        inset 0 1px 0 rgba(var(--sk-blossom-soft-rgb), 0.06),
+        -4px 0 14px rgba(var(--sk-plum-rgb), 0.45),
+        -14px 0 46px rgba(var(--sk-plum-rgb), 0.55),
+        -18px 0 60px rgba(var(--sk-blossom-rgb), 0.16);
+    color: var(--sk-cream);
+}
+[data-scene-theme="sakura"] .hmt-sliver:hover {
+    border-color: rgba(var(--sk-blossom-rgb), 0.50);
+    background:
+        linear-gradient(90deg, rgba(var(--sk-blossom-rgb), 0.18) 0%, rgba(var(--sk-blossom-rgb), 0) 55%),
+        linear-gradient(180deg, rgba(var(--sk-plum-rgb), 0.97) 0%, rgba(var(--sk-plum-rgb), 0.98) 100%);
+    box-shadow:
+        inset 1px 0 0 rgba(var(--sk-blossom-soft-rgb), 0.18),
+        inset 0 1px 0 rgba(var(--sk-blossom-soft-rgb), 0.10),
+        -6px 0 20px rgba(var(--sk-plum-rgb), 0.50),
+        -18px 0 60px rgba(var(--sk-plum-rgb), 0.55),
+        -22px 0 80px rgba(var(--sk-blossom-rgb), 0.22);
+}
 [data-scene-theme="sakura"] .hmt-sliver__chev {
     color: rgba(var(--sk-blossom-rgb), 0.55);
 }
