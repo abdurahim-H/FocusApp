@@ -14,21 +14,26 @@
     position: fixed;
     inset: 0;
     z-index: 2200;
+    /* The container is purely a positioning shell — every interactive
+       surface lives on .notepad__sheet, which re-enables pointer-events.
+       Keeping the container itself non-interactive means the rest of the
+       app (nav, settings, account satellite, focus tab) stays clickable
+       while a note is open: the panel never blocks the background. */
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.notepad[aria-hidden='false'] { pointer-events: auto; }
 .notepad.is-open { opacity: 1; }
 
-/* Transparent click-catcher — clicking outside the sheet still closes
-   it, but the cosmos / video backdrop stays fully visible behind the
-   panel.  No tint, no blur — the sheet's own backdrop blur supplies
-   the focus separation. */
+/* Inert click-through layer — kept for ARIA/markup parity but it no
+   longer catches clicks. Closing happens via the × button, Esc, or
+   the explicit close shortcut, so the cosmic backdrop stays fully
+   reachable while the notepad is open. */
 .notepad__scrim {
     position: absolute;
     inset: 0;
     background: transparent;
+    pointer-events: none;
 }
 
 .notepad__sheet {
@@ -37,11 +42,18 @@
     left: 50%;
     transform: translate(-50%, -16px) scale(0.96);
     width: min(820px, calc(100vw - 32px));
-    height: calc(100vh - 120px);
-    max-height: 760px;
-    background: linear-gradient(180deg, rgba(20, 16, 10, 0.96), rgba(12, 9, 5, 0.96));
+    height: min(760px, calc(100vh - 120px));
+    min-width: 360px;
+    min-height: 320px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 80px);
+    /* Translucent over the cosmic backdrop — backdrop-filter does the
+       readability lift so we don't need an opaque slab. */
+    background: linear-gradient(180deg, rgba(20, 16, 10, 0.55), rgba(12, 9, 5, 0.55));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
     border: 1px solid rgba(255, 220, 160, 0.16);
-    border-radius: 22px;
+    border-radius: 28px;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55),
                 0 0 0 0.5px rgba(255, 220, 160, 0.08);
     color: rgba(255, 246, 225, 0.92);
@@ -49,6 +61,11 @@
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
+    /* `resize: both` requires a non-visible overflow; the inner regions
+       handle their own scrolling so clipping at the sheet edge is fine. */
+    overflow: hidden;
+    resize: both;
+    pointer-events: auto;
 }
 .notepad.is-open .notepad__sheet { transform: translate(-50%, 0) scale(1); }
 
@@ -72,7 +89,9 @@
     gap: 12px;
     padding: 16px 20px;
     border-bottom: 1px solid rgba(255, 220, 160, 0.08);
-    background: linear-gradient(180deg, rgba(20, 16, 10, 0.98), rgba(20, 16, 10, 0.85));
+    /* Slight tint over the translucent sheet so the title row reads as
+       the grip, but the cosmic backdrop still bleeds through. */
+    background: linear-gradient(180deg, rgba(20, 16, 10, 0.55), rgba(20, 16, 10, 0.40));
 }
 .notepad__eyebrow {
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
@@ -504,7 +523,7 @@
     gap: 12px;
     padding: 10px 20px;
     border-top: 1px solid rgba(255, 220, 160, 0.08);
-    background: rgba(20, 16, 10, 0.85);
+    background: rgba(20, 16, 10, 0.42);
     color: rgba(255, 246, 225, 0.55);
     font-size: 11.5px;
     flex-wrap: wrap;

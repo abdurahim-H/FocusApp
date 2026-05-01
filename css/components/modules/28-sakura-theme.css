@@ -839,12 +839,23 @@
 
 /* ──────────────────────────────────────────────────────────────────────
    15. STATISTICS BAR — stats chips on focus tab
+   The chip surface in base CSS is just stacked text; previous round
+   added a card frame that the user explicitly disliked ("rectangulars
+   surrounding them"). Strip the frame back to plain text and only
+   tint the value + label colours.
    ────────────────────────────────────────────────────────────────────── */
 [data-scene-theme="sakura"] .stat-chip,
 [data-scene-theme="sakura"] .stats-chip {
-    background: rgba(var(--sk-blossom-rgb), 0.08);
-    border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
+    background: transparent;
+    border: 0;
+    box-shadow: none;
     color: rgba(var(--sk-cream-rgb), 0.9);
+}
+[data-scene-theme="sakura"] .stat-value {
+    color: rgba(var(--sk-blossom-soft-rgb), 0.92);
+}
+[data-scene-theme="sakura"] .stat-label {
+    color: rgba(var(--sk-cream-rgb), 0.55);
 }
 [data-scene-theme="sakura"] .stat-chip__num,
 [data-scene-theme="sakura"] .stats-chip__num,
@@ -855,6 +866,23 @@
 [data-scene-theme="sakura"] .stats-chip__label,
 [data-scene-theme="sakura"] .stats-label {
     color: rgba(var(--sk-cream-rgb), 0.65);
+}
+/* Period toggle (TODAY / WEEK / MONTH / ALL) — base CSS keeps a small
+   pill; tint it pink to match the rest of the chip row without making
+   it shouty. */
+[data-scene-theme="sakura"] .stat-period-toggle {
+    background: rgba(var(--sk-blossom-rgb), 0.06);
+    border-color: rgba(var(--sk-blossom-rgb), 0.28);
+    color: rgba(var(--sk-blossom-rgb), 0.78);
+}
+[data-scene-theme="sakura"] .stat-period-toggle:hover,
+[data-scene-theme="sakura"] .stat-period-toggle:focus-visible {
+    background: rgba(var(--sk-blossom-rgb), 0.14);
+    border-color: rgba(var(--sk-blossom-rgb), 0.50);
+    color: var(--sk-blossom-soft);
+}
+[data-scene-theme="sakura"] .stat-divider {
+    background: rgba(var(--sk-blossom-rgb), 0.18);
 }
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -1063,20 +1091,56 @@
     background: transparent;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    pointer-events: none;
 }
 [data-scene-theme="sakura"] .notepad__sheet {
+    /* Translucent plum glass — keeps the cherry-blossom backdrop
+       readable through the sheet so opening the notepad doesn't kill
+       the scene the user wants to see. */
     background: linear-gradient(180deg,
-        rgba(var(--sk-plum-rgb), 0.78),
-        rgba(var(--sk-plum-rgb), 0.88));
+        rgba(var(--sk-plum-rgb), 0.42),
+        rgba(var(--sk-plum-rgb), 0.52));
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
     border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
-    box-shadow: 0 30px 80px rgba(var(--sk-plum-rgb), 0.6),
+    box-shadow: 0 30px 80px rgba(var(--sk-plum-rgb), 0.55),
                 0 0 0 0.5px rgba(var(--sk-blossom-rgb), 0.10);
     color: rgba(var(--sk-cream-rgb), 0.95);
+    scrollbar-color: rgba(var(--sk-blossom-rgb), 0.40) transparent;
+}
+[data-scene-theme="sakura"] .notepad__list::-webkit-scrollbar {
+    width: 8px;
+}
+[data-scene-theme="sakura"] .notepad__list::-webkit-scrollbar-track {
+    background: transparent;
+}
+[data-scene-theme="sakura"] .notepad__list::-webkit-scrollbar-thumb {
+    background: rgba(var(--sk-blossom-rgb), 0.32);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+[data-scene-theme="sakura"] .notepad__list::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.55);
+    background-clip: padding-box;
+}
+[data-scene-theme="sakura"] .notepad__list {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--sk-blossom-rgb), 0.32) transparent;
+}
+/* Resize grip (bottom-right corner of the draggable sheet) — pink dots
+   on a translucent square so it doesn't read as a default OS chrome
+   element parked against the cherry-blossom backdrop. */
+[data-scene-theme="sakura"] .notepad__sheet::-webkit-resizer {
+    background:
+        radial-gradient(circle at 70% 70%, rgba(var(--sk-blossom-rgb), 0.7) 0 1.5px, transparent 2px) 0 0 / 6px 6px,
+        rgba(var(--sk-plum-rgb), 0.45);
+    border-bottom-right-radius: 28px;
 }
 [data-scene-theme="sakura"] .notepad__head {
     background: linear-gradient(180deg,
-        rgba(var(--sk-plum-rgb), 0.95),
-        rgba(var(--sk-plum-rgb), 0.82));
+        rgba(var(--sk-plum-rgb), 0.55),
+        rgba(var(--sk-plum-rgb), 0.40));
     border-bottom: 1px solid rgba(var(--sk-blossom-rgb), 0.14);
 }
 [data-scene-theme="sakura"] .notepad__eyebrow {
@@ -1173,25 +1237,42 @@
     background: transparent;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    pointer-events: none;
 }
 [data-scene-theme="sakura"] .task-detail__sheet {
+    /* Same translucent plum glass as the notepad sheet so the two
+       drawers feel like the same family of surface. */
     background: linear-gradient(180deg,
-        rgba(var(--sk-plum-rgb), 0.82),
-        rgba(var(--sk-plum-rgb), 0.92));
+        rgba(var(--sk-plum-rgb), 0.42),
+        rgba(var(--sk-plum-rgb), 0.55));
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
     border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
-    box-shadow: 0 30px 80px rgba(var(--sk-plum-rgb), 0.6),
+    box-shadow: 0 30px 80px rgba(var(--sk-plum-rgb), 0.55),
                 0 0 0 0.5px rgba(var(--sk-blossom-rgb), 0.10);
     color: rgba(var(--sk-cream-rgb), 0.95);
+    scrollbar-color: rgba(var(--sk-blossom-rgb), 0.40) transparent;
+}
+[data-scene-theme="sakura"] .task-detail__sheet::-webkit-scrollbar-thumb {
+    background: rgba(var(--sk-blossom-rgb), 0.32);
+    background-clip: padding-box;
+}
+[data-scene-theme="sakura"] .task-detail__sheet::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--sk-blossom-rgb), 0.55);
+    background-clip: padding-box;
 }
 [data-scene-theme="sakura"] .task-detail__head {
     background: linear-gradient(180deg,
-        rgba(var(--sk-plum-rgb), 0.95),
-        rgba(var(--sk-plum-rgb), 0.82));
+        rgba(var(--sk-plum-rgb), 0.55),
+        rgba(var(--sk-plum-rgb), 0.40));
     border-bottom: 1px solid rgba(var(--sk-blossom-rgb), 0.14);
 }
 [data-scene-theme="sakura"] .task-detail__section {
     border-color: rgba(var(--sk-blossom-rgb), 0.14);
-    background: rgba(var(--sk-plum-rgb), 0.32);
+    /* Very faint blossom wash so sections delineate without piling
+       another opaque slab on top of the translucent sheet — the user
+       wants the cherry-blossom backdrop visible through the drawer. */
+    background: rgba(var(--sk-blossom-rgb), 0.04);
 }
 [data-scene-theme="sakura"] .task-detail__label {
     color: rgba(var(--sk-blossom-rgb), 0.80);

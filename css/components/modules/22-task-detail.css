@@ -8,19 +8,21 @@
     position: fixed;
     inset: 0;
     z-index: 2200;
+    /* Container is non-interactive — only the sheet catches pointer
+       events. The rest of the app stays clickable behind the drawer
+       so the user isn't trapped in a modal that hides everything. */
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.task-detail[aria-hidden='false'] { pointer-events: auto; }
 .task-detail.is-open { opacity: 1; }
 
-/* Transparent click-catcher so the cosmos / video backdrop stays
-   fully visible while the drawer is open. */
+/* Inert click-through layer — kept for ARIA/markup parity. */
 .task-detail__scrim {
     position: absolute;
     inset: 0;
     background: transparent;
+    pointer-events: none;
 }
 
 .task-detail__sheet {
@@ -31,14 +33,40 @@
     width: min(680px, calc(100vw - 32px));
     max-height: calc(100vh - 120px);
     overflow-y: auto;
-    background: linear-gradient(180deg, rgba(20, 16, 10, 0.96), rgba(12, 9, 5, 0.96));
+    /* Translucent so the cosmic backdrop bleeds through. The blur is
+       what keeps body text legible. */
+    background: linear-gradient(180deg, rgba(20, 16, 10, 0.55), rgba(12, 9, 5, 0.55));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
     border: 1px solid rgba(255, 220, 160, 0.16);
-    border-radius: 22px;
+    border-radius: 28px;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55),
                 0 0 0 0.5px rgba(255, 220, 160, 0.08);
     color: rgba(255, 246, 225, 0.92);
     transform-origin: top center;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: auto;
+    /* Slim, theme-tinted scrollbar — replaces the stark default OS
+       scrollbar that was breaking the warm aesthetic on long task
+       drawers. WebKit + Firefox properties cover the major engines. */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 220, 160, 0.28) transparent;
+}
+.task-detail__sheet::-webkit-scrollbar {
+    width: 8px;
+}
+.task-detail__sheet::-webkit-scrollbar-track {
+    background: transparent;
+}
+.task-detail__sheet::-webkit-scrollbar-thumb {
+    background: rgba(255, 220, 160, 0.22);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+.task-detail__sheet::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 220, 160, 0.38);
+    background-clip: padding-box;
 }
 .task-detail.is-open .task-detail__sheet {
     transform: translate(-50%, 0) scale(1);
@@ -52,10 +80,11 @@
     justify-content: space-between;
     gap: 12px;
     padding: 18px 22px 14px;
-    background: linear-gradient(180deg, rgba(20, 16, 10, 0.98), rgba(20, 16, 10, 0.85));
+    background: linear-gradient(180deg, rgba(20, 16, 10, 0.55), rgba(20, 16, 10, 0.40));
     border-bottom: 1px solid rgba(255, 220, 160, 0.08);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    z-index: 1;
 }
 .task-detail__back {
     appearance: none;
