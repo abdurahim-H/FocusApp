@@ -285,8 +285,41 @@ function close() {
     if (!isOpen) return;
     isOpen = false;
     panel.classList.remove('is-open');
+    panel.classList.remove('is-minimized');
     panel.setAttribute('aria-hidden', 'true');
     trap?.deactivate();
+}
+
+/** Minimize the notepad to a pill at the bottom-right of the viewport,
+ *  or restore it to its full size + last drag/resize position. The
+ *  inline `left/top/width/height` set during drag/resize is preserved
+ *  on the element — `!important` rules in the minimized CSS override
+ *  them, and removing the class lets them apply again. */
+function toggleMinimize() {
+    if (!panel) return;
+    const head = panel.querySelector('.notepad__head');
+    const minimized = panel.classList.toggle('is-minimized');
+    const btn = panel.querySelector('#notepadMinimize');
+    if (btn) {
+        btn.setAttribute('aria-label', minimized ? 'Restore notepad' : 'Minimize notepad');
+        btn.title = minimized ? 'Restore' : 'Minimize';
+    }
+    if (minimized) {
+        // While minimized, clicking anywhere on the head bar (outside
+        // the close × / restore ⌃) brings it back. Defer wiring so the
+        // pointerup/click that just minimized doesn't immediately
+        // re-fire on the same target.
+        if (panel._restoreOnHead) head?.removeEventListener('click', panel._restoreOnHead);
+        const onHeadClick = (e) => {
+            if (e.target.closest('button')) return;
+            toggleMinimize();
+        };
+        panel._restoreOnHead = onHeadClick;
+        setTimeout(() => head?.addEventListener('click', onHeadClick));
+    } else if (panel._restoreOnHead) {
+        head?.removeEventListener('click', panel._restoreOnHead);
+        panel._restoreOnHead = null;
+    }
 }
 
 // Sidebar state. Search query + active tag filter live here so they
@@ -329,6 +362,14 @@ function buildPanel() {
                     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M8 2.5v8.5M5 6l3-3 3 3"/>
                         <path d="M2.5 12.5h11"/>
+                    </svg>
+                </button>
+                <button class="notepad__head-btn notepad__minimize" type="button"
+                        id="notepadMinimize"
+                        aria-label="Minimize notepad"
+                        title="Minimize">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                        <line x1="3" y1="12" x2="13" y2="12"/>
                     </svg>
                 </button>
                 <button class="notepad__close" type="button"
@@ -379,6 +420,13 @@ function buildPanel() {
     panel.querySelectorAll('[data-notepad-close]').forEach((el) =>
         el.addEventListener('click', close)
     );
+
+    // Minimize ↔ restore toggle.
+    const minimizeBtn = panel.querySelector('#notepadMinimize');
+    minimizeBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMinimize();
+    });
 
     editorEl = panel.querySelector('#notepadEditor');
     titleEl = panel.querySelector('#notepadTitle');

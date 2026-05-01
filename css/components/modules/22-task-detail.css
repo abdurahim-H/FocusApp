@@ -8,21 +8,26 @@
     position: fixed;
     inset: 0;
     z-index: 2200;
-    /* Container is non-interactive — only the sheet catches pointer
-       events. The rest of the app stays clickable behind the drawer
-       so the user isn't trapped in a modal that hides everything. */
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .task-detail.is-open { opacity: 1; }
 
-/* Inert click-through layer — kept for ARIA/markup parity. */
+/* Click-outside-to-close — scrim catches clicks landing outside the
+   sheet and routes them to `close()` (wired in JS via data-detail-close).
+   Background remains visible (transparent fill) but isn't interactive
+   while the drawer is open: the user explicitly asked for click-away
+   dismissal after a round where clicks passed through to the focus tab
+   underneath, collapsing the dock instead of closing the drawer. */
 .task-detail__scrim {
     position: absolute;
     inset: 0;
     background: transparent;
     pointer-events: none;
+}
+.task-detail.is-open .task-detail__scrim {
+    pointer-events: auto;
 }
 
 .task-detail__sheet {
@@ -32,9 +37,13 @@
     transform: translate(-50%, -16px) scale(0.96);
     width: min(680px, calc(100vw - 32px));
     max-height: calc(100vh - 120px);
-    overflow-y: auto;
-    /* Translucent so the cosmic backdrop bleeds through. The blur is
-       what keeps body text legible. */
+    /* Flex layout so the head is a fixed-height row and only the body
+       scrolls — keeps the scrollbar inside the body's right padding,
+       away from the sheet's 28px rounded corner that previously had
+       the thumb poking through the curve. */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     background: linear-gradient(180deg, rgba(20, 16, 10, 0.55), rgba(12, 9, 5, 0.55));
     backdrop-filter: blur(14px) saturate(140%);
     -webkit-backdrop-filter: blur(14px) saturate(140%);
@@ -45,33 +54,7 @@
     color: rgba(255, 246, 225, 0.92);
     transform-origin: top center;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    /* Closed state needs to forfeit pointer-events too — the sheet is
-       still in the DOM with layout, opacity:0 only hides it visually.
-       Without this, clicks landing on the sheet's last position get
-       swallowed even after the drawer closes (the user's repro:
-       open task detail → close → can't click the task dock under it). */
     pointer-events: none;
-    /* Slim, theme-tinted scrollbar — replaces the stark default OS
-       scrollbar that was breaking the warm aesthetic on long task
-       drawers. WebKit + Firefox properties cover the major engines. */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 220, 160, 0.28) transparent;
-}
-.task-detail__sheet::-webkit-scrollbar {
-    width: 8px;
-}
-.task-detail__sheet::-webkit-scrollbar-track {
-    background: transparent;
-}
-.task-detail__sheet::-webkit-scrollbar-thumb {
-    background: rgba(255, 220, 160, 0.22);
-    border-radius: 4px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-}
-.task-detail__sheet::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 220, 160, 0.38);
-    background-clip: padding-box;
 }
 .task-detail.is-open .task-detail__sheet {
     transform: translate(-50%, 0) scale(1);
@@ -90,8 +73,7 @@
 }
 
 .task-detail__head {
-    position: sticky;
-    top: 0;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -99,9 +81,6 @@
     padding: 18px 22px 14px;
     background: linear-gradient(180deg, rgba(20, 16, 10, 0.55), rgba(20, 16, 10, 0.40));
     border-bottom: 1px solid rgba(255, 220, 160, 0.08);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 1;
 }
 .task-detail__back {
     appearance: none;
@@ -163,10 +142,34 @@
 }
 
 .task-detail__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     padding: 8px 22px 22px;
     display: flex;
     flex-direction: column;
     gap: 18px;
+    /* Slim, theme-tinted scrollbar lives on the body now (not the sheet)
+       so it sits inside the body's padding instead of poking through
+       the sheet's rounded corner. */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 220, 160, 0.28) transparent;
+}
+.task-detail__body::-webkit-scrollbar {
+    width: 8px;
+}
+.task-detail__body::-webkit-scrollbar-track {
+    background: transparent;
+}
+.task-detail__body::-webkit-scrollbar-thumb {
+    background: rgba(255, 220, 160, 0.22);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+.task-detail__body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 220, 160, 0.38);
+    background-clip: padding-box;
 }
 
 .task-detail__section {

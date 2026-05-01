@@ -1094,14 +1094,13 @@
     pointer-events: none;
 }
 [data-scene-theme="sakura"] .notepad__sheet {
-    /* Translucent plum glass — keeps the cherry-blossom backdrop
-       readable through the sheet so opening the notepad doesn't kill
-       the scene the user wants to see. */
+    /* Solid plum app-window — the user explicitly asked for the
+       notepad to act as an independent app with no backdrop bleed. */
     background: linear-gradient(180deg,
-        rgba(var(--sk-plum-rgb), 0.42),
-        rgba(var(--sk-plum-rgb), 0.52));
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
+        rgba(var(--sk-plum-rgb), 0.97),
+        rgba(var(--sk-plum-rgb), 0.99));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border: 1px solid rgba(var(--sk-blossom-rgb), 0.22);
     box-shadow: 0 30px 80px rgba(var(--sk-plum-rgb), 0.55),
                 0 0 0 0.5px rgba(var(--sk-blossom-rgb), 0.10);
@@ -1139,19 +1138,23 @@
 }
 [data-scene-theme="sakura"] .notepad__head {
     background: linear-gradient(180deg,
-        rgba(var(--sk-plum-rgb), 0.55),
-        rgba(var(--sk-plum-rgb), 0.40));
+        rgba(var(--sk-plum-rgb), 0.99),
+        rgba(var(--sk-plum-rgb), 0.95));
     border-bottom: 1px solid rgba(var(--sk-blossom-rgb), 0.14);
+}
+[data-scene-theme="sakura"] .notepad__foot {
+    background: rgba(var(--sk-plum-rgb), 0.96);
+    border-top: 1px solid rgba(var(--sk-blossom-rgb), 0.14);
+}
+[data-scene-theme="sakura"] .notepad__sidebar {
+    background: rgba(var(--sk-plum-rgb), 0.65);
+    border-right: 1px solid rgba(var(--sk-blossom-rgb), 0.14);
 }
 [data-scene-theme="sakura"] .notepad__eyebrow {
     color: rgba(var(--sk-blossom-rgb), 0.85);
 }
 [data-scene-theme="sakura"] .notepad__title-input {
     color: var(--sk-cream);
-}
-[data-scene-theme="sakura"] .notepad__sidebar {
-    border-right: 1px solid rgba(var(--sk-blossom-rgb), 0.10);
-    background: rgba(var(--sk-plum-rgb), 0.30);
 }
 [data-scene-theme="sakura"] .notepad__search,
 [data-scene-theme="sakura"] .notepad__search input {
@@ -1240,8 +1243,9 @@
     pointer-events: none;
 }
 [data-scene-theme="sakura"] .task-detail__sheet {
-    /* Same translucent plum glass as the notepad sheet so the two
-       drawers feel like the same family of surface. */
+    /* Translucent plum glass — keeps the cosmic backdrop visible while
+       the drawer is open. Body owns the scroll, so no scrollbar
+       declarations here. */
     background: linear-gradient(180deg,
         rgba(var(--sk-plum-rgb), 0.42),
         rgba(var(--sk-plum-rgb), 0.55));
@@ -1251,13 +1255,15 @@
     box-shadow: 0 30px 80px rgba(var(--sk-plum-rgb), 0.55),
                 0 0 0 0.5px rgba(var(--sk-blossom-rgb), 0.10);
     color: rgba(var(--sk-cream-rgb), 0.95);
+}
+[data-scene-theme="sakura"] .task-detail__body {
     scrollbar-color: rgba(var(--sk-blossom-rgb), 0.40) transparent;
 }
-[data-scene-theme="sakura"] .task-detail__sheet::-webkit-scrollbar-thumb {
+[data-scene-theme="sakura"] .task-detail__body::-webkit-scrollbar-thumb {
     background: rgba(var(--sk-blossom-rgb), 0.32);
     background-clip: padding-box;
 }
-[data-scene-theme="sakura"] .task-detail__sheet::-webkit-scrollbar-thumb:hover {
+[data-scene-theme="sakura"] .task-detail__body::-webkit-scrollbar-thumb:hover {
     background: rgba(var(--sk-blossom-rgb), 0.55);
     background-clip: padding-box;
 }

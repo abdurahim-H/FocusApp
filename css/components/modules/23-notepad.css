@@ -47,11 +47,11 @@
     min-height: 320px;
     max-width: calc(100vw - 32px);
     max-height: calc(100vh - 80px);
-    /* Translucent over the cosmic backdrop — backdrop-filter does the
-       readability lift so we don't need an opaque slab. */
-    background: linear-gradient(180deg, rgba(20, 16, 10, 0.55), rgba(12, 9, 5, 0.55));
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    /* Solid app-window register — the user wants the notepad to behave
+       like an independent application, NOT a translucent overlay. No
+       backdrop-filter, no see-through; the cosmic backdrop is fully
+       visible *around* the notepad but doesn't bleed through it. */
+    background: linear-gradient(180deg, rgba(20, 16, 10, 0.97), rgba(12, 9, 5, 0.99));
     border: 1px solid rgba(255, 220, 160, 0.16);
     border-radius: 28px;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55),
@@ -105,15 +105,67 @@
 .notepad__head .notepad__head-btn,
 .notepad__head .notepad__close { cursor: pointer; }
 
+/* Minimized state — the sheet collapses to a pill anchored at the
+   bottom-right of the viewport. Body + foot hide; only the head row
+   stays visible so the user can read the active note title and click
+   the bar to restore. The previous drag/resize position is kept on
+   the inline style attribute so restoring puts the sheet back where
+   it was — minimize is genuinely a "tuck away" toggle, not a reset. */
+.notepad.is-minimized .notepad__sheet {
+    width: 280px !important;
+    min-width: 280px;
+    height: 52px !important;
+    min-height: 52px;
+    top: auto !important;
+    bottom: 24px;
+    right: 24px;
+    left: auto !important;
+    transform: none !important;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                width 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                height 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    resize: none;
+    overflow: hidden;
+    cursor: pointer;
+}
+.notepad.is-minimized .notepad__body,
+.notepad.is-minimized .notepad__foot {
+    display: none;
+}
+.notepad.is-minimized .notepad__head {
+    border-bottom: none;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+/* Tighten the head row when minimized — drop the dictate + export
+   buttons so the title fits and the bar doesn't read busy. */
+.notepad.is-minimized #notepadDictate,
+.notepad.is-minimized #notepadExport,
+.notepad.is-minimized .notepad__saved {
+    display: none;
+}
+.notepad.is-minimized .notepad__title-input {
+    pointer-events: none;
+    background: transparent !important;
+}
+/* Swap the minimize icon to a chevron-up when collapsed so the
+   affordance reads as "expand again". */
+.notepad.is-minimized #notepadMinimize svg {
+    display: none;
+}
+.notepad.is-minimized #notepadMinimize::before {
+    content: '⌃';
+    font-size: 16px;
+    line-height: 1;
+}
+
 .notepad__head {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 16px 20px;
     border-bottom: 1px solid rgba(255, 220, 160, 0.08);
-    /* Slight tint over the translucent sheet so the title row reads as
-       the grip, but the cosmic backdrop still bleeds through. */
-    background: linear-gradient(180deg, rgba(20, 16, 10, 0.55), rgba(20, 16, 10, 0.40));
+    background: linear-gradient(180deg, rgba(28, 22, 14, 0.98), rgba(20, 16, 10, 0.92));
 }
 .notepad__eyebrow {
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
@@ -545,7 +597,7 @@
     gap: 12px;
     padding: 10px 20px;
     border-top: 1px solid rgba(255, 220, 160, 0.08);
-    background: rgba(20, 16, 10, 0.42);
+    background: rgba(20, 16, 10, 0.92);
     color: rgba(255, 246, 225, 0.55);
     font-size: 11.5px;
     flex-wrap: wrap;
