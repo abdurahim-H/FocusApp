@@ -189,6 +189,26 @@ const MODULES = {
             'radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.28) 100%)',
         grainOpacity: 0.04,
     }),
+
+    // ── Celestial Garden — moonlit garden video with falling petals,
+    //    glowing lotus flowers, gazebo silhouettes, and a teal-green
+    //    nebula sky. Same single-module video pattern as sakura/aurora.
+    celestialGardenVideo: makeVideoTheme({
+        id: 'celestialGardenVideo',
+        src: 'https://cdn.universefocuses.com/celestial-garden/celestial-garden-loop.mp4',
+        // The source is already lush — gentle saturation lift so the
+        // emerald + teal carry through the dark glass overlay, slight
+        // contrast bump for the lotus highlights, no brightness pull
+        // (the moonlit garden is naturally luminous).
+        filter: 'saturate(1.14) contrast(1.06)',
+        fallback: '#06241f',
+        // Garden has bright sky highlights at top and dark foreground
+        // foliage at bottom — a soft vignette keeps the corners from
+        // looking pinched against the rich centre.
+        vignette:
+            'radial-gradient(ellipse at center, rgba(0,0,0,0) 58%, rgba(0,0,0,0.30) 100%)',
+        grainOpacity: 0.04,
+    }),
 };
 
 // ───────────────────────────────────────────────────────────────────────
@@ -248,6 +268,20 @@ export const THEMES = [
             secondary: [180, 144, 232],
             accentWarm: [255, 200, 230],
             accentCool: [80, 180, 215],
+        },
+    },
+    {
+        id: 'celestial-garden',
+        label: 'Celestial Garden',
+        // Moonlit enchanted garden — emerald foliage, teal pond, white
+        // lotus flowers, drifting petals, gazebo silhouettes against a
+        // green-galaxy sky.
+        modules: [MODULES.celestialGardenVideo],
+        palette: {
+            primary: [126, 234, 192],   // emerald-mint
+            secondary: [200, 244, 226], // moonlit petal
+            accentWarm: [255, 250, 220], // lotus core warm white
+            accentCool: [80, 200, 200],  // pond teal
         },
     },
 ];

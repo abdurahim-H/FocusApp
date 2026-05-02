@@ -424,6 +424,36 @@
     .focus-content { padding-bottom: 14px; }
 }
 
+/* ── Very short viewports (≤600px tall) ─────────────────────────────────
+   At this size the floating task dock (fixed, bottom: 80px) lands
+   directly on top of the timer controls — the user sees a "tap to add"
+   pill where Start / Reset / Skip should be. The Focus tab's primary
+   purpose is the timer, so on phones-in-landscape and quarter-windows
+   we hide the dock entirely; tasks remain reachable via the toolbar's
+   list icon and the Home tab. The toolbar itself shrinks one tier so
+   the cosmos buttons stop rubbing against the timer card's edge. */
+@media (max-height: 600px) {
+    .task-dock { display: none !important; }
+    /* Give focus-content full breathing room down to the toolbar. */
+    .focus-content { padding-bottom: 8px; }
+    /* Toolbar tighter on short viewports. */
+    .cosmos-toolbar { gap: 2px; padding: 5px 7px; }
+    .cosmos-tool { width: 34px; height: 34px; }
+    /* Timer display compresses one more tier. */
+    .timer-display {
+        font-size: clamp(2.2em, 6vw, 3.4em);
+        margin-bottom: 8px;
+    }
+    /* Timer controls sit closer together so the row fits if Start +
+       Reset + Skip all show during a session. */
+    .timer-controls { gap: 6px; }
+    .timer-controls .liquid-glass-btn {
+        padding: 9px 16px !important;
+        min-height: 36px !important;
+        font-size: 12.5px !important;
+    }
+}
+
 /* ── Narrow desktop windows (≤1024px wide, taller than 700px) ──────────
    The browser window is wider than a tablet but the user has split it
    to half-screen. Cluster + filament + satellite cluster eats too much

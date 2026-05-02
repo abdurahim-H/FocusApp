@@ -98,6 +98,7 @@ export const SCHEMA = [
             { value: 'blackhole', label: 'Black Hole' },
             { value: 'sakura', label: 'Sakura' },
             { value: 'aurora-plain', label: 'Aurora' },
+            { value: 'celestial-garden', label: 'Celestial Garden' },
         ],
     },
 

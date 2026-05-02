@@ -1443,7 +1443,11 @@
     position: relative;
     width: min(420px, 100%);
     padding: 26px 26px 22px;
-    border-radius: var(--deck-radius);
+    /* 28px instead of var(--deck-radius) (20px) so the corners read as
+       softer — the popover is a floating glass card, the rounder
+       chamfer matches the language of the auth modal + account
+       dropdown rather than the tighter deck buttons. */
+    border-radius: 28px;
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid rgba(255, 205, 115, 0.22);
     backdrop-filter: blur(40px) saturate(180%);
@@ -1510,7 +1514,9 @@
 }
 .sleep-chip {
     padding: 12px 10px;
-    border-radius: 12px;
+    /* Match the popover card's softer chamfer (28px) with proportionally
+       softer chip corners — 16px reads as friendly without going round. */
+    border-radius: 16px;
     border: 1px solid var(--deck-gold-line);
     background: rgba(255, 246, 225, 0.03);
     color: var(--deck-cream);

@@ -1157,7 +1157,8 @@
    soon" stays in the third grid cell below. */
 .theme-card--blackhole,
 .theme-card--sakura,
-.theme-card--aurora {
+.theme-card--aurora,
+.theme-card--celestial {
     padding: 0;
     gap: 0;
     aspect-ratio: 4 / 3;
@@ -1175,9 +1176,14 @@
     background: #0d1129 url('../../../assets/images/aurora.jpg') center/cover no-repeat;
     border-color: rgba(126, 234, 144, 0.28);
 }
+.theme-card--celestial {
+    background: #06241f url('../../../assets/images/celestial-garden.jpg') center/cover no-repeat;
+    border-color: rgba(126, 234, 192, 0.32);
+}
 .theme-card--blackhole::after,
 .theme-card--sakura::after,
-.theme-card--aurora::after {
+.theme-card--aurora::after,
+.theme-card--celestial::after {
     background: linear-gradient(
         105deg,
         transparent 35%,
@@ -1200,6 +1206,11 @@
     border-color: rgba(126, 234, 144, 0.55);
     box-shadow: 0 4px 24px rgba(126, 234, 144, 0.20);
 }
+.theme-card--celestial:hover {
+    background: #06241f url('../../../assets/images/celestial-garden.jpg') center/cover no-repeat;
+    border-color: rgba(126, 234, 192, 0.62);
+    box-shadow: 0 4px 24px rgba(126, 234, 192, 0.22);
+}
 .theme-card--blackhole.active,
 .theme-card--blackhole.btn-primary {
     background: #050308 url('../../../assets/images/blackhole.jpg') center/cover no-repeat;
@@ -1218,9 +1229,31 @@
     border-color: rgba(126, 234, 144, 0.78);
     box-shadow: 0 0 32px rgba(126, 234, 144, 0.32), 0 4px 20px rgba(0, 0, 0, 0.4);
 }
+.theme-card--celestial.active,
+.theme-card--celestial.btn-primary {
+    background: #06241f url('../../../assets/images/celestial-garden.jpg') center/cover no-repeat;
+    border-color: rgba(126, 234, 192, 0.85);
+    box-shadow: 0 0 32px rgba(126, 234, 192, 0.36), 0 4px 20px rgba(0, 0, 0, 0.4);
+}
 .theme-card--blackhole .theme-card-preview,
 .theme-card--sakura .theme-card-preview,
-.theme-card--aurora .theme-card-preview { display: none; }
+.theme-card--aurora .theme-card-preview,
+.theme-card--celestial .theme-card-preview { display: none; }
+.theme-card--celestial .theme-card-name {
+    width: 100%;
+    padding: 16px 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: rgba(232, 250, 240, 0.98);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
+    background: linear-gradient(
+        to top,
+        rgba(6, 36, 31, 0.92) 0%,
+        rgba(6, 36, 31, 0.6) 55%,
+        rgba(6, 36, 31, 0) 100%
+    );
+}
 .theme-card--sakura .theme-card-name {
     width: 100%;
     padding: 16px 0 12px;

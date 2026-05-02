@@ -1,0 +1,1791 @@
+/* ════════════════════════════════════════════════════════════════════════
+   CELESTIAL GARDEN THEME OVERRIDES — chrome palette tuned for the
+   moonlit-garden video backdrop. Every rule is scoped under
+   [data-scene-theme="celestial-garden"] so other themes' chrome stays
+   intact.
+   ════════════════════════════════════════════════════════════════════════
+   Core palette (used through this file):
+
+     mint           #7eeac0 — primary emerald-mint accent (the foliage glow)
+     mint-soft      #c8f4e2 — pale moonlit-petal highlight
+     mint-deep      #2da870 — deep emerald — strong borders
+     teal           #5fc8c8 — secondary pond-teal accent (water reflections)
+     teal-soft      #a8e8ec — pale cyan glow (lotus rim light)
+     teal-deep      #3a8e8e — deep teal — hover halos
+     cream          #ecfaf0 — cool lotus-tinted text cream
+     stone          #a8c8c0 — moonlit cool secondary
+     sky            #06241f — deep emerald-night sky
+     sky-soft       #0f3a32 — lifted glass base shade
+
+   Glass surfaces are tuned for the dark emerald sky: deep emerald-tinted
+   dark glass with mint-green inner borders. The video supplies the
+   green↔teal motion (foliage, pond, lotus glow); chrome biases toward
+   mint so the foreground UI doesn't fight the garden. Teal is reserved
+   for hover halos and a handful of secondary accents, so the eye still
+   gets the dual hue the scene registers as.
+
+   Tabs and tiles the user explicitly asked to preserve are NOT touched:
+     • .nav-buttons (Home / Focus pill)
+     • .home-period-tiles
+     • .home-mini-timer (kept warm, mint-tinted accents only)
+   ════════════════════════════════════════════════════════════════════════ */
+
+[data-scene-theme="celestial-garden"] {
+    /* Token sheet — referenced inside scoped overrides below. Defining
+       the tokens at the document root means any celestial override can
+       say `var(--cg-mint)` without re-typing the literal. */
+    --cg-mint: #7eeac0;
+    --cg-mint-soft: #c8f4e2;
+    --cg-mint-deep: #2da870;
+    --cg-mint-pale: #ecfaf0;
+    --cg-teal: #5fc8c8;
+    --cg-teal-soft: #a8e8ec;
+    --cg-teal-deep: #3a8e8e;
+    --cg-cream: #ecfaf0;
+    --cg-stone: #a8c8c0;
+    --cg-sky: #06241f;
+    --cg-sky-soft: #0f3a32;
+
+    /* RGB triplets so we can compose alphas inline. */
+    --cg-mint-rgb: 126, 234, 192;
+    --cg-mint-soft-rgb: 200, 244, 226;
+    --cg-mint-deep-rgb: 45, 168, 112;
+    --cg-teal-rgb: 95, 200, 200;
+    --cg-teal-soft-rgb: 168, 232, 236;
+    --cg-teal-deep-rgb: 58, 142, 142;
+    --cg-cream-rgb: 236, 250, 240;
+    --cg-stone-rgb: 168, 200, 192;
+    --cg-sky-rgb: 6, 36, 31;
+    --cg-sky-soft-rgb: 15, 58, 50;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   1. SETTINGS STAR — replace warm-white star with mint-green
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .settings-trigger {
+    /* Bump the resting alpha — the bright garden video video washes
+       out a low-alpha pink, so the star wasn't readable until hovered. */
+    color: rgba(var(--cg-mint-rgb), calc(0.78 + var(--glow, 0) * 0.22));
+}
+[data-scene-theme="celestial-garden"] .settings-star {
+    filter: drop-shadow(
+        0 0 calc(4px + var(--glow, 0) * 18px)
+        rgba(var(--cg-mint-rgb), calc(0.45 + var(--glow, 0) * 0.55))
+    );
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   2. HELP TRIGGER — same treatment, mint-green ?
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .help-trigger {
+    color: rgba(var(--cg-mint-rgb), 0.78);
+    border-color: rgba(var(--cg-mint-rgb), 0.28);
+    background: rgba(var(--cg-sky-rgb), 0.42);
+}
+[data-scene-theme="celestial-garden"] .help-trigger:hover {
+    color: var(--cg-mint-soft);
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    box-shadow: 0 0 24px rgba(var(--cg-mint-rgb), 0.25);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   3. ACCOUNT SATELLITE — replace gold orbs with mint green
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .account-satellite__orbits circle[stroke] {
+    /* Bumped from 0.32 — that alpha vanished against the bright
+       garden video backdrop; 0.55 + a soft drop-shadow keeps the
+       orbits subtle but visible without competing with the avatar. */
+    stroke: rgba(var(--cg-mint-rgb), 0.55);
+    stroke-width: 1.1;
+    filter: drop-shadow(0 0 4px rgba(var(--cg-mint-rgb), 0.45));
+}
+[data-scene-theme="celestial-garden"] .account-satellite__pip {
+    fill: rgba(var(--cg-mint-soft-rgb), 1);
+    filter: drop-shadow(0 0 5px rgba(var(--cg-mint-rgb), 1));
+}
+[data-scene-theme="celestial-garden"] .cosmos-toolbar__divider {
+    background: rgba(var(--cg-mint-rgb), 0.22);
+}
+/* Auto-advance checkbox in the task dock — pink tint to match the
+   rest of the chrome under celestial-garden. */
+[data-scene-theme="celestial-garden"] .task-dock__autoadvance {
+    border-color: rgba(var(--cg-mint-rgb), 0.42);
+}
+[data-scene-theme="celestial-garden"] .task-dock__autoadvance:hover {
+    border-color: rgba(var(--cg-mint-rgb), 0.62);
+    background: rgba(var(--cg-mint-rgb), 0.10);
+}
+[data-scene-theme="celestial-garden"] .task-dock__autoadvance.is-on {
+    background: rgba(var(--cg-mint-rgb), 0.32);
+    border-color: rgba(var(--cg-mint-rgb), 0.62);
+    color: var(--cg-sky);
+}
+[data-scene-theme="celestial-garden"] .task-dock__autoadvance:focus-visible {
+    outline: 2px solid rgba(var(--cg-mint-rgb), 0.65);
+}
+[data-scene-theme="celestial-garden"] .account-satellite.is-signed-out .account-satellite__core {
+    background:
+        linear-gradient(180deg,
+            rgba(var(--cg-cream-rgb), 0.10) 0%,
+            rgba(var(--cg-cream-rgb), 0.04) 18%,
+            transparent 36%),
+        radial-gradient(circle at 50% 42%,
+            rgba(var(--cg-mint-soft-rgb), 0.10) 0%,
+            rgba(var(--cg-mint-deep-rgb), 0.18) 50%,
+            rgba(var(--cg-sky-rgb), 0.55) 100%);
+    border: 1px solid rgba(var(--cg-mint-rgb), calc(0.28 + var(--glow, 0) * 0.5));
+    box-shadow:
+        inset 0 1px 0 rgba(var(--cg-cream-rgb), 0.28),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+        inset 0 0 22px rgba(var(--cg-mint-rgb), 0.10),
+        0 4px 14px rgba(var(--cg-sky-rgb), 0.5);
+}
+[data-scene-theme="celestial-garden"] .account-satellite.is-signed-in .account-satellite__core {
+    background:
+        linear-gradient(180deg,
+            rgba(var(--cg-cream-rgb), 0.12) 0%,
+            rgba(var(--cg-cream-rgb), 0.04) 18%,
+            transparent 36%),
+        radial-gradient(circle at 50% 42%,
+            rgba(var(--cg-mint-soft-rgb), 0.22) 0%,
+            rgba(var(--cg-mint-deep-rgb), 0.22) 50%,
+            rgba(var(--cg-sky-rgb), 0.55) 100%);
+    border: 1px solid rgba(var(--cg-mint-rgb), calc(0.45 + var(--glow, 0) * 0.45));
+    box-shadow:
+        inset 0 1px 0 rgba(var(--cg-cream-rgb), 0.32),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+        inset 0 0 22px rgba(var(--cg-mint-rgb), 0.18),
+        0 0 0 1px rgba(var(--cg-mint-rgb), 0.22),
+        0 0 32px rgba(var(--cg-mint-rgb), calc(0.30 + var(--glow, 0) * 0.35)),
+        0 4px 14px rgba(var(--cg-sky-rgb), 0.5);
+    color: rgba(var(--cg-cream-rgb), 1);
+}
+[data-scene-theme="celestial-garden"] .account-satellite.is-signed-in .account-satellite__glyph {
+    filter:
+        drop-shadow(0 0 4px rgba(var(--cg-mint-soft-rgb), 0.9))
+        drop-shadow(0 0 10px rgba(var(--cg-mint-rgb), 0.55));
+}
+[data-scene-theme="celestial-garden"] .account-satellite__halo {
+    background: radial-gradient(circle,
+        rgba(var(--cg-mint-rgb), calc(0.32 * var(--glow))) 0%,
+        rgba(var(--cg-mint-rgb), calc(0.18 * var(--glow))) 35%,
+        transparent 70%);
+}
+
+/* Filament — engraved data-rail gradient + rivet swap to mint green */
+[data-scene-theme="celestial-garden"] .nav-filament__thread,
+[data-scene-theme="celestial-garden"] .nav-filament__ticks {
+    stroke: rgba(var(--cg-mint-rgb), 0.65);
+}
+[data-scene-theme="celestial-garden"] .nav-filament__pulse {
+    fill: rgba(var(--cg-mint-soft-rgb), 0.95);
+}
+[data-scene-theme="celestial-garden"] .nav-filament__rivet-halo {
+    fill: rgba(var(--cg-mint-rgb), 0.22);
+}
+[data-scene-theme="celestial-garden"] .nav-filament__rivet {
+    fill: var(--cg-mint-soft);
+    filter: drop-shadow(0 0 6px rgba(var(--cg-mint-rgb), 0.65));
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   4. ACCOUNT DROPDOWN — auth menu under the satellite
+   The original is apple liquid-glass (`rgba(255,255,255,0.07)` over a
+   strong saturated blur).  Keep the same liquid-glass quality with a
+   whisper of mint green so the surface reads as part of the Celestial Garden
+   palette — never as an opaque sky slab.  The inner flex container
+   stays transparent; the floating glass pane is `.account-dropdown`
+   itself. */
+[data-scene-theme="celestial-garden"] .account-dropdown {
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    box-shadow:
+        0 24px 60px rgba(var(--cg-sky-rgb), 0.45),
+        0 8px 18px rgba(var(--cg-sky-rgb), 0.30),
+        inset 0 1px 0 rgba(var(--cg-cream-rgb), 0.10);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__inner {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__arrow {
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    border-left: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    border-top: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__intro-title,
+[data-scene-theme="celestial-garden"] .account-dropdown__name {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__intro-body,
+[data-scene-theme="celestial-garden"] .account-dropdown__email {
+    color: rgba(var(--cg-cream-rgb), 0.70);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__btn,
+[data-scene-theme="celestial-garden"] .account-dropdown__row {
+    color: rgba(var(--cg-cream-rgb), 0.92);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.18);
+    background: rgba(var(--cg-mint-rgb), 0.04);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__btn:hover,
+[data-scene-theme="celestial-garden"] .account-dropdown__row:hover {
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    border-color: rgba(var(--cg-mint-rgb), 0.36);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__btn--primary {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+    border-color: rgba(var(--cg-mint-rgb), 0.46);
+    color: var(--cg-mint-pale);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__btn--primary:hover {
+    background: rgba(var(--cg-mint-rgb), 0.28);
+    border-color: rgba(var(--cg-mint-rgb), 0.62);
+    box-shadow: 0 0 22px rgba(var(--cg-mint-rgb), 0.32);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__divider {
+    background: rgba(var(--cg-mint-rgb), 0.16);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__sync-state {
+    color: rgba(var(--cg-cream-rgb), 0.55);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__row--danger {
+    color: #ff9bb5;
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__row--danger:hover {
+    background: rgba(255, 90, 110, 0.12);
+    border-color: rgba(255, 90, 110, 0.4);
+    color: #ffb1c2;
+}
+/* Avatar bubble — mirror of the satellite core but in mint-green. */
+[data-scene-theme="celestial-garden"] .account-dropdown__avatar {
+    background:
+        linear-gradient(180deg,
+            rgba(var(--cg-cream-rgb), 0.10) 0%,
+            rgba(var(--cg-cream-rgb), 0.03) 18%,
+            transparent 36%),
+        radial-gradient(circle at 50% 42%,
+            rgba(var(--cg-mint-soft-rgb), 0.20) 0%,
+            rgba(var(--cg-mint-deep-rgb), 0.22) 50%,
+            rgba(var(--cg-sky-rgb), 0.45) 100%);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.55);
+    box-shadow:
+        inset 0 1px 0 rgba(var(--cg-cream-rgb), 0.32),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+        inset 0 0 18px rgba(var(--cg-mint-rgb), 0.12),
+        0 0 24px rgba(var(--cg-mint-rgb), 0.32),
+        0 4px 12px rgba(var(--cg-sky-rgb), 0.5);
+    color: rgba(var(--cg-cream-rgb), 1);
+}
+[data-scene-theme="celestial-garden"] .account-dropdown__avatar-glyph {
+    filter:
+        drop-shadow(0 0 4px rgba(var(--cg-mint-soft-rgb), 0.9))
+        drop-shadow(0 0 10px rgba(var(--cg-mint-rgb), 0.55));
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   5. AUTH MODAL — sign in / sign up card
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .auth-modal__card {
+    background: rgba(var(--cg-sky-rgb), 0.88);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    box-shadow:
+        0 32px 80px rgba(var(--cg-sky-rgb), 0.7),
+        0 12px 30px rgba(var(--cg-sky-rgb), 0.5),
+        0 0 0 0.5px rgba(var(--cg-mint-rgb), 0.12),
+        inset 0 1px 0 rgba(var(--cg-cream-rgb), 0.06);
+}
+[data-scene-theme="celestial-garden"] .auth-modal h2,
+[data-scene-theme="celestial-garden"] .auth-modal h3 {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .auth-modal input,
+[data-scene-theme="celestial-garden"] .auth-modal__input {
+    background: rgba(var(--cg-mint-rgb), 0.06);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .auth-modal input:focus,
+[data-scene-theme="celestial-garden"] .auth-modal__input:focus {
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--cg-mint-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="celestial-garden"] .auth-alt__link {
+    color: rgba(var(--cg-mint-rgb), 0.85);
+}
+[data-scene-theme="celestial-garden"] .auth-alt__link:hover {
+    color: var(--cg-mint-soft);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   6. SETTINGS PANEL — main drawer chrome
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] #settingsPanel,
+[data-scene-theme="celestial-garden"] .settings-panel {
+    background: rgba(var(--cg-sky-rgb), 0.78) !important;
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.18) !important;
+    box-shadow:
+        0 32px 80px rgba(var(--cg-sky-rgb), 0.7),
+        0 0 0 0.5px rgba(var(--cg-mint-rgb), 0.10),
+        inset 0 1px 0 rgba(var(--cg-cream-rgb), 0.05),
+        inset 0 -1px 0 rgba(var(--cg-sky-rgb), 0.6) !important;
+}
+[data-scene-theme="celestial-garden"] .settings-section,
+[data-scene-theme="celestial-garden"] .settings-row,
+[data-scene-theme="celestial-garden"] .settings-card {
+    border-color: rgba(var(--cg-mint-rgb), 0.14);
+}
+[data-scene-theme="celestial-garden"] .settings-row:hover {
+    background: rgba(var(--cg-mint-rgb), 0.04);
+}
+/* Strip the encapsulating frames the user flagged in image #63/#64.
+   Settings rows previously read as "cards" because the segmented
+   options + steppers + text inputs each had a boxed background under
+   celestial-garden. Drop the boxes; the controls themselves carry the visual
+   weight (thumb, fill, swatch). */
+[data-scene-theme="celestial-garden"] .sr-segmented .sr__segmented {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    gap: 4px;
+}
+[data-scene-theme="celestial-garden"] .sr-segmented .sr__seg-btn {
+    background: transparent;
+    color: rgba(var(--cg-cream-rgb), 0.55);
+}
+[data-scene-theme="celestial-garden"] .sr-segmented .sr__seg-btn:hover {
+    background: rgba(var(--cg-mint-rgb), 0.08);
+    color: rgba(var(--cg-cream-rgb), 0.95);
+}
+[data-scene-theme="celestial-garden"] .sr-segmented .sr__seg-btn.is-active {
+    /* No box-shadow ring — the user explicitly disliked the framed
+       rectangle around the active option. Just a soft fill carries
+       the active state. */
+    background: rgba(var(--cg-mint-rgb), 0.16);
+    color: var(--cg-mint-pale);
+    box-shadow: none;
+}
+/* Slider — base CSS painted a thick gold/pink track that read as a
+   rectangular fill. The user explicitly disliked the "rectangular
+   bar" — drop the fill to a thin 2px line with low-alpha mint green on
+   the filled side and an almost-invisible cream rail on the empty
+   side. The thumb remains the visual anchor. */
+[data-scene-theme="celestial-garden"] .sr-slider .sr__range {
+    /* Track is now fully transparent. The .sr-slider::after guide
+       line below provides the visual rail; the thumb is the only
+       coloured element. The user repeatedly flagged the gradient
+       fill as "a rectangular pink bar"; with no fill there's no
+       rectangle. */
+    height: 2px;
+    background: transparent;
+    border-radius: 1px;
+    /* Explicit zeros: some user-agent stylesheets (especially Firefox)
+       paint a default border + outline + box-shadow on <input type="range">.
+       The "rectangular outline around the entire input" the user kept
+       reporting is one of those falling through. */
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+    padding: 0;
+}
+/* Faint guide line behind the slider — drawn as a thin div via the
+   row's ::before so it's NOT part of the input element (no UA chrome
+   risk). 1px tall, 8% cream, sits at the same vertical centre as the
+   2px track. Lets users see the slider extent without the input
+   itself painting a wide horizontal rectangle. */
+[data-scene-theme="celestial-garden"] .sr-slider .sr__range {
+    position: relative;
+    z-index: 1;
+}
+[data-scene-theme="celestial-garden"] .sr-slider {
+    position: relative;
+}
+[data-scene-theme="celestial-garden"] .sr-slider::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 13px;
+    height: 1px;
+    background: rgba(var(--cg-cream-rgb), 0.08);
+    pointer-events: none;
+    z-index: 0;
+}
+/* Thumb shadow used to be 0 0 10px → that 10px halo, when stretched
+   along the track at full opacity, read as a rectangular pink fill
+   surrounding the track. Drop the shadow to a tight 4px circle. */
+[data-scene-theme="celestial-garden"] .sr-slider .sr__range::-webkit-slider-thumb {
+    background: radial-gradient(circle at 40% 35%,
+        rgba(var(--cg-mint-soft-rgb), 1),
+        rgba(var(--cg-mint-rgb), 0.95));
+    border-color: rgba(var(--cg-mint-soft-rgb), 0.50);
+    box-shadow:
+        0 0 4px rgba(var(--cg-mint-rgb), 0.45),
+        0 1px 3px rgba(var(--cg-sky-rgb), 0.35);
+}
+[data-scene-theme="celestial-garden"] .sr-slider .sr__range::-webkit-slider-thumb:hover {
+    box-shadow:
+        0 0 8px rgba(var(--cg-mint-rgb), 0.65),
+        0 1px 4px rgba(var(--cg-sky-rgb), 0.40);
+}
+[data-scene-theme="celestial-garden"] .sr-slider .sr__range::-moz-range-thumb {
+    background: radial-gradient(circle at 40% 35%,
+        rgba(var(--cg-mint-soft-rgb), 1),
+        rgba(var(--cg-mint-rgb), 0.95));
+    border-color: rgba(var(--cg-mint-soft-rgb), 0.50);
+    box-shadow: 0 0 4px rgba(var(--cg-mint-rgb), 0.45);
+}
+[data-scene-theme="celestial-garden"] .sr-slider .sr__range::-moz-range-progress {
+    background: rgba(var(--cg-mint-rgb), 0.65);
+}
+/* Dirty-state indicator — base CSS pulses a gold dot next to the
+   row label whenever the value differs from default. Recolour to
+   mint green so it stops fighting the garden video palette. */
+[data-scene-theme="celestial-garden"] .sr.is-dirty .sr__label::after {
+    background: rgba(var(--cg-mint-rgb), 0.9);
+    box-shadow: 0 0 6px rgba(var(--cg-mint-rgb), 0.55);
+    animation-name: celestialDirtyPulse;
+}
+@keyframes celestialDirtyPulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(126, 234, 144, 0.40); }
+    50%      { box-shadow: 0 0 10px rgba(126, 234, 144, 0.80); }
+}
+/* Stepper button hover — base CSS used a gold tint, which read as
+   off-palette under celestial-garden. */
+[data-scene-theme="celestial-garden"] .sr-stepper .sr__step-btn:hover {
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    color: rgba(var(--cg-cream-rgb), 0.95);
+}
+/* Switch (toggle) — already pink in active state via the round-2
+   override; harmonise the inactive state too so the unfilled track
+   doesn't look like a leftover gray pill. */
+[data-scene-theme="celestial-garden"] .sr-toggle .sr__switch:not(.is-on) {
+    background: rgba(var(--cg-cream-rgb), 0.04);
+    border-color: rgba(var(--cg-cream-rgb), 0.18);
+}
+/* Settings buttons — Reset section, Permission grant, etc. Recolour
+   the gold hover state to mint green so the buttons sit in the
+   celestial-garden family. */
+[data-scene-theme="celestial-garden"] .sr-button,
+[data-scene-theme="celestial-garden"] .sr__btn,
+[data-scene-theme="celestial-garden"] .sr-button-row button {
+    border-color: rgba(var(--cg-mint-rgb), 0.18);
+    background: rgba(var(--cg-mint-rgb), 0.04);
+    color: rgba(var(--cg-cream-rgb), 0.85);
+}
+[data-scene-theme="celestial-garden"] .sr-button:hover,
+[data-scene-theme="celestial-garden"] .sr__btn:hover,
+[data-scene-theme="celestial-garden"] .sr-button-row button:hover {
+    background: rgba(var(--cg-mint-rgb), 0.14);
+    border-color: rgba(var(--cg-mint-rgb), 0.50);
+    color: var(--cg-mint-pale);
+    box-shadow: 0 0 16px rgba(var(--cg-mint-rgb), 0.18);
+}
+[data-scene-theme="celestial-garden"] .sr-button:active,
+[data-scene-theme="celestial-garden"] .sr__btn:active,
+[data-scene-theme="celestial-garden"] .sr-button-row button:active {
+    background: rgba(var(--cg-mint-rgb), 0.20);
+}
+[data-scene-theme="celestial-garden"] .sr-button.is-confirmed,
+[data-scene-theme="celestial-garden"] .sr__btn.is-confirmed {
+    background: rgba(var(--cg-mint-rgb), 0.20);
+    border-color: rgba(var(--cg-mint-rgb), 0.62);
+    color: var(--cg-mint-pale);
+    box-shadow: 0 0 22px rgba(var(--cg-mint-rgb), 0.22);
+}
+/* Stepper +/- pair — the user's screenshot showed this with a
+   visible boxed frame; strip it so the buttons read as standalone. */
+[data-scene-theme="celestial-garden"] .sr-stepper .sr__stepper {
+    background: transparent;
+    border: 0;
+}
+[data-scene-theme="celestial-garden"] .sr__text-input,
+[data-scene-theme="celestial-garden"] .sr-text .sr__text-input {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(var(--cg-mint-rgb), 0.18);
+    border-radius: 0;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+[data-scene-theme="celestial-garden"] .sr__text-input:focus,
+[data-scene-theme="celestial-garden"] .sr-text .sr__text-input:focus {
+    border-bottom-color: rgba(var(--cg-mint-rgb), 0.65);
+    box-shadow: none;
+    background: transparent;
+}
+[data-scene-theme="celestial-garden"] .settings-section__title,
+[data-scene-theme="celestial-garden"] .settings-eyebrow,
+[data-scene-theme="celestial-garden"] .settings-row__label {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .settings-row__hint {
+    color: rgba(var(--cg-cream-rgb), 0.6);
+}
+/* The chrome lives on .settings-search__input itself; .settings-search
+   is just an unstyled relative wrapper. Earlier rounds painted both
+   with the same border, which produced a square outer outline (the
+   wrapper has no border-radius) overlaid on the rounded input — the
+   "rectangle inside a rounded rectangle" mismatch the user flagged. */
+[data-scene-theme="celestial-garden"] .settings-search__input,
+[data-scene-theme="celestial-garden"] .settings-input,
+[data-scene-theme="celestial-garden"] .settings-textarea,
+[data-scene-theme="celestial-garden"] .settings-select,
+[data-scene-theme="celestial-garden"] .settings-number {
+    background: rgba(var(--cg-mint-rgb), 0.06);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .settings-input:focus,
+[data-scene-theme="celestial-garden"] .settings-textarea:focus,
+[data-scene-theme="celestial-garden"] .settings-select:focus,
+[data-scene-theme="celestial-garden"] .settings-number:focus,
+[data-scene-theme="celestial-garden"] .settings-search__input:focus {
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--cg-mint-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="celestial-garden"] .settings-row__chip,
+[data-scene-theme="celestial-garden"] .settings-chip {
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.30);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .settings-row__chip:hover,
+[data-scene-theme="celestial-garden"] .settings-chip:hover {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+    border-color: rgba(var(--cg-mint-rgb), 0.50);
+}
+[data-scene-theme="celestial-garden"] .settings-tabs__tab[aria-selected="true"],
+[data-scene-theme="celestial-garden"] .settings-tabs__tab.active {
+    color: var(--cg-mint-soft);
+    border-color: rgba(var(--cg-mint-rgb), 0.48);
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    box-shadow: inset 0 0 0 1px rgba(var(--cg-mint-rgb), 0.32);
+}
+[data-scene-theme="celestial-garden"] .settings-toggle--on,
+[data-scene-theme="celestial-garden"] .settings-toggle.is-on,
+[data-scene-theme="celestial-garden"] [role="switch"][aria-checked="true"] {
+    background: rgba(var(--cg-mint-rgb), 0.45);
+    border-color: rgba(var(--cg-mint-rgb), 0.65);
+}
+[data-scene-theme="celestial-garden"] .theme-card.is-selected,
+[data-scene-theme="celestial-garden"] .theme-card[aria-selected="true"],
+[data-scene-theme="celestial-garden"] .theme-card.selected {
+    border-color: rgba(var(--cg-mint-rgb), 0.65);
+    box-shadow: 0 0 0 3px rgba(var(--cg-mint-rgb), 0.18),
+                0 0 24px rgba(var(--cg-mint-rgb), 0.18);
+}
+
+/* Slider track + thumb */
+[data-scene-theme="celestial-garden"] input[type="range"]::-webkit-slider-runnable-track {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+}
+[data-scene-theme="celestial-garden"] input[type="range"]::-webkit-slider-thumb {
+    background: var(--cg-mint-soft);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.65);
+    box-shadow: 0 0 0 3px rgba(var(--cg-mint-rgb), 0.10);
+}
+[data-scene-theme="celestial-garden"] input[type="range"]::-moz-range-track {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+}
+[data-scene-theme="celestial-garden"] input[type="range"]::-moz-range-thumb {
+    background: var(--cg-mint-soft);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.65);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   7. PROFILE DRAWER — full analytics surface
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .profile {
+    /* Section accent palette retuned for the celestial garden — six
+       sections, all within the mint↔teal family so the chrome reads
+       as a single coherent moonlit garden rather than six competing
+       hues against the dark emerald backdrop. */
+    --accent-amber:  126, 234, 192;   /* primary mint */
+    --accent-blue:   168, 232, 236;   /* lotus rim cyan */
+    --accent-green:  200, 244, 226;   /* pale moonlit petal */
+    --accent-violet: 95, 200, 200;    /* pond teal */
+    --accent-orange: 168, 232, 200;   /* foliage glow */
+    --accent-rose:   58, 142, 142;    /* deep teal */
+}
+[data-scene-theme="celestial-garden"] .profile__sheet {
+    background: rgba(var(--cg-sky-rgb), 0.84);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.16);
+    box-shadow:
+        0 24px 80px rgba(var(--cg-sky-rgb), 0.7),
+        0 8px 24px rgba(var(--cg-sky-rgb), 0.4),
+        0 0 0 0.5px rgba(var(--cg-cream-rgb), 0.06),
+        inset 0 1px 0 rgba(var(--cg-cream-rgb), 0.06);
+}
+[data-scene-theme="celestial-garden"] .profile__rail-btn {
+    color: rgba(var(--cg-cream-rgb), 0.7);
+    border-color: transparent;
+}
+[data-scene-theme="celestial-garden"] .profile__rail-btn:hover {
+    color: var(--cg-cream);
+    background: rgba(var(--cg-mint-rgb), 0.08);
+}
+[data-scene-theme="celestial-garden"] .profile__rail-btn[aria-current="true"],
+[data-scene-theme="celestial-garden"] .profile__rail-btn.is-active {
+    color: var(--cg-mint-soft);
+    background: rgba(var(--cg-mint-rgb), 0.12);
+    border-color: rgba(var(--cg-mint-rgb), 0.35);
+}
+[data-scene-theme="celestial-garden"] .profile__name,
+[data-scene-theme="celestial-garden"] .profile__greeting,
+[data-scene-theme="celestial-garden"] .psection h2,
+[data-scene-theme="celestial-garden"] .psection h3,
+[data-scene-theme="celestial-garden"] .pchart__title {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .pkpi__num,
+[data-scene-theme="celestial-garden"] .profile__kpi-num {
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .pchart,
+[data-scene-theme="celestial-garden"] .profile__card {
+    background: rgba(var(--cg-mint-rgb), 0.04);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.16);
+}
+[data-scene-theme="celestial-garden"] .pchart__eyebrow {
+    color: rgba(var(--section-accent), 0.85);
+}
+[data-scene-theme="celestial-garden"] .profile__pill,
+[data-scene-theme="celestial-garden"] .profile__filter {
+    border-color: rgba(var(--cg-mint-rgb), 0.22);
+    color: rgba(var(--cg-cream-rgb), 0.78);
+}
+[data-scene-theme="celestial-garden"] .profile__pill.is-active,
+[data-scene-theme="celestial-garden"] .profile__filter.is-active {
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    background: rgba(var(--cg-mint-rgb), 0.14);
+    color: var(--cg-mint-soft);
+}
+/* Profile chart strokes — keep amber for charts that draw strokes from
+   currentColor unless the chart has its own colour. */
+[data-scene-theme="celestial-garden"] .pchart svg [stroke="rgb(255,205,115)"],
+[data-scene-theme="celestial-garden"] .pchart svg [stroke="rgba(255,205,115,1)"] {
+    stroke: var(--cg-mint);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   8. TASK DOCK — bottom task surface (chrome only, layout preserved)
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .task-dock {
+    background: linear-gradient(
+        180deg,
+        rgba(var(--cg-sky-rgb), 0.78),
+        rgba(var(--cg-sky-rgb), 0.88)
+    );
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    box-shadow:
+        0 -2px 0 rgba(var(--cg-mint-rgb), 0.05) inset,
+        0 18px 40px rgba(var(--cg-sky-rgb), 0.55),
+        0 0 28px rgba(var(--cg-mint-rgb), 0.10);
+    color: rgba(var(--cg-cream-rgb), 0.95);
+}
+[data-scene-theme="celestial-garden"] .task-dock[data-state="expanded"] {
+    border-color: rgba(var(--cg-mint-rgb), 0.42);
+    box-shadow:
+        0 -2px 0 rgba(var(--cg-mint-rgb), 0.08) inset,
+        0 24px 56px rgba(var(--cg-sky-rgb), 0.7),
+        0 0 38px rgba(var(--cg-mint-rgb), 0.18);
+}
+[data-scene-theme="celestial-garden"] .task-dock__rail-handle {
+    background: rgba(var(--cg-mint-rgb), 0.42);
+}
+[data-scene-theme="celestial-garden"] .task-dock__rail:hover .task-dock__rail-handle,
+[data-scene-theme="celestial-garden"] .task-dock__rail:focus-visible .task-dock__rail-handle {
+    background: rgba(var(--cg-mint-rgb), 0.78);
+}
+[data-scene-theme="celestial-garden"] .task-dock__eyebrow,
+[data-scene-theme="celestial-garden"] .task-dock__head-eyebrow {
+    color: rgba(var(--cg-mint-rgb), 0.9);
+}
+[data-scene-theme="celestial-garden"] .task-dock__active-name,
+[data-scene-theme="celestial-garden"] .task-dock__head-title {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .task-dock__count {
+    color: rgba(var(--cg-cream-rgb), 0.65);
+}
+[data-scene-theme="celestial-garden"] .task-dock__chevron {
+    color: rgba(var(--cg-mint-rgb), 0.7);
+}
+[data-scene-theme="celestial-garden"] .task-dock__progress {
+    background: rgba(var(--cg-mint-rgb), 0.14);
+    color: var(--cg-mint-soft);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.32);
+}
+[data-scene-theme="celestial-garden"] .task-dock__summary-chip {
+    background: rgba(var(--cg-mint-rgb), 0.08);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.20);
+}
+[data-scene-theme="celestial-garden"] .task-dock__summary-num {
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .task-dock__summary-label {
+    color: rgba(var(--cg-cream-rgb), 0.7);
+}
+[data-scene-theme="celestial-garden"] .task-dock__add-input,
+[data-scene-theme="celestial-garden"] .task-input,
+[data-scene-theme="celestial-garden"] .task-dock input[type="text"] {
+    background: rgba(var(--cg-mint-rgb), 0.06);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .task-dock__add-input:focus,
+[data-scene-theme="celestial-garden"] .task-input:focus {
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--cg-mint-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="celestial-garden"] .task-item,
+[data-scene-theme="celestial-garden"] .task {
+    border-color: rgba(var(--cg-mint-rgb), 0.12);
+}
+[data-scene-theme="celestial-garden"] .task-item:hover,
+[data-scene-theme="celestial-garden"] .task:hover {
+    background: rgba(var(--cg-mint-rgb), 0.04);
+    border-color: rgba(var(--cg-mint-rgb), 0.24);
+}
+[data-scene-theme="celestial-garden"] .task-text {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .task-checkbox,
+[data-scene-theme="celestial-garden"] .task-check {
+    border-color: rgba(var(--cg-mint-rgb), 0.5);
+}
+[data-scene-theme="celestial-garden"] .task-checkbox:checked,
+[data-scene-theme="celestial-garden"] .task-check.is-checked,
+[data-scene-theme="celestial-garden"] .task.completed .task-checkbox,
+[data-scene-theme="celestial-garden"] .task.completed .task-check {
+    background: rgba(var(--cg-mint-rgb), 0.6);
+    border-color: rgba(var(--cg-mint-rgb), 0.85);
+}
+[data-scene-theme="celestial-garden"] .task-add-btn,
+[data-scene-theme="celestial-garden"] .task-dock__add-btn {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.40);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .task-add-btn:hover,
+[data-scene-theme="celestial-garden"] .task-dock__add-btn:hover {
+    background: rgba(var(--cg-mint-rgb), 0.30);
+    border-color: rgba(var(--cg-mint-rgb), 0.62);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   9. TASK DETAIL DRAWER
+   The container `.task-detail` is `position:fixed; inset:0` so any
+   background on it tints the entire viewport. The chrome lives on
+   .task-detail__sheet — keep the container transparent. */
+[data-scene-theme="celestial-garden"] .task-detail__back,
+[data-scene-theme="celestial-garden"] .task-detail__close {
+    border-color: rgba(var(--cg-mint-rgb), 0.22);
+    color: rgba(var(--cg-mint-rgb), 0.85);
+}
+[data-scene-theme="celestial-garden"] .task-detail__back:hover,
+[data-scene-theme="celestial-garden"] .task-detail__close:hover {
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    color: var(--cg-mint-soft);
+    border-color: rgba(var(--cg-mint-rgb), 0.45);
+}
+[data-scene-theme="celestial-garden"] .task-detail__eyebrow {
+    color: rgba(var(--cg-mint-rgb), 0.85);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   10. COSMOS TOOLBAR — bottom-centre sound controls
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .cosmos-toolbar {
+    background: rgba(var(--cg-sky-rgb), 0.55);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    box-shadow:
+        inset 0 1px 0 rgba(var(--cg-cream-rgb), 0.06),
+        inset 0 -1px 0 rgba(var(--cg-sky-rgb), 0.5),
+        0 8px 24px rgba(var(--cg-sky-rgb), 0.5),
+        0 0 32px rgba(var(--cg-mint-rgb), 0.10);
+}
+[data-scene-theme="celestial-garden"] .cosmos-toolbar:hover {
+    border-color: rgba(var(--cg-mint-rgb), 0.40);
+    box-shadow:
+        inset 0 1px 0 rgba(var(--cg-cream-rgb), 0.10),
+        inset 0 -1px 0 rgba(var(--cg-sky-rgb), 0.55),
+        0 14px 32px rgba(var(--cg-sky-rgb), 0.6),
+        0 0 48px rgba(var(--cg-mint-rgb), 0.18);
+}
+[data-scene-theme="celestial-garden"] .cosmos-tool {
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    background: rgba(var(--cg-mint-rgb), 0.06);
+    color: rgba(var(--cg-cream-rgb), 0.9);
+}
+[data-scene-theme="celestial-garden"] .cosmos-tool:hover {
+    background: rgba(var(--cg-mint-rgb), 0.16);
+    border-color: rgba(var(--cg-mint-rgb), 0.50);
+    color: var(--cg-mint-soft);
+    box-shadow: 0 0 18px rgba(var(--cg-mint-rgb), 0.22);
+}
+[data-scene-theme="celestial-garden"] .cosmos-tool.is-active {
+    background: rgba(var(--cg-mint-rgb), 0.24);
+    border-color: rgba(var(--cg-mint-rgb), 0.65);
+    color: var(--cg-mint-pale);
+}
+[data-scene-theme="celestial-garden"] .cosmos-tool--danger:hover {
+    border-color: rgba(255, 110, 130, 0.55);
+    color: #ffb1c2;
+    background: rgba(255, 110, 130, 0.12);
+}
+[data-scene-theme="celestial-garden"] .cosmos-tool__arc circle {
+    stroke: var(--cg-mint);
+}
+[data-scene-theme="celestial-garden"] .cosmos-tool::after {
+    background: rgba(var(--cg-sky-rgb), 0.92);
+    color: var(--cg-cream);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.28);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   11. AMBIENT DECK — track cards + library drawer + sleep popover
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .track-card {
+    background: rgba(var(--cg-sky-rgb), 0.55);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.18);
+}
+[data-scene-theme="celestial-garden"] .track-card:hover {
+    border-color: rgba(var(--cg-mint-rgb), 0.36);
+    background: rgba(var(--cg-sky-rgb), 0.65);
+}
+[data-scene-theme="celestial-garden"] .track-card__name {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .track-card__category {
+    color: rgba(var(--cg-cream-rgb), 0.6);
+}
+[data-scene-theme="celestial-garden"] .track-card__volume-pct {
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .track-iconbtn {
+    border-color: rgba(var(--cg-mint-rgb), 0.22);
+    color: rgba(var(--cg-cream-rgb), 0.85);
+}
+[data-scene-theme="celestial-garden"] .track-iconbtn:hover {
+    background: rgba(var(--cg-mint-rgb), 0.12);
+    border-color: rgba(var(--cg-mint-rgb), 0.50);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .track-card input[type="range"]::-webkit-slider-runnable-track,
+[data-scene-theme="celestial-garden"] .deck-master input[type="range"]::-webkit-slider-runnable-track {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+}
+[data-scene-theme="celestial-garden"] .track-card input[type="range"]::-webkit-slider-thumb,
+[data-scene-theme="celestial-garden"] .deck-master input[type="range"]::-webkit-slider-thumb {
+    background: var(--cg-mint-soft);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.65);
+}
+[data-scene-theme="celestial-garden"] .library-drawer__panel {
+    background: rgba(var(--cg-sky-rgb), 0.92);
+    border-left: 1px solid rgba(var(--cg-mint-rgb), 0.20);
+}
+[data-scene-theme="celestial-garden"] .library-drawer__title {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .library-drawer__close,
+[data-scene-theme="celestial-garden"] .library-drawer__category-pill {
+    border-color: rgba(var(--cg-mint-rgb), 0.22);
+    color: rgba(var(--cg-cream-rgb), 0.85);
+}
+[data-scene-theme="celestial-garden"] .library-drawer__close:hover,
+[data-scene-theme="celestial-garden"] .library-drawer__category-pill:hover {
+    background: rgba(var(--cg-mint-rgb), 0.12);
+    border-color: rgba(var(--cg-mint-rgb), 0.42);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .library-drawer__category-pill.is-active {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .libcard {
+    background: rgba(var(--cg-sky-rgb), 0.55);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.18);
+}
+[data-scene-theme="celestial-garden"] .libcard:hover {
+    border-color: rgba(var(--cg-mint-rgb), 0.40);
+}
+[data-scene-theme="celestial-garden"] .libcard__name {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .libcard__category {
+    color: rgba(var(--cg-cream-rgb), 0.6);
+}
+[data-scene-theme="celestial-garden"] .libcard.is-active {
+    border-color: rgba(var(--cg-mint-rgb), 0.62);
+    box-shadow: 0 0 0 2px rgba(var(--cg-mint-rgb), 0.18);
+}
+[data-scene-theme="celestial-garden"] .deck-btn {
+    background: rgba(var(--cg-sky-rgb), 0.86);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    color: rgba(var(--cg-cream-rgb), 0.92);
+}
+/* Save-mix + Sleep popovers — liquid-glass register, green-tinted.
+   Targets the inner __card (the visible surface) so the outer
+   positioning shell stays a transparent click-catcher. */
+[data-scene-theme="celestial-garden"] .save-mix-popover__card,
+[data-scene-theme="celestial-garden"] .sleep-popover__card {
+    background: rgba(var(--cg-sky-rgb), 0.32);
+    border-color: rgba(var(--cg-mint-rgb), 0.32);
+    color: rgba(var(--cg-cream-rgb), 0.95);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.42),
+        0 6px 18px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(var(--cg-mint-rgb), 0.22),
+        inset 0 0 26px rgba(var(--cg-mint-rgb), 0.06);
+}
+[data-scene-theme="celestial-garden"] .sleep-chip {
+    border-color: rgba(var(--cg-mint-rgb), 0.28);
+    background: rgba(var(--cg-mint-rgb), 0.05);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .sleep-chip:hover {
+    background: rgba(var(--cg-mint-rgb), 0.16);
+    border-color: rgba(var(--cg-mint-rgb), 0.5);
+}
+[data-scene-theme="celestial-garden"] .deck-btn:hover {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+    border-color: rgba(var(--cg-mint-rgb), 0.45);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .ambient-toast {
+    background: rgba(var(--cg-sky-rgb), 0.92);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.30);
+    color: var(--cg-cream);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   12. HELP CENTER — drawer + entry cards
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .help-center,
+[data-scene-theme="celestial-garden"] .hc-panel {
+    background: rgba(var(--cg-sky-rgb), 0.86);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.18);
+    color: rgba(var(--cg-cream-rgb), 0.92);
+}
+[data-scene-theme="celestial-garden"] .hc-title,
+[data-scene-theme="celestial-garden"] .hc-category-title {
+    color: var(--cg-cream);
+}
+/* Same wrapper-vs-input bug as the settings search — the .hc-search
+   div is just a relative positioning shell with no border-radius, so
+   painting it the same rectangle as the rounded input produced a
+   square outline overlaid on the rounded one. Drop the wrapper. */
+[data-scene-theme="celestial-garden"] .hc-search input,
+[data-scene-theme="celestial-garden"] .hc-search__input {
+    background: rgba(var(--cg-mint-rgb), 0.06);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .hc-search input:focus,
+[data-scene-theme="celestial-garden"] .hc-search__input:focus {
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--cg-mint-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="celestial-garden"] .hc-entry {
+    border-color: rgba(var(--cg-mint-rgb), 0.16);
+}
+[data-scene-theme="celestial-garden"] .hc-entry:hover {
+    background: rgba(var(--cg-mint-rgb), 0.06);
+}
+[data-scene-theme="celestial-garden"] .hc-entry__q {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .hc-entry__a {
+    color: rgba(var(--cg-cream-rgb), 0.78);
+}
+/* Help Center category grid — replace the gold "warm inner edge" with
+   mint green. Also recolour the icon stroke and the count pill. */
+[data-scene-theme="celestial-garden"] .hc-cat-card {
+    border-color: rgba(var(--cg-mint-rgb), 0.14);
+    background: linear-gradient(
+        165deg,
+        rgba(var(--cg-mint-rgb), 0.06) 0%,
+        rgba(var(--cg-mint-rgb), 0.02) 100%
+    );
+}
+[data-scene-theme="celestial-garden"] .hc-cat-card::before {
+    background: linear-gradient(
+        165deg,
+        rgba(var(--cg-mint-rgb), 0.10) 0%,
+        rgba(var(--cg-mint-rgb), 0.04) 100%
+    );
+}
+[data-scene-theme="celestial-garden"] .hc-cat-card:hover {
+    background: linear-gradient(
+        165deg,
+        rgba(var(--cg-mint-rgb), 0.14) 0%,
+        rgba(var(--cg-mint-rgb), 0.06) 100%
+    );
+    border-color: rgba(var(--cg-mint-rgb), 0.38);
+    box-shadow: 0 6px 22px rgba(var(--cg-mint-rgb), 0.14);
+}
+[data-scene-theme="celestial-garden"] .hc-cat-card__icon {
+    color: rgba(var(--cg-mint-rgb), 0.78);
+}
+[data-scene-theme="celestial-garden"] .hc-cat-card:hover .hc-cat-card__icon {
+    color: var(--cg-mint-pale);
+}
+[data-scene-theme="celestial-garden"] .hc-cat-card__label {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .hc-cat-card__count {
+    color: rgba(var(--cg-cream-rgb), 0.55);
+}
+/* Help Center close + back chrome buttons */
+[data-scene-theme="celestial-garden"] .hc-close,
+[data-scene-theme="celestial-garden"] .hc-back {
+    color: rgba(var(--cg-cream-rgb), 0.55);
+}
+[data-scene-theme="celestial-garden"] .hc-close:hover,
+[data-scene-theme="celestial-garden"] .hc-back:hover {
+    color: var(--cg-cream);
+    background: rgba(var(--cg-mint-rgb), 0.10);
+}
+/* Footer hint + every kbd badge inside Help Center / Settings — the
+   default amber-on-charcoal didn't sit in the celestial garden palette. */
+[data-scene-theme="celestial-garden"] .hc-panel__footer {
+    color: rgba(var(--cg-cream-rgb), 0.55);
+    border-top-color: rgba(var(--cg-mint-rgb), 0.10);
+}
+[data-scene-theme="celestial-garden"] .hc-panel__footer kbd,
+[data-scene-theme="celestial-garden"] .hc-entry__body kbd,
+[data-scene-theme="celestial-garden"] .shortcut-row__key,
+[data-scene-theme="celestial-garden"] .settings-footer-hint kbd,
+[data-scene-theme="celestial-garden"] .shortcut-cheatsheet__row kbd,
+[data-scene-theme="celestial-garden"] .shortcut-cheatsheet__footer kbd {
+    background: rgba(var(--cg-sky-rgb), 0.55);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.28);
+    border-bottom-color: rgba(var(--cg-sky-rgb), 0.85);
+    color: var(--cg-mint-soft);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   13. NOTEPAD — notes drawer
+   The container `.notepad` is `position:fixed; inset:0` so it covers
+   the whole viewport. Painting a background on it (an earlier round
+   set rgba(plum, 0.88) here, plus the legacy `.notepad__panel` that
+   never existed in the markup) dimmed the garden video backdrop
+   the user explicitly asked to keep visible. The chrome lives on
+   .notepad__sheet — leave the container transparent. */
+[data-scene-theme="celestial-garden"] .notepad__title {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .notepad__list-item {
+    border-color: rgba(var(--cg-mint-rgb), 0.14);
+}
+[data-scene-theme="celestial-garden"] .notepad__list-item:hover,
+[data-scene-theme="celestial-garden"] .notepad__list-item.is-active {
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    border-color: rgba(var(--cg-mint-rgb), 0.30);
+}
+[data-scene-theme="celestial-garden"] .notepad__editor,
+[data-scene-theme="celestial-garden"] .notepad__textarea,
+[data-scene-theme="celestial-garden"] .notepad textarea {
+    background: rgba(var(--cg-mint-rgb), 0.04);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.18);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .notepad__tag {
+    background: rgba(var(--cg-mint-rgb), 0.12);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.30);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .notepad__btn {
+    background: rgba(var(--cg-mint-rgb), 0.14);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.38);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .notepad__btn:hover {
+    background: rgba(var(--cg-mint-rgb), 0.22);
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   14. DATE PICKER — calendar popover
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .date-picker {
+    background: rgba(var(--cg-sky-rgb), 0.92);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    color: rgba(var(--cg-cream-rgb), 0.92);
+}
+[data-scene-theme="celestial-garden"] .date-picker__day:hover {
+    background: rgba(var(--cg-mint-rgb), 0.15);
+}
+[data-scene-theme="celestial-garden"] .date-picker__day.is-today {
+    color: var(--cg-mint-soft);
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+}
+[data-scene-theme="celestial-garden"] .date-picker__day.is-selected {
+    background: rgba(var(--cg-mint-rgb), 0.40);
+    color: var(--cg-mint-pale);
+    border-color: rgba(var(--cg-mint-rgb), 0.65);
+}
+[data-scene-theme="celestial-garden"] .date-picker__day.is-other-month {
+    color: rgba(var(--cg-cream-rgb), 0.35);
+}
+[data-scene-theme="celestial-garden"] .date-picker__head,
+[data-scene-theme="celestial-garden"] .date-picker__nav-btn {
+    color: rgba(var(--cg-mint-rgb), 0.85);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   15. STATISTICS BAR — stats chips on focus tab
+   The chip surface in base CSS is just stacked text; previous round
+   added a card frame that the user explicitly disliked ("rectangulars
+   surrounding them"). Strip the frame back to plain text and only
+   tint the value + label colours.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .stat-chip,
+[data-scene-theme="celestial-garden"] .stats-chip {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    color: rgba(var(--cg-cream-rgb), 0.9);
+}
+[data-scene-theme="celestial-garden"] .stat-value {
+    color: rgba(var(--cg-mint-soft-rgb), 0.92);
+}
+[data-scene-theme="celestial-garden"] .stat-label {
+    color: rgba(var(--cg-cream-rgb), 0.55);
+}
+[data-scene-theme="celestial-garden"] .stat-chip__num,
+[data-scene-theme="celestial-garden"] .stats-chip__num,
+[data-scene-theme="celestial-garden"] .stats-num {
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .stat-chip__label,
+[data-scene-theme="celestial-garden"] .stats-chip__label,
+[data-scene-theme="celestial-garden"] .stats-label {
+    color: rgba(var(--cg-cream-rgb), 0.65);
+}
+/* Goal-complete celebration ring — celestial register shifts the ring
+   to lime-green so the success colour echoes the curtain itself. */
+[data-scene-theme="celestial-garden"] .stat-goal-ring.is-complete .stat-goal-ring__fill {
+    stroke: rgba(var(--cg-mint-rgb), 1);
+    filter: drop-shadow(0 0 10px rgba(var(--cg-mint-rgb), 0.6));
+}
+/* Period toggle (TODAY / WEEK / MONTH / ALL) — base CSS keeps a small
+   pill; tint it pink to match the rest of the chip row without making
+   it shouty. */
+[data-scene-theme="celestial-garden"] .stat-period-toggle {
+    background: rgba(var(--cg-mint-rgb), 0.06);
+    border-color: rgba(var(--cg-mint-rgb), 0.28);
+    color: rgba(var(--cg-mint-rgb), 0.78);
+}
+[data-scene-theme="celestial-garden"] .stat-period-toggle:hover,
+[data-scene-theme="celestial-garden"] .stat-period-toggle:focus-visible {
+    background: rgba(var(--cg-mint-rgb), 0.14);
+    border-color: rgba(var(--cg-mint-rgb), 0.50);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .stat-divider {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   16. TOASTS — settings + celebrate + notification
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .settings-toast,
+[data-scene-theme="celestial-garden"] .notification-banner,
+[data-scene-theme="celestial-garden"] .celebrate-toast {
+    background: rgba(var(--cg-sky-rgb), 0.92);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.32);
+    color: var(--cg-cream);
+    box-shadow:
+        0 12px 32px rgba(var(--cg-sky-rgb), 0.6),
+        0 0 24px rgba(var(--cg-mint-rgb), 0.15);
+}
+
+/* Account-status chip in Settings — Free / Cosmic Focus Pro pill at
+   the top of the Data & About group. Base CSS hardcodes a warm-amber
+   register; under celestial-garden the chip shifts to lime-green so the premium
+   label echoes the curtain itself rather than reading as a leftover
+   amber stamp on a cool palette. */
+[data-scene-theme="celestial-garden"] .sr-account-status__chip {
+    background: rgba(var(--cg-mint-rgb), 0.14);
+    border-color: rgba(var(--cg-mint-rgb), 0.5);
+    color: var(--cg-cream);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   17. ONBOARDING TOUR — highlight ring
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .tour-card {
+    background: rgba(var(--cg-sky-rgb), 0.92);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.32);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .tour-card h3,
+[data-scene-theme="celestial-garden"] .tour-card h2 {
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .tour-highlight {
+    box-shadow: 0 0 0 3px rgba(var(--cg-mint-rgb), 0.55),
+                0 0 28px rgba(var(--cg-mint-rgb), 0.4) !important;
+}
+[data-scene-theme="celestial-garden"] .tour-card .tour-btn {
+    background: rgba(var(--cg-mint-rgb), 0.20);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.50);
+    color: var(--cg-mint-pale);
+}
+[data-scene-theme="celestial-garden"] .tour-card .tour-btn:hover {
+    background: rgba(var(--cg-mint-rgb), 0.32);
+    border-color: rgba(var(--cg-mint-rgb), 0.70);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   18. LIQUID GLASS BUTTONS — global button family
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .liquid-glass-btn,
+[data-scene-theme="celestial-garden"] .btn-secondary {
+    border-color: rgba(var(--cg-mint-rgb), 0.22);
+    color: rgba(var(--cg-cream-rgb), 0.92);
+}
+[data-scene-theme="celestial-garden"] .liquid-glass-btn:hover,
+[data-scene-theme="celestial-garden"] .btn-secondary:hover {
+    border-color: rgba(var(--cg-mint-rgb), 0.45);
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .btn-primary {
+    background: rgba(var(--cg-mint-rgb), 0.22);
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    color: var(--cg-mint-pale);
+}
+[data-scene-theme="celestial-garden"] .btn-primary:hover {
+    background: rgba(var(--cg-mint-rgb), 0.32);
+    border-color: rgba(var(--cg-mint-rgb), 0.72);
+    box-shadow: 0 0 28px rgba(var(--cg-mint-rgb), 0.30);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   19. HEADINGS — page-level h1, greeting, datetime under celestial-garden
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] h1,
+[data-scene-theme="celestial-garden"] body[data-theme="dark"] h1 {
+    background: none;
+    -webkit-text-fill-color: var(--cg-cream);
+    color: var(--cg-cream);
+    text-shadow:
+        0 2px 8px rgba(var(--cg-sky-rgb), 0.55),
+        0 0 30px rgba(var(--cg-mint-rgb), 0.30),
+        0 0 60px rgba(var(--cg-mint-rgb), 0.12);
+    filter: none;
+}
+[data-scene-theme="celestial-garden"] body[data-theme="dark"] .greeting {
+    background: none;
+    -webkit-text-fill-color: var(--cg-mint-soft);
+    color: var(--cg-mint-soft);
+    text-shadow: 0 1px 4px rgba(var(--cg-sky-rgb), 0.55);
+    filter: none;
+}
+[data-scene-theme="celestial-garden"] body[data-theme="dark"] .date-time {
+    background: none;
+    -webkit-text-fill-color: rgba(var(--cg-cream-rgb), 0.78);
+    color: rgba(var(--cg-cream-rgb), 0.78);
+    text-shadow: 0 1px 3px rgba(var(--cg-sky-rgb), 0.45);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   20. HOME MINI-TIMER — preserved geometry, green-tinted accents
+   The user asked to keep the mini-timer card design itself; only the
+   warm-amber accents shift to mint green so it harmonises with the video.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .home-mini-timer__progress-arc {
+    stroke: var(--cg-mint);
+    filter: drop-shadow(0 0 8px rgba(var(--cg-mint-rgb), 0.4));
+}
+[data-scene-theme="celestial-garden"] .home-mini-timer__time {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .home-mini-timer__label {
+    color: rgba(var(--cg-mint-rgb), 0.85);
+}
+/* Vertical mini-timer sliver — the collapsed-state pill that sits as
+   a thin column on the right edge with `<` chevron, MM/SS digits, and
+   tiny play/reset buttons. The base styles paint everything in gold
+   (sliver background, light-leak, border, glow shadow, chevron, sep,
+   button borders, focus rings); recolour the whole register — outer
+   pill + inner elements — to mint green under celestial-garden. */
+[data-scene-theme="celestial-garden"] .hmt-sliver {
+    /* Plum dark gradient with a mint green light-leak on the left edge
+       (matching the warm-champagne light-leak of the base theme but
+       in the celestial garden palette). */
+    background:
+        linear-gradient(90deg, rgba(var(--cg-mint-rgb), 0.10) 0%, rgba(var(--cg-mint-rgb), 0) 50%),
+        linear-gradient(180deg, rgba(var(--cg-sky-rgb), 0.94) 0%, rgba(var(--cg-sky-rgb), 0.97) 100%);
+    border-color: rgba(var(--cg-mint-rgb), 0.28);
+    box-shadow:
+        inset 1px 0 0 rgba(var(--cg-mint-soft-rgb), 0.10),
+        inset 0 1px 0 rgba(var(--cg-mint-soft-rgb), 0.06),
+        -4px 0 14px rgba(var(--cg-sky-rgb), 0.45),
+        -14px 0 46px rgba(var(--cg-sky-rgb), 0.55),
+        -18px 0 60px rgba(var(--cg-mint-rgb), 0.16);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver:hover {
+    border-color: rgba(var(--cg-mint-rgb), 0.50);
+    background:
+        linear-gradient(90deg, rgba(var(--cg-mint-rgb), 0.18) 0%, rgba(var(--cg-mint-rgb), 0) 55%),
+        linear-gradient(180deg, rgba(var(--cg-sky-rgb), 0.97) 0%, rgba(var(--cg-sky-rgb), 0.98) 100%);
+    box-shadow:
+        inset 1px 0 0 rgba(var(--cg-mint-soft-rgb), 0.18),
+        inset 0 1px 0 rgba(var(--cg-mint-soft-rgb), 0.10),
+        -6px 0 20px rgba(var(--cg-sky-rgb), 0.50),
+        -18px 0 60px rgba(var(--cg-sky-rgb), 0.55),
+        -22px 0 80px rgba(var(--cg-mint-rgb), 0.22);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver__chev {
+    color: rgba(var(--cg-mint-rgb), 0.55);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver:hover .hmt-sliver__chev,
+[data-scene-theme="celestial-garden"] .hmt-sliver__expand:hover .hmt-sliver__chev {
+    color: var(--cg-mint-pale);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver__time {
+    color: var(--cg-cream);
+    text-shadow: 0 0 12px rgba(var(--cg-mint-rgb), 0.45);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver__sep {
+    color: rgba(var(--cg-mint-rgb), 0.65);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver__btn {
+    color: rgba(var(--cg-mint-rgb), 0.65);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver__btn:hover {
+    color: var(--cg-cream);
+    border-color: rgba(var(--cg-mint-rgb), 0.45);
+    background: rgba(var(--cg-mint-rgb), 0.12);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver__btn--play {
+    color: rgba(var(--cg-mint-soft-rgb), 0.85);
+    border-color: rgba(var(--cg-mint-rgb), 0.28);
+    background: rgba(var(--cg-mint-rgb), 0.08);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver__btn--play:hover {
+    color: var(--cg-cream);
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    background: rgba(var(--cg-mint-rgb), 0.18);
+    box-shadow: 0 0 14px rgba(var(--cg-mint-rgb), 0.22);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver__btn:focus-visible,
+[data-scene-theme="celestial-garden"] .hmt-sliver__expand:focus-visible {
+    outline: 2px solid rgba(var(--cg-mint-rgb), 0.65);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver__expand:hover {
+    background: rgba(var(--cg-mint-rgb), 0.12);
+}
+[data-scene-theme="celestial-garden"] .hmt-sliver__pulse {
+    background: radial-gradient(ellipse at 0% 50%,
+        rgba(var(--cg-mint-rgb), 0.22) 0%,
+        rgba(var(--cg-mint-rgb), 0) 70%);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   22. FOCUS TAB — timer controls (Start Focus / Reset / round indicator)
+   The focus-tab module ships every rule with `!important` so we have to
+   match it. Pink replaces gold; geometry stays untouched.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .timer-controls .liquid-glass-btn {
+    background: rgba(var(--cg-mint-rgb), 0.06) !important;
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22) !important;
+    color: rgba(var(--cg-cream-rgb), 0.95) !important;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.12),
+        0 6px 18px rgba(var(--cg-sky-rgb), 0.45),
+        inset 0 1px 0 rgba(var(--cg-mint-soft-rgb), 0.25),
+        inset 0 -1px 0 rgba(var(--cg-mint-rgb), 0.16) !important;
+}
+[data-scene-theme="celestial-garden"] .timer-controls .liquid-glass-btn--primary {
+    background: rgba(var(--cg-mint-rgb), 0.14) !important;
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.42) !important;
+    color: var(--cg-mint-pale) !important;
+}
+[data-scene-theme="celestial-garden"] .timer-controls .liquid-glass-btn:hover {
+    background: rgba(var(--cg-mint-rgb), 0.18) !important;
+    border-color: rgba(var(--cg-mint-rgb), 0.55) !important;
+    color: var(--cg-cream) !important;
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.14),
+        0 10px 28px rgba(var(--cg-sky-rgb), 0.55),
+        inset 0 1px 0 rgba(var(--cg-mint-soft-rgb), 0.35),
+        inset 0 -1px 0 rgba(var(--cg-mint-rgb), 0.25),
+        0 0 24px rgba(var(--cg-mint-rgb), 0.30) !important;
+}
+[data-scene-theme="celestial-garden"] .timer-controls .liquid-glass-btn:active {
+    background: rgba(var(--cg-mint-rgb), 0.10) !important;
+}
+/* Focus card stays transparent — earlier rule painted a plum veil over
+   the whole card which read as a heavy rectangle floating over the
+   curtain.  Letting the cosmos show through keeps the timer page
+   feeling open and matches the Black Hole register. */
+[data-scene-theme="celestial-garden"] .focus-content,
+[data-scene-theme="celestial-garden"] .focus-card,
+[data-scene-theme="celestial-garden"] .task-section {
+    background: transparent !important;
+    border-color: transparent !important;
+}
+[data-scene-theme="celestial-garden"] .timer-display,
+[data-scene-theme="celestial-garden"] .timer-text {
+    /* Aurora keeps the base Inter sans-serif — the serif stack that
+       used to live here was reading marketing-grandiose against the
+       photographic curtain. A soft green text-shadow is enough
+       theme-flavour without changing the typeface. */
+    text-shadow: 0 0 40px rgba(var(--cg-mint-rgb), 0.32);
+}
+[data-scene-theme="celestial-garden"] .session-eyebrow,
+[data-scene-theme="celestial-garden"] .round-counter,
+[data-scene-theme="celestial-garden"] .focus-eyebrow,
+[data-scene-theme="celestial-garden"] .focus-content .session-step,
+[data-scene-theme="celestial-garden"] .focus-content [class*="round"] {
+    color: rgba(var(--cg-mint-rgb), 0.92);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   23. STATISTICS — period tile numerals and labels (under data-scene)
+   Home period tiles per se are user-preserved. Generic stat numerals
+   on the focus tab and elsewhere shift to mint green for accent coherence.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .focus-content .stat-num,
+[data-scene-theme="celestial-garden"] .focus-content .stat-value,
+[data-scene-theme="celestial-garden"] .stats-bar .stat-num {
+    color: var(--cg-mint-soft);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   24. HOME PERIOD TILES — preserved geometry / transparency, hint of pink
+   The user wanted these tiles kept as-is, with just a touch of pink
+   warmth so they read as part of the Celestial Garden family without losing the
+   transparent glass register that makes the garden video video read
+   through them.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .home-period-tile {
+    border-color: rgba(var(--cg-mint-rgb), 0.20);
+}
+[data-scene-theme="celestial-garden"] .home-period-tile:hover,
+[data-scene-theme="celestial-garden"] .home-period-tile:focus-visible {
+    border-color: rgba(var(--cg-mint-rgb), 0.40);
+    box-shadow: 0 14px 30px rgba(var(--cg-sky-rgb), 0.42),
+                0 0 0 0.5px rgba(var(--cg-mint-rgb), 0.22);
+}
+[data-scene-theme="celestial-garden"] .home-period-tile__eyebrow {
+    color: rgba(var(--cg-mint-rgb), 0.78);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   25. NOTEPAD — drawer chrome + transparent scrim
+   The scrim used to dim the cosmos with a `rgba(4,6,10,0.6)` veil and a
+   blur. The user wants the garden video backdrop visible while the
+   notepad is open, so the scrim becomes a transparent click-catcher.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .notepad__scrim {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    pointer-events: none;
+}
+[data-scene-theme="celestial-garden"] .notepad__sheet {
+    /* Solid plum app-window — the user explicitly asked for the
+       notepad to act as an independent app with no backdrop bleed. */
+    background: linear-gradient(180deg,
+        rgba(var(--cg-sky-rgb), 0.97),
+        rgba(var(--cg-sky-rgb), 0.99));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    box-shadow: 0 30px 80px rgba(var(--cg-sky-rgb), 0.55),
+                0 0 0 0.5px rgba(var(--cg-mint-rgb), 0.10);
+    color: rgba(var(--cg-cream-rgb), 0.95);
+    scrollbar-color: rgba(var(--cg-mint-rgb), 0.40) transparent;
+}
+[data-scene-theme="celestial-garden"] .notepad__list::-webkit-scrollbar {
+    width: 8px;
+}
+[data-scene-theme="celestial-garden"] .notepad__list::-webkit-scrollbar-track {
+    background: transparent;
+}
+[data-scene-theme="celestial-garden"] .notepad__list::-webkit-scrollbar-thumb {
+    background: rgba(var(--cg-mint-rgb), 0.32);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+[data-scene-theme="celestial-garden"] .notepad__list::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--cg-mint-rgb), 0.55);
+    background-clip: padding-box;
+}
+[data-scene-theme="celestial-garden"] .notepad__list {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--cg-mint-rgb), 0.32) transparent;
+}
+/* Resize grip (bottom-right corner of the draggable sheet) — pink dots
+   on a translucent square so it doesn't read as a default OS chrome
+   element parked against the garden video backdrop. */
+[data-scene-theme="celestial-garden"] .notepad__sheet::-webkit-resizer {
+    background:
+        radial-gradient(circle at 70% 70%, rgba(var(--cg-mint-rgb), 0.7) 0 1.5px, transparent 2px) 0 0 / 6px 6px,
+        rgba(var(--cg-sky-rgb), 0.45);
+    border-bottom-right-radius: 28px;
+}
+[data-scene-theme="celestial-garden"] .notepad__head {
+    background: linear-gradient(180deg,
+        rgba(var(--cg-sky-rgb), 0.99),
+        rgba(var(--cg-sky-rgb), 0.95));
+    border-bottom: 1px solid rgba(var(--cg-mint-rgb), 0.14);
+}
+[data-scene-theme="celestial-garden"] .notepad__foot {
+    background: rgba(var(--cg-sky-rgb), 0.96);
+    border-top: 1px solid rgba(var(--cg-mint-rgb), 0.14);
+}
+[data-scene-theme="celestial-garden"] .notepad__sidebar {
+    background: rgba(var(--cg-sky-rgb), 0.65);
+    border-right: none;
+}
+[data-scene-theme="celestial-garden"] .notepad__col-resizer {
+    background: rgba(var(--cg-mint-rgb), 0.08);
+    border-left: 1px solid rgba(var(--cg-mint-rgb), 0.16);
+    border-right: 1px solid rgba(var(--cg-mint-rgb), 0.06);
+}
+[data-scene-theme="celestial-garden"] .notepad__col-resizer:hover,
+[data-scene-theme="celestial-garden"] .notepad__col-resizer:focus-visible {
+    background: rgba(var(--cg-mint-rgb), 0.22);
+}
+[data-scene-theme="celestial-garden"] .notepad__col-resizer::before {
+    background: rgba(var(--cg-mint-rgb), 0.55);
+}
+[data-scene-theme="celestial-garden"] .notepad__col-resizer:hover::before {
+    background: rgba(var(--cg-mint-rgb), 0.85);
+}
+[data-scene-theme="celestial-garden"] .notepad__eyebrow {
+    color: rgba(var(--cg-mint-rgb), 0.85);
+}
+[data-scene-theme="celestial-garden"] .notepad__title-input {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .notepad__search,
+[data-scene-theme="celestial-garden"] .notepad__search input {
+    background: rgba(var(--cg-mint-rgb), 0.06);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.20);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .notepad__search input:focus {
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--cg-mint-rgb), 0.18);
+}
+[data-scene-theme="celestial-garden"] .notepad__new-btn,
+[data-scene-theme="celestial-garden"] .notepad__new-menu-btn,
+[data-scene-theme="celestial-garden"] .notepad__head-btn,
+[data-scene-theme="celestial-garden"] .notepad__close {
+    background: rgba(var(--cg-mint-rgb), 0.08);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.28);
+    color: rgba(var(--cg-cream-rgb), 0.92);
+}
+[data-scene-theme="celestial-garden"] .notepad__new-btn:hover,
+[data-scene-theme="celestial-garden"] .notepad__new-menu-btn:hover,
+[data-scene-theme="celestial-garden"] .notepad__head-btn:hover,
+[data-scene-theme="celestial-garden"] .notepad__close:hover {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .notepad__list-item {
+    background: rgba(var(--cg-sky-rgb), 0.40);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.10);
+}
+[data-scene-theme="celestial-garden"] .notepad__list-item:hover {
+    background: rgba(var(--cg-mint-rgb), 0.10);
+    border-color: rgba(var(--cg-mint-rgb), 0.30);
+}
+[data-scene-theme="celestial-garden"] .notepad__list-item.is-active {
+    background: rgba(var(--cg-mint-rgb), 0.16);
+    border-color: rgba(var(--cg-mint-rgb), 0.45);
+}
+[data-scene-theme="celestial-garden"] .notepad__list-item-title {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .notepad__list-item-preview,
+[data-scene-theme="celestial-garden"] .notepad__list-item-meta {
+    color: rgba(var(--cg-cream-rgb), 0.55);
+}
+[data-scene-theme="celestial-garden"] .notepad__tag,
+[data-scene-theme="celestial-garden"] .notepad__tag-chip {
+    background: rgba(var(--cg-mint-rgb), 0.12);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.30);
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .notepad__tag:hover,
+[data-scene-theme="celestial-garden"] .notepad__tag-chip:hover {
+    background: rgba(var(--cg-mint-rgb), 0.22);
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+}
+[data-scene-theme="celestial-garden"] .notepad__tag.is-active,
+[data-scene-theme="celestial-garden"] .notepad__tag-chip.is-active {
+    background: rgba(var(--cg-mint-rgb), 0.30);
+    border-color: rgba(var(--cg-mint-rgb), 0.70);
+    color: var(--cg-mint-pale);
+}
+[data-scene-theme="celestial-garden"] .notepad__textarea,
+[data-scene-theme="celestial-garden"] .notepad__editor textarea {
+    background: transparent;
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .notepad__footer,
+[data-scene-theme="celestial-garden"] .notepad__stats,
+[data-scene-theme="celestial-garden"] .notepad__hint {
+    color: rgba(var(--cg-cream-rgb), 0.55);
+    border-top-color: rgba(var(--cg-mint-rgb), 0.10);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   26. TASK DETAIL DRAWER — transparent scrim + celestial chrome
+   Same treatment as the notepad: the scrim no longer dims the cosmos,
+   the panel itself carries the dark sky glass with mint green borders.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .task-detail__scrim {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    pointer-events: none;
+}
+[data-scene-theme="celestial-garden"] .task-detail__sheet {
+    /* Translucent plum glass — keeps the cosmic backdrop visible while
+       the drawer is open. Body owns the scroll, so no scrollbar
+       declarations here. */
+    background: linear-gradient(180deg,
+        rgba(var(--cg-sky-rgb), 0.42),
+        rgba(var(--cg-sky-rgb), 0.55));
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    box-shadow: 0 30px 80px rgba(var(--cg-sky-rgb), 0.55),
+                0 0 0 0.5px rgba(var(--cg-mint-rgb), 0.10);
+    color: rgba(var(--cg-cream-rgb), 0.95);
+}
+[data-scene-theme="celestial-garden"] .task-detail__body {
+    scrollbar-color: rgba(var(--cg-mint-rgb), 0.40) transparent;
+}
+[data-scene-theme="celestial-garden"] .task-detail__body::-webkit-scrollbar-thumb {
+    background: rgba(var(--cg-mint-rgb), 0.32);
+    background-clip: padding-box;
+}
+[data-scene-theme="celestial-garden"] .task-detail__body::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--cg-mint-rgb), 0.55);
+    background-clip: padding-box;
+}
+[data-scene-theme="celestial-garden"] .task-detail__head {
+    background: linear-gradient(180deg,
+        rgba(var(--cg-sky-rgb), 0.55),
+        rgba(var(--cg-sky-rgb), 0.40));
+    border-bottom: 1px solid rgba(var(--cg-mint-rgb), 0.14);
+}
+[data-scene-theme="celestial-garden"] .task-detail__section {
+    border-color: rgba(var(--cg-mint-rgb), 0.14);
+    /* Very faint mint green wash so sections delineate without piling
+       another opaque slab on top of the translucent sheet — the user
+       wants the garden video backdrop visible through the drawer. */
+    background: rgba(var(--cg-mint-rgb), 0.04);
+}
+[data-scene-theme="celestial-garden"] .task-detail__label {
+    color: rgba(var(--cg-mint-rgb), 0.80);
+}
+[data-scene-theme="celestial-garden"] .task-detail__text-input,
+[data-scene-theme="celestial-garden"] .task-detail input,
+[data-scene-theme="celestial-garden"] .task-detail textarea,
+[data-scene-theme="celestial-garden"] .task-detail select {
+    background: rgba(var(--cg-mint-rgb), 0.06);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .task-detail__text-input:focus,
+[data-scene-theme="celestial-garden"] .task-detail input:focus,
+[data-scene-theme="celestial-garden"] .task-detail textarea:focus,
+[data-scene-theme="celestial-garden"] .task-detail select:focus {
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--cg-mint-rgb), 0.18);
+    outline: none;
+}
+/* Stepper +/- buttons, repeat radios, date pill, done toggle, subtask
+   input + Add — all the small chrome controls inside the drawer. */
+[data-scene-theme="celestial-garden"] .task-detail__step-btn,
+[data-scene-theme="celestial-garden"] .task-detail__date,
+[data-scene-theme="celestial-garden"] .task-detail__date-clear,
+[data-scene-theme="celestial-garden"] .task-detail__repeat-btn,
+[data-scene-theme="celestial-garden"] .task-detail__done-toggle,
+[data-scene-theme="celestial-garden"] .task-detail__sub-add-btn,
+[data-scene-theme="celestial-garden"] .task-detail__sub-toggle {
+    background: rgba(var(--cg-mint-rgb), 0.08);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    color: rgba(var(--cg-cream-rgb), 0.92);
+}
+[data-scene-theme="celestial-garden"] .task-detail__step-btn:hover,
+[data-scene-theme="celestial-garden"] .task-detail__date:hover,
+[data-scene-theme="celestial-garden"] .task-detail__date-clear:hover,
+[data-scene-theme="celestial-garden"] .task-detail__repeat-btn:hover,
+[data-scene-theme="celestial-garden"] .task-detail__done-toggle:hover,
+[data-scene-theme="celestial-garden"] .task-detail__sub-add-btn:hover {
+    background: rgba(var(--cg-mint-rgb), 0.18);
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    color: var(--cg-mint-soft);
+}
+/* Active "is-on" recurrence option + completed done-toggle. */
+[data-scene-theme="celestial-garden"] .task-detail__repeat-btn.is-on,
+[data-scene-theme="celestial-garden"] .task-detail__done-toggle.is-on {
+    background: rgba(var(--cg-mint-rgb), 0.22);
+    border-color: rgba(var(--cg-mint-rgb), 0.62);
+    color: var(--cg-mint-pale);
+}
+[data-scene-theme="celestial-garden"] .task-detail__stepper-val {
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .task-detail__project,
+[data-scene-theme="celestial-garden"] .task-detail__sub-input {
+    background: rgba(var(--cg-mint-rgb), 0.06);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.22);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .task-detail__project:focus,
+[data-scene-theme="celestial-garden"] .task-detail__sub-input:focus {
+    border-color: rgba(var(--cg-mint-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--cg-mint-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="celestial-garden"] .task-detail__time-num {
+    color: var(--cg-mint-soft);
+}
+[data-scene-theme="celestial-garden"] .task-detail__time-label,
+[data-scene-theme="celestial-garden"] .task-detail__section-title {
+    color: rgba(var(--cg-cream-rgb), 0.78);
+}
+[data-scene-theme="celestial-garden"] .task-detail__sub-del {
+    color: rgba(255, 130, 150, 0.8);
+}
+[data-scene-theme="celestial-garden"] .task-detail__subtask {
+    background: rgba(var(--cg-sky-rgb), 0.32);
+    border: 1px solid rgba(var(--cg-mint-rgb), 0.12);
+}
+[data-scene-theme="celestial-garden"] .task-detail__subtask:hover {
+    background: rgba(var(--cg-mint-rgb), 0.06);
+    border-color: rgba(var(--cg-mint-rgb), 0.28);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   PRESERVED — explicitly do NOT touch these
+   .nav-buttons keeps its existing chrome so the tab the user singled out
+   stays identical between Black Hole and Celestial Garden.
+   This block exists as an audit trail; no rules.
+   ────────────────────────────────────────────────────────────────────── */

@@ -372,13 +372,15 @@ function renderThemeCards(row) {
             const blackhole = o.value === 'blackhole';
             const sakura = o.value === 'sakura';
             const aurora = o.value === 'aurora-plain';
-            const hero = blackhole || sakura || aurora;
+            const celestial = o.value === 'celestial-garden';
+            const hero = blackhole || sakura || aurora || celestial;
             const disabled = o.disabled ? 'disabled' : '';
             const classes = [
                 'theme-card',
                 blackhole ? 'theme-card--blackhole' : '',
                 sakura ? 'theme-card--sakura' : '',
                 aurora ? 'theme-card--aurora' : '',
+                celestial ? 'theme-card--celestial' : '',
                 o.disabled ? 'theme-card--coming-soon' : '',
                 active ? 'active' : '',
             ]
