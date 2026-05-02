@@ -274,4 +274,107 @@
     }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   SMALL-LAPTOP + MOBILE SUPPLEMENT
+   Component-level fixes that the per-module sheets didn't cover. Layered
+   below per-module @media so module-specific rules still take precedence
+   when both match.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Small laptops (≤1280px) — typical 13-14" lid open in browser ── */
+@media (max-width: 1280px) {
+    /* Focus card pulled up slightly so the stats row at the bottom of
+       focus-content sits comfortably above the floating task dock and
+       cosmos toolbar instead of being visually swallowed by them on
+       short viewports. */
+    #focus { top: 50%; }
+
+    /* Profile drawer caps at viewport width on smaller laptops; the
+       hardcoded 1100px from the larger breakpoint extended past the
+       lid on 13" screens. */
+    .profile { max-width: min(1100px, 96vw); }
+}
+
+/* ── Tablet landscape / small browsers (≤1024px) ── */
+@media (max-width: 1024px) {
+    /* Settings panel uses a side-by-side rail+pane layout on desktop;
+       below 1024px collapse to a single pane so neither pane gets
+       squeezed below readable width. */
+    .settings-panel.has-rail .settings-panel__inner {
+        grid-template-columns: 1fr;
+    }
+    .settings-panel.has-rail .settings-panel__rail { display: none; }
+
+    /* Stats bar wraps to two lines instead of squashing the chips,
+       and the dividers vanish on the wrap so they don't dangle. */
+    .stats-bar {
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+}
+
+/* ── Tablets / small windows (≤768px) ── */
+@media (max-width: 768px) {
+    /* Auth modal and Pro upgrade modal — stop them from filling the
+       viewport edge-to-edge on narrow screens; cap at 92vw and tighten
+       padding so the buttons don't overflow horizontally. */
+    .auth-modal__card,
+    .upgrade-modal__card {
+        max-width: 92vw;
+        padding: 22px 18px;
+    }
+
+    /* Onboarding tour card — same treatment, plus sit comfortably
+       within the safe area at the bottom on phones with a notch. */
+    .tour-card {
+        max-width: 92vw;
+        padding: 18px 16px;
+    }
+
+    /* Help center drawer on a phone is tighter. */
+    .help-drawer { width: min(92vw, 420px); }
+
+    /* Hide the lower-priority stat chips on phones so the row fits
+       on a single line: keep period toggle + sessions + focused;
+       drop tasks-done + streak + momentum trail. The full set is
+       still visible in the Profile drawer. */
+    .stats-bar .stat-chip:nth-of-type(n+3),
+    .stats-bar .stat-chip--streak,
+    .stats-bar .stat-chip--momentum,
+    .stats-bar .stat-divider:nth-of-type(n+3) {
+        display: none;
+    }
+}
+
+/* ── Small phones (≤480px) ── */
+@media (max-width: 480px) {
+    /* Focus tab timer controls — stack the buttons in two rows by
+       letting flex-wrap kick in (already set on .timer-controls) and
+       tighten padding so each fits the narrow row. */
+    .timer-controls .liquid-glass-btn {
+        padding: 10px 18px !important;
+        font-size: 13px !important;
+        min-height: 40px !important;
+    }
+    .timer-controls .liquid-glass-btn--small {
+        padding: 8px 12px !important;
+        min-height: 36px !important;
+        min-width: 36px !important;
+    }
+
+    /* Cosmos toolbar tighter again — already tuned at 720px in its
+       own module; this drops gap + padding once more on tiny phones
+       so the eight-button row doesn't hug the viewport edges. */
+    .cosmos-toolbar {
+        gap: 1px;
+        padding: 5px 6px;
+    }
+    .cosmos-tool { width: 32px; height: 32px; }
+
+    /* Container padding — the base mobile rule used 100px top to
+       clear the nav pill; on iPhone SE that wasted half the visible
+       area. Tighten. */
+    .container { padding: 76px 12px 20px; }
+}
+
 /* End of responsive.css */
