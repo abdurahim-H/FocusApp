@@ -1189,6 +1189,17 @@
         0 0 24px rgba(var(--au-green-rgb), 0.15);
 }
 
+/* Account-status chip in Settings — Free / Cosmic Focus Pro pill at
+   the top of the Data & About group. Base CSS hardcodes a warm-amber
+   register; under aurora the chip shifts to lime-green so the premium
+   label echoes the curtain itself rather than reading as a leftover
+   amber stamp on a cool palette. */
+[data-scene-theme="aurora-plain"] .sr-account-status__chip {
+    background: rgba(var(--au-green-rgb), 0.14);
+    border-color: rgba(var(--au-green-rgb), 0.5);
+    color: var(--au-cream);
+}
+
 /* ──────────────────────────────────────────────────────────────────────
    17. ONBOARDING TOUR — highlight ring
    ────────────────────────────────────────────────────────────────────── */
@@ -1409,32 +1420,11 @@
 }
 [data-scene-theme="aurora-plain"] .timer-display,
 [data-scene-theme="aurora-plain"] .timer-text {
-    /* Elegant serif stack to suit the aurora curtain register —
-       starts with high-quality system serifs (Hoefler Text on Apple,
-       Iowan Old Style as a fallback, Baskerville / Cormorant /
-       Garamond / Palatino across older systems) before any generic
-       serif. The numerals already use tabular-nums so the digits
-       still don't jitter as seconds tick. */
-    font-family: 'Hoefler Text', 'Iowan Old Style', 'Baskerville',
-                 'Cormorant Garamond', 'Garamond', 'Palatino',
-                 'Times New Roman', serif;
-    font-weight: 300;
-    letter-spacing: 0.01em;
+    /* Aurora keeps the base Inter sans-serif — the serif stack that
+       used to live here was reading marketing-grandiose against the
+       photographic curtain. A soft green text-shadow is enough
+       theme-flavour without changing the typeface. */
     text-shadow: 0 0 40px rgba(var(--au-green-rgb), 0.32);
-}
-/* Same elegant register on the focus-tab "Focus Time" eyebrow,
-   "Session 1 of 4" subtitle, and the Start/Reset buttons — the
-   timer surface reads as one curated typographic family. */
-[data-scene-theme="aurora-plain"] .focus-eyebrow,
-[data-scene-theme="aurora-plain"] .session-eyebrow,
-[data-scene-theme="aurora-plain"] .timer-controls .liquid-glass-btn,
-[data-scene-theme="aurora-plain"] .home-mini-timer__time,
-[data-scene-theme="aurora-plain"] .home-mini-timer__label {
-    font-family: 'Hoefler Text', 'Iowan Old Style', 'Baskerville',
-                 'Cormorant Garamond', 'Garamond', 'Palatino',
-                 'Times New Roman', serif;
-    font-weight: 400;
-    letter-spacing: 0.04em;
 }
 [data-scene-theme="aurora-plain"] .session-eyebrow,
 [data-scene-theme="aurora-plain"] .round-counter,

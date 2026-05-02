@@ -1175,6 +1175,16 @@
         0 0 24px rgba(var(--sk-blossom-rgb), 0.15);
 }
 
+/* Account-status chip in Settings — Free / Cosmic Focus Pro pill at
+   the top of the Data & About group. Base CSS hardcodes a warm-amber
+   register; under sakura the chip shifts to blossom-pink so the
+   premium label sits in the same family as the rest of the chrome. */
+[data-scene-theme="sakura"] .sr-account-status__chip {
+    background: rgba(var(--sk-blossom-rgb), 0.16);
+    border-color: rgba(var(--sk-blossom-rgb), 0.5);
+    color: var(--sk-cream);
+}
+
 /* ──────────────────────────────────────────────────────────────────────
    17. ONBOARDING TOUR — highlight ring
    ────────────────────────────────────────────────────────────────────── */
