@@ -97,7 +97,7 @@ export const SCHEMA = [
         options: [
             { value: 'blackhole', label: 'Black Hole' },
             { value: 'sakura', label: 'Sakura' },
-            { value: 'aurora-plain', label: 'Coming soon', disabled: true },
+            { value: 'aurora-plain', label: 'Aurora' },
         ],
     },
 

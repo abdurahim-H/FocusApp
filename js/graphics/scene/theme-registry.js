@@ -171,12 +171,23 @@ const MODULES = {
         grainOpacity: 0.05,
     }),
 
-    // ── Aurora Plain — video-backed (held back via schema) ──
+    // ── Aurora — northern-lights video. Filename suffixed with -v2
+    //    so the original (placeholder) clip's CDN cache can't shadow
+    //    the upgraded loop.
     auroraVideo: makeVideoTheme({
         id: 'auroraVideo',
-        src: 'https://cdn.universefocuses.com/aurora/aurora-loop.mp4',
-        filter: 'saturate(1.18) contrast(1.06) brightness(0.92)',
-        fallback: '#02050d',
+        src: 'https://cdn.universefocuses.com/aurora/aurora-loop-v2.mp4',
+        // Bumped saturation a touch to keep the green ↔ violet curtain
+        // reading vivid through the dark glass overlay; brightness pull
+        // is gentler than before because the new clip is darker overall.
+        filter: 'saturate(1.22) contrast(1.08) brightness(0.96)',
+        fallback: '#0d1129',
+        // The aurora sits at the top of the frame; the corners are
+        // clean dark sky. A gentler vignette than sakura keeps the
+        // edges from looking pinched.
+        vignette:
+            'radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.28) 100%)',
+        grainOpacity: 0.04,
     }),
 };
 

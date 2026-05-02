@@ -159,20 +159,10 @@ export const APPLY_HOOKS = {
 
     // ───────── Scene theme — driven by the registry in scene-manager ────
     'scene.theme': (v) => {
-        // Aurora Plain is held back; if a user has it saved (from a
-        // prior build or manual edit) migrate them back to Black
-        // Hole so the disabled "Coming soon" card doesn't render as
-        // the active selection. setSetting recurses through the same
-        // hook, but the early-return check on the second pass means
-        // we land cleanly on the blackhole branch below.
-        if (v === 'aurora-plain') {
-            setSetting('scene.theme', 'blackhole');
-            return;
-        }
         // Scene theme writes to its own attribute so it doesn't fight
         // the color theme system (theme-init.js owns `data-theme` for
         // dark / light / cosmos). CSS scopes chrome overrides via
-        // `[data-scene-theme="sakura"]` etc.
+        // `[data-scene-theme="sakura"]` and `[data-scene-theme="aurora-plain"]`.
         document.documentElement.setAttribute('data-scene-theme', v);
         document.body.setAttribute('data-scene-theme', v);
         // Lazy import so the apply hooks don't pull the whole 3D
