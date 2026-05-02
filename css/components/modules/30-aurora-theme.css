@@ -927,12 +927,33 @@
     border-color: rgba(var(--au-green-rgb), 0.62);
     box-shadow: 0 0 0 2px rgba(var(--au-green-rgb), 0.18);
 }
-[data-scene-theme="aurora-plain"] .deck-btn,
-[data-scene-theme="aurora-plain"] .save-mix-popover,
-[data-scene-theme="aurora-plain"] .sleep-popover {
+[data-scene-theme="aurora-plain"] .deck-btn {
     background: rgba(var(--au-sky-rgb), 0.86);
     border: 1px solid rgba(var(--au-green-rgb), 0.22);
     color: rgba(var(--au-cream-rgb), 0.92);
+}
+/* Save-mix + Sleep popovers — liquid-glass register, green-tinted.
+   Targets the inner __card (the visible surface) so the outer
+   positioning shell stays a transparent click-catcher. */
+[data-scene-theme="aurora-plain"] .save-mix-popover__card,
+[data-scene-theme="aurora-plain"] .sleep-popover__card {
+    background: rgba(var(--au-sky-rgb), 0.32);
+    border-color: rgba(var(--au-green-rgb), 0.32);
+    color: rgba(var(--au-cream-rgb), 0.95);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.42),
+        0 6px 18px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(var(--au-green-rgb), 0.22),
+        inset 0 0 26px rgba(var(--au-green-rgb), 0.06);
+}
+[data-scene-theme="aurora-plain"] .sleep-chip {
+    border-color: rgba(var(--au-green-rgb), 0.28);
+    background: rgba(var(--au-green-rgb), 0.05);
+    color: var(--au-cream);
+}
+[data-scene-theme="aurora-plain"] .sleep-chip:hover {
+    background: rgba(var(--au-green-rgb), 0.16);
+    border-color: rgba(var(--au-green-rgb), 0.5);
 }
 [data-scene-theme="aurora-plain"] .deck-btn:hover {
     background: rgba(var(--au-green-rgb), 0.18);

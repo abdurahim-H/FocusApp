@@ -1424,25 +1424,35 @@
 }
 @keyframes popoverFade { from { opacity: 0; } to { opacity: 1; } }
 
+/* Scrim is a click-catcher only — no dim, no blur. The cosmos stays
+   fully visible behind the popover; the card itself reads as a sheet
+   of polished glass over the scene. */
 .save-mix-popover__scrim,
 .sleep-popover__scrim {
     position: absolute;
     inset: 0;
-    background: rgba(4, 3, 2, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: transparent;
 }
 
+/* Apple liquid-glass card — translucent surface with strong saturated
+   blur and an inset top highlight, same register the account dropdown
+   and auth modal use. The themed overrides below repaint the surface
+   in the theme's palette without changing the glass register. */
 .save-mix-popover__card,
 .sleep-popover__card {
     position: relative;
     width: min(420px, 100%);
     padding: 26px 26px 22px;
     border-radius: var(--deck-radius);
-    background: linear-gradient(180deg, rgba(18, 14, 8, 0.95), rgba(8, 6, 3, 0.98));
-    border: 1px solid var(--deck-gold-line);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6),
-                0 0 60px rgba(255, 205, 115, 0.1);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 205, 115, 0.22);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.42),
+        0 6px 18px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 26px rgba(255, 205, 115, 0.05);
     animation: popoverPop 0.4s var(--deck-spring);
 }
 @keyframes popoverPop {

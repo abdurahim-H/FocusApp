@@ -377,4 +377,62 @@
     .container { padding: 76px 12px 20px; }
 }
 
+/* ── Short viewports (≤700px tall) ──────────────────────────────────────
+   Quarter-screen and laptop-lid-near-keyboard scenarios. The default
+   `#focus { top: 55%; transform: translate(-50%, -50%) }` centres the
+   focus card vertically — at <700px tall the card's top edge slides up
+   behind the fixed nav cluster (top: 16-100). Re-anchor the card to
+   sit just below the cluster instead of being centred, and tighten the
+   inner padding + timer size so the controls don't get pushed off the
+   bottom by the cosmos toolbar. */
+@media (max-height: 700px) {
+    /* Match the specificity of `#focus.active` from style.css so the
+       active-state transform doesn't override this. */
+    #focus,
+    #focus.active {
+        top: 112px;
+        transform: translateX(-50%);
+    }
+    .focus-content { padding: 20px 22px; }
+    .timer-display {
+        font-size: clamp(2.6em, 7vw, 4em);
+        margin-bottom: var(--space-3, 12px);
+    }
+    .session-info { margin-bottom: 8px; }
+    .timer-controls { gap: 8px; }
+    /* Notification banner stacks vertically on short viewports so the
+       three rows (text + Enable + Later) don't try to fit on a single
+       narrow row that competes with the rest of the focus content. */
+    .notification-banner {
+        padding: 10px 14px;
+        margin-bottom: 10px;
+    }
+    .banner-text { font-size: 12px; }
+}
+
+/* ── Short + narrow combo (≤1024px wide AND ≤700px tall) ────────────────
+   Quarter-window on a 14" laptop or split-pane setups. The notification
+   banner is a soft reminder eating 100+px of vertical space — at this
+   size the user can still toggle notifications from Settings, so we
+   hide it entirely to keep the timer + controls visible above the
+   floating task dock. The Start / Reset buttons are the load-bearing
+   UI; the banner is not. */
+@media (max-width: 1024px) and (max-height: 700px) {
+    .notification-banner { display: none !important; }
+    /* Give the cosmos toolbar a touch more breathing room on its row
+       so the focus card's bottom edge doesn't kiss the toolbar. */
+    .focus-content { padding-bottom: 14px; }
+}
+
+/* ── Narrow desktop windows (≤1024px wide, taller than 700px) ──────────
+   The browser window is wider than a tablet but the user has split it
+   to half-screen. Cluster + filament + satellite cluster eats too much
+   horizontal real-estate at this size — drop the filament rail so the
+   nav reads as a tight pill + satellite pair, same pattern the ≤640px
+   rule already applies but kept proportional (no satellite shrink). */
+@media (max-width: 1024px) and (min-width: 641px) {
+    .nav-filament { width: 16px; }
+    .nav-filament__svg { display: none; }
+}
+
 /* End of responsive.css */
