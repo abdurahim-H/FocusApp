@@ -157,7 +157,7 @@ const MODULES = {
     // ── Sakura — video-backed cherry-blossom theme ─────────
     sakuraVideo: makeVideoTheme({
         id: 'sakuraVideo',
-        src: '/sakura/sakura-loop.mp4',
+        src: 'https://cdn.universefocuses.com/sakura/sakura-loop.mp4',
         // Soft daylight cherry-blossom palette: gentle saturation
         // bump, micro contrast, no brightness pull-down (the source
         // is already pastel-bright by design).
@@ -174,7 +174,7 @@ const MODULES = {
     // ── Aurora Plain — video-backed (held back via schema) ──
     auroraVideo: makeVideoTheme({
         id: 'auroraVideo',
-        src: '/aurora/aurora-loop.mp4',
+        src: 'https://cdn.universefocuses.com/aurora/aurora-loop.mp4',
         filter: 'saturate(1.18) contrast(1.06) brightness(0.92)',
         fallback: '#02050d',
     }),
