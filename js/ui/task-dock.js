@@ -265,6 +265,14 @@ function onOutside(e) {
     if (e.target.closest(
         '.task-detail, .date-picker, .ambient-toast, #celebrateToast, #gentleToast'
     )) return;
+    // Don't collapse when the user clicks the cosmos toolbar's Tasks
+    // button — that button is the dock's own toggle, and the toolbar
+    // is technically "outside" the dock in DOM terms. Without this
+    // exclusion, the mousedown→onOutside (capture) ran BEFORE the
+    // click handler, hid the dock, and openTaskDock then saw a hidden
+    // dock and re-opened it on every click. The user reported "I click
+    // to close but it just re-opens"; this was the path.
+    if (e.target.closest('#deckTasksBtn')) return;
     collapse();
 }
 
