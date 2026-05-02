@@ -125,6 +125,14 @@
 .account-satellite__orbits {
     position: absolute;
     inset: 0;
+    /* The SVG carries explicit width="84" height="84" HTML attributes —
+       below 640px the button shrinks to 64×64 but the attributes hold
+       the SVG at 84×84, anchoring its top-left corner to the button's
+       top-left and offsetting the orbit centre 10px right + 10px down
+       from the avatar. Force the SVG to fill the button at every
+       viewport so the orbits, halo, and core stay concentric. */
+    width: 100%;
+    height: 100%;
     overflow: visible;
 }
 .account-satellite__orbit {
@@ -1250,8 +1258,34 @@
        collapse to just the satellite tucked next to the pill. */
     .nav-filament { width: 24px; }
     .nav-filament__svg { display: none; }
+    /* Whole satellite shrinks proportionally — desktop is 84/40/60 for
+       button/core/halo; mobile keeps the same ratio at 64/30/46 so the
+       orbit rings (which scale via the SVG viewBox) still sit a clean
+       gap outside the core rather than collapsing onto its border. */
     .account-satellite { width: 64px; height: 64px; }
+    .account-satellite__core {
+        width: 30px;
+        height: 30px;
+        margin-top: -15px;
+        margin-left: -15px;
+    }
+    .account-satellite__halo {
+        width: 46px;
+        height: 46px;
+        margin-top: -23px;
+        margin-left: -23px;
+    }
+    /* Status dot reposition — recompute the 1 o'clock anchor for the
+       smaller core sitting in a 64px button. */
+    .account-satellite__status {
+        top: 17px;
+        right: 13px;
+        width: 7px;
+        height: 7px;
+    }
     .account-satellite__bezel,
     .account-satellite__halo,
     .account-satellite__core { transform-origin: center; }
+    /* Glyph + initial scale down with the core. */
+    .account-satellite__glyph { width: 12px; height: 12px; }
 }

@@ -703,11 +703,42 @@
 @media (max-width: 600px) {
     .notepad__sheet {
         top: 56px;
+        /* Override the desktop min-width: 540px / min-height: 360px —
+           on a 375px iPhone the min-width was forcing the sheet wider
+           than the viewport, anchored to left:50% with translate(-50%),
+           so the sheet sat half off-screen and its right edge floated
+           past the toolbar. Drop both mins so the sheet shrinks to
+           fit the viewport on phones. */
         width: calc(100vw - 16px);
         height: calc(100vh - 80px);
+        min-width: 0;
+        min-height: 0;
+        max-width: calc(100vw - 16px);
         border-radius: 18px;
+        /* Disable user resize on phones — the resize grip in the corner
+           was offering the user a way to drag the sheet wider than the
+           viewport again. Phones get a fixed-size sheet. */
+        resize: none;
     }
     .notepad__editor { padding: 18px 18px; font-size: 14.5px; }
+    /* Tighten the head row so the title + 4 action buttons fit on a
+       single line at 375px without overflowing. The eyebrow ("NOTES")
+       hides — the panel itself reads as the notes app on a phone. */
+    .notepad__head {
+        gap: 6px;
+        padding: 12px 12px;
+    }
+    .notepad__eyebrow,
+    .notepad__saved { display: none; }
+    .notepad__close,
+    .notepad__head-btn {
+        width: 28px;
+        height: 28px;
+    }
+    .notepad__title-input { font-size: 15px; padding: 4px; }
+    /* Footer hint truncates on phones; keep the live word count. */
+    .notepad__foot { padding: 8px 14px; font-size: 11px; padding-right: 14px; }
+    .notepad__hint { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

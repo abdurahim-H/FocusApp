@@ -633,9 +633,23 @@
         width: calc(100vw - 16px);
         border-radius: 18px;
     }
+    /* Tighten the body padding so the section cards inside fit within
+       the narrower sheet without their own padding pushing the inner
+       grid past the right edge. */
+    .task-detail__head { padding: 14px 14px 10px; }
+    .task-detail__body { padding: 6px 12px 16px; }
+    .task-detail__section { padding: 14px 12px; }
     .task-detail__section--grid {
         grid-template-columns: 1fr;
     }
+    /* Force a 2-column grid for the recurrence radios — auto-fit's
+       120px min was the trigger that punted one of the four buttons
+       past the section's right edge on narrow phones. */
+    .task-detail__repeat {
+        grid-template-columns: 1fr 1fr;
+    }
+    .task-detail__repeat-btn { padding: 9px 10px; }
+    .task-detail__repeat-label { font-size: 12.5px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
