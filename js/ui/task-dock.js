@@ -311,14 +311,28 @@ function paintPreview(list, activeId) {
     // Eyebrow text reflects what the preview is showing: NOW for the
     // pinned active task, NEXT for the first open task in the list,
     // DONE when the list is finished, blank when empty.
-    // Auto-advance overrides the NOW/active distinction so the
-    // preview always points at the first unfinished task; once the
-    // list is empty the preview stays put on the same item, per the
-    // user's spec ("if no further unfinished tasks then it can
-    // continue displaying the same task").
+    // Auto-advance moves the preview PAST the currently-active task to
+    // the next undone one in the list — that's what "show the next
+    // task in preview mode" means. If there's no undone task after the
+    // active, fall back to the first undone before it; if everything
+    // else is done, stay on the active task ("if no further undone
+    // tasks remaining it can remain without changing").
     const eyebrowEl = document.getElementById('taskDockEyebrow');
     if (autoAdvance && remaining > 0) {
-        const next = all.find((t) => !t.completed);
+        let next = null;
+        if (active) {
+            const idx = all.indexOf(active);
+            // 1) first undone task after the active one
+            next = all.slice(idx + 1).find((t) => !t.completed);
+            // 2) otherwise first undone task before it
+            if (!next) next = all.slice(0, idx).find((t) => !t.completed);
+            // 3) nothing else undone — keep showing active even if it's
+            //    the only undone left
+            if (!next) next = active.completed ? null : active;
+        } else {
+            // No pinned active task — fall back to the first undone.
+            next = all.find((t) => !t.completed);
+        }
         const norm = next ? normalizeTask(next) : null;
         activeNameEl.textContent = norm?.text || '— untitled task —';
         if (eyebrowEl) eyebrowEl.textContent = 'NEXT';
