@@ -1136,6 +1136,13 @@
 [data-scene-theme="sakura"] .stats-label {
     color: rgba(var(--sk-cream-rgb), 0.65);
 }
+/* Goal-complete celebration ring — base CSS uses warm-amber; under
+   sakura it shifts to a brighter blossom-pink so the "you hit it"
+   moment matches the rest of the cherry-blossom register. */
+[data-scene-theme="sakura"] .stat-goal-ring.is-complete .stat-goal-ring__fill {
+    stroke: rgba(var(--sk-blossom-rgb), 1);
+    filter: drop-shadow(0 0 8px rgba(var(--sk-blossom-rgb), 0.55));
+}
 /* Period toggle (TODAY / WEEK / MONTH / ALL) — base CSS keeps a small
    pill; tint it pink to match the rest of the chip row without making
    it shouty. */

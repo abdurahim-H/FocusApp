@@ -6,10 +6,15 @@ _quarantine/
 
 # Screenshots and temp photos
 *.png
-!assets/*.png
+!assets/**/*.png
 !public/sound-art/*.png
 !public/icon.svg
 temp- photos/
+
+# Local source videos — all production video assets are hosted on the
+# R2 CDN (cdn.universefocuses.com). Anything dropped at the repo root
+# is a working copy and should not land in commits.
+*.mp4
 
 # Source-of-truth artwork (not deployed; optimized copies live in public/sound-art/)
 pictures/

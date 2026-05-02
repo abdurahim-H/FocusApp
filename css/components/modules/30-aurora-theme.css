@@ -1151,6 +1151,12 @@
 [data-scene-theme="aurora-plain"] .stats-label {
     color: rgba(var(--au-cream-rgb), 0.65);
 }
+/* Goal-complete celebration ring — aurora register shifts the ring
+   to lime-green so the success colour echoes the curtain itself. */
+[data-scene-theme="aurora-plain"] .stat-goal-ring.is-complete .stat-goal-ring__fill {
+    stroke: rgba(var(--au-green-rgb), 1);
+    filter: drop-shadow(0 0 10px rgba(var(--au-green-rgb), 0.6));
+}
 /* Period toggle (TODAY / WEEK / MONTH / ALL) — base CSS keeps a small
    pill; tint it pink to match the rest of the chip row without making
    it shouty. */
