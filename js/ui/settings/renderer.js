@@ -237,6 +237,8 @@ function renderRow(row) {
             return renderReadonly(row);
         case 'feedback-form':
             return renderFeedbackForm(row);
+        case 'account-status':
+            return renderAccountStatus(row);
     }
     return null;
 }
@@ -626,6 +628,19 @@ function handleButtonAction(id, triggerEl) {
         case 'open-terms':
             window.open('/terms.html', '_blank', 'noopener');
             break;
+        case 'upgrade-pro':
+            import('../upgrade.js').then((mod) =>
+                mod.showUpgradeModal({ feature: 'generic' })
+            );
+            break;
+        case 'manage-subscription':
+            import('../../features/billing.js')
+                .then((mod) => mod.openCustomerPortal())
+                .catch((err) => {
+                    console.warn('[settings] portal open failed:', err);
+                    flashButton(triggerEl, 'Try again');
+                });
+            break;
     }
 }
 
@@ -1012,6 +1027,71 @@ function updateReadonlyValue(key, el) {
             break;
         }
     }
+}
+
+// ============================================================================
+// account-status — current tier + Upgrade or Manage subscription button.
+//
+// Reads billing.tier signal at render time. We register an effect once
+// (the first time renderAccountStatus is called) so the row re-renders
+// itself when the user upgrades / cancels — covers "paid on another
+// tab" without needing a full settings re-render.
+// ============================================================================
+let billingEffectRegistered = false;
+const accountRowRefs = new Set(); // track all rendered rows for refresh
+function renderAccountStatus() {
+    const el = document.createElement('div');
+    el.className = 'sr sr-account-status';
+    accountRowRefs.add(el);
+    paintAccountStatus(el);
+    registerSearchable(el, 'account subscription Pro upgrade manage cancel', '');
+
+    // Register the tier effect once. Subsequent renders just push the
+    // new tier through paintAccountStatus.
+    if (!billingEffectRegistered) {
+        billingEffectRegistered = true;
+        import('../../core/state.js').then(({ effect }) => {
+            import('../../features/billing.js').then(({ tier: tierSignal }) => {
+                effect(() => {
+                    tierSignal.value; // subscribe
+                    accountRowRefs.forEach((rowEl) => {
+                        if (rowEl.isConnected) paintAccountStatus(rowEl);
+                        else accountRowRefs.delete(rowEl);
+                    });
+                });
+            });
+        });
+    }
+    return el;
+}
+
+function paintAccountStatus(el) {
+    // Read the current tier synchronously through a dynamic import.
+    // The signal's current value is exposed; we don't need to await
+    // anything — it's initialised at module load.
+    import('../../features/billing.js').then(({ tier }) => {
+        const isPro = tier.value === 'pro';
+        const label = isPro ? 'Cosmic Focus Pro' : 'Free plan';
+        const sub = isPro
+            ? 'Manage your subscription, payment, or cancel anytime.'
+            : 'Unlock the Notes app, deep analytics, and music integrations.';
+        const btnLabel = isPro ? 'Manage subscription' : 'Upgrade to Pro';
+        const btnAction = isPro ? 'manage-subscription' : 'upgrade-pro';
+        el.innerHTML = `
+            <div class="sr__header">
+                <div class="sr-account-status__row">
+                    <span class="sr-account-status__chip">${escapeHtml(label)}</span>
+                </div>
+            </div>
+            <p class="sr__help sr-account-status__sub">${escapeHtml(sub)}</p>
+            <button class="sr__btn sr-account-status__btn"
+                    type="button" data-button-id="${escapeHtml(btnAction)}">
+                ${escapeHtml(btnLabel)}
+            </button>
+        `;
+        const btn = el.querySelector('button[data-button-id]');
+        btn?.addEventListener('click', () => handleButtonAction(btnAction, btn));
+    });
 }
 
 // Live refresh for the FPS readonly — ticks every 800ms while panel is visible.

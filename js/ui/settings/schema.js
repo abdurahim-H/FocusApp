@@ -663,6 +663,12 @@ export const SCHEMA = [
     // ═══════════════════════════════════════════════════════════════════════
     // DATA & ABOUT
     // ═══════════════════════════════════════════════════════════════════════
+    { section: 'data', type: 'group', label: 'Account' },
+    // The Account row reads the live billing.tier signal at render time
+    // and shows either an Upgrade CTA (free) or a Manage subscription
+    // button (pro). Updates reactively when the tier flips.
+    { section: 'data', type: 'account-status' },
+
     { section: 'data', type: 'group', label: 'Greeting' },
     {
         section: 'data',

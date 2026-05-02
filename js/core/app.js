@@ -301,6 +301,11 @@ export async function initApp() {
             loadedModules.account.initAccount();
         }
 
+        // Billing — Pro tier signal + Stripe checkout/portal helpers.
+        // Auth must be initialised first because billing.refreshTier()
+        // calls a Supabase RPC scoped to auth.uid().
+        import('../features/billing.js').then((m) => m.initBilling?.()).catch(() => {});
+
         // Profile — full analytics destination. Entry points:
         // momentum-trail click, the 'i' shortcut, and the account
         // dropdown's "Profile" button.

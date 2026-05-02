@@ -210,6 +210,92 @@
     border-color: rgba(var(--section-accent), 0.32);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
+/* PRO chip on locked rail buttons. Anchored at the right edge of the
+   row so it doesn't push the label around. */
+.profile__rail-btn.is-pro-locked {
+    position: relative;
+}
+.profile__rail-pro {
+    margin-left: auto;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(255, 205, 115, 0.18);
+    border: 1px solid rgba(255, 205, 115, 0.45);
+    color: rgba(255, 232, 198, 1);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1;
+}
+
+/* Pro upgrade card — shown in the body when a free user clicks a
+   gated section. Same visual register as a section so the drawer
+   doesn't suddenly look like a different surface. */
+.profile__pro-card {
+    max-width: 480px;
+    margin: 60px auto;
+    text-align: center;
+    padding: 40px 32px;
+    border-radius: 22px;
+    background: rgba(255, 220, 160, 0.05);
+    border: 1px solid rgba(255, 220, 160, 0.18);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+    color: rgba(255, 246, 225, 0.92);
+}
+.profile__pro-eyebrow {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 205, 115, 0.18);
+    border: 1px solid rgba(255, 205, 115, 0.45);
+    color: rgba(255, 232, 198, 1);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    margin-bottom: 18px;
+}
+.profile__pro-headline {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+    font-size: 24px;
+    font-weight: 350;
+    letter-spacing: -0.01em;
+    margin: 0 0 12px;
+    color: #faf3e3;
+}
+.profile__pro-body {
+    margin: 0 0 22px;
+    font-size: 14px;
+    color: rgba(255, 246, 225, 0.72);
+    line-height: 1.55;
+}
+.profile__pro-cta {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 220, 160, 0.5);
+    background: rgba(255, 220, 160, 0.16);
+    color: #faf3e3;
+    padding: 11px 22px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.profile__pro-cta:hover,
+.profile__pro-cta:focus-visible {
+    background: rgba(255, 220, 160, 0.26);
+    border-color: rgba(255, 220, 160, 0.75);
+    outline: none;
+    transform: translateY(-1px);
+}
+.profile__pro-fine {
+    margin: 14px 0 0;
+    font-size: 11.5px;
+    color: rgba(255, 246, 225, 0.45);
+    letter-spacing: 0.04em;
+}
 .profile__rail-dot {
     display: inline-block;
     width: 5px;

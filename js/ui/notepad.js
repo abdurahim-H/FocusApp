@@ -16,6 +16,8 @@
 import { effect, signal } from '../core/state.js';
 import { isReducedMotion } from '../core/motion.js';
 import { createFocusTrap } from './focus-trap.js';
+import { isPro } from '../features/billing.js';
+import { showUpgradeModal } from './upgrade.js';
 
 // ───────────────────────────────────────────────────────────────────────
 // State — a single signal carrying every note. Persisted to its own
@@ -260,12 +262,23 @@ export function initNotepad() {
             )
         ) return;
         e.preventDefault();
+        // Paywall: Notes is a Pro-only surface. Free users land on the
+        // upgrade modal instead of the notepad.
+        if (!isPro()) {
+            showUpgradeModal({ feature: 'notes' });
+            return;
+        }
         open();
     });
 }
 
-/** Public API — used by the account dropdown's "Open notes" row. */
+/** Public API — used by the account dropdown's "Open notes" row and
+ *  the cosmos toolbar's Notes button. Both gate through isPro(). */
 export function openNotepad() {
+    if (!isPro()) {
+        showUpgradeModal({ feature: 'notes' });
+        return;
+    }
     open();
 }
 

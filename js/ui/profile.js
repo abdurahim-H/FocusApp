@@ -26,6 +26,9 @@
 
 import { isReducedMotion } from '../core/motion.js';
 import * as auth from '../features/auth.js';
+import { isPro, tier as tierSignal } from '../features/billing.js';
+import { showUpgradeModal } from './upgrade.js';
+import { effect } from '../core/state.js';
 import {
     anomalyFlags,
     bucketByDayOfWeek,
@@ -81,6 +84,45 @@ const SECTIONS = [
     { id: 'insights', label: 'Insights' },
 ];
 
+// Sections gated behind Pro. Focus + Time remain free — those two
+// surfaces give a casual user enough self-knowledge to feel the app
+// is honest without needing the deeper analytics layer.
+const PRO_SECTIONS = new Set(['overview', 'tasks', 'sounds', 'insights']);
+
+const PRO_SECTION_COPY = {
+    overview: {
+        headline: 'Your full account dashboard.',
+        body: 'Identity card, cosmic signature, and the at-a-glance KPIs that show how the app sees your focus year.',
+    },
+    tasks: {
+        headline: 'Deep task analytics.',
+        body: 'Per-day throughput, day-of-week and hour breakdowns, efficiency, tasks-per-session ratios.',
+    },
+    sounds: {
+        headline: 'Which sounds actually deepen your focus.',
+        body: 'Cohen\'s d effect sizes on focus quality by sound — the single most surprising number in the app.',
+    },
+    insights: {
+        headline: 'Plain-English insights.',
+        body: 'Regression trends, week-over-week deltas, anomaly callouts, and the friction cost of tab-switching during focus.',
+    },
+};
+
+function renderProUpgradeCard(sectionId) {
+    const copy = PRO_SECTION_COPY[sectionId] || PRO_SECTION_COPY.overview;
+    return `
+        <div class="profile__pro-card">
+            <span class="profile__pro-eyebrow">PRO</span>
+            <h2 class="profile__pro-headline">${escapeHtml(copy.headline)}</h2>
+            <p class="profile__pro-body">${escapeHtml(copy.body)}</p>
+            <button class="profile__pro-cta" type="button" data-action="upgrade" data-section="${escapeHtml(sectionId)}">
+                Try Pro free for 7 days
+            </button>
+            <p class="profile__pro-fine">$5/month or $55/year — cancel anytime.</p>
+        </div>
+    `;
+}
+
 let initialised = false;
 let panel = null;
 let trap = null;
@@ -109,6 +151,19 @@ export function initProfile() {
     unsubscribeAuth = auth.onChange(({ user }) => {
         currentUser = user || null;
         if (isOpen && activeSection === 'overview') render();
+    });
+
+    // Re-render when the Pro tier flips — covers "upgraded on another
+    // tab" so the upgrade card swaps out for the real section live.
+    let lastTier = tierSignal.value;
+    effect(() => {
+        const t = tierSignal.value;
+        if (t === lastTier) return;
+        lastTier = t;
+        if (isOpen) {
+            renderRail();
+            render();
+        }
     });
 
     // Momentum-trail entry — clicking the dots opens Profile.
@@ -283,6 +338,12 @@ function buildPanel() {
     const content = panel.querySelector('#profileContent');
     if (content) {
         content.addEventListener('click', (e) => {
+            // Pro upgrade CTA on a gated section.
+            const upgrade = e.target.closest('[data-action="upgrade"]');
+            if (upgrade) {
+                showUpgradeModal({ feature: upgrade.dataset.section || 'generic' });
+                return;
+            }
             if (e.target.closest('[data-insight-back]')) {
                 setInsightDetail(null);
                 return;
@@ -343,16 +404,21 @@ function renderIdentity() {
 function renderRail() {
     const rail = panel.querySelector('#profileRail');
     if (!rail) return;
-    rail.innerHTML = SECTIONS.map((s, i) => `
-        <button class="profile__rail-btn ${s.id === activeSection ? 'is-active' : ''}"
+    const userIsPro = isPro();
+    rail.innerHTML = SECTIONS.map((s, i) => {
+        const locked = PRO_SECTIONS.has(s.id) && !userIsPro;
+        return `
+        <button class="profile__rail-btn ${s.id === activeSection ? 'is-active' : ''} ${locked ? 'is-pro-locked' : ''}"
                 type="button" role="tab"
                 data-section="${s.id}"
                 aria-selected="${s.id === activeSection}"
-                title="${s.label} (press ${i + 1})">
+                title="${s.label} (press ${i + 1})${locked ? ' — Pro' : ''}">
             <span class="profile__rail-dot" aria-hidden="true"></span>
             <span class="profile__rail-label">${s.label}</span>
+            ${locked ? '<span class="profile__rail-pro" aria-hidden="true">PRO</span>' : ''}
         </button>
-    `).join('');
+        `;
+    }).join('');
     rail.querySelectorAll('[data-section]').forEach((btn) =>
         btn.addEventListener('click', () => setSection(btn.dataset.section))
     );
@@ -369,6 +435,10 @@ function renderContent() {
         // We pass the unfiltered list so per-day stats can still use
         // the full set if we ever need non-focus data later.
         html = renderDayDetail(activeDayDetail, sessions);
+    } else if (PRO_SECTIONS.has(activeSection) && !isPro()) {
+        // Free users see an in-place upgrade card on Pro sections.
+        // Focus + Time stay free and render normally below.
+        html = renderProUpgradeCard(activeSection);
     } else {
         switch (activeSection) {
             case 'overview': html = renderOverview(sessions); break;

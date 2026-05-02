@@ -16,6 +16,7 @@ This repo keeps five top-level documents. Every contributor (human or AI) must k
 | **DEPLOYMENT.md**  | Infrastructure runbook — Cloudflare, R2, DNS, CSP, rollback procedures. | When deploy flow, env vars, DNS, CSP, or any piece of prod infra changes.      |
 | **SECURITY.md**    | Reporting process, scope, defenses in place, data handling.             | When security posture changes — new CSP directive, new data stored, new third-party. |
 | **CHANGELOG.md**   | Versioned user-visible history.                                         | Every user-visible change. Group under `[Unreleased]` until a release tag goes out. |
+| **MONETIZATION.md**| Pricing, paywall scope, and the implementation plan.                    | When the gated features list, pricing, or Stripe wiring changes.      |
 
 **Rule:** if a PR changes behaviour, either (a) update the relevant `.md` file in the same PR, or (b) state in the PR why no doc update is needed.
 
@@ -82,6 +83,7 @@ css/
 
 public/           verbatim-copied to dist/: index assets (icon.svg, site.webmanifest), legal (privacy.html, terms.html), 404.html, robots.txt, sitemap.xml, _headers, theme-init.js (FOUC bootstrap), auth/callback.html + callback.js (OAuth/magic-link landing)
 db/migrations/    SQL applied manually in Supabase dashboard (idempotent)
+supabase/functions/  Deno Edge Functions: create-checkout-session, create-portal-session, stripe-webhook (deployed via `supabase functions deploy`)
 tests/            Playwright smoke suite (smoke.spec.js)
 index.html        entry point; loads pinned+SRI Babylon, then /js/core/app.js
 wrangler.toml     Cloudflare Workers + Static Assets config
@@ -169,7 +171,11 @@ Only versioned `/v<X.Y.Z>/babylon.js` URLs are immutable on the BabylonJS CDN �
 
 ### Supabase migrations live in `db/migrations/`
 
-Schema changes for the optional accounts feature go in `db/migrations/NNNN_*.sql`. They are applied manually in the Supabase SQL editor (paste-and-run) — there's no automatic migration runner. Migrations should be idempotent (`create table if not exists`, `drop policy if exists … create policy …`) so they're safe to re-run. The current state is a single migration creating `public.usernames` + the `is_username_taken()` RPC.
+Schema changes for the optional accounts feature go in `db/migrations/NNNN_*.sql`. They are applied manually in the Supabase SQL editor (paste-and-run) — there's no automatic migration runner. Migrations should be idempotent (`create table if not exists`, `drop policy if exists … create policy …`) so they're safe to re-run. Current migrations: `0001_usernames.sql`, `0002_sessions.sql`, `0003_billing.sql` (Pro tier table + `get_my_tier()` RPC).
+
+### Stripe paywall — see MONETIZATION.md
+
+The Pro tier is wired through three Supabase Edge Functions in `supabase/functions/`: `create-checkout-session`, `create-portal-session`, and `stripe-webhook`. The webhook is the ONLY thing that mutates `public.billing` — it runs with the service-role key and bypasses RLS. The client never reads `billing` directly; it calls the `get_my_tier()` RPC which returns just the tier string. UI gates go through `js/features/billing.js → isPro()`. Required env vars on the Supabase functions: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `APP_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. The full list of gated features and the user-facing flow is in `MONETIZATION.md`.
 
 ### Production console is silent
 
@@ -210,7 +216,9 @@ Anything in `public/` is copied verbatim to `dist/` root with its filename prese
 - Don't reintroduce `console.log` as a user-visible signal — it's stripped from prod. Use `console.warn` / `error` for anything meant to be seen.
 - Don't create new `*.md` files beyond the five documented above unless the user asks.
 - Don't run `git push --force`, `git reset --hard`, `rm -rf`, or `localStorage.clear()` during a debug session without confirming.
-- **Don't import `@supabase/supabase-js` from anywhere except `js/features/auth.js`.** That file is the single point of contact with the auth provider. Everything else calls the thin API it exposes (`signInWithMagicLink`, `signInWithOAuth`, `signOut`, `onChange`, `getUser`, `isConfigured`, `isUsernameAvailable`, `claimUsername`). One file changes if we ever swap providers.
+- **Don't import `@supabase/supabase-js` from anywhere except `js/features/auth.js`.** That file is the single point of contact with the auth provider. Everything else calls the thin API it exposes (`signInWithMagicLink`, `signInWithOAuth`, `signOut`, `onChange`, `getUser`, `isConfigured`, `isUsernameAvailable`, `claimUsername`, `callRpc`, `invokeFunction`). One file changes if we ever swap providers.
+- **Don't read `tier.value` directly to gate features.** The Pro paywall has exactly one client-side helper: `isPro()` from `js/features/billing.js`. Every gate (Notes, Profile sections, future audio integrations) calls `isPro()`. Reading the signal directly leaks the abstraction; a future provider swap (Stripe → LemonSqueezy / Paddle) would have to chase down every call site instead of editing one file.
+- **Don't trust the client tier flag for anything that costs money to serve.** `isPro()` is UI-friction only — a user with devtools can flip it. For features with a real per-user infrastructure cost (cloud sync, OAuth-backed music integrations when they ship), enforce `tier='pro'` server-side in the relevant Supabase Edge Function or RLS policy. Truth lives in `public.billing.tier`, written ONLY by the Stripe webhook running with the service-role key.
 - **Don't bypass the password policy.** `js/features/auth.js → signUpWithPassword` runs `validatePassword` + `isPasswordBreached` (HIBP) before calling Supabase. New auth flows must call this same function — don't reach for `c.auth.signUp` directly.
 - **Don't paste an inline `<script>` block.** Externalise it under `public/` so CSP can keep `script-src` free of `'unsafe-inline'`. Same applies to `on*=` event-handler attributes in HTML.
 - **Don't put `position: fixed` chrome inside `.container`.** `.container` has `contain: layout style paint` which makes it the containing block for fixed descendants AND clips paint and pointer hits to its box. Settings panel, cosmos toolbar, library drawer, save-mix popover, sleep popover, account satellite, account dropdown, and auth modal all live as direct children of `<body>` for this reason. Adding a new floating overlay? It goes outside `.container`.

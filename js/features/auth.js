@@ -507,6 +507,45 @@ function sanitiseUsername(raw) {
     return s.slice(0, 30);
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// Generic Supabase helpers — used by billing.js (and any future feature
+// that needs RPC / Edge-Function access). Keeps auth.js the single
+// importer of @supabase/supabase-js per the CLAUDE.md invariant.
+// ════════════════════════════════════════════════════════════════════════════
+
+/** Call a Supabase RPC (Postgres function defined via SECURITY DEFINER).
+ *  Returns the data payload on success, throws on auth/network failure.
+ *  Returns null silently when not signed in (every RPC we expose
+ *  requires auth.uid()). */
+export async function callRpc(name, params) {
+    if (!isConfigured()) return null;
+    if (!cachedUser) return null;
+    const c = await getClient();
+    const { data, error } = await withTimeout(
+        c.rpc(name, params),
+        REQUEST_TIMEOUT_MS,
+        `rpc:${name}`
+    );
+    if (error) throw normaliseError(error);
+    return data;
+}
+
+/** Invoke a Supabase Edge Function. Body is sent as JSON. Returns
+ *  the parsed JSON response. Throws on any non-2xx, network failure,
+ *  or timeout. Returns null silently when not signed in. */
+export async function invokeFunction(name, body = {}) {
+    if (!isConfigured()) return null;
+    if (!cachedUser) return null;
+    const c = await getClient();
+    const { data, error } = await withTimeout(
+        c.functions.invoke(name, { body }),
+        REQUEST_TIMEOUT_MS,
+        `fn:${name}`
+    );
+    if (error) throw normaliseError(error);
+    return data;
+}
+
 /** Throw an Error with a typed `code` property. Lets the UI translate
  *  to friendly copy without parsing message strings. */
 function throwTyped(code, message) {
