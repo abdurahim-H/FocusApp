@@ -1421,13 +1421,18 @@ function renderInsights(sessions) {
 
     const insights = [];
 
-    if (reg && Math.abs(reg.slopePerWeek) > 0.5) {
+    // Require r² ≥ 0.05 alongside a non-trivial slope so a single
+    // big day can't dominate a near-flat line and produce a
+    // confident-sounding "going up" headline. Slope-only is
+    // statistically meaningless when the fit explains <5% of the
+    // variance in daily totals.
+    if (reg && Math.abs(reg.slopePerWeek) > 0.5 && (reg.r2 || 0) >= 0.05) {
         const direction = reg.slope > 0 ? 'going up' : 'going down';
         const verb = reg.slope > 0 ? 'gaining' : 'losing';
         const slopeAbs = Math.abs(reg.slopePerWeek);
         const slopeStr = slopeAbs >= 1
             ? `${slopeAbs.toFixed(0)} ${slopeAbs >= 1.5 ? 'minutes' : 'minute'} a week`
-            : `roughly ${Math.round(slopeAbs * 4)} minutes a month`;
+            : `roughly ${Math.round(slopeAbs * (30 / 7))} minutes a month`;
         const trendVals = regressionLine(last30) || [];
         insights.push({
             kind: 'trend',
@@ -1444,8 +1449,13 @@ function renderInsights(sessions) {
     // informative than the wow card which just splits the window in
     // half regardless of where the actual change happened. When CUSUM
     // fires, the wow card is suppressed below to avoid double-counting.
+    // Threshold the change-point delta relative to baseline rather
+    // than at a flat 5 minutes. For a heavy user averaging 200 min/day,
+    // 5 min is noise; for a light user averaging 20 min/day it's a
+    // real shift. Require the larger of (5 min, 15% of baseline) so
+    // the card fires on changes that matter to *this* user's scale.
     const cp = detectChangePoint(dailyTotals(sessions, 60));
-    if (cp && Math.abs(cp.delta) >= 5) {
+    if (cp && Math.abs(cp.delta) >= Math.max(5, (cp.beforeMean || 0) * 0.15)) {
         const dirWord = cp.direction > 0 ? 'jumped' : 'dropped';
         const beforeMin = Math.round(cp.beforeMean);
         const afterMin = Math.round(cp.afterMean);
@@ -1481,8 +1491,14 @@ function renderInsights(sessions) {
     if (Math.abs(z) >= 1.5) {
         const todayMin = Math.round(todayTotal);
         const usualMin = Math.round(mean(last30.slice(0, -1)));
+        // The multiplicative branch needs a non-trivial baseline; with
+        // a sparse history `usualMin` rounds to 0 and the comparison
+        // `todayMin >= 0 * 2` fires for every above-usual day, then
+        // ratioCopy(_, 0) returns "far above" producing "about far
+        // above a normal day." Keep the multiplicative branch only
+        // when the baseline is at least 1 minute.
         const headline = z > 0
-            ? todayMin >= usualMin * 2
+            ? usualMin >= 1 && todayMin >= usualMin * 2
                 ? `today is way past your usual — about ${ratioCopy(todayMin, usualMin)} a normal day`
                 : `today is well above your usual focus`
             : `today is well below your usual focus`;
@@ -1515,7 +1531,12 @@ function renderInsights(sessions) {
         });
     }
 
-    if (sessions.length >= 8 && Math.abs(correlation) > 0.2) {
+    // Pearson r is noisy at small n. The 95% CI for r=0.2 at n=8 spans
+    // roughly [-0.55, +0.75] — essentially indistinguishable from no
+    // correlation. Require either real n (≥20) at the standard 0.2
+    // bar, or a stronger effect (≥0.4) when sample size is small.
+    const corrThreshold = sessions.length >= 20 ? 0.2 : 0.4;
+    if (sessions.length >= 8 && Math.abs(correlation) > corrThreshold) {
         // Real Pearson r — negative is the expected case (switches
         // hurt quality), positive is the surprising one (switches
         // correlate with *higher* quality, which deserves its own
@@ -1564,13 +1585,18 @@ function renderInsights(sessions) {
         // band around the projection — honest about uncertainty.
         const past14 = last30.slice(-14);
         const hw = holtWintersAdditive(last30, 7);
-        const fc = hw ? holtWintersForecast(hw, 14) : null;
-        const projected14 = fc ? fc.mean : new Array(14).fill(dailyAvg);
-        const projectedLower = fc ? fc.lower : null;
-        const projectedUpper = fc ? fc.upper : null;
-        const forecastClamped = fc ? fc.clamped : false;
-        const projectedSum = projected14.reduce((a, b) => a + b, 0);
-        const monthForecastReal = hw ? projectedSum * (30 / 14) : monthForecast;
+        // Run the model out to 30 days directly rather than projecting
+        // 14 days and scaling by 30/14 — the latter implicitly assumes
+        // days 15-30 mirror days 1-14, which discards the trend term
+        // HW already produced. The card itself only paints 14 days
+        // (past14 + projected14) so the chart stays the same.
+        const fc30 = hw ? holtWintersForecast(hw, 30) : null;
+        const projected30 = fc30 ? fc30.mean : new Array(30).fill(dailyAvg);
+        const projected14 = projected30.slice(0, 14);
+        const projectedLower = fc30 ? fc30.lower.slice(0, 14) : null;
+        const projectedUpper = fc30 ? fc30.upper.slice(0, 14) : null;
+        const forecastClamped = fc30 ? fc30.clamped : false;
+        const monthForecastReal = projected30.reduce((a, b) => a + b, 0);
         const monthHrs = monthForecastReal / 60;
         const valueText = monthHrs >= 1
             ? `${monthHrs.toFixed(1)} hours`
@@ -1601,7 +1627,11 @@ function renderInsights(sessions) {
     // insight entirely when silhouette is low, because that's the
     // honest signal that no real cluster structure exists in the
     // data and any K we pick would invent groups that aren't there.
-    if (sessions.length >= 12) {
+    // n≥20 keeps clusters from being invented out of 3-points-per-cluster
+    // noise at K=4 — silhouette is structurally unstable below that and
+    // the resulting "two distinct groups" headline tends to flicker as
+    // each new session shifts the centroids.
+    if (sessions.length >= 20) {
         const durs = sessions.map((s) => (s.durationSeconds || 0) / 60);
         const dMin = Math.min(...durs);
         const dMax = Math.max(...durs);
@@ -1662,7 +1692,11 @@ function renderInsights(sessions) {
     // For each named condition, compute P(complete | condition) and
     // its lift versus the overall completion rate. Surface the
     // strongest signal in plain language.
-    if (sessions.length >= 10) {
+    // Conditional sub-groups are noisy at small n: at n=10 even a 30%
+    // lift can sit inside the binomial CI. Bumping the floor to 20
+    // sessions and the lift threshold to 25% kills most coin-flip
+    // headlines while still letting genuinely strong patterns through.
+    if (sessions.length >= 20) {
         const conditions = [
             { name: 'starting before 10 AM', predicate: (s) => new Date(s.startedAt).getHours() < 10 },
             { name: 'starting in the afternoon (12–5 PM)', predicate: (s) => {
@@ -1678,10 +1712,17 @@ function renderInsights(sessions) {
             }},
         ];
         const ranked = rankConditions(sessions, conditions);
-        if (ranked.length > 0 && Math.abs(ranked[0].lift - 1) > 0.12) {
+        if (ranked.length > 0 && Math.abs(ranked[0].lift - 1) > 0.25) {
             const top = ranked[0];
             const matters = top.lift > 1;
-            const factor = matters ? top.lift.toFixed(1) : (1 / Math.max(0.01, top.lift)).toFixed(1);
+            // top.lift can legitimately be 0 (zero completions in the
+            // sub-group). Without a floor, 1/0.01 = 100× would print as
+            // a headline-grabbing "100× less likely" — alarmist for
+            // what's actually a small-sample artefact. Floor at 0.05 →
+            // worst-case "20× less likely", still strong but bounded.
+            const factor = matters
+                ? top.lift.toFixed(1)
+                : (1 / Math.max(0.05, top.lift)).toFixed(1);
             insights.push({
                 kind: 'conditions',
                 headline: matters
@@ -1701,7 +1742,12 @@ function renderInsights(sessions) {
     // above the baseline cut rate, one bad session predicts another —
     // "the next session after a cut is N× more likely to be cut too"
     // is much more actionable than the overall percentage.
-    const chain = sessionTransitionChain(sessions);
+    // Need ~20 transitions before a 25% lift is meaningfully different
+    // from a coin flip. Below that, the two-state chain estimates are
+    // dominated by single-trial noise and routinely produce "after a
+    // cut, you cut the next one 100% of the time" headlines from a
+    // run of two unlucky sessions.
+    const chain = sessions.length >= 20 ? sessionTransitionChain(sessions) : null;
     if (chain && chain.cutClusterLift !== null && chain.pXgivenX !== null) {
         const cutLift = chain.cutClusterLift;
         const completeLift = chain.completeClusterLift;
@@ -2380,9 +2426,6 @@ function detailCorrelation(ins) {
 function detailFriction(ins) {
     const d = ins.data;
     const avgPerSession = d.sessionCount ? d.switches / d.sessionCount : 0;
-    const cleanSessionsPct = d.sessionCount
-        ? Math.round((d.sessionCount - d.switches > 0 ? 1 : 0) * 100)
-        : 0;
     return `
         ${detailBlock('What this is', `
             <p>An estimate of focused time you've lost to context-switching during your sessions.</p>
@@ -2545,7 +2588,7 @@ function detailPatterns(ins) {
                 <li>Repeat until the groups stop changing</li>
                 <li>Restart 5 times — keep the run with the cleanest groups</li>
             </ol>
-            <p>We tried K = 2, 3, and 4, and picked the K with the cleanest separation between groups (the "elbow" point).</p>
+            <p>We tried K = 2, 3, and 4, and picked the K with the highest silhouette score — the metric that measures how cleanly each session fits its assigned group versus the next-closest one.</p>
         `)}
         ${detailBlock('Your groups', `<ul class="cluster-list">${clusterRows}</ul>`)}
         ${detailBlock('Reading the chart', `

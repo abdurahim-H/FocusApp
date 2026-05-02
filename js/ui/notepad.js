@@ -18,6 +18,7 @@ import { isReducedMotion } from '../core/motion.js';
 import { createFocusTrap } from './focus-trap.js';
 import { isPro } from '../features/billing.js';
 import { showUpgradeModal } from './upgrade.js';
+import { showGentleToast } from '../utils/gentle-toast.js';
 
 // ───────────────────────────────────────────────────────────────────────
 // State — a single signal carrying every note. Persisted to its own
@@ -551,7 +552,12 @@ function buildPanel() {
     // Voice dictation (Web Speech API). Transcribed text is appended
     // at the editor's current cursor position. Browser support: all
     // Chromium-based, plus Safari since 14.1; Firefox is the holdout
-    // — we hide the button when the API isn't available.
+    // — we mark the button unavailable when the API isn't there.
+    // Errors (mic permission denied, no-speech, network) surface
+    // via gentle toast instead of vanishing into console — the
+    // previous silent-fail path made the button look broken when
+    // the underlying issue was a one-time permission denial the
+    // user had no way to spot from the UI.
     const dictateBtn = panel.querySelector('#notepadDictate');
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SR) {
@@ -594,7 +600,34 @@ function buildPanel() {
                     showSavedFlash();
                 };
                 recognizer.onerror = (e) => {
-                    console.warn('[notepad] dictation error:', e?.error);
+                    const code = e?.error || 'unknown';
+                    console.warn('[notepad] dictation error:', code);
+                    const copy = ({
+                        'not-allowed': {
+                            title: 'Microphone access blocked',
+                            detail: 'Allow mic access in your browser settings, then try again.',
+                        },
+                        'service-not-allowed': {
+                            title: 'Microphone access blocked',
+                            detail: 'Allow mic access in your browser settings, then try again.',
+                        },
+                        'no-speech': {
+                            title: 'Didn\'t catch that',
+                            detail: 'No speech detected — try speaking a little closer to the mic.',
+                        },
+                        'audio-capture': {
+                            title: 'No microphone detected',
+                            detail: 'Plug one in or pick a different input device.',
+                        },
+                        network: {
+                            title: 'Dictation needs a connection',
+                            detail: 'Speech recognition runs in the cloud — check your network and try again.',
+                        },
+                    })[code] || {
+                        title: 'Dictation hit a snag',
+                        detail: 'Couldn\'t start voice input. Reload the page and try again.',
+                    };
+                    showGentleToast({ icon: '🎙️', ...copy });
                     stop();
                 };
                 recognizer.onend = () => stop();
@@ -605,6 +638,11 @@ function buildPanel() {
                 editorEl.focus();
             } catch (e) {
                 console.warn('[notepad] dictation unavailable:', e);
+                showGentleToast({
+                    icon: '🎙️',
+                    title: 'Dictation unavailable',
+                    detail: 'Couldn\'t start voice input in this browser.',
+                });
             }
         });
     } else if (dictateBtn) {

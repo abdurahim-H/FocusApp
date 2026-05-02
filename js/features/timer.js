@@ -343,7 +343,6 @@ export function completeSession() {
             elapsedSeconds,
             completed: openEnded ? true : elapsedSeconds >= configuredSeconds,
             taskCount: taskList.length,
-            tasksCompleted: taskList.filter((t) => t.completed).length,
         });
 
         triggerSessionCompleteUI();

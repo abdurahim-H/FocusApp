@@ -16,13 +16,13 @@
 // Lifecycle:
 //   beginSession({ kind, targetDurationSeconds })
 //     ↓ (Page Visibility events accumulate distraction telemetry)
-//   endSession({ elapsedSeconds, completed, taskCount, tasksCompleted })
+//   endSession({ elapsedSeconds, completed, taskCount })
 //     ↓ (computes focusQuality, persists locally, mirrors to cloud)
 //
 // Only `kind: 'focus'` is captured today. Break sessions could be added
 // later without a schema change — the column already exists.
 
-import { activeSounds } from '../core/state.js';
+import { activeSounds, effect, tasks } from '../core/state.js';
 import * as auth from './auth.js';
 
 const STORAGE_KEY = 'fu_sessions_v1';
@@ -34,6 +34,15 @@ const MAX_LOCAL_SESSIONS = 5000;
 let currentSession = null;
 let cachedSessions = loadFromStorage();
 const subscribers = new Set();
+// Disposes the activeSounds effect that accumulates the union of
+// sounds played at any point during a session. Held at module scope
+// so beginSession can guarantee no orphan effect is left over from a
+// stuck prior session.
+let stopSoundsEffect = null;
+
+function readCompletedTasksCount() {
+    return (tasks.value || []).filter((t) => !!t.completed).length;
+}
 
 // ───────────────────────────────────────────────────────────────────────
 // Lifecycle
@@ -51,14 +60,32 @@ export function beginSession({ kind = 'focus', targetDurationSeconds }) {
         // than fabricate one.
         currentSession = null;
     }
+    if (stopSoundsEffect) {
+        try { stopSoundsEffect(); } catch (_) { /* noop */ }
+        stopSoundsEffect = null;
+    }
     currentSession = {
         kind,
         startedAt: Date.now(),
         targetDurationSeconds,
         distractionCount: 0,
         distractionSeconds: 0,
-        activeSounds: Array.from(new Set(activeSounds.value || [])),
+        // Working accumulator: every sound active at any point during
+        // the session lands here via the effect below. Translated to a
+        // plain array on endSession so the persisted shape stays the
+        // same as before.
+        activeSoundsSet: new Set(activeSounds.value || []),
+        // Snapshot the completed-tasks count at start so endSession can
+        // diff against the count at finish. Without this, the recorded
+        // tasksCompleted reflects the cumulative total (every prior
+        // session's completions counted again).
+        tasksCompletedAtStart: readCompletedTasksCount(),
     };
+    stopSoundsEffect = effect(() => {
+        const list = activeSounds.value || [];
+        if (!currentSession) return;
+        for (const s of list) currentSession.activeSoundsSet.add(s);
+    });
     visibilityHiddenAt = null;
 }
 
@@ -70,7 +97,6 @@ export function endSession({
     elapsedSeconds = null,
     completed = false,
     taskCount = 0,
-    tasksCompleted = 0,
 } = {}) {
     if (!currentSession) return null;
     // Fold any in-progress hidden window into the totals before sealing
@@ -86,8 +112,18 @@ export function endSession({
     const duration = Number.isFinite(elapsedSeconds) && elapsedSeconds >= 0
         ? Math.round(elapsedSeconds)
         : wallClockSeconds;
+    // Per-session tasks-done = (total completed at end) − (snapshot at start),
+    // clamped at zero so deletes/un-checks during the session can't yield
+    // a negative count.
+    const tasksCompleted = Math.max(
+        0,
+        readCompletedTasksCount() - (currentSession.tasksCompletedAtStart || 0)
+    );
+    const activeSoundsArr = Array.from(currentSession.activeSoundsSet || []);
     const record = {
         ...currentSession,
+        // Replace the working accumulator with the public-shape array.
+        activeSounds: activeSoundsArr,
         // Local-only id; replaced with the Postgres uuid once the cloud
         // mirror succeeds. Lets the UI key items reliably either way.
         id: `local-${currentSession.startedAt.toString(36)}`,
@@ -95,7 +131,7 @@ export function endSession({
         durationSeconds: duration,
         completed: !!completed,
         taskCount: Math.max(0, taskCount | 0),
-        tasksCompleted: Math.max(0, tasksCompleted | 0),
+        tasksCompleted,
         focusQuality: focusQualityScore({
             duration,
             target: currentSession.targetDurationSeconds,
@@ -105,6 +141,14 @@ export function endSession({
             completed: !!completed,
         }),
     };
+    // Strip working fields so the persisted shape matches the public
+    // schema (no Set objects, no start snapshot leaking out).
+    delete record.activeSoundsSet;
+    delete record.tasksCompletedAtStart;
+    if (stopSoundsEffect) {
+        try { stopSoundsEffect(); } catch (_) { /* noop */ }
+        stopSoundsEffect = null;
+    }
     currentSession = null;
     cachedSessions = [...cachedSessions, record];
     persistLocal();
@@ -128,6 +172,10 @@ export function endSession({
 /** Discard the in-progress session without recording it. Used by the
  *  reset path and by sign-out / page-hide cleanups. */
 export function abandonCurrentSession() {
+    if (stopSoundsEffect) {
+        try { stopSoundsEffect(); } catch (_) { /* noop */ }
+        stopSoundsEffect = null;
+    }
     currentSession = null;
     visibilityHiddenAt = null;
 }
