@@ -373,7 +373,8 @@ function renderThemeCards(row) {
             const sakura = o.value === 'sakura';
             const aurora = o.value === 'aurora-plain';
             const celestial = o.value === 'celestial-garden';
-            const hero = blackhole || sakura || aurora || celestial;
+            const autumn = o.value === 'silent-autumn';
+            const hero = blackhole || sakura || aurora || celestial || autumn;
             const disabled = o.disabled ? 'disabled' : '';
             const classes = [
                 'theme-card',
@@ -381,6 +382,7 @@ function renderThemeCards(row) {
                 sakura ? 'theme-card--sakura' : '',
                 aurora ? 'theme-card--aurora' : '',
                 celestial ? 'theme-card--celestial' : '',
+                autumn ? 'theme-card--autumn' : '',
                 o.disabled ? 'theme-card--coming-soon' : '',
                 active ? 'active' : '',
             ]

@@ -209,6 +209,27 @@ const MODULES = {
             'radial-gradient(ellipse at center, rgba(0,0,0,0) 58%, rgba(0,0,0,0.30) 100%)',
         grainOpacity: 0.04,
     }),
+
+    // ── Silent Autumn — sumi-e ink painting in motion: red maple
+    //    + gold ginkgo leaves drifting against parchment, ink-brush
+    //    trunk, mist mountains. Single-module video pattern.
+    silentAutumnVideo: makeVideoTheme({
+        id: 'silentAutumnVideo',
+        src: 'https://cdn.universefocuses.com/silent-autumn/silent-autumn-loop.mp4',
+        // Source is bright cream parchment with crimson + gold
+        // accents. A mild saturation+contrast nudge keeps the leaves
+        // reading vivid through the dark glass overlay; a slight
+        // brightness pull-down stops the parchment from blowing out
+        // against the chrome.
+        filter: 'saturate(1.08) contrast(1.05) brightness(0.96)',
+        fallback: '#1f1a16',
+        // The parchment is already soft at the edges; a stronger
+        // vignette keeps the chrome readable against the bright
+        // centre without pinching the corners.
+        vignette:
+            'radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.42) 100%)',
+        grainOpacity: 0.06,
+    }),
 };
 
 // ───────────────────────────────────────────────────────────────────────
@@ -282,6 +303,19 @@ export const THEMES = [
             secondary: [200, 244, 226], // moonlit petal
             accentWarm: [255, 250, 220], // lotus core warm white
             accentCool: [80, 200, 200],  // pond teal
+        },
+    },
+    {
+        id: 'silent-autumn',
+        label: 'Silent Autumn',
+        // Sumi-e ink painting: red maple + gold ginkgo leaves drift
+        // against parchment, ink-brush trunk, mist mountains.
+        modules: [MODULES.silentAutumnVideo],
+        palette: {
+            primary: [200, 66, 31],     // crimson maple
+            secondary: [212, 165, 68],  // ginkgo gold
+            accentWarm: [232, 117, 69], // warm leaf-orange
+            accentCool: [184, 176, 160], // mist stone
         },
     },
 ];

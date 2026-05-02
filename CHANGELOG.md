@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added
+- **Silent Autumn** scene theme — sumi-e ink-painting video backdrop (red maple + gold ginkgo leaves drifting across a parchment sky, ink-brush trunk, mist mountains). Per-theme chrome module retunes settings, profile drawer, account satellite, focus rings, task dock, notepad, help center, modals, and popovers to a crimson↔gold palette so the foreground UI sits as a focal accent rather than fighting the painting.
 - **Optional accounts** via Supabase. Email + password, Google OAuth, and magic-link sign-in. The auth surface is gated behind a satellite trigger that hangs off the right side of the nav pill, with a glass-orb dropdown when signed in.
 - **Password policy** enforced at sign-up: length 8–128, no whitespace at edges, no single-character repeats, 50-entry common-password blocklist, plus a Have-I-Been-Pwned k-anonymity breach check (only the first 5 hex chars of SHA-1 leave the browser). Live 4-bar strength meter on the form.
 - **Show / hide password toggle** and **Caps Lock hint** on the auth modal.

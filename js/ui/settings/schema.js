@@ -99,6 +99,7 @@ export const SCHEMA = [
             { value: 'sakura', label: 'Sakura' },
             { value: 'aurora-plain', label: 'Aurora' },
             { value: 'celestial-garden', label: 'Celestial Garden' },
+            { value: 'silent-autumn', label: 'Silent Autumn' },
         ],
     },
 
