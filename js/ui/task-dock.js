@@ -197,22 +197,33 @@ function toggle() {
 }
 
 /** Public entry — wired to the cosmos toolbar's tasks button.
- *  Pure toggle: visible → hide entirely, hidden → show + expand.
- *  Works the same on Focus and Home/Ambient — the override flag
- *  defeats the tab default in either direction. */
+ *  Behaviour differs by tab:
+ *    Focus  — slim NEXT preview is always visible. The button toggles
+ *             between collapsed (slim) and expanded (full panel);
+ *             never hides the strip the user expects to see.
+ *    Other  — there's no default surface, so the button toggles
+ *             between hidden and visible+expanded entirely. */
 export function openTaskDock() {
     if (!dock) return;
     const visible = !dock.classList.contains('hidden');
+    const expanded = dock.dataset.state === 'expanded';
+    if (mode.value === 'focus') {
+        // Clear any leftover 'hide' override so the focus default
+        // (visible) takes over again, then flip between slim and
+        // full panel.
+        visibilityOverride = null;
+        if (!visible) show();
+        if (expanded) collapse();
+        else expand();
+        return;
+    }
+    // Non-focus tab — full toggle between hidden and visible+expanded.
     if (visible) {
-        // Close entirely, regardless of which tab is showing — the
-        // user's intent is unambiguous: "the dock is open and I want
-        // it gone." Override = 'hide' wins over the focus-tab default.
         visibilityOverride = 'hide';
         collapse();
         hide();
         return;
     }
-    // Open + expand.
     visibilityOverride = 'show';
     show();
     expand();
