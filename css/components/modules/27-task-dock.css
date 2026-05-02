@@ -166,11 +166,12 @@
     overflow: hidden;
 }
 
-/* Auto-advance checkbox at the left edge of the collapsed strip.
-   Toggle UI, not a "mark done" — clicking it shifts the preview to
-   point at the first open task (or stays on the current one if the
-   list is empty). The eyebrow text becomes "NEXT" instead of "NOW"
-   while the toggle is on. */
+/* Done-checkbox at the left edge of the collapsed strip — completes
+   whatever task is currently in the preview. The reactive paintPreview
+   re-fires on the resulting tasks-signal change, so the next undone
+   task slides into the slot automatically. Class name kept for diff
+   stability; the .is-on variant is now used as a momentary feedback
+   pulse (currently no caller — kept for future use). */
 .task-dock__autoadvance {
     flex-shrink: 0;
     width: 18px;
@@ -198,6 +199,14 @@
     background: rgba(255, 220, 160, 0.22);
     border-color: rgba(255, 220, 160, 0.55);
     color: rgba(20, 14, 6, 1);
+}
+.task-dock__autoadvance[aria-disabled="true"] {
+    opacity: 0.4;
+    cursor: default;
+}
+.task-dock__autoadvance[aria-disabled="true"]:hover {
+    background: transparent;
+    border-color: rgba(255, 220, 160, 0.32);
 }
 
 .task-dock__active {

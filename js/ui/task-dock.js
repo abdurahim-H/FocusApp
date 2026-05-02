@@ -27,23 +27,16 @@
 // for the cosmos toolbar lift.
 
 import { activeTaskId, effect, mode, tasks } from '../core/state.js';
-import { normalizeTask } from '../features/tasks.js';
+import { normalizeTask, toggleTask } from '../features/tasks.js';
 
 const STATE_KEY = 'fu_task_dock_state';
-const AUTOADVANCE_KEY = 'fu_task_dock_autoadvance';
-
-function readAutoAdvance() {
-    try {
-        return localStorage.getItem(AUTOADVANCE_KEY) === '1';
-    } catch (_) {
-        return false;
-    }
-}
-
-let autoAdvance = readAutoAdvance();
 
 let initialised = false;
 let dock = null;
+// The task currently shown in the slim-bar preview. The dock's
+// done-button toggles this id; null disables the button (empty list
+// or "all done" state).
+let previewedTaskId = null;
 // Visibility override flag. Three values:
 //   null  — follow the tab default (visible on Focus, hidden elsewhere)
 //   'show' — user manually opened on a non-focus tab
@@ -107,31 +100,23 @@ export function initTaskDock() {
     collapsedBtn?.addEventListener('click', toggle);
     closeBtn?.addEventListener('click', collapse);
 
-    // Auto-advance checkbox — flips a persistent preference. When on,
-    // the dock's collapsed-state preview always points at the first
-    // unfinished task instead of a pinned NOW. Click handler swallows
-    // its event so it doesn't bubble up to the parent button (which
-    // would also expand the dock).
-    const autoBtn = document.getElementById('taskDockAutoAdvance');
-    autoBtn?.addEventListener('click', (e) => {
+    // Slim-bar done button — completes the task currently shown in the
+    // preview. The reactive paintPreview re-fires after toggleTask
+    // mutates the list, so the next undone task slides into the slot
+    // automatically. Stop propagation so the click doesn't bubble up to
+    // the parent button (which would expand the dock).
+    const doneBtn = document.getElementById('taskDockAutoAdvance');
+    doneBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
-        autoAdvance = !autoAdvance;
-        try { localStorage.setItem(AUTOADVANCE_KEY, autoAdvance ? '1' : '0'); } catch (_) {}
-        autoBtn.setAttribute('aria-checked', String(autoAdvance));
-        autoBtn.classList.toggle('is-on', autoAdvance);
-        paintPreview(tasks.value, activeTaskId.value);
+        if (previewedTaskId == null) return;
+        toggleTask(previewedTaskId);
     });
-    autoBtn?.addEventListener('keydown', (e) => {
+    doneBtn?.addEventListener('keydown', (e) => {
         if (e.key !== ' ' && e.key !== 'Enter') return;
         e.preventDefault();
         e.stopPropagation();
-        autoBtn.click();
+        doneBtn.click();
     });
-    // Reflect the persisted state on first paint.
-    if (autoBtn) {
-        autoBtn.setAttribute('aria-checked', String(autoAdvance));
-        autoBtn.classList.toggle('is-on', autoAdvance);
-    }
 
     // Outside click collapses an expanded dock. We use mousedown on the
     // capture phase so a click that starts inside but ends outside
@@ -308,48 +293,27 @@ function paintPreview(list, activeId) {
     const remaining = all.filter((t) => !t.completed).length;
     const total = all.length;
 
-    // Eyebrow text reflects what the preview is showing: NOW for the
-    // pinned active task, NEXT for the first open task in the list,
-    // DONE when the list is finished, blank when empty.
-    // Auto-advance moves the preview PAST the currently-active task to
-    // the next undone one in the list — that's what "show the next
-    // task in preview mode" means. If there's no undone task after the
-    // active, fall back to the first undone before it; if everything
-    // else is done, stay on the active task ("if no further undone
-    // tasks remaining it can remain without changing").
+    // Eyebrow text reflects what the preview is showing: NOW for a
+    // pinned-and-undone active task, NEXT for the first open task in
+    // the list, DONE when the list is finished, blank when empty.
+    // The active task gets skipped if it's already completed so the
+    // dock doesn't strand the user on a checked-off NOW.
     const eyebrowEl = document.getElementById('taskDockEyebrow');
-    if (autoAdvance && remaining > 0) {
-        let next = null;
-        if (active) {
-            const idx = all.indexOf(active);
-            // 1) first undone task after the active one
-            next = all.slice(idx + 1).find((t) => !t.completed);
-            // 2) otherwise first undone task before it
-            if (!next) next = all.slice(0, idx).find((t) => !t.completed);
-            // 3) nothing else undone — keep showing active even if it's
-            //    the only undone left
-            if (!next) next = active.completed ? null : active;
-        } else {
-            // No pinned active task — fall back to the first undone.
-            next = all.find((t) => !t.completed);
-        }
-        const norm = next ? normalizeTask(next) : null;
-        activeNameEl.textContent = norm?.text || '— untitled task —';
-        if (eyebrowEl) eyebrowEl.textContent = 'NEXT';
-        dock?.classList.remove('task-dock--no-active');
-    } else if (active) {
-        const norm = normalizeTask(active);
-        activeNameEl.textContent = norm.text || '— untitled task —';
-        if (eyebrowEl) eyebrowEl.textContent = 'NOW';
-        dock?.classList.remove('task-dock--no-active');
+    let preview = null;
+    let label = '';
+    if (active && !active.completed) {
+        preview = active;
+        label = 'NOW';
     } else if (remaining > 0) {
-        // Show the first open task as the preview — the user can jump
-        // straight into it. Picking the topmost open task matches the
-        // "next up" mental model of an ordered list.
-        const next = all.find((t) => !t.completed);
-        const norm = next ? normalizeTask(next) : null;
-        activeNameEl.textContent = norm?.text || '— untitled task —';
-        if (eyebrowEl) eyebrowEl.textContent = 'NEXT';
+        preview = all.find((t) => !t.completed);
+        label = 'NEXT';
+    }
+    previewedTaskId = preview ? preview.id : null;
+
+    if (preview) {
+        const norm = normalizeTask(preview);
+        activeNameEl.textContent = norm.text || '— untitled task —';
+        if (eyebrowEl) eyebrowEl.textContent = label;
         dock?.classList.remove('task-dock--no-active');
     } else if (total > 0) {
         activeNameEl.textContent = 'all tasks done';
@@ -359,6 +323,20 @@ function paintPreview(list, activeId) {
         activeNameEl.textContent = 'add your first task';
         if (eyebrowEl) eyebrowEl.textContent = '';
         dock?.classList.add('task-dock--no-active');
+    }
+    // Slim-bar done button mirrors the previewed task's completed
+    // state. With no preview (DONE / empty) it's disabled.
+    const doneBtn = document.getElementById('taskDockAutoAdvance');
+    if (doneBtn) {
+        if (previewedTaskId == null) {
+            doneBtn.setAttribute('aria-disabled', 'true');
+            doneBtn.setAttribute('aria-checked', 'false');
+            doneBtn.classList.remove('is-on');
+        } else {
+            doneBtn.removeAttribute('aria-disabled');
+            doneBtn.setAttribute('aria-checked', 'false');
+            doneBtn.classList.remove('is-on');
+        }
     }
 
     countEl.textContent = total === 0
