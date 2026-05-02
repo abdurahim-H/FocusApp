@@ -93,6 +93,11 @@ _archive/
 # Wrangler local state (from @cloudflare/vite-plugin dev server)
 .wrangler/
 
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+
 # Playwright artifacts
 /test-results/
 /playwright-report/
