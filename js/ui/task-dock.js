@@ -30,9 +30,25 @@ import { activeTaskId, effect, mode, tasks } from '../core/state.js';
 import { normalizeTask } from '../features/tasks.js';
 
 const STATE_KEY = 'fu_task_dock_state';
+const AUTOADVANCE_KEY = 'fu_task_dock_autoadvance';
+
+function readAutoAdvance() {
+    try {
+        return localStorage.getItem(AUTOADVANCE_KEY) === '1';
+    } catch (_) {
+        return false;
+    }
+}
+
+let autoAdvance = readAutoAdvance();
 
 let initialised = false;
 let dock = null;
+// Manual-open flag: when the user clicks the toolbar tasks button on
+// a non-focus tab, this is set true so the visibility effect keeps
+// the dock open even though mode is 'home'. Reset by the toolbar
+// button toggle and by the explicit close paths (× button, Esc).
+let manuallyOpen = false;
 let collapsedBtn = null;
 let railBtn = null;
 let closeBtn = null;
@@ -89,6 +105,32 @@ export function initTaskDock() {
     collapsedBtn?.addEventListener('click', toggle);
     closeBtn?.addEventListener('click', collapse);
 
+    // Auto-advance checkbox — flips a persistent preference. When on,
+    // the dock's collapsed-state preview always points at the first
+    // unfinished task instead of a pinned NOW. Click handler swallows
+    // its event so it doesn't bubble up to the parent button (which
+    // would also expand the dock).
+    const autoBtn = document.getElementById('taskDockAutoAdvance');
+    autoBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        autoAdvance = !autoAdvance;
+        try { localStorage.setItem(AUTOADVANCE_KEY, autoAdvance ? '1' : '0'); } catch (_) {}
+        autoBtn.setAttribute('aria-checked', String(autoAdvance));
+        autoBtn.classList.toggle('is-on', autoAdvance);
+        paintPreview(tasks.value, activeTaskId.value);
+    });
+    autoBtn?.addEventListener('keydown', (e) => {
+        if (e.key !== ' ' && e.key !== 'Enter') return;
+        e.preventDefault();
+        e.stopPropagation();
+        autoBtn.click();
+    });
+    // Reflect the persisted state on first paint.
+    if (autoBtn) {
+        autoBtn.setAttribute('aria-checked', String(autoAdvance));
+        autoBtn.classList.toggle('is-on', autoAdvance);
+    }
+
     // Outside click collapses an expanded dock. We use mousedown on the
     // capture phase so a click that starts inside but ends outside
     // (text selection) doesn't collapse mid-drag.
@@ -96,14 +138,14 @@ export function initTaskDock() {
     document.addEventListener('keydown', onKey);
 
     // Reactive: visibility follows the current top-level navigation
-    // tab. The user explicitly didn't want the dock to appear on the
-    // Home tab — including while a timer is running — so we drop the
-    // legacy 'timer' mode value (which timer.js still writes for its
-    // own state machine) and only show on 'focus'. Tasks remain
-    // accessible from Home via the cosmos toolbar's tasks button.
+    // tab OR the manual override flag. The dock auto-shows on Focus,
+    // stays hidden on Home/Ambient unless the user explicitly opened
+    // it via the cosmos toolbar's tasks button. The manual flag
+    // resets whenever the user explicitly closes (collapse + outside
+    // click, or Esc, or the toolbar button toggle).
     effect(() => {
         const m = mode.value;
-        if (m === 'focus') {
+        if (m === 'focus' || manuallyOpen) {
             show();
         } else {
             hide();
@@ -149,17 +191,30 @@ function toggle() {
     else expand();
 }
 
-/** Public entry — opened by the cosmos toolbar's tasks button. The
- *  dock only renders on the Focus tab, so we run the full nav switch
- *  (which updates both the mode signal and the active-tab pill) and
- *  expand once the focus panel has settled. */
+/** Public entry — wired to the cosmos toolbar's tasks button.
+ *  Toggles: a second click on an already-expanded dock collapses
+ *  (and on a non-focus tab, hides) it. Opens in place — no tab
+ *  switch — so users can manage tasks without leaving Home or
+ *  Ambient. */
 export function openTaskDock() {
-    import('./navigation.js').then(({ switchMode }) => {
-        switchMode('focus');
-        // Mode change → visibility effect runs → show() wires up the
-        // dock; expand on the next frame.
-        requestAnimationFrame(() => expand());
-    });
+    if (!dock) return;
+    const visible = !dock.classList.contains('hidden');
+    const expanded = dock.dataset.state === 'expanded';
+    if (visible && expanded) {
+        // Already open → close it down. On non-focus tabs we also
+        // drop the manual flag so the visibility effect hides the
+        // dock back into its off-tab state.
+        collapse();
+        if (mode.value !== 'focus') {
+            manuallyOpen = false;
+            hide();
+        }
+        return;
+    }
+    // Open: force-show on the current tab and expand the panel.
+    manuallyOpen = true;
+    show();
+    expand();
 }
 
 function expand() {
@@ -180,6 +235,14 @@ function collapse() {
     railBtn?.setAttribute('aria-expanded', 'false');
     document.body.classList.remove('is-task-dock-expanded');
     writeState('collapsed');
+    // If the user opened the dock manually from a non-focus tab, an
+    // explicit collapse should also dismiss it entirely — otherwise
+    // a slim strip would linger across Home/Ambient with no visual
+    // anchor to close it.
+    if (manuallyOpen && mode.value !== 'focus') {
+        manuallyOpen = false;
+        hide();
+    }
 }
 
 function onOutside(e) {
@@ -228,8 +291,19 @@ function paintPreview(list, activeId) {
     // Eyebrow text reflects what the preview is showing: NOW for the
     // pinned active task, NEXT for the first open task in the list,
     // DONE when the list is finished, blank when empty.
+    // Auto-advance overrides the NOW/active distinction so the
+    // preview always points at the first unfinished task; once the
+    // list is empty the preview stays put on the same item, per the
+    // user's spec ("if no further unfinished tasks then it can
+    // continue displaying the same task").
     const eyebrowEl = document.getElementById('taskDockEyebrow');
-    if (active) {
+    if (autoAdvance && remaining > 0) {
+        const next = all.find((t) => !t.completed);
+        const norm = next ? normalizeTask(next) : null;
+        activeNameEl.textContent = norm?.text || '— untitled task —';
+        if (eyebrowEl) eyebrowEl.textContent = 'NEXT';
+        dock?.classList.remove('task-dock--no-active');
+    } else if (active) {
         const norm = normalizeTask(active);
         activeNameEl.textContent = norm.text || '— untitled task —';
         if (eyebrowEl) eyebrowEl.textContent = 'NOW';

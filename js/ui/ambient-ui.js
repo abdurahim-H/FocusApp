@@ -39,6 +39,7 @@ import {
 } from '../features/sounds.js';
 import { createFocusTrap } from './focus-trap.js';
 import { switchMode } from './navigation.js';
+import { openTaskDock } from './task-dock.js';
 import {
     get as settingsGet,
     set as settingsSet,
@@ -160,7 +161,8 @@ function wireDeckControls() {
         import('./notepad.js').then((m) => m.openNotepad?.());
     });
     document.getElementById('deckTasksBtn')?.addEventListener('click', () => {
-        import('./task-dock.js').then((m) => m.openTaskDock?.());
+        // Static-imported above — task-dock.js is already loaded.
+        openTaskDock();
     });
 }
 

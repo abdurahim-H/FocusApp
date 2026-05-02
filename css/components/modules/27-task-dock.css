@@ -166,6 +166,40 @@
     overflow: hidden;
 }
 
+/* Auto-advance checkbox at the left edge of the collapsed strip.
+   Toggle UI, not a "mark done" — clicking it shifts the preview to
+   point at the first open task (or stays on the current one if the
+   list is empty). The eyebrow text becomes "NEXT" instead of "NOW"
+   while the toggle is on. */
+.task-dock__autoadvance {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    border: 1.5px solid rgba(255, 220, 160, 0.32);
+    background: transparent;
+    color: rgba(255, 220, 160, 0.0);
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.task-dock__autoadvance:hover {
+    border-color: rgba(255, 220, 160, 0.55);
+    background: rgba(255, 220, 160, 0.06);
+}
+.task-dock__autoadvance:focus-visible {
+    outline: 2px solid rgba(255, 220, 160, 0.6);
+    outline-offset: 2px;
+}
+.task-dock__autoadvance.is-on {
+    background: rgba(255, 220, 160, 0.22);
+    border-color: rgba(255, 220, 160, 0.55);
+    color: rgba(20, 14, 6, 1);
+}
+
 .task-dock__active {
     /* Single-row in the slim collapsed strip — eyebrow tag sits to
        the left of the preview text, both on one baseline. */
