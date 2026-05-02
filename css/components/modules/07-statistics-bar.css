@@ -113,6 +113,11 @@
     color: rgba(210, 190, 155, 0.7);
     font-variant-numeric: tabular-nums;
     letter-spacing: var(--tracking-tight);
+    /* Keep multi-segment durations like "1h 37m 4s" on a single
+       baseline. Without this the flex column lets the formatter's
+       space-separated parts wrap onto three lines once the focused
+       total crosses an hour, and they stack inside the goal ring. */
+    white-space: nowrap;
     line-height: 1;
 }
 
