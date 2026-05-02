@@ -44,11 +44,13 @@ let autoAdvance = readAutoAdvance();
 
 let initialised = false;
 let dock = null;
-// Manual-open flag: when the user clicks the toolbar tasks button on
-// a non-focus tab, this is set true so the visibility effect keeps
-// the dock open even though mode is 'home'. Reset by the toolbar
-// button toggle and by the explicit close paths (× button, Esc).
-let manuallyOpen = false;
+// Visibility override flag. Three values:
+//   null  — follow the tab default (visible on Focus, hidden elsewhere)
+//   'show' — user manually opened on a non-focus tab
+//   'hide' — user manually closed on the focus tab
+// Reset to null whenever the user navigates between tabs so the
+// natural-default visibility takes over again.
+let visibilityOverride = null;
 let collapsedBtn = null;
 let railBtn = null;
 let closeBtn = null;
@@ -137,19 +139,22 @@ export function initTaskDock() {
     document.addEventListener('mousedown', onOutside, true);
     document.addEventListener('keydown', onKey);
 
-    // Reactive: visibility follows the current top-level navigation
-    // tab OR the manual override flag. The dock auto-shows on Focus,
-    // stays hidden on Home/Ambient unless the user explicitly opened
-    // it via the cosmos toolbar's tasks button. The manual flag
-    // resets whenever the user explicitly closes (collapse + outside
-    // click, or Esc, or the toolbar button toggle).
+    // Reactive: visibility = visibilityOverride (if set) or the tab
+    // default (Focus → visible, anything else → hidden). The override
+    // resets on every tab change so the natural default takes over
+    // when the user navigates around — they can re-toggle from the
+    // toolbar button on the new tab if they want to.
     effect(() => {
         const m = mode.value;
-        if (m === 'focus' || manuallyOpen) {
-            show();
-        } else {
-            hide();
-        }
+        visibilityOverride = null;
+        const shouldShow =
+            visibilityOverride === 'show'
+                ? true
+                : visibilityOverride === 'hide'
+                    ? false
+                    : m === 'focus';
+        if (shouldShow) show();
+        else hide();
     });
 
     // Reactive: collapsed-state preview. Re-paints whenever the task
@@ -192,27 +197,23 @@ function toggle() {
 }
 
 /** Public entry — wired to the cosmos toolbar's tasks button.
- *  Toggles: a second click on an already-expanded dock collapses
- *  (and on a non-focus tab, hides) it. Opens in place — no tab
- *  switch — so users can manage tasks without leaving Home or
- *  Ambient. */
+ *  Pure toggle: visible → hide entirely, hidden → show + expand.
+ *  Works the same on Focus and Home/Ambient — the override flag
+ *  defeats the tab default in either direction. */
 export function openTaskDock() {
     if (!dock) return;
     const visible = !dock.classList.contains('hidden');
-    const expanded = dock.dataset.state === 'expanded';
-    if (visible && expanded) {
-        // Already open → close it down. On non-focus tabs we also
-        // drop the manual flag so the visibility effect hides the
-        // dock back into its off-tab state.
+    if (visible) {
+        // Close entirely, regardless of which tab is showing — the
+        // user's intent is unambiguous: "the dock is open and I want
+        // it gone." Override = 'hide' wins over the focus-tab default.
+        visibilityOverride = 'hide';
         collapse();
-        if (mode.value !== 'focus') {
-            manuallyOpen = false;
-            hide();
-        }
+        hide();
         return;
     }
-    // Open: force-show on the current tab and expand the panel.
-    manuallyOpen = true;
+    // Open + expand.
+    visibilityOverride = 'show';
     show();
     expand();
 }
@@ -235,12 +236,12 @@ function collapse() {
     railBtn?.setAttribute('aria-expanded', 'false');
     document.body.classList.remove('is-task-dock-expanded');
     writeState('collapsed');
-    // If the user opened the dock manually from a non-focus tab, an
-    // explicit collapse should also dismiss it entirely — otherwise
-    // a slim strip would linger across Home/Ambient with no visual
-    // anchor to close it.
-    if (manuallyOpen && mode.value !== 'focus') {
-        manuallyOpen = false;
+    // If the user opened the dock with the toolbar button on a
+    // non-focus tab and then collapses via the × / outside click,
+    // dismiss entirely — otherwise a slim strip would linger across
+    // Home/Ambient with no visual anchor to close it.
+    if (visibilityOverride === 'show' && mode.value !== 'focus') {
+        visibilityOverride = null;
         hide();
     }
 }
