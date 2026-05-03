@@ -62,6 +62,7 @@ Do **not** proxy the `MX` record or the email `TXT` records — proxying breaks 
   - `aurora/aurora-loop-v2.mp4`
   - `celestial-garden/celestial-garden-loop.mp4`
   - `silent-autumn/silent-autumn-loop.mp4`
+  - `ocean/ocean-loop.mp4`
 - **Custom domain:** `cdn.universefocuses.com`, status **Active**, Minimum TLS `1.0`, Access **Enabled**.
 - Adding more sounds: drag-drop into the bucket for a handful, or `rclone copy ./sounds r2:focusapp-sounds --transfers=10 --progress` for bulk.
 - Adding a theme video: `npx wrangler r2 object put focusapp-sounds/<theme>/<theme>-loop.mp4 --file <local.mp4> --content-type video/mp4 --remote`. Source file stays local (gitignored); the bucket is the source of truth for production.

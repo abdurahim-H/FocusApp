@@ -1,0 +1,1793 @@
+/* ════════════════════════════════════════════════════════════════════════
+   OCEAN THEME OVERRIDES — chrome palette tuned for the underwater
+   kelp-forest video backdrop (sun-rays piercing through deep blue
+   water, kelp silhouettes, fish, rock seabed). Every rule is scoped
+   under [data-scene-theme="ocean"] so other themes' chrome stays
+   intact.
+   ════════════════════════════════════════════════════════════════════════
+   Core palette (used through this file):
+
+     cyan           #6ec8e8 — primary ocean-cyan accent (the sun-ray water)
+     cyan-soft      #c8e4f0 — pale water-glow highlight
+     cyan-deep      #2a7da8 — deep cyan — strong borders
+     kelp           #98b868 — secondary kelp-green accent (the kelp blades)
+     kelp-soft      #c8d8a0 — pale kelp highlight
+     kelp-deep      #5a7838 — deep kelp — hover halos
+     pearl          #d8eef4 — bright sun-ray cream / primary text
+     mist           #a0c4d4 — cool secondary (mid-water haze)
+     deep           #0a2438 — deep ocean glass base
+     deep-soft      #143850 — lifted ocean glass shade
+
+   Glass surfaces are tuned for the deep underwater scene: deep
+   ocean-tinted dark glass with cyan inner borders. The video supplies
+   the cyan↔kelp motion (sun-rays through water + kelp blades); chrome
+   biases toward cyan so the foreground UI sits within the sun-ray
+   register. Kelp green is reserved for hover halos and a handful of
+   secondary accents, so the eye still gets the dual hue the scene
+   registers as.
+
+   Tabs and tiles the user explicitly asked to preserve are NOT touched:
+     • .nav-buttons (Home / Focus pill)
+     • .home-period-tiles
+     • .home-mini-timer (kept warm, cyan-tinted accents only)
+   ════════════════════════════════════════════════════════════════════════ */
+
+[data-scene-theme="ocean"] {
+    /* Token sheet — referenced inside scoped overrides below. Defining
+       the tokens at the document root means any ocean override can
+       say `var(--oc-cyan)` without re-typing the literal. */
+    --oc-cyan: #6ec8e8;
+    --oc-cyan-soft: #c8e4f0;
+    --oc-cyan-deep: #2a7da8;
+    --oc-cyan-pale: #e8f4fa;
+    --oc-kelp: #98b868;
+    --oc-kelp-soft: #c8d8a0;
+    --oc-kelp-deep: #5a7838;
+    --oc-pearl: #d8eef4;
+    --oc-mist: #a0c4d4;
+    --oc-deep: #0a2438;
+    --oc-deep-soft: #143850;
+
+    /* RGB triplets so we can compose alphas inline. */
+    --oc-cyan-rgb: 110, 200, 232;
+    --oc-cyan-soft-rgb: 200, 228, 240;
+    --oc-cyan-deep-rgb: 42, 125, 168;
+    --oc-kelp-rgb: 152, 184, 104;
+    --oc-kelp-soft-rgb: 200, 216, 160;
+    --oc-kelp-deep-rgb: 90, 120, 56;
+    --oc-pearl-rgb: 216, 238, 244;
+    --oc-mist-rgb: 160, 196, 212;
+    --oc-deep-rgb: 10, 36, 56;
+    --oc-deep-soft-rgb: 20, 56, 80;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   1. SETTINGS STAR — replace warm-white star with cyan
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .settings-trigger {
+    /* Bump the resting alpha — the bright ocean video video washes
+       out a low-alpha pink, so the star wasn't readable until hovered. */
+    color: rgba(var(--oc-cyan-rgb), calc(0.78 + var(--glow, 0) * 0.22));
+}
+[data-scene-theme="ocean"] .settings-star {
+    filter: drop-shadow(
+        0 0 calc(4px + var(--glow, 0) * 18px)
+        rgba(var(--oc-cyan-rgb), calc(0.45 + var(--glow, 0) * 0.55))
+    );
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   2. HELP TRIGGER — same treatment, cyan ?
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .help-trigger {
+    color: rgba(var(--oc-cyan-rgb), 0.78);
+    border-color: rgba(var(--oc-cyan-rgb), 0.28);
+    background: rgba(var(--oc-deep-rgb), 0.42);
+}
+[data-scene-theme="ocean"] .help-trigger:hover {
+    color: var(--oc-cyan-soft);
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    box-shadow: 0 0 24px rgba(var(--oc-cyan-rgb), 0.25);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   3. ACCOUNT SATELLITE — replace warm orbs with cyan
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .account-satellite__orbits circle[stroke] {
+    /* Bumped from 0.32 — that alpha vanished against the bright
+       ocean video backdrop; 0.55 + a soft drop-shadow keeps the
+       orbits subtle but visible without competing with the avatar. */
+    stroke: rgba(var(--oc-cyan-rgb), 0.55);
+    stroke-width: 1.1;
+    filter: drop-shadow(0 0 4px rgba(var(--oc-cyan-rgb), 0.45));
+}
+[data-scene-theme="ocean"] .account-satellite__pip {
+    fill: rgba(var(--oc-cyan-soft-rgb), 1);
+    filter: drop-shadow(0 0 5px rgba(var(--oc-cyan-rgb), 1));
+}
+[data-scene-theme="ocean"] .cosmos-toolbar__divider {
+    background: rgba(var(--oc-cyan-rgb), 0.22);
+}
+/* Auto-advance checkbox in the task dock — pink tint to match the
+   rest of the chrome under ocean. */
+[data-scene-theme="ocean"] .task-dock__autoadvance {
+    border-color: rgba(var(--oc-cyan-rgb), 0.42);
+}
+[data-scene-theme="ocean"] .task-dock__autoadvance:hover {
+    border-color: rgba(var(--oc-cyan-rgb), 0.62);
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+}
+[data-scene-theme="ocean"] .task-dock__autoadvance.is-on {
+    background: rgba(var(--oc-cyan-rgb), 0.32);
+    border-color: rgba(var(--oc-cyan-rgb), 0.62);
+    color: var(--oc-deep);
+}
+[data-scene-theme="ocean"] .task-dock__autoadvance:focus-visible {
+    outline: 2px solid rgba(var(--oc-cyan-rgb), 0.65);
+}
+[data-scene-theme="ocean"] .account-satellite.is-signed-out .account-satellite__core {
+    background:
+        linear-gradient(180deg,
+            rgba(var(--oc-pearl-rgb), 0.10) 0%,
+            rgba(var(--oc-pearl-rgb), 0.04) 18%,
+            transparent 36%),
+        radial-gradient(circle at 50% 42%,
+            rgba(var(--oc-cyan-soft-rgb), 0.10) 0%,
+            rgba(var(--oc-cyan-deep-rgb), 0.18) 50%,
+            rgba(var(--oc-deep-rgb), 0.55) 100%);
+    border: 1px solid rgba(var(--oc-cyan-rgb), calc(0.28 + var(--glow, 0) * 0.5));
+    box-shadow:
+        inset 0 1px 0 rgba(var(--oc-pearl-rgb), 0.28),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+        inset 0 0 22px rgba(var(--oc-cyan-rgb), 0.10),
+        0 4px 14px rgba(var(--oc-deep-rgb), 0.5);
+}
+[data-scene-theme="ocean"] .account-satellite.is-signed-in .account-satellite__core {
+    background:
+        linear-gradient(180deg,
+            rgba(var(--oc-pearl-rgb), 0.12) 0%,
+            rgba(var(--oc-pearl-rgb), 0.04) 18%,
+            transparent 36%),
+        radial-gradient(circle at 50% 42%,
+            rgba(var(--oc-cyan-soft-rgb), 0.22) 0%,
+            rgba(var(--oc-cyan-deep-rgb), 0.22) 50%,
+            rgba(var(--oc-deep-rgb), 0.55) 100%);
+    border: 1px solid rgba(var(--oc-cyan-rgb), calc(0.45 + var(--glow, 0) * 0.45));
+    box-shadow:
+        inset 0 1px 0 rgba(var(--oc-pearl-rgb), 0.32),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+        inset 0 0 22px rgba(var(--oc-cyan-rgb), 0.18),
+        0 0 0 1px rgba(var(--oc-cyan-rgb), 0.22),
+        0 0 32px rgba(var(--oc-cyan-rgb), calc(0.30 + var(--glow, 0) * 0.35)),
+        0 4px 14px rgba(var(--oc-deep-rgb), 0.5);
+    color: rgba(var(--oc-pearl-rgb), 1);
+}
+[data-scene-theme="ocean"] .account-satellite.is-signed-in .account-satellite__glyph {
+    filter:
+        drop-shadow(0 0 4px rgba(var(--oc-cyan-soft-rgb), 0.9))
+        drop-shadow(0 0 10px rgba(var(--oc-cyan-rgb), 0.55));
+}
+[data-scene-theme="ocean"] .account-satellite__halo {
+    background: radial-gradient(circle,
+        rgba(var(--oc-cyan-rgb), calc(0.32 * var(--glow))) 0%,
+        rgba(var(--oc-cyan-rgb), calc(0.18 * var(--glow))) 35%,
+        transparent 70%);
+}
+
+/* Filament — engraved data-rail gradient + rivet swap to cyan */
+[data-scene-theme="ocean"] .nav-filament__thread,
+[data-scene-theme="ocean"] .nav-filament__ticks {
+    stroke: rgba(var(--oc-cyan-rgb), 0.65);
+}
+[data-scene-theme="ocean"] .nav-filament__pulse {
+    fill: rgba(var(--oc-cyan-soft-rgb), 0.95);
+}
+[data-scene-theme="ocean"] .nav-filament__rivet-halo {
+    fill: rgba(var(--oc-cyan-rgb), 0.22);
+}
+[data-scene-theme="ocean"] .nav-filament__rivet {
+    fill: var(--oc-cyan-soft);
+    filter: drop-shadow(0 0 6px rgba(var(--oc-cyan-rgb), 0.65));
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   4. ACCOUNT DROPDOWN — auth menu under the satellite
+   The original is apple liquid-glass (`rgba(255,255,255,0.07)` over a
+   strong saturated blur).  Keep the same liquid-glass quality with a
+   whisper of cyan so the surface reads as part of the Ocean
+   palette — never as an opaque sky slab.  The inner flex container
+   stays transparent; the floating glass pane is `.account-dropdown`
+   itself. */
+[data-scene-theme="ocean"] .account-dropdown {
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    box-shadow:
+        0 24px 60px rgba(var(--oc-deep-rgb), 0.45),
+        0 8px 18px rgba(var(--oc-deep-rgb), 0.30),
+        inset 0 1px 0 rgba(var(--oc-pearl-rgb), 0.10);
+}
+[data-scene-theme="ocean"] .account-dropdown__inner {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+[data-scene-theme="ocean"] .account-dropdown__arrow {
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    border-left: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    border-top: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+}
+[data-scene-theme="ocean"] .account-dropdown__intro-title,
+[data-scene-theme="ocean"] .account-dropdown__name {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .account-dropdown__intro-body,
+[data-scene-theme="ocean"] .account-dropdown__email {
+    color: rgba(var(--oc-pearl-rgb), 0.70);
+}
+[data-scene-theme="ocean"] .account-dropdown__btn,
+[data-scene-theme="ocean"] .account-dropdown__row {
+    color: rgba(var(--oc-pearl-rgb), 0.92);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.18);
+    background: rgba(var(--oc-cyan-rgb), 0.04);
+}
+[data-scene-theme="ocean"] .account-dropdown__btn:hover,
+[data-scene-theme="ocean"] .account-dropdown__row:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    border-color: rgba(var(--oc-cyan-rgb), 0.36);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .account-dropdown__btn--primary {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+    border-color: rgba(var(--oc-cyan-rgb), 0.46);
+    color: var(--oc-cyan-pale);
+}
+[data-scene-theme="ocean"] .account-dropdown__btn--primary:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.28);
+    border-color: rgba(var(--oc-cyan-rgb), 0.62);
+    box-shadow: 0 0 22px rgba(var(--oc-cyan-rgb), 0.32);
+}
+[data-scene-theme="ocean"] .account-dropdown__divider {
+    background: rgba(var(--oc-cyan-rgb), 0.16);
+}
+[data-scene-theme="ocean"] .account-dropdown__sync-state {
+    color: rgba(var(--oc-pearl-rgb), 0.55);
+}
+[data-scene-theme="ocean"] .account-dropdown__row--danger {
+    color: #ff9bb5;
+}
+[data-scene-theme="ocean"] .account-dropdown__row--danger:hover {
+    background: rgba(255, 90, 110, 0.12);
+    border-color: rgba(255, 90, 110, 0.4);
+    color: #ffb1c2;
+}
+/* Avatar bubble — mirror of the satellite core but in cyan. */
+[data-scene-theme="ocean"] .account-dropdown__avatar {
+    background:
+        linear-gradient(180deg,
+            rgba(var(--oc-pearl-rgb), 0.10) 0%,
+            rgba(var(--oc-pearl-rgb), 0.03) 18%,
+            transparent 36%),
+        radial-gradient(circle at 50% 42%,
+            rgba(var(--oc-cyan-soft-rgb), 0.20) 0%,
+            rgba(var(--oc-cyan-deep-rgb), 0.22) 50%,
+            rgba(var(--oc-deep-rgb), 0.45) 100%);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.55);
+    box-shadow:
+        inset 0 1px 0 rgba(var(--oc-pearl-rgb), 0.32),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+        inset 0 0 18px rgba(var(--oc-cyan-rgb), 0.12),
+        0 0 24px rgba(var(--oc-cyan-rgb), 0.32),
+        0 4px 12px rgba(var(--oc-deep-rgb), 0.5);
+    color: rgba(var(--oc-pearl-rgb), 1);
+}
+[data-scene-theme="ocean"] .account-dropdown__avatar-glyph {
+    filter:
+        drop-shadow(0 0 4px rgba(var(--oc-cyan-soft-rgb), 0.9))
+        drop-shadow(0 0 10px rgba(var(--oc-cyan-rgb), 0.55));
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   5. AUTH MODAL — sign in / sign up card
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .auth-modal__card {
+    background: rgba(var(--oc-deep-rgb), 0.88);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    box-shadow:
+        0 32px 80px rgba(var(--oc-deep-rgb), 0.7),
+        0 12px 30px rgba(var(--oc-deep-rgb), 0.5),
+        0 0 0 0.5px rgba(var(--oc-cyan-rgb), 0.12),
+        inset 0 1px 0 rgba(var(--oc-pearl-rgb), 0.06);
+}
+[data-scene-theme="ocean"] .auth-modal h2,
+[data-scene-theme="ocean"] .auth-modal h3 {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .auth-modal input,
+[data-scene-theme="ocean"] .auth-modal__input {
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .auth-modal input:focus,
+[data-scene-theme="ocean"] .auth-modal__input:focus {
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--oc-cyan-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="ocean"] .auth-alt__link {
+    color: rgba(var(--oc-cyan-rgb), 0.85);
+}
+[data-scene-theme="ocean"] .auth-alt__link:hover {
+    color: var(--oc-cyan-soft);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   6. SETTINGS PANEL — main drawer chrome
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] #settingsPanel,
+[data-scene-theme="ocean"] .settings-panel {
+    background: rgba(var(--oc-deep-rgb), 0.78) !important;
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.18) !important;
+    box-shadow:
+        0 32px 80px rgba(var(--oc-deep-rgb), 0.7),
+        0 0 0 0.5px rgba(var(--oc-cyan-rgb), 0.10),
+        inset 0 1px 0 rgba(var(--oc-pearl-rgb), 0.05),
+        inset 0 -1px 0 rgba(var(--oc-deep-rgb), 0.6) !important;
+}
+[data-scene-theme="ocean"] .settings-section,
+[data-scene-theme="ocean"] .settings-row,
+[data-scene-theme="ocean"] .settings-card {
+    border-color: rgba(var(--oc-cyan-rgb), 0.14);
+}
+[data-scene-theme="ocean"] .settings-row:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.04);
+}
+/* Strip the encapsulating frames the user flagged in image #63/#64.
+   Settings rows previously read as "cards" because the segmented
+   options + steppers + text inputs each had a boxed background under
+   ocean. Drop the boxes; the controls themselves carry the visual
+   weight (thumb, fill, swatch). */
+[data-scene-theme="ocean"] .sr-segmented .sr__segmented {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    gap: 4px;
+}
+[data-scene-theme="ocean"] .sr-segmented .sr__seg-btn {
+    background: transparent;
+    color: rgba(var(--oc-pearl-rgb), 0.55);
+}
+[data-scene-theme="ocean"] .sr-segmented .sr__seg-btn:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.08);
+    color: rgba(var(--oc-pearl-rgb), 0.95);
+}
+[data-scene-theme="ocean"] .sr-segmented .sr__seg-btn.is-active {
+    /* No box-shadow ring — the user explicitly disliked the framed
+       rectangle around the active option. Just a soft fill carries
+       the active state. */
+    background: rgba(var(--oc-cyan-rgb), 0.16);
+    color: var(--oc-cyan-pale);
+    box-shadow: none;
+}
+/* Slider — base CSS painted a thick gold/pink track that read as a
+   rectangular fill. The user explicitly disliked the "rectangular
+   bar" — drop the fill to a thin 2px line with low-alpha cyan on
+   the filled side and an almost-invisible cream rail on the empty
+   side. The thumb remains the visual anchor. */
+[data-scene-theme="ocean"] .sr-slider .sr__range {
+    /* Track is now fully transparent. The .sr-slider::after guide
+       line below provides the visual rail; the thumb is the only
+       coloured element. The user repeatedly flagged the gradient
+       fill as "a rectangular pink bar"; with no fill there's no
+       rectangle. */
+    height: 2px;
+    background: transparent;
+    border-radius: 1px;
+    /* Explicit zeros: some user-agent stylesheets (especially Firefox)
+       paint a default border + outline + box-shadow on <input type="range">.
+       The "rectangular outline around the entire input" the user kept
+       reporting is one of those falling through. */
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+    padding: 0;
+}
+/* Faint guide line behind the slider — drawn as a thin div via the
+   row's ::before so it's NOT part of the input element (no UA chrome
+   risk). 1px tall, 8% cream, sits at the same vertical centre as the
+   2px track. Lets users see the slider extent without the input
+   itself painting a wide horizontal rectangle. */
+[data-scene-theme="ocean"] .sr-slider .sr__range {
+    position: relative;
+    z-index: 1;
+}
+[data-scene-theme="ocean"] .sr-slider {
+    position: relative;
+}
+[data-scene-theme="ocean"] .sr-slider::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 13px;
+    height: 1px;
+    background: rgba(var(--oc-pearl-rgb), 0.08);
+    pointer-events: none;
+    z-index: 0;
+}
+/* Thumb shadow used to be 0 0 10px → that 10px halo, when stretched
+   along the track at full opacity, read as a rectangular pink fill
+   surrounding the track. Drop the shadow to a tight 4px circle. */
+[data-scene-theme="ocean"] .sr-slider .sr__range::-webkit-slider-thumb {
+    background: radial-gradient(circle at 40% 35%,
+        rgba(var(--oc-cyan-soft-rgb), 1),
+        rgba(var(--oc-cyan-rgb), 0.95));
+    border-color: rgba(var(--oc-cyan-soft-rgb), 0.50);
+    box-shadow:
+        0 0 4px rgba(var(--oc-cyan-rgb), 0.45),
+        0 1px 3px rgba(var(--oc-deep-rgb), 0.35);
+}
+[data-scene-theme="ocean"] .sr-slider .sr__range::-webkit-slider-thumb:hover {
+    box-shadow:
+        0 0 8px rgba(var(--oc-cyan-rgb), 0.65),
+        0 1px 4px rgba(var(--oc-deep-rgb), 0.40);
+}
+[data-scene-theme="ocean"] .sr-slider .sr__range::-moz-range-thumb {
+    background: radial-gradient(circle at 40% 35%,
+        rgba(var(--oc-cyan-soft-rgb), 1),
+        rgba(var(--oc-cyan-rgb), 0.95));
+    border-color: rgba(var(--oc-cyan-soft-rgb), 0.50);
+    box-shadow: 0 0 4px rgba(var(--oc-cyan-rgb), 0.45);
+}
+[data-scene-theme="ocean"] .sr-slider .sr__range::-moz-range-progress {
+    background: rgba(var(--oc-cyan-rgb), 0.65);
+}
+/* Dirty-state indicator — base CSS pulses a gold dot next to the
+   row label whenever the value differs from default. Recolour to
+   cyan so it stops fighting the ocean video palette. */
+[data-scene-theme="ocean"] .sr.is-dirty .sr__label::after {
+    background: rgba(var(--oc-cyan-rgb), 0.9);
+    box-shadow: 0 0 6px rgba(var(--oc-cyan-rgb), 0.55);
+    animation-name: oceanDirtyPulse;
+}
+@keyframes oceanDirtyPulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(110, 200, 232, 0.40); }
+    50%      { box-shadow: 0 0 10px rgba(110, 200, 232, 0.80); }
+}
+/* Stepper button hover — base CSS used a gold tint, which read as
+   off-palette under ocean. */
+[data-scene-theme="ocean"] .sr-stepper .sr__step-btn:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    color: rgba(var(--oc-pearl-rgb), 0.95);
+}
+/* Switch (toggle) — already pink in active state via the round-2
+   override; harmonise the inactive state too so the unfilled track
+   doesn't look like a leftover gray pill. */
+[data-scene-theme="ocean"] .sr-toggle .sr__switch:not(.is-on) {
+    background: rgba(var(--oc-pearl-rgb), 0.04);
+    border-color: rgba(var(--oc-pearl-rgb), 0.18);
+}
+/* Settings buttons — Reset section, Permission grant, etc. Recolour
+   the gold hover state to cyan so the buttons sit in the
+   ocean family. */
+[data-scene-theme="ocean"] .sr-button,
+[data-scene-theme="ocean"] .sr__btn,
+[data-scene-theme="ocean"] .sr-button-row button {
+    border-color: rgba(var(--oc-cyan-rgb), 0.18);
+    background: rgba(var(--oc-cyan-rgb), 0.04);
+    color: rgba(var(--oc-pearl-rgb), 0.85);
+}
+[data-scene-theme="ocean"] .sr-button:hover,
+[data-scene-theme="ocean"] .sr__btn:hover,
+[data-scene-theme="ocean"] .sr-button-row button:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.14);
+    border-color: rgba(var(--oc-cyan-rgb), 0.50);
+    color: var(--oc-cyan-pale);
+    box-shadow: 0 0 16px rgba(var(--oc-cyan-rgb), 0.18);
+}
+[data-scene-theme="ocean"] .sr-button:active,
+[data-scene-theme="ocean"] .sr__btn:active,
+[data-scene-theme="ocean"] .sr-button-row button:active {
+    background: rgba(var(--oc-cyan-rgb), 0.20);
+}
+[data-scene-theme="ocean"] .sr-button.is-confirmed,
+[data-scene-theme="ocean"] .sr__btn.is-confirmed {
+    background: rgba(var(--oc-cyan-rgb), 0.20);
+    border-color: rgba(var(--oc-cyan-rgb), 0.62);
+    color: var(--oc-cyan-pale);
+    box-shadow: 0 0 22px rgba(var(--oc-cyan-rgb), 0.22);
+}
+/* Stepper +/- pair — the user's screenshot showed this with a
+   visible boxed frame; strip it so the buttons read as standalone. */
+[data-scene-theme="ocean"] .sr-stepper .sr__stepper {
+    background: transparent;
+    border: 0;
+}
+[data-scene-theme="ocean"] .sr__text-input,
+[data-scene-theme="ocean"] .sr-text .sr__text-input {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(var(--oc-cyan-rgb), 0.18);
+    border-radius: 0;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+[data-scene-theme="ocean"] .sr__text-input:focus,
+[data-scene-theme="ocean"] .sr-text .sr__text-input:focus {
+    border-bottom-color: rgba(var(--oc-cyan-rgb), 0.65);
+    box-shadow: none;
+    background: transparent;
+}
+[data-scene-theme="ocean"] .settings-section__title,
+[data-scene-theme="ocean"] .settings-eyebrow,
+[data-scene-theme="ocean"] .settings-row__label {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .settings-row__hint {
+    color: rgba(var(--oc-pearl-rgb), 0.6);
+}
+/* The chrome lives on .settings-search__input itself; .settings-search
+   is just an unstyled relative wrapper. Earlier rounds painted both
+   with the same border, which produced a square outer outline (the
+   wrapper has no border-radius) overlaid on the rounded input — the
+   "rectangle inside a rounded rectangle" mismatch the user flagged. */
+[data-scene-theme="ocean"] .settings-search__input,
+[data-scene-theme="ocean"] .settings-input,
+[data-scene-theme="ocean"] .settings-textarea,
+[data-scene-theme="ocean"] .settings-select,
+[data-scene-theme="ocean"] .settings-number {
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .settings-input:focus,
+[data-scene-theme="ocean"] .settings-textarea:focus,
+[data-scene-theme="ocean"] .settings-select:focus,
+[data-scene-theme="ocean"] .settings-number:focus,
+[data-scene-theme="ocean"] .settings-search__input:focus {
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--oc-cyan-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="ocean"] .settings-row__chip,
+[data-scene-theme="ocean"] .settings-chip {
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.30);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .settings-row__chip:hover,
+[data-scene-theme="ocean"] .settings-chip:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+    border-color: rgba(var(--oc-cyan-rgb), 0.50);
+}
+[data-scene-theme="ocean"] .settings-tabs__tab[aria-selected="true"],
+[data-scene-theme="ocean"] .settings-tabs__tab.active {
+    color: var(--oc-cyan-soft);
+    border-color: rgba(var(--oc-cyan-rgb), 0.48);
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    box-shadow: inset 0 0 0 1px rgba(var(--oc-cyan-rgb), 0.32);
+}
+[data-scene-theme="ocean"] .settings-toggle--on,
+[data-scene-theme="ocean"] .settings-toggle.is-on,
+[data-scene-theme="ocean"] [role="switch"][aria-checked="true"] {
+    background: rgba(var(--oc-cyan-rgb), 0.45);
+    border-color: rgba(var(--oc-cyan-rgb), 0.65);
+}
+[data-scene-theme="ocean"] .theme-card.is-selected,
+[data-scene-theme="ocean"] .theme-card[aria-selected="true"],
+[data-scene-theme="ocean"] .theme-card.selected {
+    border-color: rgba(var(--oc-cyan-rgb), 0.65);
+    box-shadow: 0 0 0 3px rgba(var(--oc-cyan-rgb), 0.18),
+                0 0 24px rgba(var(--oc-cyan-rgb), 0.18);
+}
+
+/* Slider track + thumb */
+[data-scene-theme="ocean"] input[type="range"]::-webkit-slider-runnable-track {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+}
+[data-scene-theme="ocean"] input[type="range"]::-webkit-slider-thumb {
+    background: var(--oc-cyan-soft);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.65);
+    box-shadow: 0 0 0 3px rgba(var(--oc-cyan-rgb), 0.10);
+}
+[data-scene-theme="ocean"] input[type="range"]::-moz-range-track {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+}
+[data-scene-theme="ocean"] input[type="range"]::-moz-range-thumb {
+    background: var(--oc-cyan-soft);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.65);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   7. PROFILE DRAWER — full analytics surface
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .profile {
+    /* Section accent palette retuned for the underwater scene — six
+       sections, all within the cyan↔kelp family so the chrome reads
+       as a single coherent ocean rather than six competing hues
+       against the deep-water backdrop. */
+    --accent-amber:  110, 200, 232;   /* primary cyan */
+    --accent-blue:   200, 228, 240;   /* pale water glow */
+    --accent-green:  200, 216, 160;   /* pale kelp */
+    --accent-violet: 152, 184, 104;   /* kelp green */
+    --accent-orange: 216, 238, 244;   /* sun-ray pearl */
+    --accent-rose:   90, 120, 56;     /* deep kelp */
+}
+[data-scene-theme="ocean"] .profile__sheet {
+    background: rgba(var(--oc-deep-rgb), 0.84);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.16);
+    box-shadow:
+        0 24px 80px rgba(var(--oc-deep-rgb), 0.7),
+        0 8px 24px rgba(var(--oc-deep-rgb), 0.4),
+        0 0 0 0.5px rgba(var(--oc-pearl-rgb), 0.06),
+        inset 0 1px 0 rgba(var(--oc-pearl-rgb), 0.06);
+}
+[data-scene-theme="ocean"] .profile__rail-btn {
+    color: rgba(var(--oc-pearl-rgb), 0.7);
+    border-color: transparent;
+}
+[data-scene-theme="ocean"] .profile__rail-btn:hover {
+    color: var(--oc-pearl);
+    background: rgba(var(--oc-cyan-rgb), 0.08);
+}
+[data-scene-theme="ocean"] .profile__rail-btn[aria-current="true"],
+[data-scene-theme="ocean"] .profile__rail-btn.is-active {
+    color: var(--oc-cyan-soft);
+    background: rgba(var(--oc-cyan-rgb), 0.12);
+    border-color: rgba(var(--oc-cyan-rgb), 0.35);
+}
+[data-scene-theme="ocean"] .profile__name,
+[data-scene-theme="ocean"] .profile__greeting,
+[data-scene-theme="ocean"] .psection h2,
+[data-scene-theme="ocean"] .psection h3,
+[data-scene-theme="ocean"] .pchart__title {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .pkpi__num,
+[data-scene-theme="ocean"] .profile__kpi-num {
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .pchart,
+[data-scene-theme="ocean"] .profile__card {
+    background: rgba(var(--oc-cyan-rgb), 0.04);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.16);
+}
+[data-scene-theme="ocean"] .pchart__eyebrow {
+    color: rgba(var(--section-accent), 0.85);
+}
+[data-scene-theme="ocean"] .profile__pill,
+[data-scene-theme="ocean"] .profile__filter {
+    border-color: rgba(var(--oc-cyan-rgb), 0.22);
+    color: rgba(var(--oc-pearl-rgb), 0.78);
+}
+[data-scene-theme="ocean"] .profile__pill.is-active,
+[data-scene-theme="ocean"] .profile__filter.is-active {
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    background: rgba(var(--oc-cyan-rgb), 0.14);
+    color: var(--oc-cyan-soft);
+}
+/* Profile chart strokes — keep amber for charts that draw strokes from
+   currentColor unless the chart has its own colour. */
+[data-scene-theme="ocean"] .pchart svg [stroke="rgb(255,205,115)"],
+[data-scene-theme="ocean"] .pchart svg [stroke="rgba(255,205,115,1)"] {
+    stroke: var(--oc-cyan);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   8. TASK DOCK — bottom task surface (chrome only, layout preserved)
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .task-dock {
+    background: linear-gradient(
+        180deg,
+        rgba(var(--oc-deep-rgb), 0.78),
+        rgba(var(--oc-deep-rgb), 0.88)
+    );
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    box-shadow:
+        0 -2px 0 rgba(var(--oc-cyan-rgb), 0.05) inset,
+        0 18px 40px rgba(var(--oc-deep-rgb), 0.55),
+        0 0 28px rgba(var(--oc-cyan-rgb), 0.10);
+    color: rgba(var(--oc-pearl-rgb), 0.95);
+}
+[data-scene-theme="ocean"] .task-dock[data-state="expanded"] {
+    border-color: rgba(var(--oc-cyan-rgb), 0.42);
+    box-shadow:
+        0 -2px 0 rgba(var(--oc-cyan-rgb), 0.08) inset,
+        0 24px 56px rgba(var(--oc-deep-rgb), 0.7),
+        0 0 38px rgba(var(--oc-cyan-rgb), 0.18);
+}
+[data-scene-theme="ocean"] .task-dock__rail-handle {
+    background: rgba(var(--oc-cyan-rgb), 0.42);
+}
+[data-scene-theme="ocean"] .task-dock__rail:hover .task-dock__rail-handle,
+[data-scene-theme="ocean"] .task-dock__rail:focus-visible .task-dock__rail-handle {
+    background: rgba(var(--oc-cyan-rgb), 0.78);
+}
+[data-scene-theme="ocean"] .task-dock__eyebrow,
+[data-scene-theme="ocean"] .task-dock__head-eyebrow {
+    color: rgba(var(--oc-cyan-rgb), 0.9);
+}
+[data-scene-theme="ocean"] .task-dock__active-name,
+[data-scene-theme="ocean"] .task-dock__head-title {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .task-dock__count {
+    color: rgba(var(--oc-pearl-rgb), 0.65);
+}
+[data-scene-theme="ocean"] .task-dock__chevron {
+    color: rgba(var(--oc-cyan-rgb), 0.7);
+}
+[data-scene-theme="ocean"] .task-dock__progress {
+    background: rgba(var(--oc-cyan-rgb), 0.14);
+    color: var(--oc-cyan-soft);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.32);
+}
+[data-scene-theme="ocean"] .task-dock__summary-chip {
+    background: rgba(var(--oc-cyan-rgb), 0.08);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.20);
+}
+[data-scene-theme="ocean"] .task-dock__summary-num {
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .task-dock__summary-label {
+    color: rgba(var(--oc-pearl-rgb), 0.7);
+}
+[data-scene-theme="ocean"] .task-dock__add-input,
+[data-scene-theme="ocean"] .task-input,
+[data-scene-theme="ocean"] .task-dock input[type="text"] {
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .task-dock__add-input:focus,
+[data-scene-theme="ocean"] .task-input:focus {
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--oc-cyan-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="ocean"] .task-item,
+[data-scene-theme="ocean"] .task {
+    border-color: rgba(var(--oc-cyan-rgb), 0.12);
+}
+[data-scene-theme="ocean"] .task-item:hover,
+[data-scene-theme="ocean"] .task:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.04);
+    border-color: rgba(var(--oc-cyan-rgb), 0.24);
+}
+[data-scene-theme="ocean"] .task-text {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .task-checkbox,
+[data-scene-theme="ocean"] .task-check {
+    border-color: rgba(var(--oc-cyan-rgb), 0.5);
+}
+[data-scene-theme="ocean"] .task-checkbox:checked,
+[data-scene-theme="ocean"] .task-check.is-checked,
+[data-scene-theme="ocean"] .task.completed .task-checkbox,
+[data-scene-theme="ocean"] .task.completed .task-check {
+    background: rgba(var(--oc-cyan-rgb), 0.6);
+    border-color: rgba(var(--oc-cyan-rgb), 0.85);
+}
+[data-scene-theme="ocean"] .task-add-btn,
+[data-scene-theme="ocean"] .task-dock__add-btn {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.40);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .task-add-btn:hover,
+[data-scene-theme="ocean"] .task-dock__add-btn:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.30);
+    border-color: rgba(var(--oc-cyan-rgb), 0.62);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   9. TASK DETAIL DRAWER
+   The container `.task-detail` is `position:fixed; inset:0` so any
+   background on it tints the entire viewport. The chrome lives on
+   .task-detail__sheet — keep the container transparent. */
+[data-scene-theme="ocean"] .task-detail__back,
+[data-scene-theme="ocean"] .task-detail__close {
+    border-color: rgba(var(--oc-cyan-rgb), 0.22);
+    color: rgba(var(--oc-cyan-rgb), 0.85);
+}
+[data-scene-theme="ocean"] .task-detail__back:hover,
+[data-scene-theme="ocean"] .task-detail__close:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    color: var(--oc-cyan-soft);
+    border-color: rgba(var(--oc-cyan-rgb), 0.45);
+}
+[data-scene-theme="ocean"] .task-detail__eyebrow {
+    color: rgba(var(--oc-cyan-rgb), 0.85);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   10. COSMOS TOOLBAR — bottom-centre sound controls
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .cosmos-toolbar {
+    background: rgba(var(--oc-deep-rgb), 0.55);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    box-shadow:
+        inset 0 1px 0 rgba(var(--oc-pearl-rgb), 0.06),
+        inset 0 -1px 0 rgba(var(--oc-deep-rgb), 0.5),
+        0 8px 24px rgba(var(--oc-deep-rgb), 0.5),
+        0 0 32px rgba(var(--oc-cyan-rgb), 0.10);
+}
+[data-scene-theme="ocean"] .cosmos-toolbar:hover {
+    border-color: rgba(var(--oc-cyan-rgb), 0.40);
+    box-shadow:
+        inset 0 1px 0 rgba(var(--oc-pearl-rgb), 0.10),
+        inset 0 -1px 0 rgba(var(--oc-deep-rgb), 0.55),
+        0 14px 32px rgba(var(--oc-deep-rgb), 0.6),
+        0 0 48px rgba(var(--oc-cyan-rgb), 0.18);
+}
+[data-scene-theme="ocean"] .cosmos-tool {
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+    color: rgba(var(--oc-pearl-rgb), 0.9);
+}
+[data-scene-theme="ocean"] .cosmos-tool:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.16);
+    border-color: rgba(var(--oc-cyan-rgb), 0.50);
+    color: var(--oc-cyan-soft);
+    box-shadow: 0 0 18px rgba(var(--oc-cyan-rgb), 0.22);
+}
+[data-scene-theme="ocean"] .cosmos-tool.is-active {
+    background: rgba(var(--oc-cyan-rgb), 0.24);
+    border-color: rgba(var(--oc-cyan-rgb), 0.65);
+    color: var(--oc-cyan-pale);
+}
+[data-scene-theme="ocean"] .cosmos-tool--danger:hover {
+    border-color: rgba(255, 110, 130, 0.55);
+    color: #ffb1c2;
+    background: rgba(255, 110, 130, 0.12);
+}
+[data-scene-theme="ocean"] .cosmos-tool__arc circle {
+    stroke: var(--oc-cyan);
+}
+[data-scene-theme="ocean"] .cosmos-tool::after {
+    background: rgba(var(--oc-deep-rgb), 0.92);
+    color: var(--oc-pearl);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.28);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   11. AMBIENT DECK — track cards + library drawer + sleep popover
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .track-card {
+    background: rgba(var(--oc-deep-rgb), 0.55);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.18);
+}
+[data-scene-theme="ocean"] .track-card:hover {
+    border-color: rgba(var(--oc-cyan-rgb), 0.36);
+    background: rgba(var(--oc-deep-rgb), 0.65);
+}
+[data-scene-theme="ocean"] .track-card__name {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .track-card__category {
+    color: rgba(var(--oc-pearl-rgb), 0.6);
+}
+[data-scene-theme="ocean"] .track-card__volume-pct {
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .track-iconbtn {
+    border-color: rgba(var(--oc-cyan-rgb), 0.22);
+    color: rgba(var(--oc-pearl-rgb), 0.85);
+}
+[data-scene-theme="ocean"] .track-iconbtn:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.12);
+    border-color: rgba(var(--oc-cyan-rgb), 0.50);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .track-card input[type="range"]::-webkit-slider-runnable-track,
+[data-scene-theme="ocean"] .deck-master input[type="range"]::-webkit-slider-runnable-track {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+}
+[data-scene-theme="ocean"] .track-card input[type="range"]::-webkit-slider-thumb,
+[data-scene-theme="ocean"] .deck-master input[type="range"]::-webkit-slider-thumb {
+    background: var(--oc-cyan-soft);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.65);
+}
+[data-scene-theme="ocean"] .library-drawer__panel {
+    background: rgba(var(--oc-deep-rgb), 0.92);
+    border-left: 1px solid rgba(var(--oc-cyan-rgb), 0.20);
+}
+[data-scene-theme="ocean"] .library-drawer__title {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .library-drawer__close,
+[data-scene-theme="ocean"] .library-drawer__category-pill {
+    border-color: rgba(var(--oc-cyan-rgb), 0.22);
+    color: rgba(var(--oc-pearl-rgb), 0.85);
+}
+[data-scene-theme="ocean"] .library-drawer__close:hover,
+[data-scene-theme="ocean"] .library-drawer__category-pill:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.12);
+    border-color: rgba(var(--oc-cyan-rgb), 0.42);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .library-drawer__category-pill.is-active {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .libcard {
+    background: rgba(var(--oc-deep-rgb), 0.55);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.18);
+}
+[data-scene-theme="ocean"] .libcard:hover {
+    border-color: rgba(var(--oc-cyan-rgb), 0.40);
+}
+[data-scene-theme="ocean"] .libcard__name {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .libcard__category {
+    color: rgba(var(--oc-pearl-rgb), 0.6);
+}
+[data-scene-theme="ocean"] .libcard.is-active {
+    border-color: rgba(var(--oc-cyan-rgb), 0.62);
+    box-shadow: 0 0 0 2px rgba(var(--oc-cyan-rgb), 0.18);
+}
+[data-scene-theme="ocean"] .deck-btn {
+    background: rgba(var(--oc-deep-rgb), 0.86);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    color: rgba(var(--oc-pearl-rgb), 0.92);
+}
+/* Save-mix + Sleep popovers — liquid-glass register, green-tinted.
+   Targets the inner __card (the visible surface) so the outer
+   positioning shell stays a transparent click-catcher. */
+[data-scene-theme="ocean"] .save-mix-popover__card,
+[data-scene-theme="ocean"] .sleep-popover__card {
+    background: rgba(var(--oc-deep-rgb), 0.32);
+    border-color: rgba(var(--oc-cyan-rgb), 0.32);
+    color: rgba(var(--oc-pearl-rgb), 0.95);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.42),
+        0 6px 18px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(var(--oc-cyan-rgb), 0.22),
+        inset 0 0 26px rgba(var(--oc-cyan-rgb), 0.06);
+}
+[data-scene-theme="ocean"] .sleep-chip {
+    border-color: rgba(var(--oc-cyan-rgb), 0.28);
+    background: rgba(var(--oc-cyan-rgb), 0.05);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .sleep-chip:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.16);
+    border-color: rgba(var(--oc-cyan-rgb), 0.5);
+}
+[data-scene-theme="ocean"] .deck-btn:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+    border-color: rgba(var(--oc-cyan-rgb), 0.45);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .ambient-toast {
+    background: rgba(var(--oc-deep-rgb), 0.92);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.30);
+    color: var(--oc-pearl);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   12. HELP CENTER — drawer + entry cards
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .help-center,
+[data-scene-theme="ocean"] .hc-panel {
+    background: rgba(var(--oc-deep-rgb), 0.86);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.18);
+    color: rgba(var(--oc-pearl-rgb), 0.92);
+}
+[data-scene-theme="ocean"] .hc-title,
+[data-scene-theme="ocean"] .hc-category-title {
+    color: var(--oc-pearl);
+}
+/* Same wrapper-vs-input bug as the settings search — the .hc-search
+   div is just a relative positioning shell with no border-radius, so
+   painting it the same rectangle as the rounded input produced a
+   square outline overlaid on the rounded one. Drop the wrapper. */
+[data-scene-theme="ocean"] .hc-search input,
+[data-scene-theme="ocean"] .hc-search__input {
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .hc-search input:focus,
+[data-scene-theme="ocean"] .hc-search__input:focus {
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--oc-cyan-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="ocean"] .hc-entry {
+    border-color: rgba(var(--oc-cyan-rgb), 0.16);
+}
+[data-scene-theme="ocean"] .hc-entry:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+}
+[data-scene-theme="ocean"] .hc-entry__q {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .hc-entry__a {
+    color: rgba(var(--oc-pearl-rgb), 0.78);
+}
+/* Help Center category grid — replace the gold "warm inner edge" with
+   cyan. Also recolour the icon stroke and the count pill. */
+[data-scene-theme="ocean"] .hc-cat-card {
+    border-color: rgba(var(--oc-cyan-rgb), 0.14);
+    background: linear-gradient(
+        165deg,
+        rgba(var(--oc-cyan-rgb), 0.06) 0%,
+        rgba(var(--oc-cyan-rgb), 0.02) 100%
+    );
+}
+[data-scene-theme="ocean"] .hc-cat-card::before {
+    background: linear-gradient(
+        165deg,
+        rgba(var(--oc-cyan-rgb), 0.10) 0%,
+        rgba(var(--oc-cyan-rgb), 0.04) 100%
+    );
+}
+[data-scene-theme="ocean"] .hc-cat-card:hover {
+    background: linear-gradient(
+        165deg,
+        rgba(var(--oc-cyan-rgb), 0.14) 0%,
+        rgba(var(--oc-cyan-rgb), 0.06) 100%
+    );
+    border-color: rgba(var(--oc-cyan-rgb), 0.38);
+    box-shadow: 0 6px 22px rgba(var(--oc-cyan-rgb), 0.14);
+}
+[data-scene-theme="ocean"] .hc-cat-card__icon {
+    color: rgba(var(--oc-cyan-rgb), 0.78);
+}
+[data-scene-theme="ocean"] .hc-cat-card:hover .hc-cat-card__icon {
+    color: var(--oc-cyan-pale);
+}
+[data-scene-theme="ocean"] .hc-cat-card__label {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .hc-cat-card__count {
+    color: rgba(var(--oc-pearl-rgb), 0.55);
+}
+/* Help Center close + back chrome buttons */
+[data-scene-theme="ocean"] .hc-close,
+[data-scene-theme="ocean"] .hc-back {
+    color: rgba(var(--oc-pearl-rgb), 0.55);
+}
+[data-scene-theme="ocean"] .hc-close:hover,
+[data-scene-theme="ocean"] .hc-back:hover {
+    color: var(--oc-pearl);
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+}
+/* Footer hint + every kbd badge inside Help Center / Settings — the
+   default amber-on-charcoal didn't sit in the ocean palette. */
+[data-scene-theme="ocean"] .hc-panel__footer {
+    color: rgba(var(--oc-pearl-rgb), 0.55);
+    border-top-color: rgba(var(--oc-cyan-rgb), 0.10);
+}
+[data-scene-theme="ocean"] .hc-panel__footer kbd,
+[data-scene-theme="ocean"] .hc-entry__body kbd,
+[data-scene-theme="ocean"] .shortcut-row__key,
+[data-scene-theme="ocean"] .settings-footer-hint kbd,
+[data-scene-theme="ocean"] .shortcut-cheatsheet__row kbd,
+[data-scene-theme="ocean"] .shortcut-cheatsheet__footer kbd {
+    background: rgba(var(--oc-deep-rgb), 0.55);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.28);
+    border-bottom-color: rgba(var(--oc-deep-rgb), 0.85);
+    color: var(--oc-cyan-soft);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   13. NOTEPAD — notes drawer
+   The container `.notepad` is `position:fixed; inset:0` so it covers
+   the whole viewport. Painting a background on it (an earlier round
+   set rgba(plum, 0.88) here, plus the legacy `.notepad__panel` that
+   never existed in the markup) dimmed the ocean video backdrop
+   the user explicitly asked to keep visible. The chrome lives on
+   .notepad__sheet — leave the container transparent. */
+[data-scene-theme="ocean"] .notepad__title {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .notepad__list-item {
+    border-color: rgba(var(--oc-cyan-rgb), 0.14);
+}
+[data-scene-theme="ocean"] .notepad__list-item:hover,
+[data-scene-theme="ocean"] .notepad__list-item.is-active {
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    border-color: rgba(var(--oc-cyan-rgb), 0.30);
+}
+[data-scene-theme="ocean"] .notepad__editor,
+[data-scene-theme="ocean"] .notepad__textarea,
+[data-scene-theme="ocean"] .notepad textarea {
+    background: rgba(var(--oc-cyan-rgb), 0.04);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.18);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .notepad__tag {
+    background: rgba(var(--oc-cyan-rgb), 0.12);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.30);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .notepad__btn {
+    background: rgba(var(--oc-cyan-rgb), 0.14);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.38);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .notepad__btn:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.22);
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   14. DATE PICKER — calendar popover
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .date-picker {
+    background: rgba(var(--oc-deep-rgb), 0.92);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    color: rgba(var(--oc-pearl-rgb), 0.92);
+}
+[data-scene-theme="ocean"] .date-picker__day:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.15);
+}
+[data-scene-theme="ocean"] .date-picker__day.is-today {
+    color: var(--oc-cyan-soft);
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+}
+[data-scene-theme="ocean"] .date-picker__day.is-selected {
+    background: rgba(var(--oc-cyan-rgb), 0.40);
+    color: var(--oc-cyan-pale);
+    border-color: rgba(var(--oc-cyan-rgb), 0.65);
+}
+[data-scene-theme="ocean"] .date-picker__day.is-other-month {
+    color: rgba(var(--oc-pearl-rgb), 0.35);
+}
+[data-scene-theme="ocean"] .date-picker__head,
+[data-scene-theme="ocean"] .date-picker__nav-btn {
+    color: rgba(var(--oc-cyan-rgb), 0.85);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   15. STATISTICS BAR — stats chips on focus tab
+   The chip surface in base CSS is just stacked text; previous round
+   added a card frame that the user explicitly disliked ("rectangulars
+   surrounding them"). Strip the frame back to plain text and only
+   tint the value + label colours.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .stat-chip,
+[data-scene-theme="ocean"] .stats-chip {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    color: rgba(var(--oc-pearl-rgb), 0.9);
+}
+[data-scene-theme="ocean"] .stat-value {
+    color: rgba(var(--oc-cyan-soft-rgb), 0.92);
+}
+[data-scene-theme="ocean"] .stat-label {
+    color: rgba(var(--oc-pearl-rgb), 0.55);
+}
+[data-scene-theme="ocean"] .stat-chip__num,
+[data-scene-theme="ocean"] .stats-chip__num,
+[data-scene-theme="ocean"] .stats-num {
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .stat-chip__label,
+[data-scene-theme="ocean"] .stats-chip__label,
+[data-scene-theme="ocean"] .stats-label {
+    color: rgba(var(--oc-pearl-rgb), 0.65);
+}
+/* Goal-complete celebration ring — ocean register shifts the ring
+   to cyan so the success colour echoes the curtain itself. */
+[data-scene-theme="ocean"] .stat-goal-ring.is-complete .stat-goal-ring__fill {
+    stroke: rgba(var(--oc-cyan-rgb), 1);
+    filter: drop-shadow(0 0 10px rgba(var(--oc-cyan-rgb), 0.6));
+}
+/* Period toggle (TODAY / WEEK / MONTH / ALL) — base CSS keeps a small
+   pill; tint it pink to match the rest of the chip row without making
+   it shouty. */
+[data-scene-theme="ocean"] .stat-period-toggle {
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+    border-color: rgba(var(--oc-cyan-rgb), 0.28);
+    color: rgba(var(--oc-cyan-rgb), 0.78);
+}
+[data-scene-theme="ocean"] .stat-period-toggle:hover,
+[data-scene-theme="ocean"] .stat-period-toggle:focus-visible {
+    background: rgba(var(--oc-cyan-rgb), 0.14);
+    border-color: rgba(var(--oc-cyan-rgb), 0.50);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .stat-divider {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   16. TOASTS — settings + celebrate + notification
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .settings-toast,
+[data-scene-theme="ocean"] .notification-banner,
+[data-scene-theme="ocean"] .celebrate-toast {
+    background: rgba(var(--oc-deep-rgb), 0.92);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.32);
+    color: var(--oc-pearl);
+    box-shadow:
+        0 12px 32px rgba(var(--oc-deep-rgb), 0.6),
+        0 0 24px rgba(var(--oc-cyan-rgb), 0.15);
+}
+
+/* Account-status chip in Settings — Free / Cosmic Focus Pro pill at
+   the top of the Data & About group. Base CSS hardcodes a warm-amber
+   register; under ocean the chip shifts to cyan so the premium
+   label echoes the curtain itself rather than reading as a leftover
+   amber stamp on a cool palette. */
+[data-scene-theme="ocean"] .sr-account-status__chip {
+    background: rgba(var(--oc-cyan-rgb), 0.14);
+    border-color: rgba(var(--oc-cyan-rgb), 0.5);
+    color: var(--oc-pearl);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   17. ONBOARDING TOUR — highlight ring
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .tour-card {
+    background: rgba(var(--oc-deep-rgb), 0.92);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.32);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .tour-card h3,
+[data-scene-theme="ocean"] .tour-card h2 {
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .tour-highlight {
+    box-shadow: 0 0 0 3px rgba(var(--oc-cyan-rgb), 0.55),
+                0 0 28px rgba(var(--oc-cyan-rgb), 0.4) !important;
+}
+[data-scene-theme="ocean"] .tour-card .tour-btn {
+    background: rgba(var(--oc-cyan-rgb), 0.20);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.50);
+    color: var(--oc-cyan-pale);
+}
+[data-scene-theme="ocean"] .tour-card .tour-btn:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.32);
+    border-color: rgba(var(--oc-cyan-rgb), 0.70);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   18. LIQUID GLASS BUTTONS — global button family
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .liquid-glass-btn,
+[data-scene-theme="ocean"] .btn-secondary {
+    border-color: rgba(var(--oc-cyan-rgb), 0.22);
+    color: rgba(var(--oc-pearl-rgb), 0.92);
+}
+[data-scene-theme="ocean"] .liquid-glass-btn:hover,
+[data-scene-theme="ocean"] .btn-secondary:hover {
+    border-color: rgba(var(--oc-cyan-rgb), 0.45);
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .btn-primary {
+    background: rgba(var(--oc-cyan-rgb), 0.22);
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    color: var(--oc-cyan-pale);
+}
+[data-scene-theme="ocean"] .btn-primary:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.32);
+    border-color: rgba(var(--oc-cyan-rgb), 0.72);
+    box-shadow: 0 0 28px rgba(var(--oc-cyan-rgb), 0.30);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   19. HEADINGS — page-level h1, greeting, datetime under ocean
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] h1,
+[data-scene-theme="ocean"] body[data-theme="dark"] h1 {
+    background: none;
+    -webkit-text-fill-color: var(--oc-pearl);
+    color: var(--oc-pearl);
+    text-shadow:
+        0 2px 8px rgba(var(--oc-deep-rgb), 0.55),
+        0 0 30px rgba(var(--oc-cyan-rgb), 0.30),
+        0 0 60px rgba(var(--oc-cyan-rgb), 0.12);
+    filter: none;
+}
+[data-scene-theme="ocean"] body[data-theme="dark"] .greeting {
+    background: none;
+    -webkit-text-fill-color: var(--oc-cyan-soft);
+    color: var(--oc-cyan-soft);
+    text-shadow: 0 1px 4px rgba(var(--oc-deep-rgb), 0.55);
+    filter: none;
+}
+[data-scene-theme="ocean"] body[data-theme="dark"] .date-time {
+    background: none;
+    -webkit-text-fill-color: rgba(var(--oc-pearl-rgb), 0.78);
+    color: rgba(var(--oc-pearl-rgb), 0.78);
+    text-shadow: 0 1px 3px rgba(var(--oc-deep-rgb), 0.45);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   20. HOME MINI-TIMER — preserved geometry, green-tinted accents
+   The user asked to keep the mini-timer card design itself; only the
+   warm-amber accents shift to cyan so it harmonises with the video.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .home-mini-timer__progress-arc {
+    stroke: var(--oc-cyan);
+    filter: drop-shadow(0 0 8px rgba(var(--oc-cyan-rgb), 0.4));
+}
+[data-scene-theme="ocean"] .home-mini-timer__time {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .home-mini-timer__label {
+    color: rgba(var(--oc-cyan-rgb), 0.85);
+}
+/* Vertical mini-timer sliver — the collapsed-state pill that sits as
+   a thin column on the right edge with `<` chevron, MM/SS digits, and
+   tiny play/reset buttons. The base styles paint everything in gold
+   (sliver background, light-leak, border, glow shadow, chevron, sep,
+   button borders, focus rings); recolour the whole register — outer
+   pill + inner elements — to cyan under ocean. */
+[data-scene-theme="ocean"] .hmt-sliver {
+    /* Plum dark gradient with a cyan light-leak on the left edge
+       (matching the warm-champagne light-leak of the base theme but
+       in the ocean palette). */
+    background:
+        linear-gradient(90deg, rgba(var(--oc-cyan-rgb), 0.10) 0%, rgba(var(--oc-cyan-rgb), 0) 50%),
+        linear-gradient(180deg, rgba(var(--oc-deep-rgb), 0.94) 0%, rgba(var(--oc-deep-rgb), 0.97) 100%);
+    border-color: rgba(var(--oc-cyan-rgb), 0.28);
+    box-shadow:
+        inset 1px 0 0 rgba(var(--oc-cyan-soft-rgb), 0.10),
+        inset 0 1px 0 rgba(var(--oc-cyan-soft-rgb), 0.06),
+        -4px 0 14px rgba(var(--oc-deep-rgb), 0.45),
+        -14px 0 46px rgba(var(--oc-deep-rgb), 0.55),
+        -18px 0 60px rgba(var(--oc-cyan-rgb), 0.16);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .hmt-sliver:hover {
+    border-color: rgba(var(--oc-cyan-rgb), 0.50);
+    background:
+        linear-gradient(90deg, rgba(var(--oc-cyan-rgb), 0.18) 0%, rgba(var(--oc-cyan-rgb), 0) 55%),
+        linear-gradient(180deg, rgba(var(--oc-deep-rgb), 0.97) 0%, rgba(var(--oc-deep-rgb), 0.98) 100%);
+    box-shadow:
+        inset 1px 0 0 rgba(var(--oc-cyan-soft-rgb), 0.18),
+        inset 0 1px 0 rgba(var(--oc-cyan-soft-rgb), 0.10),
+        -6px 0 20px rgba(var(--oc-deep-rgb), 0.50),
+        -18px 0 60px rgba(var(--oc-deep-rgb), 0.55),
+        -22px 0 80px rgba(var(--oc-cyan-rgb), 0.22);
+}
+[data-scene-theme="ocean"] .hmt-sliver__chev {
+    color: rgba(var(--oc-cyan-rgb), 0.55);
+}
+[data-scene-theme="ocean"] .hmt-sliver:hover .hmt-sliver__chev,
+[data-scene-theme="ocean"] .hmt-sliver__expand:hover .hmt-sliver__chev {
+    color: var(--oc-cyan-pale);
+}
+[data-scene-theme="ocean"] .hmt-sliver__time {
+    color: var(--oc-pearl);
+    text-shadow: 0 0 12px rgba(var(--oc-cyan-rgb), 0.45);
+}
+[data-scene-theme="ocean"] .hmt-sliver__sep {
+    color: rgba(var(--oc-cyan-rgb), 0.65);
+}
+[data-scene-theme="ocean"] .hmt-sliver__btn {
+    color: rgba(var(--oc-cyan-rgb), 0.65);
+}
+[data-scene-theme="ocean"] .hmt-sliver__btn:hover {
+    color: var(--oc-pearl);
+    border-color: rgba(var(--oc-cyan-rgb), 0.45);
+    background: rgba(var(--oc-cyan-rgb), 0.12);
+}
+[data-scene-theme="ocean"] .hmt-sliver__btn--play {
+    color: rgba(var(--oc-cyan-soft-rgb), 0.85);
+    border-color: rgba(var(--oc-cyan-rgb), 0.28);
+    background: rgba(var(--oc-cyan-rgb), 0.08);
+}
+[data-scene-theme="ocean"] .hmt-sliver__btn--play:hover {
+    color: var(--oc-pearl);
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+    box-shadow: 0 0 14px rgba(var(--oc-cyan-rgb), 0.22);
+}
+[data-scene-theme="ocean"] .hmt-sliver__btn:focus-visible,
+[data-scene-theme="ocean"] .hmt-sliver__expand:focus-visible {
+    outline: 2px solid rgba(var(--oc-cyan-rgb), 0.65);
+}
+[data-scene-theme="ocean"] .hmt-sliver__expand:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.12);
+}
+[data-scene-theme="ocean"] .hmt-sliver__pulse {
+    background: radial-gradient(ellipse at 0% 50%,
+        rgba(var(--oc-cyan-rgb), 0.22) 0%,
+        rgba(var(--oc-cyan-rgb), 0) 70%);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   22. FOCUS TAB — timer controls (Start Focus / Reset / round indicator)
+   The focus-tab module ships every rule with `!important` so we have to
+   match it. Pink replaces gold; geometry stays untouched.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .timer-controls .liquid-glass-btn {
+    background: rgba(var(--oc-cyan-rgb), 0.06) !important;
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22) !important;
+    color: rgba(var(--oc-pearl-rgb), 0.95) !important;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.12),
+        0 6px 18px rgba(var(--oc-deep-rgb), 0.45),
+        inset 0 1px 0 rgba(var(--oc-cyan-soft-rgb), 0.25),
+        inset 0 -1px 0 rgba(var(--oc-cyan-rgb), 0.16) !important;
+}
+[data-scene-theme="ocean"] .timer-controls .liquid-glass-btn--primary {
+    background: rgba(var(--oc-cyan-rgb), 0.14) !important;
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.42) !important;
+    color: var(--oc-cyan-pale) !important;
+}
+[data-scene-theme="ocean"] .timer-controls .liquid-glass-btn:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.18) !important;
+    border-color: rgba(var(--oc-cyan-rgb), 0.55) !important;
+    color: var(--oc-pearl) !important;
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.14),
+        0 10px 28px rgba(var(--oc-deep-rgb), 0.55),
+        inset 0 1px 0 rgba(var(--oc-cyan-soft-rgb), 0.35),
+        inset 0 -1px 0 rgba(var(--oc-cyan-rgb), 0.25),
+        0 0 24px rgba(var(--oc-cyan-rgb), 0.30) !important;
+}
+[data-scene-theme="ocean"] .timer-controls .liquid-glass-btn:active {
+    background: rgba(var(--oc-cyan-rgb), 0.10) !important;
+}
+/* Focus card stays transparent — earlier rule painted a plum veil over
+   the whole card which read as a heavy rectangle floating over the
+   curtain.  Letting the cosmos show through keeps the timer page
+   feeling open and matches the Black Hole register. */
+[data-scene-theme="ocean"] .focus-content,
+[data-scene-theme="ocean"] .focus-card,
+[data-scene-theme="ocean"] .task-section {
+    background: transparent !important;
+    border-color: transparent !important;
+}
+[data-scene-theme="ocean"] .timer-display,
+[data-scene-theme="ocean"] .timer-text {
+    /* Aurora keeps the base Inter sans-serif — the serif stack that
+       used to live here was reading marketing-grandiose against the
+       photographic curtain. A soft green text-shadow is enough
+       theme-flavour without changing the typeface. */
+    text-shadow: 0 0 40px rgba(var(--oc-cyan-rgb), 0.32);
+}
+[data-scene-theme="ocean"] .session-eyebrow,
+[data-scene-theme="ocean"] .round-counter,
+[data-scene-theme="ocean"] .focus-eyebrow,
+[data-scene-theme="ocean"] .focus-content .session-step,
+[data-scene-theme="ocean"] .focus-content [class*="round"] {
+    color: rgba(var(--oc-cyan-rgb), 0.92);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   23. STATISTICS — period tile numerals and labels (under data-scene)
+   Home period tiles per se are user-preserved. Generic stat numerals
+   on the focus tab and elsewhere shift to cyan for accent coherence.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .focus-content .stat-num,
+[data-scene-theme="ocean"] .focus-content .stat-value,
+[data-scene-theme="ocean"] .stats-bar .stat-num {
+    color: var(--oc-cyan-soft);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   24. HOME PERIOD TILES — preserved geometry / transparency, hint of pink
+   The user wanted these tiles kept as-is, with just a touch of pink
+   warmth so they read as part of the Ocean family without losing the
+   transparent glass register that makes the ocean video video read
+   through them.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .home-period-tile {
+    border-color: rgba(var(--oc-cyan-rgb), 0.20);
+}
+[data-scene-theme="ocean"] .home-period-tile:hover,
+[data-scene-theme="ocean"] .home-period-tile:focus-visible {
+    border-color: rgba(var(--oc-cyan-rgb), 0.40);
+    box-shadow: 0 14px 30px rgba(var(--oc-deep-rgb), 0.42),
+                0 0 0 0.5px rgba(var(--oc-cyan-rgb), 0.22);
+}
+[data-scene-theme="ocean"] .home-period-tile__eyebrow {
+    color: rgba(var(--oc-cyan-rgb), 0.78);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   25. NOTEPAD — drawer chrome + transparent scrim
+   The scrim used to dim the cosmos with a `rgba(4,6,10,0.6)` veil and a
+   blur. The user wants the ocean video backdrop visible while the
+   notepad is open, so the scrim becomes a transparent click-catcher.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .notepad__scrim {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    pointer-events: none;
+}
+[data-scene-theme="ocean"] .notepad__sheet {
+    /* Solid plum app-window — the user explicitly asked for the
+       notepad to act as an independent app with no backdrop bleed. */
+    background: linear-gradient(180deg,
+        rgba(var(--oc-deep-rgb), 0.97),
+        rgba(var(--oc-deep-rgb), 0.99));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    box-shadow: 0 30px 80px rgba(var(--oc-deep-rgb), 0.55),
+                0 0 0 0.5px rgba(var(--oc-cyan-rgb), 0.10);
+    color: rgba(var(--oc-pearl-rgb), 0.95);
+    scrollbar-color: rgba(var(--oc-cyan-rgb), 0.40) transparent;
+}
+[data-scene-theme="ocean"] .notepad__list::-webkit-scrollbar {
+    width: 8px;
+}
+[data-scene-theme="ocean"] .notepad__list::-webkit-scrollbar-track {
+    background: transparent;
+}
+[data-scene-theme="ocean"] .notepad__list::-webkit-scrollbar-thumb {
+    background: rgba(var(--oc-cyan-rgb), 0.32);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+[data-scene-theme="ocean"] .notepad__list::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.55);
+    background-clip: padding-box;
+}
+[data-scene-theme="ocean"] .notepad__list {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--oc-cyan-rgb), 0.32) transparent;
+}
+/* Resize grip (bottom-right corner of the draggable sheet) — pink dots
+   on a translucent square so it doesn't read as a default OS chrome
+   element parked against the ocean video backdrop. */
+[data-scene-theme="ocean"] .notepad__sheet::-webkit-resizer {
+    background:
+        radial-gradient(circle at 70% 70%, rgba(var(--oc-cyan-rgb), 0.7) 0 1.5px, transparent 2px) 0 0 / 6px 6px,
+        rgba(var(--oc-deep-rgb), 0.45);
+    border-bottom-right-radius: 28px;
+}
+[data-scene-theme="ocean"] .notepad__head {
+    background: linear-gradient(180deg,
+        rgba(var(--oc-deep-rgb), 0.99),
+        rgba(var(--oc-deep-rgb), 0.95));
+    border-bottom: 1px solid rgba(var(--oc-cyan-rgb), 0.14);
+}
+[data-scene-theme="ocean"] .notepad__foot {
+    background: rgba(var(--oc-deep-rgb), 0.96);
+    border-top: 1px solid rgba(var(--oc-cyan-rgb), 0.14);
+}
+[data-scene-theme="ocean"] .notepad__sidebar {
+    background: rgba(var(--oc-deep-rgb), 0.65);
+    border-right: none;
+}
+[data-scene-theme="ocean"] .notepad__col-resizer {
+    background: rgba(var(--oc-cyan-rgb), 0.08);
+    border-left: 1px solid rgba(var(--oc-cyan-rgb), 0.16);
+    border-right: 1px solid rgba(var(--oc-cyan-rgb), 0.06);
+}
+[data-scene-theme="ocean"] .notepad__col-resizer:hover,
+[data-scene-theme="ocean"] .notepad__col-resizer:focus-visible {
+    background: rgba(var(--oc-cyan-rgb), 0.22);
+}
+[data-scene-theme="ocean"] .notepad__col-resizer::before {
+    background: rgba(var(--oc-cyan-rgb), 0.55);
+}
+[data-scene-theme="ocean"] .notepad__col-resizer:hover::before {
+    background: rgba(var(--oc-cyan-rgb), 0.85);
+}
+[data-scene-theme="ocean"] .notepad__eyebrow {
+    color: rgba(var(--oc-cyan-rgb), 0.85);
+}
+[data-scene-theme="ocean"] .notepad__title-input {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .notepad__search,
+[data-scene-theme="ocean"] .notepad__search input {
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.20);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .notepad__search input:focus {
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--oc-cyan-rgb), 0.18);
+}
+[data-scene-theme="ocean"] .notepad__new-btn,
+[data-scene-theme="ocean"] .notepad__new-menu-btn,
+[data-scene-theme="ocean"] .notepad__head-btn,
+[data-scene-theme="ocean"] .notepad__close {
+    background: rgba(var(--oc-cyan-rgb), 0.08);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.28);
+    color: rgba(var(--oc-pearl-rgb), 0.92);
+}
+[data-scene-theme="ocean"] .notepad__new-btn:hover,
+[data-scene-theme="ocean"] .notepad__new-menu-btn:hover,
+[data-scene-theme="ocean"] .notepad__head-btn:hover,
+[data-scene-theme="ocean"] .notepad__close:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .notepad__list-item {
+    background: rgba(var(--oc-deep-rgb), 0.40);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.10);
+}
+[data-scene-theme="ocean"] .notepad__list-item:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.10);
+    border-color: rgba(var(--oc-cyan-rgb), 0.30);
+}
+[data-scene-theme="ocean"] .notepad__list-item.is-active {
+    background: rgba(var(--oc-cyan-rgb), 0.16);
+    border-color: rgba(var(--oc-cyan-rgb), 0.45);
+}
+[data-scene-theme="ocean"] .notepad__list-item-title {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .notepad__list-item-preview,
+[data-scene-theme="ocean"] .notepad__list-item-meta {
+    color: rgba(var(--oc-pearl-rgb), 0.55);
+}
+[data-scene-theme="ocean"] .notepad__tag,
+[data-scene-theme="ocean"] .notepad__tag-chip {
+    background: rgba(var(--oc-cyan-rgb), 0.12);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.30);
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .notepad__tag:hover,
+[data-scene-theme="ocean"] .notepad__tag-chip:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.22);
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+}
+[data-scene-theme="ocean"] .notepad__tag.is-active,
+[data-scene-theme="ocean"] .notepad__tag-chip.is-active {
+    background: rgba(var(--oc-cyan-rgb), 0.30);
+    border-color: rgba(var(--oc-cyan-rgb), 0.70);
+    color: var(--oc-cyan-pale);
+}
+[data-scene-theme="ocean"] .notepad__textarea,
+[data-scene-theme="ocean"] .notepad__editor textarea {
+    background: transparent;
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .notepad__footer,
+[data-scene-theme="ocean"] .notepad__stats,
+[data-scene-theme="ocean"] .notepad__hint {
+    color: rgba(var(--oc-pearl-rgb), 0.55);
+    border-top-color: rgba(var(--oc-cyan-rgb), 0.10);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   26. TASK DETAIL DRAWER — transparent scrim + ocean chrome
+   Same treatment as the notepad: the scrim no longer dims the cosmos,
+   the panel itself carries the dark sky glass with cyan borders.
+   ────────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .task-detail__scrim {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    pointer-events: none;
+}
+[data-scene-theme="ocean"] .task-detail__sheet {
+    /* Translucent plum glass — keeps the cosmic backdrop visible while
+       the drawer is open. Body owns the scroll, so no scrollbar
+       declarations here. */
+    background: linear-gradient(180deg,
+        rgba(var(--oc-deep-rgb), 0.42),
+        rgba(var(--oc-deep-rgb), 0.55));
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    box-shadow: 0 30px 80px rgba(var(--oc-deep-rgb), 0.55),
+                0 0 0 0.5px rgba(var(--oc-cyan-rgb), 0.10);
+    color: rgba(var(--oc-pearl-rgb), 0.95);
+}
+[data-scene-theme="ocean"] .task-detail__body {
+    scrollbar-color: rgba(var(--oc-cyan-rgb), 0.40) transparent;
+}
+[data-scene-theme="ocean"] .task-detail__body::-webkit-scrollbar-thumb {
+    background: rgba(var(--oc-cyan-rgb), 0.32);
+    background-clip: padding-box;
+}
+[data-scene-theme="ocean"] .task-detail__body::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.55);
+    background-clip: padding-box;
+}
+[data-scene-theme="ocean"] .task-detail__head {
+    background: linear-gradient(180deg,
+        rgba(var(--oc-deep-rgb), 0.55),
+        rgba(var(--oc-deep-rgb), 0.40));
+    border-bottom: 1px solid rgba(var(--oc-cyan-rgb), 0.14);
+}
+[data-scene-theme="ocean"] .task-detail__section {
+    border-color: rgba(var(--oc-cyan-rgb), 0.14);
+    /* Very faint cyan wash so sections delineate without piling
+       another opaque slab on top of the translucent sheet — the user
+       wants the ocean video backdrop visible through the drawer. */
+    background: rgba(var(--oc-cyan-rgb), 0.04);
+}
+[data-scene-theme="ocean"] .task-detail__label {
+    color: rgba(var(--oc-cyan-rgb), 0.80);
+}
+[data-scene-theme="ocean"] .task-detail__text-input,
+[data-scene-theme="ocean"] .task-detail input,
+[data-scene-theme="ocean"] .task-detail textarea,
+[data-scene-theme="ocean"] .task-detail select {
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .task-detail__text-input:focus,
+[data-scene-theme="ocean"] .task-detail input:focus,
+[data-scene-theme="ocean"] .task-detail textarea:focus,
+[data-scene-theme="ocean"] .task-detail select:focus {
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--oc-cyan-rgb), 0.18);
+    outline: none;
+}
+/* Stepper +/- buttons, repeat radios, date pill, done toggle, subtask
+   input + Add — all the small chrome controls inside the drawer. */
+[data-scene-theme="ocean"] .task-detail__step-btn,
+[data-scene-theme="ocean"] .task-detail__date,
+[data-scene-theme="ocean"] .task-detail__date-clear,
+[data-scene-theme="ocean"] .task-detail__repeat-btn,
+[data-scene-theme="ocean"] .task-detail__done-toggle,
+[data-scene-theme="ocean"] .task-detail__sub-add-btn,
+[data-scene-theme="ocean"] .task-detail__sub-toggle {
+    background: rgba(var(--oc-cyan-rgb), 0.08);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    color: rgba(var(--oc-pearl-rgb), 0.92);
+}
+[data-scene-theme="ocean"] .task-detail__step-btn:hover,
+[data-scene-theme="ocean"] .task-detail__date:hover,
+[data-scene-theme="ocean"] .task-detail__date-clear:hover,
+[data-scene-theme="ocean"] .task-detail__repeat-btn:hover,
+[data-scene-theme="ocean"] .task-detail__done-toggle:hover,
+[data-scene-theme="ocean"] .task-detail__sub-add-btn:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.18);
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    color: var(--oc-cyan-soft);
+}
+/* Active "is-on" recurrence option + completed done-toggle. */
+[data-scene-theme="ocean"] .task-detail__repeat-btn.is-on,
+[data-scene-theme="ocean"] .task-detail__done-toggle.is-on {
+    background: rgba(var(--oc-cyan-rgb), 0.22);
+    border-color: rgba(var(--oc-cyan-rgb), 0.62);
+    color: var(--oc-cyan-pale);
+}
+[data-scene-theme="ocean"] .task-detail__stepper-val {
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .task-detail__project,
+[data-scene-theme="ocean"] .task-detail__sub-input {
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.22);
+    color: var(--oc-pearl);
+}
+[data-scene-theme="ocean"] .task-detail__project:focus,
+[data-scene-theme="ocean"] .task-detail__sub-input:focus {
+    border-color: rgba(var(--oc-cyan-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--oc-cyan-rgb), 0.18);
+    outline: none;
+}
+[data-scene-theme="ocean"] .task-detail__time-num {
+    color: var(--oc-cyan-soft);
+}
+[data-scene-theme="ocean"] .task-detail__time-label,
+[data-scene-theme="ocean"] .task-detail__section-title {
+    color: rgba(var(--oc-pearl-rgb), 0.78);
+}
+[data-scene-theme="ocean"] .task-detail__sub-del {
+    color: rgba(255, 130, 150, 0.8);
+}
+[data-scene-theme="ocean"] .task-detail__subtask {
+    background: rgba(var(--oc-deep-rgb), 0.32);
+    border: 1px solid rgba(var(--oc-cyan-rgb), 0.12);
+}
+[data-scene-theme="ocean"] .task-detail__subtask:hover {
+    background: rgba(var(--oc-cyan-rgb), 0.06);
+    border-color: rgba(var(--oc-cyan-rgb), 0.28);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   PRESERVED — explicitly do NOT touch these
+   .nav-buttons keeps its existing chrome so the tab the user singled out
+   stays identical between Black Hole and Ocean.
+   This block exists as an audit trail; no rules.
+   ────────────────────────────────────────────────────────────────────── */

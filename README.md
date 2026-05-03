@@ -14,7 +14,7 @@ A browser-only productivity app:
 - **Focus timer** with configurable durations, cycle goals, auto-start, long-break intervals, and schedules
 - **Tasks** with spring animations, subtasks, due dates, recurring, drag-reorder, carry-over, and per-task detail drawer
 - **Ambient sounds** layered from Cloudflare R2 — rain, ocean, forest, café and more, mixed live
-- **Five scene themes** — Black Hole (real-time WebGL with gravitational lensing, photon ring, drifting nebula, parallax starfield, god rays, film grain), plus four pre-rendered video themes: Sakura, Aurora, Celestial Garden, Silent Autumn. Every chrome surface (settings, profile, account, dock, popovers) retunes its palette per theme.
+- **Six scene themes** — Black Hole (real-time WebGL with gravitational lensing, photon ring, drifting nebula, parallax starfield, god rays, film grain), plus five pre-rendered video themes: Sakura, Aurora, Celestial Garden, Silent Autumn, Ocean. Every chrome surface (settings, profile, account, dock, popovers) retunes its palette per theme.
 - **Statistics** — sessions today, total focus time, streak, tasks completed, all tracked locally
 - **Settings** — declarative schema covering quality presets, themes, timer flow, shortcuts, notifications, profiles, motion, and data export/import/reset
 - **Onboarding tour** on first visit, replayable from Settings

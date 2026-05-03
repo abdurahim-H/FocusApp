@@ -100,6 +100,7 @@ export const SCHEMA = [
             { value: 'aurora-plain', label: 'Aurora' },
             { value: 'celestial-garden', label: 'Celestial Garden' },
             { value: 'silent-autumn', label: 'Silent Autumn' },
+            { value: 'ocean', label: 'Ocean' },
         ],
     },
 

@@ -1159,7 +1159,8 @@
 .theme-card--sakura,
 .theme-card--aurora,
 .theme-card--celestial,
-.theme-card--autumn {
+.theme-card--autumn,
+.theme-card--ocean {
     padding: 0;
     gap: 0;
     aspect-ratio: 4 / 3;
@@ -1185,11 +1186,16 @@
     background: #1f1a16 url('../../../assets/images/silent-autumn.jpg') center/cover no-repeat;
     border-color: rgba(200, 66, 31, 0.32);
 }
+.theme-card--ocean {
+    background: #0a2438 url('../../../assets/images/ocean.jpg') center/cover no-repeat;
+    border-color: rgba(110, 200, 232, 0.32);
+}
 .theme-card--blackhole::after,
 .theme-card--sakura::after,
 .theme-card--aurora::after,
 .theme-card--celestial::after,
-.theme-card--autumn::after {
+.theme-card--autumn::after,
+.theme-card--ocean::after {
     background: linear-gradient(
         105deg,
         transparent 35%,
@@ -1222,6 +1228,11 @@
     border-color: rgba(200, 66, 31, 0.62);
     box-shadow: 0 4px 24px rgba(200, 66, 31, 0.24);
 }
+.theme-card--ocean:hover {
+    background: #0a2438 url('../../../assets/images/ocean.jpg') center/cover no-repeat;
+    border-color: rgba(110, 200, 232, 0.62);
+    box-shadow: 0 4px 24px rgba(110, 200, 232, 0.22);
+}
 .theme-card--blackhole.active,
 .theme-card--blackhole.btn-primary {
     background: #050308 url('../../../assets/images/blackhole.jpg') center/cover no-repeat;
@@ -1252,11 +1263,18 @@
     border-color: rgba(200, 66, 31, 0.85);
     box-shadow: 0 0 32px rgba(200, 66, 31, 0.34), 0 4px 20px rgba(0, 0, 0, 0.4);
 }
+.theme-card--ocean.active,
+.theme-card--ocean.btn-primary {
+    background: #0a2438 url('../../../assets/images/ocean.jpg') center/cover no-repeat;
+    border-color: rgba(110, 200, 232, 0.85);
+    box-shadow: 0 0 32px rgba(110, 200, 232, 0.34), 0 4px 20px rgba(0, 0, 0, 0.4);
+}
 .theme-card--blackhole .theme-card-preview,
 .theme-card--sakura .theme-card-preview,
 .theme-card--aurora .theme-card-preview,
 .theme-card--celestial .theme-card-preview,
-.theme-card--autumn .theme-card-preview { display: none; }
+.theme-card--autumn .theme-card-preview,
+.theme-card--ocean .theme-card-preview { display: none; }
 .theme-card--celestial .theme-card-name {
     width: 100%;
     padding: 16px 0 12px;
@@ -1330,6 +1348,21 @@
         rgba(31, 26, 22, 0.92) 0%,
         rgba(31, 26, 22, 0.6) 55%,
         rgba(31, 26, 22, 0) 100%
+    );
+}
+.theme-card--ocean .theme-card-name {
+    width: 100%;
+    padding: 16px 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: rgba(216, 238, 244, 0.98);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
+    background: linear-gradient(
+        to top,
+        rgba(10, 36, 56, 0.92) 0%,
+        rgba(10, 36, 56, 0.6) 55%,
+        rgba(10, 36, 56, 0) 100%
     );
 }
 

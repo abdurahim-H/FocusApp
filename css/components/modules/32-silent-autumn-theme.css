@@ -1158,23 +1158,27 @@
     background: transparent;
     border: 0;
     box-shadow: none;
-    color: rgba(var(--sa-paper-rgb), 0.9);
+    color: rgba(var(--sa-ink-rgb), 0.9);
 }
-[data-scene-theme="silent-autumn"] .stat-value {
-    color: rgba(var(--sa-crimson-soft-rgb), 0.92);
-}
-[data-scene-theme="silent-autumn"] .stat-label {
-    color: rgba(var(--sa-paper-rgb), 0.55);
-}
+/* Stats sit DIRECTLY on the parchment-bright video (no card behind
+   them), so paper-on-bright was washing the labels out — see screenshot
+   bug. Switch to deep-crimson tint for values + ink for labels, plus
+   a paper text-shadow halo so dark trunk patches in the video can't
+   swallow the text either. */
+[data-scene-theme="silent-autumn"] .stat-value,
 [data-scene-theme="silent-autumn"] .stat-chip__num,
 [data-scene-theme="silent-autumn"] .stats-chip__num,
 [data-scene-theme="silent-autumn"] .stats-num {
-    color: var(--sa-crimson-soft);
+    color: rgba(var(--sa-crimson-deep-rgb), 0.95);
+    text-shadow: 0 1px 8px rgba(var(--sa-paper-rgb), 0.65);
 }
+[data-scene-theme="silent-autumn"] .stat-label,
 [data-scene-theme="silent-autumn"] .stat-chip__label,
 [data-scene-theme="silent-autumn"] .stats-chip__label,
 [data-scene-theme="silent-autumn"] .stats-label {
-    color: rgba(var(--sa-paper-rgb), 0.65);
+    color: rgba(var(--sa-ink-rgb), 0.78);
+    text-shadow: 0 1px 6px rgba(var(--sa-paper-rgb), 0.7);
+    font-weight: 600;
 }
 /* Goal-complete celebration ring — silent-autumn register shifts the ring
    to crimson so the success colour echoes the curtain itself. */

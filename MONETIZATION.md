@@ -4,12 +4,12 @@ A freemium plan with a **narrow** paywall: most of the app stays free; Pro
 gates a small set of high-value features. Two SKUs only — Free and Pro.
 
 > **TL;DR.** Free covers daily focus work — the timer, tasks, sounds,
-> all five scene themes (Black Hole / Sakura / Aurora / Celestial Garden
-> / Silent Autumn), the cosmos, statistics on Home, the Focus and Time
-> sections of the Profile drawer. Pro adds the **Notes app**, the
-> **Overview / Tasks / Sounds / Insights** sections of Profile, and
-> (when built) **Spotify / YouTube Music / Apple Music integrations**.
-> Pricing: **$5/mo or $55/yr**.
+> all six scene themes (Black Hole / Sakura / Aurora / Celestial Garden
+> / Silent Autumn / Ocean), the cosmos, statistics on Home, the Focus
+> and Time sections of the Profile drawer. Pro adds the **Notes app**,
+> the **Overview / Tasks / Sounds / Insights** sections of Profile,
+> and (when built) **Spotify / YouTube Music / Apple Music
+> integrations**. Pricing: **$5/mo or $55/yr**.
 
 ---
 
@@ -43,8 +43,9 @@ The whole core app is free, indefinitely, no limits.
 - **Sounds** — full ambient library, unlimited saved constellations,
   per-track EQ + pan, sleep timer, surprise-me, auto-start mix on focus.
 - **Themes** — Black Hole, Sakura, Aurora, Celestial Garden, Silent
-  Autumn, every future scene, all stream themes (YouTube/SoundCloud
-  iframes), all advanced visual sliders, immersive mode.
+  Autumn, Ocean, every future scene, all stream themes
+  (YouTube/SoundCloud iframes), all advanced visual sliders,
+  immersive mode.
 - **Statistics on Home** — period tiles (today/week/month), momentum
   trail, 30-day calendar, total focus time, sessions today, tasks done.
 - **Profile drawer**: **Focus** + **Time** sections — heatmaps, hour×day

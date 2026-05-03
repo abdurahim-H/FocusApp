@@ -234,6 +234,27 @@ const MODULES = {
             'radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.42) 100%)',
         grainOpacity: 0.06,
     }),
+
+    // ── Ocean — underwater kelp forest with sun-rays piercing
+    //    through deep blue water, kelp silhouettes, fish, and a
+    //    rocky seabed. Single-module video pattern.
+    oceanVideo: makeVideoTheme({
+        id: 'oceanVideo',
+        src: 'https://cdn.universefocuses.com/ocean/ocean-loop.mp4',
+        // Source is naturally moody (deep blues + dark kelp). A
+        // gentle saturation lift brings out the cyan rays + kelp
+        // green; no brightness change — the underwater scene wants
+        // its low-key tonal feel preserved.
+        filter: 'saturate(1.10) contrast(1.06)',
+        fallback: '#0a2438',
+        // Underwater scene is dark at the edges already (kelp
+        // silhouettes, deep water); a gentler vignette keeps the
+        // corners from looking pinched against the bright sun-ray
+        // centre column.
+        vignette:
+            'radial-gradient(ellipse at center, rgba(0,0,0,0) 58%, rgba(0,0,0,0.30) 100%)',
+        grainOpacity: 0.04,
+    }),
 };
 
 // ───────────────────────────────────────────────────────────────────────
@@ -320,6 +341,19 @@ export const THEMES = [
             secondary: [212, 165, 68],  // ginkgo gold
             accentWarm: [232, 117, 69], // warm leaf-orange
             accentCool: [184, 176, 160], // mist stone
+        },
+    },
+    {
+        id: 'ocean',
+        label: 'Ocean',
+        // Underwater kelp forest — sun-rays piercing through deep
+        // blue water, kelp silhouettes, fish, rocky seabed.
+        modules: [MODULES.oceanVideo],
+        palette: {
+            primary: [110, 200, 232],   // ocean cyan
+            secondary: [152, 184, 104], // kelp green
+            accentWarm: [216, 238, 244], // sun-ray pearl
+            accentCool: [160, 196, 212], // mid-water mist
         },
     },
 ];
