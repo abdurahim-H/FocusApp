@@ -12,14 +12,15 @@ Live at **[universefocuses.com](https://universefocuses.com)**.
 A browser-only productivity app:
 
 - **Focus timer** with configurable durations, cycle goals, auto-start, long-break intervals, and schedules
-- **Tasks** with spring animations, checkbox toggles, and per-session persistence
+- **Tasks** with spring animations, subtasks, due dates, recurring, drag-reorder, carry-over, and per-task detail drawer
 - **Ambient sounds** layered from Cloudflare R2 — rain, ocean, forest, café and more, mixed live
-- **3D black-hole scene** — tilted accretion disk with gravitational lensing, photon ring, drifting nebula, parallax starfield, god rays, film grain
+- **Five scene themes** — Black Hole (real-time WebGL with gravitational lensing, photon ring, drifting nebula, parallax starfield, god rays, film grain), plus four pre-rendered video themes: Sakura, Aurora, Celestial Garden, Silent Autumn. Every chrome surface (settings, profile, account, dock, popovers) retunes its palette per theme.
 - **Statistics** — sessions today, total focus time, streak, tasks completed, all tracked locally
 - **Settings** — declarative schema covering quality presets, themes, timer flow, shortcuts, notifications, profiles, motion, and data export/import/reset
 - **Onboarding tour** on first visit, replayable from Settings
 - **Help Center** (press `?`) — searchable Q&A across every feature
 - **Optional account** (Supabase) for users who want a profile + identity — email/password or Google OAuth, with HIBP-checked passwords and unique handles. Anonymous mode is still the default and fully featured.
+- **Pro tier** ($5/mo or $55/yr) via Stripe Checkout — unlocks the Notepad app and four Profile sections (Overview / Tasks / Sounds / Insights). Everything else stays free forever. See [MONETIZATION.md](MONETIZATION.md).
 
 No server logic for the productivity surface — everything persists in `localStorage`. Sign-in is optional and adds a profile + handle today (cross-device sync is the next planned phase).
 
@@ -104,6 +105,8 @@ dist/            build output (gitignored)
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — deeper technical narrative: render loop, scene layers, settings schema, state model
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** — infrastructure runbook: Cloudflare Workers, R2, DNS, env vars, SSL, how to recover when prod breaks
 - **[SECURITY.md](SECURITY.md)** — how to report vulnerabilities, supported versions, CSP + data-handling policy
+- **[MONETIZATION.md](MONETIZATION.md)** — pricing, Pro paywall scope, Stripe wiring, gated features list
+- **[ROADMAP.md](ROADMAP.md)** — feature backlog with effort sizing, ordered by wave
 - **[CHANGELOG.md](CHANGELOG.md)** — versioned release history
 
 ## Stack

@@ -20,12 +20,13 @@
 // `setTheme(id)` infrastructure exists for the future swap; not used
 // from any UI surface yet.
 
-// Sakura + Aurora Plain are pre-rendered video loops painted onto
-// the scene container with CSS colour grading + grain + vignette.
-// Both themes share the makeVideoTheme factory below; only the src
-// + filter config differs.  The original shader-based aurora stack
-// (sky / terrain / mountains / ribbons / snow) lives untouched in
-// /aurora as reference for a future shader rebuild.
+// Sakura + Aurora Plain + Celestial Garden + Silent Autumn are
+// pre-rendered video loops painted onto the scene container with
+// CSS colour grading + grain + vignette. They share the
+// makeVideoTheme factory below; only the src + filter config
+// differs. The original shader-based aurora stack (sky / terrain /
+// mountains / ribbons / snow) lives untouched in
+// js/graphics/aurora/ as reference for a future shader rebuild.
 import { makeVideoTheme } from './video-backdrop.js';
 import { createBlackHole, disposeBlackHole, updateBlackHole } from '../blackhole/blackhole.js';
 import {

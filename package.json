@@ -20,7 +20,7 @@
     "productivity",
     "pomodoro",
     "3d",
-    "threejs",
+    "babylonjs",
     "webgl",
     "ambient-sounds",
     "focus-timer",
@@ -28,18 +28,18 @@
     "cosmic",
     "black-hole"
   ],
-  "author": "Cosmic Focus Team",
+  "author": "Abdurahim Hudulov",
   "license": "MIT",
-  "homepage": "https://github.com/yourusername/cosmic-focus",
+  "homepage": "https://universefocuses.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/cosmic-focus.git"
+    "url": "git+https://github.com/abdurahim-H/FocusApp.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/cosmic-focus/issues"
+    "url": "https://github.com/abdurahim-H/FocusApp/issues"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=22.16.0"
   },
   "browserslist": [
     "> 1%",

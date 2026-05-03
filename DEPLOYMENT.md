@@ -51,9 +51,15 @@ Typical end-to-end time: **~90 seconds**.
 Do **not** proxy the `MX` record or the email `TXT` records — proxying breaks mail.
 
 ### R2 → `focusapp-sounds`
-- **Objects:** `rain_00.wav`, `ocean_04.wav`, `forest_00.wav`, `crowd_0.wav` at the bucket root.
+- **Sound objects** at the bucket root: `rain_00.wav`, `ocean_04.wav`, `forest_00.wav`, `crowd_0.wav`, plus the rest of the ambient library.
+- **Theme video objects** under prefixes — one folder per scene theme:
+  - `sakura/sakura-loop.mp4`
+  - `aurora/aurora-loop-v2.mp4`
+  - `celestial-garden/celestial-garden-loop.mp4`
+  - `silent-autumn/silent-autumn-loop.mp4`
 - **Custom domain:** `cdn.universefocuses.com`, status **Active**, Minimum TLS `1.0`, Access **Enabled**.
 - Adding more sounds: drag-drop into the bucket for a handful, or `rclone copy ./sounds r2:focusapp-sounds --transfers=10 --progress` for bulk.
+- Adding a theme video: `npx wrangler r2 object put focusapp-sounds/<theme>/<theme>-loop.mp4 --file <local.mp4> --content-type video/mp4 --remote`. Source file stays local (gitignored); the bucket is the source of truth for production.
 
 ## Incident runbook
 
@@ -122,7 +128,10 @@ Schema changes for the accounts feature live in `db/migrations/NNNN_*.sql`. Ther
 3. Click Run. The output should be `Success. No rows returned.`
 4. Migrations are idempotent (`create table if not exists`, `drop policy if exists … create policy …`) so re-running them is safe.
 
-Currently applied: `db/migrations/0001_usernames.sql` — creates `public.usernames` (PRIMARY KEY on the handle, RLS-restricted, unique index per user) plus the `is_username_taken(text)` `SECURITY DEFINER` function used for live availability probes.
+Currently applied:
+- `db/migrations/0001_usernames.sql` — creates `public.usernames` (PRIMARY KEY on the handle, RLS-restricted, unique index per user) plus the `is_username_taken(text)` `SECURITY DEFINER` function used for live availability probes.
+- `db/migrations/0002_sessions.sql` — focus-session log table reserved for the cloud-sync phase.
+- `db/migrations/0003_billing.sql` — `public.billing` Pro tier table + `get_my_tier()` RPC. Mutated **only** by the Stripe webhook running with the service-role key (bypasses RLS); the client reads the tier through `get_my_tier()` which returns just the tier string.
 
 When adding a new migration:
 - Number it sequentially (`0002_*.sql`, `0003_*.sql`).

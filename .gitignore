@@ -98,6 +98,9 @@ _archive/
 # Wrangler local state (from @cloudflare/vite-plugin dev server)
 .wrangler/
 
+# Claude Code session state (scheduled tasks, locks, etc.)
+.claude/
+
 # Supabase CLI local state
 supabase/.temp/
 supabase/.branches/

@@ -6,7 +6,7 @@ Orientation for Claude Code (and any other AI agent) working on this repo. Read 
 
 ## Documentation contract
 
-This repo keeps five top-level documents. Every contributor (human or AI) must keep them in sync when their changes affect what's described:
+This repo keeps eight top-level documents. Every contributor (human or AI) must keep them in sync when their changes affect what's described:
 
 | File               | Purpose                                                                 | When to update                                                                 |
 |--------------------|-------------------------------------------------------------------------|--------------------------------------------------------------------------------|
@@ -17,6 +17,7 @@ This repo keeps five top-level documents. Every contributor (human or AI) must k
 | **SECURITY.md**    | Reporting process, scope, defenses in place, data handling.             | When security posture changes — new CSP directive, new data stored, new third-party. |
 | **CHANGELOG.md**   | Versioned user-visible history.                                         | Every user-visible change. Group under `[Unreleased]` until a release tag goes out. |
 | **MONETIZATION.md**| Pricing, paywall scope, and the implementation plan.                    | When the gated features list, pricing, or Stripe wiring changes.      |
+| **ROADMAP.md**     | Long-form feature backlog with effort sizing and dependencies.          | When a roadmap item ships, gets cancelled, or a new theme/wave is added.       |
 
 **Rule:** if a PR changes behaviour, either (a) update the relevant `.md` file in the same PR, or (b) state in the PR why no doc update is needed.
 
@@ -79,7 +80,7 @@ css/
   components/
     components.css                — thin @import aggregator
     apple-liquid-glass.css        — liquid-glass button system
-    modules/                      — 16 focused CSS modules (home, mini-timer, settings panel, stats, tasks, tour, help, ambient deck, account, etc.)
+    modules/                      — 29 focused CSS modules (home, mini-timer, settings panel, stats, tasks, tour, help, ambient deck, account, profile, period tiles, task detail, notepad, stream themes, celebrate toast, date picker, task dock, sakura/aurora/celestial-garden/silent-autumn theme overrides, upgrade modal). Numbering has gaps (17, 18, 20) where past modules were folded back in — preserved so existing import order isn't churned.
 
 public/           verbatim-copied to dist/: index assets (icon.svg, site.webmanifest), legal (privacy.html, terms.html), 404.html, robots.txt, sitemap.xml, _headers, theme-init.js (FOUC bootstrap), auth/callback.html + callback.js (OAuth/magic-link landing)
 db/migrations/    SQL applied manually in Supabase dashboard (idempotent)
@@ -214,7 +215,7 @@ Anything in `public/` is copied verbatim to `dist/` root with its filename prese
 - Don't regenerate `package-lock.json` on macOS without matching on Linux (see "Lock file drift" above).
 - Don't add a runtime origin without also adding it to CSP in `public/_headers`.
 - Don't reintroduce `console.log` as a user-visible signal — it's stripped from prod. Use `console.warn` / `error` for anything meant to be seen.
-- Don't create new `*.md` files beyond the five documented above unless the user asks.
+- Don't create new `*.md` files beyond the eight documented above unless the user asks.
 - Don't run `git push --force`, `git reset --hard`, `rm -rf`, or `localStorage.clear()` during a debug session without confirming.
 - **Don't import `@supabase/supabase-js` from anywhere except `js/features/auth.js`.** That file is the single point of contact with the auth provider. Everything else calls the thin API it exposes (`signInWithMagicLink`, `signInWithOAuth`, `signOut`, `onChange`, `getUser`, `isConfigured`, `isUsernameAvailable`, `claimUsername`, `callRpc`, `invokeFunction`). One file changes if we ever swap providers.
 - **Don't read `tier.value` directly to gate features.** The Pro paywall has exactly one client-side helper: `isPro()` from `js/features/billing.js`. Every gate (Notes, Profile sections, future audio integrations) calls `isPro()`. Reading the signal directly leaks the abstraction; a future provider swap (Stripe → LemonSqueezy / Paddle) would have to chase down every call site instead of editing one file.

@@ -114,7 +114,7 @@ The Supabase SDK is bundled (npm) and lazy-imported on first use, so the initial
 
 **Email enumeration.** Sign-up gives the same UI response whether the email is fresh or already on file — "Check your email." When Supabase returns `already_registered`, the client silently fires a magic-link to the same address so the existing user receives a usable email regardless of whether they originally signed up with password or Google. From an attacker's side the response is identical; they can't iterate addresses to learn which are registered.
 
-**Username uniqueness.** A separate `public.usernames` table in Supabase enforces uniqueness via `PRIMARY KEY` on the handle. Row-Level Security restricts the table to "users see / insert / delete their own row." Public availability probes go through `is_username_taken(text)`, a `SECURITY DEFINER` function that returns just a boolean — `user_id` never leaves the database. The migration SQL lives in `db/migrations/0001_usernames.sql` and is applied manually in the Supabase dashboard. If a user signs up with email confirmation enabled, the claim is deferred to first sign-in via `onAuthStateChange`.
+**Username uniqueness.** A separate `public.usernames` table in Supabase enforces uniqueness via `PRIMARY KEY` on the handle. Row-Level Security restricts the table to "users see / insert / delete their own row." Public availability probes go through `is_username_taken(text)`, a `SECURITY DEFINER` function that returns just a boolean — `user_id` never leaves the database. The migration SQL lives in `db/migrations/0001_usernames.sql` and is applied manually in the Supabase dashboard. If a user signs up with email confirmation enabled, the claim is deferred to first sign-in via `onAuthStateChange`. Two further migrations live alongside: `0002_sessions.sql` (focus-session log table, reserved for the cloud-sync phase) and `0003_billing.sql` (`public.billing` Pro tier table + `get_my_tier()` RPC, written only by the Stripe webhook running with the service-role key).
 
 **Auth callback.** `public/auth/callback.html` (+ external `callback.js`) receives the Supabase redirect. It surfaces error params (`error`, `error_description`) inline with a friendly message and a Back link; on success it redirects to `/` while preserving the URL fragment so the SDK's `detectSessionInUrl` can finish the handshake.
 
@@ -144,26 +144,39 @@ Cache policy (in `public/_headers`):
 
 `css/components/components.css` is a thin aggregator. The real CSS files live in `css/components/modules/`:
 
-| Module                           | Scope                                    |
-|----------------------------------|------------------------------------------|
-| `01-home-base.css`               | Home layout, greeting                    |
-| `02-home-mini-timer.css`         | Draggable mini-timer widget              |
-| `03-preset-cards.css`            | Scene quality cards                      |
-| `04-settings-star.css`           | ✦ trigger button                         |
-| `05-settings-panel.css`          | Settings modal, rail, every row          |
-| `06-notification-banner.css`     | In-app notification banner               |
-| `07-statistics-bar.css`          | Sessions / streak chips                  |
-| `08-clear-all-button.css`        | Clear-All control                        |
-| `09-focus-tab.css`               | Focus-mode hero treatment                |
-| `10-task-section.css`            | Task list and checkbox                   |
-| `11-settings-toast.css`          | Ephemeral settings toast                 |
-| `12-onboarding-tour.css`         | Welcome tour overlay                     |
-| `13-help-center.css`             | Search + Q&A overlay                     |
-| `14-focus-rings.css`             | a11y `:focus-visible` styling            |
-| `15-ambient-deck.css`            | Ambient mixer deck + mix rail            |
-| `16-account.css`                 | Account satellite, dropdown, auth modal  |
+| Module                                | Scope                                       |
+|---------------------------------------|---------------------------------------------|
+| `01-home-base.css`                    | Home layout, greeting                       |
+| `02-home-mini-timer.css`              | Draggable mini-timer widget                 |
+| `03-preset-cards.css`                 | Scene quality cards                         |
+| `04-settings-star.css`                | ✦ trigger button                            |
+| `05-settings-panel.css`               | Settings modal, rail, every row             |
+| `06-notification-banner.css`          | In-app notification banner                  |
+| `07-statistics-bar.css`               | Sessions / streak chips                     |
+| `08-clear-all-button.css`             | Clear-All control                           |
+| `09-focus-tab.css`                    | Focus-mode hero treatment                   |
+| `10-task-section.css`                 | Task list and checkbox                      |
+| `11-settings-toast.css`               | Ephemeral settings toast                    |
+| `12-onboarding-tour.css`              | Welcome tour overlay                        |
+| `13-help-center.css`                  | Search + Q&A overlay                        |
+| `14-focus-rings.css`                  | a11y `:focus-visible` styling               |
+| `15-ambient-deck.css`                 | Ambient mixer deck + mix rail               |
+| `16-account.css`                      | Account satellite, dropdown, auth modal     |
+| `19-profile.css`                      | Profile drawer (Overview / Focus / Time / …) |
+| `21-home-period-tiles.css`            | Today / week / month / 365 tiles on Home    |
+| `22-task-detail.css`                  | Per-task drawer (subtasks, repeat, due)     |
+| `23-notepad.css`                      | Multi-note workspace (Pro)                  |
+| `24-stream-themes.css`                | YouTube / SoundCloud iframe backdrops       |
+| `25-celebrate-toast.css`              | Goal-complete celebration ring + toast      |
+| `26-date-picker.css`                  | Custom calendar popover                     |
+| `27-task-dock.css`                    | Bottom-anchored Focus-tab task surface      |
+| `28-sakura-theme.css`                 | Sakura per-theme chrome retune              |
+| `29-upgrade-modal.css`                | Stripe upgrade sheet                        |
+| `30-aurora-theme.css`                 | Aurora per-theme chrome retune              |
+| `31-celestial-garden-theme.css`       | Celestial Garden per-theme chrome retune    |
+| `32-silent-autumn-theme.css`          | Silent Autumn per-theme chrome retune       |
 
-Import order = cascade order; later rules win on equal specificity. `apple-liquid-glass.css` lives alongside as a cohesive third-party-style module for the liquid-glass button system.
+Numbering has gaps at 17, 18, 20 where past modules were folded back into earlier files — preserved so existing import order isn't churned. Import order = cascade order; later rules win on equal specificity. `apple-liquid-glass.css` lives alongside as a cohesive third-party-style module for the liquid-glass button system.
 
 ## Security posture
 
@@ -186,6 +199,12 @@ See **[SECURITY.md](SECURITY.md)** for the full posture and the vulnerability-re
 - Supabase project wired in. Email/password + Google OAuth + magic-link.
 - HIBP-checked password policy, anti-enumeration sign-up, unique-handle table with Postgres RLS + `SECURITY DEFINER` availability RPC.
 - Anonymous mode remains the default — sign-in is strictly optional.
+
+### Phase 2a.1 — Pro paywall (shipped)
+
+- Stripe Checkout + Customer Portal wired through three Supabase Edge Functions (`create-checkout-session`, `create-portal-session`, `stripe-webhook`).
+- `public.billing` Pro tier table mutated only by the webhook running with the service-role key; client reads tier through the `get_my_tier()` RPC.
+- Single client-side gate: `js/features/billing.js → isPro()`. Gated surfaces: the Notepad app + four Profile sections (Overview / Tasks / Sounds / Insights). See `MONETIZATION.md`.
 
 ### Phase 2b — Cloud sync (planned)
 
