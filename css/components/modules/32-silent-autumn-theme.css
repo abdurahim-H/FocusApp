@@ -1797,3 +1797,25 @@
    stays identical between Black Hole and Silent Autumn.
    This block exists as an audit trail; no rules.
    ────────────────────────────────────────────────────────────────────── */
+
+/* ────────────────────────────────────────────────────────────────────
+   27. MUSIC SERVICES DOCK — silent-autumn chrome
+   The autumn video is BRIGHT (parchment ground), so the dock card
+   needs to be properly dark (ink-tinted glass with crimson border)
+   to stand out against the brightest patches of the video. Icons
+   inside the dark card stay paper-cream so the contrast is reversed
+   from the parent page — same trick the cosmos toolbar uses on this
+   theme.
+   ──────────────────────────────────────────────────────────────────── */
+[data-scene-theme="silent-autumn"] .music-services {
+    background: rgba(var(--sa-ink-rgb), 0.78);
+    border-color: rgba(var(--sa-crimson-rgb), 0.32);
+    box-shadow:
+        0 18px 40px rgba(var(--sa-ink-rgb), 0.55),
+        inset 0 1px 0 rgba(var(--sa-paper-rgb), 0.10);
+}
+[data-scene-theme="silent-autumn"] .music-service-btn {
+    color: rgba(var(--sa-paper-rgb), 0.92);
+    border-color: rgba(var(--sa-crimson-rgb), 0.20);
+    background: rgba(var(--sa-paper-rgb), 0.04);
+}

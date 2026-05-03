@@ -1791,3 +1791,19 @@
    stays identical between Black Hole and Ocean.
    This block exists as an audit trail; no rules.
    ────────────────────────────────────────────────────────────────────── */
+
+/* ────────────────────────────────────────────────────────────────────
+   27. MUSIC SERVICES DOCK — ocean chrome
+   ──────────────────────────────────────────────────────────────────── */
+[data-scene-theme="ocean"] .music-services {
+    background: rgba(var(--oc-deep-rgb), 0.62);
+    border-color: rgba(var(--oc-cyan-rgb), 0.22);
+    box-shadow:
+        0 18px 40px rgba(var(--oc-deep-rgb), 0.55),
+        inset 0 1px 0 rgba(var(--oc-pearl-rgb), 0.10);
+}
+[data-scene-theme="ocean"] .music-service-btn {
+    color: rgba(var(--oc-pearl-rgb), 0.85);
+    border-color: rgba(var(--oc-cyan-rgb), 0.18);
+    background: rgba(var(--oc-deep-soft-rgb), 0.18);
+}

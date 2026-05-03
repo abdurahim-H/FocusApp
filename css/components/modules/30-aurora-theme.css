@@ -1793,3 +1793,19 @@
    stays identical between Black Hole and Aurora.
    This block exists as an audit trail; no rules.
    ────────────────────────────────────────────────────────────────────── */
+
+/* ────────────────────────────────────────────────────────────────────
+   27. MUSIC SERVICES DOCK — aurora chrome on bottom-left connect pill
+   ──────────────────────────────────────────────────────────────────── */
+[data-scene-theme="aurora-plain"] .music-services {
+    background: rgba(var(--au-sky-rgb), 0.62);
+    border-color: rgba(var(--au-green-rgb), 0.22);
+    box-shadow:
+        0 18px 40px rgba(var(--au-sky-rgb), 0.55),
+        inset 0 1px 0 rgba(var(--au-cream-rgb), 0.10);
+}
+[data-scene-theme="aurora-plain"] .music-service-btn {
+    color: rgba(var(--au-cream-rgb), 0.85);
+    border-color: rgba(var(--au-green-rgb), 0.18);
+    background: rgba(var(--au-sky-soft-rgb), 0.18);
+}

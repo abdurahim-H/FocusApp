@@ -1,0 +1,126 @@
+/* ════════════════════════════════════════════════════════════════════════
+   MUSIC SERVICES DOCK — bottom-left horizontal pill of connect buttons
+   for Spotify / YouTube Music / Apple Music / YouTube / SoundCloud.
+
+   Default chrome here is the dark cosmos register. Per-theme modules
+   (28-sakura, 30-aurora, 31-celestial-garden, 32-silent-autumn,
+   33-ocean) override the glass + halo + icon-rest colour to match the
+   active scene theme. Brand colours stay in the .music-service-btn's
+   `--brand` custom property and only show on :hover and .is-connected
+   so the icons remain instantly recognisable as Spotify / Apple etc.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.music-services {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 1450;                 /* under cosmos toolbar (1500), above canvas */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.36),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    transition: border-color 220ms ease, box-shadow 220ms ease;
+    pointer-events: auto;
+}
+
+.music-service-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.78);     /* monochrome icon rest */
+    cursor: pointer;
+    transition:
+        transform 180ms ease,
+        background 180ms ease,
+        border-color 180ms ease,
+        color 180ms ease,
+        box-shadow 220ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.music-service-btn:hover,
+.music-service-btn:focus-visible {
+    transform: scale(1.07);
+    color: var(--brand);
+    border-color: color-mix(in srgb, var(--brand) 60%, transparent);
+    background: color-mix(in srgb, var(--brand) 12%, transparent);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--brand) 35%, transparent);
+    outline: none;
+}
+
+.music-service-btn:active {
+    transform: scale(0.96);
+}
+
+.music-service-btn__icon {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+    pointer-events: none;
+}
+
+/* Connected indicator — small dot at the bottom-right of each button
+   that lights up in the brand colour once an OAuth handshake stuck.
+   Hidden by default; .is-connected reveals it. */
+.music-service-btn__dot {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brand);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 180ms ease, transform 180ms ease;
+    box-shadow: 0 0 8px var(--brand);
+}
+
+.music-service-btn.is-connected {
+    color: var(--brand);
+    border-color: color-mix(in srgb, var(--brand) 70%, transparent);
+    background: color-mix(in srgb, var(--brand) 14%, transparent);
+}
+.music-service-btn.is-connected .music-service-btn__dot {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Mobile: the bottom area is already crowded with the cosmos toolbar
+   and the task dock. Hide the music dock on small viewports — Pro
+   users can still trigger the upgrade / connect flow from the
+   Settings → Account section once the OAuth surface lands.
+
+   Threshold matches the same 600 px boundary used by 23-notepad and
+   27-task-dock so all three responsive rules collapse together. */
+@media (max-width: 600px) {
+    .music-services { display: none; }
+}
+
+/* Reduced motion: drop the scale + shadow animations — keep the
+   colour change so users still see the brand-colour hover hint. */
+@media (prefers-reduced-motion: reduce) {
+    .music-service-btn,
+    .music-service-btn:hover,
+    .music-service-btn:focus-visible,
+    .music-service-btn:active {
+        transform: none;
+        transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+    }
+}

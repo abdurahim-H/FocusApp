@@ -27,6 +27,7 @@ import * as homePeriodTiles from '../ui/home-period-tiles.js';
 import * as navigation from '../ui/navigation.js';
 import * as profile from '../ui/profile.js';
 import * as settings from '../ui/settings.js';
+import * as musicServices from '../ui/music-services.js';
 import * as notepad from '../ui/notepad.js';
 import * as streamThemes from '../ui/stream-themes.js';
 import * as taskDetail from '../ui/task-detail.js';
@@ -63,6 +64,7 @@ const modules = {
     taskDetail,
     notepad,
     streamThemes,
+    musicServices,
     wellnessReminders,
 };
 
@@ -416,6 +418,12 @@ function setupTaskControls(loadedModules) {
     // a YouTube / SoundCloud iframe in for the 3D canvas.
     if (loadedModules.streamThemes?.initStreamThemes) {
         loadedModules.streamThemes.initStreamThemes();
+    }
+    // Music services dock — bottom-left pill of Spotify / YT Music /
+    // Apple Music / YouTube / SoundCloud connect buttons. Pro feature;
+    // free users hit the upgrade modal on click.
+    if (loadedModules.musicServices?.mountMusicServices) {
+        loadedModules.musicServices.mountMusicServices();
     }
 }
 

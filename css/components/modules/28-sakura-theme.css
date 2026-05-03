@@ -1795,3 +1795,19 @@
    stays identical between Black Hole and Sakura.
    This block exists as an audit trail; no rules.
    ────────────────────────────────────────────────────────────────────── */
+
+/* ────────────────────────────────────────────────────────────────────
+   27. MUSIC SERVICES DOCK — sakura chrome on bottom-left connect pill
+   ──────────────────────────────────────────────────────────────────── */
+[data-scene-theme="sakura"] .music-services {
+    background: rgba(var(--sk-blossom-deep-rgb), 0.32);
+    border-color: rgba(var(--sk-blossom-rgb), 0.28);
+    box-shadow:
+        0 18px 40px rgba(var(--sk-blossom-deep-rgb), 0.45),
+        inset 0 1px 0 rgba(var(--sk-paper-rgb), 0.12);
+}
+[data-scene-theme="sakura"] .music-service-btn {
+    color: rgba(var(--sk-paper-rgb), 0.85);
+    border-color: rgba(var(--sk-paper-rgb), 0.14);
+    background: rgba(var(--sk-paper-rgb), 0.04);
+}

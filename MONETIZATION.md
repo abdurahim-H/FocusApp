@@ -101,17 +101,40 @@ The four Pro sections each carry a clear value story:
   week-over-week deltas, anomaly callouts, friction-cost estimate of
   tab-switching during focus.
 
-### C. Future — third-party music integrations
+### C. Third-party music integrations
 
-Not built yet. When they ship, they'll be Pro:
+UI shell is live (bottom-left dock — `js/ui/music-services.js` +
+`css/components/modules/34-music-services.css`); OAuth flows are not
+wired yet. The dock surfaces five services: **Spotify, YouTube Music,
+Apple Music, YouTube, SoundCloud**. Free users land in the upgrade
+modal on click; Pro users land in a "wiring in progress" toast until
+the OAuth client for each provider is registered.
 
-- **Spotify** — connect account, control playback from the focus
-  screen, log "what I listened to during focus" into Insights.
-- **YouTube Music / Apple Music** — same shape.
+What each service still needs before the connect button can actually
+connect (these are dev-account chores that have to happen outside the
+codebase):
+
+| Service        | Setup checklist                                                                                                                                                                                                |
+|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Spotify        | Register at `developer.spotify.com` → create an app → add redirect URI `https://universefocuses.com/auth/callback.html` → Client ID into a new Edge Function (`spotify-token`) for the PKCE token exchange.    |
+| YouTube Music  | No public API. Realistic option: use Google OAuth + the unofficial `ytmusicapi` proxy in an Edge Function. Same redirect URI. Set expectation that this one is the most fragile.                                |
+| Apple Music    | Apple Developer Program ($99 / yr). Generate a MusicKit private key + team ID. Surface MusicKit JS on the page (CSP `script-src` allowance), prompt for Apple ID inside MusicKit's flow. No server token exchange — token stays client-side. |
+| YouTube        | Google Cloud Console → OAuth consent screen → YouTube Data API v3 scope. Same redirect URI as the YT Music flow; can share the Edge Function.                                                                  |
+| SoundCloud     | Already partially live as a backdrop stream. Full-account connect wants `developers.soundcloud.com` → register app → OAuth 2 token exchange in an Edge Function.                                                |
+
+Once a Client ID + Edge Function exists for a provider, the wiring on
+the client side is small: fill out the provider's branch of
+`onClick(svc)` in `js/ui/music-services.js` (currently a one-line
+upgrade-modal-or-toast switch), set the connection bit via the
+already-exported `setConnected(serviceId, true)` after the callback
+lands.
 
 Why these belong on the Pro side: they require an OAuth handshake with
 your server, refresh-token storage, and per-user API quota — *real*
-per-user cost. Pro pays for it.
+per-user cost. Pro pays for it. Server-side enforcement (Edge
+Function checks the caller's `tier='pro'` via the same
+`get_my_tier()` RPC the client uses) keeps the gate honest even for
+users who flip `isPro()` in devtools.
 
 ---
 

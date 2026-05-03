@@ -70,6 +70,7 @@ js/
     notification-banner.js, wellness-reminders.js (toast renderers — DOM-side reminder loops),
     task-dock.js (bottom-anchored task surface — slim/expanded states for the Focus tab),
     task-detail.js (per-task drawer), date-picker.js (custom calendar popover), notepad.js,
+    music-services.js (bottom-left dock for Spotify / YT Music / Apple Music / YT / SoundCloud connects — Pro gate),
     home-mini-timer.js, home-period-tiles.js, help-center.js, help-content.js, navigation.js,
     button-feel.js, ui-effects.js, focus-trap.js, profile.js, stream-themes.js, timer-particles.js,
     account.js (signed-in/-out satellite + auth modal), ambient-ui.js, cosmos-a11y.js
@@ -80,7 +81,7 @@ css/
   components/
     components.css                — thin @import aggregator
     apple-liquid-glass.css        — liquid-glass button system
-    modules/                      — 30 focused CSS modules (home, mini-timer, settings panel, stats, tasks, tour, help, ambient deck, account, profile, period tiles, task detail, notepad, stream themes, celebrate toast, date picker, task dock, sakura/aurora/celestial-garden/silent-autumn/ocean theme overrides, upgrade modal). Numbering has gaps (17, 18, 20) where past modules were folded back in — preserved so existing import order isn't churned.
+    modules/                      — 31 focused CSS modules (home, mini-timer, settings panel, stats, tasks, tour, help, ambient deck, account, profile, period tiles, task detail, notepad, stream themes, celebrate toast, date picker, task dock, sakura/aurora/celestial-garden/silent-autumn/ocean theme overrides, upgrade modal, music services dock). Numbering has gaps (17, 18, 20) where past modules were folded back in — preserved so existing import order isn't churned.
 
 public/           verbatim-copied to dist/: index assets (icon.svg, site.webmanifest), legal (privacy.html, terms.html), 404.html, robots.txt, sitemap.xml, _headers, theme-init.js (FOUC bootstrap), auth/callback.html + callback.js (OAuth/magic-link landing)
 db/migrations/    SQL applied manually in Supabase dashboard (idempotent)
