@@ -1,28 +1,30 @@
 /* ════════════════════════════════════════════════════════════════════════
    AURORA THEME OVERRIDES — chrome palette tuned for the northern-lights
-   video backdrop. Every rule is scoped under [data-scene-theme="aurora-plain"]
-   so the warm-amber default is preserved on Black Hole and the pink
-   aurora register is preserved on Aurora.
+   video backdrop (green curtain over snow with magenta edges + a warm
+   yellow horizon glow). Every rule is scoped under
+   [data-scene-theme="aurora-plain"] so other themes' chrome stays intact.
    ════════════════════════════════════════════════════════════════════════
    Core palette (used through this file):
 
-     green          #7eea90 — primary aurora-green accent (replaces amber)
-     green-soft     #b8f5c4 — pale green highlight (the diffuse glow)
-     green-deep     #3da868 — deep accent / strong borders
-     violet         #b07adb — secondary violet accent (top of the curtain)
-     violet-soft    #d8a5ec — pale magenta highlight
-     violet-deep    #7c4caa — deep violet — used for hover halos
+     green          #8eecb0 — primary aurora-green accent (the main curtain)
+     green-soft     #c4f4d4 — pale green highlight (the diffuse glow)
+     green-deep     #3da870 — deep accent / strong borders
+     violet         #c898e8 — secondary magenta-violet accent (curtain edges)
+     violet-soft    #e0baf0 — pale magenta highlight
+     violet-deep    #7e4cb0 — deep violet — used for hover halos
+     glow           #ecec98 — warm yellow-green horizon glow accent
      cream          #e8f7ee — cool-tinted text cream
-     stone          #a8c2c8 — snow-blue secondary
-     sky            #0d1129 — deep night-sky navy (replaces sky-dark)
-     sky-soft       #1f2547 — slightly lifted glass-base shade
+     stone          #a8c2c8 — snow-blue secondary (the foreground snow)
+     sky            #0a1228 — deep midnight-indigo (the night sky)
+     sky-soft       #1a2440 — slightly lifted glass-base shade
 
-   Glass surfaces are tuned for the dark sky: deep navy-tinted dark glass
-   with aurora-green inner borders. The video already supplies the green
-   ↔ violet motion; chrome biases toward green so the foreground UI
-   doesn't fight the curtain. Violet is reserved for hover halos and a
-   handful of secondary accents, so the eye still gets the dual hue
-   the photo registers as.
+   Glass surfaces are tuned for the dark midnight sky: deep indigo-tinted
+   dark glass with aurora-green inner borders. The video supplies the
+   green ↔ magenta motion (curtain + edges) and a yellow horizon flare;
+   chrome biases toward green so the foreground UI doesn't fight the
+   curtain. Magenta is reserved for hover halos and a handful of
+   secondary accents, so the eye still gets the dual hue the scene
+   registers as.
 
    Tabs and tiles the user explicitly asked to preserve are NOT touched:
      • .nav-buttons (Home / Focus pill)
@@ -34,29 +36,31 @@
     /* Token sheet — referenced inside scoped overrides below. Defining
        the tokens at the document root means any aurora override can
        say `var(--au-green)` without re-typing the literal. */
-    --au-green: #7eea90;
-    --au-green-soft: #b8f5c4;
-    --au-green-deep: #3da868;
+    --au-green: #8eecb0;
+    --au-green-soft: #c4f4d4;
+    --au-green-deep: #3da870;
     --au-green-pale: #e8fff0;
-    --au-violet: #b07adb;
-    --au-violet-soft: #d8a5ec;
-    --au-violet-deep: #7c4caa;
+    --au-violet: #c898e8;
+    --au-violet-soft: #e0baf0;
+    --au-violet-deep: #7e4cb0;
+    --au-glow: #ecec98;
     --au-cream: #e8f7ee;
     --au-stone: #a8c2c8;
-    --au-sky: #0d1129;
-    --au-sky-soft: #1f2547;
+    --au-sky: #0a1228;
+    --au-sky-soft: #1a2440;
 
     /* RGB triplets so we can compose alphas inline. */
-    --au-green-rgb: 126, 234, 144;
-    --au-green-soft-rgb: 184, 245, 196;
-    --au-green-deep-rgb: 61, 168, 104;
-    --au-violet-rgb: 176, 122, 219;
-    --au-violet-soft-rgb: 216, 165, 236;
-    --au-violet-deep-rgb: 124, 76, 170;
+    --au-green-rgb: 142, 236, 176;
+    --au-green-soft-rgb: 196, 244, 212;
+    --au-green-deep-rgb: 61, 168, 112;
+    --au-violet-rgb: 200, 152, 232;
+    --au-violet-soft-rgb: 224, 186, 240;
+    --au-violet-deep-rgb: 126, 76, 176;
+    --au-glow-rgb: 236, 236, 152;
     --au-cream-rgb: 232, 247, 238;
     --au-stone-rgb: 168, 194, 200;
-    --au-sky-rgb: 13, 17, 41;
-    --au-sky-soft-rgb: 31, 37, 71;
+    --au-sky-rgb: 10, 18, 40;
+    --au-sky-soft-rgb: 26, 36, 64;
 }
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -450,8 +454,8 @@
     animation-name: auroraDirtyPulse;
 }
 @keyframes auroraDirtyPulse {
-    0%, 100% { box-shadow: 0 0 4px rgba(126, 234, 144, 0.40); }
-    50%      { box-shadow: 0 0 10px rgba(126, 234, 144, 0.80); }
+    0%, 100% { box-shadow: 0 0 4px rgba(142, 236, 176, 0.40); }
+    50%      { box-shadow: 0 0 10px rgba(142, 236, 176, 0.80); }
 }
 /* Stepper button hover — base CSS used a gold tint, which read as
    off-palette under aurora. */
@@ -605,12 +609,12 @@
        sections, all now within the green ↔ violet curtain family so
        the chrome reads as a single coherent night sky rather than six
        competing hues against the aurora backdrop. */
-    --accent-amber:  126, 234, 144;   /* primary aurora green */
-    --accent-blue:   140, 195, 220;   /* glacial blue */
-    --accent-green:  184, 245, 196;   /* pale lime */
-    --accent-violet: 176, 122, 219;   /* aurora violet */
-    --accent-orange: 216, 165, 236;   /* magenta-violet */
-    --accent-rose:   124, 76, 170;    /* deep violet */
+    --accent-amber:  142, 236, 176;   /* primary aurora green */
+    --accent-blue:   168, 194, 200;   /* snow-stone blue */
+    --accent-green:  196, 244, 212;   /* pale aurora wash */
+    --accent-violet: 200, 152, 232;   /* magenta-violet curtain edge */
+    --accent-orange: 236, 236, 152;   /* warm horizon glow */
+    --accent-rose:   126, 76, 176;    /* deep violet */
 }
 [data-scene-theme="aurora-plain"] .profile__sheet {
     background: rgba(var(--au-sky-rgb), 0.84);

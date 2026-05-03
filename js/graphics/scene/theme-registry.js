@@ -172,22 +172,25 @@ const MODULES = {
         grainOpacity: 0.05,
     }),
 
-    // ── Aurora — northern-lights video. Filename suffixed with -v2
-    //    so the original (placeholder) clip's CDN cache can't shadow
-    //    the upgraded loop.
+    // ── Aurora — northern-lights video. Filename suffixed with -v3
+    //    after a clip swap (v2 was a placeholder; v3 is the proper
+    //    green-curtain over snow with magenta edges + warm horizon
+    //    glow). The version suffix prevents CDN cache misses from
+    //    shadowing the new clip.
     auroraVideo: makeVideoTheme({
         id: 'auroraVideo',
-        src: 'https://cdn.universefocuses.com/aurora/aurora-loop-v2.mp4',
-        // Bumped saturation a touch to keep the green ↔ violet curtain
-        // reading vivid through the dark glass overlay; brightness pull
-        // is gentler than before because the new clip is darker overall.
-        filter: 'saturate(1.22) contrast(1.08) brightness(0.96)',
-        fallback: '#0d1129',
-        // The aurora sits at the top of the frame; the corners are
-        // clean dark sky. A gentler vignette than sakura keeps the
-        // edges from looking pinched.
+        src: 'https://cdn.universefocuses.com/aurora/aurora-loop-v3.mp4',
+        // The new clip is naturally vivid — the curtain reads bright
+        // through the dark glass overlay without much help. A gentle
+        // saturation+contrast nudge keeps the magenta edges + yellow
+        // horizon glow popping; no brightness pull-down needed.
+        filter: 'saturate(1.10) contrast(1.06)',
+        fallback: '#0a1228',
+        // The curtain is in the upper half of the frame; the snowy
+        // foreground is bright. A gentle vignette stops the corners
+        // from looking pinched against the bright snow.
         vignette:
-            'radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.28) 100%)',
+            'radial-gradient(ellipse at center, rgba(0,0,0,0) 56%, rgba(0,0,0,0.30) 100%)',
         grainOpacity: 0.04,
     }),
 
@@ -281,15 +284,15 @@ export const THEMES = [
     {
         id: 'aurora-plain',
         label: 'Aurora Plain',
-        // Held back from the user-facing surface (schema marks the
-        // card "Coming soon"); kept registered so dev work + manual
-        // theme overrides keep working. Single-module video theme.
+        // Northern-lights video theme — green curtain over snow with
+        // magenta edges + a warm yellow horizon glow. Single-module
+        // video pattern.
         modules: [MODULES.auroraVideo],
         palette: {
-            primary: [128, 232, 178],
-            secondary: [180, 144, 232],
-            accentWarm: [255, 200, 230],
-            accentCool: [80, 180, 215],
+            primary: [142, 236, 176],   // aurora green
+            secondary: [200, 152, 232], // magenta-violet curtain edge
+            accentWarm: [236, 236, 152], // warm horizon glow
+            accentCool: [168, 194, 200], // snow-stone blue
         },
     },
     {

@@ -1174,8 +1174,8 @@
     border-color: rgba(247, 168, 194, 0.28);
 }
 .theme-card--aurora {
-    background: #0d1129 url('../../../assets/images/aurora.jpg') center/cover no-repeat;
-    border-color: rgba(126, 234, 144, 0.28);
+    background: #0a1228 url('../../../assets/images/aurora.jpg') center/cover no-repeat;
+    border-color: rgba(142, 236, 176, 0.28);
 }
 .theme-card--celestial {
     background: #06241f url('../../../assets/images/celestial-garden.jpg') center/cover no-repeat;
@@ -1208,9 +1208,9 @@
     box-shadow: 0 4px 24px rgba(247, 168, 194, 0.18);
 }
 .theme-card--aurora:hover {
-    background: #0d1129 url('../../../assets/images/aurora.jpg') center/cover no-repeat;
-    border-color: rgba(126, 234, 144, 0.55);
-    box-shadow: 0 4px 24px rgba(126, 234, 144, 0.20);
+    background: #0a1228 url('../../../assets/images/aurora.jpg') center/cover no-repeat;
+    border-color: rgba(142, 236, 176, 0.55);
+    box-shadow: 0 4px 24px rgba(142, 236, 176, 0.20);
 }
 .theme-card--celestial:hover {
     background: #06241f url('../../../assets/images/celestial-garden.jpg') center/cover no-repeat;
@@ -1236,9 +1236,9 @@
 }
 .theme-card--aurora.active,
 .theme-card--aurora.btn-primary {
-    background: #0d1129 url('../../../assets/images/aurora.jpg') center/cover no-repeat;
-    border-color: rgba(126, 234, 144, 0.78);
-    box-shadow: 0 0 32px rgba(126, 234, 144, 0.32), 0 4px 20px rgba(0, 0, 0, 0.4);
+    background: #0a1228 url('../../../assets/images/aurora.jpg') center/cover no-repeat;
+    border-color: rgba(142, 236, 176, 0.78);
+    box-shadow: 0 0 32px rgba(142, 236, 176, 0.32), 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 .theme-card--celestial.active,
 .theme-card--celestial.btn-primary {
@@ -1312,9 +1312,9 @@
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
     background: linear-gradient(
         to top,
-        rgba(13, 17, 41, 0.92) 0%,
-        rgba(13, 17, 41, 0.6) 55%,
-        rgba(13, 17, 41, 0) 100%
+        rgba(10, 18, 40, 0.92) 0%,
+        rgba(10, 18, 40, 0.6) 55%,
+        rgba(10, 18, 40, 0) 100%
     );
 }
 .theme-card--autumn .theme-card-name {

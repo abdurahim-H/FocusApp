@@ -43,7 +43,7 @@ npm run build      # outputs to dist/
 npm run preview    # serves the built dist/ locally
 ```
 
-Deploys are manual — push to `master`, then run `npx wrangler deploy` from the repo root. The `@cloudflare/vite-plugin` writes `dist/wrangler.json` during `npm run build` so the Worker knows what to ship. Sound files and theme videos are served separately from a Cloudflare R2 bucket (`cdn.universefocuses.com`) rather than from the app bundle.
+Production redeploys automatically when you push to `master`. Cloudflare's Workers git integration runs `npm ci` + `npm run build` + `npx wrangler deploy` remotely; new versions show up at universefocuses.com within ~30 seconds. You can also run `npx wrangler deploy` locally for an immediate ship if you don't want to wait. Sound files and theme videos are served separately from a Cloudflare R2 bucket (`cdn.universefocuses.com`) rather than from the app bundle.
 
 ## Code quality
 
