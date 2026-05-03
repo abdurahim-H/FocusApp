@@ -12,8 +12,12 @@
 
 .music-services {
     position: fixed;
-    bottom: 24px;
-    left: 24px;
+    bottom: 20px;
+    /* The help "?" trigger lives at left: 20px / width: 38px (see
+       13-help-center.css) — i.e. its right edge is at 58 px. Start
+       the dock at 76 px so there's a comfortable 18 px gap and the
+       leftmost button (Spotify) doesn't sit under the help button. */
+    left: 76px;
     z-index: 1450;                 /* under cosmos toolbar (1500), above canvas */
     display: flex;
     flex-direction: row;
