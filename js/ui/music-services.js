@@ -31,53 +31,79 @@ import { showGentleToast } from '../utils/gentle-toast.js';
 //   label       — short brand-correct display name (used for aria-label
 //                 and the toast / modal copy).
 //   brand       — exact brand colour used in :hover and connected state.
-//                 Trademarked; we use them as service identifiers in
-//                 a UI control, which falls under fair use for every
+//                 Trademarked; we use them as service identifiers in a
+//                 UI control, which falls under fair use for every
 //                 provider's brand guidelines as of 2026.
-//   path        — single-path SVG, viewBox 0 0 24 24, fill="currentColor".
-//                 Recognisable but minimal — the smallest shape that
-//                 still reads as the brand at 22px.
+//   glyph       — raw inner SVG markup for the icon. Each icon mixes
+//                 stroke and fill against `currentColor` so it stays
+//                 monochrome by default (theme-aware) and shifts to the
+//                 brand colour on :hover via the parent's color cascade.
+//                 viewBox is fixed at 0 0 24 24 by the renderer.
 
 const SERVICES = [
     {
         id: 'spotify',
         label: 'Spotify',
         brand: '#1db954',
-        // Three sound-wave bars curving inside a circle (the Spotify
-        // mark, simplified).
-        path: 'M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.78.78 0 01-1.07.26c-2.93-1.79-6.62-2.2-10.97-1.21a.78.78 0 11-.34-1.52c4.76-1.07 8.85-.6 12.13 1.4.36.22.47.7.25 1.07zm1.23-2.74a.97.97 0 01-1.34.32c-3.36-2.06-8.48-2.66-12.45-1.45a.97.97 0 11-.56-1.86c4.55-1.38 10.2-.71 14.04 1.65a.97.97 0 01.31 1.34zm.1-2.86c-4.03-2.39-10.67-2.61-14.51-1.45a1.17 1.17 0 11-.68-2.24c4.42-1.34 11.74-1.08 16.36 1.66a1.17 1.17 0 11-1.18 2.03z',
+        // Outline circle + three nested sound-wave arcs.
+        glyph: `
+            <circle cx="12" cy="12" r="9.5"/>
+            <path d="M7 9.5c3.4-0.9 7.6-0.6 10.4 1"/>
+            <path d="M7.5 12.6c2.8-0.7 6.6-0.4 9.2 1"/>
+            <path d="M8 15.5c2.2-0.5 5-0.4 7.2 0.6"/>
+        `,
     },
     {
         id: 'youtube-music',
         label: 'YouTube Music',
         brand: '#ff0033',
-        // Circle outline with a small triangle inside — distinct
-        // from the YouTube square so the two rows don't read as
-        // duplicates.
-        path: 'M12 2a10 10 0 100 20 10 10 0 000-20zm0 1.6a8.4 8.4 0 110 16.8 8.4 8.4 0 010-16.8zm-1.7 4.7v7.4l6.4-3.7-6.4-3.7z',
+        // Outline circle with a filled play triangle — distinct from
+        // YouTube's rectangle so the two icons don't read as duplicates.
+        glyph: `
+            <circle cx="12" cy="12" r="9.5"/>
+            <path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/>
+        `,
     },
     {
         id: 'apple-music',
         label: 'Apple Music',
         brand: '#fa2d48',
-        // Rounded square with a music note (eighth-note) — the
-        // Apple Music brand mark, simplified to currentColor.
-        path: 'M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm10 4l-6 1.2v6.5a2.4 2.4 0 11-1.5-2.22V8.5l6-1.2v5a2.4 2.4 0 11-1.5-2.22V7z',
+        // Rounded square + eighth-note (stem + two filled note heads).
+        // The previous single-path attempt collapsed the note via a bad
+        // subpath winding — splitting heads into ellipses makes the
+        // glyph rock-solid at 22 px.
+        glyph: `
+            <rect x="3" y="3" width="18" height="18" rx="3.5"/>
+            <path d="M10 16V8.2l5.4-1.1V14"/>
+            <ellipse cx="8.7" cy="16" rx="1.8" ry="1.5" fill="currentColor" stroke="none"/>
+            <ellipse cx="14.1" cy="14.7" rx="1.8" ry="1.5" fill="currentColor" stroke="none"/>
+        `,
     },
     {
         id: 'youtube',
         label: 'YouTube',
         brand: '#ff0000',
-        // The classic rounded-rectangle play button.
-        path: 'M22.54 6.42a2.78 2.78 0 00-1.96-1.96C18.88 4 12 4 12 4s-6.88 0-8.58.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.96 1.96C5.12 20 12 20 12 20s6.88 0 8.58-.46a2.78 2.78 0 001.96-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58zM10 15.5v-7l6 3.5-6 3.5z',
+        // The classic rounded rectangle + filled play triangle.
+        glyph: `
+            <rect x="2" y="5.5" width="20" height="13" rx="3.2"/>
+            <path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/>
+        `,
     },
     {
         id: 'soundcloud',
         label: 'SoundCloud',
         brand: '#ff5500',
-        // Cloud with a stack of vertical bars to the left — the
-        // SoundCloud mark, condensed.
-        path: 'M2 14.4v3.6h.8v-3.6H2zm1.6-1v4.6h.8v-4.6h-.8zm1.6-.6v5.2h.8v-5.2h-.8zm1.6-.4v5.6h.8v-5.6h-.8zm1.6-.2v5.8h.8v-5.8h-.8zm1.6-.4v6.2h.8v-6.2h-.8zm1.6-.8v7h.8v-7h-.8zm1.6-1v8h.8v-8h-.8zm6.86 5.2c-.21-3.18-2.74-5.7-5.86-5.7-.96 0-1.86.23-2.66.64v8.86h8.16c1.41 0 2.54-1.16 2.54-2.6 0-1.36-1-2.46-2.18-2.6z',
+        // Stack of vertical sound-bars rising left-to-right, with a
+        // cloud bump on the right edge. Filled glyph (no stroke).
+        glyph: `
+            <g fill="currentColor" stroke="none">
+                <rect x="2" y="13" width="1.4" height="5" rx="0.6"/>
+                <rect x="4.4" y="11.5" width="1.4" height="6.5" rx="0.6"/>
+                <rect x="6.8" y="9.5" width="1.4" height="8.5" rx="0.6"/>
+                <rect x="9.2" y="8" width="1.4" height="10" rx="0.6"/>
+                <path d="M11.5 8c1.4-2.6 5.4-2.6 6.6 0.4 0.5-0.15 1.6-0.15 2.1 0.4 1 0.4 1.8 1.4 1.8 2.6 0 1.6-1.3 2.6-2.8 2.6h-7.7V8z"/>
+            </g>
+        `,
     },
 ];
 
@@ -133,8 +159,11 @@ function buildDock() {
         btn.setAttribute('aria-label', `Connect ${svc.label}`);
         btn.setAttribute('title', svc.label);
         btn.innerHTML = `
-            <svg class="music-service-btn__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="${svc.path}"/>
+            <svg class="music-service-btn__icon" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor"
+                 stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+                ${svc.glyph}
             </svg>
             <span class="music-service-btn__dot" aria-hidden="true"></span>
         `;

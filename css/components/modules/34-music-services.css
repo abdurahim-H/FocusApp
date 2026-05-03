@@ -75,8 +75,11 @@
 .music-service-btn__icon {
     width: 22px;
     height: 22px;
-    fill: currentColor;
     pointer-events: none;
+    /* Each glyph sets its own fill / stroke via inline SVG attributes
+       so we can mix outlined shapes (Spotify circle, Apple rounded
+       square) with filled accents (the play triangles, the music-note
+       heads) — all picking up `currentColor` from the button. */
 }
 
 /* Connected indicator — small dot at the bottom-right of each button
