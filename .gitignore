@@ -12,11 +12,14 @@ _quarantine/
 temp- photos/
 
 # Local source videos — all production video assets are hosted on the
-# R2 CDN (cdn.universefocuses.com). Anything dropped at the repo root
-# is a working copy and should not land in commits.
+# R2 CDN (cdn.universefocuses.com). The _sources/ directory is where
+# the working copies live so the repo root stays clean.
 *.mp4
+_sources/
 
-# Source-of-truth artwork (not deployed; optimized copies live in public/sound-art/)
+# Source-of-truth artwork (not deployed; optimized copies live in
+# public/sound-art/ for sound icons, or assets/images/ as size-reduced
+# JPGs for theme cards).
 pictures/
 
 # Dependencies

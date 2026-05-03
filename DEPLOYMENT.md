@@ -5,13 +5,19 @@ How Cosmic Focus is deployed, and what to do when something breaks.
 ## Stack at a glance
 
 ```
-  GitHub (abdurahim-H/FocusApp, master branch)
-          ↓ webhook on push
+  Local machine
+       ↓ npm run build  (Vite → dist/, with dist/wrangler.json from
+       ↓                 @cloudflare/vite-plugin)
+       ↓ npx wrangler deploy
   Cloudflare Workers + Static Assets (project: "focusapp")
-          ↓ serves at
+       ↓ serves at
   universefocuses.com  +  www.universefocuses.com
-          ↓ browser also fetches audio from
+       ↓ browser also fetches audio + theme videos from
   Cloudflare R2 (bucket: "focusapp-sounds") via cdn.universefocuses.com
+
+  GitHub (abdurahim-H/FocusApp, master branch) — source of truth for
+  the code, but does NOT trigger production deploys. Push to GitHub
+  for history; run `wrangler deploy` separately to ship.
 ```
 
 - **Domain registrar:** Squarespace (domain renews 2026-12-23).
@@ -21,22 +27,45 @@ How Cosmic Focus is deployed, and what to do when something breaks.
 
 ## Normal deploy flow
 
-1. Commit + push to `master` on `github.com/abdurahim-H/FocusApp`.
-2. Cloudflare receives the GitHub webhook, clones the commit.
-3. Cache-restore → `npm ci` → `npm run build` → `npx wrangler deploy`.
-4. `wrangler.toml` + `@cloudflare/vite-plugin` tell the Worker to serve `dist/` as static assets. `not_found_handling = "404-page"` routes unknown paths to `dist/404.html`.
-5. New deployment shows up in Cloudflare → Workers & Pages → focusapp → Deployments.
+Deploys are **manual**. There is no GitHub webhook, no Cloudflare Pages
+git integration, and no GitHub Actions workflow. Every production
+deploy runs from the developer's machine.
 
-Typical end-to-end time: **~90 seconds**.
+1. Commit + push to `master` on `github.com/abdurahim-H/FocusApp` (so the
+   history is captured remotely).
+2. From the repo root, run:
+   ```bash
+   npx wrangler deploy
+   ```
+   The first invocation each session may prompt for OAuth in the browser.
+3. `npm run build` runs implicitly via the `@cloudflare/vite-plugin` —
+   it transforms `index.html`, content-hashes assets into `dist/assets/*`,
+   copies `public/` verbatim, and writes `dist/wrangler.json` so the
+   Worker knows which files to upload.
+4. `wrangler.toml` + `dist/wrangler.json` tell the Worker to serve
+   `dist/` as static assets. `not_found_handling = "404-page"` routes
+   unknown paths to `dist/404.html`.
+5. New deployment shows up in Cloudflare → Workers & Pages → focusapp →
+   Deployments. The CLI prints the version ID on success.
+
+Typical end-to-end time: **~30–60 seconds** (most of it is the asset
+upload to Cloudflare).
 
 ## Required Cloudflare settings
 
 ### Workers & Pages → `focusapp`
-- Git integration: `abdurahim-H/FocusApp`, production branch `master`.
-- Build command: `npm run build`
-- Deploy command: `npx wrangler deploy`
-- Root directory: *(blank)*
-- Environment variables: *(none — the Supabase URL and anon key are checked into `js/core/auth-config.js` because they are public by design; row-level security on Supabase is what protects user data, never the anon key)*
+- **Deploy mechanism:** manual `npx wrangler deploy` from the repo root.
+  No git connection on the Cloudflare side; no GitHub Actions on our
+  side. If you want auto-deploy on push, the simplest path is to add a
+  GitHub Actions workflow at `.github/workflows/deploy.yml` that runs
+  `npm ci && npx wrangler deploy` with `CLOUDFLARE_API_TOKEN` /
+  `CLOUDFLARE_ACCOUNT_ID` as repo secrets.
+- **Build command (local):** `npm run build` (auto-runs via the
+  Cloudflare Vite plugin during `wrangler deploy`).
+- **Environment variables:** *(none — the Supabase URL and anon key are
+  checked into `js/core/auth-config.js` because they are public by
+  design; row-level security on Supabase is what protects user data,
+  never the anon key)*
 
 ### DNS records (Websites → universefocuses.com → DNS)
 | Type   | Name               | Content                              | Proxy   |
@@ -63,14 +92,14 @@ Do **not** proxy the `MX` record or the email `TXT` records — proxying breaks 
 
 ## Incident runbook
 
-### "The build is failing in CI"
+### "The local build or deploy fails"
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `npm ci` says "package.json and package-lock.json not in sync, Missing <dep>" | Lock file drifted — usually cross-platform (macOS vs Linux transitive deps) | Regenerate the lock file **inside a Linux container** matching CI (Node 22.16.0, npm 10.9.2): `rm -rf node_modules package-lock.json && docker run --rm -v "$(pwd)":/app -w /app --platform=linux/amd64 node:22.16.0 bash -c "npm install --include=optional --no-audit --no-fund"`. Commit the regenerated `package-lock.json`. |
-| `wrangler deploy` says `Asset too large — 25 MiB limit` | Cloudflare's build cache restored stale `dist/sounds/*.wav` from before the R2 migration | Clear the build cache: Cloudflare → focusapp → Settings → Build → Clear cache. Build script already does `rm -rf dist && vite build` so a clean run succeeds. |
+| `npm ci` says "package.json and package-lock.json not in sync, Missing <dep>" | Lock file drifted — usually cross-platform (macOS vs Linux transitive deps when a contributor on Linux runs `npm ci`) | Regenerate the lock file **inside a Linux container** matching the canonical env (Node 22.16.0, npm 10.9.2): `rm -rf node_modules package-lock.json && docker run --rm -v "$(pwd)":/app -w /app --platform=linux/amd64 node:22.16.0 bash -c "npm install --include=optional --no-audit --no-fund"`. Commit the regenerated `package-lock.json`. |
+| `wrangler deploy` says `Asset too large — 25 MiB limit` | Some media file slipped into `dist/` (theme video, audio, source PNG) that should live on R2 instead | Move the file to R2 via `npx wrangler r2 object put focusapp-sounds/<path> --file <local> --remote`, reference it in the code via `https://cdn.universefocuses.com/<path>`, and re-run `npm run build` to confirm `dist/` no longer contains the oversized asset. |
 | `Cannot modify Vite config: could not find a valid plugins array` | `wrangler deploy` ran its auto-configure step and couldn't find the Cloudflare plugin | Ensure `vite.config.js` has `plugins: [cloudflare()]` and `@cloudflare/vite-plugin` is in `devDependencies`. |
-| `Cannot find native binding` for Rolldown | Local `node_modules/` was installed for the wrong platform | On the local machine run `rm -rf node_modules && npm ci`. |
+| `Cannot find native binding` for Rolldown | Local `node_modules/` was installed for the wrong platform | `rm -rf node_modules && npm ci`. |
 
 ### "The site loads but audio is broken"
 

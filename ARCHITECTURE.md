@@ -127,7 +127,7 @@ The Supabase SDK is bundled (npm) and lazy-imported on first use, so the initial
 ### Production
 
 `npm run build`:
-1. `rm -rf dist` — defeats any stale file from prior builds or CI caches.
+1. `rm -rf dist` — defeats any stale file from prior builds.
 2. `vite build` — transforms `index.html`:
    - Inlines `@import` CSS into one bundle (`dist/assets/index-*.css`).
    - Code-splits JS into ~20 hashed chunks with manifest (`dist/assets/*.js`).

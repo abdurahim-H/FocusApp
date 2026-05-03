@@ -49,7 +49,7 @@ npm test               # run smoke suite headless (~4 min)
 npm run test:ui        # Playwright UI runner for debugging
 ```
 
-Prefer `npm start` when debugging things that behave differently under a bundler. Use Docker (Node 22.16.0, linux/amd64) when touching `package-lock.json` to match CI exactly — see the "Lock file drift" section below.
+Prefer `npm start` when debugging things that behave differently under a bundler. Use Docker (Node 22.16.0, linux/amd64) when touching `package-lock.json` so the lock stays portable to a Linux contributor or future CI — see the "Lock file drift" section below.
 
 ## Directory map (the parts that matter)
 
@@ -141,7 +141,7 @@ Group 0 = background (skybox, starfield, motes, petals, shooting stars, star-glo
 
 ### Lock file drift (cross-platform npm)
 
-`package-lock.json` must work on **both** macOS (local dev) and Linux x64 (Cloudflare CI). macOS npm and Linux npm resolve optional platform deps differently. If you change dependencies, regenerate the lock file inside the exact CI environment, not on your Mac:
+`package-lock.json` must work on **both** macOS (local dev) and Linux x64 (any future CI / second contributor on Linux). macOS npm and Linux npm resolve optional platform deps differently. If you change dependencies, regenerate the lock file inside a Linux container matching the canonical env (Node 22.16.0):
 
 ```bash
 rm -rf node_modules package-lock.json
@@ -151,7 +151,7 @@ docker run --rm -v "$(pwd)":/app -w /app --platform=linux/amd64 node:22.16.0 \
 rm -rf node_modules && npm ci
 ```
 
-Committing a Mac-only lock causes CI to fail with `Missing @emnapi/... from lock file`.
+A Mac-only lock will fail any Linux `npm ci` with `Missing @emnapi/... from lock file`. Today this is only a hypothetical (deploy is manual from macOS) but the rule is cheap insurance against the day a Linux contributor or GitHub Actions deploy gets wired up.
 
 ### CSP is strict — and it's in `public/_headers`
 
@@ -235,7 +235,7 @@ Anything in `public/` is copied verbatim to `dist/` root with its filename prese
 | Tasks / stats missing after reload | `localStorage` keys (`fu_*`) |
 | Timer jumps after refresh | `home-mini-timer.js → restoreTimerState()` and `timer.js` |
 | Sound plays locally but not in prod (or vice-versa) | R2 custom domain `cdn.universefocuses.com` — see `DEPLOYMENT.md` runbook |
-| CI build fails on `npm ci` with "Missing ... from lock file" | Lock file drift between macOS and Linux — regenerate in Docker per "Lock file drift" above |
+| `npm ci` fails on Linux with "Missing ... from lock file" | Lock file drift between macOS and Linux — regenerate in Docker per "Lock file drift" above |
 | Feature works in dev but fails in prod with console errors | CSP almost certainly; edit `public/_headers` and redeploy |
 | CSS change has no visual effect | Check which module file in `css/components/modules/` actually owns those rules |
 

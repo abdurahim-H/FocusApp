@@ -43,7 +43,7 @@ npm run build      # outputs to dist/
 npm run preview    # serves the built dist/ locally
 ```
 
-Production deploys automatically to Cloudflare on every push to `master` via `wrangler deploy` + the `@cloudflare/vite-plugin`. Sound files are served separately from a Cloudflare R2 bucket (`cdn.universefocuses.com`) rather than from the app bundle.
+Deploys are manual — push to `master`, then run `npx wrangler deploy` from the repo root. The `@cloudflare/vite-plugin` writes `dist/wrangler.json` during `npm run build` so the Worker knows what to ship. Sound files and theme videos are served separately from a Cloudflare R2 bucket (`cdn.universefocuses.com`) rather than from the app bundle.
 
 ## Code quality
 
