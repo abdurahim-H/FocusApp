@@ -121,24 +121,41 @@ function build() {
             </div>
             <div class="upgrade-modal__plans">
                 <button class="upgrade-modal__plan" type="button" data-plan="monthly">
-                    <span class="upgrade-modal__plan-price">$5</span>
-                    <span class="upgrade-modal__plan-cadence">per month</span>
+                    <span class="upgrade-modal__plan-price">€5</span>
+                    <span class="upgrade-modal__plan-cadence">per month, incl. VAT</span>
                     <span class="upgrade-modal__plan-fine">cancel anytime</span>
                 </button>
                 <button class="upgrade-modal__plan upgrade-modal__plan--featured"
                         type="button" data-plan="yearly">
                     <span class="upgrade-modal__plan-tag">save a month</span>
-                    <span class="upgrade-modal__plan-price">$55</span>
-                    <span class="upgrade-modal__plan-cadence">per year</span>
-                    <span class="upgrade-modal__plan-fine">~$4.58 / mo</span>
+                    <span class="upgrade-modal__plan-price">€55</span>
+                    <span class="upgrade-modal__plan-cadence">per year, incl. VAT</span>
+                    <span class="upgrade-modal__plan-fine">~€4.58 / mo</span>
                 </button>
             </div>
             <p class="upgrade-modal__trial" data-trial-line>
-                Both plans start with a 7-day free trial.
+                Both plans start with a <strong>7-day free trial</strong>. After the trial, the chosen plan renews automatically each billing cycle until cancelled.
             </p>
             <ul class="upgrade-modal__features">
                 ${FEATURE_LIST.map((f) => `<li>${escapeHtml(f.replace('✓ ', ''))}</li>`).join('')}
             </ul>
+            <div class="upgrade-modal__disclosure">
+                <p>
+                    Prices for EU consumers include applicable VAT at your country's rate. EU business customers can enter a VAT ID at checkout for reverse-charge handling where eligible. Cancel anytime in <em>Settings → Account → Manage subscription</em>; Pro features remain active until the end of the current billing period. Payment is processed by Stripe Payments Europe, Ltd.
+                </p>
+                <p>
+                    By subscribing you agree to immediate performance and acknowledge that, under §356(5) BGB, your statutory 14-day right of withdrawal expires the moment Pro features are activated. You can still cancel the subscription contractually at any time as described above.
+                </p>
+                <p class="upgrade-modal__legal-links">
+                    <a href="/terms.html" target="_blank" rel="noopener">Terms</a>
+                    ·
+                    <a href="/privacy.html" target="_blank" rel="noopener">Privacy</a>
+                    ·
+                    <a href="/widerrufsbelehrung.html" target="_blank" rel="noopener">Right of Withdrawal</a>
+                    ·
+                    <a href="/impressum.html" target="_blank" rel="noopener">Impressum</a>
+                </p>
+            </div>
             <p class="upgrade-modal__error" data-error hidden></p>
             <p class="upgrade-modal__signin" data-signin-line hidden>
                 <button type="button" class="upgrade-modal__signin-btn"

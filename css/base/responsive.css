@@ -317,9 +317,12 @@
 @media (max-width: 768px) {
     /* Auth modal and Pro upgrade modal — stop them from filling the
        viewport edge-to-edge on narrow screens; cap at 92vw and tighten
-       padding so the buttons don't overflow horizontally. */
+       padding so the buttons don't overflow horizontally. The Pro
+       modal's element is .upgrade-modal__sheet (not __card — that
+       bug was inherited from the auth-modal copy that DOES use
+       __card). */
     .auth-modal__card,
-    .upgrade-modal__card {
+    .upgrade-modal__sheet {
         max-width: 92vw;
         padding: 22px 18px;
     }

@@ -258,3 +258,40 @@
     .upgrade-modal__sheet,
     .upgrade-modal__plan { transition: opacity 0.2s ease; transform: none !important; }
 }
+
+/* ── EU/Germany consumer disclosure block (Wave 31) ────────────────
+   Required pre-contractual information for paid subscriptions —
+   VAT statement, renewal, withdrawal-right exception under §356(5)
+   BGB, links to Terms / Privacy / Widerrufsbelehrung / Impressum,
+   merchant identity (Stripe). Sits between the trial line and the
+   error / sign-in lines so the user reads it before clicking a plan
+   button. */
+.upgrade-modal__disclosure {
+    margin: 14px 0 6px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 220, 160, 0.16);
+    border-radius: 12px;
+    background: rgba(255, 220, 160, 0.04);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: rgba(232, 220, 195, 0.78);
+}
+.upgrade-modal__disclosure p {
+    margin: 0 0 8px;
+}
+.upgrade-modal__disclosure p:last-child { margin-bottom: 0; }
+.upgrade-modal__legal-links {
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(220, 205, 180, 0.7);
+}
+.upgrade-modal__legal-links a {
+    color: rgba(255, 205, 115, 0.92);
+    text-decoration: none;
+    margin: 0 4px;
+}
+.upgrade-modal__legal-links a:first-child { margin-left: 0; }
+.upgrade-modal__legal-links a:hover,
+.upgrade-modal__legal-links a:focus-visible {
+    text-decoration: underline;
+}

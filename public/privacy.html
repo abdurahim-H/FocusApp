@@ -19,7 +19,7 @@
             line-height: 1.65;
             padding: 48px 24px 96px;
         }
-        main { max-width: 720px; margin: 0 auto; }
+        main { max-width: 760px; margin: 0 auto; }
         header { margin-bottom: 40px; }
         a.back {
             color: rgba(200, 146, 42, 0.9);
@@ -46,9 +46,15 @@
             margin: 40px 0 12px;
             letter-spacing: -0.01em;
         }
-        p, li { color: rgba(232, 220, 195, 0.85); }
+        h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #F0DFC0;
+            margin: 22px 0 8px;
+        }
+        p, li, td, th { color: rgba(232, 220, 195, 0.85); }
         p { margin: 0 0 14px; }
-        ul { padding-left: 22px; margin: 0 0 14px; }
+        ul, ol { padding-left: 22px; margin: 0 0 14px; }
         li { margin-bottom: 6px; }
         strong { color: #F5E8D0; }
         a { color: rgba(200, 146, 42, 0.95); }
@@ -58,6 +64,38 @@
             background: rgba(200, 146, 42, 0.1);
             padding: 1px 6px;
             border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 0 18px;
+            font-size: 13.5px;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(200, 146, 42, 0.12);
+            vertical-align: top;
+        }
+        th {
+            color: #F5E8D0;
+            font-weight: 600;
+        }
+        .legal-footer {
+            margin-top: 56px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(200, 146, 42, 0.18);
+            font-size: 13px;
+            color: rgba(220, 205, 180, 0.62);
+        }
+        .legal-footer a { margin-right: 16px; }
+        .todo {
+            background: rgba(255, 110, 60, 0.16);
+            color: #ffd0b0;
+            padding: 0 6px;
+            border-radius: 4px;
+            font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+            font-size: 0.92em;
         }
     </style>
 </head>
@@ -69,83 +107,177 @@
             <p class="updated">Last updated: May 4, 2026</p>
         </header>
 
-        <p>This Privacy Policy explains what information Cosmic Focus (the "Service", accessible at <a href="https://universefocuses.com">universefocuses.com</a>) collects, how it is used, and the choices you have.</p>
+        <p>This Privacy Policy explains what personal data Cosmic Focus (the "Service", accessible at <a href="https://universefocuses.com">universefocuses.com</a>) processes, on what legal basis, for how long, and the rights you have under the EU General Data Protection Regulation (Regulation (EU) 2016/679, "GDPR") and German Federal Data Protection Act (BDSG).</p>
 
-        <h2>1. Data stored locally on your device</h2>
-        <p>Most of what Cosmic Focus stores is kept in your own browser, on your own device, using <code>localStorage</code> and <code>sessionStorage</code>. This includes:</p>
+        <h2>1. Data controller</h2>
+        <p>The data controller responsible for processing within the meaning of Art. 4(7) GDPR is:</p>
+        <ul>
+            <li><strong>Name:</strong> <span class="todo">{{TODO: legal name — natural person or registered company}}</span></li>
+            <li><strong>Address:</strong> <span class="todo">{{TODO: street, postal code, city, country}}</span></li>
+            <li><strong>Email:</strong> <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a></li>
+            <li><strong>Phone:</strong> <span class="todo">{{TODO: phone or "available on request via email"}}</span></li>
+        </ul>
+        <p>Full company / business identification appears in the <a href="/impressum.html">Impressum</a>. We have not appointed a Data Protection Officer because the Service does not meet the threshold under Art. 37 GDPR or §38 BDSG.</p>
+
+        <h2>2. Categories of personal data we process</h2>
+        <h3>2.1 Local-only data (your browser)</h3>
+        <p>Most of what Cosmic Focus stores never leaves your device. The following lives in your browser's <code>localStorage</code> and <code>sessionStorage</code> (these are HTML5 storage technologies, distinct from cookies):</p>
         <ul>
             <li>Your tasks, focus session history, and statistics</li>
-            <li>Your settings (timer durations, scene quality, keyboard shortcuts, sound preferences, etc.)</li>
+            <li>Your settings (timer durations, scene quality, keyboard shortcuts, sound preferences, scene theme)</li>
             <li>Saved focus presets and schedules</li>
-            <li>UI state such as the position of the mini timer</li>
+            <li>Position of the mini-timer + Spotify mini-player widgets</li>
+            <li>If you connect Spotify: an access + refresh token (key <code>fu_spotify_tokens</code>) and your Spotify profile (key <code>fu_spotify_user</code>) — see section 4</li>
         </ul>
-        <p>This data never leaves your device unless you are signed into an account (see below). Clearing your browser storage for this site removes it permanently.</p>
+        <p>This data is not transmitted to us and we have no access to it.</p>
 
-        <h2>2. Data stored in your account (optional)</h2>
-        <p>If you choose to create an account, we use <strong>Supabase</strong> to store a copy of your productivity data (tasks, stats, settings, presets) so it can follow you across devices. The account stores:</p>
+        <h3>2.2 Account data (only if you sign in)</h3>
+        <p>Sign-in is optional. Anonymous use is fully featured. If you create an account, we process:</p>
         <ul>
-            <li>Your email address (and, if you sign in with a third-party provider, the identifier they return)</li>
-            <li>The productivity data listed above, keyed to your account</li>
-            <li>Timestamps of account creation, last sign-in, and last sync</li>
+            <li>Email address</li>
+            <li>Hashed password (when using email/password) or third-party identifier (Google OAuth, magic link)</li>
+            <li>Display name and unique handle (username)</li>
+            <li>Account creation, last sign-in, and last sync timestamps</li>
+            <li>Focus-session log records (table <code>public.sessions</code>)</li>
         </ul>
-        <p>You can use Cosmic Focus anonymously without ever creating an account. You can export or delete all account data at any time from <em>Settings → Data & About</em>.</p>
+        <p>The Privacy Policy previously stated that tasks / settings / presets are mirrored to the cloud. That is the planned next phase but is <strong>not yet implemented</strong>. Today, only sessions / billing / account-identity tables exist server-side.</p>
 
-        <h2>3. Third-party services</h2>
-        <p>The Service loads resources from the following third parties when you use it:</p>
+        <h3>2.3 Subscription data (only if you upgrade to Pro)</h3>
+        <p>If you purchase a Pro subscription, we process:</p>
         <ul>
-            <li><strong>Cloudflare</strong> — hosts the site and provides security/CDN services.</li>
-            <li><strong>Google Fonts</strong> — serves the Inter font family.</li>
-            <li><strong>Babylon.js CDN</strong> — serves the 3D rendering library.</li>
-            <li><strong>Supabase</strong> — powers optional accounts and cloud sync.</li>
-            <li><strong>Stripe</strong> — processes Pro tier subscription payments. Stripe receives only what's needed to bill you (card details, billing address). We never see your card number.</li>
-            <li><strong>Spotify</strong> — only when you explicitly connect your Spotify account from the Streaming tab in the Music drawer (Pro feature). See section 4 for what we receive and store.</li>
+            <li>Your Stripe customer ID and subscription ID</li>
+            <li>Subscription status (<code>active</code>, <code>trialing</code>, <code>past_due</code>, <code>canceled</code>) and the period-end timestamp</li>
+            <li>Pro tier flag (<code>'pro'</code> / <code>'free'</code>) in the <code>public.billing</code> table</li>
         </ul>
-        <p>These providers may receive your IP address and basic request metadata as part of delivering their service. We do not share additional information with them beyond what each integration requires.</p>
+        <p>Payment card data is processed entirely by Stripe and never reaches us.</p>
 
-        <h2>4. Music-service integrations (optional)</h2>
-        <p>If you choose to connect a music streaming service from <em>Music → Streaming</em>, we use the standard OAuth handshake provided by that service. Today this covers <strong>Spotify</strong>; YouTube Music, Apple Music, YouTube, and SoundCloud are scaffolded but not yet wired.</p>
-        <p>For Spotify specifically, when you click <em>Connect</em> we request the following scopes and use them as follows:</p>
+        <h2>3. Purposes and legal bases (Art. 6(1) GDPR)</h2>
+        <table>
+            <thead>
+                <tr><th>Purpose</th><th>Legal basis</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Operating the Service in your browser</td><td>Art. 6(1)(b) — performance of contract / pre-contractual measures</td></tr>
+                <tr><td>Providing optional accounts (sign-in, sync, identity)</td><td>Art. 6(1)(b) — performance of contract</td></tr>
+                <tr><td>Billing the Pro subscription</td><td>Art. 6(1)(b) — performance of contract</td></tr>
+                <tr><td>Tax + accounting record retention</td><td>Art. 6(1)(c) — legal obligation (§147 AO, §257 HGB)</td></tr>
+                <tr><td>Spotify / future music-service integrations (only when you click Connect)</td><td>Art. 6(1)(a) — consent</td></tr>
+                <tr><td>Cookieless aggregate analytics via Cloudflare</td><td>Art. 6(1)(f) — legitimate interest in understanding traffic levels and uptime</td></tr>
+                <tr><td>Responding to support requests</td><td>Art. 6(1)(f) / Art. 6(1)(a)</td></tr>
+                <tr><td>HIBP password breach check at sign-up</td><td>Art. 6(1)(f) — legitimate interest in account security</td></tr>
+            </tbody>
+        </table>
+
+        <h2>4. Music-service integrations (optional, consent-based)</h2>
+        <p>If you click <em>Connect</em> on a service in <em>Music → Streaming</em>, you authorize us to call that service's API on your behalf. This is processed under your consent (Art. 6(1)(a) GDPR), which you can withdraw at any time without affecting the lawfulness of past processing.</p>
+        <p>Today this is wired only for <strong>Spotify</strong>. The scopes we request are:</p>
         <ul>
-            <li><code>user-read-email</code> + <code>user-read-private</code> — to display your Spotify name + Premium status in the connected-account chip and tooltip.</li>
-            <li><code>streaming</code> + <code>user-modify-playback-state</code> + <code>user-read-playback-state</code> + <code>user-read-currently-playing</code> — to render the "Now playing" mini-player and let the play / pause / next / previous buttons control your active Spotify device.</li>
+            <li><code>user-read-email</code> + <code>user-read-private</code> — to display your Spotify name and detect Premium status</li>
+            <li><code>streaming</code> + <code>user-modify-playback-state</code> + <code>user-read-playback-state</code> + <code>user-read-currently-playing</code> — to render the "Now playing" widget and let the play / pause / next / previous buttons control your active Spotify device</li>
         </ul>
-        <p>What we receive from Spotify and where it lives:</p>
+        <p>We receive your Spotify display name, email, and product tier (free / premium / open). Tokens and profile live in your browser's <code>localStorage</code> only — they are <strong>never sent to our servers</strong>. To revoke:</p>
         <ul>
-            <li><strong>Display name + email + Premium status</strong> — stored in your browser's <code>localStorage</code> under the key <code>fu_spotify_user</code>. Used only for the UI label and to gate the Premium-only playback controls. Never sent to our servers.</li>
-            <li><strong>Access token + refresh token</strong> — stored in your browser's <code>localStorage</code> under the key <code>fu_spotify_tokens</code>. Used to call Spotify's API on your behalf when you interact with the mini-player or search panel. Never sent to our servers.</li>
-            <li><strong>Currently-playing track metadata</strong> — fetched live from Spotify when the mini-player is on screen. Not stored.</li>
+            <li><strong>From Cosmic Focus</strong> — right-click the Spotify chip in <em>Music → Streaming</em> and confirm Disconnect.</li>
+            <li><strong>From Spotify</strong> — open <a href="https://www.spotify.com/account/apps/" target="_blank" rel="noopener">spotify.com/account/apps</a> and remove access for "Cosmic Focus".</li>
         </ul>
-        <p>We don't have a server-side database of your music data. Everything related to the Spotify integration lives only in your own browser. To revoke at any time:</p>
+
+        <h2>5. Recipients and processors</h2>
+        <p>We use the following processors under Art. 28 GDPR:</p>
+        <table>
+            <thead>
+                <tr><th>Processor</th><th>Purpose</th><th>Country / region</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Cloudflare, Inc.</td><td>Hosting, CDN, edge security, cookieless analytics</td><td>USA + global edge</td></tr>
+                <tr><td>Supabase, Inc.</td><td>Authentication, database, edge functions for billing</td><td>EU region (Frankfurt) + USA</td></tr>
+                <tr><td>Stripe Payments Europe, Ltd.</td><td>Payment processing for Pro subscriptions</td><td>Ireland (EU) with USA infrastructure</td></tr>
+                <tr><td>Spotify AB (only if you connect)</td><td>OAuth + music API</td><td>Sweden (EU)</td></tr>
+                <tr><td>Have I Been Pwned (cloudflare-fronted)</td><td>HIBP password-breach check at sign-up — only the first 5 hex chars of SHA-1 leave the browser</td><td>Australia / Cloudflare edge</td></tr>
+                <tr><td>Google LLC (Fonts)</td><td>Inter font delivery</td><td>USA</td></tr>
+                <tr><td>BabylonJS CDN (Microsoft Azure-fronted)</td><td>3D rendering library delivery</td><td>USA + global edge</td></tr>
+            </tbody>
+        </table>
+
+        <h2>6. International transfers</h2>
+        <p>Some processors are based in or transfer data to the United States. These transfers occur on the basis of:</p>
         <ul>
-            <li><strong>From Cosmic Focus</strong> — right-click the Spotify chip in <em>Music → Streaming</em> and confirm Disconnect. This clears the tokens and profile from your local storage.</li>
-            <li><strong>From Spotify</strong> — visit your Spotify <a href="https://www.spotify.com/account/apps/" target="_blank" rel="noopener">Apps page</a>, find "Cosmic Focus", and click Remove Access. This invalidates the tokens server-side.</li>
+            <li>The EU-US Data Privacy Framework (where the recipient is certified)</li>
+            <li>The European Commission's Standard Contractual Clauses (Art. 46 GDPR), where the recipient is not DPF-certified</li>
         </ul>
-        <p>Cosmic Focus is not affiliated with Spotify AB. Any audio content you listen to is delivered by Spotify under their own terms and licences.</p>
+        <p>We do not engage in any onward transfers beyond what each processor needs for service delivery.</p>
 
-        <h2>5. Analytics</h2>
-        <p>We use <strong>Cloudflare Web Analytics</strong>, which is cookieless and does not track individual users across sites. It provides aggregate information about page views and performance. We do not use Google Analytics, Facebook Pixel, or any advertising trackers.</p>
+        <h2>7. Retention periods</h2>
+        <table>
+            <thead><tr><th>Data category</th><th>Retention</th></tr></thead>
+            <tbody>
+                <tr><td>Local browser data (tasks / settings / stats)</td><td>Until you clear it; we have no copy</td></tr>
+                <tr><td>Account email + identity</td><td>Until you delete the account</td></tr>
+                <tr><td>Session log records</td><td>Until account deletion</td></tr>
+                <tr><td>Billing records (Stripe + <code>public.billing</code>)</td><td>10 years (§147 AO + §257 HGB tax/accounting retention)</td></tr>
+                <tr><td>Stripe webhook event log</td><td>2 years for fraud and dispute analysis</td></tr>
+                <tr><td>Support emails</td><td>3 years from last contact</td></tr>
+                <tr><td>Cloudflare aggregate analytics</td><td>Up to 6 months, no per-user records</td></tr>
+                <tr><td>Spotify tokens + profile</td><td>In your browser only; cleared on disconnect</td></tr>
+            </tbody>
+        </table>
 
-        <h2>6. Cookies</h2>
-        <p>Cosmic Focus does not set tracking cookies. Supabase may set a session cookie to keep you signed in if you have an account. That cookie is used only for authentication.</p>
-
-        <h2>7. Your rights</h2>
-        <p>You can at any time:</p>
+        <h2>8. Your rights under GDPR</h2>
+        <p>You have the following rights regarding your personal data:</p>
         <ul>
-            <li>Export your data as JSON or CSV from <em>Settings → Data & About</em>.</li>
-            <li>Delete everything stored locally via <em>Settings → Data & About → Clear all data</em>.</li>
+            <li><strong>Access</strong> (Art. 15) — request a copy of your data</li>
+            <li><strong>Rectification</strong> (Art. 16) — correct inaccurate data</li>
+            <li><strong>Erasure</strong> (Art. 17) — request deletion ("right to be forgotten")</li>
+            <li><strong>Restriction</strong> (Art. 18) — limit processing</li>
+            <li><strong>Portability</strong> (Art. 20) — receive your data in a structured, machine-readable format</li>
+            <li><strong>Objection</strong> (Art. 21) — object to processing based on legitimate interests</li>
+            <li><strong>Withdrawal of consent</strong> (Art. 7(3)) — revoke consent at any time, without affecting the lawfulness of prior processing</li>
+            <li><strong>Lodge a complaint</strong> (Art. 77) with a supervisory authority — for users in Germany the competent authority is <span class="todo">{{TODO: your responsible Datenschutzbehörde based on residence — e.g. Berliner Beauftragte für Datenschutz und Informationsfreiheit, Hamburgischer Beauftragter für Datenschutz, Bayerisches Landesamt für Datenschutzaufsicht, …}}</span>. Other EU residents may complain to their national supervisory authority.</li>
+        </ul>
+        <p>You can also at any time:</p>
+        <ul>
+            <li>Export your data as JSON or CSV from <em>Settings → Data &amp; About</em>.</li>
+            <li>Delete everything stored locally via <em>Settings → Data &amp; About → Clear all data</em>.</li>
             <li>Delete your account and all associated cloud data from <em>Settings → Account</em>.</li>
             <li>Disconnect any music streaming service from <em>Music → Streaming</em> by right-clicking its chip.</li>
+            <li>Cancel a Pro subscription from the Stripe Customer Portal at any time, accessible via <em>Settings → Account → Manage subscription</em>.</li>
         </ul>
-        <p>Under the GDPR and CCPA you also have the right to request access to, correction of, or deletion of your personal data. Contact us as described below.</p>
+        <p>To exercise any right, email <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>. We respond within one month per Art. 12(3) GDPR.</p>
 
-        <h2>8. Children</h2>
-        <p>Cosmic Focus is not directed at children under 13 and we do not knowingly collect personal information from children.</p>
+        <h2>9. Security</h2>
+        <p>We implement appropriate technical and organizational measures (Art. 32 GDPR), including:</p>
+        <ul>
+            <li>HTTPS / TLS for all traffic, with HSTS</li>
+            <li>Strict Content-Security-Policy without <code>'unsafe-inline'</code></li>
+            <li>Hashed + salted passwords (bcrypt, managed by Supabase Auth)</li>
+            <li>Have-I-Been-Pwned breach screening at sign-up (k-anonymity — only the first 5 SHA-1 chars leave your browser)</li>
+            <li>Postgres Row-Level Security restricting per-user data access</li>
+            <li>PKCE for all OAuth flows</li>
+            <li>Stripe webhook signatures verified before persisting billing state</li>
+        </ul>
 
-        <h2>9. Changes to this policy</h2>
-        <p>We may update this Privacy Policy from time to time. The "Last updated" date at the top of this page reflects the most recent version.</p>
+        <h2>10. Cookies and similar storage technologies</h2>
+        <p>Cosmic Focus does <strong>not</strong> set tracking cookies. Cloudflare Web Analytics is cookieless and does not track individual users across sites.</p>
+        <p>Supabase Auth, when you sign in, stores your session token using <code>localStorage</code> (browser storage, not a cookie). For implementation simplicity, this is the standard Supabase JS SDK behavior.</p>
+        <p>Stripe sets a small number of strictly-necessary cookies on its own checkout / portal pages (which run on stripe.com, not on universefocuses.com) for fraud detection and session management. Those cookies are subject to Stripe's own privacy policy.</p>
 
-        <h2>10. Contact</h2>
-        <p>Questions about this policy? Email <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>.</p>
+        <h2>11. Children</h2>
+        <p>The Service is not directed at children under 16 and we do not knowingly process personal data of children. If you are under 16 and reside in the EU, please do not create an account or click <em>Connect</em> on any music service. If we become aware that we hold data of a child under 16, we will delete it.</p>
+
+        <h2>12. Microphone access</h2>
+        <p>The Pro Notes feature includes optional voice dictation, which uses your browser's built-in <code>SpeechRecognition</code> API. The Permissions Policy declares <code>microphone=(self)</code> so the browser may prompt for access when you click the dictation button. Audio is processed by your browser / OS speech-recognition service and not stored or transmitted by Cosmic Focus.</p>
+
+        <h2>13. Changes to this policy</h2>
+        <p>We may update this Privacy Policy. The "Last updated" date at the top reflects the most recent version. Substantive changes will be communicated via in-app notice and / or email to signed-in users.</p>
+
+        <h2>14. Contact</h2>
+        <p>Questions about this policy: <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>.</p>
+
+        <nav class="legal-footer" aria-label="Legal documents">
+            <a href="/impressum.html">Impressum</a>
+            <a href="/terms.html">Terms of Service</a>
+            <a href="/widerrufsbelehrung.html">Right of Withdrawal</a>
+            <a href="/privacy.html">Privacy Policy</a>
+        </nav>
     </main>
 </body>
 </html>

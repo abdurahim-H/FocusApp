@@ -83,7 +83,7 @@ css/
     apple-liquid-glass.css        — liquid-glass button system
     modules/                      — 32 focused CSS modules (home, mini-timer, settings panel, stats, tasks, tour, help, ambient deck, account, profile, period tiles, task detail, notepad, stream themes, celebrate toast, date picker, task dock, sakura/aurora/celestial-garden/silent-autumn/ocean theme overrides, upgrade modal, music services dock, Spotify mini-player). Numbering has gaps (17, 18, 20) where past modules were folded back in — preserved so existing import order isn't churned.
 
-public/           verbatim-copied to dist/: index assets (icon.svg, site.webmanifest), legal (privacy.html, terms.html), 404.html, robots.txt, sitemap.xml, _headers, theme-init.js (FOUC bootstrap), auth/callback.html + callback.js (OAuth/magic-link landing)
+public/           verbatim-copied to dist/: index assets (icon.svg, site.webmanifest), legal (privacy.html, terms.html, impressum.html, widerrufsbelehrung.html), 404.html, robots.txt, sitemap.xml, _headers, theme-init.js (FOUC bootstrap), auth/callback.html + callback.js (OAuth/magic-link landing). The four legal pages cross-link via a `.legal-footer` block. impressum.html + privacy.html + widerrufsbelehrung.html still contain `{{TODO: …}}` placeholders for the operator's name / address / phone / VAT-status / supervisory authority — these must be filled in before public paid launch in Germany / EU.
 db/migrations/    SQL applied manually in Supabase dashboard (idempotent)
 supabase/functions/  Deno Edge Functions: create-checkout-session, create-portal-session, stripe-webhook (deployed via `supabase functions deploy`)
 tests/            Playwright smoke suite (smoke.spec.js)

@@ -19,7 +19,7 @@
             line-height: 1.65;
             padding: 48px 24px 96px;
         }
-        main { max-width: 720px; margin: 0 auto; }
+        main { max-width: 760px; margin: 0 auto; }
         header { margin-bottom: 40px; }
         a.back {
             color: rgba(200, 146, 42, 0.9);
@@ -46,12 +46,41 @@
             margin: 40px 0 12px;
             letter-spacing: -0.01em;
         }
+        h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #F0DFC0;
+            margin: 22px 0 8px;
+        }
         p, li { color: rgba(232, 220, 195, 0.85); }
         p { margin: 0 0 14px; }
-        ul { padding-left: 22px; margin: 0 0 14px; }
+        ul, ol { padding-left: 22px; margin: 0 0 14px; }
         li { margin-bottom: 6px; }
         strong { color: #F5E8D0; }
         a { color: rgba(200, 146, 42, 0.95); }
+        .legal-footer {
+            margin-top: 56px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(200, 146, 42, 0.18);
+            font-size: 13px;
+            color: rgba(220, 205, 180, 0.62);
+        }
+        .legal-footer a { margin-right: 16px; }
+        .todo {
+            background: rgba(255, 110, 60, 0.16);
+            color: #ffd0b0;
+            padding: 0 6px;
+            border-radius: 4px;
+            font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+            font-size: 0.92em;
+        }
+        .callout {
+            border-left: 3px solid rgba(200, 146, 42, 0.55);
+            background: rgba(200, 146, 42, 0.05);
+            padding: 12px 16px;
+            margin: 16px 0;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -62,13 +91,21 @@
             <p class="updated">Last updated: May 4, 2026</p>
         </header>
 
-        <p>These terms govern your use of Cosmic Focus (the "Service"), accessible at <a href="https://universefocuses.com">universefocuses.com</a>. By using the Service you agree to these terms.</p>
+        <p>These Terms of Service ("Terms") govern your use of Cosmic Focus (the "Service"), accessible at <a href="https://universefocuses.com">universefocuses.com</a>. The Service is provided by <span class="todo">{{TODO: legal name}}</span>, address per <a href="/impressum.html">Impressum</a> ("we", "us"). By using the Service you agree to these Terms.</p>
+
+        <p>If you are a consumer in the EU and purchase a Pro subscription, you have a statutory right of withdrawal — see <a href="/widerrufsbelehrung.html">Right of Withdrawal</a> and section 7 below.</p>
 
         <h2>1. The Service</h2>
-        <p>Cosmic Focus is a Pomodoro timer and productivity tool that runs in your browser. It is free to use. You may use it with or without an account.</p>
+        <p>Cosmic Focus is a browser-based productivity application offering Pomodoro / focus-session timing, task management, ambient soundscapes, and an optional 3D scene. The Service operates as a single-page web app rendered in your browser.</p>
+        <p>The Service is offered in two tiers:</p>
+        <ul>
+            <li><strong>Free</strong> — covers the core productivity surface (timer, tasks, ambient sounds, all themes, basic statistics, optional account).</li>
+            <li><strong>Pro</strong> — adds the Notes app, four sections of the Profile drawer (Overview / Tasks / Sounds / Insights), and music-service integrations (currently Spotify; others in development).</li>
+        </ul>
 
         <h2>2. Accounts</h2>
-        <p>If you create an account, you are responsible for safeguarding your credentials and for any activity that occurs under your account. Notify us at <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a> if you suspect unauthorized use. You may delete your account at any time from <em>Settings → Account</em>.</p>
+        <p>Anonymous use is fully featured. If you create an account, you are responsible for safeguarding your credentials and for activity that occurs under your account. Notify us at <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a> if you suspect unauthorized use. You may delete your account at any time from <em>Settings → Account</em>.</p>
+        <p>You must be at least <strong>16 years old</strong> to create an account or purchase a Pro subscription. If you are under 16 and reside in the EU, you may not use account features without verifiable consent of your parent or legal guardian.</p>
 
         <h2>3. Acceptable use</h2>
         <p>You agree not to:</p>
@@ -77,40 +114,102 @@
             <li>Attempt to disrupt, overload, reverse-engineer, or gain unauthorized access to the Service or its underlying infrastructure.</li>
             <li>Use automated systems to scrape or abuse the Service in a way that degrades it for other users.</li>
             <li>Upload or transmit malicious code, or use the Service to harass others.</li>
+            <li>Bypass the Pro paywall or share Pro account credentials with anyone outside your household.</li>
         </ul>
 
         <h2>4. Content you create</h2>
-        <p>You retain ownership of the tasks, notes, and other content you create in Cosmic Focus. We only store it to provide the Service (see <a href="/privacy.html">Privacy Policy</a>).</p>
+        <p>You retain ownership of the tasks, notes, and other content you create in Cosmic Focus. We process such content only as needed to provide the Service (see <a href="/privacy.html">Privacy Policy</a>).</p>
 
-        <h2>5. Third-party music services</h2>
+        <h2>5. Pro subscriptions</h2>
+
+        <h3>5.1 Pricing and plans</h3>
+        <p>Pro is offered in two billing cadences:</p>
+        <ul>
+            <li><strong>Pro Monthly</strong> — €5.00 per month (or local equivalent), recurring monthly</li>
+            <li><strong>Pro Yearly</strong> — €55.00 per year (or local equivalent), recurring yearly</li>
+        </ul>
+        <p><strong>VAT.</strong> All prices shown to consumers in the EU include applicable Value Added Tax (VAT) at the rate of your country of residence. The exact VAT amount is itemised on your Stripe invoice and at checkout. For business customers (B2B) within the EU who provide a valid VAT identification number at checkout, the reverse-charge mechanism may apply where eligible.</p>
+
+        <h3>5.2 Trial period</h3>
+        <p>Pro offers a 7-day free trial when you start a new subscription. You enter a payment method at checkout but are <strong>not charged during the trial</strong>. If you cancel <strong>before the trial ends</strong>, you owe nothing. If you do not cancel, your card is charged on the day the trial ends and the subscription begins.</p>
+
+        <h3>5.3 Automatic renewal</h3>
+        <p>Pro subscriptions renew automatically at the end of each billing cycle (monthly or yearly) until you cancel. The renewal price is the same as the original purchase price unless we have given you written notice of a price change at least 30 days in advance, in which case you may cancel before the change takes effect.</p>
+
+        <h3>5.4 Cancellation</h3>
+        <p>You can cancel a Pro subscription at any time, with no fees or penalties:</p>
+        <ul>
+            <li><strong>From inside Cosmic Focus</strong> — <em>Settings → Account → Manage subscription</em>. This opens the Stripe Customer Portal where you can cancel.</li>
+            <li><strong>By email</strong> — <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a> with the email tied to your account.</li>
+        </ul>
+        <p>Your Pro features remain active until the end of the current billing period. We do not pro-rate refunds for the unused remainder of a billing period unless statutorily required.</p>
+
+        <h3>5.5 Failed payments</h3>
+        <p>If a renewal payment fails (expired card, insufficient funds, etc.), your subscription enters a grace period of up to 7 days during which Pro features remain available. If payment is still not received after the grace period, the subscription transitions to <em>past_due</em> and your account reverts to Free until you update your payment method.</p>
+
+        <h3>5.6 Refunds</h3>
+        <p>Refund eligibility:</p>
+        <ul>
+            <li><strong>Right of withdrawal (EU consumers)</strong>: a 14-day right of withdrawal applies — see <a href="/widerrufsbelehrung.html">Right of Withdrawal</a> and section 7 below. To exercise it for a digital service, you can use the contact details there.</li>
+            <li><strong>Service downtime</strong>: if the Service has been unavailable for more than 72 consecutive hours within a paid month due to our fault, you may request a pro-rated refund.</li>
+            <li><strong>Discretionary refunds</strong>: outside the cases above we may grant a refund as a goodwill gesture; this is at our discretion and does not constitute a binding policy.</li>
+        </ul>
+
+        <h2>6. Payment processor</h2>
+        <p>All payments are processed by <strong>Stripe Payments Europe, Ltd.</strong>, registered in Ireland. Cosmic Focus never sees your full payment-card number. Stripe is a payment service provider regulated by the Central Bank of Ireland and applies its own <a href="https://stripe.com/legal/consumer" target="_blank" rel="noopener">terms</a> and <a href="https://stripe.com/privacy" target="_blank" rel="noopener">privacy policy</a> to the payment.</p>
+
+        <h2>7. Right of withdrawal (EU consumers)</h2>
+        <p>You have the right to withdraw from your subscription contract within 14 days without giving any reason, in accordance with §312g + §355 BGB.</p>
+
+        <div class="callout">
+            <p><strong>Digital-content exception (§356(5) BGB).</strong> When you start a Pro subscription, Stripe Checkout asks you to expressly consent to immediate performance and to acknowledge that you lose your right of withdrawal once we begin providing the service before the end of the 14-day period. Cosmic Focus delivers Pro features the moment your subscription becomes active, so this consent is required to start. If you do not give this consent, you cannot subscribe.</p>
+        </div>
+
+        <p>Detailed instructions and the model withdrawal form (Anlage 2 BGB) are in <a href="/widerrufsbelehrung.html">Right of Withdrawal</a>.</p>
+
+        <h2>8. Third-party music services</h2>
         <p>Cosmic Focus offers optional integrations with third-party music streaming services (currently <strong>Spotify</strong>, with YouTube Music, Apple Music, YouTube, and SoundCloud planned). These integrations are off by default; you opt in by clicking <em>Connect</em> on the relevant service in <em>Music → Streaming</em>.</p>
         <p>When you connect a service:</p>
         <ul>
-            <li>You are subject to that service's own Terms of Service in addition to these terms. For Spotify, that means the <a href="https://www.spotify.com/legal/end-user-agreement/" target="_blank" rel="noopener">Spotify Terms and Conditions of Use</a>.</li>
+            <li>You are subject to that service's own Terms of Service in addition to these Terms. For Spotify, that is the <a href="https://www.spotify.com/legal/end-user-agreement/" target="_blank" rel="noopener">Spotify Terms and Conditions of Use</a>.</li>
             <li>Cosmic Focus is not affiliated with, endorsed by, or sponsored by any of these services. We are an independent third-party client of their public APIs.</li>
             <li>All audio content you listen to is delivered by the streaming service under their own licences. Cosmic Focus does not store, copy, redistribute, or modify any music content. We act only as a remote-control surface for playback you initiate.</li>
-            <li>Some features (in-browser playback for Spotify, for example) may require a paid subscription with the streaming service. We surface that requirement at the point of failure but do not guarantee it.</li>
+            <li>Some features (in-browser playback for Spotify, for example) may require a paid subscription with the streaming service.</li>
             <li>The streaming services may change, restrict, or remove their APIs at any time. If they do, the relevant integration in Cosmic Focus may stop working without notice.</li>
             <li>You can disconnect any service at any time from inside Cosmic Focus (right-click the service chip in <em>Music → Streaming</em>) and from the streaming service's own account-management page.</li>
         </ul>
 
-        <h2>6. Changes to the Service</h2>
-        <p>We may add, change, or remove features at any time. We try to announce significant changes in advance but are not required to. The Service is provided "as is" and we may discontinue it at any time.</p>
+        <h2>9. Changes to the Service</h2>
+        <p>We may add, change, or remove features at any time. We try to announce significant changes in advance but are not required to. If a change materially reduces the value of a paid Pro subscription, we will notify subscribers and offer a pro-rated refund or downgrade. The Service is otherwise provided "as is".</p>
 
-        <h2>7. No warranty</h2>
-        <p>The Service is provided on an "as is" and "as available" basis without warranties of any kind, whether express or implied, including merchantability, fitness for a particular purpose, and non-infringement. We do not warrant that the Service will be uninterrupted, error-free, or that it will meet your requirements.</p>
+        <h2>10. No warranty</h2>
+        <p>The Service is provided "as is" and "as available" without warranties of any kind, whether express or implied, including merchantability, fitness for a particular purpose, and non-infringement. We do not warrant that the Service will be uninterrupted, error-free, or that it will meet your requirements. This limitation does not affect any statutory consumer warranty rights you may have under applicable law.</p>
 
-        <h2>8. Limitation of liability</h2>
-        <p>To the maximum extent permitted by law, we are not liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of data, productivity, or profits arising from your use of the Service.</p>
+        <h2>11. Limitation of liability</h2>
+        <p>To the maximum extent permitted by law, we are not liable for indirect, incidental, special, consequential, or punitive damages, or any loss of data, productivity, or profits arising from your use of the Service. For consumers in the EU, statutory liability for intent, gross negligence, or harm to life / body / health is unaffected. Our aggregate liability for direct damages, where not excluded above, is limited to the amount you have paid to us during the 12 months preceding the event.</p>
 
-        <h2>9. Termination</h2>
-        <p>You can stop using the Service at any time. We may suspend or terminate your access if we reasonably believe you have violated these terms.</p>
+        <h2>12. Termination</h2>
+        <p>You can stop using the Service at any time. We may suspend or terminate your access if we reasonably believe you have violated these Terms (in which case we will give you advance notice and an opportunity to cure where reasonable). On termination, you may export your data per the <a href="/privacy.html">Privacy Policy</a>.</p>
 
-        <h2>10. Changes to these terms</h2>
-        <p>We may update these terms from time to time. Continued use of the Service after changes are posted constitutes acceptance of the new terms.</p>
+        <h2>13. Changes to these Terms</h2>
+        <p>We may update these Terms. Substantive changes affecting your rights will be communicated via in-app notice and / or email at least 30 days in advance. Continued use of the Service after changes take effect constitutes acceptance.</p>
 
-        <h2>11. Contact</h2>
-        <p>Questions about these terms? Email <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>.</p>
+        <h2>14. Governing law and jurisdiction</h2>
+        <p>These Terms are governed by the laws of the Federal Republic of Germany, excluding the UN Convention on Contracts for the International Sale of Goods. For consumers within the EU, this choice of law does not deprive you of the protection of mandatory provisions under the law of your country of habitual residence (Art. 6(2) Rome I).</p>
+        <p>If you are a consumer, suit may be brought either in your country of residence or in the courts having jurisdiction over the seat of the controller. The European Commission also provides an Online Dispute Resolution platform at <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">ec.europa.eu/consumers/odr</a>. We are not obliged and not willing to participate in dispute-resolution proceedings before a consumer arbitration board.</p>
+
+        <h2>15. Severability</h2>
+        <p>If any provision of these Terms is held invalid or unenforceable, the remaining provisions remain in full effect. The invalid provision will be replaced by a valid one that comes closest to the economic intent of the original.</p>
+
+        <h2>16. Contact</h2>
+        <p>Questions about these Terms: <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>. Postal address per <a href="/impressum.html">Impressum</a>.</p>
+
+        <nav class="legal-footer" aria-label="Legal documents">
+            <a href="/impressum.html">Impressum</a>
+            <a href="/terms.html">Terms of Service</a>
+            <a href="/widerrufsbelehrung.html">Right of Withdrawal</a>
+            <a href="/privacy.html">Privacy Policy</a>
+        </nav>
     </main>
 </body>
 </html>
