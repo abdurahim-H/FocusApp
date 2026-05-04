@@ -426,6 +426,14 @@ function setupTaskControls(loadedModules) {
         loadedModules.musicServices.mountMusicServices();
     }
 
+    // Spotify mini-player — bottom-right "Now playing" card. Mounts
+    // itself only when Spotify is connected; subscribes to
+    // onConnectionChange so connect/disconnect bring it up / tear it
+    // down without a page reload.
+    import('../ui/spotify-mini-player.js').then(({ mountSpotifyMiniPlayer }) => {
+        mountSpotifyMiniPlayer();
+    });
+
     // Spotify OAuth callback — if the user just bounced back from the
     // Spotify auth page, the URL has ?code=...&state=... Process it
     // before anything else can read those params, then clean the URL.

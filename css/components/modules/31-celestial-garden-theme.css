@@ -1805,3 +1805,25 @@
     border-color: rgba(var(--cg-mint-rgb), 0.18);
     background: rgba(var(--cg-sky-soft-rgb), 0.18);
 }
+
+/* ────────────────────────────────────────────────────────────────────
+   28. SPOTIFY MINI PLAYER — celestial-garden chrome
+   ──────────────────────────────────────────────────────────────────── */
+[data-scene-theme="celestial-garden"] .spotify-mini-player {
+    background: rgba(var(--cg-sky-rgb), 0.62);
+    border-color: rgba(var(--cg-mint-rgb), 0.22);
+    box-shadow:
+        0 18px 40px rgba(var(--cg-sky-rgb), 0.55),
+        inset 0 1px 0 rgba(var(--cg-cream-rgb), 0.10);
+    color: rgba(var(--cg-cream-rgb), 0.92);
+}
+[data-scene-theme="celestial-garden"] .spotify-mini-player__title { color: rgba(var(--cg-cream-rgb), 0.96); }
+[data-scene-theme="celestial-garden"] .spotify-mini-player__artist { color: rgba(var(--cg-cream-rgb), 0.62); }
+[data-scene-theme="celestial-garden"] .spotify-mini-player__btn { color: rgba(var(--cg-cream-rgb), 0.82); }
+[data-scene-theme="celestial-garden"] .spotify-mini-player__btn:hover:not(:disabled) {
+    background: rgba(var(--cg-mint-rgb), 0.16);
+    color: var(--cg-cream);
+}
+[data-scene-theme="celestial-garden"] .spotify-mini-player__btn--primary {
+    background: rgba(var(--cg-mint-rgb), 0.16);
+}

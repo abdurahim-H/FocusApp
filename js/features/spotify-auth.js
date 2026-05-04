@@ -31,8 +31,32 @@
 // XSS contract: every value coming back from Spotify (display_name,
 // id, email) is read-only and pushed only into textContent / as a
 // string `title` attribute downstream — never innerHTML.
+//
+//   onConnectionChange(cb)   → subscribe to connect/disconnect events
+//                              (used by the mini-player widget so it
+//                              can mount/unmount itself reactively).
 
 import { SPOTIFY_CLIENT_ID } from '../core/auth-config.js';
+
+// ────────────────────────────────────────────────────────────────────────────
+// Connection-change pub/sub
+// ────────────────────────────────────────────────────────────────────────────
+
+const connectionSubscribers = new Set();
+
+export function onConnectionChange(cb) {
+    connectionSubscribers.add(cb);
+    return () => connectionSubscribers.delete(cb);
+}
+
+function notifyConnectionChange() {
+    const connected = isSpotifyConnected();
+    for (const cb of connectionSubscribers) {
+        try { cb(connected); } catch (e) {
+            console.warn('[spotify-auth] subscriber threw:', e);
+        }
+    }
+}
 
 // Scopes — request the union of A (identity) + B (playback) up front
 // so a future mini-player widget doesn't need a re-auth dance.
@@ -232,6 +256,7 @@ export async function processCallbackIfPresent() {
         // import avoids a circular dependency at module load time.
         const { setConnected } = await import('../ui/music-services.js');
         setConnected('spotify', true);
+        notifyConnectionChange();
 
         // Cleanup the URL so a refresh doesn't re-process the (now
         // expired) code.
@@ -289,4 +314,5 @@ export async function disconnectSpotify() {
         const { setConnected } = await import('../ui/music-services.js');
         setConnected('spotify', false);
     } catch (_) { /* tolerate — dock not mounted */ }
+    notifyConnectionChange();
 }

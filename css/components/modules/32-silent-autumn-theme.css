@@ -1819,3 +1819,28 @@
     border-color: rgba(var(--sa-crimson-rgb), 0.20);
     background: rgba(var(--sa-paper-rgb), 0.04);
 }
+
+/* ────────────────────────────────────────────────────────────────────
+   28. SPOTIFY MINI PLAYER — silent-autumn chrome
+   The autumn video is parchment-bright, so the mini-player needs a
+   genuinely dark glass card (same trick as the music-services dock
+   on this theme) to read against the brightest patches of the video.
+   ──────────────────────────────────────────────────────────────────── */
+[data-scene-theme="silent-autumn"] .spotify-mini-player {
+    background: rgba(var(--sa-ink-rgb), 0.78);
+    border-color: rgba(var(--sa-crimson-rgb), 0.32);
+    box-shadow:
+        0 18px 40px rgba(var(--sa-ink-rgb), 0.55),
+        inset 0 1px 0 rgba(var(--sa-paper-rgb), 0.10);
+    color: rgba(var(--sa-paper-rgb), 0.94);
+}
+[data-scene-theme="silent-autumn"] .spotify-mini-player__title { color: rgba(var(--sa-paper-rgb), 0.98); }
+[data-scene-theme="silent-autumn"] .spotify-mini-player__artist { color: rgba(var(--sa-paper-rgb), 0.66); }
+[data-scene-theme="silent-autumn"] .spotify-mini-player__btn { color: rgba(var(--sa-paper-rgb), 0.85); }
+[data-scene-theme="silent-autumn"] .spotify-mini-player__btn:hover:not(:disabled) {
+    background: rgba(var(--sa-crimson-rgb), 0.18);
+    color: var(--sa-paper);
+}
+[data-scene-theme="silent-autumn"] .spotify-mini-player__btn--primary {
+    background: rgba(var(--sa-crimson-rgb), 0.16);
+}

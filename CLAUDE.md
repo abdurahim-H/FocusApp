@@ -81,7 +81,7 @@ css/
   components/
     components.css                — thin @import aggregator
     apple-liquid-glass.css        — liquid-glass button system
-    modules/                      — 31 focused CSS modules (home, mini-timer, settings panel, stats, tasks, tour, help, ambient deck, account, profile, period tiles, task detail, notepad, stream themes, celebrate toast, date picker, task dock, sakura/aurora/celestial-garden/silent-autumn/ocean theme overrides, upgrade modal, music services dock). Numbering has gaps (17, 18, 20) where past modules were folded back in — preserved so existing import order isn't churned.
+    modules/                      — 32 focused CSS modules (home, mini-timer, settings panel, stats, tasks, tour, help, ambient deck, account, profile, period tiles, task detail, notepad, stream themes, celebrate toast, date picker, task dock, sakura/aurora/celestial-garden/silent-autumn/ocean theme overrides, upgrade modal, music services dock, Spotify mini-player). Numbering has gaps (17, 18, 20) where past modules were folded back in — preserved so existing import order isn't churned.
 
 public/           verbatim-copied to dist/: index assets (icon.svg, site.webmanifest), legal (privacy.html, terms.html), 404.html, robots.txt, sitemap.xml, _headers, theme-init.js (FOUC bootstrap), auth/callback.html + callback.js (OAuth/magic-link landing)
 db/migrations/    SQL applied manually in Supabase dashboard (idempotent)

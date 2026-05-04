@@ -1,0 +1,177 @@
+/* ════════════════════════════════════════════════════════════════════════
+   SPOTIFY MINI PLAYER — small "Now playing" card at bottom-right.
+
+   Layout mirrors the music-services dock at bottom-left so the two
+   read as a horizontal pair. Default chrome here is the dark cosmos
+   register; per-theme modules (28 / 30 / 31 / 32 / 33) retune the
+   glass + border + accent stroke.
+
+   Only mounted while Spotify is connected. When .is-empty (no active
+   playback), it renders compact and read-only; when .is-playing or
+   .is-paused, the toggle button shows the right glyph.
+
+   Premium gate: when the user's Spotify account is `product='free'`,
+   js/ui/spotify-mini-player.js disables every control button and
+   sets a "Spotify Premium required for in-browser playback" tooltip.
+   The visual style is just the standard :disabled state.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.spotify-mini-player {
+    position: fixed;
+    bottom: 20px;
+    right: 24px;
+    z-index: 1450;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px 8px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.36),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    color: rgba(255, 255, 255, 0.92);
+    transition: border-color 220ms ease, box-shadow 220ms ease;
+    pointer-events: auto;
+    /* Cap width so a long track title doesn't push the card across
+       the screen. Below the cap, .meta truncates with ellipsis. */
+    max-width: min(420px, calc(100vw - 220px));
+    min-width: 240px;
+}
+
+/* ── Album art slot ── */
+.spotify-mini-player__art {
+    position: relative;
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.06);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.55);
+}
+.spotify-mini-player__art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.spotify-mini-player__art-fallback {
+    width: 22px;
+    height: 22px;
+}
+.spotify-mini-player__art.has-art .spotify-mini-player__art-fallback {
+    display: none;
+}
+
+/* ── Track + artist text ── */
+.spotify-mini-player__meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.2;
+}
+.spotify-mini-player__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.spotify-mini-player__artist {
+    font-size: 11.5px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.62);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Controls ── */
+.spotify-mini-player__controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+}
+.spotify-mini-player__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease, transform 140ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.spotify-mini-player__btn svg {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+}
+.spotify-mini-player__btn--primary {
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.10);
+}
+.spotify-mini-player__btn--primary svg {
+    width: 18px;
+    height: 18px;
+}
+.spotify-mini-player__btn:hover:not(:disabled),
+.spotify-mini-player__btn:focus-visible:not(:disabled) {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    outline: none;
+}
+.spotify-mini-player__btn--primary:hover:not(:disabled),
+.spotify-mini-player__btn--primary:focus-visible:not(:disabled) {
+    background: rgba(255, 255, 255, 0.18);
+}
+.spotify-mini-player__btn:active:not(:disabled) {
+    transform: scale(0.94);
+}
+.spotify-mini-player__btn:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+}
+
+/* Toggle: show play OR pause depending on state. Default to play
+   (paused / empty); .is-playing flips to pause. */
+.spotify-mini-player__pause { display: none; }
+.spotify-mini-player.is-playing .spotify-mini-player__play { display: none; }
+.spotify-mini-player.is-playing .spotify-mini-player__pause { display: block; }
+
+/* When nothing is playing, dim the meta line and slim the card.
+   Controls remain visible so the user sees they exist. */
+.spotify-mini-player.is-empty .spotify-mini-player__title { opacity: 0.6; }
+
+/* Mobile: bottom area is busy. Hide the player below the same 600 px
+   threshold as the music-services dock, notepad, and task-dock so all
+   four responsive collapses agree. */
+@media (max-width: 600px) {
+    .spotify-mini-player { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spotify-mini-player__btn,
+    .spotify-mini-player__btn:hover,
+    .spotify-mini-player__btn:active {
+        transform: none;
+        transition: background 120ms ease, color 120ms ease;
+    }
+}

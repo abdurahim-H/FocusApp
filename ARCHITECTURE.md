@@ -177,6 +177,7 @@ Cache policy (in `public/_headers`):
 | `32-silent-autumn-theme.css`          | Silent Autumn per-theme chrome retune       |
 | `33-ocean-theme.css`                  | Ocean per-theme chrome retune               |
 | `34-music-services.css`               | Bottom-left music-service connect dock      |
+| `35-spotify-mini-player.css`          | Bottom-right Spotify "Now playing" card     |
 
 Numbering has gaps at 17, 18, 20 where past modules were folded back into earlier files — preserved so existing import order isn't churned. Import order = cascade order; later rules win on equal specificity. `apple-liquid-glass.css` lives alongside as a cohesive third-party-style module for the liquid-glass button system.
 
