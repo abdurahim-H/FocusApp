@@ -652,12 +652,15 @@
          instant, styled, no native-title delay. -->
     <div class="cosmos-toolbar" id="cosmosToolbar" role="group" aria-label="Cosmos controls">
         <button class="cosmos-tool" id="deckAddSoundBtn"
-                aria-label="Add a sound — opens the sound library"
-                data-tooltip="Add a sound">
+                aria-label="Music — ambient sounds and streaming services"
+                data-tooltip="Music">
+            <!-- Eighth-note glyph: stem connecting two filled note heads.
+                 Replaces the old `+` button — clicking opens the Music
+                 drawer with two tabs (Ambient / Streaming). -->
             <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="10" cy="10" r="7"/>
-                <line x1="10" y1="6.5" x2="10" y2="13.5"/>
-                <line x1="6.5" y1="10" x2="13.5" y2="10"/>
+                <path d="M8.4 13.6V4.8l7.2-1.4v8.7"/>
+                <ellipse cx="6.7" cy="13.6" rx="2" ry="1.6" fill="currentColor" stroke="none"/>
+                <ellipse cx="13.9" cy="12.1" rx="2" ry="1.6" fill="currentColor" stroke="none"/>
             </svg>
         </button>
         <button class="cosmos-tool" id="deckSaveMixBtn"
@@ -738,27 +741,75 @@
         </button>
     </div>
 
-    <!-- Library drawer — outside .container so it overlays the viewport. -->
+    <!-- Music drawer — Ambient sounds + Streaming services in one
+         place. Outside .container so it overlays the viewport. -->
     <aside class="library-drawer" id="libraryDrawer"
-           role="dialog" aria-modal="true" aria-label="Sound library" aria-hidden="true">
+           role="dialog" aria-modal="true" aria-label="Music" aria-hidden="true">
         <div class="library-drawer__scrim" data-drawer-close></div>
         <div class="library-drawer__panel">
             <header class="library-drawer__header">
-                <h2 class="library-drawer__title">Sound Library</h2>
-                <button class="library-drawer__close" data-drawer-close aria-label="Close library">
+                <h2 class="library-drawer__title">Music</h2>
+                <button class="library-drawer__close" data-drawer-close aria-label="Close music">
                     <span aria-hidden="true">×</span>
                 </button>
             </header>
-            <div class="library-drawer__search">
-                <span class="library-drawer__search-icon" aria-hidden="true">⌕</span>
-                <input type="search" id="libraryDrawerSearch"
-                       class="library-drawer__input"
-                       placeholder="Search sounds"
-                       aria-label="Search sounds"
-                       autocomplete="off" spellcheck="false">
+
+            <!-- Tab pill: Ambient (cosmic ambient mixer) /
+                 Streaming (Spotify et al. with search-and-play). -->
+            <nav class="library-drawer__tabs" role="tablist" aria-label="Music source">
+                <button class="library-drawer__tab is-active"
+                        data-tab="ambient" role="tab"
+                        aria-selected="true" aria-controls="libraryDrawerAmbient">
+                    Ambient
+                </button>
+                <button class="library-drawer__tab"
+                        data-tab="streaming" role="tab"
+                        aria-selected="false" aria-controls="libraryDrawerStreaming">
+                    Streaming
+                </button>
+            </nav>
+
+            <!-- Ambient tab — original sound library content. -->
+            <div class="library-drawer__panel-body"
+                 id="libraryDrawerAmbient" data-tab-panel="ambient" role="tabpanel">
+                <div class="library-drawer__search">
+                    <span class="library-drawer__search-icon" aria-hidden="true">⌕</span>
+                    <input type="search" id="libraryDrawerSearch"
+                           class="library-drawer__input"
+                           placeholder="Search sounds"
+                           aria-label="Search sounds"
+                           autocomplete="off" spellcheck="false">
+                </div>
+                <div class="library-drawer__body" id="libraryDrawerBody"></div>
+                <p class="library-drawer__footnote">More sounds arriving soon. Nudge us: <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>.</p>
             </div>
-            <div class="library-drawer__body" id="libraryDrawerBody"></div>
-            <p class="library-drawer__footnote">More sounds arriving soon. Nudge us: <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>.</p>
+
+            <!-- Streaming tab — service connect chips + Spotify
+                 search-and-play. Hidden until the user clicks the tab,
+                 then lazy-built by ambient-ui.js. -->
+            <div class="library-drawer__panel-body"
+                 id="libraryDrawerStreaming" data-tab-panel="streaming"
+                 role="tabpanel" hidden>
+                <p class="streaming-eyebrow">Connect a service</p>
+                <div class="streaming-services" id="streamingServices"></div>
+
+                <div class="streaming-search" id="streamingSearch" hidden>
+                    <p class="streaming-eyebrow">Search Spotify</p>
+                    <div class="library-drawer__search">
+                        <span class="library-drawer__search-icon" aria-hidden="true">⌕</span>
+                        <input type="search" id="streamingSearchInput"
+                               class="library-drawer__input"
+                               placeholder="Track, artist, or album"
+                               aria-label="Search Spotify"
+                               autocomplete="off" spellcheck="false">
+                    </div>
+                    <div class="streaming-results" id="streamingResults"></div>
+                </div>
+
+                <div class="streaming-empty" id="streamingEmpty">
+                    <p>Connect a music service above to search and play tracks from inside Cosmic Focus. Pro feature.</p>
+                </div>
+            </div>
         </div>
     </aside>
 

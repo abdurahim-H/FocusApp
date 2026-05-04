@@ -40,7 +40,25 @@
        the screen. Below the cap, .meta truncates with ellipsis. */
     max-width: min(420px, calc(100vw - 220px));
     min-width: 240px;
+    /* The card is draggable — grab cursor over the body, default
+       cursor over interactive children. The :active state below
+       upgrades to grabbing while a drag is in flight. */
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
 }
+.spotify-mini-player.is-dragging {
+    cursor: grabbing;
+    transition: none;
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+/* Buttons are NOT drag handles. Restore the pointer cursor over
+   them so the user gets the right affordance for clicking. */
+.spotify-mini-player__btn { cursor: pointer; }
+.spotify-mini-player__btn:disabled { cursor: not-allowed; }
 
 /* ── Album art slot ── */
 .spotify-mini-player__art {

@@ -1,17 +1,26 @@
 // music-services.js
 //
-// Bottom-left dock of music-streaming connect buttons: Spotify,
-// YouTube Music, Apple Music, YouTube, SoundCloud. The dock chrome
-// follows the active scene theme via per-theme CSS overrides — every
-// theme module retunes the glass card + halo. Brand icons stay
-// monochrome and inherit `currentColor` from the theme by default;
-// they shift to full brand colour on hover or when connected.
+// Catalog + click handlers for the streaming-service connect buttons
+// (Spotify, YouTube Music, Apple Music, YouTube, SoundCloud). Used to
+// be a standalone bottom-left dock; that surface was folded into the
+// Music drawer's Streaming tab so the connect chips and the
+// search-and-play row live together. The buttons themselves keep
+// their .music-service-btn / --brand styling so theme overrides
+// continue to apply unchanged.
+//
+// Public API:
+//   renderServiceButtons(container)  → paint the 5 chips into any
+//                                      element. Re-paintable; idempotent.
+//   setConnected(serviceId, value)   → toggle the .is-connected class
+//                                      + tooltip. Called by spotify-auth.
+//   onServicesChange(cb)             → subscribe to setConnected events
+//                                      so the parent UI (the streaming
+//                                      tab) can react (show/hide search,
+//                                      etc.) without polling.
 //
 // Pro gate: the connect flow is a Pro feature per MONETIZATION.md.
 // Free users land in the upgrade modal; signed-in Pro users see a
-// "wiring in progress" toast until the OAuth backend is registered
-// (each provider requires a developer-account setup that lives
-// outside this file — see MONETIZATION.md for the checklist).
+// "wiring in progress" toast until the OAuth backend is registered.
 //
 // XSS: every label / svg-path string used here is an author-controlled
 // constant. No user input flows into innerHTML.
@@ -108,7 +117,24 @@ const SERVICES = [
 ];
 
 const LS_KEY_PREFIX = 'fu_music_connected_';
-const DOCK_ID = 'music-services-dock';
+
+/** Containers that have rendered service buttons — used so we can
+ *  re-paint state when setConnected fires from a different surface. */
+const renderedContainers = new Set();
+const changeSubscribers = new Set();
+
+export function onServicesChange(cb) {
+    changeSubscribers.add(cb);
+    return () => changeSubscribers.delete(cb);
+}
+
+function notifyServicesChange(serviceId) {
+    for (const cb of changeSubscribers) {
+        try { cb(serviceId, isConnected(serviceId)); } catch (e) {
+            console.warn('[music-services] subscriber threw:', e);
+        }
+    }
+}
 
 // ────────────────────────────────────────────────────────────────────────────
 // Connection state (placeholder until OAuth lands)
@@ -122,9 +148,9 @@ function isConnected(serviceId) {
     }
 }
 
-// Reserved for the future OAuth callback path. Marking as exported so
-// the auth callback handler can flip the bit when it lands without
-// reaching into localStorage directly from elsewhere.
+// Reserved for the OAuth callback path. The Spotify auth module
+// flips this when a connect succeeds; the future YT Music / Apple /
+// YouTube / SoundCloud handlers will too.
 export function setConnected(serviceId, value) {
     try {
         if (value) {
@@ -134,21 +160,18 @@ export function setConnected(serviceId, value) {
         }
     } catch (_) { /* tolerate */ }
     refreshButtonState(serviceId);
+    notifyServicesChange(serviceId);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// DOM
+// Render
 // ────────────────────────────────────────────────────────────────────────────
 
-let dockEl = null;
-
-function buildDock() {
-    if (dockEl) return dockEl;
-    dockEl = document.createElement('div');
-    dockEl.id = DOCK_ID;
-    dockEl.className = 'music-services';
-    dockEl.setAttribute('aria-label', 'Connect a music service');
-    dockEl.setAttribute('role', 'group');
+/** Paint the 5 service buttons into the given container. Idempotent —
+ *  re-render replaces existing children. */
+export function renderServiceButtons(container) {
+    if (!container) return;
+    container.innerHTML = '';
 
     for (const svc of SERVICES) {
         const btn = document.createElement('button');
@@ -169,39 +192,40 @@ function buildDock() {
         `;
         btn.addEventListener('click', () => onClick(svc));
         btn.addEventListener('contextmenu', (e) => onContextMenu(svc, e));
-        dockEl.appendChild(btn);
+        container.appendChild(btn);
     }
 
-    document.body.appendChild(dockEl);
+    renderedContainers.add(container);
 
     // Reflect any cached connection state from a prior session.
     for (const svc of SERVICES) refreshButtonState(svc.id);
-
-    return dockEl;
 }
 
 function refreshButtonState(serviceId) {
-    if (!dockEl) return;
-    const btn = dockEl.querySelector(`[data-service-id="${serviceId}"]`);
-    if (!btn) return;
-    const connected = isConnected(serviceId);
-    btn.classList.toggle('is-connected', connected);
-
-    // Spotify is the first provider with a live profile fetch — when
-    // connected, surface the display_name in the tooltip so the user
-    // can see at a glance which account is linked. Other providers
-    // fall back to the static label.
     const svc = SERVICES.find((s) => s.id === serviceId);
     if (!svc) return;
-    if (serviceId === 'spotify' && connected) {
-        import('../features/spotify-auth.js').then(({ getSpotifyUser }) => {
-            const user = getSpotifyUser();
-            btn.title = user?.display_name
-                ? `Spotify — connected as ${user.display_name} (right-click to disconnect)`
-                : `Spotify — connected (right-click to disconnect)`;
-        });
-    } else {
-        btn.title = svc.label;
+    const connected = isConnected(serviceId);
+
+    // The same service may live in multiple containers (e.g. if a
+    // future surface also wants chips). Update them all.
+    for (const container of renderedContainers) {
+        if (!container.isConnected) {
+            renderedContainers.delete(container);
+            continue;
+        }
+        const btn = container.querySelector(`[data-service-id="${serviceId}"]`);
+        if (!btn) continue;
+        btn.classList.toggle('is-connected', connected);
+        if (serviceId === 'spotify' && connected) {
+            import('../features/spotify-auth.js').then(({ getSpotifyUser }) => {
+                const user = getSpotifyUser();
+                btn.title = user?.display_name
+                    ? `Spotify — connected as ${user.display_name} (right-click to disconnect)`
+                    : `Spotify — connected (right-click to disconnect)`;
+            });
+        } else {
+            btn.title = svc.label;
+        }
     }
 }
 
@@ -283,16 +307,11 @@ async function onContextMenu(svc, e) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// Public bootstrap
+// Compatibility shims — the previous standalone bottom-left dock is
+// gone; service buttons now live inside the Music drawer's Streaming
+// tab. These exports stay so any caller that still references them
+// is a no-op rather than a crash.
 // ────────────────────────────────────────────────────────────────────────────
 
-export function mountMusicServices() {
-    if (typeof document === 'undefined') return;
-    if (document.getElementById(DOCK_ID)) return;
-    buildDock();
-}
-
-export function unmountMusicServices() {
-    if (dockEl?.parentNode) dockEl.parentNode.removeChild(dockEl);
-    dockEl = null;
-}
+export function mountMusicServices() { /* no-op — superseded by renderServiceButtons */ }
+export function unmountMusicServices() { /* no-op */ }

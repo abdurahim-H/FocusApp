@@ -1263,7 +1263,146 @@ function wireDrawer() {
             card.classList.toggle('is-active', ids.has(card.dataset.sound));
         });
     });
+
+    // Tab pill — Ambient / Streaming.
+    const tabs = drawer.querySelectorAll('.library-drawer__tab');
+    tabs.forEach((tab) => {
+        tab.addEventListener('click', () => switchDrawerTab(tab.dataset.tab));
+    });
 }
+
+let streamingTabReady = false;
+
+function switchDrawerTab(target) {
+    const drawer = document.getElementById('libraryDrawer');
+    if (!drawer) return;
+    drawer.querySelectorAll('.library-drawer__tab').forEach((t) => {
+        const active = t.dataset.tab === target;
+        t.classList.toggle('is-active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    drawer.querySelectorAll('[data-tab-panel]').forEach((p) => {
+        p.hidden = p.dataset.tabPanel !== target;
+    });
+    drawer.dataset.activeTab = target;
+    if (target === 'streaming' && !streamingTabReady) {
+        streamingTabReady = true;
+        initStreamingTab();
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Streaming tab — service connect chips + Spotify search-and-play
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function initStreamingTab() {
+    const servicesEl = document.getElementById('streamingServices');
+    const searchWrap = document.getElementById('streamingSearch');
+    const emptyEl = document.getElementById('streamingEmpty');
+    const searchInput = document.getElementById('streamingSearchInput');
+    const resultsEl = document.getElementById('streamingResults');
+    if (!servicesEl) return;
+
+    // Render the 5 service connect chips into the streaming tab.
+    const { renderServiceButtons, onServicesChange } =
+        await import('./music-services.js');
+    renderServiceButtons(servicesEl);
+
+    // Show / hide the search panel based on Spotify connection state.
+    const refreshConnectedView = async () => {
+        const { isSpotifyConnected } =
+            await import('../features/spotify-auth.js');
+        const connected = isSpotifyConnected();
+        searchWrap.hidden = !connected;
+        emptyEl.hidden = connected;
+    };
+    refreshConnectedView();
+    onServicesChange((id) => {
+        if (id === 'spotify') refreshConnectedView();
+    });
+
+    // Debounced search.
+    let debounceTimer = null;
+    let lastQuery = '';
+    searchInput.addEventListener('input', () => {
+        const q = searchInput.value.trim();
+        if (q === lastQuery) return;
+        lastQuery = q;
+        clearTimeout(debounceTimer);
+        if (!q) {
+            resultsEl.innerHTML = '';
+            resultsEl.classList.remove('has-results');
+            return;
+        }
+        debounceTimer = setTimeout(() => runStreamingSearch(q, resultsEl), 240);
+    });
+}
+
+async function runStreamingSearch(query, resultsEl) {
+    const { searchSpotify, playTrackUri } =
+        await import('../features/spotify-search.js');
+    resultsEl.classList.add('is-loading');
+    const data = await searchSpotify(query, 12);
+    resultsEl.classList.remove('is-loading');
+
+    const tracks = data?.tracks?.items || [];
+    if (!tracks.length) {
+        resultsEl.classList.remove('has-results');
+        resultsEl.innerHTML = '<p class="streaming-results__empty">No matches.</p>';
+        return;
+    }
+
+    resultsEl.classList.add('has-results');
+    resultsEl.innerHTML = tracks.map((t, i) => {
+        const art = t.album?.images?.[2]?.url || t.album?.images?.[0]?.url || '';
+        const artists = (t.artists || []).map((a) => a.name).filter(Boolean).join(', ');
+        const dur = formatTrackDuration(t.duration_ms || 0);
+        return `
+            <button type="button" class="streaming-result"
+                    data-uri="${escapeAttr(t.uri)}"
+                    aria-label="Play ${escapeAttr(t.name)} by ${escapeAttr(artists)}">
+                <span class="streaming-result__art">${
+                    art ? `<img src="${escapeAttr(art)}" alt="" loading="lazy" decoding="async">` : ''
+                }</span>
+                <span class="streaming-result__meta">
+                    <span class="streaming-result__title">${escapeHtml(t.name || '—')}</span>
+                    <span class="streaming-result__artist">${escapeHtml(artists)}</span>
+                </span>
+                <span class="streaming-result__duration">${dur}</span>
+                <span class="streaming-result__play" aria-hidden="true">▶</span>
+            </button>
+        `;
+    }).join('');
+
+    resultsEl.querySelectorAll('.streaming-result').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+            const uri = btn.dataset.uri;
+            if (!uri) return;
+            btn.classList.add('is-busy');
+            const r = await playTrackUri(uri);
+            btn.classList.remove('is-busy');
+            if (r?.ok === false) {
+                const { showGentleToast } = await import('../utils/gentle-toast.js');
+                showGentleToast({
+                    icon: '⚠',
+                    title: 'Playback failed',
+                    detail: r.error || 'Spotify rejected the request.',
+                    ttl: 7000,
+                });
+            }
+        });
+    });
+}
+
+function formatTrackDuration(ms) {
+    if (!Number.isFinite(ms) || ms <= 0) return '';
+    const total = Math.floor(ms / 1000);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// (escapeHtml + escapeAttr already defined further down — reusing those.)
 
 export async function openDrawer() {
     const drawer = document.getElementById('libraryDrawer');

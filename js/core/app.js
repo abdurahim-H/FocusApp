@@ -419,12 +419,10 @@ function setupTaskControls(loadedModules) {
     if (loadedModules.streamThemes?.initStreamThemes) {
         loadedModules.streamThemes.initStreamThemes();
     }
-    // Music services dock — bottom-left pill of Spotify / YT Music /
-    // Apple Music / YouTube / SoundCloud connect buttons. Pro feature;
-    // free users hit the upgrade modal on click.
-    if (loadedModules.musicServices?.mountMusicServices) {
-        loadedModules.musicServices.mountMusicServices();
-    }
+    // (The standalone bottom-left music-services dock has been folded
+    //  into the Music drawer's Streaming tab — see ambient-ui.js
+    //  initStreamingTab(). The mountMusicServices() call is now a
+    //  no-op kept only for backwards compatibility.)
 
     // Spotify mini-player — bottom-right "Now playing" card. Mounts
     // itself only when Spotify is connected; subscribes to

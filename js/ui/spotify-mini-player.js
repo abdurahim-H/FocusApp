@@ -36,6 +36,7 @@ import { showGentleToast } from '../utils/gentle-toast.js';
 
 const WIDGET_ID = 'spotify-mini-player';
 const POLL_INTERVAL_MS = 10_000;
+const POSITION_LS_KEY = 'fu_spotify_player_pos';
 
 let widgetEl = null;
 let pollTimer = null;
@@ -98,6 +99,11 @@ function buildWidget() {
     `;
     document.body.appendChild(widgetEl);
 
+    // Drag handles — the album art + meta region is the grab handle.
+    // Buttons are not, so a click on prev / play / next still
+    // controls playback instead of starting a drag.
+    makeDraggable(widgetEl);
+
     // Premium-only controls — disabled for free users with a tooltip.
     if (!isPremium()) {
         for (const btn of widgetEl.querySelectorAll('button[data-action]')) {
@@ -131,6 +137,99 @@ function buildWidget() {
 function destroyWidget() {
     if (widgetEl?.parentNode) widgetEl.parentNode.removeChild(widgetEl);
     widgetEl = null;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Drag — pointer-driven, viewport-clamped, position persisted across
+// reloads in localStorage. The control buttons opt out so pressing
+// play / next / prev never accidentally starts a drag.
+// ────────────────────────────────────────────────────────────────────────────
+
+function loadSavedPosition() {
+    try {
+        const raw = localStorage.getItem(POSITION_LS_KEY);
+        if (!raw) return null;
+        const pos = JSON.parse(raw);
+        if (!Number.isFinite(pos?.left) || !Number.isFinite(pos?.top)) return null;
+        return pos;
+    } catch { return null; }
+}
+
+function applyPosition(el, left, top) {
+    // Clamp to viewport with an 8 px breathing margin on every edge.
+    const w = el.offsetWidth || 280;
+    const h = el.offsetHeight || 56;
+    const clampedLeft = Math.max(8, Math.min(window.innerWidth - w - 8, left));
+    const clampedTop = Math.max(8, Math.min(window.innerHeight - h - 8, top));
+    el.style.left = `${clampedLeft}px`;
+    el.style.top = `${clampedTop}px`;
+    el.style.right = 'auto';
+    el.style.bottom = 'auto';
+}
+
+function makeDraggable(el) {
+    // Restore saved position on mount, after the widget has actually
+    // measured itself (offsetWidth/height need it to be in the DOM).
+    requestAnimationFrame(() => {
+        const saved = loadSavedPosition();
+        if (saved) applyPosition(el, saved.left, saved.top);
+    });
+
+    let dragging = false;
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let originLeft = 0;
+    let originTop = 0;
+
+    function onPointerDown(e) {
+        // Buttons opt out — clicking play / next / prev shouldn't drag.
+        if (e.target.closest('button')) return;
+        if (e.button !== undefined && e.button !== 0) return; // left button only
+        dragging = true;
+        pointerId = e.pointerId;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = el.getBoundingClientRect();
+        originLeft = rect.left;
+        originTop = rect.top;
+        el.classList.add('is-dragging');
+        try { el.setPointerCapture(pointerId); } catch (_) { /* tolerate */ }
+        e.preventDefault();
+    }
+
+    function onPointerMove(e) {
+        if (!dragging || e.pointerId !== pointerId) return;
+        applyPosition(el, originLeft + (e.clientX - startX), originTop + (e.clientY - startY));
+    }
+
+    function onPointerUp(e) {
+        if (!dragging || (e && e.pointerId !== pointerId)) return;
+        dragging = false;
+        el.classList.remove('is-dragging');
+        try { el.releasePointerCapture(pointerId); } catch (_) { /* tolerate */ }
+        pointerId = null;
+        const rect = el.getBoundingClientRect();
+        try {
+            localStorage.setItem(POSITION_LS_KEY, JSON.stringify({
+                left: rect.left,
+                top: rect.top,
+            }));
+        } catch (_) { /* tolerate */ }
+    }
+
+    el.addEventListener('pointerdown', onPointerDown);
+    el.addEventListener('pointermove', onPointerMove);
+    el.addEventListener('pointerup', onPointerUp);
+    el.addEventListener('pointercancel', onPointerUp);
+    el.addEventListener('lostpointercapture', onPointerUp);
+
+    // Re-clamp on viewport resize so a window that shrinks doesn't
+    // strand the player off-screen.
+    window.addEventListener('resize', () => {
+        const rect = el.getBoundingClientRect();
+        applyPosition(el, rect.left, rect.top);
+    });
 }
 
 // ────────────────────────────────────────────────────────────────────────────
