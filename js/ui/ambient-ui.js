@@ -1342,7 +1342,7 @@ async function runStreamingSearch(query, resultsEl) {
     const { searchSpotify, playTrackUri } =
         await import('../features/spotify-search.js');
     resultsEl.classList.add('is-loading');
-    const data = await searchSpotify(query, 12);
+    const data = await searchSpotify(query, 20);
     resultsEl.classList.remove('is-loading');
 
     const tracks = data?.tracks?.items || [];
