@@ -183,35 +183,110 @@ export async function getCurrentlyPlaying() {
     };
 }
 
-/** Premium-only. Returns true if the API accepted the call. */
+// ────────────────────────────────────────────────────────────────────────────
+// Detailed control call — returns { ok, error? } so the widget can
+// surface specific failure modes (NO_ACTIVE_DEVICE, PREMIUM_REQUIRED)
+// as actionable toasts instead of silently failing.
+// ────────────────────────────────────────────────────────────────────────────
+
+async function controlCall(path, init = {}) {
+    const token = await getAccessToken();
+    if (!token) return { ok: false, error: 'No Spotify session. Try reconnecting.' };
+    let res;
+    try {
+        res = await fetch(`https://api.spotify.com/v1${path}`, {
+            ...init,
+            headers: { Authorization: `Bearer ${token}`, ...(init.headers || {}) },
+        });
+    } catch (e) {
+        return { ok: false, error: 'Network error reaching Spotify.' };
+    }
+    if (res.ok || res.status === 204) return { ok: true };
+
+    let body = null;
+    try { body = await res.json(); } catch { /* tolerate */ }
+    const reason = body?.error?.reason;
+    const message = body?.error?.message;
+
+    if (reason === 'NO_ACTIVE_DEVICE') {
+        return {
+            ok: false,
+            reason,
+            error: 'No active Spotify device. Open Spotify on your phone or desktop and start a track once — Cosmic Focus can take over from there.',
+        };
+    }
+    if (reason === 'PREMIUM_REQUIRED' || res.status === 403) {
+        return {
+            ok: false,
+            reason: 'PREMIUM_REQUIRED',
+            error: 'Spotify Premium is required for in-browser playback control.',
+        };
+    }
+    return { ok: false, status: res.status, error: message || `Spotify API error (${res.status}).` };
+}
+
+/** Premium-only. Returns { ok, error? }. The widget reads .ok and
+ *  surfaces .error via gentle-toast on failure. */
 export async function togglePlay() {
     const state = await getCurrentlyPlaying();
-    const path = state?.is_playing ? '/me/player/pause' : '/me/player/play';
-    const result = await fetchSpotify(path, { method: 'PUT' });
-    return result !== null;
+
+    // Currently playing? Pause whatever's active. Spotify doesn't
+    // care which device is the target for /pause — it pauses the
+    // active one.
+    if (state?.is_playing) {
+        return controlCall('/me/player/pause', { method: 'PUT' });
+    }
+
+    // Not playing. Prefer our own SDK device so the user's browser
+    // becomes the active speaker. Targeting a device by ID also
+    // auto-activates it, which is what we want on the very first
+    // play click after the SDK comes up.
+    const ourDevice = getDeviceId();
+    if (ourDevice) {
+        const r = await controlCall(
+            `/me/player/play?device_id=${encodeURIComponent(ourDevice)}`,
+            { method: 'PUT' }
+        );
+        if (r.ok) return r;
+        // Fall through to default-device play if our targeted call
+        // failed for some non-Premium / non-no-device reason.
+        if (r.reason === 'PREMIUM_REQUIRED') return r;
+    }
+
+    return controlCall('/me/player/play', { method: 'PUT' });
+}
+
+async function withDeviceFallback(path, method) {
+    const ourDevice = getDeviceId();
+    if (ourDevice) {
+        const sep = path.includes('?') ? '&' : '?';
+        const r = await controlCall(
+            `${path}${sep}device_id=${encodeURIComponent(ourDevice)}`,
+            { method }
+        );
+        if (r.ok || r.reason === 'PREMIUM_REQUIRED') return r;
+    }
+    return controlCall(path, { method });
 }
 
 export async function next() {
-    return (await fetchSpotify('/me/player/next', { method: 'POST' })) !== null;
+    return withDeviceFallback('/me/player/next', 'POST');
 }
 
 export async function prev() {
-    return (await fetchSpotify('/me/player/previous', { method: 'POST' })) !== null;
+    return withDeviceFallback('/me/player/previous', 'POST');
 }
 
 export async function seek(positionMs) {
-    return (await fetchSpotify(
+    return withDeviceFallback(
         `/me/player/seek?position_ms=${Math.max(0, Math.floor(positionMs))}`,
-        { method: 'PUT' }
-    )) !== null;
+        'PUT'
+    );
 }
 
 export async function setVolumePct(pct) {
     const v = Math.max(0, Math.min(100, Math.round(pct)));
-    return (await fetchSpotify(
-        `/me/player/volume?volume_percent=${v}`,
-        { method: 'PUT' }
-    )) !== null;
+    return withDeviceFallback(`/me/player/volume?volume_percent=${v}`, 'PUT');
 }
 
 export function isPremium() {

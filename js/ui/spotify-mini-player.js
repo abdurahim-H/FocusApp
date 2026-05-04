@@ -32,6 +32,7 @@ import {
     onPlayerStateChange,
     isPremium,
 } from '../features/spotify-player.js';
+import { showGentleToast } from '../utils/gentle-toast.js';
 
 const WIDGET_ID = 'spotify-mini-player';
 const POLL_INTERVAL_MS = 10_000;
@@ -104,12 +105,24 @@ function buildWidget() {
             btn.title = 'Spotify Premium required for in-browser playback';
         }
     } else {
+        const handle = (fn, action) => async () => {
+            const r = await fn();
+            if (r && r.ok === false) {
+                showGentleToast({
+                    icon: '⚠',
+                    title: action === 'toggle' ? 'Playback failed' : `${action === 'next' ? 'Skip' : 'Previous'} failed`,
+                    detail: r.error || 'Spotify rejected the request.',
+                    ttl: 7000,
+                });
+            }
+            scheduleRefresh();
+        };
         widgetEl.querySelector('[data-action="prev"]')
-            .addEventListener('click', () => prevTrack().then(scheduleRefresh));
+            .addEventListener('click', handle(prevTrack, 'prev'));
         widgetEl.querySelector('[data-action="toggle"]')
-            .addEventListener('click', () => togglePlay().then(scheduleRefresh));
+            .addEventListener('click', handle(togglePlay, 'toggle'));
         widgetEl.querySelector('[data-action="next"]')
-            .addEventListener('click', () => nextTrack().then(scheduleRefresh));
+            .addEventListener('click', handle(nextTrack, 'next'));
     }
 
     return widgetEl;
