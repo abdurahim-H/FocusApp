@@ -66,7 +66,7 @@
         <header>
             <a class="back" href="/">← Back to Cosmic Focus</a>
             <h1>Privacy Policy</h1>
-            <p class="updated">Last updated: April 19, 2026</p>
+            <p class="updated">Last updated: May 4, 2026</p>
         </header>
 
         <p>This Privacy Policy explains what information Cosmic Focus (the "Service", accessible at <a href="https://universefocuses.com">universefocuses.com</a>) collects, how it is used, and the choices you have.</p>
@@ -97,31 +97,54 @@
             <li><strong>Google Fonts</strong> — serves the Inter font family.</li>
             <li><strong>Babylon.js CDN</strong> — serves the 3D rendering library.</li>
             <li><strong>Supabase</strong> — powers optional accounts and cloud sync.</li>
+            <li><strong>Stripe</strong> — processes Pro tier subscription payments. Stripe receives only what's needed to bill you (card details, billing address). We never see your card number.</li>
+            <li><strong>Spotify</strong> — only when you explicitly connect your Spotify account from the Streaming tab in the Music drawer (Pro feature). See section 4 for what we receive and store.</li>
         </ul>
-        <p>These providers may receive your IP address and basic request metadata as part of delivering their service. We do not share additional information with them.</p>
+        <p>These providers may receive your IP address and basic request metadata as part of delivering their service. We do not share additional information with them beyond what each integration requires.</p>
 
-        <h2>4. Analytics</h2>
+        <h2>4. Music-service integrations (optional)</h2>
+        <p>If you choose to connect a music streaming service from <em>Music → Streaming</em>, we use the standard OAuth handshake provided by that service. Today this covers <strong>Spotify</strong>; YouTube Music, Apple Music, YouTube, and SoundCloud are scaffolded but not yet wired.</p>
+        <p>For Spotify specifically, when you click <em>Connect</em> we request the following scopes and use them as follows:</p>
+        <ul>
+            <li><code>user-read-email</code> + <code>user-read-private</code> — to display your Spotify name + Premium status in the connected-account chip and tooltip.</li>
+            <li><code>streaming</code> + <code>user-modify-playback-state</code> + <code>user-read-playback-state</code> + <code>user-read-currently-playing</code> — to render the "Now playing" mini-player and let the play / pause / next / previous buttons control your active Spotify device.</li>
+        </ul>
+        <p>What we receive from Spotify and where it lives:</p>
+        <ul>
+            <li><strong>Display name + email + Premium status</strong> — stored in your browser's <code>localStorage</code> under the key <code>fu_spotify_user</code>. Used only for the UI label and to gate the Premium-only playback controls. Never sent to our servers.</li>
+            <li><strong>Access token + refresh token</strong> — stored in your browser's <code>localStorage</code> under the key <code>fu_spotify_tokens</code>. Used to call Spotify's API on your behalf when you interact with the mini-player or search panel. Never sent to our servers.</li>
+            <li><strong>Currently-playing track metadata</strong> — fetched live from Spotify when the mini-player is on screen. Not stored.</li>
+        </ul>
+        <p>We don't have a server-side database of your music data. Everything related to the Spotify integration lives only in your own browser. To revoke at any time:</p>
+        <ul>
+            <li><strong>From Cosmic Focus</strong> — right-click the Spotify chip in <em>Music → Streaming</em> and confirm Disconnect. This clears the tokens and profile from your local storage.</li>
+            <li><strong>From Spotify</strong> — visit your Spotify <a href="https://www.spotify.com/account/apps/" target="_blank" rel="noopener">Apps page</a>, find "Cosmic Focus", and click Remove Access. This invalidates the tokens server-side.</li>
+        </ul>
+        <p>Cosmic Focus is not affiliated with Spotify AB. Any audio content you listen to is delivered by Spotify under their own terms and licences.</p>
+
+        <h2>5. Analytics</h2>
         <p>We use <strong>Cloudflare Web Analytics</strong>, which is cookieless and does not track individual users across sites. It provides aggregate information about page views and performance. We do not use Google Analytics, Facebook Pixel, or any advertising trackers.</p>
 
-        <h2>5. Cookies</h2>
+        <h2>6. Cookies</h2>
         <p>Cosmic Focus does not set tracking cookies. Supabase may set a session cookie to keep you signed in if you have an account. That cookie is used only for authentication.</p>
 
-        <h2>6. Your rights</h2>
+        <h2>7. Your rights</h2>
         <p>You can at any time:</p>
         <ul>
             <li>Export your data as JSON or CSV from <em>Settings → Data & About</em>.</li>
             <li>Delete everything stored locally via <em>Settings → Data & About → Clear all data</em>.</li>
             <li>Delete your account and all associated cloud data from <em>Settings → Account</em>.</li>
+            <li>Disconnect any music streaming service from <em>Music → Streaming</em> by right-clicking its chip.</li>
         </ul>
         <p>Under the GDPR and CCPA you also have the right to request access to, correction of, or deletion of your personal data. Contact us as described below.</p>
 
-        <h2>7. Children</h2>
+        <h2>8. Children</h2>
         <p>Cosmic Focus is not directed at children under 13 and we do not knowingly collect personal information from children.</p>
 
-        <h2>8. Changes to this policy</h2>
+        <h2>9. Changes to this policy</h2>
         <p>We may update this Privacy Policy from time to time. The "Last updated" date at the top of this page reflects the most recent version.</p>
 
-        <h2>9. Contact</h2>
+        <h2>10. Contact</h2>
         <p>Questions about this policy? Email <a href="mailto:abduh@universefocuses.com">abduh@universefocuses.com</a>.</p>
     </main>
 </body>

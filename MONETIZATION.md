@@ -103,21 +103,132 @@ The four Pro sections each carry a clear value story:
 
 ### C. Third-party music integrations
 
-UI shell is live (bottom-left dock — `js/ui/music-services.js` +
-`css/components/modules/34-music-services.css`); OAuth flows are not
-wired yet. The dock surfaces five services: **Spotify, YouTube Music,
-Apple Music, YouTube, SoundCloud**. Free users land in the upgrade
-modal on click; Pro users land in a "wiring in progress" toast until
-the OAuth client for each provider is registered.
+UI lives inside the Music drawer's Streaming tab (cosmos toolbar →
+music note → Streaming). Five services are surfaced: **Spotify,
+YouTube Music, Apple Music, YouTube, SoundCloud**. **Spotify is wired
+end-to-end** — PKCE OAuth, /me identity fetch, mini-player widget,
+Web API control endpoints, and search-and-play via /v1/search +
+/me/player/play. The other four still surface a "wiring in progress"
+toast until each has its own provider-side dashboard registration.
 
-What each service still needs before the connect button can actually
-connect (these are dev-account chores that have to happen outside the
-codebase):
+#### Spotify — current state
+
+- **Status:** live as a Pro feature, **app is in Spotify Development
+  Mode** so only the ≤5 emails listed in User Management can connect.
+- **Client ID:** stored in `js/core/auth-config.js` (public — PKCE
+  doesn't use a client secret).
+- **Redirect URIs registered:** both `https://universefocuses.com/auth/callback.html`
+  and the `www.` variant — Cloudflare's Worker entry redirects www to
+  apex anyway, but registering both means OAuth doesn't break the
+  rare case where Cloudflare's edge cache serves the www HTML.
+- **Scopes used:** `user-read-email`, `user-read-private`,
+  `streaming`, `user-modify-playback-state`, `user-read-playback-state`,
+  `user-read-currently-playing`.
+- **Where tokens live:** `localStorage` under `fu_spotify_tokens` and
+  `fu_spotify_user`. No server-side storage today — Cosmic Focus
+  itself never sees the user's tokens. Refresh happens client-side
+  through the same PKCE token endpoint.
+
+#### Spotify — Extension Request (going public)
+
+To remove the 5-user cap and let any Spotify user connect, the app
+has to graduate from Development Mode by submitting an **Extension
+Request**. Spotify reviews it (1–3 weeks turnaround based on
+community reports), and on approval the cap goes away forever.
+
+**Submission form draft** — paste these straight into Spotify's form
+when you fill it out at `developer.spotify.com` → app → Extension
+Request:
+
+> **Application name:** Cosmic Focus
+>
+> **Application URL:** https://universefocuses.com
+>
+> **Application description:**
+> Cosmic Focus is a browser-based productivity timer (Pomodoro / focus
+> sessions / task management) rendered on top of a real-time 3D
+> ambient scene. Spotify integration is an optional Pro-tier feature
+> that lets paying users connect their Spotify account, see what's
+> currently playing, and control playback (play / pause / skip /
+> search-and-play) from the focus screen — without leaving the
+> productivity surface to switch apps.
+>
+> **How the app uses Spotify:**
+> 1. PKCE OAuth handshake on the `Connect` button. No client secret;
+>    no server-side token storage. Tokens land in the user's
+>    `localStorage` and are used only by the user's own browser.
+> 2. `GET /v1/me` once after connect to display the user's name and
+>    detect Premium status (controls are disabled for Free accounts
+>    with a Premium-required tooltip).
+> 3. `GET /v1/me/player/currently-playing` polled every 10 s while the
+>    mini-player widget is mounted, to keep "Now playing" metadata
+>    fresh.
+> 4. Web Playback SDK (`https://sdk.scdn.co/spotify-player.js`)
+>    registers the user's browser as a Spotify Connect device named
+>    "Cosmic Focus", so Premium users can use the browser as a
+>    speaker.
+> 5. `GET /v1/search?type=track` for the search-and-play row; results
+>    play via `PUT /v1/me/player/play` with a track URI body.
+> 6. `PUT /me/player/pause`, `POST /me/player/next`,
+>    `POST /me/player/previous` for transport controls.
+>
+> **Commercial use:** Yes — Cosmic Focus has a Pro tier (USD $5/mo or
+> $55/yr via Stripe). The Spotify integration is gated behind that
+> Pro tier. Cosmic Focus does not redistribute, store, copy, or
+> modify any Spotify content. The app acts only as a remote-control
+> surface for playback the user initiates on their own account.
+>
+> **Authentication method:** PKCE (Authorization Code + PKCE). No
+> client secret on the browser side; no server-side token exchange.
+>
+> **Data handling:**
+> - Access + refresh tokens stored in the user's own browser
+>   `localStorage` under `fu_spotify_tokens`.
+> - Cached profile (display name, email, product tier) in
+>   `fu_spotify_user`.
+> - All of the above is wiped when the user disconnects from inside
+>   Cosmic Focus or revokes access at spotify.com/account/apps.
+> - Cosmic Focus has no server-side database of music data.
+>
+> **Privacy Policy:** https://universefocuses.com/privacy.html
+> **Terms of Service:** https://universefocuses.com/terms.html
+> **Estimated daily active users (year 1):** under 1,000.
+>
+> **Branding compliance:** the Spotify chip in the connect dock uses
+> the Spotify mark in its connected state, sized at 22 px, on a
+> contrasting glass card. We do not modify the mark, do not use it
+> larger than other service marks, and link the user back to Spotify
+> for account management (privacy.html section 4 has the
+> spotify.com/account/apps link).
+
+**Things to attach to the form**:
+- App icon, square ≥512×512 PNG. Recommended: re-use `icon.svg` from
+  `public/`, exported at 1024×1024 and downscaled.
+- Demo video (15–30 s) or 3–5 screenshots showing: the Connect click
+  → Spotify auth screen → returning to the app → mini-player
+  populating with a track → search panel returning results.
+
+Spotify reviews against [their developer policy](https://developer.spotify.com/policy)
+and [design guidelines](https://developer.spotify.com/documentation/design).
+The privacy policy + terms updates already include the disclosures
+they look for (data handling, third-party compliance, revocation
+path, no-affiliation statement).
+
+#### Spotify — what's still TODO server-side
+
+When MAU justifies it, move token storage to a Supabase Edge Function
++ a `spotify_tokens` table with RLS so server-side Pro enforcement
+can gate refresh calls. Today's purely-client-side approach is fine
+because we're nowhere near rate limits and no money is at stake on
+each token refresh, but it doesn't scale.
+
+#### The other four services
+
+Same shape as Spotify but each has its own dashboard registration:
 
 | Service        | Setup checklist                                                                                                                                                                                                |
 |----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Spotify        | Register at `developer.spotify.com` → create an app → add redirect URI `https://universefocuses.com/auth/callback.html` → Client ID into a new Edge Function (`spotify-token`) for the PKCE token exchange.    |
-| YouTube Music  | No public API. Realistic option: use Google OAuth + the unofficial `ytmusicapi` proxy in an Edge Function. Same redirect URI. Set expectation that this one is the most fragile.                                |
+| YouTube Music  | No public API. Realistic option: use Google OAuth + the unofficial `ytmusicapi` proxy in an Edge Function. Set expectation that this one is the most fragile.                                                   |
 | Apple Music    | Apple Developer Program ($99 / yr). Generate a MusicKit private key + team ID. Surface MusicKit JS on the page (CSP `script-src` allowance), prompt for Apple ID inside MusicKit's flow. No server token exchange — token stays client-side. |
 | YouTube        | Google Cloud Console → OAuth consent screen → YouTube Data API v3 scope. Same redirect URI as the YT Music flow; can share the Edge Function.                                                                  |
 | SoundCloud     | Already partially live as a backdrop stream. Full-account connect wants `developers.soundcloud.com` → register app → OAuth 2 token exchange in an Edge Function.                                                |
