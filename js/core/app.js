@@ -425,6 +425,25 @@ function setupTaskControls(loadedModules) {
     if (loadedModules.musicServices?.mountMusicServices) {
         loadedModules.musicServices.mountMusicServices();
     }
+
+    // Spotify OAuth callback — if the user just bounced back from the
+    // Spotify auth page, the URL has ?code=...&state=... Process it
+    // before anything else can read those params, then clean the URL.
+    // No-op when state doesn't match the one we set, so it leaves
+    // Supabase's PKCE flow alone.
+    import('../features/spotify-auth.js').then(({ processCallbackIfPresent }) => {
+        processCallbackIfPresent().then((profile) => {
+            if (profile) {
+                import('../utils/gentle-toast.js').then(({ showGentleToast }) => {
+                    showGentleToast({
+                        icon: '♪',
+                        title: 'Spotify connected',
+                        detail: `Linked to ${profile.display_name || profile.id || 'your Spotify account'}.`,
+                    });
+                });
+            }
+        });
+    });
 }
 
 // Add keyboard shortcut for performance dashboard

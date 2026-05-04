@@ -168,6 +168,7 @@ function buildDock() {
             <span class="music-service-btn__dot" aria-hidden="true"></span>
         `;
         btn.addEventListener('click', () => onClick(svc));
+        btn.addEventListener('contextmenu', (e) => onContextMenu(svc, e));
         dockEl.appendChild(btn);
     }
 
@@ -183,14 +184,32 @@ function refreshButtonState(serviceId) {
     if (!dockEl) return;
     const btn = dockEl.querySelector(`[data-service-id="${serviceId}"]`);
     if (!btn) return;
-    btn.classList.toggle('is-connected', isConnected(serviceId));
+    const connected = isConnected(serviceId);
+    btn.classList.toggle('is-connected', connected);
+
+    // Spotify is the first provider with a live profile fetch — when
+    // connected, surface the display_name in the tooltip so the user
+    // can see at a glance which account is linked. Other providers
+    // fall back to the static label.
+    const svc = SERVICES.find((s) => s.id === serviceId);
+    if (!svc) return;
+    if (serviceId === 'spotify' && connected) {
+        import('../features/spotify-auth.js').then(({ getSpotifyUser }) => {
+            const user = getSpotifyUser();
+            btn.title = user?.display_name
+                ? `Spotify — connected as ${user.display_name} (right-click to disconnect)`
+                : `Spotify — connected (right-click to disconnect)`;
+        });
+    } else {
+        btn.title = svc.label;
+    }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
 // Click handler
 // ────────────────────────────────────────────────────────────────────────────
 
-function onClick(svc) {
+async function onClick(svc) {
     // Free user → upgrade modal (the music feature keys are already
     // declared in upgrade.js → FEATURES). Use the closest match for
     // YouTube (no dedicated entry) — it shares Spotify's copy.
@@ -215,14 +234,51 @@ function onClick(svc) {
         return;
     }
 
-    // Pro + signed in → real connect flow lives here once OAuth is
-    // registered. For now surface a clear "in progress" notice so we
-    // don't fake a connection that won't actually play music.
+    // Spotify is the first provider with a real OAuth flow.
+    if (svc.id === 'spotify') {
+        const { isSpotifyConnected, connectSpotify, getSpotifyUser }
+            = await import('../features/spotify-auth.js');
+        if (isSpotifyConnected()) {
+            const user = getSpotifyUser();
+            const detail = user
+                ? `Connected as ${user.display_name}. Right-click the icon to disconnect.`
+                : `Right-click the icon to disconnect.`;
+            showGentleToast({ icon: '♪', title: 'Spotify connected', detail });
+            return;
+        }
+        // Will navigate the page away to accounts.spotify.com — the
+        // promise won't resolve, the redirect happens.
+        await connectSpotify();
+        return;
+    }
+
+    // Other providers — OAuth not wired yet. Surface a clear notice
+    // so we don't fake a connection that won't actually play music.
     showGentleToast({
         icon: '♪',
         title: `${svc.label} — wiring in progress`,
         detail: `Connect flow ships once the OAuth client is registered. Your Pro subscription already covers it; check back soon.`,
         ttl: 6000,
+    });
+}
+
+async function onContextMenu(svc, e) {
+    // Right-click the Spotify button → disconnect (with confirmation).
+    // Other providers don't have a connect flow yet, so right-click is
+    // a no-op there.
+    if (svc.id !== 'spotify') return;
+    e.preventDefault();
+    const { isSpotifyConnected, disconnectSpotify, getSpotifyUser }
+        = await import('../features/spotify-auth.js');
+    if (!isSpotifyConnected()) return;
+    const user = getSpotifyUser();
+    const name = user?.display_name ? ` (${user.display_name})` : '';
+    if (!confirm(`Disconnect Spotify${name}?`)) return;
+    await disconnectSpotify();
+    showGentleToast({
+        icon: '♪',
+        title: 'Spotify disconnected',
+        detail: 'Reconnect anytime from the dock.',
     });
 }
 

@@ -12,3 +12,10 @@
 
 export const SUPABASE_URL = 'https://gctgnctloknqbbqxcewu.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_JRlgFJRGSQvU1B-As8hOrw_vNKSUrt7';
+
+// Spotify Web API + Web Playback SDK Client ID. Public by design —
+// PKCE auth flow doesn't use a client secret on the browser side, so
+// shipping this in source is safe. The two registered redirect URIs
+// (`https://universefocuses.com/auth/callback.html` and the `www.`
+// variant) are the only places Spotify will redirect back to.
+export const SPOTIFY_CLIENT_ID = '0a4c5843ff964ec78878fa8155689d01';
