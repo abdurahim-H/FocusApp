@@ -561,17 +561,27 @@ export function getCamera() {
 export function dispose() {
     window.removeEventListener('resize', handleResize);
 
+    // Post-processing modules: still owned directly by scene-manager.
     disposeGodRays();
     disposeAnamorphicStreak();
     disposePostProcessing();
-    disposeEtherealPetals();
-    disposeCosmicMotes();
-    disposeStarGlows();
-    disposeShootingStars();
-    disposeBlackHole();
-    disposeNebula();
-    disposeStarField();
-    disposeCosmicSkybox();
+
+    // Per-theme modules (skybox / starfield / nebula / blackhole /
+    // shooting stars / star-glows / cosmic-motes / ethereal-petals,
+    // plus the video-backed themes): owned by the registry. The
+    // earlier inline calls to disposeEtherealPetals / disposeCosmicMotes /
+    // disposeStarGlows / disposeShootingStars / disposeBlackHole /
+    // disposeNebula / disposeStarField / disposeCosmicSkybox were
+    // ReferenceErrors — those names were never imported. The registry
+    // already iterates the active theme's module list and calls each
+    // module's dispose() in reverse order, so this delegates cleanly.
+    if (activeTheme) {
+        try { deactivateTheme(activeTheme); } catch (e) {
+            console.warn('[scene-manager] deactivateTheme failed:', e);
+        }
+        activeTheme = null;
+        activeCtx = null;
+    }
 
     if (scene) {
         scene.dispose();

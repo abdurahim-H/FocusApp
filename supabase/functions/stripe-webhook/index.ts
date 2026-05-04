@@ -11,14 +11,21 @@
 //   • customer.subscription.deleted    — fully cancelled / period ended
 //   • invoice.payment_failed           — keep tier=pro for grace, mark status
 //
-// Mapping rule: tier='pro' iff Stripe status ∈ {active, trialing}.
-// Everything else collapses to tier='free'.
+// Mapping rule: tier='pro' iff Stripe status ∈ {active, trialing,
+// past_due}. The `past_due` inclusion is deliberate — it implements
+// a grace period during Stripe's smart-retry window, so a single
+// failed renewal payment doesn't immediately revoke Pro features.
+// Stripe transitions past_due → unpaid (or canceled, per the
+// dashboard's failed-payment policy) once retries are exhausted,
+// and neither of those is in the Pro set so the user does
+// eventually downgrade. The webhook comment + Terms § 5.5 + the
+// audit all agree on this policy.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Stripe from 'https://esm.sh/stripe@17.6.0?target=deno';
 import { getStripe } from '../_shared/stripe.ts';
 
-const PRO_STATUSES = new Set(['active', 'trialing']);
+const PRO_STATUSES = new Set(['active', 'trialing', 'past_due']);
 
 Deno.serve(async (req) => {
     if (req.method !== 'POST') {
@@ -96,8 +103,13 @@ async function handleEvent(
         }
 
         case 'invoice.payment_failed': {
-            // Don't downgrade immediately — Stripe handles dunning. Just
-            // refresh the subscription state so status reflects 'past_due'.
+            // Don't downgrade immediately — Stripe handles dunning and
+            // the past_due → grace mapping in PRO_STATUSES keeps tier
+            // = 'pro' for the duration of Stripe's retry window. Once
+            // retries are exhausted, Stripe will transition the
+            // subscription to unpaid or canceled and fire a separate
+            // customer.subscription.updated / .deleted event that
+            // flips tier to 'free'.
             const invoice = event.data.object as Stripe.Invoice;
             if (!invoice.subscription) return;
             const sub = await stripe.subscriptions.retrieve(invoice.subscription as string);

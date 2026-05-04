@@ -38,20 +38,30 @@ export const lastFreezeUsedDate = signal('');
 // ============================================================================
 const STATS_KEY = 'fu_stats_v1';
 
+/** Return today's date as YYYY-MM-DD in the user's LOCAL timezone.
+ *  Earlier versions used `new Date().toISOString().slice(0, 10)` which
+ *  returns UTC — for a user in CEST (UTC+2) that meant a focus session
+ *  finished at 1 am local was bucketed under the previous day. The
+ *  period-lower-bound functions further down already use local
+ *  midnight; the *ISO helpers are now consistent. */
+function localISO(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function todayISO() {
-    return new Date().toISOString().slice(0, 10);
+    return localISO(new Date());
 }
 
 function yesterdayISO() {
     const d = new Date();
     d.setDate(d.getDate() - 1);
-    return d.toISOString().slice(0, 10);
+    return localISO(d);
 }
 
 function dayBeforeYesterdayISO() {
     const d = new Date();
     d.setDate(d.getDate() - 2);
-    return d.toISOString().slice(0, 10);
+    return localISO(d);
 }
 
 // Monday-anchored week start for the streak-insurance "once per week" check.
@@ -61,7 +71,7 @@ function startOfWeekISO() {
     d.setHours(0, 0, 0, 0);
     const dow = (d.getDay() + 6) % 7; // Mon=0..Sun=6
     d.setDate(d.getDate() - dow);
-    return d.toISOString().slice(0, 10);
+    return localISO(d);
 }
 
 function loadStats() {
@@ -253,16 +263,20 @@ function maybeFlagPersonalBest(justFinishedSeconds) {
 
 /** Sum focus seconds across all sessions on the given ISO date. Pulls
  *  from the canonical sessions list; statistics' lifetime accumulator
- *  isn't day-bucketed so it can't answer this directly.
+ *  (`totalFocusSeconds`) isn't day-bucketed so it can't answer this.
  *
- *  The rest of this module derives "today" from `new Date().toISOString()`
- *  (UTC), so the day window here MUST also be UTC. Earlier versions used
- *  `new Date(\`${iso}T00:00:00\`)` which JavaScript parses as local
- *  midnight — for users in negative-UTC timezones that pushed the
- *  window forward by 4-12 hours, missing late-evening sessions. The
- *  trailing `Z` pins the parse to UTC. */
+ *  Both the iso input and the parsed window are now LOCAL — matches
+ *  todayISO() / yesterdayISO() etc. and the period-lower-bound
+ *  functions, which all use local midnight. Previously the iso was
+ *  UTC-formatted but parsed as UTC midnight, so a user in CEST who
+ *  did focus from 22:00–23:30 local on Mar 4 (= 20:00–21:30 UTC) got
+ *  it correctly bucketed; but a session at 00:30 local Mar 5 (=
+ *  22:30 UTC Mar 4) was bucketed under "Mar 4" by ISO formatting yet
+ *  the period-bound used local midnight (Mar 5), so the same session
+ *  showed under different days in different code paths. */
 function sumSecondsForDate(iso) {
-    const startMs = new Date(`${iso}T00:00:00.000Z`).getTime();
+    const [y, m, d] = iso.split('-').map(Number);
+    const startMs = new Date(y, m - 1, d).getTime(); // local midnight
     const endMs = startMs + 86_400_000;
     return getAllSessions()
         .filter((s) => s.kind === 'focus' && s.startedAt >= startMs && s.startedAt < endMs)
@@ -415,9 +429,11 @@ function renderStatsBar() {
         });
 
         if (currentPeriod === 'today') {
-            // Existing signal-driven values are fine for today.
             if (sessionsEl) sessionsEl.textContent = sessionsToday.value;
-            if (totalEl) totalEl.textContent = formatDuration(totalFocusSeconds.value);
+            // totalFocusSeconds is the LIFETIME accumulator — using it
+            // here would render lifetime focus time as "Today's focus".
+            // Re-derive today from the sessions list for accuracy.
+            if (totalEl) totalEl.textContent = formatDuration(sumSecondsForDate(todayISO()));
             if (tasksEl) tasksEl.textContent = tasksCompletedToday.value;
         } else {
             const periodSessions = sessionsInActivePeriod();
@@ -489,7 +505,11 @@ function renderGoalRing() {
         return;
     }
     ring.classList.remove('hidden');
-    const todayMin = totalFocusSeconds.value / 60;
+    // Daily progress must read TODAY, not lifetime. Same reason as
+    // the stats-bar fix above — `totalFocusSeconds` is a lifetime
+    // accumulator and would mark the goal complete after the user
+    // has done enough focus across all time, not just today.
+    const todayMin = sumSecondsForDate(todayISO()) / 60;
     // Cap at 1 — we don't paint past the full ring. Once the user
     // hits the goal, the ring stays full and lights up.
     const progress = Math.min(1, todayMin / goalMin);

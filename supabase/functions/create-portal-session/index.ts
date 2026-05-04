@@ -6,13 +6,13 @@
 // UX from there.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { CORS_HEADERS, jsonResponse, preflight } from '../_shared/cors.ts';
+import { jsonResponse, preflight } from '../_shared/cors.ts';
 import { getStripe } from '../_shared/stripe.ts';
 
 Deno.serve(async (req) => {
-    if (req.method === 'OPTIONS') return preflight();
+    if (req.method === 'OPTIONS') return preflight(req);
     if (req.method !== 'POST') {
-        return jsonResponse({ error: 'method_not_allowed' }, 405);
+        return jsonResponse(req, { error: 'method_not_allowed' }, 405);
     }
 
     try {
@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
         });
         const { data: userData } = await userClient.auth.getUser();
         const user = userData?.user;
-        if (!user) return jsonResponse({ error: 'unauthorized' }, 401);
+        if (!user) return jsonResponse(req, { error: 'unauthorized' }, 401);
 
         // Look up the user's Stripe customer id. If they've never paid,
         // there's no portal to open — surface a friendly error.
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
 
         const customerId = row?.stripe_customer_id;
         if (!customerId) {
-            return jsonResponse({ error: 'no_customer' }, 404);
+            return jsonResponse(req, { error: 'no_customer' }, 404);
         }
 
         const stripe = getStripe();
@@ -55,9 +55,9 @@ Deno.serve(async (req) => {
             return_url: baseUrl,
         });
 
-        return jsonResponse({ url: session.url });
+        return jsonResponse(req, { url: session.url });
     } catch (err) {
         console.error('[create-portal-session]', err);
-        return jsonResponse({ error: 'server_error', detail: String(err) }, 500);
+        return jsonResponse(req, { error: 'server_error', detail: String(err) }, 500);
     }
 });
