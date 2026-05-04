@@ -8,7 +8,12 @@ import { getAccessToken } from './spotify-auth.js';
 import { getDeviceId } from './spotify-player.js';
 
 /**
- * GET /v1/search?type=track,album,artist
+ * GET /v1/search?type=track
+ *
+ * Track-only search — covers the "find a song and play it"
+ * use case the streaming tab is built around. Album / artist /
+ * playlist search can be re-introduced later as separate filters
+ * if there's demand.
  *
  * Returns parsed body or null on failure. The widget treats null as
  * "no results" (same as an empty-array response).
@@ -16,9 +21,14 @@ import { getDeviceId } from './spotify-player.js';
 export async function searchSpotify(query, limit = 12) {
     const token = await getAccessToken();
     if (!token) return null;
-    const q = encodeURIComponent(query.trim());
+    const q = String(query || '').trim();
     if (!q) return null;
-    const url = `https://api.spotify.com/v1/search?q=${q}&type=track,album,artist&limit=${limit}`;
+    const params = new URLSearchParams({
+        q,
+        type: 'track',
+        limit: String(Math.max(1, Math.min(50, limit))),
+    });
+    const url = `https://api.spotify.com/v1/search?${params.toString()}`;
     let res;
     try {
         res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
@@ -27,7 +37,11 @@ export async function searchSpotify(query, limit = 12) {
         return null;
     }
     if (!res.ok) {
-        console.warn(`[spotify-search] /search → ${res.status}`);
+        // Surface Spotify's own error body so 400 / 403 actually tell
+        // us what's wrong instead of just the status code.
+        let bodyText = '';
+        try { bodyText = await res.text(); } catch { /* tolerate */ }
+        console.warn(`[spotify-search] /search → ${res.status}`, bodyText.slice(0, 240));
         return null;
     }
     try { return await res.json(); } catch { return null; }
