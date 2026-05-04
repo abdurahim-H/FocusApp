@@ -214,8 +214,25 @@ async function fetchProfile(accessToken) {
     const res = await fetch('https://api.spotify.com/v1/me', {
         headers: { Authorization: `Bearer ${accessToken}` },
     });
-    if (!res.ok) throw new Error(`Profile fetch failed (${res.status})`);
-    return res.json();
+    if (res.ok) return res.json();
+    // 403 from /me with a freshly-issued token nearly always means the
+    // app is in Spotify's Development Mode and the authorising user
+    // isn't on the app's User Management list. Surface that with a
+    // specific message so the upstream error toast can tell the user
+    // exactly what to fix instead of "Profile fetch failed (403)".
+    if (res.status === 403) {
+        const e = new Error(
+            'Spotify rejected the profile read (403). Most likely cause: '
+            + 'this Spotify account isn\'t added in your app\'s '
+            + 'User Management list (the app is in Development mode, so '
+            + 'only listed accounts can use it). Add yourself in the '
+            + 'Spotify developer dashboard → Cosmic Focus → User '
+            + 'Management → Add new user, then try again.'
+        );
+        e.code = 'spotify_user_not_in_dev_list';
+        throw e;
+    }
+    throw new Error(`Profile fetch failed (${res.status})`);
 }
 
 /**
@@ -267,6 +284,24 @@ export async function processCallbackIfPresent() {
         return profile;
     } catch (e) {
         console.warn('[spotify-auth] callback processing failed:', e);
+        // Surface a user-visible toast — silent console errors leave
+        // the user staring at a non-green dock button with no clue
+        // what's wrong. Also clear the URL so a refresh doesn't loop.
+        try {
+            url.searchParams.delete('code');
+            url.searchParams.delete('state');
+            history.replaceState(null, '', url.pathname + url.search + url.hash);
+        } catch (_) { /* tolerate */ }
+        try {
+            const { showGentleToast } = await import('../utils/gentle-toast.js');
+            const detail = e.code === 'spotify_user_not_in_dev_list'
+                ? 'Add your Spotify account email to the app\'s User Management list in the Spotify developer dashboard, then try again.'
+                : (e.message || 'Please try again.');
+            const title = e.code === 'spotify_user_not_in_dev_list'
+                ? 'Spotify access denied'
+                : 'Spotify connect failed';
+            showGentleToast({ icon: '⚠', title, detail, ttl: 9000 });
+        } catch (_) { /* tolerate */ }
         return null;
     }
 }

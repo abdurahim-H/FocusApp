@@ -1,0 +1,16 @@
+# Cloudflare Workers Static Assets redirects.
+#
+# Canonical host is `universefocuses.com` (no www). Anyone landing on
+# the www form gets bounced to the apex with a permanent (301) redirect
+# so localStorage / sessionStorage / cookies all live under one origin
+# — without this, a user who signs in on universefocuses.com would have
+# to sign in again when they hit www.universefocuses.com (different
+# origin = different storage). Same reasoning fixes the Spotify
+# redirect-URI mismatch class of bugs (one canonical host, one
+# registered redirect URI).
+#
+# Format: <from>  <to>  <status>
+# `:splat` matches the wildcard part of the source path so query strings
+# and deep paths are preserved verbatim.
+
+https://www.universefocuses.com/*  https://universefocuses.com/:splat  301
