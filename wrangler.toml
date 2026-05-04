@@ -1,10 +1,15 @@
 # Cloudflare Workers — Static Assets config.
-# Tells `npx wrangler deploy` to serve the Vite build output as a static site.
+# Tells `npx wrangler deploy` to serve the Vite build output as a static
+# site, fronted by a tiny Worker (src/worker.js) that canonicalises
+# www.universefocuses.com → universefocuses.com so localStorage /
+# cookies / sessions live under one origin.
 # https://developers.cloudflare.com/workers/static-assets/
 
 name = "focusapp"
+main = "src/worker.js"
 compatibility_date = "2026-04-19"
 
 [assets]
+binding = "ASSETS"
 directory = "./dist"
 not_found_handling = "404-page"
