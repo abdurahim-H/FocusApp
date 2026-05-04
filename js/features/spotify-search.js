@@ -18,21 +18,17 @@ import { getDeviceId } from './spotify-player.js';
  * Returns parsed body or null on failure. The widget treats null as
  * "no results" (same as an empty-array response).
  */
-export async function searchSpotify(query, limit = 20) {
+export async function searchSpotify(query) {
     const token = await getAccessToken();
     if (!token) return null;
     const q = String(query || '').trim();
     if (!q) return null;
-    // Spotify rejects /search with `Invalid limit` for some values
-    // under their tightened dev-mode quota — even the previously
-    // documented `limit=12`. 20 is the API default and consistently
-    // accepted; clamp to [1, 50] in case a caller ever needs a smaller
-    // page (we'll trim client-side if so).
-    const params = new URLSearchParams({
-        q,
-        type: 'track',
-        limit: String(Math.max(1, Math.min(50, limit))),
-    });
+    // Spotify's tightened dev-mode quota rejects any explicit
+    // `limit` value — even the documented default of 20 came back
+    // with `{"error":{"status":400,"message":"Invalid limit"}}`.
+    // So we omit limit entirely; Spotify applies its default (20)
+    // server-side and returns up to that many results.
+    const params = new URLSearchParams({ q, type: 'track' });
     const url = `https://api.spotify.com/v1/search?${params.toString()}`;
     let res;
     try {
