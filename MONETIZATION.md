@@ -3,6 +3,12 @@
 A freemium plan with a **narrow** paywall: most of the app stays free; Pro
 gates a small set of high-value features. Two SKUs only — Free and Pro.
 
+> **⚠️ Paywall currently OFF.** As of the latest `[Unreleased]` changelog
+> entry the paywall is disabled via the `PAYWALL_ENABLED` kill-switch in
+> `js/features/billing.js` — every gated feature below is free for everyone.
+> The gates and Stripe wiring are untouched; set `PAYWALL_ENABLED = true` to
+> re-enable Pro exactly as documented here.
+
 > **TL;DR.** Free covers daily focus work — the timer, tasks, sounds,
 > all six scene themes (Black Hole / Sakura / Aurora / Celestial Garden
 > / Silent Autumn / Ocean), the cosmos, statistics on Home, the Focus

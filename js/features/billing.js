@@ -43,6 +43,14 @@ export const tier = signal('free');
 const CACHE_KEY = 'fu_tier_cache';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000; // 5 min
 
+// Paywall kill-switch. While false, every feature is free for everyone —
+// signed-in or not, current or future — because isPro() short-circuits to
+// true and the settings account card drops its upgrade CTA. Flip back to
+// true to restore the Pro gates; nothing else needs to change. The real
+// tier signal keeps tracking the server underneath so genuine subscribers
+// still see "Manage subscription".
+export const PAYWALL_ENABLED = false;
+
 // ────────────────────────────────────────────────────────────────────────────
 // Cache (optimistic-load on import)
 // ────────────────────────────────────────────────────────────────────────────
@@ -86,6 +94,7 @@ function clearCache() {
 
 /** Synchronous gate. Use this everywhere. */
 export function isPro() {
+    if (!PAYWALL_ENABLED) return true; // paywall off — all features free
     return tier.value === 'pro';
 }
 

@@ -10,6 +10,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+- **Paywall temporarily disabled** — every Pro feature (Notes, the Overview / Tasks / Sounds / Insights Profile sections, music-service connects) is free for all users, signed-in or not. Flipped via a single `PAYWALL_ENABLED` kill-switch in `js/features/billing.js`; `isPro()` short-circuits to `true` and the settings account card drops its upgrade CTA in favour of an "All features unlocked" chip. No gates were removed — flipping the flag back restores Pro exactly as before.
+
 ### Added
 - **Spotify connect (PKCE OAuth) + mini-player widget.** Click the Spotify icon in the music dock → Spotify auth page → land back with the icon green and a "Now playing" card at bottom-right showing track title / artist / album art and play, pause, skip controls. Token refresh is automatic; right-click the dock icon to disconnect. Premium accounts get full playback control; Free accounts see the metadata read-only with controls disabled. Web Playback SDK registers your browser as a Spotify Connect device named "Cosmic Focus".
 - **Music services dock** at bottom-left — connect buttons for Spotify, YouTube Music, Apple Music, YouTube, and SoundCloud. Spotify is wired end-to-end; the other four still surface a "wiring in progress" toast until each gets its own provider-side dashboard registration. Brand icons stay recognisable on hover and when connected; rest-state colour and dock chrome retune per theme.

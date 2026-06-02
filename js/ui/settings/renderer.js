@@ -1077,7 +1077,21 @@ function paintAccountStatus(el) {
     // Read the current tier synchronously through a dynamic import.
     // The signal's current value is exposed; we don't need to await
     // anything — it's initialised at module load.
-    import('../../features/billing.js').then(({ tier }) => {
+    import('../../features/billing.js').then(({ tier, PAYWALL_ENABLED }) => {
+        // Paywall off: everyone has every feature. Only genuine paid
+        // subscribers keep the manage-subscription CTA; free users see an
+        // "all unlocked" chip with no upgrade prompt to chase a dead button.
+        if (!PAYWALL_ENABLED && tier.value !== 'pro') {
+            el.innerHTML = `
+                <div class="sr__header">
+                    <div class="sr-account-status__row">
+                        <span class="sr-account-status__chip">All features unlocked</span>
+                    </div>
+                </div>
+                <p class="sr__help sr-account-status__sub">Every feature is free right now — no upgrade needed.</p>
+            `;
+            return;
+        }
         const isPro = tier.value === 'pro';
         const label = isPro ? 'Cosmic Focus Pro' : 'Free plan';
         const sub = isPro
