@@ -1,0 +1,96 @@
+/*
+ * Cosmic Focus kit — form fields. Accessible by construction:
+ * every control pairs with a real .cf-field__label (for=) or aria-label.
+ */
+.cf-field { display: grid; gap: var(--sp-2); }
+.cf-field__label { font-size: var(--text-sm); font-weight: var(--w-medium); color: var(--fg); }
+.cf-field__help { font-size: var(--text-xs); color: var(--fg-subtle); }
+.cf-field__error { font-size: var(--text-xs); color: var(--danger); }
+.cf-field.is-invalid .cf-field__label { color: var(--danger); }
+
+/* Text / textarea */
+.cf-input, .cf-textarea {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--text-base);   /* 16px keeps iOS from auto-zooming */
+  color: var(--fg);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 11px var(--sp-3);
+  min-height: 44px;
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.cf-textarea { min-height: 96px; resize: vertical; line-height: var(--leading-normal); }
+.cf-input::placeholder, .cf-textarea::placeholder { color: var(--fg-subtle); }
+.cf-input:focus-visible, .cf-textarea:focus-visible {
+  outline: none; border-color: var(--brand-soft);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 30%, transparent);
+}
+.cf-field.is-invalid .cf-input, .cf-field.is-invalid .cf-textarea { border-color: var(--danger); }
+
+/* Range slider — aurora fill driven by --fill (0-100%) set from JS */
+.cf-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px; cursor: pointer;
+  border-radius: var(--radius-full);
+  background:
+    linear-gradient(90deg, var(--brand), var(--brand-alt)) 0 / var(--fill, 50%) 100% no-repeat,
+    var(--surface-3);
+}
+.cf-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; border-radius: var(--radius-full);
+  background: #fff; box-shadow: var(--elev-1), var(--glow-violet); cursor: grab;
+}
+.cf-slider::-moz-range-thumb {
+  width: 20px; height: 20px; border: 0; border-radius: var(--radius-full);
+  background: #fff; box-shadow: var(--elev-1), var(--glow-violet); cursor: grab;
+}
+.cf-slider:focus-visible { outline: none; box-shadow: var(--ring-shadow); }
+
+/* Stepper */
+.cf-stepper { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.cf-stepper__btn {
+  width: 34px; height: 34px; border-radius: var(--radius-full);
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--fg); cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-base) var(--ease-out);
+}
+.cf-stepper__btn:hover { background: var(--surface-3); }
+.cf-stepper__btn:active { transform: scale(.92); }
+.cf-stepper__btn:focus-visible { outline: none; box-shadow: var(--ring-shadow); }
+.cf-stepper__value { min-width: 3ch; text-align: center; font-variant-numeric: tabular-nums; font-weight: var(--w-medium); }
+
+/* Segmented control (wrap buttons in role=radiogroup) */
+.cf-segmented {
+  display: inline-flex; padding: 4px; gap: 2px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-full);
+}
+.cf-segmented__btn {
+  font-family: var(--font-ui); font-size: var(--text-sm); font-weight: var(--w-medium);
+  color: var(--fg-muted); background: transparent; border: 0; border-radius: var(--radius-full);
+  padding: 7px 14px; min-height: 34px; cursor: pointer;
+  transition: color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
+}
+.cf-segmented__btn.is-active { color: var(--brand-contrast); background: var(--aurora-grad); }
+.cf-segmented__btn:focus-visible { outline: none; box-shadow: var(--ring-shadow); }
+
+/* Switch (button role=switch, aria-checked) */
+.cf-switch {
+  position: relative; width: 46px; height: 28px; flex: 0 0 auto; padding: 0;
+  border-radius: var(--radius-full); border: 1px solid var(--border);
+  background: var(--surface-3); cursor: pointer;
+  transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+}
+.cf-switch[aria-checked="true"] { background: var(--aurora-grad); border-color: transparent; }
+.cf-switch__thumb {
+  position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: var(--radius-full);
+  background: #fff; box-shadow: var(--elev-1); transition: transform var(--dur-base) var(--ease-spring);
+}
+.cf-switch[aria-checked="true"] .cf-switch__thumb { transform: translateX(18px); }
+.cf-switch:focus-visible { outline: none; box-shadow: var(--ring-shadow); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-stepper__btn:active { transform: none; }
+}

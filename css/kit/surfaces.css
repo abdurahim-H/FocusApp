@@ -1,0 +1,60 @@
+/*
+ * Cosmic Focus kit — surfaces (glass, cards, chips, dividers).
+ * One tokenised glass recipe; variants change elevation only.
+ */
+.cf-surface {
+  background: var(--surface-2);
+  backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  border: 1px solid var(--border);
+  box-shadow: var(--elev-2), var(--glass-inset);
+  border-radius: var(--radius-lg);
+}
+.cf-surface--raised { box-shadow: var(--elev-3), var(--glass-inset); }
+.cf-surface--flat { box-shadow: none; background: var(--surface-1); }
+.cf-surface--brandline { border-top: 2px solid transparent; border-image: var(--aurora-grad) 1; }
+
+.cf-card {
+  background: var(--surface-2);
+  backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  border: 1px solid var(--border);
+  box-shadow: var(--elev-2), var(--glass-inset);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-6);
+}
+.cf-card__eyebrow {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  color: var(--brand-soft);
+  font-weight: var(--w-medium);
+  margin: 0;
+}
+.cf-card__title {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-tight);
+  margin: var(--sp-1) 0 0;
+}
+.cf-card__sub { color: var(--fg-muted); font-size: var(--text-sm); margin: var(--sp-1) 0 0; }
+
+.cf-divider { height: 1px; background: var(--border); border: 0; margin: var(--sp-4) 0; }
+
+/* Chip / badge */
+.cf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  font-weight: var(--w-medium);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--fg-muted);
+}
+.cf-chip--focus  { color: var(--focus); border-color: color-mix(in srgb, var(--focus) 42%, transparent); }
+.cf-chip--break  { color: var(--break); border-color: color-mix(in srgb, var(--break) 42%, transparent); }
+.cf-chip--celebrate { color: var(--celebrate); border-color: color-mix(in srgb, var(--celebrate) 42%, transparent); }

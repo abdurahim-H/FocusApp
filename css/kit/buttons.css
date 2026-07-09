@@ -1,0 +1,75 @@
+/*
+ * Cosmic Focus kit — buttons.
+ * Namespaced .cf-btn so it coexists with the legacy .liquid-glass-btn during the rebuild.
+ * All values come from tokens.css. Press feel + reduced-motion built in.
+ */
+.cf-btn {
+  --_bg: var(--surface-2);
+  --_fg: var(--fg);
+  --_bd: var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  font-family: var(--font-ui);
+  font-weight: var(--w-semibold);
+  font-size: var(--text-sm);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  min-height: 44px;              /* touch target floor */
+  padding: 0 var(--sp-5);
+  color: var(--_fg);
+  background: var(--_bg);
+  border: 1px solid var(--_bd);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(var(--blur-md)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(160%);
+  transition:
+    transform var(--dur-fast) var(--ease-spring),
+    background var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+.cf-btn:hover { background: var(--surface-3); }
+.cf-btn:active { transform: scale(.96); }
+.cf-btn:focus-visible { outline: none; box-shadow: var(--ring-shadow); }
+.cf-btn[disabled],
+.cf-btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; pointer-events: none; }
+
+/* Variants */
+.cf-btn--primary {
+  --_fg: var(--brand-contrast);
+  --_bd: transparent;
+  background: var(--aurora-grad);
+  background-size: 160% 160%;
+  background-position: 0 0;
+  box-shadow: var(--glow-violet);
+}
+.cf-btn--primary:hover { background-position: 100% 0; }
+.cf-btn--ghost { --_bg: transparent; --_bd: transparent; }
+.cf-btn--ghost:hover { background: var(--surface-1); }
+.cf-btn--outline { --_bg: transparent; }
+.cf-btn--danger { --_fg: #2b0410; --_bd: transparent; background: var(--danger); }
+.cf-btn--danger:hover { background: color-mix(in srgb, var(--danger) 88%, white); }
+.cf-btn--break { --_fg: #04231b; --_bd: transparent; background: var(--break); }
+
+/* Armed state for the two-step confirmAction() pattern */
+.cf-btn.is-arming { --_fg: #2b0410; --_bd: transparent; background: var(--danger); }
+
+/* Sizes */
+.cf-btn--sm { min-height: 34px; padding: 0 var(--sp-3); font-size: var(--text-xs); }
+.cf-btn--lg { min-height: 52px; padding: 0 var(--sp-8); font-size: var(--text-base); }
+
+/* Icon-only — preserve a 44px hit area even around a 20px glyph */
+.cf-btn--icon { min-width: 44px; padding: 0; }
+.cf-btn--icon.cf-btn--sm { min-width: 34px; min-height: 34px; }
+.cf-btn__icon { width: var(--icon-md); height: var(--icon-md); display: block; flex: 0 0 auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-btn { transition: background var(--dur-base) linear; }
+  .cf-btn:active { transform: none; }
+}

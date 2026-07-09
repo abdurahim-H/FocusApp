@@ -1,0 +1,56 @@
+/*
+ * Cosmic Focus kit — expanded nav pill (Home · Focus · Progress).
+ * Sliding aurora indicator is a positioned child driven by JS (--x / --w),
+ * so it works without :has() and animates on the compositor.
+ */
+.cf-navpill {
+  position: relative;
+  display: inline-flex;
+  gap: 2px;
+  padding: 5px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  box-shadow: var(--elev-2), var(--glass-inset);
+}
+.cf-navpill__btn {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-ui);
+  font-weight: var(--w-medium);
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-full);
+  padding: 9px 20px;
+  min-height: 40px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--dur-base) var(--ease-out);
+}
+.cf-navpill__btn:hover { color: var(--fg); }
+.cf-navpill__btn.is-active,
+.cf-navpill__btn[aria-current="page"] { color: var(--brand-contrast); }
+.cf-navpill__btn:focus-visible { outline: none; box-shadow: var(--ring-shadow); }
+
+.cf-navpill__indicator {
+  position: absolute;
+  z-index: 0;
+  top: 5px;
+  bottom: 5px;
+  left: 0;
+  width: var(--w, 0px);
+  border-radius: var(--radius-full);
+  background: var(--aurora-grad);
+  box-shadow: var(--glow-violet);
+  transform: translateX(var(--x, 0px));
+  transition: transform var(--dur-slow) var(--ease-out), width var(--dur-slow) var(--ease-out);
+  will-change: transform, width;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cf-navpill__btn,
+  .cf-navpill__indicator { transition: none; }
+}
