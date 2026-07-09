@@ -1,0 +1,99 @@
+/*
+ * Cosmic Focus — new shell layout (Aurora Reimagine). Loaded only by the new
+ * shell entry (index2.html); intentionally independent of the legacy style.css.
+ */
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: var(--font-ui);
+  color: var(--fg);
+  background: var(--bg);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+#scene-container { position: fixed; inset: 0; z-index: var(--z-scene); }
+#scene-container canvas { width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
+
+/* Aurora vignette over the scene — improves text legibility (the contrast floor) */
+.cf-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-scene);
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(139, 92, 255, .12), transparent 60%),
+    radial-gradient(100% 70% at 100% 8%, rgba(34, 224, 255, .08), transparent 55%),
+    linear-gradient(180deg, rgba(6, 4, 15, .35), rgba(6, 4, 15, 0) 28%, rgba(6, 4, 15, .55));
+}
+
+.cf-app { position: relative; z-index: var(--z-content); height: 100dvh; }
+
+.cf-skip {
+  position: fixed; left: 8px; top: -60px; z-index: var(--z-skip);
+  background: var(--surface-3); color: var(--fg);
+  padding: 10px 16px; border-radius: var(--radius-md);
+  transition: top var(--dur-base) var(--ease-out);
+}
+.cf-skip:focus { top: 8px; }
+
+/* Top nav cluster (centered pill) */
+.cf-topnav {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top, 0px));
+  left: 50%; transform: translateX(-50%);
+  z-index: var(--z-chrome);
+  display: flex; align-items: center; gap: var(--sp-3);
+}
+
+/* Corner chrome */
+.cf-corner {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top, 0px));
+  z-index: var(--z-chrome);
+  display: flex; gap: var(--sp-2);
+}
+.cf-corner--left { left: max(18px, env(safe-area-inset-left, 0px)); }
+.cf-corner--right { right: max(18px, env(safe-area-inset-right, 0px)); }
+
+/* Mode panels */
+.cf-modes { position: relative; height: 100dvh; }
+.cf-mode {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  padding: 104px var(--sp-6) var(--sp-16);
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+.cf-mode.is-active { opacity: 1; visibility: visible; }
+@media (prefers-reduced-motion: reduce) { .cf-mode { transition: none; } }
+
+/* Home surface */
+.cf-home { text-align: center; max-width: 720px; }
+.cf-home__eyebrow { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--brand-soft); margin: 0; }
+.cf-home__title {
+  font-family: var(--font-display); font-weight: var(--w-bold);
+  font-size: var(--text-hero); line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tighter); margin: var(--sp-2) 0 0;
+}
+.cf-home__greeting { font-size: var(--text-md); color: var(--fg-muted); margin: var(--sp-5) 0 0; }
+.cf-home__clock { font-variant-numeric: tabular-nums; font-size: var(--text-sm); color: var(--fg-subtle); margin-top: var(--sp-2); }
+.cf-home__cta { margin-top: var(--sp-8); display: inline-flex; gap: var(--sp-3); flex-wrap: wrap; justify-content: center; }
+
+/* Loader */
+.cf-loading {
+  position: fixed; inset: 0; z-index: var(--z-modal);
+  display: grid; place-items: center; background: var(--space-950);
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+.cf-loading.hide { opacity: 0; pointer-events: none; }
+.cf-loading__orbit {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid var(--surface-3); border-top-color: var(--brand);
+  animation: cf-spin 900ms linear infinite;
+}
+@keyframes cf-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .cf-loading__orbit { animation: none; } }

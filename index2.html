@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Cosmic Focus — Aurora shell (preview)</title>
+    <meta name="robots" content="noindex">
+
+    <!-- Self-hosted fonts + design tokens + component kit + shell -->
+    <link rel="stylesheet" href="/css/base/fonts.css">
+    <link rel="stylesheet" href="/css/base/tokens.css">
+    <link rel="stylesheet" href="/css/kit.css">
+    <link rel="stylesheet" href="/css/ui2/shell.css">
+</head>
+<body>
+    <div id="scene-container"></div>
+
+    <div id="cf-loading" class="cf-loading" role="status" aria-label="Loading">
+        <div class="cf-loading__orbit"></div>
+    </div>
+
+    <!-- Babylon.js Core — pinned + SRI-verified (same build as the live app). -->
+    <script src="https://cdn.babylonjs.com/v9.4.1/babylon.js"
+            integrity="sha384-HEGohGgtXj+OSGtOn/YbHsrJ4GGPSzh6zeoRM2lTYO58/xontiDbO4JwX0H1nH5H"
+            crossorigin="anonymous"></script>
+
+    <script type="module" src="/js/ui2/boot.js"></script>
+</body>
+</html>
