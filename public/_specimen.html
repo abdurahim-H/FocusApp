@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cosmic Focus — Aurora Reimagine specimen</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/css/base/fonts.css">
+  <link rel="stylesheet" href="/css/base/tokens.css">
+  <style>
+    /* Specimen-only layout (dev style guide; not shipped to master) */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100dvh; color: var(--fg);
+      font-family: var(--font-ui); line-height: var(--leading-normal);
+      background:
+        radial-gradient(90% 60% at 20% -10%, rgba(139,92,255,.22), transparent 60%),
+        radial-gradient(80% 60% at 90% 10%, rgba(34,224,255,.16), transparent 55%),
+        radial-gradient(70% 60% at 60% 110%, rgba(255,61,166,.14), transparent 55%),
+        var(--space-950);
+      background-attachment: fixed;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: var(--sp-16) var(--sp-6) var(--sp-24); }
+    section { margin-block: var(--sp-16); }
+    .eyebrow {
+      font-family: var(--font-ui); font-weight: var(--w-medium); font-size: var(--text-xs);
+      text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--brand-soft);
+      margin: 0 0 var(--sp-4);
+    }
+    h2.sec { font-family: var(--font-display); font-weight: var(--w-semibold); font-size: var(--text-xl);
+      letter-spacing: var(--tracking-tight); margin: 0 0 var(--sp-6); color: var(--fg); }
+    .row { display: flex; flex-wrap: wrap; gap: var(--sp-4); align-items: center; }
+    .grid { display: grid; gap: var(--sp-4); }
+    .muted { color: var(--fg-muted); }
+    code { font-family: var(--font-mono); font-size: .85em; color: var(--brand-alt-safe); }
+
+    /* Swatches */
+    .swatches { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .sw { border-radius: var(--radius-md); border: 1px solid var(--border); overflow: hidden; }
+    .sw__chip { height: 72px; }
+    .sw__meta { padding: var(--sp-2) var(--sp-3); background: var(--surface-1); font-size: var(--text-xs); }
+    .sw__name { font-weight: var(--w-medium); }
+    .sw__hex { color: var(--fg-subtle); font-family: var(--font-mono); }
+
+    /* Type ramp */
+    .hero { font-family: var(--font-display); font-weight: var(--w-bold); font-size: var(--text-hero);
+      line-height: var(--leading-tight); letter-spacing: var(--tracking-tighter); margin: 0; }
+    .display { font-family: var(--font-display); font-weight: var(--w-semibold); font-size: var(--text-3xl);
+      line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); margin: var(--sp-4) 0 0; }
+    .h1 { font-family: var(--font-display); font-weight: var(--w-semibold); font-size: var(--text-2xl); margin: var(--sp-4) 0 0; }
+    .body { font-size: var(--text-base); max-width: 60ch; color: var(--fg-muted); margin: var(--sp-4) 0 0; }
+    .label { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-caps);
+      color: var(--fg-subtle); margin: var(--sp-4) 0 0; font-weight: var(--w-medium); }
+
+    /* Buttons */
+    .btn { font-family: var(--font-ui); font-weight: var(--w-semibold); font-size: var(--text-sm);
+      border: 1px solid var(--border); border-radius: var(--radius-full); padding: 12px 22px; color: var(--fg);
+      background: var(--surface-2); backdrop-filter: blur(var(--blur-md)); cursor: pointer;
+      transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-base) var(--ease-out); }
+    .btn:hover { transform: translateY(-1px); }
+    .btn--primary { background: var(--aurora-grad); color: var(--brand-contrast); border-color: transparent; box-shadow: var(--glow-violet); }
+    .btn--ghost { background: transparent; }
+    .btn--danger { color: #2b0410; background: var(--danger); border-color: transparent; }
+
+    /* Glass card */
+    .card { padding: var(--sp-6); }
+    .card h3 { font-family: var(--font-display); font-weight: var(--w-semibold); margin: 0 0 var(--sp-2); }
+
+    /* Timer sample */
+    .timer { text-align: center; padding: var(--sp-10) var(--sp-6); }
+    .timer__type { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--brand-soft); }
+    .timer__time { font-family: var(--font-ui); font-weight: var(--w-display); font-size: clamp(4rem, 16vw, 8rem);
+      line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums slashed-zero;
+      background: var(--aurora-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .timer__sub { color: var(--fg-muted); font-size: var(--text-sm); margin-top: var(--sp-2); }
+
+    /* Nav pill */
+    .pill { display: inline-flex; gap: 2px; padding: 5px; border-radius: var(--radius-full);
+      background: var(--surface-2); border: 1px solid var(--border); backdrop-filter: blur(var(--blur-lg)); box-shadow: var(--elev-2); }
+    .pill button { font-family: var(--font-ui); font-weight: var(--w-medium); font-size: var(--text-sm); color: var(--fg-muted);
+      background: transparent; border: 0; border-radius: var(--radius-full); padding: 9px 20px; cursor: pointer; }
+    .pill button.active { color: var(--brand-contrast); background: var(--aurora-grad); box-shadow: var(--glow-violet); }
+
+    /* Task card */
+    .task { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-4); }
+    .check { width: 22px; height: 22px; border-radius: var(--radius-full); border: 2px solid var(--brand-soft); flex: 0 0 auto; }
+    .task__name { font-weight: var(--w-medium); }
+    .chip { font-size: var(--text-xs); padding: 3px 10px; border-radius: var(--radius-full); background: var(--surface-2);
+      border: 1px solid var(--border); color: var(--fg-muted); }
+    .chip--focus { color: var(--focus); border-color: color-mix(in srgb, var(--focus) 40%, transparent); }
+    .chip--break { color: var(--break); border-color: color-mix(in srgb, var(--break) 40%, transparent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header>
+      <p class="eyebrow">Cosmic Focus · design system</p>
+      <h1 class="hero"><span class="aurora-text">Aurora</span> Reimagine</h1>
+      <p class="body">The bold direction, rendered from the real tokens (<code>css/base/tokens.css</code>) and self-hosted fonts (<code>Clash Display</code> + <code>Inter</code>). Electric violet → magenta → cyan on deep space; gold reserved for celebration.</p>
+    </header>
+
+    <section>
+      <p class="eyebrow">Palette</p>
+      <h2 class="sec">Aurora spectrum</h2>
+      <div class="grid swatches" id="swatches"></div>
+    </section>
+
+    <section>
+      <p class="eyebrow">Typography</p>
+      <h2 class="sec">Editorial scale — Clash Display + Inter</h2>
+      <div class="hero">Focus deeper</div>
+      <div class="display">Display 56 · Clash</div>
+      <div class="h1">H1 40 · Clash Semibold</div>
+      <p class="body">Body 16 · Inter — long-form legibility with a ~5:1 hero-to-body contrast ratio. The quick brown fox jumps over the lazy dog, 0123456789.</p>
+      <p class="label">Label · Inter 500 · uppercase</p>
+    </section>
+
+    <section>
+      <p class="eyebrow">Buttons</p>
+      <h2 class="sec">Actions</h2>
+      <div class="row">
+        <button class="btn btn--primary">Start Focus</button>
+        <button class="btn">Secondary</button>
+        <button class="btn btn--ghost">Ghost</button>
+        <button class="btn btn--danger">Clear sky</button>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">Navigation</p>
+      <h2 class="sec">Expanded pill</h2>
+      <div class="pill">
+        <button class="active">Home</button>
+        <button>Focus</button>
+        <button>Progress</button>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">Surfaces</p>
+      <h2 class="sec">Glass + timer + tasks</h2>
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="aurora-glass timer">
+          <div class="timer__type">Focus</div>
+          <div class="timer__time">24:59</div>
+          <div class="timer__sub">Session 1 of 4</div>
+        </div>
+        <div class="aurora-glass card">
+          <h3>Tasks</h3>
+          <div class="task"><span class="check"></span><span class="task__name">Design the token system</span><span class="chip chip--focus">focus</span></div>
+          <div class="task"><span class="check"></span><span class="task__name">Wire the component kit</span><span class="chip">2 🍅</span></div>
+          <div class="task"><span class="check"></span><span class="task__name">Take a break</span><span class="chip chip--break">break</span></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <script>
+    // Render swatches from the actual CSS variables so the specimen never drifts from tokens.css
+    const groups = [
+      ['--space-900','space-900'],['--space-700','space-700'],
+      ['--violet-500','violet-500 (brand)'],['--violet-400','violet-400'],
+      ['--magenta-500','magenta-500'],['--cyan-400','cyan-400'],['--cyan-500','cyan-500'],
+      ['--lime-400','lime-400 (break)'],['--gold-400','gold-400 (celebrate)'],
+      ['--success-400','success'],['--warning-400','warning'],['--danger-400','danger'],
+    ];
+    const cs = getComputedStyle(document.documentElement);
+    document.getElementById('swatches').innerHTML = groups.map(([v,name]) => {
+      const hex = cs.getPropertyValue(v).trim();
+      return `<div class="sw"><div class="sw__chip" style="background:${hex}"></div>
+        <div class="sw__meta"><div class="sw__name">${name}</div><div class="sw__hex">${hex}</div></div></div>`;
+    }).join('');
+  </script>
+</body>
+</html>

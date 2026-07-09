@@ -1,0 +1,230 @@
+/*
+ * Cosmic Focus — design tokens (Aurora Reimagine)
+ * Single source of truth for the rebuilt UI layer. Three layers:
+ *   primitive (raw)  →  semantic (role, theme-mapped)  →  component (scoped, elsewhere)
+ * New names are namespaced to NOT collide with the legacy tokens in style.css/themes.css,
+ * so this file is additive and the current app keeps booting while the rebuild lands.
+ */
+
+:root {
+  /* ---------- PRIMITIVE: space (deep, blue-violet-tinted; never pure #000) ---------- */
+  --space-950: #06040F;
+  --space-900: #0B0918;
+  --space-800: #141024;
+  --space-700: #1E1836;
+  --space-600: #2A2248;
+
+  /* ---------- PRIMITIVE: star (cool bright neutral text ramp) ---------- */
+  --star-50:  #F7F7FF;
+  --star-100: #ECEBFF;
+  --star-200: #D8D6F2;
+  --star-300: #C4C2E8;
+  --star-500: #9591C0;
+  --star-700: #6A6690;
+
+  /* ---------- PRIMITIVE: aurora (electric brand spectrum) ---------- */
+  --violet-300: #C9B4FF;
+  --violet-400: #A780FF;
+  --violet-500: #8B5CFF;   /* brand core */
+  --violet-600: #6D28D9;
+  --magenta-400: #FF7AC6;
+  --magenta-500: #FF3DA6;  /* hot pop */
+  --cyan-300: #7DF9FF;
+  --cyan-400: #22E0FF;     /* electric accent (non-text / glow) */
+  --cyan-500: #0BB8D6;     /* contrast-safer cyan for text on dark */
+  --lime-400: #5CF2C4;     /* aquamarine — rest/break */
+  --gold-400: #FFCE6A;     /* retained ONLY for celebration/achievement */
+
+  /* ---------- PRIMITIVE: status ---------- */
+  --success-400: #38E5A6;
+  --warning-400: #FFC53D;
+  --danger-400:  #FF5C7A;
+
+  /* ---------- PRIMITIVE: glass fills (white alpha ramp) ---------- */
+  --glass-1: rgba(255,255,255,.045);
+  --glass-2: rgba(255,255,255,.085);
+  --glass-3: rgba(255,255,255,.13);
+  --glass-border: rgba(255,255,255,.16);
+  --glass-border-strong: rgba(255,255,255,.28);
+  --glass-highlight: rgba(255,255,255,.30);   /* specular top edge */
+
+  /* ---------- PRIMITIVE: radius (6 stops + full) ---------- */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 999px;
+
+  /* ---------- PRIMITIVE: blur (4 stops) ---------- */
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-lg: 30px;
+  --blur-xl: 48px;
+
+  /* ---------- PRIMITIVE: elevation (disciplined 2-3 layer glass shadow) ---------- */
+  --elev-1: 0 2px 8px rgba(2,1,8,.28);
+  --elev-2: 0 8px 24px rgba(2,1,8,.36);
+  --elev-3: 0 16px 48px rgba(2,1,8,.46);
+  --glass-inset: inset 0 1px 0 var(--glass-highlight);
+  --glass-innerglow: inset 0 0 24px rgba(255,255,255,.05);
+
+  /* ---------- PRIMITIVE: aurora signature (gradients + glows) ---------- */
+  --aurora-grad: linear-gradient(115deg, #8B5CFF 0%, #FF3DA6 50%, #22E0FF 100%);
+  --aurora-grad-soft: linear-gradient(135deg, rgba(139,92,255,.92), rgba(34,224,255,.92));
+  --glow-violet:  0 0 48px rgba(139,92,255,.45);
+  --glow-cyan:    0 0 40px rgba(34,224,255,.40);
+  --glow-magenta: 0 0 40px rgba(255,61,166,.40);
+
+  /* ---------- PRIMITIVE: type ---------- */
+  --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Clash Display', 'Inter', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, monospace;
+
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 20px;   /* ~Sub 22 */
+  --text-lg: 22px;
+  --text-xl: 32px;   /* H2 */
+  --text-2xl: 40px;  /* H1 */
+  --text-3xl: 56px;  /* Display */
+  --text-hero: clamp(3.25rem, 9vw, 5rem);  /* editorial hero, ~72 cap */
+
+  --w-light: 300;
+  --w-regular: 400;
+  --w-medium: 500;
+  --w-semibold: 600;
+  --w-bold: 700;
+  --w-display: 200;  /* giant timer only */
+
+  --tracking-tighter: -0.045em;  /* display heroes */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+  --tracking-caps: 0.12em;       /* uppercase labels */
+
+  --leading-tight: 1.05;   /* display */
+  --leading-snug: 1.25;    /* headings */
+  --leading-normal: 1.6;   /* body */
+
+  /* ---------- PRIMITIVE: spacing (4px base — canonical; mirrors legacy values) ---------- */
+  --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
+  --sp-5: 20px;  --sp-6: 24px;  --sp-8: 32px;  --sp-10: 40px;
+  --sp-12: 48px; --sp-16: 64px; --sp-20: 80px; --sp-24: 96px;
+
+  /* ---------- PRIMITIVE: motion ---------- */
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+  --dur-slow: 320ms;
+  --dur-slower: 480ms;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);       /* standard enter (premium) */
+  --ease-in: cubic-bezier(.4, 0, 1, 1);          /* exit */
+  --ease-standard: cubic-bezier(.4, 0, .2, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1); /* press / playful */
+
+  /* ---------- PRIMITIVE: z-index ladder ---------- */
+  --z-scene: 1;
+  --z-content: 10;
+  --z-chrome: 100;
+  --z-dock: 200;
+  --z-toolbar: 300;
+  --z-drawer: 1000;
+  --z-overlay: 2000;
+  --z-popover: 3000;
+  --z-modal: 9000;
+  --z-toast: 9500;
+  --z-skip: 10000;
+
+  /* ---------- SEMANTIC (role tokens; theme layer remaps these) ---------- */
+  --bg: var(--space-900);
+  --surface-1: var(--glass-1);
+  --surface-2: var(--glass-2);
+  --surface-3: var(--glass-3);
+  --border: var(--glass-border);
+  --border-strong: var(--glass-border-strong);
+
+  --fg: var(--star-100);
+  --fg-muted: var(--star-300);
+  --fg-subtle: var(--star-500);
+
+  --brand: var(--violet-500);
+  --brand-soft: var(--violet-400);
+  --brand-alt: var(--cyan-400);       /* electric cyan accent (non-text) */
+  --brand-alt-safe: var(--cyan-500);  /* cyan for text on dark */
+  --brand-contrast: var(--space-950); /* text/icon on a brand fill */
+  --celebrate: var(--gold-400);
+
+  --focus: var(--violet-500);   /* focus session = aurora violet (active) */
+  --break: var(--lime-400);     /* break = aquamarine (rest) */
+
+  --success: var(--success-400);
+  --warning: var(--warning-400);
+  --danger: var(--danger-400);
+
+  --ring: var(--violet-400);            /* focus-visible ring */
+  --ring-shadow: 0 0 0 2px var(--space-900), 0 0 0 4px var(--ring);
+
+  /* Contrast floor: guaranteed legibility for text over the live scene */
+  --text-scrim: radial-gradient(120% 140% at 50% 40%, rgba(6,4,15,.55), rgba(6,4,15,0) 72%);
+  --text-legibility-shadow: 0 1px 2px rgba(2,1,8,.6), 0 0 18px rgba(2,1,8,.45);
+
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+}
+
+/* Respect reduced motion at the token level — components read these too */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-slow: 1ms;
+    --dur-slower: 1ms;
+  }
+}
+
+/* ---------------- shared utilities (composed by the new component kit) ---------------- */
+
+/* Frosted glass surface — one recipe, tokenized */
+.aurora-glass {
+  background: var(--surface-2);
+  backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  border: 1px solid var(--border);
+  box-shadow: var(--elev-2), var(--glass-inset);
+  border-radius: var(--radius-lg);
+}
+
+/* Legibility floor for primary text sitting over the 3D scene */
+.on-scene {
+  text-shadow: var(--text-legibility-shadow);
+}
+.on-scene-panel {
+  position: relative;
+  isolation: isolate;
+}
+.on-scene-panel::before {
+  content: "";
+  position: absolute;
+  inset: -8% -6%;
+  z-index: -1;
+  background: var(--text-scrim);
+  pointer-events: none;
+}
+
+/* Aurora gradient text (heroes / brand moments) */
+.aurora-text {
+  background: var(--aurora-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Focus-visible ring (kit-wide) */
+.kit-focusable:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-shadow);
+}
