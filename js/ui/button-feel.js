@@ -28,10 +28,18 @@ export function initButtonFeel() {
     // Cursor-reactive specular highlight: --mx/--my drive a CSS ::after light
     // that tracks the pointer across the glass. rAF-throttled, motion-gated.
     document.addEventListener('pointermove', onPointerMove, { passive: true });
+    // Pointer-aware ambient glow that trails the cursor across the scene.
+    if (!isReducedMotion()) {
+        ambientEl = document.createElement('div');
+        ambientEl.className = 'pointer-ambient';
+        ambientEl.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(ambientEl);
+    }
 }
 
 let cursorRaf = 0;
 let lastCursorEvent = null;
+let ambientEl = null;
 
 function onPointerMove(e) {
     if (isReducedMotion()) return;
@@ -43,7 +51,14 @@ function onPointerMove(e) {
 function applyCursorLight() {
     cursorRaf = 0;
     const e = lastCursorEvent;
-    const el = e?.target?.closest ? e.target.closest('.liquid-glass-btn') : null;
+    if (!e) return;
+    // Ambient glow follows the pointer everywhere (sits behind the UI).
+    if (ambientEl) {
+        ambientEl.style.setProperty('--px', `${e.clientX}px`);
+        ambientEl.style.setProperty('--py', `${e.clientY}px`);
+    }
+    // Specular highlight only when over a glass button.
+    const el = e.target?.closest ? e.target.closest('.liquid-glass-btn') : null;
     if (!el) return;
     const r = el.getBoundingClientRect();
     if (!r.width || !r.height) return;

@@ -1391,3 +1391,19 @@
         display: none;
     }
 }
+
+/* Pointer-aware ambient light — a soft warm glow trails the cursor across the
+   scene, behind the UI (screen-blended so it lifts the scene, never the text).
+   Element + --px/--py are managed in js/ui/button-feel.js; motion-gated there. */
+.pointer-ambient {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: radial-gradient(
+        600px circle at var(--px, 50%) var(--py, 50%),
+        rgba(255, 205, 115, 0.08),
+        rgba(255, 205, 115, 0) 62%
+    );
+    mix-blend-mode: screen;
+}
