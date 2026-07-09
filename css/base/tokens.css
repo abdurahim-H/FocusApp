@@ -73,6 +73,7 @@
   /* ---------- PRIMITIVE: aurora signature (gradients + glows) ---------- */
   --aurora-grad: linear-gradient(115deg, #8B5CFF 0%, #FF3DA6 50%, #22E0FF 100%);
   --aurora-grad-soft: linear-gradient(135deg, rgba(139,92,255,.92), rgba(34,224,255,.92));
+  --aurora-text: linear-gradient(115deg, #C9B4FF 0%, #FF7AC6 46%, #7DF9FF 100%);  /* brighter — gradient TEXT on dark */
   --glow-violet:  0 0 48px rgba(139,92,255,.45);
   --glow-cyan:    0 0 40px rgba(34,224,255,.40);
   --glow-magenta: 0 0 40px rgba(255,61,166,.40);
@@ -216,7 +217,7 @@
 
 /* Aurora gradient text (heroes / brand moments) */
 .aurora-text {
-  background: var(--aurora-grad);
+  background: var(--aurora-text);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

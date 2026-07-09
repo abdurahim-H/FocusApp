@@ -72,7 +72,18 @@ body {
 @media (prefers-reduced-motion: reduce) { .cf-mode { transition: none; } }
 
 /* Home surface */
-.cf-home { text-align: center; max-width: 720px; }
+.cf-home { position: relative; text-align: center; max-width: 720px; }
+/* Contrast floor: a soft radial scrim separates the hero from the bright
+   accretion disk / black hole sitting dead-center behind it. */
+.cf-home::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -14% -20%;
+  background: radial-gradient(58% 54% at 50% 46%, rgba(6, 4, 15, .74), rgba(6, 4, 15, .38) 54%, transparent 78%);
+  pointer-events: none;
+}
+.cf-home__title { filter: drop-shadow(0 2px 22px rgba(139, 92, 255, .35)); }
 .cf-home__eyebrow { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--brand-soft); margin: 0; }
 .cf-home__title {
   font-family: var(--font-display); font-weight: var(--w-bold);
