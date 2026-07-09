@@ -5,6 +5,7 @@
  * Corner chrome (settings/help/account) is scaffolded here; wired in Phase 3.
  */
 import { h, icon, mountBodyLevel } from './kit/index.js';
+import { replayReveal } from './motion.js';
 import { createNav } from './nav.js';
 import { mountFocus } from './surfaces/focus.js';
 import { mountHome } from './surfaces/home.js';
@@ -68,7 +69,16 @@ export function mountShell() {
     );
 
     const skip = h('a', { class: 'cf-skip', href: '#cf-main' }, 'Skip to content');
+    const ambient = h(
+        'div',
+        { class: 'cf-ambient', 'aria-hidden': 'true' },
+        h('span', { class: 'cf-ambient__blob cf-ambient__blob--1' }),
+        h('span', { class: 'cf-ambient__blob cf-ambient__blob--2' }),
+        h('span', { class: 'cf-ambient__blob cf-ambient__blob--3' })
+    );
+
     document.body.insertBefore(skip, document.body.firstChild);
+    mountBodyLevel(ambient);
     mountBodyLevel(app);
     mountBodyLevel(topnav);
     mountBodyLevel(left);
@@ -93,6 +103,7 @@ export function mountShell() {
         for (const m of MODES) panels[m.id].classList.toggle('is-active', m.id === id);
         nav.setActive(id);
         document.body.dataset.mode = id;
+        replayReveal(panels[id]);
     }
     goTo('home');
 

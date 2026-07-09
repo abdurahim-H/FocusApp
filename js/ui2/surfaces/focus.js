@@ -19,6 +19,7 @@ import {
     updateTimerDisplay,
 } from '../../features/timer.js';
 import { h, icon, lifecycle } from '../kit/index.js';
+import { magnetic } from '../motion.js';
 
 export function mountFocus(root, ctx) {
     const life = lifecycle();
@@ -98,7 +99,7 @@ export function mountFocus(root, ctx) {
 
     const card = h(
         'div',
-        { class: 'cf-surface cf-timer on-scene-panel' },
+        { class: 'cf-surface cf-timer on-scene-panel cf-reveal' },
         typeLabel,
         time,
         session,
@@ -114,6 +115,7 @@ export function mountFocus(root, ctx) {
         cycleBtn
     );
     root.appendChild(card);
+    life.add(magnetic(startBtn));
 
     // Populate from current state and keep the phase label / primary label synced.
     function syncLabels() {

@@ -3,6 +3,7 @@
  * The first rebuilt surface. Period tiles / stats land with the Progress surface.
  */
 import { h, icon } from '../kit/index.js';
+import { magnetic } from '../motion.js';
 
 function greeting() {
     const hr = new Date().getHours();
@@ -27,7 +28,7 @@ export function mountHome(root, ctx) {
 
     const home = h(
         'div',
-        { class: 'cf-home on-scene' },
+        { class: 'cf-home on-scene cf-reveal' },
         h('p', { class: 'cf-home__eyebrow' }, 'Cosmic Focus'),
         h(
             'h1',
@@ -40,6 +41,7 @@ export function mountHome(root, ctx) {
         h('div', { class: 'cf-home__cta' }, startBtn)
     );
     root.appendChild(home);
+    const stopMag = magnetic(startBtn);
 
     function tick() {
         clock.textContent = new Date().toLocaleTimeString([], {
@@ -51,6 +53,7 @@ export function mountHome(root, ctx) {
     const id = setInterval(tick, 15000);
 
     return () => {
+        stopMag();
         clearInterval(id);
         home.remove();
     };
