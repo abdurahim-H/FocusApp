@@ -1359,3 +1359,35 @@
 .active-sound-chip .chip-close:focus:not(:focus-visible) {
     outline: none;
 }
+
+/* ============================================================================
+   Cursor-reactive specular highlight (added enhancement)
+   A soft light tracks the pointer across the glass, using the free ::after.
+   Screen-blended so it lightens the frost without dimming the label.
+   --mx/--my are set per-button in js/ui/button-feel.js; motion-gated.
+   ============================================================================ */
+.liquid-glass-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+        circle at var(--mx, 50%) var(--my, 50%),
+        rgba(255, 255, 255, 0.34),
+        rgba(255, 255, 255, 0.10) 35%,
+        rgba(255, 255, 255, 0) 62%
+    );
+    mix-blend-mode: screen;
+}
+.liquid-glass-btn:hover::after {
+    opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+    .liquid-glass-btn::after {
+        display: none;
+    }
+}

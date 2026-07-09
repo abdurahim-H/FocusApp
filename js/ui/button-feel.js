@@ -25,6 +25,30 @@ export function initButtonFeel() {
     document.addEventListener('pointercancel', onPointerUp, { passive: true });
     // Release on leave so a button doesn't stay pressed if pointer drags away
     document.addEventListener('pointerleave', onPointerUp, { passive: true, capture: true });
+    // Cursor-reactive specular highlight: --mx/--my drive a CSS ::after light
+    // that tracks the pointer across the glass. rAF-throttled, motion-gated.
+    document.addEventListener('pointermove', onPointerMove, { passive: true });
+}
+
+let cursorRaf = 0;
+let lastCursorEvent = null;
+
+function onPointerMove(e) {
+    if (isReducedMotion()) return;
+    lastCursorEvent = e;
+    if (cursorRaf) return;
+    cursorRaf = requestAnimationFrame(applyCursorLight);
+}
+
+function applyCursorLight() {
+    cursorRaf = 0;
+    const e = lastCursorEvent;
+    const el = e?.target?.closest ? e.target.closest('.liquid-glass-btn') : null;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    el.style.setProperty('--mx', `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`);
+    el.style.setProperty('--my', `${(((e.clientY - r.top) / r.height) * 100).toFixed(1)}%`);
 }
 
 function onPointerDown(e) {
