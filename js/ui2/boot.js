@@ -4,9 +4,12 @@
  * only the UI layer is new. Served from index2.html during the rebuild.
  */
 import * as scene3d from '../graphics/scene/scene-manager.js';
+import * as cleanup from '../utils/cleanup.js';
 import { mountShell } from './shell.js';
 
 async function boot() {
+    // Tracked intervals (the timer tick) register with the cleanup system.
+    cleanup.initCleanupSystem?.();
     mountShell();
 
     const loading = document.getElementById('cf-loading');

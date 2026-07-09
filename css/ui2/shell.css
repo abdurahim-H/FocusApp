@@ -94,6 +94,22 @@ body {
 .cf-home__clock { font-variant-numeric: tabular-nums; font-size: var(--text-sm); color: var(--fg-subtle); margin-top: var(--sp-2); }
 .cf-home__cta { margin-top: var(--sp-8); display: inline-flex; gap: var(--sp-3); flex-wrap: wrap; justify-content: center; }
 
+/* Focus / timer surface */
+.hidden { display: none !important; }
+.cf-timer { text-align: center; width: min(460px, 92vw); padding: var(--sp-10) var(--sp-8); }
+.cf-timer__type { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--brand-soft); }
+.cf-timer.is-break .cf-timer__type { color: var(--break); }
+.cf-timer__time {
+  font-family: var(--font-ui); font-weight: var(--w-display);
+  font-size: clamp(4.5rem, 15vw, 7rem); line-height: 1; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero; color: var(--fg);
+  margin: var(--sp-2) 0; text-shadow: 0 2px 30px rgba(139, 92, 255, .28);
+}
+.cf-timer.is-break .cf-timer__time { text-shadow: 0 2px 30px rgba(34, 224, 255, .28); }
+.cf-timer__session { color: var(--fg-muted); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cf-timer__controls { display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: center; margin-top: var(--sp-8); }
+.cf-timer__cycle { margin-top: var(--sp-4); color: var(--fg-subtle); }
+
 /* Loader */
 .cf-loading {
   position: fixed; inset: 0; z-index: var(--z-modal);

@@ -6,6 +6,7 @@
  */
 import { h, icon, mountBodyLevel } from './kit/index.js';
 import { createNav } from './nav.js';
+import { mountFocus } from './surfaces/focus.js';
 import { mountHome } from './surfaces/home.js';
 
 const MODES = [
@@ -75,14 +76,7 @@ export function mountShell() {
 
     // Mount surfaces. Focus/Progress are placeholders until their phases land.
     mountHome(panels.home, ctx);
-    panels.focus.appendChild(
-        h(
-            'div',
-            { class: 'cf-empty on-scene' },
-            h('p', { class: 'cf-empty__headline' }, 'Focus'),
-            h('p', { class: 'cf-empty__sub' }, 'The timer surface is being rebuilt on the new kit.')
-        )
-    );
+    mountFocus(panels.focus, ctx);
     panels.progress.appendChild(
         h(
             'div',
